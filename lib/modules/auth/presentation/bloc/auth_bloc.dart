@@ -19,7 +19,9 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       final response = await repository.login(event.username, event.password);
       emit(AuthSuccess(response.data));
       if (response.data.roleName == 'hacienda') {
-        InjectorContainer.getIt<AppRouter>().push(TreasuryRoute());
+        InjectorContainer.getIt<AppRouter>().push(
+          PartnersRoute(nombre: response.data.fullName),
+        );
       }
     } catch (e) {
       emit(AuthError(e.toString()));
