@@ -43,9 +43,9 @@ class _AuthScreenState extends State<AuthScreen> {
             if (role == 'hacienda') {
               context.router.replace(const TreasuryRoute());
             } else if (role == 'socios') {
-              context.router.replace(const PartnersRoute());
+              context.router.replace(PartnersRoute(nombre: ''));
             } else if (role == 'vigilancia') {
-              context.router.replace(const PartnersRoute());
+              context.router.replace(const TreasuryRoute());
             } else {
               print('Rol: $role');
             }
@@ -75,7 +75,7 @@ class _AuthScreenState extends State<AuthScreen> {
                   Container(
                     padding: const EdgeInsets.all(18),
                     decoration: BoxDecoration(
-                      color: Theme.of(context).colorScheme.leadBajito,
+                      color: Theme.of(context).colorScheme.bajo,
                       borderRadius: BorderRadius.circular(16),
                     ),
                     child: Icon(
