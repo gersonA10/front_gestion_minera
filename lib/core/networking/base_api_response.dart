@@ -1,5 +1,8 @@
+/// Base class used to handle networking responses
 class BaseApiResponse<T> {
-  BaseApiResponse({required this.data});
+  BaseApiResponse({
+    required this.data,
+  });
 
   late final T data;
 

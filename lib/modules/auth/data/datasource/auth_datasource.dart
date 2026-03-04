@@ -1,16 +1,18 @@
-import 'package:dio/dio.dart';
-
-import '../../domain/entity/entity.dart';
+import '../../../../core/networking/http_services.dart';
 import '../models/model.dart';
 
 class AuthDatasource {
-  final _dio = Dio();
-  AuthDatasource();
-  Future<LoginResponseEntity> login(String email, String password) async {
-    final response = await _dio.post(
-      'http://192.168.1.203:3000/api/users/login',
+  final ApiClient apiClient;
+
+  AuthDatasource({required this.apiClient});
+
+  Future<LoginResponseModel> login(String email, String password) async {
+    final response = await apiClient.post(
+      '/api/users/login', 
+      operationName: 'login',
       data: {"email": email, "password": password},
     );
-    return LoginResponseModel.fromJson(response.data);
+    
+    return LoginResponseModel.fromJson(response);
   }
 }

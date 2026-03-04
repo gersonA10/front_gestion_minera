@@ -1,6 +1,6 @@
-/*
+import 'package:dio/dio.dart';
+
 class DioExceptionKey {
-  static const unauthorized = 'dio_unauthorized';
   static const cancelRequest = 'dio_cancel_request';
   static const connectTimeout = 'dio_connect_timeout';
   static const receiveTimeout = 'dio_receive_timeout';
@@ -9,66 +9,102 @@ class DioExceptionKey {
   static const offline = 'dio_offline';
   static const unexpected = 'dio_unexpected';
   static const unknown = 'dio_unknown';
-  static const apiLogicError = 'api_logic_error';
+  static const unauthorised = 'dio_unauthorized';
 }
 
 class BaseApiException implements Exception {
   final String key;
   final String message;
+  final DioExceptionType type;
+  final RequestOptions requestOptions;
+  final StackTrace? stackTrace;
+  final Response? response;
+  final String? detail;
 
-  const BaseApiException({required this.key, required this.message});
+  BaseApiException({
+    required this.key,
+    required this.message,
+    required this.type,
+    required this.requestOptions,
+    this.stackTrace,
+    this.response,
+    this.detail,
+  });
 
-  factory BaseApiException.dioError({
+  factory BaseApiException.fromDioError({
     required DioException dioError,
     BaseApiException Function(DioException dioError)? handleResponseType,
   }) {
     switch (dioError.type) {
       case DioExceptionType.cancel:
         return BaseApiException(
-          key: DioExceptionKey.apiLogicError,
-          message: "La peticion a la Api fue cancelada",
+          key: DioExceptionKey.cancelRequest,
+          message: 'Request to API server was cancelled',
+          requestOptions: dioError.requestOptions,
+          type: DioExceptionType.cancel,
+          stackTrace: dioError.stackTrace,
         );
       case DioExceptionType.connectionTimeout:
         return BaseApiException(
           key: DioExceptionKey.connectTimeout,
           message:
-              "Tu solicitud no pudo ser procesada.\nPor favor intente nuevamente",
+              'Tu solicitud no pudo ser procesada. \nPor favor, intenta nuevamente.',
+          requestOptions: dioError.requestOptions,
+          type: DioExceptionType.connectionTimeout,
+          stackTrace: dioError.stackTrace,
         );
       case DioExceptionType.receiveTimeout:
         return BaseApiException(
           key: DioExceptionKey.receiveTimeout,
-          message: "Tiempo de espera agotado",
+          message: 'Receive timeout in connection with API server',
+          requestOptions: dioError.requestOptions,
+          type: DioExceptionType.receiveTimeout,
+          stackTrace: dioError.stackTrace,
         );
       case DioExceptionType.sendTimeout:
         return BaseApiException(
           key: DioExceptionKey.sendTimeout,
-          message: "Tiempo de envio expirado",
+          message: 'Send timeout in connection with API server',
+          requestOptions: dioError.requestOptions,
+          type: DioExceptionType.sendTimeout,
+          stackTrace: dioError.stackTrace,
         );
-      case DioExceptionType.badResponse:
+      case (DioExceptionType.badResponse):
         if (handleResponseType != null) return handleResponseType(dioError);
         return BaseApiException(
           key: DioExceptionKey.response,
           message:
-              "dioError ${DioExceptionType.badResponse}: ${dioError.error}",
+              'DioError ${DioExceptionType.badResponse}: ${dioError.error}',
+          requestOptions: dioError.requestOptions,
+          type: DioExceptionType.badResponse,
+          response: dioError.response,
         );
-      case DioExceptionType.connectionError:
-        if (dioError.message?.contains("SocketException") ?? false) {
+      case (DioExceptionType.connectionError):
+        if (dioError.message?.contains('SocketException') ?? false) {
           return BaseApiException(
             key: DioExceptionKey.offline,
-            message: "No hay internet",
+            message: 'No Internet',
+            requestOptions: dioError.requestOptions,
+            type: DioExceptionType.connectionError,
+            stackTrace: dioError.stackTrace,
           );
         } else {
           return BaseApiException(
             key: DioExceptionKey.unexpected,
-            message: "Error inesperado",
+            message: 'Unexpected error occurred',
+            requestOptions: dioError.requestOptions,
+            type: DioExceptionType.connectionError,
+            stackTrace: dioError.stackTrace,
           );
         }
       default:
         return BaseApiException(
           key: DioExceptionKey.unknown,
-          message: "Ocurrio un error",
+          message: 'Something went wrong',
+          requestOptions: dioError.requestOptions,
+          type: DioExceptionType.unknown,
+          stackTrace: dioError.stackTrace,
         );
     }
   }
 }
-*/

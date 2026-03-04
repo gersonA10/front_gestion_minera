@@ -1,5 +1,10 @@
-/*
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:front_gestion_minera/core/networking/base_api_client.dart';
+import 'package:front_gestion_minera/core/networking/base_api_exception.dart';
+import 'package:front_gestion_minera/core/networking/base_api_option.dart';
+import 'package:front_gestion_minera/core/networking/interceptor.service.dart';
 
 class ApiClient extends BaseApiClient {
   late final int connectTimeout;
@@ -12,7 +17,7 @@ class ApiClient extends BaseApiClient {
   }) : super(context);
 
   @override
-  get baseUrl => dotenv.env['BASE_URL']!;
+  get baseUrl => dotenv.env['API_BASE_URL']!;
 
   @override
   get customBaseOptions {
@@ -23,7 +28,9 @@ class ApiClient extends BaseApiClient {
   }
 
   @override
-  get interceptors => {InterceptorService: InterceptorService(api)};
+  get interceptors => {
+        InterceptorService: InterceptorService(api),
+      };
 
   Future<dynamic> get(
     String path, {
@@ -31,7 +38,10 @@ class ApiClient extends BaseApiClient {
     Map<String, dynamic>? queryParameters,
   }) async {
     final response = await network(
-      request: (request) => request.get(path, queryParameters: queryParameters),
+      request: (request) => request.get(
+        path,
+        queryParameters: queryParameters,
+      ),
       handleSuccess: (startedAt, response) async {
         return await _handleSuccess(
           startedAt: startedAt,
@@ -49,14 +59,12 @@ class ApiClient extends BaseApiClient {
     required String operationName,
     required Map<String, dynamic> data,
     Map<String, dynamic>? queryParameters,
-    Map<String, dynamic>? headers,
   }) async {
     final response = await network(
       request: (request) => request.post(
         path,
         data: data,
         queryParameters: queryParameters,
-        options: Options(headers: headers),
       ),
       handleSuccess: (startedAt, response) async {
         return await _handleSuccess(
@@ -81,32 +89,32 @@ class ApiClient extends BaseApiClient {
     final formData = FormData.fromMap({
       ...data,
       ...?files?.asMap().map(
-        (i, file) => MapEntry(
-          file['name'],
-          MultipartFile.fromFileSync(
-            file['path'],
-            filename: file['filename'],
-            contentType: file['contentType'],
+            (i, file) => MapEntry(
+                file['name'],
+                MultipartFile.fromFileSync(
+                  file['path'],
+                  filename: file['filename'],
+                  contentType: file['contentType'],
+                )),
           ),
-        ),
-      ),
-      ...?fileGroups?.map(
-        (key, files) => MapEntry(
-          key,
-          files.map((file) {
-            return MultipartFile.fromFileSync(
-              file['path'],
-              filename: file['filename'],
-              contentType: file['contentType'],
-            );
-          }).toList(),
-        ),
-      ),
+      ...?fileGroups?.map((key, files) => MapEntry(
+            key,
+            files.map((file) {
+              return MultipartFile.fromFileSync(
+                file['path'],
+                filename: file['filename'],
+                contentType: file['contentType'],
+              );
+            }).toList(),
+          )),
     });
 
     final response = await network(
-      request: (request) =>
-          request.post(path, data: formData, queryParameters: queryParameters),
+      request: (request) => request.post(
+        path,
+        data: formData,
+        queryParameters: queryParameters,
+      ),
       handleSuccess: (startedAt, response) async {
         return await _handleSuccess(
           startedAt: startedAt,
@@ -129,16 +137,13 @@ class ApiClient extends BaseApiClient {
   }) async {
     final formData = FormData.fromMap({
       ...?data,
-      ...?files?.asMap().map(
-        (i, file) => MapEntry(
+      ...?files?.asMap().map((i, file) => MapEntry(
           file['name'],
           MultipartFile.fromFileSync(
             file['path'],
             filename: file['filename'],
             contentType: file['contentType'],
-          ),
-        ),
-      ),
+          ))),
     });
 
     final response = await network(
@@ -193,8 +198,11 @@ class ApiClient extends BaseApiClient {
     Map<String, dynamic>? queryParameters,
   }) async {
     final response = await network(
-      request: (request) =>
-          request.put(path, data: data, queryParameters: queryParameters),
+      request: (request) => request.put(
+        path,
+        data: data,
+        queryParameters: queryParameters,
+      ),
       handleSuccess: (startedAt, response) async {
         return await _handleSuccess(
           startedAt: startedAt,
@@ -214,8 +222,11 @@ class ApiClient extends BaseApiClient {
     Map<String, dynamic>? queryParameters,
   }) async {
     final response = await network(
-      request: (request) =>
-          request.delete(path, data: data, queryParameters: queryParameters),
+      request: (request) => request.delete(
+        path,
+        data: data,
+        queryParameters: queryParameters,
+      ),
       handleSuccess: (startedAt, response) async {
         return await _handleSuccess(
           startedAt: startedAt,
@@ -233,30 +244,26 @@ class ApiClient extends BaseApiClient {
     required Response response,
     required String operationName,
   }) async {
-    if (response.data is Map<String, dynamic>) {
-      final state = response.data['state'];
-      final message = response.data['message'];
-      final successStates = [0, 1, 200];
-      if (!successStates.contains(state)) {
-        throw BaseApiException(
-          key: response.data['key'] ?? DioExceptionKey.apiLogicError,
-          message: message ?? 'Ha ocurrido un error inesperado.',
-        );
-      }
-    }
-
     return response.data;
   }
 
   @override
-  BaseApiException handleResponseType(DioException error) {
+  BaseApiException handleResponseType(
+    DioException error,
+  ) {
     late String key;
     late String message;
+    String? detail;
 
     if (error.response?.statusCode == 401) {
       return BaseApiException(
-        key: DioExceptionKey.unauthorized,
+        key: DioExceptionKey.unauthorised,
         message: 'Sesión expirada',
+        type: error.type,
+        requestOptions: error.requestOptions,
+        stackTrace: error.stackTrace,
+        response: error.response,
+        detail: detail,
       );
     }
 
@@ -273,9 +280,17 @@ class ApiClient extends BaseApiClient {
     } else {
       key = DioExceptionKey.unexpected;
       message = 'Error inesperado';
+      detail = 'The response data is not a map';
     }
 
-    return BaseApiException(key: key, message: message);
+    return BaseApiException(
+      key: key,
+      message: message,
+      type: error.type,
+      requestOptions: error.requestOptions,
+      stackTrace: error.stackTrace,
+      response: error.response,
+      detail: detail,
+    );
   }
 }
-*/

@@ -6,13 +6,14 @@ import 'package:get_it/get_it.dart';
 import 'domain/repositories/repository.dart';
 
 void initAuthContainer(GetIt getIt) {
-  //var apiClient = ApiClient();
-  //Datasource
-  getIt.registerLazySingleton(() => AuthDatasource());
-  //repository
+  // Inyectamos el ApiClient que viene de injector _container
+  getIt.registerLazySingleton(() => AuthDatasource(apiClient: getIt()));
+  
+  // Repository
   getIt.registerFactory<AuthRepository>(
     () => AuthRepositoryImpl(datasource: getIt()),
   );
-  //Bloc
+  
+  // Bloc
   getIt.registerFactory(() => AuthBloc(repository: getIt()));
 }

@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:front_gestion_minera/injector_container.dart';
 import 'package:front_gestion_minera/config/router/app_router.dart';
 
 void main() async {
+   await dotenv.load(fileName: '.env');
   InjectorContainer.setupGetIt();
   runApp(const MainApp());
 }

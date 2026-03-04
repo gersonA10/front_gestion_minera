@@ -1,62 +1,54 @@
-/*
-import 'package:flutter/material.dart';
+import 'package:dio/dio.dart';
+import 'package:flutter/widgets.dart';
+import 'package:front_gestion_minera/core/networking/base_api_exception.dart';
+import 'package:front_gestion_minera/core/networking/base_api_option.dart';
+import 'package:front_gestion_minera/core/networking/base_api_response.dart';
 
 class BaseApiClient {
   late Dio api;
   late DateTime _startedAt;
-  final Map<Type, dynamic> decoders = {};
-  final BaseApiOption baseApiOption = BaseApiOption();
+  final BaseApiOption customBaseOptions = BaseApiOption();
   final String baseUrl = '';
+  final Map<Type, Interceptor> interceptors = {};
+  final Map<Type, dynamic> decoders = {};
 
   BaseApiClient(BuildContext? context) {
     _init();
   }
 
+  /// Initialize class
   void _init() {
     final baseOptions = BaseOptions(
       baseUrl: baseUrl,
-      connectTimeout: Duration(minutes: baseApiOption.connectTimeout),
-      receiveTimeout: Duration(minutes: baseApiOption.receiveTimeout),
-      headers: baseApiOption.headers,
+      connectTimeout: Duration(minutes: customBaseOptions.connectTimeout),
+      receiveTimeout: Duration(minutes: customBaseOptions.receiveTimeout),
+      headers: customBaseOptions.headers,
     );
+
     api = Dio(baseOptions);
-  }
-
-  _morphJsonResponse<T>(dynamic json) {
-    BaseApiResponse defaultResponse = BaseApiResponse<T>.fromJson(
-      json,
-      decoders,
-      type: T,
-    );
-    return defaultResponse.data;
-  }
-
-  BaseApiException handleResponseType(DioException error) {
-    late String key;
-    late String message;
-
-    if (error.response!.data is Map) {
-      key = error.response!.data['key'];
-      message = error.response!.data['message'];
-    } else {
-      key = DioExceptionKey.unexpected;
-      message = 'Agregar error';
+    if (interceptors.isNotEmpty) {
+      _addInterceptors();
     }
-
-    return BaseApiException(key: key, message: message);
   }
 
-  BaseApiException _onError(DioException dioError) {
-    return BaseApiException.dioError(
-      dioError: dioError,
-      handleResponseType: handleResponseType,
-    );
-  }
-
+  /// Networking class to handle API requests
+  /// Use the [request] callback to call an API
+  /// [handleSuccess] overrides the response on a successful status code
+  /// [handleFailure] is executed before the exception is thrown
+  ///
+  /// Usage:
+  /// Future<List<User>?> fetchUsers() async {
+  ///     return await network<List<User>>(
+  ///         request: (request) => request.get("/users"),
+  ///     );
+  ///   }
   Future<T?> network<T>({
     required Function(Dio api) request,
     Function(DateTime startetAt, Response response)? handleSuccess,
-    Function(DateTime startetAt, BaseApiException exception)? handleFailure,
+    Function(
+      DateTime startetAt,
+      BaseApiException exception,
+    )? handleFailure,
   }) async {
     try {
       late final Response response;
@@ -78,5 +70,56 @@ class BaseApiClient {
       throw error;
     }
   }
+
+  /// Handle the [DioException] response if there is an issue.
+  BaseApiException _onError(DioException dioError) {
+    return BaseApiException.fromDioError(
+      dioError: dioError,
+      handleResponseType: handleResponseType,
+    );
+  }
+
+  /// Overrites the response type error of dioError
+  BaseApiException handleResponseType(DioException error) {
+    late String key;
+    late String message;
+    String? detail;
+
+    if (error.response!.data is Map) {
+      key = error.response!.data['key'];
+      message = error.response!.data['message'];
+      detail = error.response!.data['detail'];
+    } else {
+      key = DioExceptionKey.unexpected;
+      message = 'Agregar error';
+    }
+
+    return BaseApiException(
+      key: key,
+      message: message,
+      type: error.type,
+      requestOptions: error.requestOptions,
+      stackTrace: error.stackTrace,
+      response: error.response,
+      detail: detail,
+    );
+  }
+
+  /// Display a error to the user
+  /// This method is only called if you provide the API service
+  /// with a [BuildContext].
+  displayError(DioException dioError, BuildContext context) {}
+
+  /// Morphs json into Object using the 'config/api_decoders'.
+  _morphJsonResponse<T>(dynamic json) {
+    BaseApiResponse defaultResponse = BaseApiResponse<T>.fromJson(
+      json,
+      decoders,
+      type: T,
+    );
+    return defaultResponse.data;
+  }
+
+  /// Adds all the [interceptors] to [dio].
+  _addInterceptors() => api.interceptors.addAll(interceptors.values);
 }
-*/

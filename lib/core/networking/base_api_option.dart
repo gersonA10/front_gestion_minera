@@ -4,8 +4,8 @@ class BaseApiOption {
   final Map<String, dynamic>? headers;
 
   BaseApiOption({
-    this.connectTimeout = 3000,
-    this.receiveTimeout = 3000,
+    this.connectTimeout = 30000,
+    this.receiveTimeout = 30000,
     this.headers,
   });
 }
