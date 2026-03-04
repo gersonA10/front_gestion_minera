@@ -28,7 +28,6 @@ class _AuthScreenState extends State<AuthScreen> {
   Widget build(BuildContext context) {
     final screenSize = MediaQuery.of(context).size;
     final double smallSpacing = screenSize.height * 0.02;
-
     return BlocProvider(
       create: (context) => InjectorContainer.getIt<AuthBloc>(),
       child: Scaffold(
@@ -61,7 +60,7 @@ class _AuthScreenState extends State<AuthScreen> {
                       Container(
                         padding: const EdgeInsets.all(18),
                         decoration: BoxDecoration(
-                          color: Theme.of(context).colorScheme.leadBajito,
+                          color: Theme.of(context).colorScheme.bajo,
                           borderRadius: BorderRadius.circular(16),
                         ),
                         child: Icon(
