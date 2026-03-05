@@ -6,6 +6,7 @@ import 'package:front_gestion_minera/config/theme/extension_theme.dart';
 import 'package:front_gestion_minera/injector_container.dart';
 import 'package:front_gestion_minera/modules/partners/presentation/widgets/custom_card_widget.dart';
 import 'package:front_gestion_minera/utils/greeting_util.dart';
+import 'package:front_gestion_minera/utils/session/user_session.dart';
 import 'package:front_gestion_minera/utils/text_util.dart';
 
 @RoutePage()
@@ -55,7 +56,7 @@ class PartnersScreen extends StatelessWidget {
                           style: AppTextStyles.mainStyleGrey14(context),
                         ),
                         Text(
-                          nombre,
+                          UserSession.userName,
                           style: AppTextStyles.mainStyle16Bold(context),
                         ),
                       ],

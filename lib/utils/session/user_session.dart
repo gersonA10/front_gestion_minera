@@ -9,6 +9,14 @@ class UserSession {
   static const String _accessTokenKey = 'TOKEN';
   static const String _refreshTokenKey = 'REFRESHTOKEN';
 
+  //Aceder a datos
+  static String userName = '';
+
+  static Future<void> loadSession() async {
+    final preferences = await SharedPreferences.getInstance();
+    userName = preferences.getString(_fullNameKey) ?? '';
+  }
+
   //  ACCESS TOKEN
   static Future<void> setAccessToken(String token) async {
     final preferences = await SharedPreferences.getInstance();
@@ -25,7 +33,7 @@ class UserSession {
     final preferences = await SharedPreferences.getInstance();
     return preferences.getString(_roleKey) ?? '';
   }
-  
+
   // Para saber si el user esta logeado
   static Future<bool> hasToken() async {
     final token = await getAccessToken();

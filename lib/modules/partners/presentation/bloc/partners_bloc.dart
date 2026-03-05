@@ -25,6 +25,8 @@ class PartnersBloc extends Bloc<PartnersEvent, PartnersState> {
       emit(ContributeHistorySuccess(response));
     } on BaseApiException catch (error) {
       emit(ContributeHistoryError(mapErrorMessage(error.key)));
+    } catch (e) {
+      emit(ContributeHistoryError('Error inesperado: $e'));
     }
   }
 

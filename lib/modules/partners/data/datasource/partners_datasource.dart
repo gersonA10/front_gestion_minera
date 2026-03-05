@@ -11,7 +11,7 @@ class PartnersDatasource {
       operationName: 'brings up the weeks transaction history',
     );
 
-    return List<LoanHistoryDataModel>.from(response);
+    return ContributeHistoryResponseModel.fromJson(response).data;
   }
 
   Future<List<LoanHistoryDataEntity>> getcontributeHistoryWeek() async {
