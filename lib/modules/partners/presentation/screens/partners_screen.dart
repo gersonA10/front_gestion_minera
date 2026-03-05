@@ -96,7 +96,11 @@ class PartnersScreen extends StatelessWidget {
                     subtitle: 'Nueva Gestion de Socios Financieros',
                   ),
                   CustomCardWidget(
-                    onTap: () {},
+                    onTap: () {
+                      InjectorContainer.getIt<AppRouter>().push(
+                        LoanHistoryRoute(),
+                      );
+                    },
                     screenSize: screenSize,
                     topPadding: topPadding,
                     smallSpacing: smallSpacing,
@@ -111,7 +115,9 @@ class PartnersScreen extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: [
                   CustomCardWidget(
-                    onTap: () {},
+                    onTap: () {
+                      context.router.push(DistributesRoute());
+                    },
                     screenSize: screenSize,
                     topPadding: topPadding,
                     smallSpacing: smallSpacing,

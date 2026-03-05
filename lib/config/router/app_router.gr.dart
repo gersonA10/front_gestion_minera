@@ -9,26 +9,30 @@
 // coverage:ignore-file
 
 // ignore_for_file: no_leading_underscores_for_library_prefixes
-import 'package:auto_route/auto_route.dart' as _i5;
-import 'package:flutter/material.dart' as _i6;
+import 'package:auto_route/auto_route.dart' as _i7;
+import 'package:flutter/material.dart' as _i8;
 import 'package:front_gestion_minera/modules/auth/presentation/screen/auth_screens.dart'
     as _i1;
 import 'package:front_gestion_minera/modules/partners/presentation/screens/contribute_history_screen.dart'
     as _i2;
-import 'package:front_gestion_minera/modules/partners/presentation/screens/partners_screen.dart'
+import 'package:front_gestion_minera/modules/partners/presentation/screens/distributes_screen.dart'
     as _i3;
-import 'package:front_gestion_minera/modules/treasury/presentation/screen/treasury_screen.dart'
+import 'package:front_gestion_minera/modules/partners/presentation/screens/loan_history_screen.dart'
     as _i4;
+import 'package:front_gestion_minera/modules/partners/presentation/screens/partners_screen.dart'
+    as _i5;
+import 'package:front_gestion_minera/modules/treasury/presentation/screen/treasury_screen.dart'
+    as _i6;
 
 /// generated route for
 /// [_i1.AuthScreen]
-class AuthRoute extends _i5.PageRouteInfo<void> {
-  const AuthRoute({List<_i5.PageRouteInfo>? children})
+class AuthRoute extends _i7.PageRouteInfo<void> {
+  const AuthRoute({List<_i7.PageRouteInfo>? children})
     : super(AuthRoute.name, initialChildren: children);
 
   static const String name = 'AuthRoute';
 
-  static _i5.PageInfo page = _i5.PageInfo(
+  static _i7.PageInfo page = _i7.PageInfo(
     name,
     builder: (data) {
       return const _i1.AuthScreen();
@@ -38,13 +42,13 @@ class AuthRoute extends _i5.PageRouteInfo<void> {
 
 /// generated route for
 /// [_i2.ContributeHistoryScreen]
-class ContributeHistoryRoute extends _i5.PageRouteInfo<void> {
-  const ContributeHistoryRoute({List<_i5.PageRouteInfo>? children})
+class ContributeHistoryRoute extends _i7.PageRouteInfo<void> {
+  const ContributeHistoryRoute({List<_i7.PageRouteInfo>? children})
     : super(ContributeHistoryRoute.name, initialChildren: children);
 
   static const String name = 'ContributeHistoryRoute';
 
-  static _i5.PageInfo page = _i5.PageInfo(
+  static _i7.PageInfo page = _i7.PageInfo(
     name,
     builder: (data) {
       return const _i2.ContributeHistoryScreen();
@@ -53,12 +57,44 @@ class ContributeHistoryRoute extends _i5.PageRouteInfo<void> {
 }
 
 /// generated route for
-/// [_i3.PartnersScreen]
-class PartnersRoute extends _i5.PageRouteInfo<PartnersRouteArgs> {
+/// [_i3.DistributesScreen]
+class DistributesRoute extends _i7.PageRouteInfo<void> {
+  const DistributesRoute({List<_i7.PageRouteInfo>? children})
+    : super(DistributesRoute.name, initialChildren: children);
+
+  static const String name = 'DistributesRoute';
+
+  static _i7.PageInfo page = _i7.PageInfo(
+    name,
+    builder: (data) {
+      return const _i3.DistributesScreen();
+    },
+  );
+}
+
+/// generated route for
+/// [_i4.LoanHistoryScreen]
+class LoanHistoryRoute extends _i7.PageRouteInfo<void> {
+  const LoanHistoryRoute({List<_i7.PageRouteInfo>? children})
+    : super(LoanHistoryRoute.name, initialChildren: children);
+
+  static const String name = 'LoanHistoryRoute';
+
+  static _i7.PageInfo page = _i7.PageInfo(
+    name,
+    builder: (data) {
+      return const _i4.LoanHistoryScreen();
+    },
+  );
+}
+
+/// generated route for
+/// [_i5.PartnersScreen]
+class PartnersRoute extends _i7.PageRouteInfo<PartnersRouteArgs> {
   PartnersRoute({
-    _i6.Key? key,
+    _i8.Key? key,
     required String nombre,
-    List<_i5.PageRouteInfo>? children,
+    List<_i7.PageRouteInfo>? children,
   }) : super(
          PartnersRoute.name,
          args: PartnersRouteArgs(key: key, nombre: nombre),
@@ -67,11 +103,11 @@ class PartnersRoute extends _i5.PageRouteInfo<PartnersRouteArgs> {
 
   static const String name = 'PartnersRoute';
 
-  static _i5.PageInfo page = _i5.PageInfo(
+  static _i7.PageInfo page = _i7.PageInfo(
     name,
     builder: (data) {
       final args = data.argsAs<PartnersRouteArgs>();
-      return _i3.PartnersScreen(key: args.key, nombre: args.nombre);
+      return _i5.PartnersScreen(key: args.key, nombre: args.nombre);
     },
   );
 }
@@ -79,7 +115,7 @@ class PartnersRoute extends _i5.PageRouteInfo<PartnersRouteArgs> {
 class PartnersRouteArgs {
   const PartnersRouteArgs({this.key, required this.nombre});
 
-  final _i6.Key? key;
+  final _i8.Key? key;
 
   final String nombre;
 
@@ -90,17 +126,17 @@ class PartnersRouteArgs {
 }
 
 /// generated route for
-/// [_i4.TreasuryScreen]
-class TreasuryRoute extends _i5.PageRouteInfo<void> {
-  const TreasuryRoute({List<_i5.PageRouteInfo>? children})
+/// [_i6.TreasuryScreen]
+class TreasuryRoute extends _i7.PageRouteInfo<void> {
+  const TreasuryRoute({List<_i7.PageRouteInfo>? children})
     : super(TreasuryRoute.name, initialChildren: children);
 
   static const String name = 'TreasuryRoute';
 
-  static _i5.PageInfo page = _i5.PageInfo(
+  static _i7.PageInfo page = _i7.PageInfo(
     name,
     builder: (data) {
-      return const _i4.TreasuryScreen();
+      return const _i6.TreasuryScreen();
     },
   );
 }
