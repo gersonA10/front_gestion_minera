@@ -13,6 +13,7 @@ import 'package:auto_route/auto_route.dart' as _i5;
 import 'package:flutter/material.dart' as _i6;
 import 'package:front_gestion_minera/modules/auth/presentation/screen/auth_screens.dart'
     as _i1;
+import 'package:front_gestion_minera/modules/partners/presentation/screens/loan_history_screen.dart'
 import 'package:front_gestion_minera/modules/partners/presentation/screens/distributes_screen.dart'
     as _i2;
 import 'package:front_gestion_minera/modules/partners/presentation/screens/partners_screen.dart'
@@ -37,6 +38,12 @@ class AuthRoute extends _i5.PageRouteInfo<void> {
 }
 
 /// generated route for
+/// [_i2.LoanHistoryScreen]
+class LoanHistoryRoute extends _i5.PageRouteInfo<void> {
+  const LoanHistoryRoute({List<_i5.PageRouteInfo>? children})
+    : super(LoanHistoryRoute.name, initialChildren: children);
+
+  static const String name = 'LoanHistoryRoute';
 /// [_i2.DistributesScreen]
 class DistributesRoute extends _i5.PageRouteInfo<void> {
   const DistributesRoute({List<_i5.PageRouteInfo>? children})
@@ -47,6 +54,7 @@ class DistributesRoute extends _i5.PageRouteInfo<void> {
   static _i5.PageInfo page = _i5.PageInfo(
     name,
     builder: (data) {
+      return const _i2.LoanHistoryScreen();
       return const _i2.DistributesScreen();
     },
   );
