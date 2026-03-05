@@ -109,7 +109,7 @@ class PartnersScreen extends StatelessWidget {
                 children: [
                   CustomCardWidget(
                     onTap: () {
-                      context.router.push(ContributesRoute());
+                      context.router.push(DistributesRoute());
                     },
                     screenSize: screenSize,
                     topPadding: topPadding,
