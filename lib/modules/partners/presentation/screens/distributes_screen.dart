@@ -172,8 +172,6 @@ class DistributesScreen extends StatelessWidget {
   }
 }
 
-// --- WIDGETS REUTILIZABLES ---
-
 class CustomCardMetric extends StatelessWidget {
   const CustomCardMetric({
     required this.title,
@@ -238,7 +236,7 @@ class DividendCard extends StatelessWidget {
   final String title;
   final String dateInfo;
   final String amount;
-  final bool isPaid; // true = PAGADO (Verde), false = PENDIENTE (Amarillo)
+  final bool isPaid; 
 
   @override
   Widget build(BuildContext context) {
