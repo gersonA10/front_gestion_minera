@@ -2,9 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:front_gestion_minera/injector_container.dart';
 import 'package:front_gestion_minera/config/router/app_router.dart';
+//import 'package:shared_preferences/shared_preferences.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  //final prefs = await SharedPreferences.getInstance();
+  //await prefs.clear();
   await dotenv.load(fileName: '.env');
   InjectorContainer.setupGetIt();
   runApp(const MainApp());

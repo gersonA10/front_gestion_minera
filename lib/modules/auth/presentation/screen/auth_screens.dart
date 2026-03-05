@@ -18,7 +18,7 @@ class AuthScreen extends StatefulWidget {
 
 class _AuthScreenState extends State<AuthScreen> {
   final TextEditingController userController = TextEditingController(
-    text: 'juan.hacienda@mina.com',
+    text: 'juan.socio@mina.com',
   );
   final TextEditingController passwordController = TextEditingController(
     text: '12345',
@@ -38,7 +38,7 @@ class _AuthScreenState extends State<AuthScreen> {
         body: BlocConsumer<AuthBloc, AuthState>(
           listener: (context, state) {
             if (state is AuthError) {
-               CustomAlert.show(
+              CustomAlert.show(
                 context,
                 title: 'Error',
                 message: state.message,

@@ -29,7 +29,7 @@ class PartnersDatasource {
   ) async {
     final response = await apiClient.get(
       '/api/contributions/history',
-      queryParameters: {'period': 'month', '&extract_date': date},
+      queryParameters: {'?period': 'month', '&extract_date': date},
       operationName: 'brings up the transaction history for the month',
     );
 

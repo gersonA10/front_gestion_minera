@@ -1,4 +1,4 @@
-/*import 'package:auto_route/auto_route.dart';
+import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:front_gestion_minera/config/theme/extension_theme.dart';
@@ -7,27 +7,77 @@ import 'package:front_gestion_minera/modules/partners/presentation/bloc/partners
 import 'package:front_gestion_minera/utils/text_util.dart';
 
 @RoutePage()
-class ContributeHistoryScreen extends StatelessWidget {
+class ContributeHistoryScreen extends StatefulWidget {
   const ContributeHistoryScreen({super.key});
+
+  @override
+  State<ContributeHistoryScreen> createState() =>
+      _ContributeHistoryScreenState();
+}
+
+class _ContributeHistoryScreenState extends State<ContributeHistoryScreen> {
+  String selectedDate = '';
+
+  String getCurrentMonth() {
+    final now = DateTime.now();
+    return "${now.year}-${now.month.toString().padLeft(2, '0')}-01";
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    selectedDate = getCurrentMonth();
+  }
+
+  Future<void> pickMonth() async {
+    final DateTime? picked = await showDatePicker(
+      context: context,
+      initialDate: DateTime.now(),
+      firstDate: DateTime(2020),
+      lastDate: DateTime(2035),
+    );
+
+    if (picked != null) {
+      final formatted =
+          "${picked.year}-${picked.month.toString().padLeft(2, '0')}-01";
+
+      setState(() {
+        selectedDate = formatted;
+      });
+
+      context.read<PartnersBloc>().add(
+        GetContributeHistoryMonth(exactDate: formatted),
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     final screenSize = MediaQuery.of(context).size;
     final double smallSpacing = screenSize.height * 0.02;
     final double topPadding = screenSize.height * 0.2;
-    return BlocProvider(
-      create: (context) => InjectorContainer.getIt<PartnersBloc>(),
+    return MultiBlocProvider(
+      providers: [
+        BlocProvider(
+          create: (context) =>
+              InjectorContainer.getIt<PartnersBloc>()
+                ..add(GetContributeHistory()),
+        ),
+      ],
       child: Scaffold(
         appBar: AppBar(
           backgroundColor: Theme.of(context).colorScheme.white,
           elevation: 0,
-          title: Padding(
-            padding: EdgeInsets.only(top: topPadding * 0.05),
-            child: Text(
-              'Historial de Aportes',
-              style: AppTextStyles.mainStyle16Bold(context),
-            ),
+          title: Text(
+            'Historial de Aportes',
+            style: AppTextStyles.mainStyle16Bold(context),
           ),
+          actions: [
+            IconButton(
+              icon: const Icon(Icons.calendar_month),
+              onPressed: pickMonth,
+            ),
+          ],
         ),
         body: BlocConsumer<PartnersBloc, PartnersState>(
           listener: (context, state) {
@@ -46,42 +96,39 @@ class ContributeHistoryScreen extends StatelessWidget {
                 child: Column(
                   children: [
                     Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceAround,
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        ElevatedButton(
-                          onPressed: () {
-                            context.read<PartnersBloc>().add(
-                              GetContributeHistory(),
-                            );
-                          },
-                          child: Text('Todos'),
+                        _filterButton(
+                          context,
+                          'Todos',
+                          () => context.read<PartnersBloc>().add(
+                            GetContributeHistory(),
+                          ),
                         ),
-                        ElevatedButton(
-                          onPressed: () {
-                            context.read<PartnersBloc>().add(
-                              GetContributeHistoryWeek(),
-                            );
-                          },
-                          child: Text('Semana'),
+                        _filterButton(
+                          context,
+                          'Semana',
+                          () => context.read<PartnersBloc>().add(
+                            GetContributeHistoryWeek(),
+                          ),
                         ),
-                        ElevatedButton(
-                          onPressed: () {
-                            context.read<PartnersBloc>().add(
-                              GetContributeHistoryMonth(exactDate: ''),
-                            );
-                          },
-                          child: Text('Mes'),
+                        _filterButton(
+                          context,
+                          'Mes',
+                          () => context.read<PartnersBloc>().add(
+                            GetContributeHistoryMonth(exactDate: selectedDate),
+                          ),
                         ),
-                        ElevatedButton(
-                          onPressed: () {
-                            context.read<PartnersBloc>().add(
-                              GetContributeHistoryYear(exactDate: ''),
-                            );
-                          },
-                          child: Text('Año'),
+                        _filterButton(
+                          context,
+                          'Año',
+                          () => context.read<PartnersBloc>().add(
+                            GetContributeHistoryYear(exactDate: selectedDate),
+                          ),
                         ),
                       ],
                     ),
+
                     SizedBox(height: smallSpacing * 0.5),
                     Container(
                       height: screenSize.height * 0.25,
@@ -163,10 +210,19 @@ class ContributeHistoryScreen extends StatelessWidget {
                       ),
                     ),
                     ListView.builder(
-                      itemBuilder: (context, index) {
-                        return Container();
-                      },
+                      itemCount: 5,
                       shrinkWrap: true,
+                      physics: const NeverScrollableScrollPhysics(),
+                      itemBuilder: (context, index) {
+                        //final item = contributions[index];
+
+                        return ContributionCard(
+                          date: "2024-01-01",
+                          motivo: "Contribución mensual",
+                          monto: 5000.0,
+                          status: "confirmado",
+                        );
+                      },
                     ),
                   ],
                 ),
@@ -178,8 +234,96 @@ class ContributeHistoryScreen extends StatelessWidget {
       ),
     );
   }
+
+  Widget _filterButton(BuildContext context, String text, VoidCallback onTap) {
+    return ElevatedButton(
+      style: ElevatedButton.styleFrom(
+        backgroundColor: Theme.of(context).colorScheme.blue,
+      ),
+      onPressed: onTap,
+      child: Text(text),
+    );
+  }
 }
-*/
+
+class ContributionCard extends StatelessWidget {
+  final String date;
+  final String motivo;
+  final double monto;
+  final String status;
+
+  const ContributionCard({
+    super.key,
+    required this.date,
+    required this.motivo,
+    required this.monto,
+    required this.status,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final bool confirmed = status == "confirmado";
+
+    return Container(
+      margin: const EdgeInsets.only(bottom: 12),
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: Theme.of(context).colorScheme.white,
+        borderRadius: BorderRadius.circular(14),
+        boxShadow: [BoxShadow(color: Colors.black12, blurRadius: 6)],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          /// FECHA Y ESTADO
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(date),
+              Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 10,
+                  vertical: 4,
+                ),
+                decoration: BoxDecoration(
+                  color: confirmed ? Colors.green[100] : Colors.orange[100],
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                child: Text(
+                  confirmed ? "CONFIRMADO" : "PENDIENTE",
+                  style: TextStyle(
+                    color: confirmed ? Colors.green : Colors.orange,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+            ],
+          ),
+
+          const SizedBox(height: 8),
+
+          Text("Motivo: $motivo"),
+
+          const SizedBox(height: 10),
+
+          Align(
+            alignment: Alignment.bottomRight,
+            child: Text(
+              "Bs. $monto",
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+                color: Theme.of(context).colorScheme.blue,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/*
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -422,80 +566,4 @@ class _ContributeHistoryScreenState extends State<ContributeHistoryScreen> {
     );
   }
 }
-
-class ContributionCard extends StatelessWidget {
-  final String date;
-  final String motivo;
-  final double monto;
-  final String status;
-
-  const ContributionCard({
-    super.key,
-    required this.date,
-    required this.motivo,
-    required this.monto,
-    required this.status,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final bool confirmed = status == "confirmado";
-
-    return Container(
-      margin: const EdgeInsets.only(bottom: 12),
-      padding: const EdgeInsets.all(14),
-      decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.white,
-        borderRadius: BorderRadius.circular(14),
-        boxShadow: [BoxShadow(color: Colors.black12, blurRadius: 6)],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          /// FECHA Y ESTADO
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(date),
-              Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 10,
-                  vertical: 4,
-                ),
-                decoration: BoxDecoration(
-                  color: confirmed ? Colors.green[100] : Colors.orange[100],
-                  borderRadius: BorderRadius.circular(20),
-                ),
-                child: Text(
-                  confirmed ? "CONFIRMADO" : "PENDIENTE",
-                  style: TextStyle(
-                    color: confirmed ? Colors.green : Colors.orange,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ),
-            ],
-          ),
-
-          const SizedBox(height: 8),
-
-          Text("Motivo: $motivo"),
-
-          const SizedBox(height: 10),
-
-          Align(
-            alignment: Alignment.bottomRight,
-            child: Text(
-              "Bs. $monto",
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-                color: Theme.of(context).colorScheme.blue,
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
+*/

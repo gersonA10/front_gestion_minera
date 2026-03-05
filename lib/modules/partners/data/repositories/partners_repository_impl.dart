@@ -8,7 +8,7 @@ class PartnersRepositoryImpl extends PartnersRepository {
 
   @override
   Future<List<LoanHistoryDataEntity>> getcontributeHistory() async {
-    return await datasource.getcontributeHistoryWeek();
+    return await datasource.getcontributeHistory();
   }
 
   @override
