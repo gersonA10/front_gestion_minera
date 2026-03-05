@@ -114,7 +114,9 @@ class PartnersScreen extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: [
                   CustomCardWidget(
-                    onTap: () {},
+                    onTap: () {
+                      context.router.push(DistributesRoute());
+                    },
                     screenSize: screenSize,
                     topPadding: topPadding,
                     smallSpacing: smallSpacing,

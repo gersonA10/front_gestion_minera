@@ -14,6 +14,7 @@ import 'package:flutter/material.dart' as _i6;
 import 'package:front_gestion_minera/modules/auth/presentation/screen/auth_screens.dart'
     as _i1;
 import 'package:front_gestion_minera/modules/partners/presentation/screens/loan_history_screen.dart'
+import 'package:front_gestion_minera/modules/partners/presentation/screens/distributes_screen.dart'
     as _i2;
 import 'package:front_gestion_minera/modules/partners/presentation/screens/partners_screen.dart'
     as _i3;
@@ -43,11 +44,18 @@ class LoanHistoryRoute extends _i5.PageRouteInfo<void> {
     : super(LoanHistoryRoute.name, initialChildren: children);
 
   static const String name = 'LoanHistoryRoute';
+/// [_i2.DistributesScreen]
+class DistributesRoute extends _i5.PageRouteInfo<void> {
+  const DistributesRoute({List<_i5.PageRouteInfo>? children})
+    : super(DistributesRoute.name, initialChildren: children);
+
+  static const String name = 'DistributesRoute';
 
   static _i5.PageInfo page = _i5.PageInfo(
     name,
     builder: (data) {
       return const _i2.LoanHistoryScreen();
+      return const _i2.DistributesScreen();
     },
   );
 }
