@@ -1,7 +1,9 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:front_gestion_minera/config/router/app_router.gr.dart';
 import 'package:front_gestion_minera/config/theme/extension_theme.dart';
+import 'package:front_gestion_minera/core/widgets/custom_alert_widget.dart';
 import 'package:front_gestion_minera/injector_container.dart';
 import 'package:front_gestion_minera/modules/auth/presentation/bloc/auth_bloc.dart';
 import 'package:front_gestion_minera/utils/text_util.dart';
@@ -33,7 +35,34 @@ class _AuthScreenState extends State<AuthScreen> {
       create: (context) => InjectorContainer.getIt<AuthBloc>(),
       child: Scaffold(
         backgroundColor: const Color(0xFFF3F5F7),
-        body: BlocBuilder<AuthBloc, AuthState>(
+        body: BlocConsumer<AuthBloc, AuthState>(
+          listener: (context, state) {
+            if (state is AuthError) {
+               CustomAlert.show(
+                context,
+                title: 'Error',
+                message: state.message,
+                type: AlertType.error,
+              );
+            } else if (state is AuthLoading) {
+              CustomAlert.show(
+                context,
+                title: 'Cargando...',
+                message: 'Iniciando sesion, por favor espere...',
+                type: AlertType.success,
+              );
+            } else if (state is AuthSuccess) {
+              final role = state.data.roleName;
+
+              if (role == 'hacienda') {
+                context.router.replaceAll([const TreasuryRoute()]);
+              } else if (role == 'socios') {
+                context.router.replaceAll([PartnersRoute(nombre: '')]);
+              } else if (role == 'vigilancia') {
+                context.router.replaceAll([const TreasuryRoute()]);
+              }
+            }
+          },
           builder: (context, state) {
             return Center(
               child: SingleChildScrollView(
@@ -61,7 +90,7 @@ class _AuthScreenState extends State<AuthScreen> {
                       Container(
                         padding: const EdgeInsets.all(18),
                         decoration: BoxDecoration(
-                          color: Theme.of(context).colorScheme.leadBajito,
+                          color: Theme.of(context).colorScheme.bajo,
                           borderRadius: BorderRadius.circular(16),
                         ),
                         child: Icon(
@@ -150,14 +179,16 @@ class _AuthScreenState extends State<AuthScreen> {
                               borderRadius: BorderRadius.circular(14),
                             ),
                           ),
-                          onPressed: () {
-                            context.read<AuthBloc>().add(
-                              AuthDataEvent(
-                                username: userController.text,
-                                password: passwordController.text,
-                              ),
-                            );
-                          },
+                          onPressed: state is AuthLoading
+                              ? null
+                              : () {
+                                  context.read<AuthBloc>().add(
+                                    AuthDataEvent(
+                                      username: userController.text,
+                                      password: passwordController.text,
+                                    ),
+                                  );
+                                },
                           child: Text(
                             'Iniciar Sesión',
                             style: AppTextStyles.mainStyleWhite14Bold(context),

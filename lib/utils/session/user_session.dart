@@ -1,17 +1,15 @@
-import 'package:front_gestion_minera/modules/auth/data/models/auth_model.dart';
+import 'package:front_gestion_minera/modules/auth/domain/entity/auth_entity.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-
-
 class UserSession {
-  // Aquí irás agregando más llaves según crezca el proyecto (ej. ROL, SUCURSAL)
   static const String _idKey = 'ID';
-  static const String _nameKey = 'NAME';
+  static const String _fullNameKey = 'FULLNAME';
   static const String _emailKey = 'EMAIL';
+  static const String _roleKey = 'ROLE';
   static const String _accessTokenKey = 'TOKEN';
   static const String _refreshTokenKey = 'REFRESHTOKEN';
 
-  // --- ACCESS TOKEN ---
+  //  ACCESS TOKEN
   static Future<void> setAccessToken(String token) async {
     final preferences = await SharedPreferences.getInstance();
     await preferences.setString(_accessTokenKey, token);
@@ -22,42 +20,43 @@ class UserSession {
     return preferences.getString(_accessTokenKey) ?? '';
   }
 
-  // --- REFRESH TOKEN ---
-  static Future<void> setRefreshToken(String refreshtoken) async {
+  //  OBTENER ROL
+  static Future<String> getRole() async {
     final preferences = await SharedPreferences.getInstance();
-    await preferences.setString(_refreshTokenKey, refreshtoken);
+    return preferences.getString(_roleKey) ?? '';
+  }
+  
+  // Para saber si el user esta logeado
+  static Future<bool> hasToken() async {
+    final token = await getAccessToken();
+    return token.isNotEmpty;
   }
 
-  static Future<String> getRefreshToken() async {
-    final preferences = await SharedPreferences.getInstance();
-    return preferences.getString(_refreshTokenKey) ?? '';
-  }
-
-  // --- USER DATA BÁSICA (Opcional por ahora) ---
-  static Future<void> setUserData({
-    required LoginDataModel userData,
-  }) async {
+  // GUARDAR SESIÓN COMPLETA
+  // Usamos la Entidad del dominio
+  static Future<void> setUserSession(LoginDataEntity userData) async {
     final preferences = await SharedPreferences.getInstance();
     await preferences.setString(_idKey, userData.id);
-    await preferences.setString(_nameKey, userData.email);
-    await preferences.setString(_emailKey, userData.roleName);
-    await preferences.setString( _accessTokenKey, userData.sessionToken);
+    await preferences.setString(_fullNameKey, userData.fullName);
+    await preferences.setString(_emailKey, userData.email);
+    await preferences.setString(_roleKey, userData.roleName);
+    await preferences.setString(_accessTokenKey, userData.sessionToken);
   }
 
-  // --- CLEAR (Ideal para el Logout) ---
+  //  CLEAR
   static Future<void> clear() async {
     final preferences = await SharedPreferences.getInstance();
     await preferences.remove(_idKey);
-    await preferences.remove(_nameKey);
+    await preferences.remove(_fullNameKey);
     await preferences.remove(_emailKey);
+    await preferences.remove(_roleKey);
     await preferences.remove(_accessTokenKey);
     await preferences.remove(_refreshTokenKey);
   }
 
-  // --- VALIDACIÓN DE SESIÓN ---
+  //  VALIDACIÓN DE SESIÓN
   static Future<bool> isSession() async {
     final preferences = await SharedPreferences.getInstance();
-    // Validamos por el token en lugar del ID, es más seguro para saber si hay sesión activa
     return (preferences.getString(_accessTokenKey) ?? '').isNotEmpty;
   }
 }
