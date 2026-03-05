@@ -9,7 +9,7 @@ class UserSession {
   static const String _accessTokenKey = 'TOKEN';
   static const String _refreshTokenKey = 'REFRESHTOKEN';
 
-  //  ACCESS TOKEN 
+  //  ACCESS TOKEN
   static Future<void> setAccessToken(String token) async {
     final preferences = await SharedPreferences.getInstance();
     await preferences.setString(_accessTokenKey, token);
@@ -20,13 +20,19 @@ class UserSession {
     return preferences.getString(_accessTokenKey) ?? '';
   }
 
-  //  OBTENER ROL 
+  //  OBTENER ROL
   static Future<String> getRole() async {
     final preferences = await SharedPreferences.getInstance();
     return preferences.getString(_roleKey) ?? '';
   }
+  
+  // Para saber si el user esta logeado
+  static Future<bool> hasToken() async {
+    final token = await getAccessToken();
+    return token.isNotEmpty;
+  }
 
-  // GUARDAR SESIÓN COMPLETA 
+  // GUARDAR SESIÓN COMPLETA
   // Usamos la Entidad del dominio
   static Future<void> setUserSession(LoginDataEntity userData) async {
     final preferences = await SharedPreferences.getInstance();
@@ -37,7 +43,7 @@ class UserSession {
     await preferences.setString(_accessTokenKey, userData.sessionToken);
   }
 
-  //  CLEAR 
+  //  CLEAR
   static Future<void> clear() async {
     final preferences = await SharedPreferences.getInstance();
     await preferences.remove(_idKey);
@@ -48,7 +54,7 @@ class UserSession {
     await preferences.remove(_refreshTokenKey);
   }
 
-  //  VALIDACIÓN DE SESIÓN 
+  //  VALIDACIÓN DE SESIÓN
   static Future<bool> isSession() async {
     final preferences = await SharedPreferences.getInstance();
     return (preferences.getString(_accessTokenKey) ?? '').isNotEmpty;
