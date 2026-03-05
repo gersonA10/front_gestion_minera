@@ -1,18 +1,18 @@
 import 'dart:convert';
-import 'package:front_gestion_minera/modules/partners/domain/entity/partners_entity.dart';
+import '../../domain/entity/entity.dart';
 
-LoanHistoryResponseModel loanHistoryResponseFromJson(String str) =>
-    LoanHistoryResponseModel.fromJson(json.decode(str));
+ContributeHistoryResponseModel loanHistoryResponseFromJson(String str) =>
+    ContributeHistoryResponseModel.fromJson(json.decode(str));
 
-class LoanHistoryResponseModel extends LoanHistoryResponseEntity {
-  LoanHistoryResponseModel({
+class ContributeHistoryResponseModel extends ContributeHistoryResponseEntity {
+  ContributeHistoryResponseModel({
     required super.success,
     required super.message,
     required super.data,
   });
 
-  factory LoanHistoryResponseModel.fromJson(Map<String, dynamic> json) =>
-      LoanHistoryResponseModel(
+  factory ContributeHistoryResponseModel.fromJson(Map<String, dynamic> json) =>
+      ContributeHistoryResponseModel(
         success: json["success"],
         message: json["message"],
         data: List<LoanHistoryDataModel>.from(

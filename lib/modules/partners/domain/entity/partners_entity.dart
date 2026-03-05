@@ -1,9 +1,9 @@
-class LoanHistoryResponseEntity {
+class ContributeHistoryResponseEntity {
   final bool success;
   final String message;
   final List<LoanHistoryDataEntity> data;
 
-  LoanHistoryResponseEntity({
+  ContributeHistoryResponseEntity({
     required this.success,
     required this.message,
     required this.data,
