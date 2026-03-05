@@ -1,6 +1,9 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
+import 'package:front_gestion_minera/config/router/app_router.dart';
+import 'package:front_gestion_minera/config/router/app_router.gr.dart';
 import 'package:front_gestion_minera/config/theme/extension_theme.dart';
+import 'package:front_gestion_minera/injector_container.dart';
 import 'package:front_gestion_minera/modules/partners/presentation/widgets/custom_card_widget.dart';
 import 'package:front_gestion_minera/utils/greeting_util.dart';
 import 'package:front_gestion_minera/utils/text_util.dart';
@@ -92,7 +95,11 @@ class PartnersScreen extends StatelessWidget {
                     subtitle: 'Nueva Gestion de Socios Financieros',
                   ),
                   CustomCardWidget(
-                    onTap: () {},
+                    onTap: () {
+                      InjectorContainer.getIt<AppRouter>().push(
+                        LoanHistoryRoute(),
+                      );
+                    },
                     screenSize: screenSize,
                     topPadding: topPadding,
                     smallSpacing: smallSpacing,
