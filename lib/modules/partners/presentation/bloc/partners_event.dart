@@ -2,6 +2,8 @@ part of 'partners_bloc.dart';
 
 sealed class PartnersEvent {}
 
+class GetContributeHistory extends PartnersEvent {}
+
 class GetContributeHistoryWeek extends PartnersEvent {}
 
 class GetContributeHistoryYear extends PartnersEvent {

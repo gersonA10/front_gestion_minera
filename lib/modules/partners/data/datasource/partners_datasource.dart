@@ -5,6 +5,14 @@ import '../models/model.dart';
 class PartnersDatasource {
   final ApiClient apiClient;
   PartnersDatasource({required this.apiClient});
+  Future<List<LoanHistoryDataEntity>> getcontributeHistory() async {
+    final response = await apiClient.get(
+      '/api/contributions/history',
+      operationName: 'brings up the weeks transaction history',
+    );
+
+    return List<LoanHistoryDataModel>.from(response);
+  }
 
   Future<List<LoanHistoryDataEntity>> getcontributeHistoryWeek() async {
     final response = await apiClient.get(
