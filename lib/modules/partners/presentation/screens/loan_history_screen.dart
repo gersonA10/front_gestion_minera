@@ -19,7 +19,7 @@ class LoanHistoryScreen extends StatelessWidget {
       appBar: AppBar(
         surfaceTintColor: Theme.of(context).colorScheme.white,
         elevation: 0,
-        backgroundColor: Theme.of(context).colorScheme.black,
+        backgroundColor: Theme.of(context).colorScheme.white,
         centerTitle: true,
         // leading: Icon(
         //   Icons.arrow_back,
