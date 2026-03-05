@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:front_gestion_minera/config/router/app_router.gr.dart';
 import 'package:front_gestion_minera/config/theme/extension_theme.dart';
+import 'package:front_gestion_minera/core/widgets/custom_alert_widget.dart';
 import 'package:front_gestion_minera/injector_container.dart';
 import 'package:front_gestion_minera/modules/auth/presentation/bloc/auth_bloc.dart';
 import 'package:front_gestion_minera/utils/text_util.dart';
@@ -37,20 +38,28 @@ class _AuthScreenState extends State<AuthScreen> {
         body: BlocConsumer<AuthBloc, AuthState>(
           listener: (context, state) {
             if (state is AuthError) {
-              ScaffoldMessenger.of(
+               CustomAlert.show(
                 context,
-              ).showSnackBar(SnackBar(content: Text(state.message)));
+                title: 'Error',
+                message: state.message,
+                type: AlertType.error,
+              );
+            } else if (state is AuthLoading) {
+              CustomAlert.show(
+                context,
+                title: 'Cargando...',
+                message: 'Iniciando sesion, por favor espere...',
+                type: AlertType.success,
+              );
             } else if (state is AuthSuccess) {
               final role = state.data.roleName;
 
               if (role == 'hacienda') {
-                context.router.replace(const TreasuryRoute());
+                context.router.replaceAll([const TreasuryRoute()]);
               } else if (role == 'socios') {
-                context.router.replace(PartnersRoute(nombre: ''));
+                context.router.replaceAll([PartnersRoute(nombre: '')]);
               } else if (role == 'vigilancia') {
-                context.router.replace(const TreasuryRoute());
-              } else {
-                print('Rol: $role');
+                context.router.replaceAll([const TreasuryRoute()]);
               }
             }
           },
@@ -170,14 +179,16 @@ class _AuthScreenState extends State<AuthScreen> {
                               borderRadius: BorderRadius.circular(14),
                             ),
                           ),
-                          onPressed: () {
-                            context.read<AuthBloc>().add(
-                              AuthDataEvent(
-                                username: userController.text,
-                                password: passwordController.text,
-                              ),
-                            );
-                          },
+                          onPressed: state is AuthLoading
+                              ? null
+                              : () {
+                                  context.read<AuthBloc>().add(
+                                    AuthDataEvent(
+                                      username: userController.text,
+                                      password: passwordController.text,
+                                    ),
+                                  );
+                                },
                           child: Text(
                             'Iniciar Sesión',
                             style: AppTextStyles.mainStyleWhite14Bold(context),
