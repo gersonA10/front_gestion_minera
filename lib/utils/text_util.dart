@@ -101,8 +101,11 @@ class AppTextStyles {
         fontWeight: FontWeight.bold,
       );
   static TextStyle mainStyle16Bold(BuildContext context) => GoogleFonts.inter(
-    //color: Theme.of(context).colorScheme.white,
     fontSize: 16,
+    fontWeight: FontWeight.bold,
+  );
+    static TextStyle mainStyle17Bold(BuildContext context) => GoogleFonts.inter(
+    fontSize: 17,
     fontWeight: FontWeight.bold,
   );
   static TextStyle mainStyleWhite14Bold(BuildContext context) =>
