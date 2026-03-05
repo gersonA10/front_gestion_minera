@@ -4,8 +4,7 @@ import 'package:front_gestion_minera/injector_container.dart';
 import 'package:front_gestion_minera/config/router/app_router.dart';
 
 void main() async {
-  WidgetsFlutterBinding.ensureInitialized();
-  await dotenv.load(fileName: '.env');
+   await dotenv.load(fileName: '.env');
   InjectorContainer.setupGetIt();
   runApp(const MainApp());
 }
