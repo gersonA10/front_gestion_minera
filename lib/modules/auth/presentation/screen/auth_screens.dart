@@ -1,6 +1,7 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:front_gestion_minera/config/router/app_router.gr.dart';
 import 'package:front_gestion_minera/config/theme/extension_theme.dart';
 import 'package:front_gestion_minera/injector_container.dart';
 import 'package:front_gestion_minera/modules/auth/presentation/bloc/auth_bloc.dart';
@@ -28,11 +29,31 @@ class _AuthScreenState extends State<AuthScreen> {
   Widget build(BuildContext context) {
     final screenSize = MediaQuery.of(context).size;
     final double smallSpacing = screenSize.height * 0.02;
+
     return BlocProvider(
       create: (context) => InjectorContainer.getIt<AuthBloc>(),
       child: Scaffold(
         backgroundColor: const Color(0xFFF3F5F7),
-        body: BlocBuilder<AuthBloc, AuthState>(
+        body: BlocConsumer<AuthBloc, AuthState>(
+          listener: (context, state) {
+            if (state is AuthError) {
+              ScaffoldMessenger.of(
+                context,
+              ).showSnackBar(SnackBar(content: Text(state.message)));
+            } else if (state is AuthSuccess) {
+              final role = state.data.roleName;
+
+              if (role == 'hacienda') {
+                context.router.replace(const TreasuryRoute());
+              } else if (role == 'socios') {
+                context.router.replace(PartnersRoute(nombre: ''));
+              } else if (role == 'vigilancia') {
+                context.router.replace(const TreasuryRoute());
+              } else {
+                print('Rol: $role');
+              }
+            }
+          },
           builder: (context, state) {
             return Center(
               child: SingleChildScrollView(
