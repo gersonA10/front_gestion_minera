@@ -1,5 +1,6 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
+import 'package:front_gestion_minera/config/router/app_router.gr.dart';
 import 'package:front_gestion_minera/config/theme/extension_theme.dart';
 import 'package:front_gestion_minera/modules/partners/presentation/widgets/custom_card_widget.dart';
 import 'package:front_gestion_minera/utils/greeting_util.dart';
@@ -107,7 +108,9 @@ class PartnersScreen extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: [
                   CustomCardWidget(
-                    onTap: () {},
+                    onTap: () {
+                      context.router.push(ContributesRoute());
+                    },
                     screenSize: screenSize,
                     topPadding: topPadding,
                     smallSpacing: smallSpacing,
