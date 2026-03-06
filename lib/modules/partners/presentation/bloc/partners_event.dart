@@ -15,3 +15,13 @@ class PartnersSubmitMoneyRequestEvent extends PartnersEvent {
     required this.evidenceUrlPath,
   });
 }
+
+
+class GetRequestHistoryEvent extends PartnersEvent {
+  final String? status;
+  final String? search;
+  final bool isRefresh;
+ GetRequestHistoryEvent({this.status, this.search, this.isRefresh = true});
+}
+
+class LoadMoreRequestHistoryEvent extends PartnersEvent {}

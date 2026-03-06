@@ -237,7 +237,7 @@ class _MoneyRequestScreenState extends State<MoneyRequestScreen> {
                       prefixIcon: Padding(
                         padding: const EdgeInsets.all(15.0),
                         child: Text(
-                          '\$',
+                          'Bs',
                           style: AppTextStyles.mainStyleBlue18Bold(context),
                         ),
                       ),
@@ -259,6 +259,7 @@ class _MoneyRequestScreenState extends State<MoneyRequestScreen> {
                   ),
                   SizedBox(height: smallSpacing * 0.5),
                   TextFormField(
+                    textCapitalization: TextCapitalization.sentences,
                     controller: _descripcionController,
                     maxLines: 4,
                     textInputAction: TextInputAction.done, 
