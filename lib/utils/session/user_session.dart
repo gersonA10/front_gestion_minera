@@ -17,6 +17,11 @@ class UserSession {
     userName = preferences.getString(_fullNameKey) ?? '';
   }
 
+  static Future<String> getFullName() async {
+    final preferences = await SharedPreferences.getInstance();
+    return preferences.getString(_fullNameKey) ?? 'Usuario';
+  }
+
   //  ACCESS TOKEN
   static Future<void> setAccessToken(String token) async {
     final preferences = await SharedPreferences.getInstance();

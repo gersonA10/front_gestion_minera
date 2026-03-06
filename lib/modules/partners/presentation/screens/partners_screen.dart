@@ -97,9 +97,7 @@ class PartnersScreen extends StatelessWidget {
                   ),
                   CustomCardWidget(
                     onTap: () {
-                      InjectorContainer.getIt<AppRouter>().push(
-                        LoanHistoryRoute(),
-                      );
+                      context.router.push(LoanHistoryRoute());
                     },
                     screenSize: screenSize,
                     topPadding: topPadding,
@@ -126,7 +124,9 @@ class PartnersScreen extends StatelessWidget {
                     subtitle: 'Entradas de Capital',
                   ),
                   CustomCardWidget(
-                    onTap: () {},
+                    onTap: () {
+                      context.router.push(MoneyRequestRoute());
+                    },
                     screenSize: screenSize,
                     topPadding: topPadding,
                     smallSpacing: smallSpacing,
@@ -154,7 +154,9 @@ class PartnersScreen extends StatelessWidget {
                     subtitle: 'Contribuciones Totales',
                   ),
                   CustomCardWidget(
-                    onTap: () {},
+                    onTap: () {
+                      context.router.push(const RequestHistoryRoute());
+                    },
                     screenSize: screenSize,
                     topPadding: topPadding,
                     smallSpacing: smallSpacing,
