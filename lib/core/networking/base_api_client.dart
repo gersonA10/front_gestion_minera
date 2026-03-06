@@ -20,8 +20,8 @@ class BaseApiClient {
   void _init() {
     final baseOptions = BaseOptions(
       baseUrl: baseUrl,
-      connectTimeout: Duration(minutes: customBaseOptions.connectTimeout),
-      receiveTimeout: Duration(minutes: customBaseOptions.receiveTimeout),
+      connectTimeout: Duration(milliseconds: customBaseOptions.connectTimeout),
+      receiveTimeout: Duration(milliseconds: customBaseOptions.receiveTimeout),
       headers: customBaseOptions.headers,
     );
 

@@ -12,5 +12,7 @@ void initPartnersContainer(GetIt getIt) {
     () => MoneyRequestRepositoryImpl(datasource: getIt()),
   );
   // Bloc
-  getIt.registerFactory(() => PartnersBloc(repository: getIt()));
+  getIt.registerFactory(
+    () => PartnersBloc(repository: getIt(), moneyRepository: getIt()),
+  );
 }

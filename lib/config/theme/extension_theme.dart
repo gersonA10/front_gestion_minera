@@ -14,4 +14,6 @@ extension ExtensionsLinghTheme on ColorScheme {
   Color get red => const Color.fromARGB(255, 255, 0, 0);
   Color get bajo => const Color(0xFFF6F6F8);
   Color get amber => const Color(0xFFEFC805);
+  Color get whitebajo => const Color(0xffEDEFF4);
+  Color get bluebajo1 => const Color.fromRGBO(183, 203, 242, 1);
 }

@@ -1,14 +1,18 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:front_gestion_minera/core/networking/base_api_exception.dart';
+import 'package:front_gestion_minera/utils/error.dart';
 import 'package:front_gestion_minera/modules/partners/domain/entity/money_request_entity.dart';
 import 'package:front_gestion_minera/modules/partners/domain/entity/request_history_entity.dart';
 import 'package:front_gestion_minera/modules/partners/domain/repositories/money_request_repository.dart';
 
+import '../../domain/entity/entity.dart';
+import '../../domain/repositories/repository.dart';
 part 'partners_event.dart';
 part 'partners_state.dart';
 
 class PartnersBloc extends Bloc<PartnersEvent, PartnersState> {
-  final MoneyRequestRepository repository;
+  PartnersRepository repository;
+  final MoneyRequestRepository moneyRepository;
 
   int _currentPage = 1;
   bool _hasReachedMax = false;
@@ -16,11 +20,73 @@ class PartnersBloc extends Bloc<PartnersEvent, PartnersState> {
   String? _currentStatus;
   String? _currentSearch;
 
-  PartnersBloc({required this.repository}) : super(PartnersInitial()) {
-    on<LoadMoreRequestHistoryEvent>(_onLoadMoreHistory);
-    on<GetRequestHistoryEvent>(_onGetRequestHistory);
-    // Manejador para la solicitud de dinero
+  PartnersBloc({required this.repository, required this.moneyRepository})
+    : super(ContributeHistoryInitial()) {
+    on<GetContributeHistory>(_getContributeHistory);
+    on<GetContributeHistoryWeek>(_getContributeHistoryWeek);
+    on<GetContributeHistoryMonth>(_getcontributeHistoryMonth);
+    on<GetContributeHistoryYear>(_getContributeHistoryYear);
+
     on<PartnersSubmitMoneyRequestEvent>(_onSubmitMoneyRequest);
+    on<GetRequestHistoryEvent>(_onGetRequestHistory);
+    on<LoadMoreRequestHistoryEvent>(_onLoadMoreHistory);
+  }
+  Future<void> _getContributeHistory(
+    GetContributeHistory event,
+    Emitter<PartnersState> emit,
+  ) async {
+    emit(ContributeHistoryLoading());
+    try {
+      final response = await repository.getcontributeHistory();
+      emit(ContributeHistorySuccess(response));
+    } on BaseApiException catch (error) {
+      emit(ContributeHistoryError(mapErrorMessage(error.key)));
+    } catch (e) {
+      emit(ContributeHistoryError('Error inesperado: $e'));
+    }
+  }
+
+  Future<void> _getContributeHistoryWeek(
+    GetContributeHistoryWeek event,
+    Emitter<PartnersState> emit,
+  ) async {
+    emit(ContributeHistoryLoading());
+    try {
+      final response = await repository.getcontributeHistoryWeek();
+      emit(ContributeHistorySuccess(response));
+    } on BaseApiException catch (error) {
+      emit(ContributeHistoryError(mapErrorMessage(error.key)));
+    }
+  }
+
+  Future<void> _getcontributeHistoryMonth(
+    GetContributeHistoryMonth event,
+    Emitter<PartnersState> emit,
+  ) async {
+    emit(ContributeHistoryLoading());
+    try {
+      final response = await repository.getcontributeHistoryMonth(
+        event.exactDate,
+      );
+      emit(ContributeHistorySuccess(response));
+    } on BaseApiException catch (error) {
+      emit(ContributeHistoryError(mapErrorMessage(error.key)));
+    }
+  }
+
+  Future<void> _getContributeHistoryYear(
+    GetContributeHistoryYear event,
+    Emitter<PartnersState> emit,
+  ) async {
+    emit(ContributeHistoryLoading());
+    try {
+      final response = await repository.getcontributeHistoryYear(
+        event.exactDate,
+      );
+      emit(ContributeHistorySuccess(response));
+    } on BaseApiException catch (error) {
+      emit(ContributeHistoryError(mapErrorMessage(error.key)));
+    }
   }
 
   Future<void> _onSubmitMoneyRequest(
@@ -41,7 +107,7 @@ class PartnersBloc extends Bloc<PartnersEvent, PartnersState> {
         evidenceUrlPath: event.evidenceUrlPath,
       );
 
-      await repository.submitMoneyRequest(requestEntity);
+      await moneyRepository.submitMoneyRequest(requestEntity);
 
       emit(PartnersMoneyRequestSuccess());
     } on BaseApiException catch (error) {
@@ -79,7 +145,7 @@ class PartnersBloc extends Bloc<PartnersEvent, PartnersState> {
     _currentSearch = event.search;
 
     try {
-      final paginatedData = await repository.getHistory(
+      final paginatedData = await moneyRepository.getHistory(
         status: _currentStatus,
         search: _currentSearch,
         page: _currentPage,
@@ -109,7 +175,7 @@ class PartnersBloc extends Bloc<PartnersEvent, PartnersState> {
 
     _currentPage++;
     try {
-      final paginatedData = await repository.getHistory(
+      final paginatedData = await moneyRepository.getHistory(
         status: _currentStatus,
         search: _currentSearch,
         page: _currentPage,
@@ -126,6 +192,6 @@ class PartnersBloc extends Bloc<PartnersEvent, PartnersState> {
       );
     } on BaseApiException catch (_) {
       emit(RequestHistoryError('Ocurrió un error al cargar el historial.'));
-    } 
+    }
   }
 }

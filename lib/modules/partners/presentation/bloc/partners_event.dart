@@ -2,6 +2,20 @@ part of 'partners_bloc.dart';
 
 sealed class PartnersEvent {}
 
+class GetContributeHistory extends PartnersEvent {}
+
+class GetContributeHistoryWeek extends PartnersEvent {}
+
+class GetContributeHistoryYear extends PartnersEvent {
+  final String exactDate;
+  GetContributeHistoryYear({required this.exactDate});
+}
+
+class GetContributeHistoryMonth extends PartnersEvent {
+  final String exactDate;
+  GetContributeHistoryMonth({required this.exactDate});
+}
+
 class PartnersSubmitMoneyRequestEvent extends PartnersEvent {
   final String area;
   final double requestedAmount;
@@ -16,12 +30,11 @@ class PartnersSubmitMoneyRequestEvent extends PartnersEvent {
   });
 }
 
-
 class GetRequestHistoryEvent extends PartnersEvent {
   final String? status;
   final String? search;
   final bool isRefresh;
- GetRequestHistoryEvent({this.status, this.search, this.isRefresh = true});
+  GetRequestHistoryEvent({this.status, this.search, this.isRefresh = true});
 }
 
 class LoadMoreRequestHistoryEvent extends PartnersEvent {}

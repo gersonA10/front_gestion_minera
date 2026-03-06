@@ -1,9 +1,12 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
+import 'package:front_gestion_minera/config/router/app_router.dart';
 import 'package:front_gestion_minera/config/router/app_router.gr.dart';
 import 'package:front_gestion_minera/config/theme/extension_theme.dart';
+import 'package:front_gestion_minera/injector_container.dart';
 import 'package:front_gestion_minera/modules/partners/presentation/widgets/custom_card_widget.dart';
 import 'package:front_gestion_minera/utils/greeting_util.dart';
+import 'package:front_gestion_minera/utils/session/user_session.dart';
 import 'package:front_gestion_minera/utils/text_util.dart';
 
 @RoutePage()
@@ -53,7 +56,7 @@ class PartnersScreen extends StatelessWidget {
                           style: AppTextStyles.mainStyleGrey14(context),
                         ),
                         Text(
-                          nombre,
+                          UserSession.userName,
                           style: AppTextStyles.mainStyle16Bold(context),
                         ),
                       ],
@@ -94,9 +97,7 @@ class PartnersScreen extends StatelessWidget {
                   ),
                   CustomCardWidget(
                     onTap: () {
-                      context.router.push(
-                        LoanHistoryRoute(),
-                      );
+                      context.router.push(LoanHistoryRoute());
                     },
                     screenSize: screenSize,
                     topPadding: topPadding,
@@ -124,7 +125,7 @@ class PartnersScreen extends StatelessWidget {
                   ),
                   CustomCardWidget(
                     onTap: () {
-                        context.router.push(MoneyRequestRoute());
+                      context.router.push(MoneyRequestRoute());
                     },
                     screenSize: screenSize,
                     topPadding: topPadding,
@@ -140,7 +141,11 @@ class PartnersScreen extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: [
                   CustomCardWidget(
-                    onTap: () {},
+                    onTap: () {
+                      InjectorContainer.getIt<AppRouter>().push(
+                        const ContributeHistoryRoute(),
+                      );
+                    },
                     screenSize: screenSize,
                     topPadding: topPadding,
                     smallSpacing: smallSpacing,
@@ -150,7 +155,7 @@ class PartnersScreen extends StatelessWidget {
                   ),
                   CustomCardWidget(
                     onTap: () {
-                      context.router.push(const RequestHistoryRoute()); 
+                      context.router.push(const RequestHistoryRoute());
                     },
                     screenSize: screenSize,
                     topPadding: topPadding,
