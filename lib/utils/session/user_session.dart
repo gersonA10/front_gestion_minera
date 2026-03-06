@@ -9,6 +9,12 @@ class UserSession {
   static const String _accessTokenKey = 'TOKEN';
   static const String _refreshTokenKey = 'REFRESHTOKEN';
 
+  
+  static Future<String> getFullName() async {
+    final preferences = await SharedPreferences.getInstance();
+    return preferences.getString(_fullNameKey) ?? 'Usuario';
+  }
+
   //  ACCESS TOKEN
   static Future<void> setAccessToken(String token) async {
     final preferences = await SharedPreferences.getInstance();

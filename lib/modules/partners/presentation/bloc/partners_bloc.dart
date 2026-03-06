@@ -1,13 +1,16 @@
 
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:front_gestion_minera/core/networking/base_api_exception.dart';
+import 'package:front_gestion_minera/modules/partners/domain/entity/money_request_entity.dart';
+import 'package:front_gestion_minera/modules/partners/domain/repositories/money_request_repository.dart';
 
 part 'partners_event.dart';
 part 'partners_state.dart';
 
 class PartnersBloc extends Bloc<PartnersEvent, PartnersState> {
-  PartnersBloc() : super(PartnersInitial()) {
+  final MoneyRequestRepository repository;
+  PartnersBloc({required this.repository}) : super(PartnersInitial()) {
     
-    // Handler para eventos iniciales o futuros
     on<PartnersEvent>((event, emit) {
       // TODO: implement event handler
     });
@@ -22,13 +25,31 @@ class PartnersBloc extends Bloc<PartnersEvent, PartnersState> {
   ) async {
     emit(PartnersMoneyRequestLoading());
     try {
-      // TODO: Aquí ira el repositorio
-      
-      await Future.delayed(const Duration(seconds: 2));
-      
+
+      if ( event.evidenceUrlPath.isEmpty ) {
+        emit(PartnersMoneyRequestError('El Comprobante es obligatorio.'));
+        return;
+      } 
+
+      final requestEntity = MoneyRequestEntity(
+        area: event.area, 
+        requestedAmount: event.requestedAmount, 
+        description: event.description, 
+        evidenceUrlPath: event.evidenceUrlPath
+      );
+
+      await repository.submitMoneyRequest(requestEntity);
+
       emit(PartnersMoneyRequestSuccess());
-    } catch (e) {
-      emit(PartnersMoneyRequestError('Ocurrió un error al enviar la solicitud de egreso.'));
+    } on BaseApiException catch (error){
+       switch (error.key) {
+        case "dio_unexpected":
+        case "dio_connect_timeout":
+          emit(PartnersMoneyRequestError('Ocurrió un error al enviar la solicitud de egreso.'));
+          break;
+        default:
+          emit(PartnersMoneyRequestError('Ocurrió un error al enviar la solicitud de egreso.'));
+      }
     }
   }
 }
