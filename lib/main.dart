@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:front_gestion_minera/config/theme/app_theme.dart';
 import 'package:front_gestion_minera/injector_container.dart';
 import 'package:front_gestion_minera/config/router/app_router.dart';
 
@@ -16,7 +17,12 @@ class MainApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final appRouter = InjectorContainer.getIt<AppRouter>();
-    return MaterialApp.router(routerConfig: appRouter.config());
+    return MaterialApp.router(
+      themeMode: ThemeMode.system,
+      theme: TAppTheme.lightTheme,
+      darkTheme: TAppTheme.dartTheme,
+      routerConfig: appRouter.config(),
+    );
   }
 }
 /**
