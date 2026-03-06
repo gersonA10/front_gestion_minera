@@ -201,3 +201,347 @@ class LoanCard extends StatelessWidget {
     );
   }
 }
+
+class SearchContributionBar extends StatelessWidget {
+  final double smallSpacing;
+  const SearchContributionBar({super.key, required this.smallSpacing});
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = Theme.of(context).colorScheme;
+
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Expanded(
+          child: Container(
+            height: 40,
+            padding: const EdgeInsets.symmetric(horizontal: 14),
+            decoration: BoxDecoration(
+              color: colors.whitebajo,
+              borderRadius: BorderRadius.circular(14),
+            ),
+            child: TextField(
+              style: AppTextStyles.mainStyle12(context),
+              decoration: InputDecoration(
+                icon: Icon(Icons.search, size: 20),
+                hintText: "Buscar por motivo",
+                hintStyle: AppTextStyles.mainStyleGrey12(context),
+                border: InputBorder.none,
+                contentPadding: EdgeInsets.only(bottom: 10),
+              ),
+            ),
+          ),
+        ),
+        SizedBox(width: smallSpacing * 0.5),
+        Container(
+          height: smallSpacing * 2,
+          width: smallSpacing * 2.5,
+          decoration: BoxDecoration(
+            color: colors.blue,
+            borderRadius: BorderRadius.circular(14),
+          ),
+          child: Icon(Icons.tune, color: colors.white),
+        ),
+      ],
+    );
+  }
+}
+
+class FilterChipButton extends StatelessWidget {
+  final String text;
+  final bool active;
+  final VoidCallback onTap;
+
+  const FilterChipButton({
+    super.key,
+    required this.text,
+    required this.active,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: EdgeInsets.symmetric(horizontal: 18, vertical: 5),
+        // alignment: Alignment.ce,
+        decoration: BoxDecoration(
+          color: active ? const Color(0xff2457C5) : const Color(0xffEDEFF4),
+          borderRadius: BorderRadius.circular(24),
+        ),
+        child: Text(
+          text,
+          style: TextStyle(
+            color: active ? Colors.white : Colors.black54,
+            fontWeight: FontWeight.w600,
+            fontSize: 10,
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class ContributionSummaryCard extends StatelessWidget {
+  final double total;
+  final double confirmed;
+  final double pending;
+  final String month;
+  final double topadding;
+  final double smallSpacing;
+
+  const ContributionSummaryCard({
+    super.key,
+    required this.total,
+    required this.confirmed,
+    required this.pending,
+    required this.month,
+    required this.topadding,
+    required this.smallSpacing,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = Theme.of(context).colorScheme;
+
+    return Container(
+      padding: EdgeInsets.all(topadding * 0.08),
+      decoration: BoxDecoration(
+        color: colors.blue,
+        borderRadius: BorderRadius.circular(10),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            "Total Aportado ($month)",
+            style: AppTextStyles.mainStyleGrey10(
+              context,
+            ).copyWith(color: colors.bluebajo1),
+          ),
+
+          SizedBox(height: smallSpacing * 0.5),
+
+          Text(
+            "\$${total.toStringAsFixed(2)}",
+            style: AppTextStyles.mainStyleWhite25Bold(context),
+          ),
+
+          SizedBox(height: smallSpacing * 0.5),
+
+          Row(
+            children: [
+              Expanded(
+                child: Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: Colors.white24,
+                    borderRadius: BorderRadius.circular(5),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text(
+                        "CONFIRMADO",
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          color: colors.bluebajo1,
+                          fontSize: 7,
+                        ),
+                      ),
+                      Text(
+                        "\$${confirmed.toStringAsFixed(2)}",
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 12,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+
+              const SizedBox(width: 10),
+
+              Expanded(
+                child: Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: Colors.white24,
+                    borderRadius: BorderRadius.circular(5),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text(
+                        "PENDIENTE",
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          color: colors.bluebajo1,
+                          fontSize: 7,
+                        ),
+                      ),
+                      Text(
+                        "\$${pending.toStringAsFixed(2)}",
+                        style: const TextStyle(
+                          color: Colors.amber,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 12,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class MonthHeader extends StatelessWidget {
+  final String month;
+  final int count;
+
+  const MonthHeader({super.key, required this.month, required this.count});
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Text(
+          month.toUpperCase(),
+          style: const TextStyle(
+            fontWeight: FontWeight.bold,
+            color: Colors.grey,
+          ),
+        ),
+        Text(
+          "$count Registros",
+          style: const TextStyle(
+            color: Color(0xff2457C5),
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class ContributionCard extends StatelessWidget {
+  final String date;
+  final String motivo;
+  final String sistema;
+  final String caja;
+  final double monto;
+  final bool confirmed;
+
+  const ContributionCard({
+    super.key,
+    required this.date,
+    required this.motivo,
+    required this.sistema,
+    required this.caja,
+    required this.monto,
+    required this.confirmed,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 14),
+      padding: const EdgeInsets.all(18),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(18),
+        boxShadow: const [BoxShadow(color: Colors.black12, blurRadius: 8)],
+      ),
+      child: Column(
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(date, style: AppTextStyles.mainStyle10(context)),
+              Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 4,
+                ),
+                decoration: BoxDecoration(
+                  color: confirmed ? Colors.green[100] : Colors.orange[100],
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                child: Text(
+                  confirmed ? "CONFIRMADO" : "PENDIENTE",
+                  style: TextStyle(
+                    color: confirmed ? Colors.green : Colors.orange,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 9,
+                  ),
+                ),
+              ),
+            ],
+          ),
+
+          const SizedBox(height: 14),
+
+          Row(
+            children: [
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      "MOTIVO",
+                      style: AppTextStyles.mainStyleGrey10(context),
+                    ),
+                    Text(motivo, style: AppTextStyles.mainStyle12Bold(context)),
+                  ],
+                ),
+              ),
+            ],
+          ),
+
+          const SizedBox(height: 12),
+
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text("CAJA", style: AppTextStyles.mainStyleGrey10(context)),
+                  SizedBox(
+                    width: 150,
+                    child: Text(
+                      caja,
+                      style: AppTextStyles.mainStyle12Bold(context),
+                    ),
+                  ),
+                ],
+              ),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  Text("MONTO", style: AppTextStyles.mainStyleGrey10(context)),
+                  Text(
+                    "\$${monto.toStringAsFixed(2)}",
+                    style: AppTextStyles.mainStyleBlue16Bold(context),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+}

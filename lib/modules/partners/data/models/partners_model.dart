@@ -15,14 +15,14 @@ class ContributeHistoryResponseModel extends ContributeHistoryResponseEntity {
       ContributeHistoryResponseModel(
         success: json["success"],
         message: json["message"],
-        data: List<LoanHistoryDataModel>.from(
-          json["data"].map((x) => LoanHistoryDataModel.fromJson(x)),
+        data: List<ContributeHistoryDataModel>.from(
+          json["data"].map((x) => ContributeHistoryDataModel.fromJson(x)),
         ),
       );
 }
 
-class LoanHistoryDataModel extends LoanHistoryDataEntity {
-  LoanHistoryDataModel({
+class ContributeHistoryDataModel extends ContributeHistoryDataEntity {
+  ContributeHistoryDataModel({
     required super.detailId,
     required super.motivo,
     required super.monto,
@@ -30,8 +30,8 @@ class LoanHistoryDataModel extends LoanHistoryDataEntity {
     required super.fechaPago,
   });
 
-  factory LoanHistoryDataModel.fromJson(Map<String, dynamic> json) =>
-      LoanHistoryDataModel(
+  factory ContributeHistoryDataModel.fromJson(Map<String, dynamic> json) =>
+      ContributeHistoryDataModel(
         detailId: json["detail_id"],
         motivo: json["motivo"],
         monto: json["monto"],

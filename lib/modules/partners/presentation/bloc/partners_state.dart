@@ -12,6 +12,6 @@ final class ContributeHistoryError extends PartnersState {
 }
 
 final class ContributeHistorySuccess extends PartnersState {
-  final List<LoanHistoryDataEntity> data;
+  final List<ContributeHistoryDataEntity> data;
   ContributeHistorySuccess(this.data);
 }

@@ -1,7 +1,7 @@
 class ContributeHistoryResponseEntity {
   final bool success;
   final String message;
-  final List<LoanHistoryDataEntity> data;
+  final List<ContributeHistoryDataEntity> data;
 
   ContributeHistoryResponseEntity({
     required this.success,
@@ -10,14 +10,14 @@ class ContributeHistoryResponseEntity {
   });
 }
 
-class LoanHistoryDataEntity {
+class ContributeHistoryDataEntity {
   final String detailId;
   final String motivo;
   final String monto;
   final String estado;
   final DateTime fechaPago;
 
-  LoanHistoryDataEntity({
+  ContributeHistoryDataEntity({
     required this.detailId,
     required this.motivo,
     required this.monto,

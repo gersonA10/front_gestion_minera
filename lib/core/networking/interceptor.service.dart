@@ -13,26 +13,18 @@ class InterceptorService extends Interceptor {
   ) async {
     final token = await UserSession.getAccessToken();
     if (token.isNotEmpty && !options.headers.containsKey('Authorization')) {
-      options.headers.addAll(
-        {'Authorization': token},
-      );
+      options.headers.addAll({'Authorization': token});
     }
     handler.next(options);
   }
 
   @override
-  void onResponse(
-    Response response,
-    ResponseInterceptorHandler handler,
-  ) async {
+  void onResponse(Response response, ResponseInterceptorHandler handler) async {
     handler.next(response);
   }
 
   @override
-  void onError(
-    DioException err,
-    ErrorInterceptorHandler handler,
-  ) async {
+  void onError(DioException err, ErrorInterceptorHandler handler) async {
     try {
       if (int.parse(err.response?.statusCode.toString() ?? '0') == 401) {
         //TODO: Refresh token logic here

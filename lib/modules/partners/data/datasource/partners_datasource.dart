@@ -5,7 +5,7 @@ import '../models/model.dart';
 class PartnersDatasource {
   final ApiClient apiClient;
   PartnersDatasource({required this.apiClient});
-  Future<List<LoanHistoryDataEntity>> getcontributeHistory() async {
+  Future<List<ContributeHistoryDataEntity>> getcontributeHistory() async {
     final response = await apiClient.get(
       '/api/contributions/history',
       operationName: 'brings up the weeks transaction history',
@@ -14,17 +14,17 @@ class PartnersDatasource {
     return ContributeHistoryResponseModel.fromJson(response).data;
   }
 
-  Future<List<LoanHistoryDataEntity>> getcontributeHistoryWeek() async {
+  Future<List<ContributeHistoryDataEntity>> getcontributeHistoryWeek() async {
     final response = await apiClient.get(
       '/api/contributions/history',
       queryParameters: {'period': 'week'},
       operationName: 'brings up the weeks transaction history',
     );
 
-    return List<LoanHistoryDataModel>.from(response);
+    return ContributeHistoryResponseModel.fromJson(response).data;
   }
 
-  Future<List<LoanHistoryDataEntity>> getcontributeHistoryMonth(
+  Future<List<ContributeHistoryDataEntity>> getcontributeHistoryMonth(
     String date,
   ) async {
     final response = await apiClient.get(
@@ -33,10 +33,10 @@ class PartnersDatasource {
       operationName: 'brings up the transaction history for the month',
     );
 
-    return List<LoanHistoryDataModel>.from(response);
+    return ContributeHistoryResponseModel.fromJson(response).data;
   }
 
-  Future<List<LoanHistoryDataEntity>> getcontributeHistoryYear(
+  Future<List<ContributeHistoryDataEntity>> getcontributeHistoryYear(
     String date,
   ) async {
     final response = await apiClient.get(
@@ -45,6 +45,6 @@ class PartnersDatasource {
       operationName: 'brings up the transaction history for the year',
     );
 
-    return List<LoanHistoryDataModel>.from(response);
+    return ContributeHistoryResponseModel.fromJson(response).data;
   }
 }
