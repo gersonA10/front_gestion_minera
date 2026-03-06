@@ -125,7 +125,9 @@ class PartnersScreen extends StatelessWidget {
                     subtitle: 'Entradas de Capital',
                   ),
                   CustomCardWidget(
-                    onTap: () {},
+                    onTap: () {
+                        context.router.push(MoneyRequestRoute());
+                    },
                     screenSize: screenSize,
                     topPadding: topPadding,
                     smallSpacing: smallSpacing,
