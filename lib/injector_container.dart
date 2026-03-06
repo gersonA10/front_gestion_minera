@@ -1,7 +1,8 @@
 import 'package:front_gestion_minera/config/router/app_router.dart';
 import 'package:front_gestion_minera/config/router/guards/auth_guard.dart';
 import 'package:front_gestion_minera/modules/auth/auth_container.dart';
-import 'package:front_gestion_minera/core/networking/http_services.dart'; 
+import 'package:front_gestion_minera/core/networking/http_services.dart';
+import 'package:front_gestion_minera/modules/partners/presentation/partners_container.dart'; 
 import 'package:get_it/get_it.dart';
 
 class InjectorContainer {
@@ -18,5 +19,6 @@ class InjectorContainer {
     getIt.registerLazySingleton<ApiClient>(() => ApiClient());
 
     initAuthContainer(getIt);
+    initPartnersContainer(getIt);
   }
 }
