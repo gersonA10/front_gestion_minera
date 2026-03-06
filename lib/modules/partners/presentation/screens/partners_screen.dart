@@ -87,13 +87,15 @@ class PartnersScreen extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: [
                   CustomCardWidget(
-                    onTap: () {},
+                    onTap: () {
+                      InjectorContainer.getIt<AppRouter>().push(LoanRoute());
+                    },
                     screenSize: screenSize,
                     topPadding: topPadding,
                     smallSpacing: smallSpacing,
                     icon: Icons.account_balance,
-                    title: 'Socios Financieros',
-                    subtitle: 'Nueva Gestion de Socios Financieros',
+                    title: 'Registrar prestamo',
+                    subtitle: 'Nueva solicitud de prestamo',
                   ),
                   CustomCardWidget(
                     onTap: () {

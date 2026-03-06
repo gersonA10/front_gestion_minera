@@ -18,5 +18,6 @@ class AppRouter extends RootStackRouter {
     AutoRoute(page: DistributesRoute.page),
     AutoRoute(page: MoneyRequestRoute.page),
     AutoRoute(page: RequestHistoryRoute.page),
+    AutoRoute(page: LoanRoute.page),
   ];
 }

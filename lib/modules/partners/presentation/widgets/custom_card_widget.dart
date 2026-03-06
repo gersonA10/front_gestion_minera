@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:front_gestion_minera/config/theme/extension_theme.dart';
 import 'package:front_gestion_minera/utils/text_util.dart';
@@ -535,6 +537,137 @@ class ContributionCard extends StatelessWidget {
                   Text(
                     "\$${monto.toStringAsFixed(2)}",
                     style: AppTextStyles.mainStyleBlue16Bold(context),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class TextLoanScreen extends StatelessWidget {
+  final String? hintText;
+  const TextLoanScreen({super.key, required this.hintText});
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      height: 50,
+      child: TextFormField(
+        decoration: InputDecoration(
+          hintText: hintText,
+          hintStyle: const TextStyle(color: Colors.grey),
+          filled: true,
+          fillColor: Colors.white,
+          contentPadding: const EdgeInsets.symmetric(horizontal: 14),
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: BorderSide(color: Colors.grey.shade300),
+          ),
+          enabledBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: BorderSide(color: Colors.grey.shade300),
+          ),
+          focusedBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: BorderSide(color: Colors.blue),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class Container12 extends StatelessWidget {
+  const Container12({
+    super.key,
+    required this.smallSpacing,
+    required this.colors,
+    required this.image,
+    required this.onOpenCamera,
+  });
+
+  final double smallSpacing;
+  final ColorScheme colors;
+  final File? image;
+  final VoidCallback onOpenCamera;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: EdgeInsets.all(smallSpacing * 1.5),
+      decoration: BoxDecoration(
+        color: colors.white,
+        borderRadius: BorderRadius.circular(16),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text("Monto", style: AppTextStyles.mainStyle14Bold(context)),
+          SizedBox(height: smallSpacing * 1),
+          TextLoanScreen(hintText: "Bs. 0.00"),
+          SizedBox(height: smallSpacing * 1),
+          Text("Motivo", style: AppTextStyles.mainStyle14Bold(context)),
+          SizedBox(height: smallSpacing * 1),
+          TextLoanScreen(hintText: "Escribe el motivo del préstamo"),
+          SizedBox(height: smallSpacing * 1),
+          Text(
+            "Nombre del solicitante",
+            style: AppTextStyles.mainStyle14Bold(context),
+          ),
+          SizedBox(height: smallSpacing * 1),
+          TextLoanScreen(hintText: "Los tigresitos"),
+          SizedBox(height: 18),
+          Text(
+            "Comprobante",
+            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+          ),
+
+          const SizedBox(height: 10),
+
+          Row(
+            children: [
+              GestureDetector(
+                onTap: onOpenCamera,
+                child: Container(
+                  width: 70,
+                  height: 70,
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(12),
+                    image: DecorationImage(
+                      image: image != null
+                          ? FileImage(image!)
+                          : const NetworkImage("https://picsum.photos/200")
+                                as ImageProvider,
+                      fit: BoxFit.cover,
+                    ),
+                  ),
+                  child: const Center(
+                    child: Icon(Icons.camera_alt, color: Colors.white),
+                  ),
+                ),
+              ),
+
+              const SizedBox(width: 12),
+
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: const [
+                  Text(
+                    "recibo_pago_042.jpg",
+                    style: TextStyle(color: Colors.grey),
+                  ),
+                  SizedBox(height: 4),
+                  Text(
+                    "Ver imagen completa",
+                    style: TextStyle(
+                      color: Colors.amber,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 10,
+                    ),
                   ),
                 ],
               ),
