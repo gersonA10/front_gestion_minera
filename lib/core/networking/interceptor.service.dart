@@ -14,7 +14,7 @@ class InterceptorService extends Interceptor {
     final token = await UserSession.getAccessToken();
     if (token.isNotEmpty && !options.headers.containsKey('Authorization')) {
       options.headers.addAll(
-        {'Authorization': 'Bearer $token'},
+        {'Authorization': token},
       );
     }
     handler.next(options);
