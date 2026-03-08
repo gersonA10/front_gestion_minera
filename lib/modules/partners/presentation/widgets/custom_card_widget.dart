@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/svg.dart';
 import 'package:front_gestion_minera/config/theme/extension_theme.dart';
 import 'package:front_gestion_minera/modules/partners/domain/entity/partners_entity.dart';
 import 'package:front_gestion_minera/utils/text_util.dart';
@@ -20,7 +21,7 @@ class CustomCardWidget extends StatelessWidget {
   final Size screenSize;
   final double topPadding;
   final double smallSpacing;
-  final IconData icon;
+  final String icon;
   final String title;
   final String subtitle;
   final GestureTapCallback onTap;
@@ -57,11 +58,7 @@ class CustomCardWidget extends StatelessWidget {
                   color: Theme.of(context).colorScheme.bajo,
                   borderRadius: BorderRadius.circular(16),
                 ),
-                child: Icon(
-                  icon,
-                  size: smallSpacing * 1.5,
-                  color: Theme.of(context).colorScheme.amber,
-                ),
+                child: SvgPicture.asset(icon, width: 28, height: 28),
               ),
               SizedBox(height: smallSpacing * 0.8),
               Text(
@@ -454,7 +451,8 @@ class ContributionCard extends StatelessWidget {
     required this.sistema,
     required this.caja,
     required this.monto,
-    required this.confirmed, required ContributeHistoryDataEntity item,
+    required this.confirmed,
+    required ContributeHistoryDataEntity item,
   });
 
   @override
@@ -582,8 +580,8 @@ class TextLoanScreen extends StatelessWidget {
   }
 }
 
-class Container12 extends StatelessWidget {
-  const Container12({
+class CustomForm extends StatelessWidget {
+  const CustomForm({
     super.key,
     required this.smallSpacing,
     required this.colors,
@@ -626,9 +624,7 @@ class Container12 extends StatelessWidget {
             "Comprobante",
             style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
           ),
-
-          const SizedBox(height: 10),
-
+          SizedBox(height: smallSpacing * 1),
           Row(
             children: [
               GestureDetector(
@@ -651,9 +647,7 @@ class Container12 extends StatelessWidget {
                   ),
                 ),
               ),
-
-              const SizedBox(width: 12),
-
+              const SizedBox(width: 10),
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: const [
@@ -674,6 +668,7 @@ class Container12 extends StatelessWidget {
               ),
             ],
           ),
+          SizedBox(height: smallSpacing * 1),
         ],
       ),
     );

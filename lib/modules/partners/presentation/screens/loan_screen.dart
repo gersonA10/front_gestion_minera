@@ -98,18 +98,17 @@ class _LoanScreenState extends State<LoanScreen>
                     ),
                     SizedBox(height: smallSpacing),
                     SizedBox(
-                      height: 480,
+                      height: 550,
                       child: TabBarView(
                         controller: _tabController,
                         children: [
-                          Container12(
+                          CustomForm(
                             smallSpacing: smallSpacing,
                             colors: colors,
                             image: _image,
                             onOpenCamera: _openCamera,
                           ),
-
-                          Container12(
+                          CustomForm(
                             smallSpacing: smallSpacing,
                             colors: colors,
                             image: _image,

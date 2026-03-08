@@ -5,6 +5,7 @@ import 'package:front_gestion_minera/config/router/app_router.gr.dart';
 import 'package:front_gestion_minera/config/theme/extension_theme.dart';
 import 'package:front_gestion_minera/injector_container.dart';
 import 'package:front_gestion_minera/modules/partners/presentation/widgets/custom_card_widget.dart';
+import 'package:front_gestion_minera/utils/assets.dart';
 import 'package:front_gestion_minera/utils/greeting_util.dart';
 import 'package:front_gestion_minera/utils/session/user_session.dart';
 import 'package:front_gestion_minera/utils/text_util.dart';
@@ -22,7 +23,7 @@ class PartnersScreen extends StatelessWidget {
 
     return Scaffold(
       appBar: PreferredSize(
-        preferredSize: Size.fromHeight(topPadding * 1),
+        preferredSize: Size.fromHeight(150),
         child: Container(
           height: screenSize.height * 0.5,
           color: Theme.of(context).colorScheme.white,
@@ -93,7 +94,7 @@ class PartnersScreen extends StatelessWidget {
                     screenSize: screenSize,
                     topPadding: topPadding,
                     smallSpacing: smallSpacing,
-                    icon: Icons.account_balance,
+                    icon: AssetImageApp.getIconLoan2,
                     title: 'Registrar prestamo',
                     subtitle: 'Nueva solicitud de prestamo',
                   ),
@@ -104,7 +105,7 @@ class PartnersScreen extends StatelessWidget {
                     screenSize: screenSize,
                     topPadding: topPadding,
                     smallSpacing: smallSpacing,
-                    icon: Icons.account_balance,
+                    icon: AssetImageApp.getIconLoan,
                     title: 'Historial de Prestamos',
                     subtitle: 'Seguimiento de Cuotas',
                   ),
@@ -121,7 +122,7 @@ class PartnersScreen extends StatelessWidget {
                     screenSize: screenSize,
                     topPadding: topPadding,
                     smallSpacing: smallSpacing,
-                    icon: Icons.account_balance,
+                    icon: AssetImageApp.getIconLoan4,
                     title: 'Ingresos',
                     subtitle: 'Entradas de Capital',
                   ),
@@ -132,7 +133,7 @@ class PartnersScreen extends StatelessWidget {
                     screenSize: screenSize,
                     topPadding: topPadding,
                     smallSpacing: smallSpacing,
-                    icon: Icons.account_balance,
+                    icon: AssetImageApp.getIconLoan3,
                     title: 'Solicitar dinero',
                     subtitle: 'Solicitud de Egreso',
                   ),
@@ -151,7 +152,7 @@ class PartnersScreen extends StatelessWidget {
                     screenSize: screenSize,
                     topPadding: topPadding,
                     smallSpacing: smallSpacing,
-                    icon: Icons.account_balance,
+                    icon: AssetImageApp.getIconLoan3,
                     title: 'Historial de Aportes',
                     subtitle: 'Contribuciones Totales',
                   ),
@@ -162,7 +163,7 @@ class PartnersScreen extends StatelessWidget {
                     screenSize: screenSize,
                     topPadding: topPadding,
                     smallSpacing: smallSpacing,
-                    icon: Icons.account_balance,
+                    icon: AssetImageApp.getIconLoan,
                     title: 'Historial de Solicitudes',
                     subtitle: 'Seguimiento de solicitud',
                   ),
@@ -178,7 +179,7 @@ class PartnersScreen extends StatelessWidget {
                     screenSize: screenSize,
                     topPadding: topPadding,
                     smallSpacing: smallSpacing,
-                    icon: Icons.account_balance,
+                    icon: AssetImageApp.getIconLoan4,
                     title: 'Bandeja de Socios',
                     subtitle: 'Verifica tu asistencia y otras actividades',
                   ),
