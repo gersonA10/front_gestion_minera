@@ -38,3 +38,12 @@ class GetRequestHistoryEvent extends PartnersEvent {
 }
 
 class LoadMoreRequestHistoryEvent extends PartnersEvent {}
+
+class LoanHistoryRequestEvent extends PartnersEvent {
+  LoanHistoryRequestEvent();
+}
+
+class LoanHistoryStatusRequestEvent extends PartnersEvent {
+  final String status;
+  LoanHistoryStatusRequestEvent({required this.status});
+}

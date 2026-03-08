@@ -23,6 +23,10 @@ void initPartnersContainer(GetIt getIt) {
 
   // Bloc
   getIt.registerFactory(
-    () => PartnersBloc(repository: getIt(), moneyRepository: getIt()),
+    () => PartnersBloc(
+      repository: getIt(),
+      moneyRepository: getIt(),
+      loanHistoryRepository: getIt(),
+    ),
   );
 }
