@@ -2,18 +2,23 @@ part of 'partners_bloc.dart';
 
 sealed class PartnersState {}
 
-final class ContributeHistoryInitial extends PartnersState {}
+final class ContributeDataInitial extends PartnersState {}
 
-final class ContributeHistoryLoading extends PartnersState {}
+final class ContributeDataLoading extends PartnersState {}
 
-final class ContributeHistoryError extends PartnersState {
+final class ContributeDataError extends PartnersState {
   final String message;
-  ContributeHistoryError(this.message);
+  ContributeDataError(this.message);
 }
 
-final class ContributeHistorySuccess extends PartnersState {
-  final List<ContributeHistoryDataEntity> data;
-  ContributeHistorySuccess(this.data);
+final class ContributeDataLoaded extends PartnersState {
+  final ContributionMetricsEntity metrics;
+  final Map<String, List<ContributeHistoryDataEntity>> groupedHistory;
+
+  ContributeDataLoaded({
+    required this.metrics,
+    required this.groupedHistory,
+  });
 }
 
 final class PartnersInitial extends PartnersState {}

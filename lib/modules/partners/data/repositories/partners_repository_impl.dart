@@ -7,26 +7,22 @@ class PartnersRepositoryImpl extends PartnersRepository {
   PartnersRepositoryImpl({required this.datasource});
 
   @override
-  Future<List<ContributeHistoryDataEntity>> getcontributeHistory() async {
-    return await datasource.getcontributeHistory();
+  Future<ContributionMetricsEntity> getContributionMetrics() async {
+    return await datasource.getContributionMetrics();
   }
 
   @override
-  Future<List<ContributeHistoryDataEntity>> getcontributeHistoryWeek() async {
-    return await datasource.getcontributeHistoryWeek();
-  }
-
-  @override
-  Future<List<ContributeHistoryDataEntity>> getcontributeHistoryMonth(
-    String date,
-  ) async {
-    return await datasource.getcontributeHistoryMonth(date);
-  }
-
-  @override
-  Future<List<ContributeHistoryDataEntity>> getcontributeHistoryYear(
-    String date,
-  ) async {
-    return await datasource.getcontributeHistoryYear(date);
+  Future<List<ContributeHistoryDataEntity>> getContributeHistory({
+    String? period,
+    String? exactDate,
+    String? status,
+    String? search,
+  }) async {
+    return await datasource.getContributeHistory(
+      period: period,
+      exactDate: exactDate,
+      status: status,
+      search: search,
+    );
   }
 }

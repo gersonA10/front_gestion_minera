@@ -2,18 +2,18 @@ part of 'partners_bloc.dart';
 
 sealed class PartnersEvent {}
 
-class GetContributeHistory extends PartnersEvent {}
+class FetchContributeDataEvent extends PartnersEvent {
+  final String? status;
+  final String? search;
+  final String? period;
+  final String? exactDate;
 
-class GetContributeHistoryWeek extends PartnersEvent {}
-
-class GetContributeHistoryYear extends PartnersEvent {
-  final String exactDate;
-  GetContributeHistoryYear({required this.exactDate});
-}
-
-class GetContributeHistoryMonth extends PartnersEvent {
-  final String exactDate;
-  GetContributeHistoryMonth({required this.exactDate});
+  FetchContributeDataEvent({
+    this.status, 
+    this.search, 
+    this.period, 
+    this.exactDate
+  });
 }
 
 class PartnersSubmitMoneyRequestEvent extends PartnersEvent {
