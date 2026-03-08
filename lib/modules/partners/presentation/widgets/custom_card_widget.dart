@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:front_gestion_minera/config/theme/extension_theme.dart';
+import 'package:front_gestion_minera/modules/partners/domain/entity/partners_entity.dart';
 import 'package:front_gestion_minera/utils/text_util.dart';
 
 class CustomCardWidget extends StatelessWidget {
@@ -453,7 +454,7 @@ class ContributionCard extends StatelessWidget {
     required this.sistema,
     required this.caja,
     required this.monto,
-    required this.confirmed,
+    required this.confirmed, required ContributeHistoryDataEntity item,
   });
 
   @override

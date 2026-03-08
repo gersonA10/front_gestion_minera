@@ -21,74 +21,62 @@ class PartnersBloc extends Bloc<PartnersEvent, PartnersState> {
   String? _currentSearch;
 
   PartnersBloc({required this.repository, required this.moneyRepository})
-    : super(ContributeHistoryInitial()) {
-    on<GetContributeHistory>(_getContributeHistory);
-    on<GetContributeHistoryWeek>(_getContributeHistoryWeek);
-    on<GetContributeHistoryMonth>(_getcontributeHistoryMonth);
-    on<GetContributeHistoryYear>(_getContributeHistoryYear);
+    : super(ContributeDataInitial()) {
+    on<FetchContributeDataEvent>(_onFetchContributeData);
 
     on<PartnersSubmitMoneyRequestEvent>(_onSubmitMoneyRequest);
     on<GetRequestHistoryEvent>(_onGetRequestHistory);
     on<LoadMoreRequestHistoryEvent>(_onLoadMoreHistory);
   }
-  Future<void> _getContributeHistory(
-    GetContributeHistory event,
+   
+
+   Future<void> _onFetchContributeData(
+    FetchContributeDataEvent event,
     Emitter<PartnersState> emit,
   ) async {
-    emit(ContributeHistoryLoading());
+    emit(ContributeDataLoading());
     try {
-      final response = await repository.getcontributeHistory();
-      emit(ContributeHistorySuccess(response));
+      // Disparamos ambas peticiones en paralelo
+      final results = await Future.wait([
+        repository.getContributionMetrics(),
+        repository.getContributeHistory(
+          status: event.status,
+          search: event.search,
+          period: event.period,
+          exactDate: event.exactDate,
+        ),
+      ]);
+
+      final metrics = results[0] as ContributionMetricsEntity;
+      final history = results[1] as List<ContributeHistoryDataEntity>;
+
+      // Agrupamos el historial por "MES AÑO"
+      final Map<String, List<ContributeHistoryDataEntity>> groupedHistory = {};
+      const months = [
+        'ENERO', 'FEBRERO', 'MARZO', 'ABRIL', 'MAYO', 'JUNIO',
+        'JULIO', 'AGOSTO', 'SEPTIEMBRE', 'OCTUBRE', 'NOVIEMBRE', 'DICIEMBRE'
+      ];
+
+      for (var item in history) {
+        final monthName = months[item.fechaPago.month - 1];
+        final groupKey = '$monthName ${item.fechaPago.year}';
+        
+        if (!groupedHistory.containsKey(groupKey)) {
+          groupedHistory[groupKey] = [];
+        }
+        groupedHistory[groupKey]!.add(item);
+      }
+
+      emit(ContributeDataLoaded(
+        metrics: metrics,
+        groupedHistory: groupedHistory,
+      ));
     } on BaseApiException catch (error) {
-      emit(ContributeHistoryError(mapErrorMessage(error.key)));
+      emit(ContributeDataError(mapErrorMessage(error.key)));
     } catch (e) {
-      emit(ContributeHistoryError('Error inesperado: $e'));
+      emit(ContributeDataError('Error inesperado: $e'));
     }
   }
-
-  Future<void> _getContributeHistoryWeek(
-    GetContributeHistoryWeek event,
-    Emitter<PartnersState> emit,
-  ) async {
-    emit(ContributeHistoryLoading());
-    try {
-      final response = await repository.getcontributeHistoryWeek();
-      emit(ContributeHistorySuccess(response));
-    } on BaseApiException catch (error) {
-      emit(ContributeHistoryError(mapErrorMessage(error.key)));
-    }
-  }
-
-  Future<void> _getcontributeHistoryMonth(
-    GetContributeHistoryMonth event,
-    Emitter<PartnersState> emit,
-  ) async {
-    emit(ContributeHistoryLoading());
-    try {
-      final response = await repository.getcontributeHistoryMonth(
-        event.exactDate,
-      );
-      emit(ContributeHistorySuccess(response));
-    } on BaseApiException catch (error) {
-      emit(ContributeHistoryError(mapErrorMessage(error.key)));
-    }
-  }
-
-  Future<void> _getContributeHistoryYear(
-    GetContributeHistoryYear event,
-    Emitter<PartnersState> emit,
-  ) async {
-    emit(ContributeHistoryLoading());
-    try {
-      final response = await repository.getcontributeHistoryYear(
-        event.exactDate,
-      );
-      emit(ContributeHistorySuccess(response));
-    } on BaseApiException catch (error) {
-      emit(ContributeHistoryError(mapErrorMessage(error.key)));
-    }
-  }
-
   Future<void> _onSubmitMoneyRequest(
     PartnersSubmitMoneyRequestEvent event,
     Emitter<PartnersState> emit,

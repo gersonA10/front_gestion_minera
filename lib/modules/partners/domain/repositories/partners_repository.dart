@@ -1,12 +1,12 @@
 import '../entity/entity.dart';
 
 abstract class PartnersRepository {
-  Future<List<ContributeHistoryDataEntity>> getcontributeHistory();
-  Future<List<ContributeHistoryDataEntity>> getcontributeHistoryWeek();
-  Future<List<ContributeHistoryDataEntity>> getcontributeHistoryMonth(
-    String date,
-  );
-  Future<List<ContributeHistoryDataEntity>> getcontributeHistoryYear(
-    String date,
-  );
+  Future<ContributionMetricsEntity> getContributionMetrics();
+  
+  Future<List<ContributeHistoryDataEntity>> getContributeHistory({
+    String? period,
+    String? exactDate,
+    String? status,
+    String? search,
+  });
 }
