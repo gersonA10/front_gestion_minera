@@ -5,44 +5,36 @@ import '../models/model.dart';
 class PartnersDatasource {
   final ApiClient apiClient;
   PartnersDatasource({required this.apiClient});
-  Future<List<ContributeHistoryDataEntity>> getcontributeHistory() async {
-    final response = await apiClient.get(
-      '/api/contributions/history',
-      operationName: 'brings up the weeks transaction history',
-    );
 
-    return ContributeHistoryResponseModel.fromJson(response).data;
+  Future<ContributionMetricsModel> getContributionMetrics() async {
+    final response = await apiClient.get(
+      '/api/contributions/metrics',
+      operationName: 'getContributionMetrics',
+    );
+    return ContributionMetricsModel.fromJson(response['data'] ?? {});
   }
 
-  Future<List<ContributeHistoryDataEntity>> getcontributeHistoryWeek() async {
+  Future<List<ContributeHistoryDataEntity>> getContributeHistory({
+    String? period,
+    String? exactDate,
+    String? status,
+    String? search,
+  }) async {
+    final Map<String, dynamic> queryParameters = {};
+
+    if (period != null) queryParameters['period'] = period;
+    if (exactDate != null) queryParameters['exact_date'] = exactDate;
+    if (status != null && status.toLowerCase() != 'todo') {
+       queryParameters['status'] = status.toLowerCase();
+    }
+    if (search != null && search.trim().isNotEmpty) {
+       queryParameters['search'] = search.trim();
+    }
+
     final response = await apiClient.get(
       '/api/contributions/history',
-      queryParameters: {'period': 'week'},
-      operationName: 'brings up the weeks transaction history',
-    );
-
-    return ContributeHistoryResponseModel.fromJson(response).data;
-  }
-
-  Future<List<ContributeHistoryDataEntity>> getcontributeHistoryMonth(
-    String date,
-  ) async {
-    final response = await apiClient.get(
-      '/api/contributions/history',
-      queryParameters: {'?period': 'month', '&extract_date': date},
-      operationName: 'brings up the transaction history for the month',
-    );
-
-    return ContributeHistoryResponseModel.fromJson(response).data;
-  }
-
-  Future<List<ContributeHistoryDataEntity>> getcontributeHistoryYear(
-    String date,
-  ) async {
-    final response = await apiClient.get(
-      '/api/contributions/history',
-      queryParameters: {'period': 'year', '&extract_date': date},
-      operationName: 'brings up the transaction history for the year',
+      queryParameters: queryParameters.isNotEmpty ? queryParameters : null,
+      operationName: 'getContributeHistory',
     );
 
     return ContributeHistoryResponseModel.fromJson(response).data;

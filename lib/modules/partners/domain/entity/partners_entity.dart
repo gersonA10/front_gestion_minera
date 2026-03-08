@@ -1,3 +1,17 @@
+// Métrica de aportes
+class ContributionMetricsEntity {
+  final double totalAportado;
+  final double totalConfirmado;
+  final double totalPendiente;
+
+  ContributionMetricsEntity({
+    required this.totalAportado,
+    required this.totalConfirmado,
+    required this.totalPendiente,
+  });
+}
+
+// Historial
 class ContributeHistoryResponseEntity {
   final bool success;
   final String message;
@@ -13,7 +27,7 @@ class ContributeHistoryResponseEntity {
 class ContributeHistoryDataEntity {
   final String detailId;
   final String motivo;
-  final String monto;
+  final double monto;
   final String estado;
   final DateTime fechaPago;
 
