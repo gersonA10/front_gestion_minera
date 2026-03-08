@@ -71,3 +71,13 @@ final class LoanHistoryStatusSuccess extends PartnersState {
 
   LoanHistoryStatusSuccess(this.history);
 }
+
+//Estados para registar un prestamo
+final class LoanRegisterLoading extends PartnersState {}
+
+final class LoanRegisterError extends PartnersState {
+  final String message;
+  LoanRegisterError(this.message);
+}
+
+final class LoanRegisterSuccess extends PartnersState {}

@@ -14,6 +14,7 @@ class PartnersBloc extends Bloc<PartnersEvent, PartnersState> {
   PartnersRepository repository;
   final MoneyRequestRepository moneyRepository;
   final LoanHistoryRepository loanHistoryRepository;
+  final LoanRegisterRequestRepository loanRegisterRequestRepository;
 
   int _currentPage = 1;
   bool _hasReachedMax = false;
@@ -25,6 +26,7 @@ class PartnersBloc extends Bloc<PartnersEvent, PartnersState> {
     required this.repository,
     required this.moneyRepository,
     required this.loanHistoryRepository,
+    required this.loanRegisterRequestRepository,
   }) : super(ContributeHistoryInitial()) {
     on<GetContributeHistory>(_getContributeHistory);
     on<GetContributeHistoryWeek>(_getContributeHistoryWeek);
@@ -37,6 +39,8 @@ class PartnersBloc extends Bloc<PartnersEvent, PartnersState> {
 
     on<LoanHistoryRequestEvent>(_onLoanHistoryRequest);
     on<LoanHistoryStatusRequestEvent>(_onLoanHistoryStatusRequest);
+
+    on<LoanRegisterEvent>(_onLoanRegister);
   }
   Future<void> _getContributeHistory(
     GetContributeHistory event,
@@ -231,6 +235,47 @@ class PartnersBloc extends Bloc<PartnersEvent, PartnersState> {
       emit(LoanHistoryStatusError(mapErrorMessage(error.key)));
     } catch (e) {
       emit(LoanHistoryStatusError('Error inesperado: $e'));
+    }
+  }
+
+  Future<void> _onLoanRegister(
+    LoanRegisterEvent event,
+    Emitter<PartnersState> emit,
+  ) async {
+    emit(LoanRegisterLoading());
+    try {
+      if (event.comprobanteImg.isEmpty) {
+        emit(LoanRegisterError('El Comprobante es obligatorio.'));
+        return;
+      }
+
+      final requestEntity = LoanRequestEntity(
+        loanType: event.loanType,
+        amountOrQuantity: event.amount,
+        description: event.description,
+        comprobanteImg: event.comprobanteImg,
+      );
+
+      await loanRegisterRequestRepository.loanRegister(requestEntity);
+
+      emit(LoanRegisterSuccess());
+    } on BaseApiException catch (error) {
+      switch (error.key) {
+        case "dio_unexpected":
+        case "dio_connect_timeout":
+          emit(
+            LoanRegisterError(
+              'Ocurrió un error al enviar la solicitud de egreso.',
+            ),
+          );
+          break;
+        default:
+          emit(
+            LoanRegisterError(
+              'Ocurrió un error al enviar la solicitud de egreso.',
+            ),
+          );
+      }
     }
   }
 }

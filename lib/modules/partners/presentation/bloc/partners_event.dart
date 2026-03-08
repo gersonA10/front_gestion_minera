@@ -47,3 +47,16 @@ class LoanHistoryStatusRequestEvent extends PartnersEvent {
   final String status;
   LoanHistoryStatusRequestEvent({required this.status});
 }
+
+class LoanRegisterEvent extends PartnersEvent {
+  final String loanType;
+  final double amount;
+  final String description;
+  final String comprobanteImg;
+  LoanRegisterEvent({
+    required this.loanType,
+    required this.amount,
+    required this.description,
+    required this.comprobanteImg,
+  });
+}
