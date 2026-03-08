@@ -4,6 +4,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:front_gestion_minera/config/theme/extension_theme.dart';
 import 'package:front_gestion_minera/injector_container.dart';
 import 'package:front_gestion_minera/modules/partners/domain/entity/request_history_entity.dart';
+import 'package:front_gestion_minera/utils/date_util.dart';
 import 'package:front_gestion_minera/utils/text_util.dart';
 
 import '../bloc/partners_bloc.dart';
@@ -36,7 +37,7 @@ class _RequestHistoryScreenState extends State<RequestHistoryScreen>
   void initState() {
     super.initState();
     _partnersBloc = InjectorContainer.getIt<PartnersBloc>()
-      ..add(GetRequestHistoryEvent());
+      ..add(GetHistoryEvent());
 
     _tabController = TabController(length: _tabs.length, vsync: this);
     _searchController = TextEditingController();
@@ -68,7 +69,7 @@ class _RequestHistoryScreenState extends State<RequestHistoryScreen>
 
   void _fetchHistory({bool isRefresh = false}) {
     _partnersBloc.add(
-      GetRequestHistoryEvent(
+      GetHistoryEvent(
         status: _mapTabToStatus(_tabController.index),
         isRefresh: isRefresh,
         search: _searchController.text.trim().isEmpty
@@ -208,12 +209,15 @@ class _RequestHistoryScreenState extends State<RequestHistoryScreen>
                                           child: Column(
                                             children: [
                                               CircularProgressIndicator(),
-                                              SizedBox(height: 10,),
+                                              SizedBox(height: 10),
                                               Text(
                                                 'Cargando mas registros...',
-                                                style: AppTextStyles.mainStyle12(
-                                                  context,
-                                                ).copyWith(color: colors.lead),
+                                                style:
+                                                    AppTextStyles.mainStyle12(
+                                                      context,
+                                                    ).copyWith(
+                                                      color: colors.lead,
+                                                    ),
                                               ),
                                             ],
                                           ),
@@ -429,25 +433,6 @@ class _RequestCard extends StatelessWidget {
     }
   }
 
-  String _formatDate(DateTime date) {
-    const months = [
-      'ENE',
-      'FEB',
-      'MAR',
-      'ABR',
-      'MAY',
-      'JUN',
-      'JUL',
-      'AGO',
-      'SEP',
-      'OCT',
-      'NOV',
-      'DIC',
-    ];
-
-    return '${date.day.toString().padLeft(2, '0')} ${months[date.month - 1]} ${date.year}';
-  }
-
   void _showRejectionDialog(
     BuildContext context, {
     required ColorScheme colors,
@@ -596,7 +581,7 @@ class _RequestCard extends StatelessWidget {
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
                             Text(
-                              _formatDate(item.date),
+                              formatDate(item.date),
                               style: AppTextStyles.mainStyle10Bold(
                                 context,
                               ).copyWith(color: colors.lead),

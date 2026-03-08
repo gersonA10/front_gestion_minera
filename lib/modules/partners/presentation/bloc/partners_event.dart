@@ -9,10 +9,10 @@ class FetchContributeDataEvent extends PartnersEvent {
   final String? exactDate;
 
   FetchContributeDataEvent({
-    this.status, 
-    this.search, 
-    this.period, 
-    this.exactDate
+    this.status,
+    this.search,
+    this.period,
+    this.exactDate,
   });
 }
 
@@ -30,11 +30,11 @@ class PartnersSubmitMoneyRequestEvent extends PartnersEvent {
   });
 }
 
-class GetRequestHistoryEvent extends PartnersEvent {
+class GetHistoryEvent extends PartnersEvent {
   final String? status;
   final String? search;
   final bool isRefresh;
-  GetRequestHistoryEvent({this.status, this.search, this.isRefresh = true});
+  GetHistoryEvent({this.status, this.search, this.isRefresh = true});
 }
 
 class LoadMoreRequestHistoryEvent extends PartnersEvent {}
@@ -43,9 +43,14 @@ class LoanHistoryRequestEvent extends PartnersEvent {
   LoanHistoryRequestEvent();
 }
 
-class LoanHistoryStatusRequestEvent extends PartnersEvent {
+class LoanHistoryStatustEvent extends PartnersEvent {
   final String status;
-  LoanHistoryStatusRequestEvent({required this.status});
+  LoanHistoryStatustEvent({required this.status});
+}
+
+class LoanHistorySearchEvent extends PartnersEvent {
+  final String search;
+  LoanHistorySearchEvent({required this.search});
 }
 
 class LoanRegisterEvent extends PartnersEvent {

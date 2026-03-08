@@ -40,6 +40,7 @@ class LoanHistoryDataModel extends LoanHistoryDataEntity {
         description: json["description"],
         fileUrl: json["file_url"],
         status: json["status"],
-        createdAt: DateTime.parse(json["created_at"]),
+        createdAt:
+            DateTime.tryParse(json["created_at"] ?? '') ?? DateTime.now(),
       );
 }

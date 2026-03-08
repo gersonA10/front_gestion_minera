@@ -31,11 +31,12 @@ class PartnersBloc extends Bloc<PartnersEvent, PartnersState> {
     on<FetchContributeDataEvent>(_onFetchContributeData);
 
     on<PartnersSubmitMoneyRequestEvent>(_onSubmitMoneyRequest);
-    on<GetRequestHistoryEvent>(_onGetRequestHistory);
+    on<GetHistoryEvent>(_onGetRequestHistory);
     on<LoadMoreRequestHistoryEvent>(_onLoadMoreHistory);
 
     on<LoanHistoryRequestEvent>(_onLoanHistoryRequest);
-    on<LoanHistoryStatusRequestEvent>(_onLoanHistoryStatusRequest);
+    on<LoanHistoryStatustEvent>(_onLoanHistoryStatusRequest);
+    on<LoanHistorySearchEvent>(_onLoanHistorySearchRequest);
 
     on<LoanRegisterEvent>(_onLoanRegister);
   }
@@ -139,7 +140,7 @@ class PartnersBloc extends Bloc<PartnersEvent, PartnersState> {
   }
 
   Future<void> _onGetRequestHistory(
-    GetRequestHistoryEvent event,
+    GetHistoryEvent event,
     Emitter<PartnersState> emit,
   ) async {
     if (event.isRefresh) {
@@ -219,13 +220,30 @@ class PartnersBloc extends Bloc<PartnersEvent, PartnersState> {
   }
 
   Future<void> _onLoanHistoryStatusRequest(
-    LoanHistoryStatusRequestEvent event,
+    LoanHistoryStatustEvent event,
     Emitter<PartnersState> emit,
   ) async {
     emit(LoanHistoryStatusLoading());
     try {
       final response = await loanHistoryRepository.getLoanHistoryStatus(
         event.status,
+      );
+      emit(LoanHistoryStatusSuccess(response));
+    } on BaseApiException catch (error) {
+      emit(LoanHistoryStatusError(mapErrorMessage(error.key)));
+    } catch (e) {
+      emit(LoanHistoryStatusError('Error inesperado: $e'));
+    }
+  }
+
+  Future<void> _onLoanHistorySearchRequest(
+    LoanHistorySearchEvent event,
+    Emitter<PartnersState> emit,
+  ) async {
+    emit(LoanHistoryStatusLoading());
+    try {
+      final response = await loanHistoryRepository.getLoanHistoryFillter(
+        event.search,
       );
       emit(LoanHistoryStatusSuccess(response));
     } on BaseApiException catch (error) {
