@@ -57,7 +57,7 @@ class _AuthScreenState extends State<AuthScreen> {
               } else if (role == 'socios') {
                 context.router.replaceAll([PartnersRoute(nombre: '')]);
               } else if (role == 'vigilancia') {
-                context.router.replaceAll([const TreasuryRoute()]);
+                context.router.replaceAll([const HomeSurveillanceRoute()]);
               }
             }
           },
