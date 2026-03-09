@@ -1,13 +1,9 @@
-import 'package:front_gestion_minera/modules/partners/data/datasource/money_request_datasource.dart';
-import 'package:front_gestion_minera/modules/partners/data/repositories/loan_history_repository_impl.dart';
-import 'package:front_gestion_minera/modules/partners/data/repositories/loan_register_request_repository_impl.dart';
-import 'package:front_gestion_minera/modules/partners/data/repositories/money_request_repository_impl.dart';
-import 'package:front_gestion_minera/modules/partners/data/repositories/partners_repository_impl.dart';
-import 'package:front_gestion_minera/modules/partners/domain/repositories/money_request_repository.dart';
 import 'package:front_gestion_minera/modules/partners/presentation/bloc/partners_bloc.dart';
 import 'package:get_it/get_it.dart';
 
 import 'data/datasource/datasource.dart';
+import 'data/repositories/distributes_repository_impl.dart';
+import 'data/repositories/repository_impl.dart';
 import 'domain/repositories/repository.dart';
 
 void initPartnersContainer(GetIt getIt) {
@@ -18,6 +14,8 @@ void initPartnersContainer(GetIt getIt) {
     () => LoanRegisterRequestDatasource(apiClient: getIt()),
   );
   getIt.registerLazySingleton(() => LoanHistoryDatasource(apiClient: getIt()));
+
+  getIt.registerLazySingleton(() => DistributesDatasource(apiClient: getIt()));
 
   // Repository
   getIt.registerFactory<PartnersRepository>(
@@ -32,6 +30,7 @@ void initPartnersContainer(GetIt getIt) {
   getIt.registerFactory<LoanHistoryRepository>(
     () => LoanHistoryRepositoryImpl(datasource: getIt()),
   );
+  getIt.registerFactory<DistributesRepository>(() => DistributesRepositoryImpl(datasource: getIt()));
 
   // Bloc
   getIt.registerFactory(
@@ -40,6 +39,7 @@ void initPartnersContainer(GetIt getIt) {
       moneyRepository: getIt(),
       loanHistoryRepository: getIt(),
       loanRegisterRequestRepository: getIt(),
+      distributesRepository: getIt(),
     ),
   );
 }

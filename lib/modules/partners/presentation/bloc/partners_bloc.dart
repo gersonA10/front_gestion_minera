@@ -15,6 +15,7 @@ class PartnersBloc extends Bloc<PartnersEvent, PartnersState> {
   final MoneyRequestRepository moneyRepository;
   final LoanHistoryRepository loanHistoryRepository;
   final LoanRegisterRequestRepository loanRegisterRequestRepository;
+  final DistributesRepository distributesRepository; 
 
   int _currentPage = 1;
   bool _hasReachedMax = false;
@@ -22,11 +23,22 @@ class PartnersBloc extends Bloc<PartnersEvent, PartnersState> {
   String? _currentStatus;
   String? _currentSearch;
 
+  // Paginación para dividendos (Distributes)
+  int _distributesPage = 1;
+  bool _distributesReachedMax = false;
+  List<DistributesHistoryEntity> _currentDistributesHistory = [];
+  DistributesMetricsEntity? _currentDistributesMetrics;
+  String? _distStatus;
+  String? _distSearch;
+  String? _distPeriod;
+  String? _distExactDate;
+
   PartnersBloc({
     required this.repository,
     required this.moneyRepository,
     required this.loanHistoryRepository,
     required this.loanRegisterRequestRepository,
+    required this.distributesRepository,
   }) : super(ContributeDataInitial()) {
     on<FetchContributeDataEvent>(_onFetchContributeData);
 
@@ -39,6 +51,10 @@ class PartnersBloc extends Bloc<PartnersEvent, PartnersState> {
     on<LoanHistorySearchEvent>(_onLoanHistorySearchRequest);
 
     on<LoanRegisterEvent>(_onLoanRegister);
+
+    //Dividendos
+    on<FetchDistributesDataEvent>(_onFetchDistributesData);
+    on<LoadMoreDistributesEvent>(_onLoadMoreDistributes);
   }
 
   Future<void> _onFetchContributeData(
@@ -286,5 +302,95 @@ class PartnersBloc extends Bloc<PartnersEvent, PartnersState> {
           );
       }
     }
+  }
+
+  Future<void> _onFetchDistributesData(
+    FetchDistributesDataEvent event,
+    Emitter<PartnersState> emit,
+  ) async {
+    if (event.isRefresh) {
+      emit(DistributesDataLoading());
+      _distributesPage = 1;
+      _distributesReachedMax = false;
+      _currentDistributesHistory.clear();
+    }
+
+    _distStatus = event.status;
+    _distSearch = event.search;
+    _distPeriod = event.period;
+    _distExactDate = event.exactDate;
+
+    try {
+      final results = await Future.wait([
+        distributesRepository.getMetrics(),
+        distributesRepository.getHistory(
+          status: _distStatus,
+          search: _distSearch,
+          period: _distPeriod,
+          exactDate: _distExactDate,
+          page: _distributesPage,
+        ),
+      ]);
+
+      _currentDistributesMetrics = results[0] as DistributesMetricsEntity;
+      final historyResult = results[1] as PaginatedDistributesHistoryEntity;
+
+      _currentDistributesHistory = historyResult.items;
+      _distributesReachedMax = !historyResult.hasMoreData;
+
+      emit(DistributesDataLoaded(
+        metrics: _currentDistributesMetrics!,
+        groupedHistory: _groupDistributesByMonth(_currentDistributesHistory),
+        hasReachedMax: _distributesReachedMax,
+      ));
+    } on BaseApiException catch (error) {
+      emit(DistributesDataError(mapErrorMessage(error.key)));
+    } catch (e) {
+      emit(DistributesDataError('Error inesperado: $e'));
+    }
+  }
+
+  Future<void> _onLoadMoreDistributes(
+    LoadMoreDistributesEvent event,
+    Emitter<PartnersState> emit,
+  ) async {
+    if (_distributesReachedMax || _currentDistributesMetrics == null) return;
+
+    _distributesPage++;
+    try {
+      final historyResult = await distributesRepository.getHistory(
+        status: _distStatus,
+        search: _distSearch,
+        period: _distPeriod,
+        exactDate: _distExactDate,
+        page: _distributesPage,
+      );
+
+      _currentDistributesHistory.addAll(historyResult.items);
+      _distributesReachedMax = !historyResult.hasMoreData;
+
+      emit(DistributesDataLoaded(
+        metrics: _currentDistributesMetrics!,
+        groupedHistory: _groupDistributesByMonth(_currentDistributesHistory),
+        hasReachedMax: _distributesReachedMax,
+      ));
+    } on BaseApiException catch (_) {
+    }
+  }
+
+  Map<String, List<DistributesHistoryEntity>> _groupDistributesByMonth(List<DistributesHistoryEntity> history) {
+    final Map<String, List<DistributesHistoryEntity>> grouped = {};
+    const months = ['ENERO', 'FEBRERO', 'MARZO', 'ABRIL', 'MAYO', 'JUNIO', 'JULIO', 'AGOSTO', 'SEPTIEMBRE', 'OCTUBRE', 'NOVIEMBRE', 'DICIEMBRE'];
+
+    for (var item in history) {
+      final monthName = months[item.registeredDate.month - 1];
+      final groupKey = '$monthName ${item.registeredDate.year}';
+
+      if (!grouped.containsKey(groupKey)) {
+        grouped[groupKey] = [];
+      }
+      grouped[groupKey]!.add(item);
+    }
+    return grouped;
   }
 }
