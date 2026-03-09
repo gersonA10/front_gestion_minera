@@ -3,7 +3,6 @@ import 'package:front_gestion_minera/utils/session/user_session.dart';
 import 'package:front_gestion_minera/utils/session/session_actions.dart';
 
 class InterceptorService extends Interceptor {
-  // ignore: unused_field
   final Dio _dio;
 
   InterceptorService(this._dio);
@@ -28,7 +27,12 @@ class InterceptorService extends Interceptor {
   @override
   void onError(DioException err, ErrorInterceptorHandler handler) async {
     if (err.response?.statusCode == 401) {
-      await SessionActions.logout(true);
+      final isLoginRequest = err.requestOptions.path.toLowerCase().contains('login');
+
+      if (!isLoginRequest) {
+        await SessionActions.logout(true);
+      }
+
       return handler.next(err);
     } 
     

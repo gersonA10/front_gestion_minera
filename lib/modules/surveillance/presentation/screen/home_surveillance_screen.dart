@@ -1,5 +1,6 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
+import 'package:front_gestion_minera/config/router/app_router.gr.dart';
 import 'package:front_gestion_minera/config/theme/extension_theme.dart';
 import 'package:front_gestion_minera/modules/surveillance/presentation/widget/request_card_widget.dart';
 import 'package:front_gestion_minera/utils/text_util.dart';
@@ -41,9 +42,12 @@ class _HomeSurveillanceScreenState extends State<HomeSurveillanceScreen> {
           Padding(
             padding: const EdgeInsets.only(right: 16),
             child: Center(
-              child: Text(
-                "Historial",
-                style: AppTextStyles.mainStyleBlue12Bold(context),
+              child: TextButton(
+                onPressed: () => context.router.push(const HistoryRequestsRoute()),
+                child: Text(
+                  "Historial",
+                  style: AppTextStyles.mainStyleBlue12Bold(context),
+                ),
               ),
             ),
           ),
