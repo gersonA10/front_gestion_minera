@@ -1,7 +1,7 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:front_gestion_minera/config/theme/extension_theme.dart';
-import 'package:front_gestion_minera/modules/surveillance/presentation/widget/widgets.dart';
+import 'package:front_gestion_minera/modules/surveillance/presentation/widget/request_card_widget.dart';
 import 'package:front_gestion_minera/utils/text_util.dart';
 
 @RoutePage()
