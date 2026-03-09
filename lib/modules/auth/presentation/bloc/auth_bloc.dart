@@ -15,23 +15,27 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     on<AuthDataEvent>(authBloc);
   }
 
-  Future<void> authBloc(AuthDataEvent event, Emitter<AuthState> emit) async {
-    emit(AuthLoading());
-    try {
-      final response = await repository.login(event.username, event.password);
-      await UserSession.setUserSession(response.data);
-      emit(AuthSuccess(response.data));
-    } on BaseApiException catch (error) {
-      switch (error.key) {
-        case "dio_unexpected":
-        case "dio_connect_timeout":
-          emit(AuthError('Ha ocurrido un error, por favor intente nuevamente.'));
-          break;
-        default:
-          emit(AuthError('Ha ocurrido un error, por favor intente nuevamente.'));
-      }
-    } catch (error) {
+Future<void> authBloc(AuthDataEvent event, Emitter<AuthState> emit) async {
+  emit(AuthLoading());
+
+  try {
+    final response = await repository.login(event.username, event.password);
+    await UserSession.setUserSession(response.data);
+    emit(AuthSuccess(response.data));
+
+  } on BaseApiException catch (error) {
+
+    if (error.key == "dio_unexpected" || error.key == "dio_connect_timeout") {
       emit(AuthError('Ha ocurrido un error, por favor intente nuevamente.'));
+      return;
     }
+
+    final errorMessage =  error.response?.data?['message'] ?? 'Ha ocurrido un error, por favor intente nuevamente.';
+
+    emit(AuthError(errorMessage));
+
+  } catch (_) {
+    emit(AuthError('Ha ocurrido un error, por favor intente nuevamente.'));
   }
+}
 }
