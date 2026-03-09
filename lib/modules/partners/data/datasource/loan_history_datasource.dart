@@ -25,4 +25,16 @@ class LoanHistoryDatasource {
 
     return LoanHistoryResponseModel.fromJson(response).data;
   }
+
+  Future<List<LoanHistoryDataEntity>> getLoanHistoryFillter(
+    String search,
+  ) async {
+    final response = await apiClient.get(
+      '/api/loans/history?',
+      queryParameters: {'search': search},
+      operationName: 'search',
+    );
+
+    return LoanHistoryResponseModel.fromJson(response).data;
+  }
 }

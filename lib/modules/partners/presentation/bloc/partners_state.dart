@@ -15,10 +15,7 @@ final class ContributeDataLoaded extends PartnersState {
   final ContributionMetricsEntity metrics;
   final Map<String, List<ContributeHistoryDataEntity>> groupedHistory;
 
-  ContributeDataLoaded({
-    required this.metrics,
-    required this.groupedHistory,
-  });
+  ContributeDataLoaded({required this.metrics, required this.groupedHistory});
 }
 
 final class PartnersInitial extends PartnersState {}

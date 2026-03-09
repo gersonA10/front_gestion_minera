@@ -18,4 +18,11 @@ class LoanHistoryRepositoryImpl extends LoanHistoryRepository {
   ) async {
     return await datasource.getLoanHistoryStatus(status);
   }
+
+  @override
+  Future<List<LoanHistoryDataEntity>> getLoanHistoryFillter(
+    String search,
+  ) async {
+    return await datasource.getLoanHistoryFillter(search);
+  }
 }
