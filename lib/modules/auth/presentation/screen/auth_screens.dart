@@ -18,7 +18,7 @@ class AuthScreen extends StatefulWidget {
 
 class _AuthScreenState extends State<AuthScreen> {
   final TextEditingController userController = TextEditingController(
-    text: 'juan.socio@mina.com',
+    text: 'juan.vigilancia@mina.com',
   );
   final TextEditingController passwordController = TextEditingController(
     text: '12345',
@@ -59,7 +59,7 @@ class _AuthScreenState extends State<AuthScreen> {
               } else if (role == 'socios') {
                 context.router.replaceAll([PartnersRoute(nombre: '')]);
               } else if (role == 'vigilancia') {
-                context.router.replaceAll([const TreasuryRoute()]);
+                context.router.replaceAll([const HomeSurveillanceRoute()]);
               }
             }
           },
