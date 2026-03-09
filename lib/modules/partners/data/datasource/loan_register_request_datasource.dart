@@ -14,10 +14,9 @@ class LoanRegisterRequestDatasource {
       data: requestModel.toFormDataMap(),
       files: [
         {
-          'loan_type': requestModel.loanType,
-          'amount_or_quantity': requestModel.amountOrQuantity,
-          'description': requestModel.description,
-          'comprobante_img': requestModel.comprobanteImg,
+          'name': 'comprobante_img',
+          'path': requestModel.comprobanteImg,
+          'filename': requestModel.comprobanteImg.split('/').last,
         },
       ],
     );

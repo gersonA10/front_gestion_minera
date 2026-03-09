@@ -549,13 +549,15 @@ class ContributionCard extends StatelessWidget {
 
 class TextLoanScreen extends StatelessWidget {
   final String? hintText;
-  const TextLoanScreen({super.key, required this.hintText});
+  final TextEditingController? controller;
+  const TextLoanScreen({super.key, required this.hintText, this.controller});
 
   @override
   Widget build(BuildContext context) {
     return SizedBox(
       height: 50,
       child: TextFormField(
+        controller: controller,
         decoration: InputDecoration(
           hintText: hintText,
           hintStyle: const TextStyle(color: Colors.grey),
@@ -587,12 +589,20 @@ class CustomForm extends StatelessWidget {
     required this.colors,
     required this.image,
     required this.onOpenCamera,
+    required this.title,
+    required this.amountController,
+    required this.reasonController,
+    required this.applicantController,
   });
 
   final double smallSpacing;
   final ColorScheme colors;
   final File? image;
   final VoidCallback onOpenCamera;
+  final String title;
+  final TextEditingController amountController;
+  final TextEditingController reasonController;
+  final TextEditingController applicantController;
 
   @override
   Widget build(BuildContext context) {
@@ -603,22 +613,29 @@ class CustomForm extends StatelessWidget {
         borderRadius: BorderRadius.circular(16),
       ),
       child: Column(
+        mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text("Monto", style: AppTextStyles.mainStyle14Bold(context)),
+          Text(title, style: AppTextStyles.mainStyle14Bold(context)),
           SizedBox(height: smallSpacing * 1),
-          TextLoanScreen(hintText: "Bs. 0.00"),
+          TextLoanScreen(hintText: "Bs. 0.00", controller: amountController),
           SizedBox(height: smallSpacing * 1),
           Text("Motivo", style: AppTextStyles.mainStyle14Bold(context)),
           SizedBox(height: smallSpacing * 1),
-          TextLoanScreen(hintText: "Escribe el motivo del préstamo"),
+          TextLoanScreen(
+            hintText: "Escribe el motivo del préstamo",
+            controller: reasonController,
+          ),
           SizedBox(height: smallSpacing * 1),
           Text(
             "Nombre del solicitante",
             style: AppTextStyles.mainStyle14Bold(context),
           ),
           SizedBox(height: smallSpacing * 1),
-          TextLoanScreen(hintText: "Los tigresitos"),
+          TextLoanScreen(
+            hintText: "Los tigresitos",
+            controller: applicantController,
+          ),
           SizedBox(height: 18),
           Text(
             "Comprobante",

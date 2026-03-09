@@ -260,17 +260,11 @@ class PartnersBloc extends Bloc<PartnersEvent, PartnersState> {
       switch (error.key) {
         case "dio_unexpected":
         case "dio_connect_timeout":
-          emit(
-            LoanRegisterError(
-              'Ocurrió un error al enviar la solicitud de egreso.',
-            ),
-          );
+          emit(LoanRegisterError('Ocurrió un error al registrar un prestamo.'));
           break;
         default:
           emit(
-            LoanRegisterError(
-              'Ocurrió un error al enviar la solicitud de egreso.',
-            ),
+            LoanRegisterError('Ocurrió un error al registrar un prestamo..'),
           );
       }
     }

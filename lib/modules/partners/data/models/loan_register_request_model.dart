@@ -22,7 +22,6 @@ class LoanRequestModel extends LoanRequestEntity {
       "loan_type": loanType,
       "amount_or_quantity": amountOrQuantity,
       "description": description,
-      "comprobante_img": comprobanteImg,
     };
   }
 }
