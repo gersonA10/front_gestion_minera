@@ -18,10 +18,8 @@ class AuthScreen extends StatefulWidget {
 
 class _AuthScreenState extends State<AuthScreen> {
   final TextEditingController userController = TextEditingController(
-    text: 'juan.socio@mina.com',
   );
   final TextEditingController passwordController = TextEditingController(
-    text: '12345',
   );
   bool obscurePassword = true;
   bool rememberMe = false;
@@ -121,8 +119,10 @@ class _AuthScreenState extends State<AuthScreen> {
                       TextFormField(
                         controller: userController,
                         decoration: InputDecoration(
-                          hintText: 'nombre@empresa.com',
-                          hintStyle: AppTextStyles.mainStyle12(context),
+                          hintText: 'correo',
+                          hintStyle: AppTextStyles.mainStyle12(context).copyWith(
+                                color: Theme.of(context).colorScheme.lead,
+                              ),
                           prefixIcon: const Icon(Icons.person_outline),
                           filled: true,
                           fillColor: Theme.of(context).colorScheme.bajo,
@@ -146,7 +146,9 @@ class _AuthScreenState extends State<AuthScreen> {
                         obscureText: obscurePassword,
                         decoration: InputDecoration(
                           hintText: 'Ingrese su contraseña',
-                          hintStyle: AppTextStyles.mainStyle12(context),
+                             hintStyle: AppTextStyles.mainStyle12(context).copyWith(
+                                color: Theme.of(context).colorScheme.lead,
+                              ),
                           prefixIcon: const Icon(Icons.lock_outline),
                           suffixIcon: IconButton(
                             icon: Icon(
