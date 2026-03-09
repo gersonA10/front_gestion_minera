@@ -2,6 +2,7 @@ import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:front_gestion_minera/config/theme/extension_theme.dart';
+import 'package:front_gestion_minera/core/widgets/custom_date_selector.dart';
 import 'package:front_gestion_minera/injector_container.dart';
 import 'package:front_gestion_minera/modules/partners/domain/entity/partners_entity.dart';
 import 'package:front_gestion_minera/modules/partners/presentation/bloc/partners_bloc.dart';
@@ -21,10 +22,11 @@ class _ContributeHistoryScreenState extends State<ContributeHistoryScreen> {
 
   String _selectedFilter = "Todo";
   final List<String> _filters = ["Todo", "Confirmados", "Pendientes", "Este mes"];
-  
-  String? _selectedDateFilter; // Para el date picker (filtro manual)
 
-  // Variables para mantener la UI antigua mientras carga la nueva (UX mejorada)
+    String? _exactDateToFetch;
+String? _periodToFetch;
+  
+
   ContributionMetricsEntity? _currentMetrics;
   Map<String, List<ContributeHistoryDataEntity>>? _currentHistory;
 
@@ -33,7 +35,6 @@ class _ContributeHistoryScreenState extends State<ContributeHistoryScreen> {
     super.initState();
     _bloc = InjectorContainer.getIt<PartnersBloc>()..add(FetchContributeDataEvent());
     
-    // Escucha para mostrar/ocultar el botón "X" en el buscador
     _searchController.addListener(() {
       setState(() {}); 
     });
@@ -46,57 +47,41 @@ class _ContributeHistoryScreenState extends State<ContributeHistoryScreen> {
     super.dispose();
   }
 
-  void _fetchData() {
-    String? period;
-    String? status;
-    
-    // Configurar estado
-    if (_selectedFilter == "Confirmados") status = 'confirmados';
-    if (_selectedFilter == "Pendientes") status = 'pendientes';
-    
-    // Configurar periodo según los chips o la fecha seleccionada
-    if (_selectedFilter == "Este mes") {
-      period = 'month';
-      _selectedDateFilter = null; // Borramos la fecha manual
-    }
+void _fetchData() {
+  String? status;
+  String? period;
 
-    _bloc.add(FetchContributeDataEvent(
-      status: status,
-      search: _searchController.text.trim(),
-      period: period,
-      exactDate: _selectedDateFilter,
-    ));
+  if (_selectedFilter == "Confirmados") status = 'confirmado';
+  if (_selectedFilter == "Pendientes") status = 'pendiente';
+
+  if (_selectedFilter == "Este mes") {
+    period = 'month';
+    _exactDateToFetch = null; 
+  } else if (_selectedFilter == "Personalizado") {
+    period = _periodToFetch; 
   }
 
-  Future<void> _selectCustomDate() async {
-    final DateTime? picked = await showDatePicker(
-      context: context,
-      initialDate: DateTime.now(),
-      firstDate: DateTime(2020),
-      lastDate: DateTime(2030),
-      builder: (context, child) {
-        return Theme(
-          data: Theme.of(context).copyWith(
-            colorScheme: ColorScheme.light(
-              primary: Theme.of(context).colorScheme.blue,
-            ),
-          ),
-          child: child!,
-        );
-      },
-    );
+  _bloc.add(FetchContributeDataEvent(
+    status: status,
+    search: _searchController.text.trim(),
+    period: period,
+    exactDate: _exactDateToFetch,
+  ));
+}
 
-    if (picked != null) {
-      setState(() {
-        _selectedFilter = "Personalizado"; 
-        // Formateamos para el backend: YYYY-MM-DD
-        _selectedDateFilter = "${picked.year}-${picked.month.toString().padLeft(2, '0')}-${picked.day.toString().padLeft(2, '0')}";
-      });
-      _fetchData();
-    }
+Future<void> _selectCustomDate() async {
+  final result = await CustomDateSelector.show(context);
+
+  if (result != null) {
+    setState(() {
+      _selectedFilter = "Personalizado"; 
+      _periodToFetch = result.period;
+      _exactDateToFetch = result.exactDate;
+    });
+    _fetchData();
   }
+}
 
-  // --- TOP CONTROLS ESTÁTICOS (No parpadean ni pierden el foco) ---
   Widget _buildTopControls(ColorScheme colors) {
     return Container(
       color: colors.backgroundColor,

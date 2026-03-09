@@ -83,3 +83,24 @@ final class LoanRegisterError extends PartnersState {
 }
 
 final class LoanRegisterSuccess extends PartnersState {}
+
+
+//dividendos
+final class DistributesDataLoading extends PartnersState {}
+
+final class DistributesDataError extends PartnersState {
+  final String message;
+  DistributesDataError(this.message);
+}
+
+final class DistributesDataLoaded extends PartnersState {
+  final DistributesMetricsEntity metrics;
+  final Map<String, List<DistributesHistoryEntity>> groupedHistory;
+  final bool hasReachedMax;
+
+  DistributesDataLoaded({
+    required this.metrics,
+    required this.groupedHistory,
+    required this.hasReachedMax,
+  });
+}

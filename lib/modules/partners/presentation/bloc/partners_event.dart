@@ -65,3 +65,21 @@ class LoanRegisterEvent extends PartnersEvent {
     required this.comprobanteImg,
   });
 }
+
+class FetchDistributesDataEvent extends PartnersEvent {
+  final String? status;
+  final String? search;
+  final String? period;
+  final String? exactDate;
+  final bool isRefresh;
+
+  FetchDistributesDataEvent({
+    this.status,
+    this.search,
+    this.period,
+    this.exactDate,
+    this.isRefresh = true,
+  });
+}
+
+class LoadMoreDistributesEvent extends PartnersEvent {}
