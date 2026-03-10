@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:front_gestion_minera/config/router/app_router.dart';
+import 'package:front_gestion_minera/config/router/app_router.gr.dart';
 import 'package:front_gestion_minera/config/theme/extension_theme.dart';
+import 'package:front_gestion_minera/injector_container.dart';
 import 'package:front_gestion_minera/utils/text_util.dart';
 
 class RequestCard extends StatelessWidget {
@@ -84,19 +87,26 @@ class RequestCard extends StatelessWidget {
                       borderRadius: BorderRadius.circular(5),
                     ),
                   ),
-                  child: Row(
-                    children: [
-                      Text(
-                        "Ver Detalle",
-                        style: AppTextStyles.mainStyleWhite10Bold(context),
-                      ),
-                      SizedBox(width: small * 0.3),
-                      Icon(
-                        Icons.arrow_forward_ios,
-                        size: 12,
-                        color: Colors.white,
-                      ),
-                    ],
+                  child: GestureDetector(
+                    onDoubleTap: () {
+                      InjectorContainer.getIt<AppRouter>().push(
+                        ApplicationDetailsRoute(),
+                      );
+                    },
+                    child: Row(
+                      children: [
+                        Text(
+                          "Ver Detalle",
+                          style: AppTextStyles.mainStyleWhite10Bold(context),
+                        ),
+                        SizedBox(width: small * 0.3),
+                        Icon(
+                          Icons.arrow_forward_ios,
+                          size: 12,
+                          color: Colors.white,
+                        ),
+                      ],
+                    ),
                   ),
                 ),
               ),
