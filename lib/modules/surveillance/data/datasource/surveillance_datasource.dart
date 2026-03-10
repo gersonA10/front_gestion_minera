@@ -37,9 +37,7 @@ class SurveillanceDatasource {
     final Map<String, dynamic> meta = response['meta'] ?? {};
 
     return {
-      'items': data
-          .map((item) => SurveillanceHistoryModel.fromJson(item))
-          .toList(),
+      'items': data.map((item) => SurveillanceHistoryModel.fromJson(item)).toList(),
       'has_more_data': meta['has_more_data'] ?? false,
     };
   }
