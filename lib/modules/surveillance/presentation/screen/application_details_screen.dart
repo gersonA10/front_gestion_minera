@@ -1,11 +1,15 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:front_gestion_minera/config/theme/extension_theme.dart';
+import 'package:front_gestion_minera/utils/date_util.dart';
 import 'package:front_gestion_minera/utils/text_util.dart';
+
+import '../../domain/entity/entity.dart';
 
 @RoutePage()
 class ApplicationDetailsScreen extends StatelessWidget {
-  const ApplicationDetailsScreen({super.key});
+  final MonitoringTrayDataEntity item;
+  const ApplicationDetailsScreen({super.key, required this.item});
 
   @override
   Widget build(BuildContext context) {
@@ -15,6 +19,7 @@ class ApplicationDetailsScreen extends StatelessWidget {
     final colors = Theme.of(context).colorScheme;
     const background = Color(0xff0b1d3a);
     const cardColor = Color(0xff1b2b44);
+
     return Scaffold(
       backgroundColor: background,
       appBar: AppBar(
@@ -92,13 +97,20 @@ class ApplicationDetailsScreen extends StatelessWidget {
                     ],
                   ),
                   SizedBox(height: smallSpacing * 0.8),
-                  _infoRow(context, "Área", "Mantenimiento Mina"),
+                  _infoRow(context, "Fecha", formatDate(item.createdAt)),
+                  Divider(color: Colors.white12),
+                  _infoRow(context, "Área", item.rol),
                   Divider(color: Colors.white12),
 
-                  _infoRow(context, "Solicitante", "Ing. Roberto Jiménez"),
+                  _infoRow(context, "Solicitante", item.name),
                   Divider(color: Colors.white12),
 
-                  _infoRow(context, "Monto", "\$1,250.00 USD", highlight: true),
+                  _infoRow(
+                    context,
+                    "Monto",
+                    "${item.amount} Bs.",
+                    highlight: true,
+                  ),
                   SizedBox(height: smallSpacing * 0.6),
                   Text(
                     "Descripción",
@@ -108,14 +120,14 @@ class ApplicationDetailsScreen extends StatelessWidget {
                   ),
                   SizedBox(height: smallSpacing * 0.5),
                   Container(
+                    width: double.infinity,
                     padding: const EdgeInsets.all(14),
                     decoration: BoxDecoration(
                       color: const Color(0xff0f213e),
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: Text(
-                      "Repuesto de válvulas de presión para excavadora Caterpillar 320. "
-                      "Requerido para evitar detención de operaciones en Tajo Sur.",
+                      item.description,
                       style: AppTextStyles.mainStyleWhite12(
                         context,
                       ).copyWith(fontSize: 10),
@@ -140,13 +152,58 @@ class ApplicationDetailsScreen extends StatelessWidget {
               padding: EdgeInsets.all(10),
               child: Column(
                 children: [
-                  ClipRRect(
-                    borderRadius: BorderRadius.circular(12),
-                    child: Image.network(
-                      "https://picsum.photos/400/200",
-                      height: 120,
-                      width: double.infinity,
-                      fit: BoxFit.cover,
+                  GestureDetector(
+                    onTap: () {
+                      showDialog(
+                        context: context,
+                        builder: (context) => Dialog(
+                          backgroundColor: Colors.transparent,
+                          child: GestureDetector(
+                            onTap: () => Navigator.pop(context),
+                            child: Image.network(
+                              item.evidencia,
+                              fit: BoxFit.contain,
+                            ),
+                          ),
+                        ),
+                      );
+                    },
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(12),
+                      child: Image.network(
+                        item.evidencia,
+                        height: 120,
+                        width: double.infinity,
+                        fit: BoxFit.cover,
+                        errorBuilder: (context, error, stackTrace) {
+                          return Container(
+                            height: 120,
+                            color: Colors.grey[800],
+                            child: const Center(
+                              child: Icon(
+                                Icons.image_not_supported,
+                                color: Colors.grey,
+                              ),
+                            ),
+                          );
+                        },
+                        loadingBuilder: (context, child, loadingProgress) {
+                          if (loadingProgress == null) return child;
+                          return Container(
+                            height: 120,
+                            color: Colors.grey[800],
+                            child: Center(
+                              child: CircularProgressIndicator(
+                                value:
+                                    loadingProgress.expectedTotalBytes != null
+                                    ? loadingProgress.cumulativeBytesLoaded /
+                                          loadingProgress.expectedTotalBytes!
+                                    : null,
+                              ),
+                            ),
+                          );
+                        },
+                      ),
                     ),
                   ),
                   Row(

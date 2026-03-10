@@ -73,12 +73,13 @@ class _HomeSurveillanceScreenState extends State<HomeSurveillanceScreen> {
               padding: const EdgeInsets.only(right: 16),
               child: Center(
                 child: TextButton(
-                onPressed: () => context.router.push(const HistoryRequestsRoute()),
-                child: Text(
-                  "Historial",
-                  style: AppTextStyles.mainStyleBlue12Bold(context),
+                  onPressed: () =>
+                      context.router.push(const HistoryRequestsRoute()),
+                  child: Text(
+                    "Historial",
+                    style: AppTextStyles.mainStyleBlue12Bold(context),
+                  ),
                 ),
-              ),
               ),
             ),
           ],
@@ -215,6 +216,7 @@ class _HomeSurveillanceScreenState extends State<HomeSurveillanceScreen> {
                                   name: item.name,
                                   area: item.rol,
                                   small: smallSpacing,
+                                  item: item,
                                 );
                               },
                             ),

@@ -5,12 +5,15 @@ import 'package:front_gestion_minera/config/theme/extension_theme.dart';
 import 'package:front_gestion_minera/injector_container.dart';
 import 'package:front_gestion_minera/utils/text_util.dart';
 
+import '../../domain/entity/entity.dart';
+
 class RequestCard extends StatelessWidget {
   final String date;
   final String name;
   final String area;
   final bool urgent;
   final double small;
+  final MonitoringTrayDataEntity item;
 
   const RequestCard({
     super.key,
@@ -19,6 +22,7 @@ class RequestCard extends StatelessWidget {
     required this.area,
     this.urgent = false,
     required this.small,
+    required this.item,
   });
 
   @override
@@ -90,7 +94,7 @@ class RequestCard extends StatelessWidget {
                   child: GestureDetector(
                     onDoubleTap: () {
                       InjectorContainer.getIt<AppRouter>().push(
-                        ApplicationDetailsRoute(),
+                        ApplicationDetailsRoute(item: item),
                       );
                     },
                     child: Row(

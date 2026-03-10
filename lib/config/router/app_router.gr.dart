@@ -27,6 +27,8 @@ import 'package:front_gestion_minera/modules/partners/presentation/screens/partn
     as _i10;
 import 'package:front_gestion_minera/modules/partners/presentation/screens/request_history_screen.dart'
     as _i11;
+import 'package:front_gestion_minera/modules/surveillance/domain/entity/entity.dart'
+    as _i15;
 import 'package:front_gestion_minera/modules/surveillance/presentation/screen/application_details_screen.dart'
     as _i1;
 import 'package:front_gestion_minera/modules/surveillance/presentation/screen/history_requests_screen.dart'
@@ -38,18 +40,40 @@ import 'package:front_gestion_minera/modules/treasury/presentation/screen/treasu
 
 /// generated route for
 /// [_i1.ApplicationDetailsScreen]
-class ApplicationDetailsRoute extends _i13.PageRouteInfo<void> {
-  const ApplicationDetailsRoute({List<_i13.PageRouteInfo>? children})
-    : super(ApplicationDetailsRoute.name, initialChildren: children);
+class ApplicationDetailsRoute
+    extends _i13.PageRouteInfo<ApplicationDetailsRouteArgs> {
+  ApplicationDetailsRoute({
+    _i14.Key? key,
+    required _i15.MonitoringTrayDataEntity item,
+    List<_i13.PageRouteInfo>? children,
+  }) : super(
+         ApplicationDetailsRoute.name,
+         args: ApplicationDetailsRouteArgs(key: key, item: item),
+         initialChildren: children,
+       );
 
   static const String name = 'ApplicationDetailsRoute';
 
   static _i13.PageInfo page = _i13.PageInfo(
     name,
     builder: (data) {
-      return const _i1.ApplicationDetailsScreen();
+      final args = data.argsAs<ApplicationDetailsRouteArgs>();
+      return _i1.ApplicationDetailsScreen(key: args.key, item: args.item);
     },
   );
+}
+
+class ApplicationDetailsRouteArgs {
+  const ApplicationDetailsRouteArgs({this.key, required this.item});
+
+  final _i14.Key? key;
+
+  final _i15.MonitoringTrayDataEntity item;
+
+  @override
+  String toString() {
+    return 'ApplicationDetailsRouteArgs{key: $key, item: $item}';
+  }
 }
 
 /// generated route for

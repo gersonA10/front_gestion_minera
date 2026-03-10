@@ -38,19 +38,21 @@ class SurveillanceDatasource {
     final Map<String, dynamic> meta = response['meta'] ?? {};
 
     return {
-      'items': data.map((item) => SurveillanceHistoryModel.fromJson(item)).toList(),
+      'items': data
+          .map((item) => SurveillanceHistoryModel.fromJson(item))
+          .toList(),
       'has_more_data': meta['has_more_data'] ?? false,
     };
   }
 
-    Future<Map<String, dynamic>> monitoringTray({
+  Future<Map<String, dynamic>> monitoringTray({
     int page = 1,
     int limit = 10,
   }) async {
     final Map<String, dynamic> queryParameters = {'page': page, 'limit': limit};
 
     final response = await apiClient.get(
-      'api/viewRequests/history',
+      '/api/viewRequests/history',
       operationName: 'I will process the application tray data.',
       queryParameters: queryParameters,
     );
@@ -61,6 +63,6 @@ class SurveillanceDatasource {
           .map((item) => MonitoringTrayDataModel.fromJson(item))
           .toList(),
       'has_more_data': meta['has_more_data'] ?? false,
-    }; 
+    };
   }
 }
