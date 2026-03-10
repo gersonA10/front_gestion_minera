@@ -23,12 +23,12 @@ class AuthGuard extends AutoRouteGuard {
         router.replaceAll([PartnersRoute(nombre: '')]);
       case 'vigilancia':
         // Todo: Aca hay que redirigir al moduo de vigilancia.
-        router.replaceAll([const TreasuryRoute()]);
-      
-    default: 
-       await UserSession.clear();
-       router.replaceAll([AuthRoute()]);
-       return;
+        router.replaceAll([const HomeSurveillanceRoute()]);
+
+      default:
+        await UserSession.clear();
+        router.replaceAll([AuthRoute()]);
+        return;
     }
   }
 }
