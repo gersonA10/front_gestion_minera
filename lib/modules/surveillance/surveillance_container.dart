@@ -5,6 +5,7 @@ import 'domain/repositories/surveillance_repository.dart';
 import 'presentation/bloc/surveillance_bloc.dart';
 
 void initSurveillanceContainer(GetIt getIt) {
+
   // Datasource
   getIt.registerLazySingleton(() => SurveillanceDatasource(apiClient: getIt()));
 
