@@ -20,6 +20,6 @@ class InjectorContainer {
 
     initAuthContainer(getIt);
     initPartnersContainer(getIt);
-   initSurveillanceContainer(getIt);
+    initSurveillanceContainer(getIt);
   }
 }

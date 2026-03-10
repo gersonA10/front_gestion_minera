@@ -10,4 +10,5 @@ abstract class SurveillanceRepository {
     int page = 1,
     int limit = 10,
   });
+   Future<MonitoringTrayEntity> monitoringTray({int page = 1, int limit = 10});
 }
