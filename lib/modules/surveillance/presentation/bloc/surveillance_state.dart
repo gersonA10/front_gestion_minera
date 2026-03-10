@@ -16,3 +16,19 @@ final class SurveillanceSuccess extends SurveillanceState {
   final bool hasReachedMax;
   SurveillanceSuccess({required this.list, required this.hasReachedMax});
 }
+final class SurveillanceHistoryLoading extends SurveillanceState {}
+
+final class SurveillanceHistoryError extends SurveillanceState {
+  final String message;
+  SurveillanceHistoryError(this.message);
+}
+
+final class SurveillanceHistoryLoaded extends SurveillanceState {
+  final List<SurveillanceHistoryEntity> history;
+  final bool hasReachedMax;
+
+  SurveillanceHistoryLoaded({
+    required this.history,
+    required this.hasReachedMax,
+  });
+}

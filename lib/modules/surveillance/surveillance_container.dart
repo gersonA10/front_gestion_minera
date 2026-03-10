@@ -1,18 +1,17 @@
-import 'package:front_gestion_minera/modules/surveillance/presentation/bloc/surveillance_bloc.dart';
 import 'package:get_it/get_it.dart';
-
-import 'data/datasource/datasource.dart';
-import 'data/repositories/repositories_impl.dart';
-import 'domain/repositories/repository.dart';
+import 'data/datasource/surveillance_datasource.dart';
+import 'data/repositories/surveillance_repository_impl.dart';
+import 'domain/repositories/surveillance_repository.dart';
+import 'presentation/bloc/surveillance_bloc.dart';
 
 void initSurveillanceContainer(GetIt getIt) {
-  getIt.registerLazySingleton(
-    () => SurveillanceDatasources(apiClient: getIt()),
-  );
+
+  // Datasource
+  getIt.registerLazySingleton(() => SurveillanceDatasource(apiClient: getIt()));
 
   // Repository
-  getIt.registerFactory<SurveillanceRepositories>(
-    () => SurveillanceRepositoriesImpl(datasources: getIt()),
+  getIt.registerFactory<SurveillanceRepository>(
+    () => SurveillanceRepositoryImpl(datasource: getIt()),
   );
 
   // Bloc
