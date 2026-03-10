@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:front_gestion_minera/config/router/app_router.gr.dart';
 import 'package:front_gestion_minera/config/theme/extension_theme.dart';
+import 'package:front_gestion_minera/modules/surveillance/presentation/screen/register_contribution.dart';
 import 'package:front_gestion_minera/injector_container.dart';
 import 'package:front_gestion_minera/modules/surveillance/presentation/bloc/surveillance_bloc.dart';
 import 'package:front_gestion_minera/modules/surveillance/presentation/widget/request_card_widget.dart';
@@ -229,7 +230,7 @@ class _HomeSurveillanceScreenState extends State<HomeSurveillanceScreen> {
         },
       );
     } else {
-      return const Center(child: Text("Contenido de Aportes"));
+      return RegisyerContributionsView();
     }
   }
 }
