@@ -1,4 +1,3 @@
-
 import '../entity/entity.dart';
 
 abstract class SurveillanceRepository {
@@ -10,5 +9,10 @@ abstract class SurveillanceRepository {
     int page = 1,
     int limit = 10,
   });
-   Future<MonitoringTrayEntity> monitoringTray({int page = 1, int limit = 10});
+  Future<MonitoringTrayEntity> monitoringTray({int page = 1, int limit = 10});
+  Future<ContributionCalculationEntity> calculateContribution(
+    double montoTotal,
+  );
+  Future<ContributionRegistrationEntity> registerContribution(
+    double montoTotal, String motivo);
 }

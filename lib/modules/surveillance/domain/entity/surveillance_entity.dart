@@ -1,7 +1,8 @@
 class MonitoringTrayEntity {
   final bool hasMoreData;
+    final int totalRecords;
   final List<MonitoringTrayDataEntity> items;
-  MonitoringTrayEntity({required this.hasMoreData, required this.items});
+  MonitoringTrayEntity({required this.hasMoreData, required this.items, required this.totalRecords});
 }
 
 class MonitoringTrayDataEntity {

@@ -38,19 +38,22 @@ class SurveillanceDatasource {
     final Map<String, dynamic> meta = response['meta'] ?? {};
 
     return {
-      'items': data.map((item) => SurveillanceHistoryModel.fromJson(item)).toList(),
+      'items': data
+          .map((item) => SurveillanceHistoryModel.fromJson(item))
+          .toList(),
       'has_more_data': meta['has_more_data'] ?? false,
+      'total_records': meta['total_records'] ?? 0,
     };
   }
 
-    Future<Map<String, dynamic>> monitoringTray({
+  Future<Map<String, dynamic>> monitoringTray({
     int page = 1,
     int limit = 10,
   }) async {
     final Map<String, dynamic> queryParameters = {'page': page, 'limit': limit};
 
     final response = await apiClient.get(
-      'api/viewRequests/history',
+      '/api/viewRequests/history',
       operationName: 'I will process the application tray data.',
       queryParameters: queryParameters,
     );
@@ -61,6 +64,33 @@ class SurveillanceDatasource {
           .map((item) => MonitoringTrayDataModel.fromJson(item))
           .toList(),
       'has_more_data': meta['has_more_data'] ?? false,
-    }; 
+      'total_records': meta['total_records'] ?? 0,
+    };
+  }
+
+  Future<Map<String, dynamic>> calculateContribution(double montoTotal) async {
+    final response = await apiClient.get(
+      '/api/surveillance/contributions/calculate',
+      queryParameters: {'monto_total': montoTotal.toString()},
+      operationName: 'calculateContribution',
+    );
+    return response['data'];
+  }
+
+  Future<Map<String, dynamic>> registerContribution(
+    double montoTotal,
+    String motivo,
+  ) async {
+    final Map<String, dynamic> body = {'monto_total': montoTotal};
+    if (motivo.trim().isNotEmpty) {
+      body['motivo'] = motivo.trim();
+    }
+
+    final response = await apiClient.post(
+      '/api/surveillance/contributions/register',
+      data: body,
+      operationName: 'registerContribution',
+    );
+    return response['data'];
   }
 }
