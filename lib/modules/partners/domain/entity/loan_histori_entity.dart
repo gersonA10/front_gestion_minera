@@ -17,6 +17,7 @@ class LoanHistoryDataEntity {
   final String description;
   final String fileUrl;
   final String status;
+  final String? motivoRechazo;
   final DateTime createdAt;
 
   LoanHistoryDataEntity({
@@ -26,6 +27,7 @@ class LoanHistoryDataEntity {
     required this.description,
     required this.fileUrl,
     required this.status,
+    this.motivoRechazo,
     required this.createdAt,
   });
 }

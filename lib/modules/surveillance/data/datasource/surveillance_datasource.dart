@@ -63,6 +63,7 @@ class SurveillanceDatasource {
           .map((item) => MonitoringTrayDataModel.fromJson(item))
           .toList(),
       'has_more_data': meta['has_more_data'] ?? false,
+
       'total_records': meta['total_records'] ?? 0,
     };
   }
