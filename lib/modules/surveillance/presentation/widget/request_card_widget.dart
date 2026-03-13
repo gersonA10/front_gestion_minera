@@ -83,7 +83,11 @@ class RequestCard extends StatelessWidget {
               SizedBox(
                 height: small * 2,
                 child: ElevatedButton(
-                  onPressed: () {},
+                  onPressed: () {
+                    InjectorContainer.getIt<AppRouter>().push(
+                      ApplicationDetailsRoute(item: item),
+                    );
+                  },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: colors.blue,
                     padding: EdgeInsets.symmetric(horizontal: 10),
@@ -91,26 +95,19 @@ class RequestCard extends StatelessWidget {
                       borderRadius: BorderRadius.circular(5),
                     ),
                   ),
-                  child: GestureDetector(
-                    onDoubleTap: () {
-                      InjectorContainer.getIt<AppRouter>().push(
-                        ApplicationDetailsRoute(item: item),
-                      );
-                    },
-                    child: Row(
-                      children: [
-                        Text(
-                          "Ver Detalle",
-                          style: AppTextStyles.mainStyleWhite10Bold(context),
-                        ),
-                        SizedBox(width: small * 0.3),
-                        Icon(
-                          Icons.arrow_forward_ios,
-                          size: 12,
-                          color: Colors.white,
-                        ),
-                      ],
-                    ),
+                  child: Row(
+                    children: [
+                      Text(
+                        "Ver Detalle",
+                        style: AppTextStyles.mainStyleWhite10Bold(context),
+                      ),
+                      SizedBox(width: small * 0.3),
+                      Icon(
+                        Icons.arrow_forward_ios,
+                        size: 12,
+                        color: Colors.white,
+                      ),
+                    ],
                   ),
                 ),
               ),
