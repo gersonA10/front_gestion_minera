@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:front_gestion_minera/modules/surveillance/presentation/bloc/surveillance_bloc.dart';
-import 'package:front_gestion_minera/modules/surveillance/presentation/widget/request_card_widget.dart';
 import 'package:front_gestion_minera/utils/text_util.dart';
 
 class ApplicationTrayWidget extends StatelessWidget {
@@ -40,7 +39,7 @@ class ApplicationTrayWidget extends StatelessWidget {
                 ],
               ),
               SizedBox(height: smallSpacing * 0.5),
-              Expanded(
+              /* Expanded(
                 child: ListView.builder(
                   itemCount: 4,
                   itemBuilder: (context, index) {
@@ -49,10 +48,11 @@ class ApplicationTrayWidget extends StatelessWidget {
                       name: "Ing. Roberto Sánchez",
                       area: "Operaciones Mina",
                       small: smallSpacing,
+                      item: ,
                     );
                   },
                 ),
-              ),
+              ),*/
             ],
           ),
         );

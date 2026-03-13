@@ -77,12 +77,13 @@ void _onItemTapped(int index) {
               padding: const EdgeInsets.only(right: 16),
               child: Center(
                 child: TextButton(
-                onPressed: () => context.router.push(const HistoryRequestsRoute()),
-                child: Text(
-                  "Historial",
-                  style: AppTextStyles.mainStyleBlue12Bold(context),
+                  onPressed: () =>
+                      context.router.push(const HistoryRequestsRoute()),
+                  child: Text(
+                    "Historial",
+                    style: AppTextStyles.mainStyleBlue12Bold(context),
+                  ),
                 ),
-              ),
               ),
             ),
           ],
@@ -219,6 +220,7 @@ void _onItemTapped(int index) {
                                   name: item.name,
                                   area: item.rol,
                                   small: smallSpacing,
+                                  item: item,
                                 );
                               },
                             ),

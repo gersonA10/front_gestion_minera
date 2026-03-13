@@ -1,6 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:front_gestion_minera/config/router/app_router.dart';
+import 'package:front_gestion_minera/config/router/app_router.gr.dart';
 import 'package:front_gestion_minera/config/theme/extension_theme.dart';
+import 'package:front_gestion_minera/injector_container.dart';
 import 'package:front_gestion_minera/utils/text_util.dart';
+
+import '../../domain/entity/entity.dart';
 
 class RequestCard extends StatelessWidget {
   final String date;
@@ -8,6 +13,7 @@ class RequestCard extends StatelessWidget {
   final String area;
   final bool urgent;
   final double small;
+  final MonitoringTrayDataEntity item;
 
   const RequestCard({
     super.key,
@@ -16,6 +22,7 @@ class RequestCard extends StatelessWidget {
     required this.area,
     this.urgent = false,
     required this.small,
+    required this.item,
   });
 
   @override
@@ -76,7 +83,11 @@ class RequestCard extends StatelessWidget {
               SizedBox(
                 height: small * 2,
                 child: ElevatedButton(
-                  onPressed: () {},
+                  onPressed: () {
+                    InjectorContainer.getIt<AppRouter>().push(
+                      ApplicationDetailsRoute(item: item),
+                    );
+                  },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: colors.blue,
                     padding: EdgeInsets.symmetric(horizontal: 10),
