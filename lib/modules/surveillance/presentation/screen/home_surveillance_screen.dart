@@ -40,10 +40,14 @@ class _HomeSurveillanceScreenState extends State<HomeSurveillanceScreen> {
     }
   }
 
-  void _onItemTapped(int index) {
+void _onItemTapped(int index) {
     setState(() {
       _selectedIndex = index;
     });
+    
+    if (index == 0) {
+      _surveillanceBloc.add(MonitoringTrayEvent(isRefresh: false));
+    }
   }
 
   void _fetchHistory({bool isRefresh = false}) {
@@ -150,7 +154,7 @@ class _HomeSurveillanceScreenState extends State<HomeSurveillanceScreen> {
                     Row(
                       children: [
                         Text(
-                          "PENDIENTES (${items.length})",
+                          "PENDIENTES (${state.totalRecords})",
                           style: AppTextStyles.mainStyleGrey12Bold(context),
                         ),
                         SizedBox(width: smallSpacing * 0.8),
@@ -230,7 +234,7 @@ class _HomeSurveillanceScreenState extends State<HomeSurveillanceScreen> {
         },
       );
     } else {
-      return RegisyerContributionsView();
+      return RegisterContributionsView();
     }
   }
 }
