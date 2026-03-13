@@ -1,4 +1,3 @@
-
 import '../../domain/entity/entity.dart';
 import '../../domain/repositories/repository.dart';
 import '../datasource/datasource.dart';
@@ -29,14 +28,15 @@ class SurveillanceRepositoryImpl implements SurveillanceRepository {
     );
 
     final models = result['items'] as List<SurveillanceHistoryModel>;
-    
+
     return PaginatedSurveillanceHistoryEntity(
       items: models.map((model) => model.toEntity()).toList(),
       hasMoreData: result['has_more_data'] as bool,
+      totalRecords: result['total_records'] as int? ?? 0,
     );
   }
 
-    @override
+  @override
   Future<MonitoringTrayEntity> monitoringTray({
     int page = 1,
     int limit = 10,
@@ -45,7 +45,26 @@ class SurveillanceRepositoryImpl implements SurveillanceRepository {
     final models = result['items'] as List<MonitoringTrayDataModel>;
     return MonitoringTrayEntity(
       items: models.map((model) => model.toEntity()).toList(),
-      hasMoreData: result['has_more_data'] as bool,
+      hasMoreData: result['has_more_data'] as bool, 
+     totalRecords: result['total_records'] as int? ?? 0,
     );
+  }
+
+  @override
+  Future<ContributionCalculationEntity> calculateContribution(
+    double montoTotal,
+  ) async {
+    final data = await datasource.calculateContribution(montoTotal);
+    return ContributionCalculationModel.fromJson(data);
+  }
+
+  @override
+  Future<ContributionRegistrationEntity> registerContribution(
+    double montoTotal, String motivo) async {
+    final data = await datasource.registerContribution(
+      montoTotal,
+      motivo,
+    );
+    return ContributionRegistrationModel.fromJson(data);
   }
 }

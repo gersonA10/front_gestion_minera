@@ -15,6 +15,7 @@ class SurveillanceBloc extends Bloc<SurveillanceEvent, SurveillanceState> {
 
   int _currentPage = 1;
   bool _hasReachedMax = false;
+  int _currentTotalRecords = 0;
   List<SurveillanceHistoryEntity> _currentHistory = [];
   List<MonitoringTrayDataEntity> _currentHistoryMonitoring = [];
   String? _currentStatus;
@@ -27,6 +28,8 @@ class SurveillanceBloc extends Bloc<SurveillanceEvent, SurveillanceState> {
     on<LoadMoreSurveillanceHistoryEvent>(_onLoadMoreHistory);
     on<MonitoringTrayEvent>(surveillanceBloc);
     on<LoadMoreRequestEvent>(loadMoreRequest);
+    on<CalculateContributionEvent>(_onCalculateContribution);
+    on<RegisterContributionEvent>(_onRegisterContribution);
   }
 
   Future<void> _onGetHistory(
@@ -99,24 +102,38 @@ class SurveillanceBloc extends Bloc<SurveillanceEvent, SurveillanceState> {
     }
   }
 
-  Future<void> surveillanceBloc(
+Future<void> surveillanceBloc(
     MonitoringTrayEvent event,
     Emitter<SurveillanceState> emit,
   ) async {
+    if (!event.isRefresh && _currentHistoryMonitoring.isNotEmpty) {
+      emit(
+        SurveillanceSuccess(
+          list: List.from(_currentHistoryMonitoring),
+          hasReachedMax: _hasReachedMax,
+          totalRecords: _currentTotalRecords,
+        ),
+      );
+      return;
+    }
+
     if (event.isRefresh) {
       _currentPage = 1;
       _hasReachedMax = false;
-      _currentHistory.clear();
+      _currentHistoryMonitoring.clear(); 
       emit(SurveillanceLoading());
     }
+    
     try {
       final response = await repository.monitoringTray(page: _currentPage);
       _currentHistoryMonitoring = response.items;
       _hasReachedMax = !response.hasMoreData;
+      _currentTotalRecords = response.totalRecords;
       emit(
         SurveillanceSuccess(
-          list: response.items,
+          list: List.from(_currentHistoryMonitoring),
           hasReachedMax: _hasReachedMax,
+          totalRecords: _currentTotalRecords
         ),
       );
     } on BaseApiException catch (error) {
@@ -142,12 +159,46 @@ class SurveillanceBloc extends Bloc<SurveillanceEvent, SurveillanceState> {
         SurveillanceSuccess(
           list: _currentHistoryMonitoring,
           hasReachedMax: _hasReachedMax,
+          totalRecords: _currentTotalRecords
         ),
       );
     } on BaseApiException catch (error) {
       emit(SurveillanceError(mapErrorMessage(error.key)));
     } catch (e) {
       emit(SurveillanceError('Error inesperado: $e'));
+    }
+  }
+
+  Future<void> _onCalculateContribution(
+    CalculateContributionEvent event,
+    Emitter<SurveillanceState> emit,
+  ) async {
+    emit(SurveillanceCalculateLoading());
+    try {
+      final calculation = await repository.calculateContribution(event.montoTotal);
+      emit(SurveillanceCalculateSuccess(calculation));
+    } on BaseApiException catch (e) {
+      emit(SurveillanceCalculateError(e.message));
+    } catch (_) {
+      emit(SurveillanceCalculateError('Ocurrió un error al calcular el aporte'));
+    }
+  }
+
+  Future<void> _onRegisterContribution(
+    RegisterContributionEvent event,
+    Emitter<SurveillanceState> emit,
+  ) async {
+    emit(SurveillanceRegisterLoading());
+    try {
+      final registration = await repository.registerContribution(
+        event.montoTotal,
+        event.motivo,
+      );
+      emit(SurveillanceRegisterSuccess(registration));
+    } on BaseApiException catch (e) {
+      emit(SurveillanceRegisterError(e.message));
+    } catch (_) {
+      emit(SurveillanceRegisterError('Ocurrió un error al registrar el aporte'));
     }
   }
 }

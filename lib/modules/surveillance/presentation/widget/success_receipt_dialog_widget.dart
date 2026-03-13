@@ -1,25 +1,22 @@
 import 'package:flutter/material.dart';
 import 'package:front_gestion_minera/config/theme/extension_theme.dart';
 import 'package:front_gestion_minera/core/widgets/custom_alert_widget.dart';
+import 'package:front_gestion_minera/modules/surveillance/domain/entity/contribution_entity.dart';
 import 'package:front_gestion_minera/utils/text_util.dart';
+import 'package:intl/intl.dart';
 
 class SuccessReceiptDialog extends StatelessWidget {
-  final double montoTotal;
-  final int cantidadPersonas;
-  final double montoPorPersona;
-  final String fecha;
+  final ContributionRegistrationEntity registration;
 
   const SuccessReceiptDialog({
     super.key,
-    required this.montoTotal,
-    required this.cantidadPersonas,
-    required this.montoPorPersona,
-    required this.fecha,
+    required this.registration,
   });
 
   @override
   Widget build(BuildContext context) {
     final colors = Theme.of(context).colorScheme;
+    final String currentDate = DateFormat('dd/MM/yyyy').format(DateTime.now());
 
     return Dialog(
       backgroundColor: colors.white,
@@ -61,16 +58,30 @@ class SuccessReceiptDialog extends StatelessWidget {
                 border: Border.all(color: colors.lead.withValues(alpha: 0.2)),
               ),
               child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  DetailRow(label: "Fecha:", value: fecha),
+                  DetailRow(label: "Fecha:", value: currentDate),
                   const SizedBox(height: 8),
-                  DetailRow(label: "Monto Total:", value: "Bs. $montoTotal"),
+                  
+                  if (registration.motivo.isNotEmpty) ...[
+                    Text(
+                      "Motivo:", 
+                      style: AppTextStyles.mainStyle12(context).copyWith(color: colors.lead)
+                    ),
+                    Text(
+                      registration.motivo, 
+                      style: AppTextStyles.mainStyle12Bold(context)
+                    ),
+                    const SizedBox(height: 8),
+                  ],
+
+                  DetailRow(label: "Monto Total:", value: "Bs. ${registration.montoTotal.toStringAsFixed(2)}"),
                   const SizedBox(height: 8),
-                  DetailRow(label: "Personas:", value: "$cantidadPersonas"),
+                  DetailRow(label: "Personas:", value: "${registration.cantidadPersonas}"),
                   const SizedBox(height: 8),
                   DetailRow(
                     label: "Por persona:",
-                    value: "Bs. $montoPorPersona",
+                    value: "Bs. ${registration.montoPorPersona.toStringAsFixed(2)}",
                     isBold: true,
                     valueColor: colors.green,
                   ),
@@ -81,11 +92,6 @@ class SuccessReceiptDialog extends StatelessWidget {
               width: double.infinity,
               child: ElevatedButton.icon(
                 onPressed: () {
-                  // ScaffoldMessenger.of(context).showSnackBar(
-                  //   const SnackBar(
-                  //     content: Text('Descargando comprobante PDF...'),
-                  //   ),
-                  // );
                   CustomAlert.show(
                     context,
                     title: 'Descargando...',

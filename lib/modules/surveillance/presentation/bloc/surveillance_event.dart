@@ -28,3 +28,15 @@ class GetSurveillanceHistoryEvent extends SurveillanceEvent {
 }
 
 class LoadMoreSurveillanceHistoryEvent extends SurveillanceEvent {}
+
+
+class CalculateContributionEvent extends SurveillanceEvent {
+  final double montoTotal;
+  CalculateContributionEvent({required this.montoTotal});
+}
+
+class RegisterContributionEvent extends SurveillanceEvent {
+  final double montoTotal;
+  final String motivo;
+  RegisterContributionEvent({required this.montoTotal, required this.motivo});
+}

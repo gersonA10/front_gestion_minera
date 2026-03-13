@@ -17,9 +17,11 @@ class SurveillanceHistoryEntity {
 class PaginatedSurveillanceHistoryEntity {
   final List<SurveillanceHistoryEntity> items;
   final bool hasMoreData;
+  final int totalRecords;
 
   PaginatedSurveillanceHistoryEntity({
     required this.items,
     required this.hasMoreData,
+    required this.totalRecords,
   });
 }
