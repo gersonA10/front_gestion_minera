@@ -18,7 +18,7 @@ class LoanHistoryDatasource {
     String status,
   ) async {
     final response = await apiClient.get(
-      '/api/loans/history?',
+      '/api/loans/history',
       queryParameters: {'status': status},
       operationName: 'brings up the loan history',
     );
@@ -30,7 +30,7 @@ class LoanHistoryDatasource {
     String search,
   ) async {
     final response = await apiClient.get(
-      '/api/loans/history?',
+      '/api/loans/history',
       queryParameters: {'search': search},
       operationName: 'search',
     );

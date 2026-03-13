@@ -204,53 +204,69 @@ class _LoanHistoryScreenState extends State<LoanHistoryScreen> {
                     ),
                   ),
                   SizedBox(height: smallSpacing * 0.5),
-                  Row(
-                    children: [
-                      FilterButton(
-                        text: 'Todos',
-                        active: _activeFilter == 'todos',
-                        onTap: () {
-                          _searchController.clear();
-                          _searchFocusNode.unfocus();
-                          setState(() {
-                            _activeFilter = 'todos';
-                          });
-                          context.read<PartnersBloc>().add(
-                            LoanHistoryRequestEvent(),
-                          );
-                        },
-                      ),
-                      SizedBox(width: smallSpacing * 1),
-                      FilterButton(
-                        text: 'Pagado',
-                        active: _activeFilter == 'pagado',
-                        onTap: () {
-                          _searchController.clear();
-                          _searchFocusNode.unfocus();
-                          setState(() {
-                            _activeFilter = 'pagado';
-                          });
-                          context.read<PartnersBloc>().add(
-                            LoanHistoryStatustEvent(status: 'pagado'),
-                          );
-                        },
-                      ),
-                      SizedBox(width: smallSpacing * 1),
-                      FilterButton(
-                        text: 'Pendiente',
-                        active: _activeFilter == 'pendiente',
-                        onTap: () {
-                          _searchController.clear();
-                          _searchFocusNode.unfocus();
-                          setState(() {
-                            _activeFilter = 'pendiente';
-                          });
-                          context.read<PartnersBloc>().add(
-                            LoanHistoryStatustEvent(status: 'pendiente'),
-                          );
-                        },
-                      ),
-                    ],
+
+                  // Reemplaza el Row de FilterButton por este bloque:
+                  SizedBox(
+                    height: 40,
+                    child: ListView(
+                      scrollDirection: Axis.horizontal,
+                      children: [
+                        FilterButton(
+                          text: 'Todos',
+                          active: _activeFilter == 'todos',
+                          onTap: () {
+                            _searchController.clear();
+                            _searchFocusNode.unfocus();
+                            setState(() => _activeFilter = 'todos');
+                            context.read<PartnersBloc>().add(LoanHistoryRequestEvent());
+                          },
+                        ),
+                        SizedBox(width: smallSpacing * 0.5),
+                        FilterButton(
+                          text: 'Pendiente',
+                          active: _activeFilter == 'en revisión' || _activeFilter == 'pendiente',
+                          onTap: () {
+                            _searchController.clear();
+                            _searchFocusNode.unfocus();
+                            setState(() => _activeFilter = 'en revisión');
+                            context.read<PartnersBloc>().add(LoanHistoryStatustEvent(status: 'en revisión'));
+                          },
+                        ),
+                        SizedBox(width: smallSpacing * 0.5),
+                        FilterButton(
+                          text: 'Aprobado',
+                          active: _activeFilter == 'aprobado',
+                          onTap: () {
+                            _searchController.clear();
+                            _searchFocusNode.unfocus();
+                            setState(() => _activeFilter = 'aprobado');
+                            context.read<PartnersBloc>().add(LoanHistoryStatustEvent(status: 'aprobado'));
+                          },
+                        ),
+                        SizedBox(width: smallSpacing * 0.5),
+                        FilterButton(
+                          text: 'Rechazado',
+                          active: _activeFilter == 'rechazado',
+                          onTap: () {
+                            _searchController.clear();
+                            _searchFocusNode.unfocus();
+                            setState(() => _activeFilter = 'rechazado');
+                            context.read<PartnersBloc>().add(LoanHistoryStatustEvent(status: 'rechazado'));
+                          },
+                        ),
+                        SizedBox(width: smallSpacing * 0.5),
+                        FilterButton(
+                          text: 'Pagado',
+                          active: _activeFilter == 'pagado',
+                          onTap: () {
+                            _searchController.clear();
+                            _searchFocusNode.unfocus();
+                            setState(() => _activeFilter = 'pagado');
+                            context.read<PartnersBloc>().add(LoanHistoryStatustEvent(status: 'pagado'));
+                          },
+                        ),
+                      ],
+                    ),
                   ),
                   SizedBox(height: smallSpacing * 0.5),
                   if (isLoading)
@@ -265,14 +281,16 @@ class _LoanHistoryScreenState extends State<LoanHistoryScreen> {
                         itemCount: historyData.length,
                         itemBuilder: (context, index) {
                           final data = historyData![index];
-                          final bool isPaid =
-                              data.status.toLowerCase() == 'pagado';
+                          // final bool isPaid =
+                          //     data.status.toLowerCase() == 'pagado';
                           return LoanCard(
                             small: smallSpacing,
                             date: formatDate((data.createdAt)),
                             reason: data.description,
                             amount: data.amountOrQuantity,
-                            isPaid: isPaid,
+                            status: data.status,
+                            motivoRechazo: data.motivoRechazo, 
+                            loanType: data.loanType,
                           );
                         },
                       ),

@@ -29,6 +29,7 @@ class LoanHistoryDataModel extends LoanHistoryDataEntity {
     required super.description,
     required super.fileUrl,
     required super.status,
+    super.motivoRechazo,
     required super.createdAt,
   });
 
@@ -40,6 +41,7 @@ class LoanHistoryDataModel extends LoanHistoryDataEntity {
         description: json["description"],
         fileUrl: json["file_url"],
         status: json["status"],
+        motivoRechazo: json["motivo_rechazo"],
         createdAt:
             DateTime.tryParse(json["created_at"] ?? '') ?? DateTime.now(),
       );

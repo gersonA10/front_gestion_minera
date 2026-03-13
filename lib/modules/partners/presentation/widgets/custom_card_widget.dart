@@ -119,7 +119,9 @@ class LoanCard extends StatelessWidget {
   final String date;
   final String reason;
   final String amount;
-  final bool isPaid;
+  final String status;
+  final String? motivoRechazo;
+  final String loanType;
   final double small;
 
   const LoanCard({
@@ -127,75 +129,173 @@ class LoanCard extends StatelessWidget {
     required this.date,
     required this.reason,
     required this.amount,
-    required this.isPaid,
+    required this.status,
+    this.motivoRechazo,
+    required this.loanType,
     required this.small,
   });
+
+  Color _getStatusColor(String statusText) {
+    switch (statusText.toLowerCase()) {
+      case 'pagado':
+        return const Color(0xff17A05D); 
+      case 'aprobado':
+        return const Color(0xff2457C5); 
+      case 'rechazado':
+        return const Color(0xffD32F2F); 
+      case 'en revisión':
+      case 'pendiente':
+      default:
+        return const Color(0xffC47A00); 
+    }
+  }
+
+  Color _getStatusBgColor(String statusText) {
+    switch (statusText.toLowerCase()) {
+      case 'pagado':
+        return const Color(0xffE7F7EE);
+      case 'aprobado':
+        return const Color(0xffE8F0FE);
+      case 'rechazado':
+        return const Color(0xffFFEBEE);
+      case 'en revisión':
+      case 'pendiente':
+      default:
+        return const Color(0xffFFF4E5);
+    }
+  }
+
+  void _showRejectionDialog(BuildContext context, ColorScheme colors) {
+    showDialog(
+      context: context,
+      builder: (dialogContext) {
+        return Dialog(
+          backgroundColor: colors.white,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+          child: Padding(
+            padding: const EdgeInsets.all(20.0),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Container(
+                  width: 56,
+                  height: 56,
+                  decoration: BoxDecoration(
+                    color: colors.red.withOpacity(0.12),
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                  child: Icon(Icons.info_outline_rounded, color: colors.red, size: 28),
+                ),
+                const SizedBox(height: 16),
+                Text(
+                  'Motivo de rechazo',
+                  style: AppTextStyles.mainStyle16Bold(context).copyWith(color: colors.black),
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 12),
+                Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.all(14),
+                  decoration: BoxDecoration(
+                    color: colors.red.withOpacity(0.06),
+                    borderRadius: BorderRadius.circular(14),
+                    border: Border.all(color: colors.red.withOpacity(0.18)),
+                  ),
+                  child: Text(
+                    motivoRechazo ?? 'Sin motivo especificado.',
+                    style: AppTextStyles.mainStyle12(context).copyWith(color: colors.black, height: 1.4),
+                  ),
+                ),
+                const SizedBox(height: 18),
+                SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton(
+                    onPressed: () => Navigator.of(dialogContext).pop(),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: colors.blue,
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                    ),
+                    child: Text('Entendido', style: AppTextStyles.mainStyle12Bold(context).copyWith(color: colors.white)),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
     final colors = Theme.of(context).colorScheme;
+    final colorStatus = _getStatusColor(status);
+    final bgStatus = _getStatusBgColor(status);
+    final isRejected = status.toLowerCase() == 'rechazado';
+
     return Card(
       elevation: small * 0.3,
       color: colors.white,
       margin: const EdgeInsets.only(bottom: 14),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'FECHA DE REGISTRO',
-                  style: AppTextStyles.mainStyleGrey12(context),
+      child: InkWell(
+        borderRadius: BorderRadius.circular(14),
+        onTap: isRejected && motivoRechazo != null
+            ? () => _showRejectionDialog(context, colors)
+            : null,
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text('FECHA DE REGISTRO', style: AppTextStyles.mainStyleGrey12(context)),
+                    SizedBox(height: small * 0.5),
+                    Text(date, style: AppTextStyles.mainStyle12Bold(context)),
+                    SizedBox(height: small * 0.5),
+                    Text('Motivo', style: AppTextStyles.mainStyleGrey12(context)),
+                    SizedBox(height: small * 0.25),
+                    Text(reason, style: AppTextStyles.mainStyle12Bold(context)),
+                    SizedBox(height: small * 0.5),
+                    Text(
+                      loanType.toLowerCase() == 'gramos' ? 'Gramos' : 'Monto total', 
+                      style: AppTextStyles.mainStyleGrey12(context)
+                    ),
+                    SizedBox(height: small * 0.25),
+                    Text(amount, style: AppTextStyles.mainStyle16Bold(context)),
+                  ],
                 ),
-                SizedBox(height: small * 0.5),
-                Text(date, style: AppTextStyles.mainStyle12Bold(context)),
-                SizedBox(height: small * 0.5),
-                Text('Motivo', style: AppTextStyles.mainStyleGrey12(context)),
-                SizedBox(height: small * 0.25),
-                Text(reason, style: AppTextStyles.mainStyle12Bold(context)),
-                SizedBox(height: small * 0.5),
-                Text(
-                  'Monto total',
-                  style: AppTextStyles.mainStyleGrey12(context),
-                ),
-              ],
-            ),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.end,
-              children: [
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 12,
-                    vertical: 4,
-                  ),
-                  decoration: BoxDecoration(
-                    color: isPaid
-                        ? const Color(0xffE7F7EE)
-                        : const Color(0xffFFF4E5),
-                    borderRadius: BorderRadius.circular(20),
-                  ),
-                  child: Text(
-                    isPaid ? 'PAGADO' : 'PENDIENTE',
-                    style: TextStyle(
-                      color: isPaid
-                          ? const Color(0xff17A05D)
-                          : const Color(0xffC47A00),
-                      fontWeight: FontWeight.bold,
-                      fontSize: 12,
+              ),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                    decoration: BoxDecoration(color: bgStatus, borderRadius: BorderRadius.circular(20)),
+                    child: Text(
+                      status.toUpperCase(),
+                      style: TextStyle(color: colorStatus, fontWeight: FontWeight.bold, fontSize: 10),
                     ),
                   ),
-                ),
-
-                SizedBox(height: small * 3.5),
-
-                Text(amount, style: AppTextStyles.mainStyle16Bold(context)),
-              ],
-            ),
-          ],
+                  if (isRejected && motivoRechazo != null) ...[
+                    SizedBox(height: small * 4.5),
+                    Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(Icons.remove_red_eye, color: colors.red, size: 16),
+                        const SizedBox(width: 4),
+                        Text('Ver motivo', style: AppTextStyles.mainStyle10Bold(context).copyWith(color: colors.red)),
+                      ],
+                    ),
+                  ],
+                ],
+              ),
+            ],
+          ),
         ),
       ),
     );
