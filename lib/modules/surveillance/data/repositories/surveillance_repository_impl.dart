@@ -45,8 +45,8 @@ class SurveillanceRepositoryImpl implements SurveillanceRepository {
     final models = result['items'] as List<MonitoringTrayDataModel>;
     return MonitoringTrayEntity(
       items: models.map((model) => model.toEntity()).toList(),
-      hasMoreData: result['has_more_data'] as bool, 
-     totalRecords: result['total_records'] as int? ?? 0,
+      hasMoreData: result['has_more_data'] as bool,
+      totalRecords: result['total_records'] as int? ?? 0,
     );
   }
 
@@ -60,11 +60,19 @@ class SurveillanceRepositoryImpl implements SurveillanceRepository {
 
   @override
   Future<ContributionRegistrationEntity> registerContribution(
-    double montoTotal, String motivo) async {
-    final data = await datasource.registerContribution(
-      montoTotal,
-      motivo,
-    );
+    double montoTotal,
+    String motivo,
+  ) async {
+    final data = await datasource.registerContribution(montoTotal, motivo);
     return ContributionRegistrationModel.fromJson(data);
+  }
+
+  @override
+  Future<ApproveTheRequestEntity> approveTheRequest(
+    String requestId,
+    String action,
+    String reason,
+  ) async {
+    return await datasource.approveTheRequest(requestId, action, reason);
   }
 }

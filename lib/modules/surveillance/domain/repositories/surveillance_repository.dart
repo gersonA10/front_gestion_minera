@@ -14,5 +14,12 @@ abstract class SurveillanceRepository {
     double montoTotal,
   );
   Future<ContributionRegistrationEntity> registerContribution(
-    double montoTotal, String motivo);
+    double montoTotal,
+    String motivo,
+  );
+  Future<ApproveTheRequestEntity> approveTheRequest(
+    String requestId,
+    String action,
+    String reason,
+  );
 }
