@@ -9,6 +9,7 @@ class MonitoringTrayDataModel extends MonitoringTrayDataEntity {
     required super.status,
     required super.amount,
     required super.evidencia,
+    required super.requestId,
   });
 
   factory MonitoringTrayDataModel.fromJson(Map<String, dynamic> json) =>
@@ -21,6 +22,7 @@ class MonitoringTrayDataModel extends MonitoringTrayDataEntity {
         status: json["status"],
         amount: json["amount"],
         evidencia: json["evidencia"],
+        requestId: json["request_id"],
       );
   MonitoringTrayDataEntity toEntity() {
     return MonitoringTrayDataEntity(
@@ -31,6 +33,7 @@ class MonitoringTrayDataModel extends MonitoringTrayDataEntity {
       name: name,
       rol: rol,
       evidencia: evidencia,
+      requestId: requestId,
     );
   }
 }
