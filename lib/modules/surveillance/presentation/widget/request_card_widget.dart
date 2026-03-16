@@ -86,8 +86,19 @@ class RequestCard extends StatelessWidget {
                 height: small * 2,
                 child: ElevatedButton(
                   onPressed: () async {
-                    final result = await InjectorContainer.getIt<AppRouter>()
-                        .push(ApplicationDetailsRoute(item: item));
+                    final result = await InjectorContainer.getIt<AppRouter>().push(
+                      ApplicationDetailsRoute(
+                        requestId: item.requestId,
+                        createdAt: item.createdAt,
+                        name: item.name,
+                        rol: item.rol,
+                        description: item.description,
+                        amount: item.amount,
+                        evidencia: item.evidencia,
+                        status: item.status,
+                        motivoRechazo: null,
+                      ),
+                    );
                     if (result == true) {
                       if (!context.mounted) return;
                       context.read<SurveillanceBloc>().add(

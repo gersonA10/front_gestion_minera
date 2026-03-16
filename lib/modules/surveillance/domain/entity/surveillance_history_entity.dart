@@ -1,7 +1,11 @@
 class SurveillanceHistoryEntity {
+  final String requestId;
   final DateTime createdAt;
   final String name;
+  final String rol;
   final String description;
+  final String amount;
+  final String evidencia;
   final String estado;
   final String? motivoRechazo;
 
@@ -11,6 +15,10 @@ class SurveillanceHistoryEntity {
     required this.description,
     required this.estado,
     this.motivoRechazo,
+    required this.requestId,
+    required this.rol,
+    required this.amount,
+    required this.evidencia,
   });
 }
 

@@ -1,4 +1,6 @@
+import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
+import 'package:front_gestion_minera/config/router/app_router.gr.dart';
 import 'package:front_gestion_minera/config/theme/extension_theme.dart';
 import 'package:front_gestion_minera/utils/date_util.dart';
 import 'package:front_gestion_minera/utils/text_util.dart';
@@ -223,6 +225,20 @@ class SurveillanceHistoryCard extends StatelessWidget {
 
                     GestureDetector(
                       onTap: () {
+                        context.router.push(
+                          ApplicationDetailsRoute(
+                            requestId: item
+                                .requestId, // De tu SurveillanceHistoryDataEntity
+                            createdAt: item.createdAt,
+                            name: item.name,
+                            rol: item.rol,
+                            description: item.description,
+                            amount: item.amount,
+                            evidencia: item.evidencia,
+                            status: item.estado,
+                            motivoRechazo: item.motivoRechazo,
+                          ),
+                        );
                         /* InjectorContainer.getIt<AppRouter>().push(
                           ApplicationDetailsRoute(item: item),
                         );*/

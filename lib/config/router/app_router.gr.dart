@@ -27,8 +27,6 @@ import 'package:front_gestion_minera/modules/partners/presentation/screens/partn
     as _i10;
 import 'package:front_gestion_minera/modules/partners/presentation/screens/request_history_screen.dart'
     as _i11;
-import 'package:front_gestion_minera/modules/surveillance/domain/entity/entity.dart'
-    as _i15;
 import 'package:front_gestion_minera/modules/surveillance/presentation/screen/application_details_screen.dart'
     as _i1;
 import 'package:front_gestion_minera/modules/surveillance/presentation/screen/history_requests_screen.dart'
@@ -44,11 +42,30 @@ class ApplicationDetailsRoute
     extends _i13.PageRouteInfo<ApplicationDetailsRouteArgs> {
   ApplicationDetailsRoute({
     _i14.Key? key,
-    required _i15.MonitoringTrayDataEntity item,
+    required String requestId,
+    required DateTime createdAt,
+    required String name,
+    required String rol,
+    required String description,
+    required String amount,
+    required String evidencia,
+    required String status,
+    String? motivoRechazo,
     List<_i13.PageRouteInfo>? children,
   }) : super(
          ApplicationDetailsRoute.name,
-         args: ApplicationDetailsRouteArgs(key: key, item: item),
+         args: ApplicationDetailsRouteArgs(
+           key: key,
+           requestId: requestId,
+           createdAt: createdAt,
+           name: name,
+           rol: rol,
+           description: description,
+           amount: amount,
+           evidencia: evidencia,
+           status: status,
+           motivoRechazo: motivoRechazo,
+         ),
          initialChildren: children,
        );
 
@@ -58,21 +75,59 @@ class ApplicationDetailsRoute
     name,
     builder: (data) {
       final args = data.argsAs<ApplicationDetailsRouteArgs>();
-      return _i1.ApplicationDetailsScreen(key: args.key, item: args.item);
+      return _i1.ApplicationDetailsScreen(
+        key: args.key,
+        requestId: args.requestId,
+        createdAt: args.createdAt,
+        name: args.name,
+        rol: args.rol,
+        description: args.description,
+        amount: args.amount,
+        evidencia: args.evidencia,
+        status: args.status,
+        motivoRechazo: args.motivoRechazo,
+      );
     },
   );
 }
 
 class ApplicationDetailsRouteArgs {
-  const ApplicationDetailsRouteArgs({this.key, required this.item});
+  const ApplicationDetailsRouteArgs({
+    this.key,
+    required this.requestId,
+    required this.createdAt,
+    required this.name,
+    required this.rol,
+    required this.description,
+    required this.amount,
+    required this.evidencia,
+    required this.status,
+    this.motivoRechazo,
+  });
 
   final _i14.Key? key;
 
-  final _i15.MonitoringTrayDataEntity item;
+  final String requestId;
+
+  final DateTime createdAt;
+
+  final String name;
+
+  final String rol;
+
+  final String description;
+
+  final String amount;
+
+  final String evidencia;
+
+  final String status;
+
+  final String? motivoRechazo;
 
   @override
   String toString() {
-    return 'ApplicationDetailsRouteArgs{key: $key, item: $item}';
+    return 'ApplicationDetailsRouteArgs{key: $key, requestId: $requestId, createdAt: $createdAt, name: $name, rol: $rol, description: $description, amount: $amount, evidencia: $evidencia, status: $status, motivoRechazo: $motivoRechazo}';
   }
 }
 
