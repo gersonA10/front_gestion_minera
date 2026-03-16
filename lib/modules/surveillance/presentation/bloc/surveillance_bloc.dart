@@ -30,6 +30,7 @@ class SurveillanceBloc extends Bloc<SurveillanceEvent, SurveillanceState> {
     on<LoadMoreRequestEvent>(loadMoreRequest);
     on<CalculateContributionEvent>(_onCalculateContribution);
     on<RegisterContributionEvent>(_onRegisterContribution);
+    on<ApproveTheRequestEvent>(_approveTheRequest);
   }
 
   Future<void> _onGetHistory(
@@ -102,7 +103,7 @@ class SurveillanceBloc extends Bloc<SurveillanceEvent, SurveillanceState> {
     }
   }
 
-Future<void> surveillanceBloc(
+  Future<void> surveillanceBloc(
     MonitoringTrayEvent event,
     Emitter<SurveillanceState> emit,
   ) async {
@@ -120,10 +121,10 @@ Future<void> surveillanceBloc(
     if (event.isRefresh) {
       _currentPage = 1;
       _hasReachedMax = false;
-      _currentHistoryMonitoring.clear(); 
+      _currentHistoryMonitoring.clear();
       emit(SurveillanceLoading());
     }
-    
+
     try {
       final response = await repository.monitoringTray(page: _currentPage);
       _currentHistoryMonitoring = response.items;
@@ -133,7 +134,7 @@ Future<void> surveillanceBloc(
         SurveillanceSuccess(
           list: List.from(_currentHistoryMonitoring),
           hasReachedMax: _hasReachedMax,
-          totalRecords: _currentTotalRecords
+          totalRecords: _currentTotalRecords,
         ),
       );
     } on BaseApiException catch (error) {
@@ -159,7 +160,7 @@ Future<void> surveillanceBloc(
         SurveillanceSuccess(
           list: _currentHistoryMonitoring,
           hasReachedMax: _hasReachedMax,
-          totalRecords: _currentTotalRecords
+          totalRecords: _currentTotalRecords,
         ),
       );
     } on BaseApiException catch (error) {
@@ -175,12 +176,16 @@ Future<void> surveillanceBloc(
   ) async {
     emit(SurveillanceCalculateLoading());
     try {
-      final calculation = await repository.calculateContribution(event.montoTotal);
+      final calculation = await repository.calculateContribution(
+        event.montoTotal,
+      );
       emit(SurveillanceCalculateSuccess(calculation));
     } on BaseApiException catch (e) {
       emit(SurveillanceCalculateError(e.message));
     } catch (_) {
-      emit(SurveillanceCalculateError('Ocurrió un error al calcular el aporte'));
+      emit(
+        SurveillanceCalculateError('Ocurrió un error al calcular el aporte'),
+      );
     }
   }
 
@@ -198,7 +203,36 @@ Future<void> surveillanceBloc(
     } on BaseApiException catch (e) {
       emit(SurveillanceRegisterError(e.message));
     } catch (_) {
-      emit(SurveillanceRegisterError('Ocurrió un error al registrar el aporte'));
+      emit(
+        SurveillanceRegisterError('Ocurrió un error al registrar el aporte'),
+      );
+    }
+  }
+
+  Future<void> _approveTheRequest(
+    ApproveTheRequestEvent event,
+    Emitter<SurveillanceState> emit,
+  ) async {
+    emit(ApproveTheRequestLoading());
+    try {
+      final response = await repository.approveTheRequest(
+        event.requestId,
+        event.action,
+        event.reason,
+      );
+      emit(ApproveTheRequestSuccess(response));
+    } on BaseApiException catch (e) {
+      switch (e.key) {
+        case "dio_unexpected":
+        case "dio_connect_timeout":
+          emit(ApproveTheRequestError('Ha ocurrido un error'));
+          break;
+        default:
+          emit(ApproveTheRequestError('Ha ocurrido un error'));
+      }
+      emit(ApproveTheRequestError(e.message));
+    } catch (_) {
+      emit(ApproveTheRequestError('Ocurrió un error al poner la acción'));
     }
   }
 }

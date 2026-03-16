@@ -15,8 +15,13 @@ final class SurveillanceSuccess extends SurveillanceState {
   final List<MonitoringTrayDataEntity> list;
   final bool hasReachedMax;
   final int totalRecords;
-  SurveillanceSuccess({required this.list, required this.hasReachedMax, required this.totalRecords});
+  SurveillanceSuccess({
+    required this.list,
+    required this.hasReachedMax,
+    required this.totalRecords,
+  });
 }
+
 final class SurveillanceHistoryLoading extends SurveillanceState {}
 
 final class SurveillanceHistoryError extends SurveillanceState {
@@ -57,4 +62,17 @@ class SurveillanceRegisterSuccess extends SurveillanceState {
 class SurveillanceRegisterError extends SurveillanceState {
   final String message;
   SurveillanceRegisterError(this.message);
+}
+
+//approveTheRequest
+class ApproveTheRequestLoading extends SurveillanceState {}
+
+class ApproveTheRequestSuccess extends SurveillanceState {
+  final ApproveTheRequestEntity approveTheRequest;
+  ApproveTheRequestSuccess(this.approveTheRequest);
+}
+
+class ApproveTheRequestError extends SurveillanceState {
+  final String message;
+  ApproveTheRequestError(this.message);
 }

@@ -7,7 +7,6 @@ import '../../domain/entity/entity.dart';
 
 class SurveillanceHistoryCard extends StatelessWidget {
   final SurveillanceHistoryEntity item;
-
   const SurveillanceHistoryCard({super.key, required this.item});
 
   Color _getStatusColor(String status, ColorScheme colors) {
@@ -145,9 +144,7 @@ class SurveillanceHistoryCard extends StatelessWidget {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Text(
-                      formatDate(
-                        item.createdAt,
-                      ).toUpperCase(), 
+                      formatDate(item.createdAt).toUpperCase(),
                       style: AppTextStyles.mainStyle10Bold(
                         context,
                       ).copyWith(color: colors.lead, letterSpacing: 0.5),
@@ -222,10 +219,14 @@ class SurveillanceHistoryCard extends StatelessWidget {
                         ),
                       )
                     else
-                      const Spacer(),
+                      Spacer(),
 
                     GestureDetector(
-                      onTap: () {},
+                      onTap: () {
+                        /* InjectorContainer.getIt<AppRouter>().push(
+                          ApplicationDetailsRoute(item: item),
+                        );*/
+                      },
                       child: Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [

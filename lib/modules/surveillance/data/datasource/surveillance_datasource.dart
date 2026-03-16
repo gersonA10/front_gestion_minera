@@ -1,6 +1,5 @@
 import 'package:front_gestion_minera/core/networking/http_services.dart';
-import 'package:front_gestion_minera/modules/surveillance/data/models/surveillance_models.dart';
-
+import '../../domain/entity/entity.dart';
 import '../models/model.dart';
 
 class SurveillanceDatasource {
@@ -93,5 +92,18 @@ class SurveillanceDatasource {
       operationName: 'registerContribution',
     );
     return response['data'];
+  }
+
+  Future<ApproveTheRequestEntity> approveTheRequest(
+    String requestId,
+    String action,
+    String reason,
+  ) async {
+    final response = await apiClient.patch(
+      '/api/processRequest/action',
+      operationName: 'the department that approves and rejects applications ',
+      data: {"request_id": requestId, "action": action, "reason": reason},
+    );
+    return ApproveTheRequestModel.fromJson(response);
   }
 }

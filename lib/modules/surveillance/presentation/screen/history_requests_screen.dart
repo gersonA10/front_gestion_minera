@@ -400,4 +400,3 @@ class _HistoryRequestsScreenState extends State<HistoryRequestsScreen> {
     );
   }
 }
-

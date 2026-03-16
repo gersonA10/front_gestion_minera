@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:front_gestion_minera/config/router/app_router.dart';
 import 'package:front_gestion_minera/config/router/app_router.gr.dart';
 import 'package:front_gestion_minera/config/theme/extension_theme.dart';
 import 'package:front_gestion_minera/injector_container.dart';
+import 'package:front_gestion_minera/modules/surveillance/presentation/bloc/surveillance_bloc.dart';
 import 'package:front_gestion_minera/utils/text_util.dart';
 
 import '../../domain/entity/entity.dart';
@@ -83,10 +85,15 @@ class RequestCard extends StatelessWidget {
               SizedBox(
                 height: small * 2,
                 child: ElevatedButton(
-                  onPressed: () {
-                    InjectorContainer.getIt<AppRouter>().push(
-                      ApplicationDetailsRoute(item: item),
-                    );
+                  onPressed: () async {
+                    final result = await InjectorContainer.getIt<AppRouter>()
+                        .push(ApplicationDetailsRoute(item: item));
+                    if (result == true) {
+                      if (!context.mounted) return;
+                      context.read<SurveillanceBloc>().add(
+                        MonitoringTrayEvent(isRefresh: true),
+                      );
+                    }
                   },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: colors.blue,

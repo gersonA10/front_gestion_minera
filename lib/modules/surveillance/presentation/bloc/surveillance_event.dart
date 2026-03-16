@@ -11,6 +11,7 @@ class LoadMoreRequestEvent extends SurveillanceEvent {
   final bool isRefresh;
   LoadMoreRequestEvent({this.isRefresh = true});
 }
+
 class GetSurveillanceHistoryEvent extends SurveillanceEvent {
   final String? status;
   final String? search;
@@ -29,7 +30,6 @@ class GetSurveillanceHistoryEvent extends SurveillanceEvent {
 
 class LoadMoreSurveillanceHistoryEvent extends SurveillanceEvent {}
 
-
 class CalculateContributionEvent extends SurveillanceEvent {
   final double montoTotal;
   CalculateContributionEvent({required this.montoTotal});
@@ -39,4 +39,15 @@ class RegisterContributionEvent extends SurveillanceEvent {
   final double montoTotal;
   final String motivo;
   RegisterContributionEvent({required this.montoTotal, required this.motivo});
+}
+
+class ApproveTheRequestEvent extends SurveillanceEvent {
+  final String requestId;
+  final String action;
+  final String reason;
+  ApproveTheRequestEvent({
+    required this.action,
+    required this.reason,
+    required this.requestId,
+  });
 }
