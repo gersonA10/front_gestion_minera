@@ -100,7 +100,7 @@ class SurveillanceDatasource {
     String reason,
   ) async {
     final response = await apiClient.patch(
-      'api/processRequest/action',
+      '/api/processRequest/action',
       operationName: 'the department that approves and rejects applications ',
       data: {"request_id": requestId, "action": action, "reason": reason},
     );

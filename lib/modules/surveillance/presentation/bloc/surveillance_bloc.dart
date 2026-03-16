@@ -222,6 +222,14 @@ class SurveillanceBloc extends Bloc<SurveillanceEvent, SurveillanceState> {
       );
       emit(ApproveTheRequestSuccess(response));
     } on BaseApiException catch (e) {
+      switch (e.key) {
+        case "dio_unexpected":
+        case "dio_connect_timeout":
+          emit(ApproveTheRequestError('Ha ocurrido un error'));
+          break;
+        default:
+          emit(ApproveTheRequestError('Ha ocurrido un error'));
+      }
       emit(ApproveTheRequestError(e.message));
     } catch (_) {
       emit(ApproveTheRequestError('Ocurrió un error al poner la acción'));
