@@ -1,4 +1,3 @@
-
 import '../../domain/entity/entity.dart';
 
 class SurveillanceHistoryModel extends SurveillanceHistoryEntity {
@@ -8,6 +7,10 @@ class SurveillanceHistoryModel extends SurveillanceHistoryEntity {
     required super.description,
     required super.estado,
     super.motivoRechazo,
+    required super.requestId,
+    required super.rol,
+    required super.amount,
+    required super.evidencia,
   });
 
   factory SurveillanceHistoryModel.fromJson(Map<String, dynamic> json) {
@@ -17,6 +20,10 @@ class SurveillanceHistoryModel extends SurveillanceHistoryEntity {
       description: json['description'] ?? 'Sin descripción',
       estado: json['estado'] ?? 'Pendiente',
       motivoRechazo: json['motivo_rechazo'],
+      requestId: json['request_id'],
+      rol: json['rol'],
+      amount: json['amount'],
+      evidencia: json['evidencia'],
     );
   }
 
@@ -27,6 +34,10 @@ class SurveillanceHistoryModel extends SurveillanceHistoryEntity {
       description: description,
       estado: estado,
       motivoRechazo: motivoRechazo,
+      requestId: requestId,
+      rol: rol,
+      amount: amount,
+      evidencia: evidencia,
     );
   }
 }
