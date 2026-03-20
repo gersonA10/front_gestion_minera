@@ -33,7 +33,7 @@ import 'package:front_gestion_minera/modules/surveillance/presentation/screen/hi
     as _i5;
 import 'package:front_gestion_minera/modules/surveillance/presentation/screen/home_surveillance_screen.dart'
     as _i6;
-import 'package:front_gestion_minera/modules/treasury/presentation/screen/treasury_screen.dart'
+import 'package:front_gestion_minera/modules/treasury/presentation/screens/treasury_screen.dart'
     as _i12;
 
 /// generated route for

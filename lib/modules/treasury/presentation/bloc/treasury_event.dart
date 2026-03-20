@@ -1,4 +1,5 @@
 part of 'treasury_bloc.dart';
 
-@immutable
-sealed class TreasuryEvent {}
+abstract class TreasuryEvent {}
+
+class FetchTreasuryMetricsEvent extends TreasuryEvent {}
