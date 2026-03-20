@@ -1,6 +1,19 @@
 part of 'treasury_bloc.dart';
 
-@immutable
-sealed class TreasuryState {}
+abstract class TreasuryState {}
 
-final class TreasuryInitial extends TreasuryState {}
+class TreasuryInitial extends TreasuryState {}
+
+class TreasuryMetricsLoading extends TreasuryState {}
+
+class TreasuryMetricsLoaded extends TreasuryState {
+  final TreasuryMetricsEntity metrics;
+
+  TreasuryMetricsLoaded({required this.metrics});
+}
+
+class TreasuryMetricsError extends TreasuryState {
+  final String message;
+
+  TreasuryMetricsError(this.message);
+}

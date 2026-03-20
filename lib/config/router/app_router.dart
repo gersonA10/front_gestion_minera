@@ -22,5 +22,6 @@ class AppRouter extends RootStackRouter {
     AutoRoute(page: HomeSurveillanceRoute.page),
     AutoRoute(page: HistoryRequestsRoute.page),
     AutoRoute(page: ApplicationDetailsRoute.page),
+    AutoRoute(page: TreasuryRoute.page),
   ];
 }

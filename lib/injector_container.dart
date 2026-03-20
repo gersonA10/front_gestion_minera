@@ -4,6 +4,7 @@ import 'package:front_gestion_minera/modules/auth/auth_container.dart';
 import 'package:front_gestion_minera/core/networking/http_services.dart';
 import 'package:front_gestion_minera/modules/partners/partners_container.dart';
 import 'package:front_gestion_minera/modules/surveillance/surveillance_container.dart';
+import 'package:front_gestion_minera/modules/treasury/treasury_container.dart';
 import 'package:get_it/get_it.dart';
 
 class InjectorContainer {
@@ -21,5 +22,6 @@ class InjectorContainer {
     initAuthContainer(getIt);
     initPartnersContainer(getIt);
     initSurveillanceContainer(getIt);
+    initTreasuryContainer(getIt);
   }
 }

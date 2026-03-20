@@ -118,6 +118,7 @@ class _AuthScreenState extends State<AuthScreen> {
                       SizedBox(height: smallSpacing * 0.5),
                       TextFormField(
                         controller: userController,
+                        keyboardType: TextInputType.emailAddress,
                         decoration: InputDecoration(
                           hintText: 'correo',
                           hintStyle: AppTextStyles.mainStyle12(context).copyWith(
