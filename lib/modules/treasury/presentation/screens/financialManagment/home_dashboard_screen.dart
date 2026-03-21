@@ -7,6 +7,7 @@ import 'package:front_gestion_minera/injector_container.dart';
 import 'package:front_gestion_minera/modules/treasury/presentation/bloc/treasury_bloc.dart';
 import 'package:front_gestion_minera/modules/treasury/presentation/widgets/financialManagment/cards_primary_and_secondary_widget.dart';
 import 'package:front_gestion_minera/modules/treasury/presentation/widgets/financialManagment/request_title_widget.dart';
+import 'package:front_gestion_minera/utils/session/user_session.dart';
 import 'package:front_gestion_minera/utils/text_util.dart';
 
 @RoutePage()
@@ -44,6 +45,13 @@ class _HomeDashboardScreenState extends State<HomeDashboardScreen> {
       ],
       child: Scaffold(
         backgroundColor: colors.backgroundColor,
+        appBar: AppBar(
+          title: Text('Gestion Financiera',style: TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+                color: colors.black,
+              ),),
+        ),
         body: IndexedStack(index: _selectedIndex, children: pages),
         floatingActionButton: _selectedIndex == 0
             ? FloatingActionButton.extended(
@@ -128,9 +136,13 @@ class HomeBody extends StatelessWidget {
   const HomeBody({super.key, required this.colors});
 
   final ColorScheme colors;
+  
 
   @override
   Widget build(BuildContext context) {
+    final userName = UserSession.userName.isEmpty
+        ? ''
+        : UserSession.userName;
     return SafeArea(
       child: SingleChildScrollView(
         padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 24.0),
@@ -139,9 +151,9 @@ class HomeBody extends StatelessWidget {
           children: [
             SizedBox(height: 4),
             Text(
-              'Hola, Carlos',
+              'Hola, $userName',
               style: TextStyle(
-                fontSize: 26,
+                fontSize: 20,
                 fontWeight: FontWeight.bold,
                 color: colors.black,
               ),
@@ -226,7 +238,7 @@ class HomeBody extends StatelessWidget {
                           Text(
                             'Solicitudes Pendientes',
                             style: const TextStyle(
-                              fontSize: 18,
+                              fontSize: 16,
                               fontWeight: FontWeight.bold,
                               color: Color(0xFF1C1C1E),
                             ),
