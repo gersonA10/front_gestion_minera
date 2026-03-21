@@ -47,6 +47,8 @@ class RequestTile extends StatelessWidget {
               children: [
                 Text(
                   title,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                   style: const TextStyle(
                     fontWeight: FontWeight.bold,
                     fontSize: 14,
@@ -61,6 +63,7 @@ class RequestTile extends StatelessWidget {
               ],
             ),
           ),
+          const SizedBox(width: 15),
           Text(
             amount,
             style: const TextStyle(

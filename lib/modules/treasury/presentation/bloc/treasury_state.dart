@@ -17,3 +17,50 @@ class TreasuryMetricsError extends TreasuryState {
 
   TreasuryMetricsError(this.message);
 }
+
+///
+
+// class BondBalanceLoading extends TreasuryState {}
+class DashboardDataLoading extends TreasuryState {}
+
+class DashboardDataError extends TreasuryState {
+  final String message;
+  
+  DashboardDataError({required this.message});
+  
+}
+
+class DashboardDataLoaded extends TreasuryState {
+  final BondBalanceResponseEntity bondBalance;
+  final PendingApplicationsResponseEntity pendingApplicationsResponseEntity;
+  
+
+  DashboardDataLoaded({required this.bondBalance, required this.pendingApplicationsResponseEntity});
+  
+}
+
+// class BondBalanceError extends TreasuryState {
+//   final String message;
+
+//   BondBalanceError(this.message);
+// }
+
+// class BondBalanceLoaded extends TreasuryState {
+//   final BondBalanceResponseEntity bondBalance;
+
+//   BondBalanceLoaded({required this.bondBalance});
+// }
+
+///
+
+class DetailsofanapplicationLoading extends TreasuryState {}
+
+class DetailsofanapplicationError extends TreasuryState {
+  final String message;
+  DetailsofanapplicationError(this.message);
+}
+
+class DetailsofanapplicationSuccess extends TreasuryState {
+  final DetailsofanapplicationDataEntity data;
+  DetailsofanapplicationSuccess({required this.data});
+}
