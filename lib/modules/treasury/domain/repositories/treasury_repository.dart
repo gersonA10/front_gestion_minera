@@ -7,4 +7,6 @@ abstract class TreasuryRepository {
   Future<DetailsofanapplicationResponseEntity> getDetailsofanapplication(
     String id,
   );
+  Future<CashResponseEntity> getCash();
+
 }

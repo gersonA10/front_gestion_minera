@@ -57,10 +57,11 @@ class DetailsofanapplicationLoading extends TreasuryState {}
 
 class DetailsofanapplicationError extends TreasuryState {
   final String message;
-  DetailsofanapplicationError(this.message);
+  DetailsofanapplicationError({required this.message});
 }
 
 class DetailsofanapplicationSuccess extends TreasuryState {
   final DetailsofanapplicationDataEntity data;
-  DetailsofanapplicationSuccess({required this.data});
+  final CashResponseEntity cash;
+  DetailsofanapplicationSuccess({required this.data, required this.cash});
 }

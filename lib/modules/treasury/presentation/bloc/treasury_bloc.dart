@@ -54,11 +54,12 @@ class TreasuryBloc extends Bloc<TreasuryEvent, TreasuryState> {
     emit(DetailsofanapplicationLoading());
     try {
       final response = await repository.getDetailsofanapplication(event.id);
-      emit(DetailsofanapplicationSuccess(data: response.data));
+      final responseCash = await repository.getCash();
+      emit(DetailsofanapplicationSuccess(data: response.data, cash: responseCash));
     } on BaseApiException catch (error) {
-      emit(DetailsofanapplicationError(mapErrorMessage(error.key)));
+      emit(DetailsofanapplicationError(message:  mapErrorMessage(error.key)));
     } catch (e) {
-      emit(DetailsofanapplicationError('Error inesperado: $e'));
+      emit(DetailsofanapplicationError(message:  'Error inesperado: $e'));
     }
   }
 }

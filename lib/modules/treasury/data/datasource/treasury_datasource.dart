@@ -40,4 +40,13 @@ class TreasuryDatasource {
     );
     return DetailsofanapplicationResponseModel.fromJson(response);
   }
+  
+  Future<CashResponseEntity> getCash(
+  ) async {
+    final response = await apiClient.get(
+      'api/treasury/cash-registers',
+      operationName: 'getCash',
+    );
+    return CashResponseModel.fromJson(response);
+  }
 }

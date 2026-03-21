@@ -38,7 +38,7 @@ class RequestTile extends StatelessWidget {
               color: Color(0xFFF5F6FA),
               shape: BoxShape.circle,
             ),
-            child: Icon(icon, color: Colors.blueGrey, size: 24),
+            child: Icon(icon, color: Colors.blueGrey, size: 14),
           ),
           const SizedBox(width: 16),
           Expanded(
@@ -51,14 +51,14 @@ class RequestTile extends StatelessWidget {
                   overflow: TextOverflow.ellipsis,
                   style: const TextStyle(
                     fontWeight: FontWeight.bold,
-                    fontSize: 14,
+                    fontSize: 12,
                     color: Color(0xFF1C1C1E),
                   ),
                 ),
                 const SizedBox(height: 4),
                 Text(
                   subtitle,
-                  style: const TextStyle(color: Colors.blueGrey, fontSize: 12),
+                  style: const TextStyle(color: Colors.blueGrey, fontSize: 10),
                 ),
               ],
             ),
@@ -68,7 +68,7 @@ class RequestTile extends StatelessWidget {
             amount,
             style: const TextStyle(
               fontWeight: FontWeight.bold,
-              fontSize: 15,
+              fontSize: 12,
               color: Color(0xFF1C1C1E),
             ),
           ),

@@ -28,4 +28,9 @@ class TreasuryRepositoryImpl implements TreasuryRepository {
   ) async {
     return await datasource.getDetailsofanapplication(id);
   }
+  
+  @override
+  Future<CashResponseEntity> getCash()async {
+    return await datasource.getCash();
+  }
 }

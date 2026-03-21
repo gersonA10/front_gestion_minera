@@ -1,6 +1,8 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:front_gestion_minera/config/router/app_router.dart';
+import 'package:front_gestion_minera/config/router/app_router.gr.dart';
 import 'package:front_gestion_minera/config/theme/extension_theme.dart';
 import 'package:front_gestion_minera/core/widgets/custom_alert_widget.dart';
 import 'package:front_gestion_minera/injector_container.dart';
@@ -47,7 +49,7 @@ class _HomeDashboardScreenState extends State<HomeDashboardScreen> {
         backgroundColor: colors.backgroundColor,
         appBar: AppBar(
           title: Text('Gestion Financiera',style: TextStyle(
-                fontSize: 20,
+                fontSize: 18,
                 fontWeight: FontWeight.bold,
                 color: colors.black,
               ),),
@@ -126,7 +128,7 @@ class _ModulesBody extends StatelessWidget {
     return const Center(
       child: Text(
         'Pantalla de Módulos',
-        style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+        style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
       ),
     );
   }
@@ -153,7 +155,7 @@ class HomeBody extends StatelessWidget {
             Text(
               'Hola, $userName',
               style: TextStyle(
-                fontSize: 20,
+                fontSize: 15,
                 fontWeight: FontWeight.bold,
                 color: colors.black,
               ),
@@ -262,14 +264,19 @@ class HomeBody extends StatelessWidget {
                       ListView.builder(
                         shrinkWrap: true,
                         physics: const NeverScrollableScrollPhysics(),
-                        itemCount: 1,
+                        itemCount: state.pendingApplicationsResponseEntity.data.length,
                         itemBuilder: (context, index) {
                           final data = state.pendingApplicationsResponseEntity.data[index];
-                          return RequestTile(
-                            title: data.motivo,
-                            subtitle: 'Solocitante:${data.solicitante}',
-                            amount: data.monto.toString(),
-                            icon: Icons.handyman,
+                          return GestureDetector(
+                            onTap: (){
+                              InjectorContainer.getIt<AppRouter>().push(ViewRequestDetailsRoute(id: data.requestId, data: state.bondBalance));
+                            },
+                            child: RequestTile(
+                              title: data.motivo,
+                              subtitle: 'Solocitante:${data.solicitante}',
+                              amount: data.monto.toString(),
+                              icon: Icons.handyman,
+                            ),
                           );
                         },
                       ),

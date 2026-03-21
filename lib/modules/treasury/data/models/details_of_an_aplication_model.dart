@@ -56,3 +56,26 @@ class FlujoAprobacionModel extends FlujoAprobacionEntity {
         fecha: DateTime.parse(json["fecha"]),
       );
 }
+///cash
+
+class CashResponseModel extends CashResponseEntity  {
+    CashResponseModel({
+        required super.data,
+    });
+    factory CashResponseModel.fromJson(Map<String, dynamic> json) => CashResponseModel(
+        data: List<CashDataModel>.from(json["data"].map((x) => CashDataModel.fromJson(x))),
+    );
+}
+
+class CashDataModel extends  CashDataEntity{
+    CashDataModel({
+        required super.id,
+        required super.nombre,
+        required super.saldoDisponible,
+    });
+    factory CashDataModel.fromJson(Map<String, dynamic> json) => CashDataModel(
+        id: json["id"],
+        nombre: json["nombre"],
+        saldoDisponible: json["saldo_disponible"],
+    );
+}
