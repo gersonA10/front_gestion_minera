@@ -1,224 +1,239 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:front_gestion_minera/config/theme/extension_theme.dart';
+import 'package:front_gestion_minera/injector_container.dart';
 
+import '../../bloc/treasury_bloc.dart';
 import '../../widgets/widgtes.dart';
 
 @RoutePage()
 class ViewRequestDetailsScreen extends StatelessWidget {
-  const ViewRequestDetailsScreen({super.key});
+  final String id;
+  const ViewRequestDetailsScreen({super.key, required this.id});
 
   @override
   Widget build(BuildContext context) {
     final colors = Theme.of(context).colorScheme;
-    return Scaffold(
-      backgroundColor: colors.backgroundColor,
-      appBar: AppBar(
-        backgroundColor: Colors.white,
-        elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.black),
-          onPressed: () => context.router.back(),
-        ),
-        title: Text(
-          'Detalle de Solicitud',
-          style: TextStyle(
-            color: Colors.black,
-            fontWeight: FontWeight.bold,
-            fontSize: 18,
+    return BlocProvider(
+      create: (context) => InjectorContainer.getIt<TreasuryBloc>()..add(DetailsofanapplicationEvent(id: id)),
+      child: Scaffold(
+        backgroundColor: colors.backgroundColor,
+        appBar: AppBar(
+          backgroundColor: Colors.white,
+          elevation: 0,
+          leading: IconButton(
+            icon: const Icon(Icons.arrow_back, color: Colors.black),
+            onPressed: () => context.router.back(),
+          ),
+          title: Text(
+            'Detalle de Solicitud',
+            style: TextStyle(
+              color: Colors.black,
+              fontWeight: FontWeight.bold,
+              fontSize: 18,
+            ),
           ),
         ),
-      ),
-      body: SingleChildScrollView(
-        child: Column(
-          children: [
-            Container(
-              width: double.infinity,
-              color: Colors.white,
-              padding: const EdgeInsets.symmetric(vertical: 32),
-              child: Column(
-                children: [
-                  const Text(
-                    '\$ 1,500.00 USD',
-                    style: TextStyle(
-                      fontSize: 32,
-                      fontWeight: FontWeight.bold,
-                      color: Color(0xFF1C1C1E),
+        body: SingleChildScrollView(
+          child: Column(
+            children: [
+              Container(
+                width: double.infinity,
+                color: Colors.white,
+                padding: const EdgeInsets.symmetric(vertical: 32),
+                child: Column(
+                  children: [
+                    const Text(
+                      '\$ 1,500.00 USD',
+                      style: TextStyle(
+                        fontSize: 32,
+                        fontWeight: FontWeight.bold,
+                        color: Color(0xFF1C1C1E),
+                      ),
                     ),
-                  ),
-                  const SizedBox(height: 12),
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 16,
-                      vertical: 6,
-                    ),
-                    decoration: BoxDecoration(
-                      color: const Color(0xFFE8F5E9),
-                      borderRadius: BorderRadius.circular(20),
-                    ),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: const [
-                        Icon(Icons.check_circle, color: Colors.green, size: 16),
-                        SizedBox(width: 8),
-                        Text(
-                          'Aprobado por Administración y Vigilancia',
-                          style: TextStyle(
+                    const SizedBox(height: 12),
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 6,
+                      ),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFE8F5E9),
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: const [
+                          Icon(
+                            Icons.check_circle,
                             color: Colors.green,
-                            fontWeight: FontWeight.bold,
-                            fontSize: 12,
+                            size: 16,
                           ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.all(20.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const SectionTitle(title: 'Información General'),
-                  WhiteCard(
-                    child: Column(
-                      children: [
-                        _infoRow(
-                          'Descripción',
-                          'Compra de repuestos maquinaria',
-                        ),
-                        const Divider(height: 24),
-                        _infoRow('Solicitante', 'Juan Pérez'),
-                        const Divider(height: 24),
-                        _infoRow('Fecha Creación', '12 Oct 2023'),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(height: 24),
-                  const SectionTitle(title: 'Historial de Aprobaciones'),
-                  WhiteCard(
-                    child: Column(
-                      children: [
-                        _timelineItem(
-                          'Aprobación Vigilancia',
-                          '12 Oct 2023, 10:30 AM',
-                          true,
-                        ),
-                        const SizedBox(height: 16),
-                        _timelineItem(
-                          'Aprobación Administración',
-                          '12 Oct 2023, 02:15 PM',
-                          true,
-                          isLast: true,
-                        ),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(height: 24),
-                  const SectionTitle(title: 'Evidencia Adjunta'),
-                  Row(
-                    children: [
-                      Container(
-                        width: 80,
-                        height: 80,
-                        decoration: BoxDecoration(
-                          color: Colors.orange.shade100,
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        child: const Icon(
-                          Icons.description_outlined,
-                          color: Colors.white,
-                        ),
-                      ),
-                      const SizedBox(width: 12),
-                      Container(
-                        width: 80,
-                        height: 80,
-                        decoration: BoxDecoration(
-                          color: Colors.brown.shade100,
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        child: const Icon(
-                          Icons.description_outlined,
-                          color: Colors.white,
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 24),
-                  const SectionTitle(title: 'Gestión de Pago'),
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const Text(
-                        'Origen de Fondos',
-                        style: TextStyle(color: Colors.grey, fontSize: 13),
-                      ),
-                      const SizedBox(height: 12),
-                      Row(
-                        children: [
-                          Expanded(
-                            child: _sourceOption(
-                              'Caja Chica',
-                              Icons.money,
-                              true,
-                            ),
-                          ),
-                          const SizedBox(width: 12),
-                          Expanded(
-                            child: _sourceOption(
-                              'Caja Mayor',
-                              Icons.account_balance,
-                              false,
+                          SizedBox(width: 8),
+                          Text(
+                            'Aprobado por Administración y Vigilancia',
+                            style: TextStyle(
+                              color: Colors.green,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 12,
                             ),
                           ),
                         ],
                       ),
-                      const SizedBox(height: 20),
-                      const Text(
-                        'Nota de Pago (Opcional)',
-                        style: TextStyle(color: Colors.grey, fontSize: 13),
+                    ),
+                  ],
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.all(20.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const SectionTitle(title: 'Información General'),
+                    WhiteCard(
+                      child: Column(
+                        children: [
+                          _infoRow(
+                            'Descripción',
+                            'Compra de repuestos maquinaria',
+                          ),
+                          const Divider(height: 24),
+                          _infoRow('Solicitante', 'Juan Pérez'),
+                          const Divider(height: 24),
+                          _infoRow('Fecha Creación', '12 Oct 2023'),
+                        ],
                       ),
-                      const SizedBox(height: 8),
-                      TextField(
-                        decoration: InputDecoration(
-                          hintText:
-                              'Añadir observaciones sobre el desembolso...',
-                          hintStyle: const TextStyle(
-                            fontSize: 14,
-                            color: Colors.grey,
+                    ),
+                    const SizedBox(height: 24),
+                    const SectionTitle(title: 'Historial de Aprobaciones'),
+                    WhiteCard(
+                      child: Column(
+                        children: [
+                          _timelineItem(
+                            'Aprobación Vigilancia',
+                            '12 Oct 2023, 10:30 AM',
+                            true,
                           ),
-                          filled: true,
-                          fillColor: Colors.white,
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(12),
-                            borderSide: BorderSide(color: Colors.grey.shade200),
+                          const SizedBox(height: 16),
+                          _timelineItem(
+                            'Aprobación Administración',
+                            '12 Oct 2023, 02:15 PM',
+                            true,
+                            isLast: true,
                           ),
-                          enabledBorder: OutlineInputBorder(
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 24),
+                    const SectionTitle(title: 'Evidencia Adjunta'),
+                    Row(
+                      children: [
+                        Container(
+                          width: 80,
+                          height: 80,
+                          decoration: BoxDecoration(
+                            color: Colors.orange.shade100,
                             borderRadius: BorderRadius.circular(12),
-                            borderSide: BorderSide(color: Colors.grey.shade200),
+                          ),
+                          child: const Icon(
+                            Icons.description_outlined,
+                            color: Colors.white,
                           ),
                         ),
-                        maxLines: 3,
-                      ),
-                      const SizedBox(height: 20),
-                      const Text(
-                        'Comprobante de Pago',
-                        style: TextStyle(color: Colors.grey, fontSize: 13),
-                      ),
-                      const SizedBox(height: 8),
-                      _buildUploadArea(),
-                    ],
-                  ),
-                  const SizedBox(height: 100),
-                ],
+                        const SizedBox(width: 12),
+                        Container(
+                          width: 80,
+                          height: 80,
+                          decoration: BoxDecoration(
+                            color: Colors.brown.shade100,
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: const Icon(
+                            Icons.description_outlined,
+                            color: Colors.white,
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 24),
+                    const SectionTitle(title: 'Gestión de Pago'),
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Text(
+                          'Origen de Fondos',
+                          style: TextStyle(color: Colors.grey, fontSize: 13),
+                        ),
+                        const SizedBox(height: 12),
+                        Row(
+                          children: [
+                            Expanded(
+                              child: _sourceOption(
+                                'Caja Chica',
+                                Icons.money,
+                                true,
+                              ),
+                            ),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: _sourceOption(
+                                'Caja Mayor',
+                                Icons.account_balance,
+                                false,
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 20),
+                        const Text(
+                          'Nota de Pago (Opcional)',
+                          style: TextStyle(color: Colors.grey, fontSize: 13),
+                        ),
+                        const SizedBox(height: 8),
+                        TextField(
+                          decoration: InputDecoration(
+                            hintText:
+                                'Añadir observaciones sobre el desembolso...',
+                            hintStyle: const TextStyle(
+                              fontSize: 14,
+                              color: Colors.grey,
+                            ),
+                            filled: true,
+                            fillColor: Colors.white,
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12),
+                              borderSide: BorderSide(
+                                color: Colors.grey.shade200,
+                              ),
+                            ),
+                            enabledBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12),
+                              borderSide: BorderSide(
+                                color: Colors.grey.shade200,
+                              ),
+                            ),
+                          ),
+                          maxLines: 3,
+                        ),
+                        const SizedBox(height: 20),
+                        const Text(
+                          'Comprobante de Pago',
+                          style: TextStyle(color: Colors.grey, fontSize: 13),
+                        ),
+                        const SizedBox(height: 8),
+                        _buildUploadArea(),
+                      ],
+                    ),
+                    const SizedBox(height: 100),
+                  ],
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
+        bottomSheet: _buildBottomActions(),
       ),
-      bottomSheet: _buildBottomActions(),
     );
   }
 

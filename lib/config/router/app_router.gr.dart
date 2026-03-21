@@ -440,16 +440,38 @@ class TreasuryRoute extends _i20.PageRouteInfo<void> {
 
 /// generated route for
 /// [_i19.ViewRequestDetailsScreen]
-class ViewRequestDetailsRoute extends _i20.PageRouteInfo<void> {
-  const ViewRequestDetailsRoute({List<_i20.PageRouteInfo>? children})
-    : super(ViewRequestDetailsRoute.name, initialChildren: children);
+class ViewRequestDetailsRoute
+    extends _i20.PageRouteInfo<ViewRequestDetailsRouteArgs> {
+  ViewRequestDetailsRoute({
+    _i21.Key? key,
+    required String id,
+    List<_i20.PageRouteInfo>? children,
+  }) : super(
+         ViewRequestDetailsRoute.name,
+         args: ViewRequestDetailsRouteArgs(key: key, id: id),
+         initialChildren: children,
+       );
 
   static const String name = 'ViewRequestDetailsRoute';
 
   static _i20.PageInfo page = _i20.PageInfo(
     name,
     builder: (data) {
-      return const _i19.ViewRequestDetailsScreen();
+      final args = data.argsAs<ViewRequestDetailsRouteArgs>();
+      return _i19.ViewRequestDetailsScreen(key: args.key, id: args.id);
     },
   );
+}
+
+class ViewRequestDetailsRouteArgs {
+  const ViewRequestDetailsRouteArgs({this.key, required this.id});
+
+  final _i21.Key? key;
+
+  final String id;
+
+  @override
+  String toString() {
+    return 'ViewRequestDetailsRouteArgs{key: $key, id: $id}';
+  }
 }
