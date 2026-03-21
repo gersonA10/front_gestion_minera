@@ -1,6 +1,9 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
+import 'package:front_gestion_minera/config/router/app_router.dart';
+import 'package:front_gestion_minera/config/router/app_router.gr.dart';
 import 'package:front_gestion_minera/config/theme/extension_theme.dart';
+import 'package:front_gestion_minera/injector_container.dart';
 import 'package:front_gestion_minera/modules/treasury/presentation/widgets/financialManagment/cards_primary_and_secondary_widget.dart';
 import 'package:front_gestion_minera/modules/treasury/presentation/widgets/financialManagment/request_title_widget.dart';
 import 'package:front_gestion_minera/utils/text_util.dart';
@@ -215,11 +218,18 @@ class HomeBody extends StatelessWidget {
               physics: const NeverScrollableScrollPhysics(),
               itemCount: 4,
               itemBuilder: (context, index) {
-                return RequestTile(
-                  title: 'Mant. Maquinaria Pesada',
-                  subtitle: 'Prov: Caterpillar Inc. • Hace 2h',
-                  amount: '-\$4,500.00',
-                  icon: Icons.handyman,
+                return GestureDetector(
+                  onTap: () {
+                    InjectorContainer.getIt<AppRouter>().push(
+                      ViewRequestDetailsRoute(),
+                    );
+                  },
+                  child: RequestTile(
+                    title: 'Mant. Maquinaria Pesada',
+                    subtitle: 'Prov: Caterpillar Inc. • Hace 2h',
+                    amount: '-\$4,500.00',
+                    icon: Icons.handyman,
+                  ),
                 );
               },
             ),

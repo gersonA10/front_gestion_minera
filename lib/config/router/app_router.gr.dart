@@ -9,8 +9,8 @@
 // coverage:ignore-file
 
 // ignore_for_file: no_leading_underscores_for_library_prefixes
-import 'package:auto_route/auto_route.dart' as _i18;
-import 'package:flutter/material.dart' as _i19;
+import 'package:auto_route/auto_route.dart' as _i19;
+import 'package:flutter/material.dart' as _i20;
 import 'package:front_gestion_minera/modules/auth/presentation/screen/auth_screens.dart'
     as _i2;
 import 'package:front_gestion_minera/modules/partners/presentation/screens/contribute_history_screen.dart'
@@ -45,13 +45,15 @@ import 'package:front_gestion_minera/modules/treasury/presentation/screens/loans
     as _i13;
 import 'package:front_gestion_minera/modules/treasury/presentation/screens/treasury_screen.dart'
     as _i17;
+import 'package:front_gestion_minera/modules/treasury/presentation/screens/view_request_details/view_request_detail_screen.dart'
+    as _i18;
 
 /// generated route for
 /// [_i1.ApplicationDetailsScreen]
 class ApplicationDetailsRoute
-    extends _i18.PageRouteInfo<ApplicationDetailsRouteArgs> {
+    extends _i19.PageRouteInfo<ApplicationDetailsRouteArgs> {
   ApplicationDetailsRoute({
-    _i19.Key? key,
+    _i20.Key? key,
     required String requestId,
     required DateTime createdAt,
     required String name,
@@ -61,7 +63,7 @@ class ApplicationDetailsRoute
     required String evidencia,
     required String status,
     String? motivoRechazo,
-    List<_i18.PageRouteInfo>? children,
+    List<_i19.PageRouteInfo>? children,
   }) : super(
          ApplicationDetailsRoute.name,
          args: ApplicationDetailsRouteArgs(
@@ -81,7 +83,7 @@ class ApplicationDetailsRoute
 
   static const String name = 'ApplicationDetailsRoute';
 
-  static _i18.PageInfo page = _i18.PageInfo(
+  static _i19.PageInfo page = _i19.PageInfo(
     name,
     builder: (data) {
       final args = data.argsAs<ApplicationDetailsRouteArgs>();
@@ -115,7 +117,7 @@ class ApplicationDetailsRouteArgs {
     this.motivoRechazo,
   });
 
-  final _i19.Key? key;
+  final _i20.Key? key;
 
   final String requestId;
 
@@ -143,13 +145,13 @@ class ApplicationDetailsRouteArgs {
 
 /// generated route for
 /// [_i2.AuthScreen]
-class AuthRoute extends _i18.PageRouteInfo<void> {
-  const AuthRoute({List<_i18.PageRouteInfo>? children})
+class AuthRoute extends _i19.PageRouteInfo<void> {
+  const AuthRoute({List<_i19.PageRouteInfo>? children})
     : super(AuthRoute.name, initialChildren: children);
 
   static const String name = 'AuthRoute';
 
-  static _i18.PageInfo page = _i18.PageInfo(
+  static _i19.PageInfo page = _i19.PageInfo(
     name,
     builder: (data) {
       return const _i2.AuthScreen();
@@ -159,13 +161,13 @@ class AuthRoute extends _i18.PageRouteInfo<void> {
 
 /// generated route for
 /// [_i3.ContributeHistoryScreen]
-class ContributeHistoryRoute extends _i18.PageRouteInfo<void> {
-  const ContributeHistoryRoute({List<_i18.PageRouteInfo>? children})
+class ContributeHistoryRoute extends _i19.PageRouteInfo<void> {
+  const ContributeHistoryRoute({List<_i19.PageRouteInfo>? children})
     : super(ContributeHistoryRoute.name, initialChildren: children);
 
   static const String name = 'ContributeHistoryRoute';
 
-  static _i18.PageInfo page = _i18.PageInfo(
+  static _i19.PageInfo page = _i19.PageInfo(
     name,
     builder: (data) {
       return const _i3.ContributeHistoryScreen();
@@ -175,13 +177,13 @@ class ContributeHistoryRoute extends _i18.PageRouteInfo<void> {
 
 /// generated route for
 /// [_i4.ContributesHomeScreen]
-class ContributesHomeRoute extends _i18.PageRouteInfo<void> {
-  const ContributesHomeRoute({List<_i18.PageRouteInfo>? children})
+class ContributesHomeRoute extends _i19.PageRouteInfo<void> {
+  const ContributesHomeRoute({List<_i19.PageRouteInfo>? children})
     : super(ContributesHomeRoute.name, initialChildren: children);
 
   static const String name = 'ContributesHomeRoute';
 
-  static _i18.PageInfo page = _i18.PageInfo(
+  static _i19.PageInfo page = _i19.PageInfo(
     name,
     builder: (data) {
       return const _i4.ContributesHomeScreen();
@@ -191,13 +193,13 @@ class ContributesHomeRoute extends _i18.PageRouteInfo<void> {
 
 /// generated route for
 /// [_i5.DistributeHomeScreen]
-class DistributeHomeRoute extends _i18.PageRouteInfo<void> {
-  const DistributeHomeRoute({List<_i18.PageRouteInfo>? children})
+class DistributeHomeRoute extends _i19.PageRouteInfo<void> {
+  const DistributeHomeRoute({List<_i19.PageRouteInfo>? children})
     : super(DistributeHomeRoute.name, initialChildren: children);
 
   static const String name = 'DistributeHomeRoute';
 
-  static _i18.PageInfo page = _i18.PageInfo(
+  static _i19.PageInfo page = _i19.PageInfo(
     name,
     builder: (data) {
       return const _i5.DistributeHomeScreen();
@@ -207,13 +209,13 @@ class DistributeHomeRoute extends _i18.PageRouteInfo<void> {
 
 /// generated route for
 /// [_i6.DistributesScreen]
-class DistributesRoute extends _i18.PageRouteInfo<void> {
-  const DistributesRoute({List<_i18.PageRouteInfo>? children})
+class DistributesRoute extends _i19.PageRouteInfo<void> {
+  const DistributesRoute({List<_i19.PageRouteInfo>? children})
     : super(DistributesRoute.name, initialChildren: children);
 
   static const String name = 'DistributesRoute';
 
-  static _i18.PageInfo page = _i18.PageInfo(
+  static _i19.PageInfo page = _i19.PageInfo(
     name,
     builder: (data) {
       return const _i6.DistributesScreen();
@@ -223,13 +225,13 @@ class DistributesRoute extends _i18.PageRouteInfo<void> {
 
 /// generated route for
 /// [_i7.GoldDashboardScreen]
-class GoldDashboardRoute extends _i18.PageRouteInfo<void> {
-  const GoldDashboardRoute({List<_i18.PageRouteInfo>? children})
+class GoldDashboardRoute extends _i19.PageRouteInfo<void> {
+  const GoldDashboardRoute({List<_i19.PageRouteInfo>? children})
     : super(GoldDashboardRoute.name, initialChildren: children);
 
   static const String name = 'GoldDashboardRoute';
 
-  static _i18.PageInfo page = _i18.PageInfo(
+  static _i19.PageInfo page = _i19.PageInfo(
     name,
     builder: (data) {
       return const _i7.GoldDashboardScreen();
@@ -239,13 +241,13 @@ class GoldDashboardRoute extends _i18.PageRouteInfo<void> {
 
 /// generated route for
 /// [_i8.HistoryRequestsScreen]
-class HistoryRequestsRoute extends _i18.PageRouteInfo<void> {
-  const HistoryRequestsRoute({List<_i18.PageRouteInfo>? children})
+class HistoryRequestsRoute extends _i19.PageRouteInfo<void> {
+  const HistoryRequestsRoute({List<_i19.PageRouteInfo>? children})
     : super(HistoryRequestsRoute.name, initialChildren: children);
 
   static const String name = 'HistoryRequestsRoute';
 
-  static _i18.PageInfo page = _i18.PageInfo(
+  static _i19.PageInfo page = _i19.PageInfo(
     name,
     builder: (data) {
       return const _i8.HistoryRequestsScreen();
@@ -255,13 +257,13 @@ class HistoryRequestsRoute extends _i18.PageRouteInfo<void> {
 
 /// generated route for
 /// [_i9.HomeDashboardScreen]
-class HomeDashboardRoute extends _i18.PageRouteInfo<void> {
-  const HomeDashboardRoute({List<_i18.PageRouteInfo>? children})
+class HomeDashboardRoute extends _i19.PageRouteInfo<void> {
+  const HomeDashboardRoute({List<_i19.PageRouteInfo>? children})
     : super(HomeDashboardRoute.name, initialChildren: children);
 
   static const String name = 'HomeDashboardRoute';
 
-  static _i18.PageInfo page = _i18.PageInfo(
+  static _i19.PageInfo page = _i19.PageInfo(
     name,
     builder: (data) {
       return const _i9.HomeDashboardScreen();
@@ -271,13 +273,13 @@ class HomeDashboardRoute extends _i18.PageRouteInfo<void> {
 
 /// generated route for
 /// [_i10.HomeSurveillanceScreen]
-class HomeSurveillanceRoute extends _i18.PageRouteInfo<void> {
-  const HomeSurveillanceRoute({List<_i18.PageRouteInfo>? children})
+class HomeSurveillanceRoute extends _i19.PageRouteInfo<void> {
+  const HomeSurveillanceRoute({List<_i19.PageRouteInfo>? children})
     : super(HomeSurveillanceRoute.name, initialChildren: children);
 
   static const String name = 'HomeSurveillanceRoute';
 
-  static _i18.PageInfo page = _i18.PageInfo(
+  static _i19.PageInfo page = _i19.PageInfo(
     name,
     builder: (data) {
       return const _i10.HomeSurveillanceScreen();
@@ -287,13 +289,13 @@ class HomeSurveillanceRoute extends _i18.PageRouteInfo<void> {
 
 /// generated route for
 /// [_i11.LoanHistoryScreen]
-class LoanHistoryRoute extends _i18.PageRouteInfo<void> {
-  const LoanHistoryRoute({List<_i18.PageRouteInfo>? children})
+class LoanHistoryRoute extends _i19.PageRouteInfo<void> {
+  const LoanHistoryRoute({List<_i19.PageRouteInfo>? children})
     : super(LoanHistoryRoute.name, initialChildren: children);
 
   static const String name = 'LoanHistoryRoute';
 
-  static _i18.PageInfo page = _i18.PageInfo(
+  static _i19.PageInfo page = _i19.PageInfo(
     name,
     builder: (data) {
       return const _i11.LoanHistoryScreen();
@@ -303,13 +305,13 @@ class LoanHistoryRoute extends _i18.PageRouteInfo<void> {
 
 /// generated route for
 /// [_i12.LoanScreen]
-class LoanRoute extends _i18.PageRouteInfo<void> {
-  const LoanRoute({List<_i18.PageRouteInfo>? children})
+class LoanRoute extends _i19.PageRouteInfo<void> {
+  const LoanRoute({List<_i19.PageRouteInfo>? children})
     : super(LoanRoute.name, initialChildren: children);
 
   static const String name = 'LoanRoute';
 
-  static _i18.PageInfo page = _i18.PageInfo(
+  static _i19.PageInfo page = _i19.PageInfo(
     name,
     builder: (data) {
       return const _i12.LoanScreen();
@@ -319,13 +321,13 @@ class LoanRoute extends _i18.PageRouteInfo<void> {
 
 /// generated route for
 /// [_i13.LoansHomeScreen]
-class LoansHomeRoute extends _i18.PageRouteInfo<void> {
-  const LoansHomeRoute({List<_i18.PageRouteInfo>? children})
+class LoansHomeRoute extends _i19.PageRouteInfo<void> {
+  const LoansHomeRoute({List<_i19.PageRouteInfo>? children})
     : super(LoansHomeRoute.name, initialChildren: children);
 
   static const String name = 'LoansHomeRoute';
 
-  static _i18.PageInfo page = _i18.PageInfo(
+  static _i19.PageInfo page = _i19.PageInfo(
     name,
     builder: (data) {
       return const _i13.LoansHomeScreen();
@@ -335,13 +337,13 @@ class LoansHomeRoute extends _i18.PageRouteInfo<void> {
 
 /// generated route for
 /// [_i14.MoneyRequestScreen]
-class MoneyRequestRoute extends _i18.PageRouteInfo<void> {
-  const MoneyRequestRoute({List<_i18.PageRouteInfo>? children})
+class MoneyRequestRoute extends _i19.PageRouteInfo<void> {
+  const MoneyRequestRoute({List<_i19.PageRouteInfo>? children})
     : super(MoneyRequestRoute.name, initialChildren: children);
 
   static const String name = 'MoneyRequestRoute';
 
-  static _i18.PageInfo page = _i18.PageInfo(
+  static _i19.PageInfo page = _i19.PageInfo(
     name,
     builder: (data) {
       return const _i14.MoneyRequestScreen();
@@ -351,11 +353,11 @@ class MoneyRequestRoute extends _i18.PageRouteInfo<void> {
 
 /// generated route for
 /// [_i15.PartnersScreen]
-class PartnersRoute extends _i18.PageRouteInfo<PartnersRouteArgs> {
+class PartnersRoute extends _i19.PageRouteInfo<PartnersRouteArgs> {
   PartnersRoute({
-    _i19.Key? key,
+    _i20.Key? key,
     required String nombre,
-    List<_i18.PageRouteInfo>? children,
+    List<_i19.PageRouteInfo>? children,
   }) : super(
          PartnersRoute.name,
          args: PartnersRouteArgs(key: key, nombre: nombre),
@@ -364,7 +366,7 @@ class PartnersRoute extends _i18.PageRouteInfo<PartnersRouteArgs> {
 
   static const String name = 'PartnersRoute';
 
-  static _i18.PageInfo page = _i18.PageInfo(
+  static _i19.PageInfo page = _i19.PageInfo(
     name,
     builder: (data) {
       final args = data.argsAs<PartnersRouteArgs>();
@@ -376,7 +378,7 @@ class PartnersRoute extends _i18.PageRouteInfo<PartnersRouteArgs> {
 class PartnersRouteArgs {
   const PartnersRouteArgs({this.key, required this.nombre});
 
-  final _i19.Key? key;
+  final _i20.Key? key;
 
   final String nombre;
 
@@ -388,13 +390,13 @@ class PartnersRouteArgs {
 
 /// generated route for
 /// [_i16.RequestHistoryScreen]
-class RequestHistoryRoute extends _i18.PageRouteInfo<void> {
-  const RequestHistoryRoute({List<_i18.PageRouteInfo>? children})
+class RequestHistoryRoute extends _i19.PageRouteInfo<void> {
+  const RequestHistoryRoute({List<_i19.PageRouteInfo>? children})
     : super(RequestHistoryRoute.name, initialChildren: children);
 
   static const String name = 'RequestHistoryRoute';
 
-  static _i18.PageInfo page = _i18.PageInfo(
+  static _i19.PageInfo page = _i19.PageInfo(
     name,
     builder: (data) {
       return const _i16.RequestHistoryScreen();
@@ -404,16 +406,32 @@ class RequestHistoryRoute extends _i18.PageRouteInfo<void> {
 
 /// generated route for
 /// [_i17.TreasuryScreen]
-class TreasuryRoute extends _i18.PageRouteInfo<void> {
-  const TreasuryRoute({List<_i18.PageRouteInfo>? children})
+class TreasuryRoute extends _i19.PageRouteInfo<void> {
+  const TreasuryRoute({List<_i19.PageRouteInfo>? children})
     : super(TreasuryRoute.name, initialChildren: children);
 
   static const String name = 'TreasuryRoute';
 
-  static _i18.PageInfo page = _i18.PageInfo(
+  static _i19.PageInfo page = _i19.PageInfo(
     name,
     builder: (data) {
       return const _i17.TreasuryScreen();
+    },
+  );
+}
+
+/// generated route for
+/// [_i18.ViewRequestDetailsScreen]
+class ViewRequestDetailsRoute extends _i19.PageRouteInfo<void> {
+  const ViewRequestDetailsRoute({List<_i19.PageRouteInfo>? children})
+    : super(ViewRequestDetailsRoute.name, initialChildren: children);
+
+  static const String name = 'ViewRequestDetailsRoute';
+
+  static _i19.PageInfo page = _i19.PageInfo(
+    name,
+    builder: (data) {
+      return const _i18.ViewRequestDetailsScreen();
     },
   );
 }
