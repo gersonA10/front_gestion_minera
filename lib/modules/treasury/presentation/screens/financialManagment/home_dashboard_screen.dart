@@ -254,8 +254,8 @@ class HomeBody extends StatelessWidget {
                         itemBuilder: (context, index) {
                           final data = state.pendingApplicationsResponseEntity.data[index];
                           return RequestTile(
-                            title: 'data.motivo,Aliquip eu anim do anim aliqua reprehenderit irure Lorem mollit laborum sint enim quis. Non labore do nisi cillum cupidatat fugiat veniam ad adipisicing proident laborum occaecat ex officia. Id pariatur voluptate Lorem enim nisi qui nulla incididunt. Amet esse commodo aliquip fugiat ad quis reprehenderit qui Lorem fugiat irure non. Ullamco cillum proident elit esse do consectetur esse nisi sint culpa culpa.',
-                            subtitle: 'Solocitante: ${data.solicitante}',
+                            title: data.motivo,
+                            subtitle: 'Solocitante:${data.solicitante}',
                             amount: data.monto.toString(),
                             icon: Icons.handyman,
                           );

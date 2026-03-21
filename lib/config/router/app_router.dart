@@ -27,6 +27,8 @@ class AppRouter extends RootStackRouter {
     AutoRoute(page: GoldDashboardRoute.page),
     AutoRoute(page: LoansHomeRoute.page),
     AutoRoute(page: DistributeHomeRoute.page),
-    AutoRoute(page: ContributesHomeRoute.page)
+    AutoRoute(page: ContributesHomeRoute.page),
+    AutoRoute(page: ViewRequestDetailsRoute.page),
+    AutoRoute(page: PendingApplicationsRoute.page),
   ];
 }
