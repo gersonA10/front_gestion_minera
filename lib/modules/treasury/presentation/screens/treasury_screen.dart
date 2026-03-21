@@ -1,6 +1,8 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:front_gestion_minera/config/router/app_router.dart';
+import 'package:front_gestion_minera/config/router/app_router.gr.dart';
 import 'package:front_gestion_minera/config/theme/extension_theme.dart';
 import 'package:front_gestion_minera/injector_container.dart';
 import 'package:front_gestion_minera/utils/session/session_actions.dart';
@@ -169,7 +171,11 @@ class _TreasuryScreenState extends State<TreasuryScreen> {
                           icon: Icons.account_balance_wallet_outlined,
                           iconColor: const Color(0xFF2563FF),
                           bgColor: const Color(0xFFEAF1FF),
-                          onTap: () {},
+                          onTap: () {
+                            InjectorContainer.getIt<AppRouter>().push(
+                              HomeDashboardRoute(),
+                            );
+                          },
                         ),
                         _buildModuleCard(
                           context,
@@ -261,8 +267,6 @@ class _TreasuryScreenState extends State<TreasuryScreen> {
     );
   }
 
-
-
   Widget _buildModuleCard(
     BuildContext context, {
     required String title,
@@ -331,6 +335,4 @@ class _TreasuryScreenState extends State<TreasuryScreen> {
       ),
     );
   }
-
-
 }
