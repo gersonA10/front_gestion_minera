@@ -96,7 +96,7 @@ class _RequestHistoryScreenState extends State<RequestHistoryScreen>
               centerTitle: true,
               leading: IconButton(
                 icon: Icon(Icons.arrow_back_ios_new, color: colors.blue),
-                onPressed: () => context.router.back(),
+                onPressed: () => context.router.back()
               ),
               title: Text(
                 'Historial de solicitudes',

@@ -70,7 +70,7 @@ class _MoneyRequestScreenState extends State<MoneyRequestScreen> {
                 leading: const Icon(Icons.camera_alt),
                 title: const Text('Tomar foto'),
                 onTap: () {
-                  Navigator.pop(context);
+                  context.router.back();
                   _pickImage(ImageSource.camera);
                 },
               ),
@@ -78,7 +78,7 @@ class _MoneyRequestScreenState extends State<MoneyRequestScreen> {
                 leading: const Icon(Icons.photo_library),
                 title: const Text('Elegir de galería'),
                 onTap: () {
-                  Navigator.pop(context);
+                  context.router.back();
                   _pickImage(ImageSource.gallery);
                 },
               ),

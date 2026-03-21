@@ -156,7 +156,7 @@ class _ApplicationDetailsScreenState extends State<ApplicationDetailsScreen> {
             );
           }
           if (state is ApproveTheRequestSuccess) {
-            Navigator.pop(context); 
+            context.router.back(); 
             context.router.maybePop(true); 
             CustomAlert.show(
               context,
@@ -166,7 +166,7 @@ class _ApplicationDetailsScreenState extends State<ApplicationDetailsScreen> {
             );
           }
           if (state is ApproveTheRequestError) {
-            Navigator.pop(context);
+            context.router.back();
             CustomAlert.show(
               context,
               title: 'Error',
@@ -175,6 +175,7 @@ class _ApplicationDetailsScreenState extends State<ApplicationDetailsScreen> {
             );
           }
         },
+        
         child: Scaffold(
           backgroundColor: background,
           appBar: AppBar(
@@ -187,7 +188,7 @@ class _ApplicationDetailsScreenState extends State<ApplicationDetailsScreen> {
                 color: colors.white,
                 size: smallSpacing * 1,
               ),
-              onPressed: () => Navigator.pop(context),
+              onPressed: () => context.router.back()
             ),
             title: Text(
               "Detalle de Solicitud",
@@ -285,7 +286,7 @@ class _ApplicationDetailsScreenState extends State<ApplicationDetailsScreen> {
                             builder: (context) => Dialog(
                               backgroundColor: Colors.transparent,
                               child: GestureDetector(
-                                onTap: () => Navigator.pop(context),
+                                onTap: () => context.router.back(),
                                 child: Image.network(widget.evidencia, fit: BoxFit.contain),
                               ),
                             ),
@@ -328,7 +329,7 @@ class _ApplicationDetailsScreenState extends State<ApplicationDetailsScreen> {
                                   isDanger: false,
                                   content: const Text("La solicitud será aprobada y pasará al siguiente proceso."),
                                   onPressed: () {
-                                    Navigator.pop(context);
+                                    context.router.back();
                                     _bloc.add(
                                       ApproveTheRequestEvent(
                                         action: 'aprobado',
@@ -397,7 +398,7 @@ class _ApplicationDetailsScreenState extends State<ApplicationDetailsScreen> {
                                             );
                                             return;
                                           }
-                                          Navigator.pop(context);
+                                          context.router.back();
                                           _bloc.add(
                                             ApproveTheRequestEvent(
                                               action: 'rechazado',
@@ -425,7 +426,7 @@ class _ApplicationDetailsScreenState extends State<ApplicationDetailsScreen> {
                             child: SizedBox(
                               height: 40,
                               child: TextButton(
-                                onPressed: () => Navigator.pop(context),
+                                onPressed: () => context.router.back(),
                                 style: OutlinedButton.styleFrom(
                                   foregroundColor: colors.lead,
                                   side: BorderSide(color: colors.lead),

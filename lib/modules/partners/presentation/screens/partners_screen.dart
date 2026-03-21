@@ -7,6 +7,7 @@ import 'package:front_gestion_minera/injector_container.dart';
 import 'package:front_gestion_minera/modules/partners/presentation/widgets/custom_card_widget.dart';
 import 'package:front_gestion_minera/utils/assets.dart';
 import 'package:front_gestion_minera/utils/greeting_util.dart';
+import 'package:front_gestion_minera/utils/session/session_actions.dart';
 import 'package:front_gestion_minera/utils/session/user_session.dart';
 import 'package:front_gestion_minera/utils/text_util.dart';
 
@@ -62,6 +63,39 @@ class PartnersScreen extends StatelessWidget {
                         ),
                       ],
                     ),
+                    Spacer(),
+                      SizedBox(
+                          height: 52,
+                          child: OutlinedButton.icon(
+                            onPressed: () {
+                              SessionActions.logout();
+                            },
+                            icon: const Icon(
+                              Icons.logout,
+                              color: Color(0xFFFF4D4F),
+                              size: 18,
+                            ),
+                            label: const Text(
+                              'Cerrar Sesión',
+                              style: TextStyle(
+                                color: Color(0xFFFF4D4F),
+                                fontWeight: FontWeight.w700,
+                                fontSize: 12,
+                              ),
+                            ),
+                            style: OutlinedButton.styleFrom(
+                              backgroundColor: Colors.transparent,
+                              side: const BorderSide(
+                                color: Color(0xFFFFC9C9),
+                                width: 1.2,
+                              ),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(14),
+                              ),
+                              elevation: 0,
+                            ),
+                          ),
+                        ),
                   ],
                 ),
                 SizedBox(height: smallSpacing * 0.8),

@@ -227,8 +227,7 @@ class SurveillanceHistoryCard extends StatelessWidget {
                       onTap: () {
                         context.router.push(
                           ApplicationDetailsRoute(
-                            requestId: item
-                                .requestId, // De tu SurveillanceHistoryDataEntity
+                            requestId: item  .requestId, // De tu SurveillanceHistoryDataEntity
                             createdAt: item.createdAt,
                             name: item.name,
                             rol: item.rol,
@@ -239,9 +238,6 @@ class SurveillanceHistoryCard extends StatelessWidget {
                             motivoRechazo: item.motivoRechazo,
                           ),
                         );
-                        /* InjectorContainer.getIt<AppRouter>().push(
-                          ApplicationDetailsRoute(item: item),
-                        );*/
                       },
                       child: Row(
                         mainAxisSize: MainAxisSize.min,
