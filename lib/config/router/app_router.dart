@@ -12,7 +12,6 @@ class AppRouter extends RootStackRouter {
   List<AutoRoute> get routes => [
     AutoRoute(page: AuthRoute.page, initial: true, guards: [authGuard]),
     AutoRoute(page: PartnersRoute.page),
-    AutoRoute(page: TreasuryRoute.page),
     AutoRoute(page: ContributeHistoryRoute.page),
     AutoRoute(page: LoanHistoryRoute.page),
     AutoRoute(page: DistributesRoute.page),

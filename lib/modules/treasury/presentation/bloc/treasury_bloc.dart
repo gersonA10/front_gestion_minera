@@ -47,21 +47,6 @@ class TreasuryBloc extends Bloc<TreasuryEvent, TreasuryState> {
     }
   }
 
-  // Future<void> _getPendingApplications(
-  //   PendingApplicationsEvent event,
-  //   Emitter<TreasuryState> emit,
-  // ) async {
-  //   emit(PendingApplicationsLoading());
-  //   try {
-  //     final response = await repository.getPendingApplications();
-  //     emit(PendingApplicationsSuccess(pendingApplications: response));
-  //   } on BaseApiException catch (error) {
-  //     emit(PendingApplicationsError(mapErrorMessage(error.key)));
-  //   } catch (e) {
-  //     emit(PendingApplicationsError('Error inesperado: $e'));
-  //   }
-  // }
-
   Future<void> _getDetailsofanapplication(
     DetailsofanapplicationEvent event,
     Emitter<TreasuryState> emit,

@@ -1,3 +1,4 @@
+import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:front_gestion_minera/config/theme/extension_theme.dart';
 import 'package:front_gestion_minera/core/widgets/custom_alert_widget.dart';
@@ -121,7 +122,7 @@ class SuccessReceiptDialog extends StatelessWidget {
             SizedBox(
               width: double.infinity,
               child: TextButton(
-                onPressed: () => Navigator.pop(context),
+                onPressed: () => context.router.back(),
                 child: Text(
                   'Cerrar',
                   style: AppTextStyles.mainStyle14Bold(
