@@ -1,7 +1,7 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:front_gestion_minera/utils/error.dart';
 import '../../../../core/networking/base_api_exception.dart';
-import '../../domain/entity/treasury_metrics_entity.dart';
+import '../../domain/entity/entity.dart';
 import '../../domain/repositories/treasury_repository.dart';
 
 part 'treasury_event.dart';
@@ -12,6 +12,8 @@ class TreasuryBloc extends Bloc<TreasuryEvent, TreasuryState> {
 
   TreasuryBloc({required this.repository}) : super(TreasuryInitial()) {
     on<FetchTreasuryMetricsEvent>(_onFetchTreasuryMetrics);
+    on<DashboardDataEvent>(_dashboardData);
+    on<DetailsofanapplicationEvent>(_getDetailsofanapplication);
   }
 
   Future<void> _onFetchTreasuryMetrics(
@@ -23,9 +25,55 @@ class TreasuryBloc extends Bloc<TreasuryEvent, TreasuryState> {
       final metrics = await repository.getMetrics();
       emit(TreasuryMetricsLoaded(metrics: metrics));
     } on BaseApiException catch (error) {
-      emit(TreasuryMetricsError(mapErrorMessage(error.key))); 
+      emit(TreasuryMetricsError(mapErrorMessage(error.key)));
     } catch (e) {
       emit(TreasuryMetricsError('Error inesperado: $e'));
+    }
+  }
+
+  Future<void> _dashboardData(
+    DashboardDataEvent event,
+    Emitter<TreasuryState> emit,
+  ) async {
+    emit(DashboardDataLoading());
+    try {
+      final responseBalance = await repository.getBondBalence();
+      final responsePending = await repository.getPendingApplications();
+      emit(DashboardDataLoaded(bondBalance: responseBalance, pendingApplicationsResponseEntity: responsePending));
+    } on BaseApiException catch (error) {
+      emit(DashboardDataError(message: mapErrorMessage(error.key)));
+    } catch (e) {
+      emit(DashboardDataError(message:'Error inesperado: $e'));
+    }
+  }
+
+  // Future<void> _getPendingApplications(
+  //   PendingApplicationsEvent event,
+  //   Emitter<TreasuryState> emit,
+  // ) async {
+  //   emit(PendingApplicationsLoading());
+  //   try {
+  //     final response = await repository.getPendingApplications();
+  //     emit(PendingApplicationsSuccess(pendingApplications: response));
+  //   } on BaseApiException catch (error) {
+  //     emit(PendingApplicationsError(mapErrorMessage(error.key)));
+  //   } catch (e) {
+  //     emit(PendingApplicationsError('Error inesperado: $e'));
+  //   }
+  // }
+
+  Future<void> _getDetailsofanapplication(
+    DetailsofanapplicationEvent event,
+    Emitter<TreasuryState> emit,
+  ) async {
+    emit(DetailsofanapplicationLoading());
+    try {
+      final response = await repository.getDetailsofanapplication(event.id);
+      emit(DetailsofanapplicationSuccess(data: response.data));
+    } on BaseApiException catch (error) {
+      emit(DetailsofanapplicationError(mapErrorMessage(error.key)));
+    } catch (e) {
+      emit(DetailsofanapplicationError('Error inesperado: $e'));
     }
   }
 }
