@@ -231,7 +231,7 @@ class HomeBody extends StatelessWidget {
                 return GestureDetector(
                   onTap: () {
                     InjectorContainer.getIt<AppRouter>().push(
-                      PendingApplicationsRoute(),
+                      ViewRequestDetailsRoute(),
                     );
                   },
                   child: RequestTile(
