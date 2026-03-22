@@ -1,6 +1,7 @@
 import '../../domain/entity/entity.dart';
 import '../../domain/repositories/repository.dart';
 import '../datasource/datasource.dart';
+import '../models/model.dart';
 
 class TreasuryRepositoryImpl implements TreasuryRepository {
   final TreasuryDatasource datasource;
@@ -32,5 +33,17 @@ class TreasuryRepositoryImpl implements TreasuryRepository {
   @override
   Future<CashResponseEntity> getCash()async {
     return await datasource.getCash();
+  }
+  
+  @override
+  Future<ListOfPendingRequestsResponseEntity> listOfPendingRequests({int page = 1, int limit = 10}) async {
+    final result = await datasource.listOfPendingRequests(page: page, limit: limit);
+    final models = result['items'] as List<ListOfPendingRequestsResponseModel>;
+    return ListOfPendingRequestsResponseEntity(
+      items: models.map((model) => model.toEntity()).toList(),
+      hasMoreData: result['has_more_data'] as bool,
+      totalRecords: result['total_records'] as int? ?? 0,
+    );
+    
   }
 }

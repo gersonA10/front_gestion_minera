@@ -14,3 +14,13 @@ class DetailsofanapplicationEvent extends TreasuryEvent {
   final String id;
   DetailsofanapplicationEvent({required this.id});
 }
+
+//
+class ListOfPendingRequestsEvent extends TreasuryEvent {
+  final bool isRefresh;
+  ListOfPendingRequestsEvent({this.isRefresh = true});
+}
+class LoadMorePendingEvent extends TreasuryEvent {
+  final bool isRefresh;
+  LoadMorePendingEvent({this.isRefresh = true});
+}

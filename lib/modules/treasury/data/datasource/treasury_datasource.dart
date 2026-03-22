@@ -1,3 +1,4 @@
+
 import '../../../../core/networking/http_services.dart';
 import '../../domain/entity/entity.dart';
 import '../models/model.dart';
@@ -48,5 +49,29 @@ class TreasuryDatasource {
       operationName: 'getCash',
     );
     return CashResponseModel.fromJson(response);
+  }
+
+
+  Future<Map<String, dynamic>> listOfPendingRequests({
+    int page = 1,
+    int limit = 10,
+  }) async {
+    final Map<String, dynamic> queryParameters = {'page': page, 'limit': limit};
+
+    final response = await apiClient.get(
+      '/api/treasury/requests/pending',
+      operationName: 'listOfPendingRequests',
+      queryParameters: queryParameters,
+    );
+    final List<dynamic> data = response['data'] ?? [];
+    final Map<String, dynamic> meta = response['meta'] ?? {};
+    return {
+      'items': data
+          .map((item) => ListOfPendingRequestsResponseModel.fromJson(item))
+          .toList(),
+      'has_more_data': meta['has_more_data'] ?? false,
+
+      'total_records': meta['total_records'] ?? 0,
+    };
   }
 }

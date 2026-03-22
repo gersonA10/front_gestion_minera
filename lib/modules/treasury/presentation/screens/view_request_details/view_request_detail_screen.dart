@@ -6,18 +6,15 @@ import 'package:front_gestion_minera/config/theme/extension_theme.dart';
 import 'package:front_gestion_minera/core/widgets/custom_alert_widget.dart';
 import 'package:front_gestion_minera/injector_container.dart';
 import 'package:image_picker/image_picker.dart';
-import '../../../domain/entity/entity.dart';
 import '../../bloc/treasury_bloc.dart';
 import '../../widgets/widgtes.dart';
 
 @RoutePage()
 class ViewRequestDetailsScreen extends StatefulWidget {
   final String id;
-  final BondBalanceResponseEntity data;
   const ViewRequestDetailsScreen({
     super.key,
     required this.id,
-    required this.data,
   });
 
   @override

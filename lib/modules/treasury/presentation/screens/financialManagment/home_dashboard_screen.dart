@@ -63,10 +63,10 @@ class _HomeDashboardScreenState extends State<HomeDashboardScreen> {
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(30),
                 ),
-                icon: Icon(Icons.receipt_long, color: colors.white),
+                icon: Icon(Icons.receipt_long, color: colors.white, size: 18,),
                 label: Text(
                   'Transacción Urgente',
-                  style: AppTextStyles.mainStyleWhite14Bold(context),
+                  style: AppTextStyles.mainStyleWhite10Bold(context),
                 ),
               )
             : null,
@@ -240,13 +240,15 @@ class HomeBody extends StatelessWidget {
                           Text(
                             'Solicitudes Pendientes',
                             style: const TextStyle(
-                              fontSize: 16,
+                              fontSize: 14,
                               fontWeight: FontWeight.bold,
                               color: Color(0xFF1C1C1E),
                             ),
                           ),
                           TextButton(
-                            onPressed: () {},
+                            onPressed: () {
+                              InjectorContainer.getIt<AppRouter>().push(PendingApplicationsRoute());
+                            },
                             style: TextButton.styleFrom(
                               foregroundColor: const Color(0xFF295AF5),
                               padding: EdgeInsets.zero,
@@ -269,7 +271,7 @@ class HomeBody extends StatelessWidget {
                           final data = state.pendingApplicationsResponseEntity.data[index];
                           return GestureDetector(
                             onTap: (){
-                              InjectorContainer.getIt<AppRouter>().push(ViewRequestDetailsRoute(id: data.requestId, data: state.bondBalance));
+                              InjectorContainer.getIt<AppRouter>().push(ViewRequestDetailsRoute(id: data.requestId));
                             },
                             child: RequestTile(
                               title: data.motivo,

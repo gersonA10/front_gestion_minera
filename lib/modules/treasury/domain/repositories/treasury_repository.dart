@@ -1,3 +1,4 @@
+
 import '../entity/entity.dart';
 
 abstract class TreasuryRepository {
@@ -8,5 +9,6 @@ abstract class TreasuryRepository {
     String id,
   );
   Future<CashResponseEntity> getCash();
+  Future<ListOfPendingRequestsResponseEntity>listOfPendingRequests({int page = 1, int limit = 10});
 
 }

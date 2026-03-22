@@ -33,8 +33,6 @@ import 'package:front_gestion_minera/modules/surveillance/presentation/screen/hi
     as _i8;
 import 'package:front_gestion_minera/modules/surveillance/presentation/screen/home_surveillance_screen.dart'
     as _i10;
-import 'package:front_gestion_minera/modules/treasury/domain/entity/entity.dart'
-    as _i22;
 import 'package:front_gestion_minera/modules/treasury/presentation/screens/contributes/contributes_home_screen.dart'
     as _i4;
 import 'package:front_gestion_minera/modules/treasury/presentation/screens/distributes/distribute_home_screen.dart'
@@ -447,11 +445,10 @@ class ViewRequestDetailsRoute
   ViewRequestDetailsRoute({
     _i21.Key? key,
     required String id,
-    required _i22.BondBalanceResponseEntity data,
     List<_i20.PageRouteInfo>? children,
   }) : super(
          ViewRequestDetailsRoute.name,
-         args: ViewRequestDetailsRouteArgs(key: key, id: id, data: data),
+         args: ViewRequestDetailsRouteArgs(key: key, id: id),
          initialChildren: children,
        );
 
@@ -461,30 +458,20 @@ class ViewRequestDetailsRoute
     name,
     builder: (data) {
       final args = data.argsAs<ViewRequestDetailsRouteArgs>();
-      return _i19.ViewRequestDetailsScreen(
-        key: args.key,
-        id: args.id,
-        data: args.data,
-      );
+      return _i19.ViewRequestDetailsScreen(key: args.key, id: args.id);
     },
   );
 }
 
 class ViewRequestDetailsRouteArgs {
-  const ViewRequestDetailsRouteArgs({
-    this.key,
-    required this.id,
-    required this.data,
-  });
+  const ViewRequestDetailsRouteArgs({this.key, required this.id});
 
   final _i21.Key? key;
 
   final String id;
 
-  final _i22.BondBalanceResponseEntity data;
-
   @override
   String toString() {
-    return 'ViewRequestDetailsRouteArgs{key: $key, id: $id, data: $data}';
+    return 'ViewRequestDetailsRouteArgs{key: $key, id: $id}';
   }
 }

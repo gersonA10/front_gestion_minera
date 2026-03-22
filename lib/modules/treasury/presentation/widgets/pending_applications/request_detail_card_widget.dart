@@ -1,9 +1,20 @@
 import 'package:flutter/material.dart';
+import 'package:front_gestion_minera/config/router/app_router.dart';
+import 'package:front_gestion_minera/config/router/app_router.gr.dart';
 import 'package:front_gestion_minera/config/theme/extension_theme.dart';
+import 'package:front_gestion_minera/injector_container.dart';
+import 'package:front_gestion_minera/utils/date_util.dart';
+
+import '../../../domain/entity/entity.dart';
 
 class RequestDetailCard extends StatelessWidget {
   final ColorScheme colors;
-  const RequestDetailCard({required this.colors, super.key});
+  final ListOfPendingDataEntity item;
+  const RequestDetailCard({
+    required this.colors,
+    super.key,
+    required this.item,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -21,9 +32,9 @@ class RequestDetailCard extends StatelessWidget {
           Row(
             children: [
               const CircleAvatar(
-                radius: 20,
+                radius: 15,
                 backgroundColor: Color(0xFFFFE0B2),
-                child: Icon(Icons.person, color: Colors.orange),
+                child: Icon(Icons.person, color: Colors.orange, size: 15),
               ),
               const SizedBox(width: 12),
               Expanded(
@@ -31,16 +42,16 @@ class RequestDetailCard extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Juan Pérez',
+                      item.name,
                       style: TextStyle(
                         fontWeight: FontWeight.bold,
-                        fontSize: 15,
+                        fontSize: 12,
                         color: colors.black,
                       ),
                     ),
-                    const Text(
-                      'Operaciones Mina',
-                      style: TextStyle(color: Colors.grey, fontSize: 12),
+                    Text(
+                      item.rol,
+                      style: TextStyle(color: Colors.grey, fontSize: 10),
                     ),
                   ],
                 ),
@@ -58,7 +69,7 @@ class RequestDetailCard extends StatelessWidget {
                   'Pendiente',
                   style: TextStyle(
                     color: Color(0xFF295AF5),
-                    fontSize: 11,
+                    fontSize: 10,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
@@ -67,17 +78,17 @@ class RequestDetailCard extends StatelessWidget {
           ),
           const SizedBox(height: 16),
           Text(
-            '\$45,200.00',
+            item.amount,
             style: TextStyle(
-              fontSize: 20,
+              fontSize: 15,
               fontWeight: FontWeight.bold,
               color: colors.black,
             ),
           ),
           const SizedBox(height: 4),
           Text(
-            'Pago de proveedores de maquinaria pesada para el sector norte...',
-            style: TextStyle(color: Colors.grey.shade600, fontSize: 12),
+            item.description,
+            style: TextStyle(color: Colors.grey.shade600, fontSize: 10),
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
           ),
@@ -86,17 +97,23 @@ class RequestDetailCard extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Row(
-                children: const [
+                children: [
                   Icon(Icons.calendar_today, size: 14, color: Colors.grey),
                   SizedBox(width: 4),
                   Text(
-                    '12 Oct 2023',
-                    style: TextStyle(color: Colors.grey, fontSize: 12),
+                    formatDate(item.createdAt),
+                    style: TextStyle(color: Colors.grey, fontSize: 10),
                   ),
                 ],
               ),
               ElevatedButton(
-                onPressed: () {},
+                onPressed: () {
+                  InjectorContainer.getIt<AppRouter>().push(
+                    ViewRequestDetailsRoute(
+                      id: item.requestId,
+                    ),
+                  );
+                },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: const Color(0xFF295AF5),
                   foregroundColor: Colors.white,
@@ -104,11 +121,11 @@ class RequestDetailCard extends StatelessWidget {
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(10),
                   ),
-                  padding: const EdgeInsets.symmetric(horizontal: 20),
+                  padding: const EdgeInsets.symmetric(horizontal: 10),
                 ),
                 child: const Text(
                   'Ver Solicitud',
-                  style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold),
+                  style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold),
                 ),
               ),
             ],
