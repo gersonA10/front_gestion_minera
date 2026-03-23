@@ -10,6 +10,11 @@ part 'treasury_event.dart';
 part 'treasury_state.dart';
 
 class TreasuryBloc extends Bloc<TreasuryEvent, TreasuryState> {
+  int _currentPage = 1;
+  bool _hasReachedMax = false;
+  int _currentTotalRecords = 0;
+    List<ListOfPendingDataEntity> _items = [];
+
   final TreasuryRepository repository;
 
   List<CashRegisterEntity> cashRegisters = [];
@@ -18,6 +23,9 @@ class TreasuryBloc extends Bloc<TreasuryEvent, TreasuryState> {
     on<FetchTreasuryMetricsEvent>(_onFetchTreasuryMetrics);
     on<DashboardDataEvent>(_dashboardData);
     on<DetailsofanapplicationEvent>(_getDetailsofanapplication);
+    on<LoadMorePendingEvent>(_loadMorePendingRequests);
+    on<ListOfPendingRequestsEvent>(_listOfPending);
+
     on<GetFinancialReportEvent>(_onGetFinancialReportEvent);
     on<RegisterUrgentIncomeEvent>(_onRegisterUrgentIncome);
     on<GetCashRegistersEvent>(_onGetCashRegisters);
@@ -66,11 +74,79 @@ class TreasuryBloc extends Bloc<TreasuryEvent, TreasuryState> {
     emit(DetailsofanapplicationLoading());
     try {
       final response = await repository.getDetailsofanapplication(event.id);
-      emit(DetailsofanapplicationSuccess(data: response.data));
+      final responseCash = await repository.getCash();
+      emit(DetailsofanapplicationSuccess(data: response.data, cash: responseCash));
     } on BaseApiException catch (error) {
-      emit(DetailsofanapplicationError(mapErrorMessage(error.key)));
+      emit(DetailsofanapplicationError(message:  mapErrorMessage(error.key)));
     } catch (e) {
-      emit(DetailsofanapplicationError('Error inesperado: $e'));
+      emit(DetailsofanapplicationError(message:  'Error inesperado: $e'));
+    }
+  }
+
+  Future<void> _listOfPending(
+    ListOfPendingRequestsEvent event,
+    Emitter<TreasuryState> emit,
+  ) async {
+    if (!event.isRefresh && _items.isNotEmpty) {
+      emit(
+        ListOfPendingRequestsSuccess(
+          list: List.from(_items),
+          hasReachedMax: _hasReachedMax,
+          totalRecords: _currentTotalRecords,
+        ),
+      );
+      return;
+    }
+
+    if (event.isRefresh) {
+      _currentPage = 1;
+      _hasReachedMax = false;
+      _items.clear();
+      emit(ListOfPendingRequestsLoading());
+    }
+
+    try {
+      final response = await repository.listOfPendingRequests(page: _currentPage);
+      _items = response.items;
+      _hasReachedMax = !response.hasMoreData;
+      _currentTotalRecords = response.totalRecords;
+      emit(
+        ListOfPendingRequestsSuccess(
+          list: List.from(_items),
+          hasReachedMax: _hasReachedMax,
+          totalRecords: _currentTotalRecords,
+        ),
+      );
+    } on BaseApiException catch (error) {
+      emit(ListOfPendingRequestsError(mapErrorMessage(error.key)));
+    } catch (e) {
+      emit(ListOfPendingRequestsError('Error inesperado: $e'));
+    }
+  }
+
+   Future<void> _loadMorePendingRequests(
+    LoadMorePendingEvent event,
+    Emitter<TreasuryState> emit,
+  ) async {
+    if (_hasReachedMax) return;
+    _currentPage++;
+    try {
+      final response = await repository.listOfPendingRequests(page: _currentPage);
+
+      _items.addAll(response.items);
+
+      _hasReachedMax = !response.hasMoreData;
+      emit(
+        ListOfPendingRequestsSuccess(
+          list: _items,
+          hasReachedMax: _hasReachedMax,
+          totalRecords: _currentTotalRecords,
+        ),
+      );
+    } on BaseApiException catch (error) {
+      emit(ListOfPendingRequestsError(mapErrorMessage(error.key)));
+    } catch (e) {
+      emit(ListOfPendingRequestsError('Error inesperado: $e'));
     }
   }
 

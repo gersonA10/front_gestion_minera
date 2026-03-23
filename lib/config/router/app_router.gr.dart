@@ -476,16 +476,38 @@ class UrgentTransactionRoute extends _i22.PageRouteInfo<void> {
 
 /// generated route for
 /// [_i21.ViewRequestDetailsScreen]
-class ViewRequestDetailsRoute extends _i22.PageRouteInfo<void> {
-  const ViewRequestDetailsRoute({List<_i22.PageRouteInfo>? children})
-    : super(ViewRequestDetailsRoute.name, initialChildren: children);
+class ViewRequestDetailsRoute
+    extends _i22.PageRouteInfo<ViewRequestDetailsRouteArgs> {
+  ViewRequestDetailsRoute({
+    _i23.Key? key,
+    required String id,
+    List<_i22.PageRouteInfo>? children,
+  }) : super(
+         ViewRequestDetailsRoute.name,
+         args: ViewRequestDetailsRouteArgs(key: key, id: id),
+         initialChildren: children,
+       );
 
   static const String name = 'ViewRequestDetailsRoute';
 
   static _i22.PageInfo page = _i22.PageInfo(
     name,
     builder: (data) {
-      return const _i21.ViewRequestDetailsScreen();
+      final args = data.argsAs<ViewRequestDetailsRouteArgs>();
+      return _i21.ViewRequestDetailsScreen(key: args.key, id: args.id);
     },
   );
+}
+
+class ViewRequestDetailsRouteArgs {
+  const ViewRequestDetailsRouteArgs({this.key, required this.id});
+
+  final _i23.Key? key;
+
+  final String id;
+
+  @override
+  String toString() {
+    return 'ViewRequestDetailsRouteArgs{key: $key, id: $id}';
+  }
 }

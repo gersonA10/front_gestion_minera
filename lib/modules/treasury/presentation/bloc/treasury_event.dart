@@ -15,6 +15,17 @@ class DetailsofanapplicationEvent extends TreasuryEvent {
   DetailsofanapplicationEvent({required this.id});
 }
 
+//
+class ListOfPendingRequestsEvent extends TreasuryEvent {
+  final bool isRefresh;
+  ListOfPendingRequestsEvent({this.isRefresh = true});
+}
+class LoadMorePendingEvent extends TreasuryEvent {
+  final bool isRefresh;
+  LoadMorePendingEvent({this.isRefresh = true});
+}
+
+
 class GetFinancialReportEvent extends TreasuryEvent {
   final String period; 
   final String? exactDate; 

@@ -7,3 +7,4 @@ export 'package:front_gestion_minera/modules/treasury/data/models/treasury_metri
 export 'package:front_gestion_minera/modules/treasury/data/models/bond_balance_model.dart';
 export 'package:front_gestion_minera/modules/treasury/data/models/pending_applications_model.dart';
 export 'package:front_gestion_minera/modules/treasury/data/models/details_of_an_aplication_model.dart';
+export 'package:front_gestion_minera/modules/treasury/data/models/list_of_pending%20_request_model.dart';

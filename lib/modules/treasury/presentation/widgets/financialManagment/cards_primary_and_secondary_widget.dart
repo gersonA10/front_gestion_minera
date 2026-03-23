@@ -17,7 +17,7 @@ class PrimaryCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      height: 130,
+      height: 90,
       decoration: BoxDecoration(
         color: const Color(0xFF295AF5),
         borderRadius: BorderRadius.circular(20),
@@ -32,16 +32,16 @@ class PrimaryCard extends StatelessWidget {
       child: Stack(
         children: [
           Positioned(
-            right: -10,
+            right: 15,
             bottom: 20,
             child: Icon(
               icon,
-              size: 80,
+              size: 40,
               color: Colors.white.withValues(alpha: 0.15),
             ),
           ),
           Padding(
-            padding: const EdgeInsets.all(20.0),
+            padding: const EdgeInsets.all(10.0),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisAlignment: MainAxisAlignment.center,
@@ -50,7 +50,7 @@ class PrimaryCard extends StatelessWidget {
                   title,
                   style: const TextStyle(
                     color: Colors.white70,
-                    fontSize: 13,
+                    fontSize: 10,
                     fontWeight: FontWeight.w500,
                   ),
                 ),
@@ -59,7 +59,7 @@ class PrimaryCard extends StatelessWidget {
                   amount,
                   style: const TextStyle(
                     color: Colors.white,
-                    fontSize: 22,
+                    fontSize: 13,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
@@ -93,8 +93,8 @@ class SecondaryCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      height: 130,
-      padding: const EdgeInsets.all(20.0),
+      height: 90,
+      padding: const EdgeInsets.all(10.0),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(20),
@@ -116,7 +116,7 @@ class SecondaryCard extends StatelessWidget {
               color: iconBgColor,
               shape: BoxShape.circle,
             ),
-            child: Icon(icon, color: iconColor, size: 20),
+            child: Icon(icon, color: iconColor, size: 10),
           ),
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -125,7 +125,7 @@ class SecondaryCard extends StatelessWidget {
                 title,
                 style: const TextStyle(
                   color: Colors.blueGrey,
-                  fontSize: 12,
+                  fontSize: 10,
                   fontWeight: FontWeight.w500,
                 ),
                 maxLines: 1,
@@ -136,7 +136,7 @@ class SecondaryCard extends StatelessWidget {
                 amount,
                 style: const TextStyle(
                   color: Color(0xFF1C1C1E),
-                  fontSize: 18,
+                  fontSize: 12,
                   fontWeight: FontWeight.bold,
                 ),
               ),

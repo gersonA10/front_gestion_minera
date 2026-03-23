@@ -41,3 +41,24 @@ class FlujoAprobacionEntity {
     required this.fecha,
   });
 }
+
+///cash
+class CashResponseEntity {
+    final List<CashDataEntity> data;
+
+    CashResponseEntity({
+        required this.data,
+    });
+}
+
+class CashDataEntity {
+    final String id;
+    final String nombre;
+    final int saldoDisponible;
+
+    CashDataEntity({
+        required this.id,
+        required this.nombre,
+        required this.saldoDisponible,
+    });
+}

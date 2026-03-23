@@ -43,12 +43,31 @@ class DetailsofanapplicationLoading extends TreasuryState {}
 
 class DetailsofanapplicationError extends TreasuryState {
   final String message;
-  DetailsofanapplicationError(this.message);
+  DetailsofanapplicationError({required this.message});
 }
 
 class DetailsofanapplicationSuccess extends TreasuryState {
   final DetailsofanapplicationDataEntity data;
-  DetailsofanapplicationSuccess({required this.data});
+  final CashResponseEntity cash;
+  DetailsofanapplicationSuccess({required this.data, required this.cash});
+}
+///
+final class ListOfPendingRequestsLoading extends TreasuryState {}
+
+final class ListOfPendingRequestsError extends TreasuryState {
+  final String message;
+  ListOfPendingRequestsError(this.message);
+}
+
+final class ListOfPendingRequestsSuccess extends TreasuryState {
+  final List<ListOfPendingDataEntity> list;
+  final bool hasReachedMax;
+  final int totalRecords;
+  ListOfPendingRequestsSuccess({
+    required this.list,
+    required this.hasReachedMax,
+    required this.totalRecords,
+  });
 }
 
 //reportes financieros
