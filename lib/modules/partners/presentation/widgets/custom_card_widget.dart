@@ -181,7 +181,7 @@ class LoanCard extends StatelessWidget {
                   width: 56,
                   height: 56,
                   decoration: BoxDecoration(
-                    color: colors.red.withOpacity(0.12),
+                    color: colors.red.withValues(alpha: 0.12),
                     borderRadius: BorderRadius.circular(16),
                   ),
                   child: Icon(Icons.info_outline_rounded, color: colors.red, size: 28),
@@ -197,9 +197,9 @@ class LoanCard extends StatelessWidget {
                   width: double.infinity,
                   padding: const EdgeInsets.all(14),
                   decoration: BoxDecoration(
-                    color: colors.red.withOpacity(0.06),
+                    color: colors.red.withValues(alpha: 0.06),
                     borderRadius: BorderRadius.circular(14),
-                    border: Border.all(color: colors.red.withOpacity(0.18)),
+                    border: Border.all(color: colors.red.withValues(alpha: 0.18)),
                   ),
                   child: Text(
                     motivoRechazo ?? 'Sin motivo especificado.',

@@ -14,6 +14,7 @@ class TreasuryBloc extends Bloc<TreasuryEvent, TreasuryState> {
     on<FetchTreasuryMetricsEvent>(_onFetchTreasuryMetrics);
     on<DashboardDataEvent>(_dashboardData);
     on<DetailsofanapplicationEvent>(_getDetailsofanapplication);
+    on<GetFinancialReportEvent>(_onGetFinancialReportEvent);
   }
 
   Future<void> _onFetchTreasuryMetrics(
@@ -61,4 +62,24 @@ class TreasuryBloc extends Bloc<TreasuryEvent, TreasuryState> {
       emit(DetailsofanapplicationError('Error inesperado: $e'));
     }
   }
+
+
+  Future<void> _onGetFinancialReportEvent(
+    GetFinancialReportEvent event,
+    Emitter<TreasuryState> emit,
+  ) async {
+    emit(FinancialReportLoading());
+    
+    try {
+      final report = await repository.getFinancialReport(
+        period: event.period,
+        exactDate: event.exactDate,
+      );
+      
+      emit(FinancialReportLoaded(report: report));
+    } catch (e) {
+      emit(FinancialReportError(message: 'Error al cargar el reporte: $e'));
+    }
+  }
+
 }

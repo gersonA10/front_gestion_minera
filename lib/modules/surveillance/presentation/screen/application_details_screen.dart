@@ -100,9 +100,9 @@ class _ApplicationDetailsScreenState extends State<ApplicationDetailsScreen> {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
       decoration: BoxDecoration(
-        color: color.withOpacity(.15),
+        color: color.withValues(alpha: .15),
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: color.withOpacity(.4)),
+        border: Border.all(color: color.withValues(alpha: .4)),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
@@ -258,7 +258,7 @@ class _ApplicationDetailsScreenState extends State<ApplicationDetailsScreen> {
                         Container(
                           width: double.infinity,
                           padding: const EdgeInsets.all(14),
-                          decoration: BoxDecoration(color: Colors.red.withOpacity(0.1), borderRadius: BorderRadius.circular(12)),
+                          decoration: BoxDecoration(color: Colors.red.withValues(alpha: 0.1), borderRadius: BorderRadius.circular(12)),
                           child: Text(
                             widget.motivoRechazo!,
                             style: AppTextStyles.mainStyleWhite12(context).copyWith(fontSize: 10, color: Colors.red[200]),

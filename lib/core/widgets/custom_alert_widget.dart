@@ -59,7 +59,7 @@ class CustomAlert {
                     Text(
                       message,
                       style: TextStyle(
-                        color:  Theme.of(context).colorScheme.black.withOpacity(0.8),
+                        color:  Theme.of(context).colorScheme.black.withValues(alpha: 0.8),
                       ),
                     ),
                   ],
