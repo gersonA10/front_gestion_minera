@@ -459,20 +459,6 @@ class TreasuryRoute extends _i22.PageRouteInfo<void> {
 }
 
 /// generated route for
-<<<<<<< HEAD
-/// [_i19.ViewRequestDetailsScreen]
-class ViewRequestDetailsRoute
-    extends _i20.PageRouteInfo<ViewRequestDetailsRouteArgs> {
-  ViewRequestDetailsRoute({
-    _i21.Key? key,
-    required String id,
-    List<_i20.PageRouteInfo>? children,
-  }) : super(
-         ViewRequestDetailsRoute.name,
-         args: ViewRequestDetailsRouteArgs(key: key, id: id),
-         initialChildren: children,
-       );
-=======
 /// [_i20.UrgentTransactionScreen]
 class UrgentTransactionRoute extends _i22.PageRouteInfo<void> {
   const UrgentTransactionRoute({List<_i22.PageRouteInfo>? children})
@@ -490,22 +476,25 @@ class UrgentTransactionRoute extends _i22.PageRouteInfo<void> {
 
 /// generated route for
 /// [_i21.ViewRequestDetailsScreen]
-class ViewRequestDetailsRoute extends _i22.PageRouteInfo<void> {
-  const ViewRequestDetailsRoute({List<_i22.PageRouteInfo>? children})
-    : super(ViewRequestDetailsRoute.name, initialChildren: children);
->>>>>>> origin/dev
+class ViewRequestDetailsRoute
+    extends _i22.PageRouteInfo<ViewRequestDetailsRouteArgs> {
+  ViewRequestDetailsRoute({
+    _i23.Key? key,
+    required String id,
+    List<_i22.PageRouteInfo>? children,
+  }) : super(
+         ViewRequestDetailsRoute.name,
+         args: ViewRequestDetailsRouteArgs(key: key, id: id),
+         initialChildren: children,
+       );
 
   static const String name = 'ViewRequestDetailsRoute';
 
   static _i22.PageInfo page = _i22.PageInfo(
     name,
     builder: (data) {
-<<<<<<< HEAD
       final args = data.argsAs<ViewRequestDetailsRouteArgs>();
-      return _i19.ViewRequestDetailsScreen(key: args.key, id: args.id);
-=======
-      return const _i21.ViewRequestDetailsScreen();
->>>>>>> origin/dev
+      return _i21.ViewRequestDetailsScreen(key: args.key, id: args.id);
     },
   );
 }
@@ -513,7 +502,7 @@ class ViewRequestDetailsRoute extends _i22.PageRouteInfo<void> {
 class ViewRequestDetailsRouteArgs {
   const ViewRequestDetailsRouteArgs({this.key, required this.id});
 
-  final _i21.Key? key;
+  final _i23.Key? key;
 
   final String id;
 
