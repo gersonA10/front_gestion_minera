@@ -1,4 +1,7 @@
+import 'package:front_gestion_minera/modules/treasury/data/models/income_request_model.dart';
+
 import '../../domain/entity/entity.dart';
+import '../../domain/entity/income_request_entity.dart';
 import '../../domain/repositories/repository.dart';
 import '../datasource/datasource.dart';
 
@@ -39,4 +42,18 @@ class TreasuryRepositoryImpl implements TreasuryRepository {
       exactDate: exactDate,
     );
   }
+
+  @override
+  Future<List<CashRegisterEntity>> getCashRegisters() async {
+    return await datasource.getCashRegisters();
+  }
+
+  @override
+  Future<IncomeResponseEntity> registerUrgentIncome(IncomeRequestEntity request) async {
+    final requestModel = IncomeRequestModel.fromEntity(request);
+    final response = await datasource.registerUrgentIncome(requestModel);
+    return response;
+  }
+
+
 }
