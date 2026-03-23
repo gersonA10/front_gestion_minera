@@ -21,3 +21,23 @@ class GetFinancialReportEvent extends TreasuryEvent {
 
   GetFinancialReportEvent({required this.period, this.exactDate});
 }
+
+class RegisterUrgentIncomeEvent extends TreasuryEvent {
+  final IncomeRequestEntity request;
+
+  RegisterUrgentIncomeEvent({required this.request});
+}
+
+class GetCashRegistersEvent extends TreasuryEvent {}
+
+class CashRegistersLoading extends TreasuryState {}
+
+class CashRegistersLoaded extends TreasuryState {
+  final List<CashRegisterEntity> cashRegisters;
+  CashRegistersLoaded({required this.cashRegisters});
+}
+
+class CashRegistersError extends TreasuryState {
+  final String message;
+  CashRegistersError(this.message);
+}

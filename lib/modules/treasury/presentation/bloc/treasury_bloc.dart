@@ -1,4 +1,6 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:front_gestion_minera/modules/treasury/data/models/model.dart';
+import 'package:front_gestion_minera/modules/treasury/domain/entity/income_request_entity.dart';
 import 'package:front_gestion_minera/utils/error.dart';
 import '../../../../core/networking/base_api_exception.dart';
 import '../../domain/entity/entity.dart';
@@ -10,11 +12,15 @@ part 'treasury_state.dart';
 class TreasuryBloc extends Bloc<TreasuryEvent, TreasuryState> {
   final TreasuryRepository repository;
 
+  List<CashRegisterEntity> cashRegisters = [];
+
   TreasuryBloc({required this.repository}) : super(TreasuryInitial()) {
     on<FetchTreasuryMetricsEvent>(_onFetchTreasuryMetrics);
     on<DashboardDataEvent>(_dashboardData);
     on<DetailsofanapplicationEvent>(_getDetailsofanapplication);
     on<GetFinancialReportEvent>(_onGetFinancialReportEvent);
+    on<RegisterUrgentIncomeEvent>(_onRegisterUrgentIncome);
+    on<GetCashRegistersEvent>(_onGetCashRegisters);
   }
 
   Future<void> _onFetchTreasuryMetrics(
@@ -40,11 +46,16 @@ class TreasuryBloc extends Bloc<TreasuryEvent, TreasuryState> {
     try {
       final responseBalance = await repository.getBondBalence();
       final responsePending = await repository.getPendingApplications();
-      emit(DashboardDataLoaded(bondBalance: responseBalance, pendingApplicationsResponseEntity: responsePending));
+      emit(
+        DashboardDataLoaded(
+          bondBalance: responseBalance,
+          pendingApplicationsResponseEntity: responsePending,
+        ),
+      );
     } on BaseApiException catch (error) {
       emit(DashboardDataError(message: mapErrorMessage(error.key)));
     } catch (e) {
-      emit(DashboardDataError(message:'Error inesperado: $e'));
+      emit(DashboardDataError(message: 'Error inesperado: $e'));
     }
   }
 
@@ -63,23 +74,55 @@ class TreasuryBloc extends Bloc<TreasuryEvent, TreasuryState> {
     }
   }
 
-
   Future<void> _onGetFinancialReportEvent(
     GetFinancialReportEvent event,
     Emitter<TreasuryState> emit,
   ) async {
     emit(FinancialReportLoading());
-    
+
     try {
       final report = await repository.getFinancialReport(
         period: event.period,
         exactDate: event.exactDate,
       );
-      
+
       emit(FinancialReportLoaded(report: report));
     } catch (e) {
       emit(FinancialReportError(message: 'Error al cargar el reporte: $e'));
     }
   }
 
+  Future<void> _onRegisterUrgentIncome(
+    RegisterUrgentIncomeEvent event,
+    Emitter<TreasuryState> emit,
+  ) async {
+    emit(UrgentIncomeLoading());
+    try {
+      final response = await repository.registerUrgentIncome(event.request);
+      emit(UrgentIncomeSuccess(response: response));
+    } on BaseApiException catch (error) {
+      if (error.key == DioExceptionKey.unauthorised) {
+      return; 
+    }
+      emit(NetworkError(message: mapErrorMessage(error.key)));
+    } catch (e) {
+      emit(UrgentIncomeError(message: 'Error inesperado: $e'));
+    }
+  }
+
+  Future<void> _onGetCashRegisters(
+    GetCashRegistersEvent event,
+    Emitter<TreasuryState> emit,
+  ) async {
+    emit(CashRegistersLoading());
+    try {
+      final registers = await repository.getCashRegisters();
+      cashRegisters = registers; 
+      emit(CashRegistersLoaded(cashRegisters: registers));
+    } on BaseApiException catch (error) {
+      emit(CashRegistersError(mapErrorMessage(error.key)));
+    } catch (e) {
+      emit(CashRegistersError('Error inesperado: $e'));
+    }
+  }
 }

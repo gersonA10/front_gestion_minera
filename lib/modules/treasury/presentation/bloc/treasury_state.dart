@@ -25,18 +25,18 @@ class DashboardDataLoading extends TreasuryState {}
 
 class DashboardDataError extends TreasuryState {
   final String message;
-  
+
   DashboardDataError({required this.message});
-  
 }
 
 class DashboardDataLoaded extends TreasuryState {
   final BondBalanceResponseEntity bondBalance;
   final PendingApplicationsResponseEntity pendingApplicationsResponseEntity;
-  
 
-  DashboardDataLoaded({required this.bondBalance, required this.pendingApplicationsResponseEntity});
-  
+  DashboardDataLoaded({
+    required this.bondBalance,
+    required this.pendingApplicationsResponseEntity,
+  });
 }
 
 class DetailsofanapplicationLoading extends TreasuryState {}
@@ -65,3 +65,25 @@ class FinancialReportError extends TreasuryState {
 
   FinancialReportError({required this.message});
 }
+
+// Ingreso urgente
+class UrgentIncomeLoading extends TreasuryState {}
+
+class UrgentIncomeSuccess extends TreasuryState {
+  final IncomeResponseEntity response;
+
+  UrgentIncomeSuccess({required this.response});
+}
+
+class UrgentIncomeError extends TreasuryState {
+  final String message;
+
+  UrgentIncomeError({required this.message});
+}
+
+class NetworkError extends TreasuryState {
+  final String message;
+
+  NetworkError({required this.message});
+}
+
