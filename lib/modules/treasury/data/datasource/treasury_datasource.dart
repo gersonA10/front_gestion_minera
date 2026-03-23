@@ -45,7 +45,7 @@ class TreasuryDatasource {
   Future<CashResponseEntity> getCash(
   ) async {
     final response = await apiClient.get(
-      'api/treasury/cash-registers',
+      '/api/treasury/cash-registers',
       operationName: 'getCash',
     );
     return CashResponseModel.fromJson(response);
