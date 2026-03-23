@@ -1,5 +1,7 @@
 
+
 import '../entity/entity.dart';
+import '../entity/income_request_entity.dart';
 
 abstract class TreasuryRepository {
   Future<TreasuryMetricsEntity> getMetrics();
@@ -11,4 +13,15 @@ abstract class TreasuryRepository {
   Future<CashResponseEntity> getCash();
   Future<ListOfPendingRequestsResponseEntity>listOfPendingRequests({int page = 1, int limit = 10});
 
+  Future<FinancialReportEntity> getFinancialReport({
+    String period = 'month',
+    String? exactDate,
+  });
+
+  Future<IncomeResponseEntity> registerUrgentIncome(IncomeRequestEntity request);
+
+  Future<List<CashRegisterEntity>> getCashRegisters();
+
+
+  
 }

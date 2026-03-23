@@ -24,3 +24,31 @@ class LoadMorePendingEvent extends TreasuryEvent {
   final bool isRefresh;
   LoadMorePendingEvent({this.isRefresh = true});
 }
+
+
+class GetFinancialReportEvent extends TreasuryEvent {
+  final String period; 
+  final String? exactDate; 
+
+  GetFinancialReportEvent({required this.period, this.exactDate});
+}
+
+class RegisterUrgentIncomeEvent extends TreasuryEvent {
+  final IncomeRequestEntity request;
+
+  RegisterUrgentIncomeEvent({required this.request});
+}
+
+class GetCashRegistersEvent extends TreasuryEvent {}
+
+class CashRegistersLoading extends TreasuryState {}
+
+class CashRegistersLoaded extends TreasuryState {
+  final List<CashRegisterEntity> cashRegisters;
+  CashRegistersLoaded({required this.cashRegisters});
+}
+
+class CashRegistersError extends TreasuryState {
+  final String message;
+  CashRegistersError(this.message);
+}

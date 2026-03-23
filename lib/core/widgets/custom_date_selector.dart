@@ -62,7 +62,7 @@ class _CustomDateSelectorState extends State<CustomDateSelector> {
               width: 50,
               height: 5,
               decoration: BoxDecoration(
-                color: colors.lead.withOpacity(0.3),
+                color: colors.lead.withValues(alpha: 0.3),
                 borderRadius: BorderRadius.circular(10),
               ),
             ),
@@ -107,7 +107,7 @@ class _CustomDateSelectorState extends State<CustomDateSelector> {
           decoration: BoxDecoration(
             color: isActive ? colors.blue : colors.white,
             borderRadius: BorderRadius.circular(12),
-            border: Border.all(color: isActive ? colors.blue : colors.lead.withOpacity(0.3)),
+            border: Border.all(color: isActive ? colors.blue : colors.lead.withValues(alpha: 0.3)),
           ),
           alignment: Alignment.center,
           child: Text(
@@ -147,7 +147,7 @@ class _CustomDateSelectorState extends State<CustomDateSelector> {
             decoration: BoxDecoration(
               color: colors.white,
               borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: colors.lead.withOpacity(0.2)),
+              border: Border.all(color: colors.lead.withValues(alpha: 0.2)),
             ),
             alignment: Alignment.center,
             child: Text(
@@ -185,7 +185,7 @@ class _CustomDateSelectorState extends State<CustomDateSelector> {
               decoration: BoxDecoration(
                 color: colors.white,
                 borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: colors.lead.withOpacity(0.2)),
+                border: Border.all(color: colors.lead.withValues(alpha: 0.2)),
               ),
               child: Text(
                 year.toString(),
@@ -202,7 +202,7 @@ class _CustomDateSelectorState extends State<CustomDateSelector> {
   Widget _buildDaySelector(ColorScheme colors) {
     return Column(
       children: [
-        Icon(Icons.calendar_month, size: 50, color: colors.lead.withOpacity(0.5)),
+        Icon(Icons.calendar_month, size: 50, color: colors.lead.withValues(alpha: 0.5)),
         const SizedBox(height: 16),
         Text(
           'Elige una fecha específica en el calendario',

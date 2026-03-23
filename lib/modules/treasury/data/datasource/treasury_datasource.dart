@@ -1,4 +1,5 @@
 
+import 'package:front_gestion_minera/modules/treasury/data/models/financial_report_model.dart';
 import '../../../../core/networking/http_services.dart';
 import '../../domain/entity/entity.dart';
 import '../models/model.dart';
@@ -72,6 +73,52 @@ class TreasuryDatasource {
       'has_more_data': meta['has_more_data'] ?? false,
 
       'total_records': meta['total_records'] ?? 0,
-    };
+    };}
+
+  Future<FinancialReportModel> getFinancialReport({
+    String period = 'month',
+    String? exactDate,
+  }) async {
+    final queryParams = <String, dynamic>{'period': period};
+    if (exactDate != null && exactDate.isNotEmpty) {
+      queryParams['exact_date'] = exactDate;
+    }
+
+    final response = await apiClient.get(
+      '/api/treasury/reports/financial',
+      queryParameters: queryParams,
+      operationName: 'getFinancialReport',
+    );
+
+    return FinancialReportModel.fromJson(response['data']);
+  }
+
+  Future<List<CashRegisterModel>> getCashRegisters() async {
+    final response = await apiClient.get(
+      '/api/treasury/cash-registers',
+      operationName: 'getCashRegisters',
+    );
+    
+    final List data = response['data'];
+    return data.map((e) => CashRegisterModel.fromJson(e)).toList();
+  }
+
+  Future<IncomeResponseModel> registerUrgentIncome(
+    IncomeRequestModel incomeRequestModel,
+  ) async {
+    final response = await apiClient.postFormData(
+      '/api/treasury/urgent/income',
+      data: incomeRequestModel.toFormDataMap(),
+      operationName: 'registerUrgentIncome',
+      files: [
+        {
+          'name': 'evidencia',
+          'path': incomeRequestModel.evidenceUrlPath,
+          'filename': incomeRequestModel.evidenceUrlPath.split('/').last
+        }
+      ]
+    );
+
+    return IncomeResponseModel.fromJson(response['data']);
   }
 }

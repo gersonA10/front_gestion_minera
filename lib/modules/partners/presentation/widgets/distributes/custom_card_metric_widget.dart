@@ -32,8 +32,8 @@ class CustomCardMetric extends StatelessWidget {
         borderRadius: BorderRadius.circular(12),
         border: isWhite ? Border.all(color: colors.bajo, width: 1.5) : null,
         boxShadow: isWhite
-            ? [BoxShadow(color: Colors.black.withOpacity(0.02), blurRadius: 8, offset: const Offset(0, 4))]
-            : [BoxShadow(color: bgColor.withOpacity(0.3), blurRadius: 8, offset: const Offset(0, 4))],
+            ? [BoxShadow(color: Colors.black.withValues(alpha: 0.02), blurRadius: 8, offset: const Offset(0, 4))]
+            : [BoxShadow(color: bgColor.withValues(alpha: 0.3), blurRadius: 8, offset: const Offset(0, 4))],
       ),
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
       child: Column(

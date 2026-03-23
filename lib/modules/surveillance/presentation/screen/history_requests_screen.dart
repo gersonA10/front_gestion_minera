@@ -158,7 +158,7 @@ class _HistoryRequestsScreenState extends State<HistoryRequestsScreen> {
                           Icon(
                             Icons.error_outline,
                             size: 48,
-                            color: colors.red.withOpacity(0.5),
+                            color: colors.red.withValues(alpha: 0.5),
                           ),
                           const SizedBox(height: 16),
                           Text(
@@ -246,7 +246,7 @@ class _HistoryRequestsScreenState extends State<HistoryRequestsScreen> {
                     decoration: BoxDecoration(
                       color: colors.white,
                       borderRadius: BorderRadius.circular(12),
-                      border: Border.all(color: colors.lead.withOpacity(0.3)),
+                      border: Border.all(color: colors.lead.withValues(alpha: 0.3)),
                     ),
                     child: TextField(
                       controller: _searchController,
@@ -258,7 +258,7 @@ class _HistoryRequestsScreenState extends State<HistoryRequestsScreen> {
                       decoration: InputDecoration(
                         prefixIcon: Icon(
                           Icons.search,
-                          color: colors.lead.withOpacity(0.8),
+                          color: colors.lead.withValues(alpha: 0.8),
                         ),
                         suffixIcon: _searchController.text.isNotEmpty
                             ? IconButton(
@@ -372,7 +372,7 @@ class _HistoryRequestsScreenState extends State<HistoryRequestsScreen> {
           color: isSelected ? colors.blue : colors.white,
           borderRadius: BorderRadius.circular(20),
           border: Border.all(
-            color: isSelected ? colors.blue : colors.lead.withOpacity(0.3),
+            color: isSelected ? colors.blue : colors.lead.withValues(alpha: 0.3),
           ),
         ),
         child: Row(
