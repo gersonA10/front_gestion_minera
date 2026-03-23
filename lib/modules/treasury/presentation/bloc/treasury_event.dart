@@ -14,3 +14,10 @@ class DetailsofanapplicationEvent extends TreasuryEvent {
   final String id;
   DetailsofanapplicationEvent({required this.id});
 }
+
+class GetFinancialReportEvent extends TreasuryEvent {
+  final String period; 
+  final String? exactDate; 
+
+  GetFinancialReportEvent({required this.period, this.exactDate});
+}

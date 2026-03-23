@@ -163,7 +163,7 @@ class _MoneyRequestScreenState extends State<MoneyRequestScreen> {
                       height: 160,
                       width: double.infinity,
                       decoration: BoxDecoration(
-                        color: colors.lead.withOpacity(0.3),
+                        color: colors.lead.withValues(alpha: 0.3),
                         borderRadius: BorderRadius.circular(16),
                         border: Border.all(color: colors.lead, width: 1.5),
                       ),
@@ -183,7 +183,7 @@ class _MoneyRequestScreenState extends State<MoneyRequestScreen> {
                                 shape: BoxShape.circle,
                                 boxShadow: [
                                   BoxShadow(
-                                    color: Colors.black.withOpacity(0.1),
+                                    color: Colors.black.withValues(alpha: 0.1),
                                     blurRadius: 10,
                                   ),
                                 ],

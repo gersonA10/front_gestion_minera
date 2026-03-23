@@ -1,4 +1,6 @@
+import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
+import 'package:front_gestion_minera/config/router/app_router.gr.dart';
 
 class ReportButtonWidget extends StatelessWidget {
   const ReportButtonWidget({super.key});
@@ -66,7 +68,9 @@ class ReportButtonWidget extends StatelessWidget {
           SizedBox(
             height: 34,
             child: ElevatedButton(
-              onPressed: () {},
+              onPressed: () {
+                context.router.push(FinancialReportsRoute());
+              },
               style: ElevatedButton.styleFrom(
                 elevation: 0,
                 backgroundColor: Colors.white,

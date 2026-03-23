@@ -1,3 +1,5 @@
+import 'package:front_gestion_minera/modules/treasury/data/models/financial_report_model.dart';
+
 import '../../../../core/networking/http_services.dart';
 import '../../domain/entity/entity.dart';
 import '../models/model.dart';
@@ -40,4 +42,23 @@ class TreasuryDatasource {
     );
     return DetailsofanapplicationResponseModel.fromJson(response);
   }
+
+Future<FinancialReportModel> getFinancialReport({
+    String period = 'month',
+    String? exactDate,
+  }) async {
+    final queryParams = <String, dynamic>{'period': period};
+    if (exactDate != null && exactDate.isNotEmpty) {
+      queryParams['exact_date'] = exactDate;
+    }
+
+    final response = await apiClient.get(
+      '/api/treasury/reports/financial',
+      queryParameters: queryParams,
+      operationName: 'getFinancialReport',
+    );
+    
+    return FinancialReportModel.fromJson(response['data']);
+  }
+
 }

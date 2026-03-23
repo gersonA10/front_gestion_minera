@@ -46,7 +46,7 @@ class SurveillanceHistoryCard extends StatelessWidget {
                   width: 56,
                   height: 56,
                   decoration: BoxDecoration(
-                    color: colors.red.withOpacity(0.12),
+                    color: colors.red.withValues(alpha: 0.12),
                     borderRadius: BorderRadius.circular(16),
                   ),
                   child: Icon(
@@ -68,9 +68,9 @@ class SurveillanceHistoryCard extends StatelessWidget {
                   width: double.infinity,
                   padding: const EdgeInsets.all(14),
                   decoration: BoxDecoration(
-                    color: colors.red.withOpacity(0.06),
+                    color: colors.red.withValues(alpha: 0.06),
                     borderRadius: BorderRadius.circular(14),
-                    border: Border.all(color: colors.red.withOpacity(0.18)),
+                    border: Border.all(color: colors.red.withValues(alpha: 0.18)),
                   ),
                   child: Text(
                     rejectionReason,
@@ -125,7 +125,7 @@ class SurveillanceHistoryCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(12),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.04),
+            color: Colors.black.withValues(alpha: 0.04),
             blurRadius: 10,
             offset: const Offset(0, 4),
           ),
@@ -157,9 +157,9 @@ class SurveillanceHistoryCard extends StatelessWidget {
                         vertical: 4,
                       ),
                       decoration: BoxDecoration(
-                        color: statusColor.withOpacity(0.1),
+                        color: statusColor.withValues(alpha: 0.1),
                         borderRadius: BorderRadius.circular(20),
-                        border: Border.all(color: statusColor.withOpacity(0.3)),
+                        border: Border.all(color: statusColor.withValues(alpha: 0.3)),
                       ),
                       child: Text(
                         item.estado.toUpperCase(),
@@ -182,7 +182,7 @@ class SurveillanceHistoryCard extends StatelessWidget {
                   item.description,
                   style: AppTextStyles.mainStyle12(
                     context,
-                  ).copyWith(color: colors.lead.withOpacity(0.9)),
+                  ).copyWith(color: colors.lead.withValues(alpha: 0.9)),
                 ),
                 const SizedBox(height: 16),
                 Row(

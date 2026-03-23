@@ -169,7 +169,7 @@ Future<void> _selectCustomDate() async {
                     decoration: BoxDecoration(
                       color: colors.white,
                       borderRadius: BorderRadius.circular(12),
-                      border: Border.all(color: colors.lead.withOpacity(0.3)),
+                      border: Border.all(color: colors.lead.withValues(alpha: 0.3)),
                     ),
                     child: TextField(
                       controller: _searchController,
@@ -235,7 +235,7 @@ Future<void> _selectCustomDate() async {
                       decoration: BoxDecoration(
                         color: isActive ? colors.blue : colors.white,
                         borderRadius: BorderRadius.circular(20),
-                        border: Border.all(color: isActive ? colors.blue : colors.lead.withOpacity(0.3)),
+                        border: Border.all(color: isActive ? colors.blue : colors.lead.withValues(alpha: 0.3)),
                       ),
                       child: Text(
                         filter,
@@ -264,7 +264,7 @@ Future<void> _selectCustomDate() async {
         width: double.infinity,
         decoration: BoxDecoration(
           color: colors.bajo,
-          border: Border(top: BorderSide(color: colors.lead.withOpacity(0.2))),
+          border: Border(top: BorderSide(color: colors.lead.withValues(alpha: 0.2))),
         ),
         child: Stack(
           children: [
@@ -316,7 +316,7 @@ Future<void> _selectCustomDate() async {
                 child: LinearProgressIndicator(color: colors.blue, backgroundColor: Colors.transparent),
               ),
               Positioned.fill(
-                child: Container(color: colors.backgroundColor.withOpacity(0.4)),
+                child: Container(color: colors.backgroundColor.withValues(alpha: 0.4)),
               ),
             ]
           ],
@@ -335,7 +335,7 @@ Future<void> _selectCustomDate() async {
             title: 'TOTAL DISTRIBUIDO',
             amount: 'Bs ${_currentMetrics!.totalDistribuido.toStringAsFixed(0)}',
             bgColor: colors.blue,
-            titleColor: colors.white.withOpacity(0.8),
+            titleColor: colors.white.withValues(alpha: 0.8),
             amountColor: colors.white,
           ),
           CustomCardMetric(

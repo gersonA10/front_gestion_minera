@@ -7,4 +7,8 @@ abstract class TreasuryRepository {
   Future<DetailsofanapplicationResponseEntity> getDetailsofanapplication(
     String id,
   );
+  Future<FinancialReportEntity> getFinancialReport({
+    String period = 'month',
+    String? exactDate,
+  });
 }

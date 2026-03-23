@@ -28,4 +28,15 @@ class TreasuryRepositoryImpl implements TreasuryRepository {
   ) async {
     return await datasource.getDetailsofanapplication(id);
   }
+
+  @override
+  Future<FinancialReportEntity> getFinancialReport({
+    String period = 'month',
+    String? exactDate,
+  }) async {
+    return await datasource.getFinancialReport(
+      period: period,
+      exactDate: exactDate,
+    );
+  }
 }

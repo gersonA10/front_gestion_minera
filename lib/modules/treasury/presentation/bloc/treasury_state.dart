@@ -39,20 +39,6 @@ class DashboardDataLoaded extends TreasuryState {
   
 }
 
-// class BondBalanceError extends TreasuryState {
-//   final String message;
-
-//   BondBalanceError(this.message);
-// }
-
-// class BondBalanceLoaded extends TreasuryState {
-//   final BondBalanceResponseEntity bondBalance;
-
-//   BondBalanceLoaded({required this.bondBalance});
-// }
-
-///
-
 class DetailsofanapplicationLoading extends TreasuryState {}
 
 class DetailsofanapplicationError extends TreasuryState {
@@ -63,4 +49,19 @@ class DetailsofanapplicationError extends TreasuryState {
 class DetailsofanapplicationSuccess extends TreasuryState {
   final DetailsofanapplicationDataEntity data;
   DetailsofanapplicationSuccess({required this.data});
+}
+
+//reportes financieros
+class FinancialReportLoading extends TreasuryState {}
+
+class FinancialReportLoaded extends TreasuryState {
+  final FinancialReportEntity report;
+
+  FinancialReportLoaded({required this.report});
+}
+
+class FinancialReportError extends TreasuryState {
+  final String message;
+
+  FinancialReportError({required this.message});
 }
