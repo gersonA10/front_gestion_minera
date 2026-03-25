@@ -71,6 +71,20 @@ class TreasuryRepositoryImpl implements TreasuryRepository {
     final response = await datasource.registerUrgentIncome(requestModel);
     return response;
   }
+  
+  @override
+  Future<ConfirmPaymentResponseEntity> confirmPayment(String idCash, ConfirmPaymentRequetsEntity confirmPaymentRequets)async {
+    final requestModel = ConfirmPaymentRequestModel.fromEntity(confirmPaymentRequets);
+    final response = await datasource.confirmPayment(idCash, requestModel);
+    return response;
+  }
+  
+  @override
+  Future<RejectAnApplicationResponseEntity> rejectAnApplication(String idCash, String reason)async {
+   return await  datasource.rejectAnApplication(idCash, reason);
+  }
+  
+  
 
 
 }

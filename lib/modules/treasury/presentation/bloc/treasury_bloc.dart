@@ -1,5 +1,4 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:front_gestion_minera/modules/treasury/data/models/model.dart';
 import 'package:front_gestion_minera/modules/treasury/domain/entity/income_request_entity.dart';
 import 'package:front_gestion_minera/utils/error.dart';
 import '../../../../core/networking/base_api_exception.dart';
@@ -29,6 +28,10 @@ class TreasuryBloc extends Bloc<TreasuryEvent, TreasuryState> {
     on<GetFinancialReportEvent>(_onGetFinancialReportEvent);
     on<RegisterUrgentIncomeEvent>(_onRegisterUrgentIncome);
     on<GetCashRegistersEvent>(_onGetCashRegisters);
+    on<ConfirmPaymentEvent>(_onConfirmPayment);
+    on<RejectAnApplicationEvent>(_rejectAnApplication);
+
+
   }
 
   Future<void> _onFetchTreasuryMetrics(
@@ -199,6 +202,37 @@ class TreasuryBloc extends Bloc<TreasuryEvent, TreasuryState> {
       emit(CashRegistersError(mapErrorMessage(error.key)));
     } catch (e) {
       emit(CashRegistersError('Error inesperado: $e'));
+    }
+  }
+  Future<void> _onConfirmPayment(
+    ConfirmPaymentEvent event,
+    Emitter<TreasuryState> emit,
+  ) async {
+    emit(ConfirmPaymentLoading());
+    try {
+      final response = await repository.confirmPayment(event.idRequest, event.confirmPaymentRequets);
+      emit(ConfirmPaymentLoaded(confirmPayment: response));
+    } on BaseApiException catch (error) {
+      if (error.key == DioExceptionKey.unauthorised) {
+      return; 
+    }
+      emit(ConfirmPaymentError(message: error.message));
+    } catch (e) {
+      emit(ConfirmPaymentError(message: 'Error inesperado: $e'));
+    }
+  }
+  Future<void> _rejectAnApplication(
+    RejectAnApplicationEvent event,
+    Emitter<TreasuryState> emit,
+  ) async {
+    emit(RejectAnApplicationLoading());
+    try {
+      final response = await repository.rejectAnApplication(event.idCash, event.reason);
+      emit(RejectAnApplicationLoaded(data:response));
+    } on BaseApiException catch (error) {
+      emit(RejectAnApplicationError(message:  mapErrorMessage(error.key)));
+    } catch (e) {
+      emit(RejectAnApplicationError(message:  'Error inesperado: $e'));
     }
   }
 }

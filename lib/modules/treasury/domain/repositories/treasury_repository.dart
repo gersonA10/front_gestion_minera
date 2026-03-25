@@ -21,6 +21,9 @@ abstract class TreasuryRepository {
   Future<IncomeResponseEntity> registerUrgentIncome(IncomeRequestEntity request);
 
   Future<List<CashRegisterEntity>> getCashRegisters();
+  Future<ConfirmPaymentResponseEntity> confirmPayment(String idCash, ConfirmPaymentRequetsEntity confirmPaymentRequets);
+Future<RejectAnApplicationResponseEntity> rejectAnApplication(String idCash,
+    String reason,);
 
 
   

@@ -41,14 +41,15 @@ class RegisterUrgentIncomeEvent extends TreasuryEvent {
 
 class GetCashRegistersEvent extends TreasuryEvent {}
 
-class CashRegistersLoading extends TreasuryState {}
 
-class CashRegistersLoaded extends TreasuryState {
-  final List<CashRegisterEntity> cashRegisters;
-  CashRegistersLoaded({required this.cashRegisters});
+class ConfirmPaymentEvent extends TreasuryEvent {
+  final String idRequest;
+  final ConfirmPaymentRequetsEntity confirmPaymentRequets;
+  ConfirmPaymentEvent({required this.idRequest, required this.confirmPaymentRequets});
 }
 
-class CashRegistersError extends TreasuryState {
-  final String message;
-  CashRegistersError(this.message);
+class RejectAnApplicationEvent extends TreasuryEvent {
+   final String idCash;
+   final String reason;
+  RejectAnApplicationEvent({required this.idCash, required this.reason});
 }
