@@ -30,4 +30,9 @@ abstract class TreasuryRepository {
 
 
   Future<List<CashRegisterEntity>> getCashRegisters();
+
+  Future<PaymentHistoryResponseEntity> getPaymentHistory({
+    int page = 1,
+    int limit = 10,
+  });
 }

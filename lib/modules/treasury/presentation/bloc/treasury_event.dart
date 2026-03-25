@@ -47,6 +47,13 @@ class RegisterUrgentExpenseEvent extends TreasuryEvent {
 
 class GetCashRegistersEvent extends TreasuryEvent {}
 
+class GetPaymentHistoryEvent extends TreasuryEvent {
+  final bool isRefresh;
+  GetPaymentHistoryEvent({this.isRefresh = true});
+}
+
+class LoadMorePaymentHistoryEvent extends TreasuryEvent {}
+
 class CashRegistersLoading extends TreasuryState {}
 
 class CashRegistersLoaded extends TreasuryState {

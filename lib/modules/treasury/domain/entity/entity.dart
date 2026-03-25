@@ -9,3 +9,4 @@ export 'package:front_gestion_minera/modules/treasury/domain/entity/bond_balance
 export 'package:front_gestion_minera/modules/treasury/domain/entity/pending_applications_entity.dart';
 export 'package:front_gestion_minera/modules/treasury/domain/entity/details_of_an_aplication_entity.dart';
 export 'package:front_gestion_minera/modules/treasury/domain/entity/list_of_pending%20_request_entity.dart';
+export 'package:front_gestion_minera/modules/treasury/domain/entity/payment_history_entity.dart';

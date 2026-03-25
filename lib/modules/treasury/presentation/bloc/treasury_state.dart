@@ -115,3 +115,25 @@ class UrgentExpenseError extends TreasuryState {
   UrgentExpenseError({required this.message});
 }
 
+// Historial de pagos
+class PaymentHistoryLoading extends TreasuryState {}
+
+class PaymentHistoryLoaded extends TreasuryState {
+  final PaymentHistorySummaryEntity summary;
+  final List<PaymentHistoryItemEntity> items;
+  final bool hasReachedMax;
+  final int totalRecords;
+
+  PaymentHistoryLoaded({
+    required this.summary,
+    required this.items,
+    required this.hasReachedMax,
+    required this.totalRecords,
+  });
+}
+
+class PaymentHistoryError extends TreasuryState {
+  final String message;
+  PaymentHistoryError(this.message);
+}
+
