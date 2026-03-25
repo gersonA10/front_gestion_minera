@@ -94,6 +94,18 @@ class UrgentIncomeSuccess extends TreasuryState {
   UrgentIncomeSuccess({required this.response});
 }
 
+class CashRegistersLoading extends TreasuryState {}
+
+class CashRegistersLoaded extends TreasuryState {
+  final List<CashRegisterEntity> cashRegisters;
+  CashRegistersLoaded({required this.cashRegisters});
+}
+
+class CashRegistersError extends TreasuryState {
+  final String message;
+  CashRegistersError(this.message);
+}
+
 class UrgentIncomeError extends TreasuryState {
   final String message;
 
@@ -115,3 +127,30 @@ class UrgentExpenseError extends TreasuryState {
   UrgentExpenseError({required this.message});
 }
 
+//confirmar pago
+class ConfirmPaymentLoading extends TreasuryState {}
+
+class ConfirmPaymentLoaded extends TreasuryState {
+  final ConfirmPaymentResponseEntity confirmPayment;
+  ConfirmPaymentLoaded({required this.confirmPayment});
+}
+
+class ConfirmPaymentError extends TreasuryState {
+  final String message;
+
+  ConfirmPaymentError( {required this.message});
+}
+
+//rechasar pago
+class RejectAnApplicationLoading extends TreasuryState {}
+
+class RejectAnApplicationLoaded extends TreasuryState {
+  final RejectAnApplicationResponseEntity data;
+  RejectAnApplicationLoaded({required this.data});
+}
+
+class RejectAnApplicationError extends TreasuryState {
+  final String message;
+
+  RejectAnApplicationError( {required this.message});
+}
