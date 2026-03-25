@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 class TransactionActionButtonsWidget extends StatelessWidget {
   final VoidCallback onCancel;
-  final VoidCallback onSubmit;
+  final VoidCallback? onSubmit;
 
   const TransactionActionButtonsWidget({
     super.key,
