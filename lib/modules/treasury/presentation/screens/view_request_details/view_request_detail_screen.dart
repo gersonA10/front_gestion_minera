@@ -123,6 +123,7 @@ class _ViewRequestDetailsScreenState extends State<ViewRequestDetailsScreen> {
           body: BlocConsumer<TreasuryBloc, TreasuryState>(
             listener: (context, state) {
               if (state is DashboardDataError) {
+                context.router.back();
                 CustomAlert.show(
                   context,
                   title: 'Error',
@@ -424,7 +425,7 @@ class _ViewRequestDetailsScreenState extends State<ViewRequestDetailsScreen> {
                                 .saldoDisponible;
 
                             showConfirmPaymentDialog(
-                              context: context,
+                              parentContext: context,
                               monto: data.monto.toString(),
                               cajaSeleccionada: cajaNombre,
                               saldoActual: saldoDisponible.toDouble(),
@@ -460,6 +461,623 @@ class _ViewRequestDetailsScreenState extends State<ViewRequestDetailsScreen> {
           ),
         ),
       ),
+    );
+  }
+
+  void showConfirmPaymentDialog({
+    required BuildContext parentContext,
+    required String monto,
+    required String cajaSeleccionada,
+    required double saldoActual,
+    required double disponible,
+    required String idCash,
+    required String notaPago,
+    required File comprobante,
+    required String idPayment,
+  }) {
+    final bloc = parentContext.read<TreasuryBloc>();
+    final double montoNumerico = double.tryParse(monto) ?? 0.0;
+    final double saldoFinal = disponible - montoNumerico;
+
+    showDialog(
+      context: parentContext,
+      barrierDismissible: false,
+      builder: (dialogContext) {
+        return BlocProvider.value(
+          value: bloc,
+          child: BlocConsumer<TreasuryBloc, TreasuryState>(
+            listener: (context, state) {
+              if (state is ConfirmPaymentLoaded) {
+                Navigator.of(dialogContext).pop(); // cerrar diálogo
+                parentContext.router.back(); // volver de la pantalla detalle
+
+                WidgetsBinding.instance.addPostFrameCallback((_) {
+                  CustomAlert.show(
+                    parentContext,
+                    title: 'Éxito',
+                    message: state.confirmPayment.message,
+                    type: AlertType.success,
+                  );
+                });
+              }
+
+              if (state is ConfirmPaymentError) {
+                Navigator.of(dialogContext).pop(); // cerrar diálogo
+                parentContext.router.back(); // volver de la pantalla detalle
+
+                WidgetsBinding.instance.addPostFrameCallback((_) {
+                  CustomAlert.show(
+                    parentContext,
+                    title: 'Error',
+                    message: state.message,
+                    type: AlertType.error,
+                  );
+                });
+              }
+            },
+            builder: (context, state) {
+              final bool isLoading = state is ConfirmPaymentLoading;
+
+              return PopScope(
+                canPop: !isLoading,
+                child: Stack(
+                  children: [
+                    Dialog(
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 15),
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Padding(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 10,
+                              ),
+                              child: Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                children: [
+                                  const Text(
+                                    'Confirmar Desembolso',
+                                    style: TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 14,
+                                    ),
+                                  ),
+                                  IconButton(
+                                    icon: const Icon(
+                                      Icons.close,
+                                      color: Colors.grey,
+                                    ),
+                                    onPressed: isLoading
+                                        ? null
+                                        : () =>
+                                              Navigator.of(dialogContext).pop(),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            const Divider(),
+                            const SizedBox(height: 20),
+                            Container(
+                              padding: const EdgeInsets.all(16),
+                              decoration: BoxDecoration(
+                                color: const Color(0xFFF1F4FF),
+                                shape: BoxShape.circle,
+                              ),
+                              child: const Icon(
+                                Icons.payments_outlined,
+                                color: Color(0xFF295AF5),
+                                size: 25,
+                              ),
+                            ),
+                            const SizedBox(height: 16),
+                            const Text(
+                              '¿Estás seguro?',
+                              style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                fontSize: 18,
+                              ),
+                            ),
+                            const SizedBox(height: 8),
+                            const Padding(
+                              padding: EdgeInsets.symmetric(horizontal: 40),
+                              child: Text(
+                                'Estás a punto de autorizar un desembolso significativo.',
+                                textAlign: TextAlign.center,
+                                style: TextStyle(
+                                  color: Colors.grey,
+                                  fontSize: 12,
+                                ),
+                              ),
+                            ),
+                            const SizedBox(height: 24),
+                            Container(
+                              margin: const EdgeInsets.symmetric(
+                                horizontal: 20,
+                              ),
+                              padding: const EdgeInsets.all(16),
+                              decoration: BoxDecoration(
+                                color: Colors.white,
+                                borderRadius: BorderRadius.circular(12),
+                                border: Border.all(color: Colors.grey.shade100),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Colors.black.withValues(alpha: 0.02),
+                                    blurRadius: 10,
+                                  ),
+                                ],
+                              ),
+                              child: Column(
+                                children: [
+                                  _buildDialogRow(
+                                    'Monto a desembolsar',
+                                    monto,
+                                    isBold: true,
+                                  ),
+                                  const Divider(height: 24),
+                                  _buildDialogRow(
+                                    'Caja seleccionada',
+                                    cajaSeleccionada,
+                                  ),
+                                  const Divider(height: 24),
+                                  _buildDialogRow(
+                                    'Saldo actual',
+                                    disponible.toString(),
+                                  ),
+                                  const Divider(height: 24),
+                                  _buildDialogRow(
+                                    'Saldo final estimado',
+                                    '$saldoFinal',
+                                    color: const Color(0xFF295AF5),
+                                    isBold: true,
+                                  ),
+                                ],
+                              ),
+                            ),
+                            const SizedBox(height: 20),
+                            Container(
+                              margin: const EdgeInsets.symmetric(
+                                horizontal: 20,
+                              ),
+                              padding: const EdgeInsets.symmetric(vertical: 10),
+                              decoration: BoxDecoration(
+                                color: const Color(0xFFFFFBEB),
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: const [
+                                  Icon(
+                                    Icons.warning_amber_rounded,
+                                    color: Colors.orange,
+                                    size: 18,
+                                  ),
+                                  SizedBox(width: 8),
+                                  Text(
+                                    'ESTA ACCIÓN NO SE PUEDE DESHACER',
+                                    style: TextStyle(
+                                      color: Colors.orange,
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 10,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            const SizedBox(height: 24),
+                            Padding(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 20,
+                              ),
+                              child: Column(
+                                children: [
+                                  ElevatedButton(
+                                    onPressed: isLoading
+                                        ? null
+                                        : () {
+                                            final request =
+                                                ConfirmPaymentRequetsEntity(
+                                                  cajaOrigenId: idCash,
+                                                  notaPago: notaPago,
+                                                  comprobante: comprobante.path,
+                                                );
+
+                                            context.read<TreasuryBloc>().add(
+                                              ConfirmPaymentEvent(
+                                                idRequest: idPayment,
+                                                confirmPaymentRequets: request,
+                                              ),
+                                            );
+                                          },
+                                    style: ElevatedButton.styleFrom(
+                                      backgroundColor: const Color(0xFF295AF5),
+                                      minimumSize: const Size(
+                                        double.infinity,
+                                        50,
+                                      ),
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(12),
+                                      ),
+                                    ),
+                                    child: Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.center,
+                                      children: [
+                                        if (isLoading) ...[
+                                          const SizedBox(
+                                            width: 18,
+                                            height: 18,
+                                            child: CircularProgressIndicator(
+                                              strokeWidth: 2,
+                                              color: Colors.white,
+                                            ),
+                                          ),
+                                          const SizedBox(width: 10),
+                                          const Text(
+                                            'Procesando...',
+                                            style: TextStyle(
+                                              color: Colors.white,
+                                              fontWeight: FontWeight.bold,
+                                              fontSize: 10,
+                                            ),
+                                          ),
+                                        ] else ...[
+                                          const Icon(
+                                            Icons.check_circle_outline,
+                                            color: Colors.white,
+                                          ),
+                                          const SizedBox(width: 8),
+                                          const Text(
+                                            'Confirmar Pago',
+                                            style: TextStyle(
+                                              color: Colors.white,
+                                              fontWeight: FontWeight.bold,
+                                              fontSize: 10,
+                                            ),
+                                          ),
+                                        ],
+                                      ],
+                                    ),
+                                  ),
+                                  const SizedBox(height: 8),
+                                  TextButton(
+                                    onPressed: isLoading
+                                        ? null
+                                        : () =>
+                                              Navigator.of(dialogContext).pop(),
+                                    style: TextButton.styleFrom(
+                                      minimumSize: const Size(
+                                        double.infinity,
+                                        50,
+                                      ),
+                                    ),
+                                    child: const Text(
+                                      'Cancelar',
+                                      style: TextStyle(
+                                        color: Colors.grey,
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 10,
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+
+                    if (isLoading)
+                      Positioned.fill(
+                        child: AbsorbPointer(
+                          child: Container(
+                            decoration: BoxDecoration(
+                              color: Colors.black.withValues(alpha: 0.08),
+                              borderRadius: BorderRadius.circular(20),
+                            ),
+                          ),
+                        ),
+                      ),
+                  ],
+                ),
+              );
+            },
+          ),
+        );
+      },
+    );
+  }
+
+  void showRejectPaymentDialog(BuildContext parentContext, String idCash) {
+    final TextEditingController reasonController = TextEditingController();
+    final bloc = parentContext.read<TreasuryBloc>();
+
+    showDialog(
+      context: parentContext,
+      barrierDismissible: false,
+      builder: (dialogContext) {
+        return BlocProvider.value(
+          value: bloc,
+          child: BlocConsumer<TreasuryBloc, TreasuryState>(
+            listener: (context, state) {
+              if (state is RejectAnApplicationLoaded) {
+                Navigator.of(dialogContext).pop(); // cerrar diálogo
+                parentContext.router.back(); // volver pantalla detalle
+
+                WidgetsBinding.instance.addPostFrameCallback((_) {
+                  CustomAlert.show(
+                    parentContext,
+                    title: 'Éxito',
+                    message: 'La solicitud ha sido rechazada.',
+                    type: AlertType.success,
+                  );
+                });
+              }
+
+              if (state is RejectAnApplicationError) {
+                Navigator.of(dialogContext).pop(); // cerrar diálogo
+                parentContext.router.back(); // volver pantalla detalle
+
+                WidgetsBinding.instance.addPostFrameCallback((_) {
+                  CustomAlert.show(
+                    parentContext,
+                    title: 'Error',
+                    message: state.message,
+                    type: AlertType.error,
+                  );
+                });
+              }
+            },
+            builder: (context, state) {
+              final bool isLoading = state is RejectAnApplicationLoading;
+
+              return PopScope(
+                canPop: !isLoading,
+                child: Stack(
+                  children: [
+                    Dialog(
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                      insetPadding: const EdgeInsets.all(20),
+                      child: SingleChildScrollView(
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 20),
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Padding(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 20,
+                                ),
+                                child: Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    const Text(
+                                      'Rechazar Solicitud',
+                                      style: TextStyle(
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 16,
+                                      ),
+                                    ),
+                                    IconButton(
+                                      icon: const Icon(
+                                        Icons.close,
+                                        color: Colors.grey,
+                                      ),
+                                      onPressed: isLoading
+                                          ? null
+                                          : () => Navigator.of(
+                                              dialogContext,
+                                            ).pop(),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              const Divider(),
+                              const SizedBox(height: 16),
+                              Container(
+                                padding: const EdgeInsets.all(16),
+                                decoration: const BoxDecoration(
+                                  color: Color(0xFFFFF0F0),
+                                  shape: BoxShape.circle,
+                                ),
+                                child: const Icon(
+                                  Icons.cancel_outlined,
+                                  color: Colors.red,
+                                  size: 32,
+                                ),
+                              ),
+                              const SizedBox(height: 16),
+                              const Text(
+                                '¿Estás seguro?',
+                                style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 20,
+                                ),
+                              ),
+                              const SizedBox(height: 8),
+                              const Padding(
+                                padding: EdgeInsets.symmetric(horizontal: 30),
+                                child: Text(
+                                  'Por favor, indica el motivo del rechazo. Esta información será visible para el solicitante.',
+                                  textAlign: TextAlign.center,
+                                  style: TextStyle(
+                                    color: Colors.grey,
+                                    fontSize: 13,
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(height: 24),
+                              Padding(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 20,
+                                ),
+                                child: TextField(
+                                  controller: reasonController,
+                                  maxLines: 4,
+                                  maxLength: 250,
+                                  enabled: !isLoading,
+                                  decoration: InputDecoration(
+                                    hintText:
+                                        'Ej. Falta documentación de respaldo...',
+                                    hintStyle: const TextStyle(
+                                      color: Colors.grey,
+                                      fontSize: 13,
+                                    ),
+                                    filled: true,
+                                    fillColor: const Color(0xFFF8FAFC),
+                                    border: OutlineInputBorder(
+                                      borderRadius: BorderRadius.circular(12),
+                                      borderSide: BorderSide(
+                                        color: Colors.grey.shade200,
+                                      ),
+                                    ),
+                                    enabledBorder: OutlineInputBorder(
+                                      borderRadius: BorderRadius.circular(12),
+                                      borderSide: BorderSide(
+                                        color: Colors.grey.shade200,
+                                      ),
+                                    ),
+                                    focusedBorder: OutlineInputBorder(
+                                      borderRadius: BorderRadius.circular(12),
+                                      borderSide: const BorderSide(
+                                        color: Colors.red,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(height: 16),
+                              Padding(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 20,
+                                ),
+                                child: Column(
+                                  children: [
+                                    ElevatedButton(
+                                      onPressed: isLoading
+                                          ? null
+                                          : () {
+                                              final motivo = reasonController
+                                                  .text
+                                                  .trim();
+
+                                              if (motivo.isEmpty) {
+                                                CustomAlert.show(
+                                                  parentContext,
+                                                  title: 'Atención',
+                                                  message:
+                                                      'El motivo del rechazo es obligatorio',
+                                                  type: AlertType.error,
+                                                );
+                                                return;
+                                              }
+
+                                              context.read<TreasuryBloc>().add(
+                                                RejectAnApplicationEvent(
+                                                  reason: motivo,
+                                                  idCash: idCash,
+                                                ),
+                                              );
+                                            },
+                                      style: ElevatedButton.styleFrom(
+                                        backgroundColor: Colors.red,
+                                        minimumSize: const Size(
+                                          double.infinity,
+                                          50,
+                                        ),
+                                        shape: RoundedRectangleBorder(
+                                          borderRadius: BorderRadius.circular(
+                                            12,
+                                          ),
+                                        ),
+                                      ),
+                                      child: Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.center,
+                                        children: [
+                                          if (isLoading) ...[
+                                            const SizedBox(
+                                              width: 18,
+                                              height: 18,
+                                              child: CircularProgressIndicator(
+                                                strokeWidth: 2,
+                                                color: Colors.white,
+                                              ),
+                                            ),
+                                            const SizedBox(width: 10),
+                                            const Text(
+                                              'Procesando...',
+                                              style: TextStyle(
+                                                color: Colors.white,
+                                                fontWeight: FontWeight.bold,
+                                              ),
+                                            ),
+                                          ] else ...[
+                                            const Text(
+                                              'Confirmar Rechazo',
+                                              style: TextStyle(
+                                                color: Colors.white,
+                                                fontWeight: FontWeight.bold,
+                                              ),
+                                            ),
+                                          ],
+                                        ],
+                                      ),
+                                    ),
+                                    const SizedBox(height: 8),
+                                    TextButton(
+                                      onPressed: isLoading
+                                          ? null
+                                          : () => Navigator.of(
+                                              dialogContext,
+                                            ).pop(),
+                                      style: TextButton.styleFrom(
+                                        minimumSize: const Size(
+                                          double.infinity,
+                                          50,
+                                        ),
+                                      ),
+                                      child: const Text(
+                                        'Cancelar',
+                                        style: TextStyle(
+                                          color: Colors.grey,
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                    if (isLoading)
+                      Positioned.fill(
+                        child: AbsorbPointer(
+                          child: Container(
+                            decoration: BoxDecoration(
+                              color: Colors.black.withValues(alpha: 0.08),
+                              borderRadius: BorderRadius.circular(20),
+                            ),
+                          ),
+                        ),
+                      ),
+                  ],
+                ),
+              );
+            },
+          ),
+        );
+      },
     );
   }
 
@@ -634,462 +1252,6 @@ class _ViewRequestDetailsScreenState extends State<ViewRequestDetailsScreen> {
                 ],
               ),
       ),
-    );
-  }
-
-  void showConfirmPaymentDialog({
-    required BuildContext context,
-    required String monto,
-    required String cajaSeleccionada,
-    required double saldoActual,
-    required double disponible,
-    required String idCash,
-    required String notaPago,
-    required File comprobante,
-    required String idPayment,
-  }) {
-    final bloc = context.read<TreasuryBloc>();
-    final double montoNumerico = double.tryParse(monto) ?? 0.0;
-    final double saldoFinal = disponible - montoNumerico;
-    showDialog(
-      context: context,
-      builder: (_) {
-        return BlocProvider.value(
-          value: bloc,
-          child: BlocConsumer<TreasuryBloc, TreasuryState>(
-            listener: (context, state) {
-              if (state is ConfirmPaymentLoaded) {
-                 context.router.back();
-                CustomAlert.show(
-                  context,
-                  title: 'Exito',
-                  message: state.confirmPayment.message,
-                  type: AlertType.success,
-                );
-
-              }
-              if (state is ConfirmPaymentError) {
-                context.router.back();
-                CustomAlert.show(
-                  context,
-                  title: 'Error',
-                  message: state.message,
-                  type: AlertType.error,
-                );
-              }
-            },
-            builder: (context, state) {
-              return Dialog(
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(20),
-                ),
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 15),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 10),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            const Text(
-                              'Confirmar Desembolso',
-                              style: TextStyle(
-                                fontWeight: FontWeight.bold,
-                                fontSize: 14,
-                              ),
-                            ),
-                            IconButton(
-                              icon: const Icon(Icons.close, color: Colors.grey),
-                              onPressed: () => Navigator.pop(context),
-                            ),
-                          ],
-                        ),
-                      ),
-                      const Divider(),
-
-                      const SizedBox(height: 20),
-
-                      Container(
-                        padding: const EdgeInsets.all(16),
-                        decoration: BoxDecoration(
-                          color: const Color(0xFFF1F4FF),
-                          shape: BoxShape.circle,
-                        ),
-                        child: const Icon(
-                          Icons.payments_outlined,
-                          color: Color(0xFF295AF5),
-                          size: 25,
-                        ),
-                      ),
-                      const SizedBox(height: 16),
-                      const Text(
-                        '¿Estás seguro?',
-                        style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 18,
-                        ),
-                      ),
-                      const SizedBox(height: 8),
-                      const Padding(
-                        padding: EdgeInsets.symmetric(horizontal: 40),
-                        child: Text(
-                          'Estás a punto de autorizar un desembolso significativo.',
-                          textAlign: TextAlign.center,
-                          style: TextStyle(color: Colors.grey, fontSize: 12),
-                        ),
-                      ),
-                      const SizedBox(height: 24),
-                      Container(
-                        margin: const EdgeInsets.symmetric(horizontal: 20),
-                        padding: const EdgeInsets.all(16),
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(12),
-                          border: Border.all(color: Colors.grey.shade100),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black.withValues(alpha: 0.02),
-                              blurRadius: 10,
-                            ),
-                          ],
-                        ),
-                        child: Column(
-                          children: [
-                            _buildDialogRow(
-                              'Monto a desembolsar',
-                              monto,
-                              isBold: true,
-                            ),
-                            const Divider(height: 24),
-                            _buildDialogRow(
-                              'Caja seleccionada',
-                              cajaSeleccionada,
-                            ),
-                            const Divider(height: 24),
-                            _buildDialogRow(
-                              'Saldo actual',
-                              disponible.toString(),
-                            ),
-                            const Divider(height: 24),
-                            _buildDialogRow(
-                              'Saldo final estimado',
-                              '$saldoFinal',
-                              color: const Color(0xFF295AF5),
-                              isBold: true,
-                            ),
-                          ],
-                        ),
-                      ),
-                      const SizedBox(height: 20),
-                      Container(
-                        margin: const EdgeInsets.symmetric(horizontal: 20),
-                        padding: const EdgeInsets.symmetric(vertical: 10),
-                        decoration: BoxDecoration(
-                          color: const Color(0xFFFFFBEB),
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: const [
-                            Icon(
-                              Icons.warning_amber_rounded,
-                              color: Colors.orange,
-                              size: 18,
-                            ),
-                            SizedBox(width: 8),
-                            Text(
-                              'ESTA ACCIÓN NO SE PUEDE DESHACER',
-                              style: TextStyle(
-                                color: Colors.orange,
-                                fontWeight: FontWeight.bold,
-                                fontSize: 10,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                      const SizedBox(height: 24),
-                      Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 20),
-                        child: Column(
-                          children: [
-                            ElevatedButton(
-                              onPressed: () {
-                                final request = ConfirmPaymentRequetsEntity(
-                                  cajaOrigenId: idCash,
-                                  notaPago: notaPago,
-                                  comprobante: comprobante.path
-                                );
-                                context.read<TreasuryBloc>().add(
-                                  ConfirmPaymentEvent(
-                                    idRequest: idPayment,
-                                    confirmPaymentRequets: request,
-                                  ),
-                                );
-                              },
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: const Color(0xFF295AF5),
-                                minimumSize: const Size(double.infinity, 50),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(12),
-                                ),
-                              ),
-                              child: Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: const [
-                                  Icon(
-                                    Icons.check_circle_outline,
-                                    color: Colors.white,
-                                  ),
-                                  SizedBox(width: 8),
-                                  Text(
-                                    'Confirmar Pago',
-                                    style: TextStyle(
-                                      color: Colors.white,
-                                      fontWeight: FontWeight.bold,
-                                      fontSize: 10,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                            const SizedBox(height: 8),
-                            TextButton(
-                              onPressed: () => Navigator.pop(context),
-                              style: TextButton.styleFrom(
-                                minimumSize: const Size(double.infinity, 50),
-                              ),
-                              child: const Text(
-                                'Cancelar',
-                                style: TextStyle(
-                                  color: Colors.grey,
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 10,
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              );
-            },
-          ),
-        );
-      },
-    );
-  }
-
-  void showRejectPaymentDialog(BuildContext context, String idCash) {
-    final TextEditingController reasonController = TextEditingController();
-    final bloc = context.read<TreasuryBloc>();
-
-    showDialog(
-      context: context,
-      builder: (_) {
-        return BlocProvider.value(
-          value: bloc,
-          child: BlocConsumer<TreasuryBloc, TreasuryState>(
-            listener: (context, state) {
-              if (state is RejectAnApplicationLoaded) {
-                 context.router.back();
-                CustomAlert.show(
-                  context,
-                  title: 'Éxito',
-                  message:
-                      'La solicitud ha sido rechazada.', 
-                  type: AlertType.success,
-                );
-              }
-              if (state is RejectAnApplicationError) {
-                 context.router.back();
-                CustomAlert.show(
-                  context,
-                  title: 'Error',
-                  message: state.message,
-                  type: AlertType.error,
-                );
-              }
-            },
-            builder: (context, state) {
-              return Dialog(
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(20),
-                ),
-                insetPadding: const EdgeInsets.all(20),
-                child: SingleChildScrollView(
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 20),
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 20),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              const Text(
-                                'Rechazar Solicitud',
-                                style: TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 16,
-                                ),
-                              ),
-                              IconButton(
-                                icon: const Icon(
-                                  Icons.close,
-                                  color: Colors.grey,
-                                ),
-                                onPressed: () => Navigator.pop(context),
-                              ),
-                            ],
-                          ),
-                        ),
-                        const Divider(),
-
-                        const SizedBox(height: 16),
-
-                        Container(
-                          padding: const EdgeInsets.all(16),
-                          decoration: const BoxDecoration(
-                            color: Color(0xFFFFF0F0),
-                            shape: BoxShape.circle,
-                          ),
-                          child: const Icon(
-                            Icons.cancel_outlined,
-                            color: Colors.red,
-                            size: 32,
-                          ),
-                        ),
-                        const SizedBox(height: 16),
-                        const Text(
-                          '¿Estás seguro?',
-                          style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 20,
-                          ),
-                        ),
-                        const SizedBox(height: 8),
-                        const Padding(
-                          padding: EdgeInsets.symmetric(horizontal: 30),
-                          child: Text(
-                            'Por favor, indica el motivo del rechazo. Esta información será visible para el solicitante.',
-                            textAlign: TextAlign.center,
-                            style: TextStyle(color: Colors.grey, fontSize: 13),
-                          ),
-                        ),
-
-                        const SizedBox(height: 24),
-
-                        Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 20),
-                          child: TextField(
-                            controller: reasonController,
-                            maxLines: 4,
-                            maxLength: 250,
-                            decoration: InputDecoration(
-                              hintText:
-                                  'Ej. Falta documentación de respaldo...',
-                              hintStyle: const TextStyle(
-                                color: Colors.grey,
-                                fontSize: 13,
-                              ),
-                              filled: true,
-                              fillColor: const Color(0xFFF8FAFC),
-                              border: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(12),
-                                borderSide: BorderSide(
-                                  color: Colors.grey.shade200,
-                                ),
-                              ),
-                              enabledBorder: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(12),
-                                borderSide: BorderSide(
-                                  color: Colors.grey.shade200,
-                                ),
-                              ),
-                              focusedBorder: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(12),
-                                borderSide: const BorderSide(color: Colors.red),
-                              ),
-                            ),
-                          ),
-                        ),
-
-                        const SizedBox(height: 16),
-
-                        Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 20),
-                          child: Column(
-                            children: [
-                              ElevatedButton(
-                                onPressed: () {
-                                  final motivo = reasonController.text.trim();
-
-                                  if (motivo.isEmpty) {
-                                    CustomAlert.show(
-                                      context,
-                                      title: 'Atención',
-                                      message:
-                                          'El motivo del rechazo es obligatorio',
-                                      type: AlertType
-                                          .error, 
-                                    );
-                                    return;
-                                  }
-                                  context.read<TreasuryBloc>().add(
-                                    RejectAnApplicationEvent(
-                                      reason: motivo,
-                                      idCash: idCash,
-                                    ),
-                                  );
-                                  Navigator.pop(context);
-                                },
-                                style: ElevatedButton.styleFrom(
-                                  backgroundColor: Colors.red,
-                                  minimumSize: const Size(double.infinity, 50),
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(12),
-                                  ),
-                                ),
-                                child: const Text(
-                                  'Confirmar Rechazo',
-                                  style: TextStyle(
-                                    color: Colors.white,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
-                              ),
-                              const SizedBox(height: 8),
-                              TextButton(
-                                onPressed: () => Navigator.pop(context),
-                                style: TextButton.styleFrom(
-                                  minimumSize: const Size(double.infinity, 50),
-                                ),
-                                child: const Text(
-                                  'Cancelar',
-                                  style: TextStyle(
-                                    color: Colors.grey,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              );
-            },
-          ),
-        );
-      },
     );
   }
 

@@ -39,6 +39,12 @@ class RegisterUrgentIncomeEvent extends TreasuryEvent {
   RegisterUrgentIncomeEvent({required this.request});
 }
 
+class RegisterUrgentExpenseEvent extends TreasuryEvent {
+  final ExpenseRequestEntity request;
+
+  RegisterUrgentExpenseEvent({required this.request});
+}
+
 class GetCashRegistersEvent extends TreasuryEvent {}
 
 

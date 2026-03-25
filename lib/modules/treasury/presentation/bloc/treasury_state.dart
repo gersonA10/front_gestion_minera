@@ -112,10 +112,19 @@ class UrgentIncomeError extends TreasuryState {
   UrgentIncomeError({required this.message});
 }
 
-class NetworkError extends TreasuryState {
+// Egreso urgente
+class UrgentExpenseLoading extends TreasuryState {}
+
+class UrgentExpenseSuccess extends TreasuryState {
+  final ExpenseResponseEntity response;
+
+  UrgentExpenseSuccess({required this.response});
+}
+
+class UrgentExpenseError extends TreasuryState {
   final String message;
 
-  NetworkError({required this.message});
+  UrgentExpenseError({required this.message});
 }
 
 //confirmar pago

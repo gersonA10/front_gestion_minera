@@ -148,6 +148,23 @@ class TreasuryDatasource {
       operationName: 'rejectAnApplication',
     );
 
-    return RejectAnApplicationResponseModel.fromJson(response);
+    return RejectAnApplicationResponseModel.fromJson(response);}
+    Future<ExpenseResponseModel> registerUrgentExpense(
+    ExpenseRequestModel expenseRequestModel,
+  ) async {
+    final response = await apiClient.postFormData(
+      '/api/treasury/urgent/expense',
+      data: expenseRequestModel.toFormDataMap(),
+      operationName: 'registerUrgentIncome',
+      files: [
+        {
+          'name': 'evidencia',
+          'path': expenseRequestModel.evidenceUrlPath,
+          'filename': expenseRequestModel.evidenceUrlPath.split('/').last
+        }
+      ]
+    );
+
+    return ExpenseResponseModel.fromJson(response['data']);
   }
 }

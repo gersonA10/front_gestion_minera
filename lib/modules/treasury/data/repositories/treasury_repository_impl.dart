@@ -85,6 +85,11 @@ class TreasuryRepositoryImpl implements TreasuryRepository {
   }
   
   
+  Future<ExpenseResponseEntity> registerUrgentExpense(ExpenseRequestEntity request) async {
+    final requestModel = ExpenseRequestModel.fromEntity(request);
+    final response = await datasource.registerUrgentExpense(requestModel);
+    return response;
+  }
 
 
 }

@@ -32,6 +32,7 @@ class TreasuryBloc extends Bloc<TreasuryEvent, TreasuryState> {
     on<RejectAnApplicationEvent>(_rejectAnApplication);
 
 
+    on<RegisterUrgentExpenseEvent>(_onRegisterUrgentExpense);
   }
 
   Future<void> _onFetchTreasuryMetrics(
@@ -183,9 +184,27 @@ class TreasuryBloc extends Bloc<TreasuryEvent, TreasuryState> {
       if (error.key == DioExceptionKey.unauthorised) {
       return; 
     }
-      emit(NetworkError(message: mapErrorMessage(error.key)));
+      emit(UrgentExpenseError(message: mapErrorMessage(error.key)));
     } catch (e) {
       emit(UrgentIncomeError(message: 'Error inesperado: $e'));
+    }
+  }
+
+    Future<void> _onRegisterUrgentExpense(
+    RegisterUrgentExpenseEvent event,
+    Emitter<TreasuryState> emit,
+  ) async {
+    emit(UrgentExpenseLoading());
+    try {
+      final response = await repository.registerUrgentExpense(event.request);
+      emit(UrgentExpenseSuccess(response: response));
+    } on BaseApiException catch (error) {
+      if (error.key == DioExceptionKey.unauthorised) {
+      return; 
+    }
+      emit(UrgentExpenseError(message: error.message));
+    } catch (e) {
+      emit(UrgentExpenseError(message: 'Error inesperado: $e'));
     }
   }
 
@@ -199,6 +218,9 @@ class TreasuryBloc extends Bloc<TreasuryEvent, TreasuryState> {
       cashRegisters = registers; 
       emit(CashRegistersLoaded(cashRegisters: registers));
     } on BaseApiException catch (error) {
+       if (error.key == DioExceptionKey.unauthorised) {
+      return; 
+    }
       emit(CashRegistersError(mapErrorMessage(error.key)));
     } catch (e) {
       emit(CashRegistersError('Error inesperado: $e'));
