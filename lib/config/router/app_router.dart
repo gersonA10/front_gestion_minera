@@ -12,7 +12,6 @@ class AppRouter extends RootStackRouter {
   List<AutoRoute> get routes => [
     AutoRoute(page: AuthRoute.page, initial: true, guards: [authGuard]),
     AutoRoute(page: PartnersRoute.page),
-    AutoRoute(page: TreasuryRoute.page),
     AutoRoute(page: ContributeHistoryRoute.page),
     AutoRoute(page: LoanHistoryRoute.page),
     AutoRoute(page: DistributesRoute.page),
@@ -27,6 +26,10 @@ class AppRouter extends RootStackRouter {
     AutoRoute(page: GoldDashboardRoute.page),
     AutoRoute(page: LoansHomeRoute.page),
     AutoRoute(page: DistributeHomeRoute.page),
-    AutoRoute(page: ContributesHomeRoute.page)
+    AutoRoute(page: ContributesHomeRoute.page),
+    AutoRoute(page: ViewRequestDetailsRoute.page),
+    AutoRoute(page: PendingApplicationsRoute.page),
+    AutoRoute(page: FinancialReportsRoute.page),
+    AutoRoute(page: UrgentTransactionRoute.page),
   ];
 }

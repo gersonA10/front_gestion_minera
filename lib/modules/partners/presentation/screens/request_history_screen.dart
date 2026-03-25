@@ -96,7 +96,7 @@ class _RequestHistoryScreenState extends State<RequestHistoryScreen>
               centerTitle: true,
               leading: IconButton(
                 icon: Icon(Icons.arrow_back_ios_new, color: colors.blue),
-                onPressed: () => context.router.back(),
+                onPressed: () => context.router.back()
               ),
               title: Text(
                 'Historial de solicitudes',
@@ -455,7 +455,7 @@ class _RequestCard extends StatelessWidget {
                   width: 56,
                   height: 56,
                   decoration: BoxDecoration(
-                    color: colors.red.withOpacity(0.12),
+                    color: colors.red.withValues(alpha: 0.12),
                     borderRadius: BorderRadius.circular(16),
                   ),
                   child: Icon(
@@ -477,9 +477,9 @@ class _RequestCard extends StatelessWidget {
                   width: double.infinity,
                   padding: const EdgeInsets.all(14),
                   decoration: BoxDecoration(
-                    color: colors.red.withOpacity(0.06),
+                    color: colors.red.withValues(alpha: 0.06),
                     borderRadius: BorderRadius.circular(14),
-                    border: Border.all(color: colors.red.withOpacity(0.18)),
+                    border: Border.all(color: colors.red.withValues(alpha: 0.18)),
                   ),
                   child: Text(
                     rejectionReason,
@@ -544,7 +544,7 @@ class _RequestCard extends StatelessWidget {
           borderRadius: BorderRadius.circular(12),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.03),
+              color: Colors.black.withValues(alpha: 0.03),
               blurRadius: 10,
               offset: const Offset(0, 4),
             ),
@@ -563,7 +563,7 @@ class _RequestCard extends StatelessWidget {
                   Container(
                     padding: const EdgeInsets.all(12),
                     decoration: BoxDecoration(
-                      color: statusColor.withOpacity(0.1),
+                      color: statusColor.withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(10),
                     ),
                     child: Icon(
@@ -647,7 +647,7 @@ class _RequestCard extends StatelessWidget {
                     Icon(
                       Icons.arrow_forward_ios_rounded,
                       size: 14,
-                      color: colors.lead.withOpacity(0.6),
+                      color: colors.lead.withValues(alpha: 0.6),
                     ),
                 ],
               ),

@@ -28,7 +28,7 @@ class MetricCard extends StatelessWidget {
         border: Border.all(color: const Color(0xFFF0F2F5)),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.025),
+            color: Colors.black.withValues(alpha: 0.025),
             blurRadius: 14,
             offset: const Offset(0, 5),
           ),

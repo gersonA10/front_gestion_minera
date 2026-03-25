@@ -142,7 +142,7 @@ class _LoanScreenState extends State<LoanScreen>
                     child: Row(
                       children: [
                         IconButton(
-                          onPressed: () => Navigator.pop(context),
+                          onPressed: () => context.router.back(),
                           icon: const Icon(Icons.arrow_back_ios_new),
                         ),
                         const Expanded(

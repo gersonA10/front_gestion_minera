@@ -98,7 +98,7 @@ Future<void> _selectCustomDate() async {
                     decoration: BoxDecoration(
                       color: colors.white,
                       borderRadius: BorderRadius.circular(12),
-                      border: Border.all(color: colors.lead.withOpacity(0.3)),
+                      border: Border.all(color: colors.lead.withValues(alpha: 0.3)),
                     ),
                     child: TextField(
                       controller: _searchController,
@@ -168,7 +168,7 @@ Future<void> _selectCustomDate() async {
                         color: isActive ? colors.blue : colors.white,
                         borderRadius: BorderRadius.circular(20),
                         border: Border.all(
-                          color: isActive ? colors.blue : colors.lead.withOpacity(0.3),
+                          color: isActive ? colors.blue : colors.lead.withValues(alpha: 0.3),
                         ),
                       ),
                       child: Text(
@@ -199,7 +199,7 @@ Future<void> _selectCustomDate() async {
         width: double.infinity,
         decoration: BoxDecoration(
           color: colors.bajo,
-          border: Border(top: BorderSide(color: colors.lead.withOpacity(0.2))),
+          border: Border(top: BorderSide(color: colors.lead.withValues(alpha: 0.2))),
         ),
         child: Stack(
           children: [
@@ -254,7 +254,7 @@ Future<void> _selectCustomDate() async {
                 child: LinearProgressIndicator(color: colors.blue, backgroundColor: Colors.transparent),
               ),
               Positioned.fill(
-                child: Container(color: colors.backgroundColor.withOpacity(0.4)),
+                child: Container(color: colors.backgroundColor.withValues(alpha: 0.4)),
               ),
             ]
           ],
@@ -361,7 +361,7 @@ class ContributionSummaryCard extends StatelessWidget {
         children: [
           Text(
             "Total Aportado",
-            style: AppTextStyles.mainStyle12(context).copyWith(color: colors.white.withOpacity(0.8)),
+            style: AppTextStyles.mainStyle12(context).copyWith(color: colors.white.withValues(alpha: 0.8)),
           ),
           const SizedBox(height: 4),
           Text(
@@ -375,7 +375,7 @@ class ContributionSummaryCard extends StatelessWidget {
                 child: Container(
                   padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
                   decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.15),
+                    color: Colors.white.withValues(alpha: 0.15),
                     borderRadius: BorderRadius.circular(10),
                   ),
                   child: Column(
@@ -383,7 +383,7 @@ class ContributionSummaryCard extends StatelessWidget {
                     children: [
                       Text(
                         "CONFIRMADO",
-                        style: TextStyle(fontWeight: FontWeight.bold, color: colors.white.withOpacity(0.7), fontSize: 9),
+                        style: TextStyle(fontWeight: FontWeight.bold, color: colors.white.withValues(alpha: 0.7), fontSize: 9),
                       ),
                       const SizedBox(height: 4),
                       Text(
@@ -399,7 +399,7 @@ class ContributionSummaryCard extends StatelessWidget {
                 child: Container(
                   padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
                   decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.15),
+                    color: Colors.white.withValues(alpha: 0.15),
                     borderRadius: BorderRadius.circular(10),
                   ),
                   child: Column(
@@ -407,7 +407,7 @@ class ContributionSummaryCard extends StatelessWidget {
                     children: [
                       Text(
                         "PENDIENTE",
-                        style: TextStyle(fontWeight: FontWeight.bold, color: colors.white.withOpacity(0.7), fontSize: 9),
+                        style: TextStyle(fontWeight: FontWeight.bold, color: colors.white.withValues(alpha: 0.7), fontSize: 9),
                       ),
                       const SizedBox(height: 4),
                       Text(
@@ -448,7 +448,7 @@ class ContributionCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.02),
+            color: Colors.black.withValues(alpha: 0.02),
             blurRadius: 10,
             offset: const Offset(0, 4),
           ),
@@ -469,7 +469,7 @@ class ContributionCard extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                 decoration: BoxDecoration(
-                  color: statusColor.withOpacity(0.1),
+                  color: statusColor.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(20),
                 ),
                 child: Text(
