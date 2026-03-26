@@ -47,6 +47,19 @@ class RegisterUrgentExpenseEvent extends TreasuryEvent {
 
 class GetCashRegistersEvent extends TreasuryEvent {}
 
+
+class ConfirmPaymentEvent extends TreasuryEvent {
+  final String idRequest;
+  final ConfirmPaymentRequetsEntity confirmPaymentRequets;
+  ConfirmPaymentEvent({required this.idRequest, required this.confirmPaymentRequets});
+}
+
+class RejectAnApplicationEvent extends TreasuryEvent {
+   final String idCash;
+   final String reason;
+  RejectAnApplicationEvent({required this.idCash, required this.reason});
+}
+
 class GetPaymentHistoryEvent extends TreasuryEvent {
   final bool isRefresh;
   GetPaymentHistoryEvent({this.isRefresh = true});
@@ -55,13 +68,3 @@ class GetPaymentHistoryEvent extends TreasuryEvent {
 class LoadMorePaymentHistoryEvent extends TreasuryEvent {}
 
 class CashRegistersLoading extends TreasuryState {}
-
-class CashRegistersLoaded extends TreasuryState {
-  final List<CashRegisterEntity> cashRegisters;
-  CashRegistersLoaded({required this.cashRegisters});
-}
-
-class CashRegistersError extends TreasuryState {
-  final String message;
-  CashRegistersError(this.message);
-}

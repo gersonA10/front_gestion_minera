@@ -286,8 +286,12 @@ class HomeBody extends StatelessWidget {
                         itemBuilder: (context, index) {
                           final data = state.pendingApplicationsResponseEntity.data[index];
                           return GestureDetector(
-                            onTap: (){
-                              InjectorContainer.getIt<AppRouter>().push(ViewRequestDetailsRoute(id: data.requestId));
+                            onTap: ()async{
+
+                              await InjectorContainer.getIt<AppRouter>().push(ViewRequestDetailsRoute(id: data.requestId));
+                              if (context.mounted) {
+                                context.read<TreasuryBloc>().add(DashboardDataEvent());
+                              }
                             },
                             child: RequestTile(
                               title: data.motivo,

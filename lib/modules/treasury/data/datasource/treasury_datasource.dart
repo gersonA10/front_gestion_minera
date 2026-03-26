@@ -1,5 +1,3 @@
-
-import 'package:front_gestion_minera/modules/treasury/data/models/financial_report_model.dart';
 import '../../../../core/networking/http_services.dart';
 import '../../domain/entity/entity.dart';
 import '../models/model.dart';
@@ -42,16 +40,14 @@ class TreasuryDatasource {
     );
     return DetailsofanapplicationResponseModel.fromJson(response);
   }
-  
-  Future<CashResponseEntity> getCash(
-  ) async {
+
+  Future<CashResponseEntity> getCash() async {
     final response = await apiClient.get(
       '/api/treasury/cash-registers',
       operationName: 'getCash',
     );
     return CashResponseModel.fromJson(response);
   }
-
 
   Future<Map<String, dynamic>> listOfPendingRequests({
     int page = 1,
@@ -73,7 +69,8 @@ class TreasuryDatasource {
       'has_more_data': meta['has_more_data'] ?? false,
 
       'total_records': meta['total_records'] ?? 0,
-    };}
+    };
+  }
 
   Future<FinancialReportModel> getFinancialReport({
     String period = 'month',
@@ -98,7 +95,7 @@ class TreasuryDatasource {
       '/api/treasury/cash-registers',
       operationName: 'getCashRegisters',
     );
-    
+
     final List data = response['data'];
     return data.map((e) => CashRegisterModel.fromJson(e)).toList();
   }
@@ -114,15 +111,64 @@ class TreasuryDatasource {
         {
           'name': 'evidencia',
           'path': incomeRequestModel.evidenceUrlPath,
-          'filename': incomeRequestModel.evidenceUrlPath.split('/').last
-        }
-      ]
+          'filename': incomeRequestModel.evidenceUrlPath.split('/').last,
+        },
+      ],
     );
 
     return IncomeResponseModel.fromJson(response['data']);
   }
 
-    Future<Map<String, dynamic>> getPaymentHistory({
+  Future<ConfirmPaymentResponseModel> confirmPayment(
+    String idRequest,
+    ConfirmPaymentRequestModel confirmPaymentRequets,
+  ) async {
+    final response = await apiClient.postFormData(
+      '/api/treasury/requests/$idRequest/disburse',
+      data: confirmPaymentRequets.toFormDataMap(),
+      operationName: 'confirmPayment',
+      files: [
+        {
+          'name': 'comprobante',
+          'path': confirmPaymentRequets.comprobante,
+          'filename': confirmPaymentRequets.comprobante.split('/').last,
+        },
+      ],
+    );
+    return ConfirmPaymentResponseModel.fromJson(response);
+  }
+
+  Future<RejectAnApplicationResponseEntity> rejectAnApplication(
+    String idCash,
+    String reason,
+  ) async {
+    final response = await apiClient.post(
+      '/api/treasury/requests/$idCash/reject-payment',
+      data: {"reason": reason},
+      operationName: 'rejectAnApplication',
+    );
+
+    return RejectAnApplicationResponseModel.fromJson(response);}
+    Future<ExpenseResponseModel> registerUrgentExpense(
+    ExpenseRequestModel expenseRequestModel,
+  ) async {
+    final response = await apiClient.postFormData(
+      '/api/treasury/urgent/expense',
+      data: expenseRequestModel.toFormDataMap(),
+      operationName: 'registerUrgentIncome',
+      files: [
+        {
+          'name': 'evidencia',
+          'path': expenseRequestModel.evidenceUrlPath,
+          'filename': expenseRequestModel.evidenceUrlPath.split('/').last
+        }
+      ]
+    );
+
+    return ExpenseResponseModel.fromJson(response['data']);
+  }
+
+      Future<Map<String, dynamic>> getPaymentHistory({
     int page = 1,
     int limit = 10,
   }) async {
@@ -146,24 +192,5 @@ class TreasuryDatasource {
       'has_more_data': meta['has_more_data'] ?? false,
       'total_records': meta['total_records'] ?? 0,
     };
-  }
-
-  Future<ExpenseResponseModel> registerUrgentExpense(
-    ExpenseRequestModel expenseRequestModel,
-  ) async {
-    final response = await apiClient.postFormData(
-      '/api/treasury/urgent/expense',
-      data: expenseRequestModel.toFormDataMap(),
-      operationName: 'registerUrgentIncome',
-      files: [
-        {
-          'name': 'evidencia',
-          'path': expenseRequestModel.evidenceUrlPath,
-          'filename': expenseRequestModel.evidenceUrlPath.split('/').last
-        }
-      ]
-    );
-
-    return ExpenseResponseModel.fromJson(response['data']);
   }
 }

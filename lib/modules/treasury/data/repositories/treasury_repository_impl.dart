@@ -73,6 +73,25 @@ class TreasuryRepositoryImpl implements TreasuryRepository {
   }
   
   @override
+  Future<ConfirmPaymentResponseEntity> confirmPayment(String idCash, ConfirmPaymentRequetsEntity confirmPaymentRequets)async {
+    final requestModel = ConfirmPaymentRequestModel.fromEntity(confirmPaymentRequets);
+    final response = await datasource.confirmPayment(idCash, requestModel);
+    return response;
+  }
+  
+  @override
+  Future<RejectAnApplicationResponseEntity> rejectAnApplication(String idCash, String reason)async {
+   return await  datasource.rejectAnApplication(idCash, reason);
+  }
+  
+  
+  Future<ExpenseResponseEntity> registerUrgentExpense(ExpenseRequestEntity request) async {
+    final requestModel = ExpenseRequestModel.fromEntity(request);
+    final response = await datasource.registerUrgentExpense(requestModel);
+    return response;
+  }
+
+    @override
   Future<PaymentHistoryResponseEntity> getPaymentHistory({
     int page = 1,
     int limit = 10,
@@ -85,13 +104,6 @@ class TreasuryRepositoryImpl implements TreasuryRepository {
       hasMoreData: result['has_more_data'] as bool,
       totalRecords: result['total_records'] as int? ?? 0,
     );
-  }
-
-  @override
-  Future<ExpenseResponseEntity> registerUrgentExpense(ExpenseRequestEntity request) async {
-    final requestModel = ExpenseRequestModel.fromEntity(request);
-    final response = await datasource.registerUrgentExpense(requestModel);
-    return response;
   }
 
 
