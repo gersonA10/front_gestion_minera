@@ -91,5 +91,20 @@ class TreasuryRepositoryImpl implements TreasuryRepository {
     return response;
   }
 
+    @override
+  Future<PaymentHistoryResponseEntity> getPaymentHistory({
+    int page = 1,
+    int limit = 10,
+  }) async {
+    final result = await datasource.getPaymentHistory(page: page, limit: limit);
+    final models = result['items'] as List<PaymentHistoryItemModel>;
+    return PaymentHistoryResponseEntity(
+      summary: result['summary'] as PaymentHistorySummaryEntity,
+      items: models,
+      hasMoreData: result['has_more_data'] as bool,
+      totalRecords: result['total_records'] as int? ?? 0,
+    );
+  }
+
 
 }

@@ -167,4 +167,30 @@ class TreasuryDatasource {
 
     return ExpenseResponseModel.fromJson(response['data']);
   }
+
+      Future<Map<String, dynamic>> getPaymentHistory({
+    int page = 1,
+    int limit = 10,
+  }) async {
+    final Map<String, dynamic> queryParameters = {'page': page, 'limit': limit};
+
+    final response = await apiClient.get(
+      '/api/treasury/transactions/history',
+      operationName: 'getPaymentHistory',
+      queryParameters: queryParameters,
+    );
+
+    final List<dynamic> data = response['data'] ?? [];
+    final Map<String, dynamic> meta = response['meta'] ?? {};
+    final Map<String, dynamic> summary = response['summary'] ?? {};
+
+    return {
+      'items': data
+          .map((item) => PaymentHistoryItemModel.fromJson(item))
+          .toList(),
+      'summary': PaymentHistorySummaryModel.fromJson(summary),
+      'has_more_data': meta['has_more_data'] ?? false,
+      'total_records': meta['total_records'] ?? 0,
+    };
+  }
 }

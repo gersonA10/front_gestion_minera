@@ -59,3 +59,12 @@ class RejectAnApplicationEvent extends TreasuryEvent {
    final String reason;
   RejectAnApplicationEvent({required this.idCash, required this.reason});
 }
+
+class GetPaymentHistoryEvent extends TreasuryEvent {
+  final bool isRefresh;
+  GetPaymentHistoryEvent({this.isRefresh = true});
+}
+
+class LoadMorePaymentHistoryEvent extends TreasuryEvent {}
+
+class CashRegistersLoading extends TreasuryState {}

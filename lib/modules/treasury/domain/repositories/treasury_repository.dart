@@ -1,4 +1,3 @@
-
 import '../entity/entity.dart';
 import '../entity/income_request_entity.dart';
 
@@ -28,12 +27,18 @@ abstract class TreasuryRepository {
     ExpenseRequestEntity request,
   );
 
-
   Future<List<CashRegisterEntity>> getCashRegisters();
-  Future<ConfirmPaymentResponseEntity> confirmPayment(String idCash, ConfirmPaymentRequetsEntity confirmPaymentRequets);
-Future<RejectAnApplicationResponseEntity> rejectAnApplication(String idCash,
-    String reason,);
+  Future<ConfirmPaymentResponseEntity> confirmPayment(
+    String idCash,
+    ConfirmPaymentRequetsEntity confirmPaymentRequets,
+  );
+  Future<RejectAnApplicationResponseEntity> rejectAnApplication(
+    String idCash,
+    String reason,
+  );
 
-
-  
+  Future<PaymentHistoryResponseEntity> getPaymentHistory({
+    int page = 1,
+    int limit = 10,
+  });
 }

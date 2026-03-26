@@ -12,11 +12,17 @@ class TreasuryBloc extends Bloc<TreasuryEvent, TreasuryState> {
   int _currentPage = 1;
   bool _hasReachedMax = false;
   int _currentTotalRecords = 0;
-    List<ListOfPendingDataEntity> _items = [];
+  List<ListOfPendingDataEntity> _items = [];
 
   final TreasuryRepository repository;
 
   List<CashRegisterEntity> cashRegisters = [];
+
+  int _paymentHistoryPage = 1;
+  bool _paymentHistoryReachedMax = false;
+  int _paymentHistoryTotalRecords = 0;
+  List<PaymentHistoryItemEntity> _paymentHistoryItems = [];
+  PaymentHistorySummaryEntity? _paymentHistorySummary;
 
   TreasuryBloc({required this.repository}) : super(TreasuryInitial()) {
     on<FetchTreasuryMetricsEvent>(_onFetchTreasuryMetrics);
@@ -31,8 +37,9 @@ class TreasuryBloc extends Bloc<TreasuryEvent, TreasuryState> {
     on<ConfirmPaymentEvent>(_onConfirmPayment);
     on<RejectAnApplicationEvent>(_rejectAnApplication);
 
-
     on<RegisterUrgentExpenseEvent>(_onRegisterUrgentExpense);
+    on<GetPaymentHistoryEvent>(_onGetPaymentHistory);
+    on<LoadMorePaymentHistoryEvent>(_onLoadMorePaymentHistory);
   }
 
   Future<void> _onFetchTreasuryMetrics(
@@ -79,11 +86,13 @@ class TreasuryBloc extends Bloc<TreasuryEvent, TreasuryState> {
     try {
       final response = await repository.getDetailsofanapplication(event.id);
       final responseCash = await repository.getCash();
-      emit(DetailsofanapplicationSuccess(data: response.data, cash: responseCash));
+      emit(
+        DetailsofanapplicationSuccess(data: response.data, cash: responseCash),
+      );
     } on BaseApiException catch (error) {
-      emit(DetailsofanapplicationError(message:  mapErrorMessage(error.key)));
+      emit(DetailsofanapplicationError(message: mapErrorMessage(error.key)));
     } catch (e) {
-      emit(DetailsofanapplicationError(message:  'Error inesperado: $e'));
+      emit(DetailsofanapplicationError(message: 'Error inesperado: $e'));
     }
   }
 
@@ -110,7 +119,9 @@ class TreasuryBloc extends Bloc<TreasuryEvent, TreasuryState> {
     }
 
     try {
-      final response = await repository.listOfPendingRequests(page: _currentPage);
+      final response = await repository.listOfPendingRequests(
+        page: _currentPage,
+      );
       _items = response.items;
       _hasReachedMax = !response.hasMoreData;
       _currentTotalRecords = response.totalRecords;
@@ -128,14 +139,16 @@ class TreasuryBloc extends Bloc<TreasuryEvent, TreasuryState> {
     }
   }
 
-   Future<void> _loadMorePendingRequests(
+  Future<void> _loadMorePendingRequests(
     LoadMorePendingEvent event,
     Emitter<TreasuryState> emit,
   ) async {
     if (_hasReachedMax) return;
     _currentPage++;
     try {
-      final response = await repository.listOfPendingRequests(page: _currentPage);
+      final response = await repository.listOfPendingRequests(
+        page: _currentPage,
+      );
 
       _items.addAll(response.items);
 
@@ -182,15 +195,15 @@ class TreasuryBloc extends Bloc<TreasuryEvent, TreasuryState> {
       emit(UrgentIncomeSuccess(response: response));
     } on BaseApiException catch (error) {
       if (error.key == DioExceptionKey.unauthorised) {
-      return; 
-    }
+        return;
+      }
       emit(UrgentExpenseError(message: mapErrorMessage(error.key)));
     } catch (e) {
       emit(UrgentIncomeError(message: 'Error inesperado: $e'));
     }
   }
 
-    Future<void> _onRegisterUrgentExpense(
+  Future<void> _onRegisterUrgentExpense(
     RegisterUrgentExpenseEvent event,
     Emitter<TreasuryState> emit,
   ) async {
@@ -200,8 +213,8 @@ class TreasuryBloc extends Bloc<TreasuryEvent, TreasuryState> {
       emit(UrgentExpenseSuccess(response: response));
     } on BaseApiException catch (error) {
       if (error.key == DioExceptionKey.unauthorised) {
-      return; 
-    }
+        return;
+      }
       emit(UrgentExpenseError(message: error.message));
     } catch (e) {
       emit(UrgentExpenseError(message: 'Error inesperado: $e'));
@@ -215,46 +228,128 @@ class TreasuryBloc extends Bloc<TreasuryEvent, TreasuryState> {
     emit(CashRegistersLoading());
     try {
       final registers = await repository.getCashRegisters();
-      cashRegisters = registers; 
+      cashRegisters = registers;
       emit(CashRegistersLoaded(cashRegisters: registers));
     } on BaseApiException catch (error) {
-       if (error.key == DioExceptionKey.unauthorised) {
-      return; 
-    }
+      if (error.key == DioExceptionKey.unauthorised) {
+        return;
+      }
       emit(CashRegistersError(mapErrorMessage(error.key)));
     } catch (e) {
       emit(CashRegistersError('Error inesperado: $e'));
     }
   }
+
   Future<void> _onConfirmPayment(
     ConfirmPaymentEvent event,
     Emitter<TreasuryState> emit,
   ) async {
     emit(ConfirmPaymentLoading());
     try {
-      final response = await repository.confirmPayment(event.idRequest, event.confirmPaymentRequets);
+      final response = await repository.confirmPayment(
+        event.idRequest,
+        event.confirmPaymentRequets,
+      );
       emit(ConfirmPaymentLoaded(confirmPayment: response));
     } on BaseApiException catch (error) {
       if (error.key == DioExceptionKey.unauthorised) {
-      return; 
-    }
+        return;
+      }
       emit(ConfirmPaymentError(message: error.message));
     } catch (e) {
       emit(ConfirmPaymentError(message: 'Error inesperado: $e'));
     }
   }
+
   Future<void> _rejectAnApplication(
     RejectAnApplicationEvent event,
     Emitter<TreasuryState> emit,
   ) async {
     emit(RejectAnApplicationLoading());
     try {
-      final response = await repository.rejectAnApplication(event.idCash, event.reason);
-      emit(RejectAnApplicationLoaded(data:response));
+      final response = await repository.rejectAnApplication(
+        event.idCash,
+        event.reason,
+      );
+      emit(RejectAnApplicationLoaded(data: response));
     } on BaseApiException catch (error) {
-      emit(RejectAnApplicationError(message:  mapErrorMessage(error.key)));
+      emit(RejectAnApplicationError(message: mapErrorMessage(error.key)));
     } catch (e) {
-      emit(RejectAnApplicationError(message:  'Error inesperado: $e'));
+      emit(RejectAnApplicationError(message: 'Error inesperado: $e'));
+    }
+  }
+
+  Future<void> _onGetPaymentHistory(
+    GetPaymentHistoryEvent event,
+    Emitter<TreasuryState> emit,
+  ) async {
+    if (!event.isRefresh && _paymentHistoryItems.isNotEmpty) {
+      emit(
+        PaymentHistoryLoaded(
+          summary: _paymentHistorySummary!,
+          items: List.from(_paymentHistoryItems),
+          hasReachedMax: _paymentHistoryReachedMax,
+          totalRecords: _paymentHistoryTotalRecords,
+        ),
+      );
+      return;
+    }
+
+    if (event.isRefresh) {
+      _paymentHistoryPage = 1;
+      _paymentHistoryReachedMax = false;
+      _paymentHistoryItems.clear();
+      _paymentHistorySummary = null;
+      emit(PaymentHistoryLoading());
+    }
+
+    try {
+      final response = await repository.getPaymentHistory(
+        page: _paymentHistoryPage,
+      );
+      _paymentHistoryItems = response.items;
+      _paymentHistorySummary = response.summary;
+      _paymentHistoryReachedMax = !response.hasMoreData;
+      _paymentHistoryTotalRecords = response.totalRecords;
+      emit(
+        PaymentHistoryLoaded(
+          summary: response.summary,
+          items: List.from(_paymentHistoryItems),
+          hasReachedMax: _paymentHistoryReachedMax,
+          totalRecords: _paymentHistoryTotalRecords,
+        ),
+      );
+    } on BaseApiException catch (error) {
+      emit(PaymentHistoryError(mapErrorMessage(error.key)));
+    } catch (e) {
+      emit(PaymentHistoryError('Error inesperado: $e'));
+    }
+  }
+
+  Future<void> _onLoadMorePaymentHistory(
+    LoadMorePaymentHistoryEvent event,
+    Emitter<TreasuryState> emit,
+  ) async {
+    if (_paymentHistoryReachedMax) return;
+    _paymentHistoryPage++;
+    try {
+      final response = await repository.getPaymentHistory(
+        page: _paymentHistoryPage,
+      );
+      _paymentHistoryItems.addAll(response.items);
+      _paymentHistoryReachedMax = !response.hasMoreData;
+      emit(
+        PaymentHistoryLoaded(
+          summary: _paymentHistorySummary!,
+          items: List.from(_paymentHistoryItems),
+          hasReachedMax: _paymentHistoryReachedMax,
+          totalRecords: _paymentHistoryTotalRecords,
+        ),
+      );
+    } on BaseApiException catch (error) {
+      emit(PaymentHistoryError(mapErrorMessage(error.key)));
+    } catch (e) {
+      emit(PaymentHistoryError('Error inesperado: $e'));
     }
   }
 }
