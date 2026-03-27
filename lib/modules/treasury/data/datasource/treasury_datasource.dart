@@ -1,4 +1,3 @@
-import 'package:front_gestion_minera/modules/treasury/data/models/financial_report_model.dart';
 import '../../../../core/networking/http_services.dart';
 import '../../domain/entity/entity.dart';
 import '../models/model.dart';
@@ -120,26 +119,26 @@ class TreasuryDatasource {
     return IncomeResponseModel.fromJson(response['data']);
   }
 
-  Future<ExpenseResponseModel> registerUrgentExpense(
-    ExpenseRequestModel expenseRequestModel,
+  Future<ConfirmPaymentResponseModel> confirmPayment(
+    String idRequest,
+    ConfirmPaymentRequestModel confirmPaymentRequets,
   ) async {
     final response = await apiClient.postFormData(
-      '/api/treasury/urgent/expense',
-      data: expenseRequestModel.toFormDataMap(),
-      operationName: 'registerUrgentIncome',
+      '/api/treasury/requests/$idRequest/disburse',
+      data: confirmPaymentRequets.toFormDataMap(),
+      operationName: 'confirmPayment',
       files: [
         {
-          'name': 'evidencia',
-          'path': expenseRequestModel.evidenceUrlPath,
-          'filename': expenseRequestModel.evidenceUrlPath.split('/').last,
+          'name': 'comprobante',
+          'path': confirmPaymentRequets.comprobante,
+          'filename': confirmPaymentRequets.comprobante.split('/').last,
         },
       ],
     );
-
-    return ExpenseResponseModel.fromJson(response['data']);
+    return ConfirmPaymentResponseModel.fromJson(response);
   }
 
-  Future<GoldInventoryModel> getGoldInventory() async {
+    Future<GoldInventoryModel> getGoldInventory() async {
     final response = await apiClient.get(
       '/api/treasury/gold',
       operationName: 'getGoldInventory',
@@ -166,5 +165,61 @@ class TreasuryDatasource {
       hasMore: meta['has_more'] ?? false,
       totalRecords: meta['total_records'] ?? 0,
     );
+  }
+
+  Future<RejectAnApplicationResponseEntity> rejectAnApplication(
+    String idCash,
+    String reason,
+  ) async {
+    final response = await apiClient.post(
+      '/api/treasury/requests/$idCash/reject-payment',
+      data: {"reason": reason},
+      operationName: 'rejectAnApplication',
+    );
+
+    return RejectAnApplicationResponseModel.fromJson(response);}
+    Future<ExpenseResponseModel> registerUrgentExpense(
+    ExpenseRequestModel expenseRequestModel,
+  ) async {
+    final response = await apiClient.postFormData(
+      '/api/treasury/urgent/expense',
+      data: expenseRequestModel.toFormDataMap(),
+      operationName: 'registerUrgentIncome',
+      files: [
+        {
+          'name': 'evidencia',
+          'path': expenseRequestModel.evidenceUrlPath,
+          'filename': expenseRequestModel.evidenceUrlPath.split('/').last,
+        },
+      ],
+    );
+
+    return ExpenseResponseModel.fromJson(response['data']);
+  }
+
+      Future<Map<String, dynamic>> getPaymentHistory({
+    int page = 1,
+    int limit = 10,
+  }) async {
+    final Map<String, dynamic> queryParameters = {'page': page, 'limit': limit};
+
+    final response = await apiClient.get(
+      '/api/treasury/transactions/history',
+      operationName: 'getPaymentHistory',
+      queryParameters: queryParameters,
+    );
+
+    final List<dynamic> data = response['data'] ?? [];
+    final Map<String, dynamic> meta = response['meta'] ?? {};
+    final Map<String, dynamic> summary = response['summary'] ?? {};
+
+    return {
+      'items': data
+          .map((item) => PaymentHistoryItemModel.fromJson(item))
+          .toList(),
+      'summary': PaymentHistorySummaryModel.fromJson(summary),
+      'has_more_data': meta['has_more_data'] ?? false,
+      'total_records': meta['total_records'] ?? 0,
+    };
   }
 }

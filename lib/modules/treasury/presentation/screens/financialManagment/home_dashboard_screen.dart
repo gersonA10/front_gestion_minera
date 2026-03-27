@@ -7,6 +7,7 @@ import 'package:front_gestion_minera/config/theme/extension_theme.dart';
 import 'package:front_gestion_minera/core/widgets/custom_alert_widget.dart';
 import 'package:front_gestion_minera/injector_container.dart';
 import 'package:front_gestion_minera/modules/treasury/presentation/bloc/treasury_bloc.dart';
+import 'package:front_gestion_minera/modules/treasury/presentation/screens/payment%20history/payment_history_screen.dart';
 import 'package:front_gestion_minera/modules/treasury/presentation/widgets/financialManagment/cards_primary_and_secondary_widget.dart';
 import 'package:front_gestion_minera/modules/treasury/presentation/widgets/financialManagment/request_title_widget.dart';
 import 'package:front_gestion_minera/utils/session/user_session.dart';
@@ -35,7 +36,7 @@ class _HomeDashboardScreenState extends State<HomeDashboardScreen> {
 
     final List<Widget> pages = [
       HomeBody(colors: colors),
-      const _HistoryBody(),
+      PaymentHistoryScreen(),
       const _ModulesBody(),
     ];
     return MultiBlocProvider(
@@ -285,8 +286,12 @@ class HomeBody extends StatelessWidget {
                         itemBuilder: (context, index) {
                           final data = state.pendingApplicationsResponseEntity.data[index];
                           return GestureDetector(
-                            onTap: (){
-                              InjectorContainer.getIt<AppRouter>().push(ViewRequestDetailsRoute(id: data.requestId));
+                            onTap: ()async{
+
+                              await InjectorContainer.getIt<AppRouter>().push(ViewRequestDetailsRoute(id: data.requestId));
+                              if (context.mounted) {
+                                context.read<TreasuryBloc>().add(DashboardDataEvent());
+                              }
                             },
                             child: RequestTile(
                               title: data.motivo,

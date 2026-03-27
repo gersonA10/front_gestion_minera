@@ -95,6 +95,17 @@ class UrgentIncomeSuccess extends TreasuryState {
   UrgentIncomeSuccess({required this.response});
 }
 
+
+class CashRegistersLoaded extends TreasuryState {
+  final List<CashRegisterEntity> cashRegisters;
+  CashRegistersLoaded({required this.cashRegisters});
+}
+
+class CashRegistersError extends TreasuryState {
+  final String message;
+  CashRegistersError(this.message);
+}
+
 class UrgentIncomeError extends TreasuryState {
   final String message;
 
@@ -115,6 +126,57 @@ class UrgentExpenseError extends TreasuryState {
 
   UrgentExpenseError({required this.message});
 }
+
+//confirmar pago
+class ConfirmPaymentLoading extends TreasuryState {}
+
+class ConfirmPaymentLoaded extends TreasuryState {
+  final ConfirmPaymentResponseEntity confirmPayment;
+  ConfirmPaymentLoaded({required this.confirmPayment});
+}
+
+class ConfirmPaymentError extends TreasuryState {
+  final String message;
+
+  ConfirmPaymentError( {required this.message});
+}
+
+//rechazar pago
+class RejectAnApplicationLoading extends TreasuryState {}
+
+class RejectAnApplicationLoaded extends TreasuryState {
+  final RejectAnApplicationResponseEntity data;
+  RejectAnApplicationLoaded({required this.data});
+}
+
+class RejectAnApplicationError extends TreasuryState {
+  final String message;
+
+  RejectAnApplicationError( {required this.message});
+}
+
+// Historial de pagos
+class PaymentHistoryLoading extends TreasuryState {}
+
+class PaymentHistoryLoaded extends TreasuryState {
+  final PaymentHistorySummaryEntity summary;
+  final List<PaymentHistoryItemEntity> items;
+  final bool hasReachedMax;
+  final int totalRecords;
+
+  PaymentHistoryLoaded({
+    required this.summary,
+    required this.items,
+    required this.hasReachedMax,
+    required this.totalRecords,
+  });
+}
+
+class PaymentHistoryError extends TreasuryState {
+  final String message;
+  PaymentHistoryError(this.message);
+}
+
 
 class GoldDashboardLoading extends TreasuryState {}
 
