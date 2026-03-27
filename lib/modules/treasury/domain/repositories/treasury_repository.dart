@@ -1,4 +1,3 @@
-
 import '../entity/entity.dart';
 import '../entity/income_request_entity.dart';
 
@@ -28,6 +27,8 @@ abstract class TreasuryRepository {
     ExpenseRequestEntity request,
   );
 
-
   Future<List<CashRegisterEntity>> getCashRegisters();
+
+  Future<GoldInventoryEntity> getGoldInventory();
+  Future<PaginatedGoldBatchesEntity> getGoldBatches({int page = 1, int limit = 10});
 }

@@ -51,6 +51,7 @@ class DetailsofanapplicationSuccess extends TreasuryState {
   final CashResponseEntity cash;
   DetailsofanapplicationSuccess({required this.data, required this.cash});
 }
+
 ///
 final class ListOfPendingRequestsLoading extends TreasuryState {}
 
@@ -115,3 +116,21 @@ class UrgentExpenseError extends TreasuryState {
   UrgentExpenseError({required this.message});
 }
 
+class GoldDashboardLoading extends TreasuryState {}
+
+class GoldDashboardLoaded extends TreasuryState {
+  final GoldInventoryEntity inventory;
+  final List<GoldBatchEntity> batches;
+  final bool hasReachedMax;
+
+  GoldDashboardLoaded({
+    required this.inventory,
+    required this.batches,
+    required this.hasReachedMax,
+  });
+}
+
+class GoldDashboardError extends TreasuryState {
+  final String message;
+  GoldDashboardError(this.message);
+}

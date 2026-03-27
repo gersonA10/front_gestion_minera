@@ -78,6 +78,17 @@ class TreasuryRepositoryImpl implements TreasuryRepository {
     final response = await datasource.registerUrgentExpense(requestModel);
     return response;
   }
+  
+  @override
+  Future<GoldInventoryEntity> getGoldInventory() async {
+    return await datasource.getGoldInventory();
+  }
+  
+  @override
+  Future<PaginatedGoldBatchesEntity> getGoldBatches({int page = 1, int limit = 10}) async {
+    final result = await datasource.getGoldBatches(page: page, limit: limit);
+    return result;
+  }
 
 
 }

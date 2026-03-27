@@ -58,3 +58,13 @@ class CashRegistersError extends TreasuryState {
   final String message;
   CashRegistersError(this.message);
 }
+
+
+//eInventario eventos
+
+class FetchGoldDashboardDataEvent extends TreasuryEvent {
+  final bool isRefresh;
+  FetchGoldDashboardDataEvent({this.isRefresh = true});
+}
+
+class LoadMoreGoldBatchesEvent extends TreasuryEvent {}

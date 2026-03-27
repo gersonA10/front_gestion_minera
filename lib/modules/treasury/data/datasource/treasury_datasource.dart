@@ -1,4 +1,3 @@
-
 import 'package:front_gestion_minera/modules/treasury/data/models/financial_report_model.dart';
 import '../../../../core/networking/http_services.dart';
 import '../../domain/entity/entity.dart';
@@ -42,16 +41,14 @@ class TreasuryDatasource {
     );
     return DetailsofanapplicationResponseModel.fromJson(response);
   }
-  
-  Future<CashResponseEntity> getCash(
-  ) async {
+
+  Future<CashResponseEntity> getCash() async {
     final response = await apiClient.get(
       '/api/treasury/cash-registers',
       operationName: 'getCash',
     );
     return CashResponseModel.fromJson(response);
   }
-
 
   Future<Map<String, dynamic>> listOfPendingRequests({
     int page = 1,
@@ -73,7 +70,8 @@ class TreasuryDatasource {
       'has_more_data': meta['has_more_data'] ?? false,
 
       'total_records': meta['total_records'] ?? 0,
-    };}
+    };
+  }
 
   Future<FinancialReportModel> getFinancialReport({
     String period = 'month',
@@ -98,7 +96,7 @@ class TreasuryDatasource {
       '/api/treasury/cash-registers',
       operationName: 'getCashRegisters',
     );
-    
+
     final List data = response['data'];
     return data.map((e) => CashRegisterModel.fromJson(e)).toList();
   }
@@ -114,15 +112,15 @@ class TreasuryDatasource {
         {
           'name': 'evidencia',
           'path': incomeRequestModel.evidenceUrlPath,
-          'filename': incomeRequestModel.evidenceUrlPath.split('/').last
-        }
-      ]
+          'filename': incomeRequestModel.evidenceUrlPath.split('/').last,
+        },
+      ],
     );
 
     return IncomeResponseModel.fromJson(response['data']);
   }
 
-    Future<ExpenseResponseModel> registerUrgentExpense(
+  Future<ExpenseResponseModel> registerUrgentExpense(
     ExpenseRequestModel expenseRequestModel,
   ) async {
     final response = await apiClient.postFormData(
@@ -133,11 +131,40 @@ class TreasuryDatasource {
         {
           'name': 'evidencia',
           'path': expenseRequestModel.evidenceUrlPath,
-          'filename': expenseRequestModel.evidenceUrlPath.split('/').last
-        }
-      ]
+          'filename': expenseRequestModel.evidenceUrlPath.split('/').last,
+        },
+      ],
     );
 
     return ExpenseResponseModel.fromJson(response['data']);
+  }
+
+  Future<GoldInventoryModel> getGoldInventory() async {
+    final response = await apiClient.get(
+      '/api/treasury/gold',
+      operationName: 'getGoldInventory',
+    );
+    return GoldInventoryModel.fromJson(response['data']);
+  }
+
+  Future<PaginatedGoldBatchesEntity> getGoldBatches({
+    int page = 1,
+    int limit = 10,
+  }) async {
+    final queryParameters = {'page': page, 'limit': limit};
+    final response = await apiClient.get(
+      '/api/treasury/batches',
+      operationName: 'getGoldBatches',
+      queryParameters: queryParameters,
+    );
+
+    final List<dynamic> data = response['data'] ?? [];
+    final Map<String, dynamic> meta = response['meta'] ?? {};
+
+    return PaginatedGoldBatchesEntity(
+      batches: data.map((item) => GoldBatchModel.fromJson(item)).toList(),
+      hasMore: meta['has_more'] ?? false,
+      totalRecords: meta['total_records'] ?? 0,
+    );
   }
 }

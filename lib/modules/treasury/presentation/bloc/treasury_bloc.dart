@@ -12,11 +12,18 @@ class TreasuryBloc extends Bloc<TreasuryEvent, TreasuryState> {
   int _currentPage = 1;
   bool _hasReachedMax = false;
   int _currentTotalRecords = 0;
-    List<ListOfPendingDataEntity> _items = [];
+  List<ListOfPendingDataEntity> _items = [];
 
   final TreasuryRepository repository;
 
   List<CashRegisterEntity> cashRegisters = [];
+
+  //onventario
+  int _currentBatchPage = 1;
+  bool _hasReachedBatchMax = false;
+  List<GoldBatchEntity> _goldBatches = [];
+  GoldInventoryEntity? _goldInventory;
+  bool _isLoadingMoreBatches = false;
 
   TreasuryBloc({required this.repository}) : super(TreasuryInitial()) {
     on<FetchTreasuryMetricsEvent>(_onFetchTreasuryMetrics);
@@ -29,6 +36,8 @@ class TreasuryBloc extends Bloc<TreasuryEvent, TreasuryState> {
     on<RegisterUrgentIncomeEvent>(_onRegisterUrgentIncome);
     on<GetCashRegistersEvent>(_onGetCashRegisters);
     on<RegisterUrgentExpenseEvent>(_onRegisterUrgentExpense);
+    on<FetchGoldDashboardDataEvent>(_onFetchGoldDashboardData);
+    on<LoadMoreGoldBatchesEvent>(_onLoadMoreGoldBatches);
   }
 
   Future<void> _onFetchTreasuryMetrics(
@@ -75,11 +84,13 @@ class TreasuryBloc extends Bloc<TreasuryEvent, TreasuryState> {
     try {
       final response = await repository.getDetailsofanapplication(event.id);
       final responseCash = await repository.getCash();
-      emit(DetailsofanapplicationSuccess(data: response.data, cash: responseCash));
+      emit(
+        DetailsofanapplicationSuccess(data: response.data, cash: responseCash),
+      );
     } on BaseApiException catch (error) {
-      emit(DetailsofanapplicationError(message:  mapErrorMessage(error.key)));
+      emit(DetailsofanapplicationError(message: mapErrorMessage(error.key)));
     } catch (e) {
-      emit(DetailsofanapplicationError(message:  'Error inesperado: $e'));
+      emit(DetailsofanapplicationError(message: 'Error inesperado: $e'));
     }
   }
 
@@ -106,7 +117,9 @@ class TreasuryBloc extends Bloc<TreasuryEvent, TreasuryState> {
     }
 
     try {
-      final response = await repository.listOfPendingRequests(page: _currentPage);
+      final response = await repository.listOfPendingRequests(
+        page: _currentPage,
+      );
       _items = response.items;
       _hasReachedMax = !response.hasMoreData;
       _currentTotalRecords = response.totalRecords;
@@ -124,14 +137,16 @@ class TreasuryBloc extends Bloc<TreasuryEvent, TreasuryState> {
     }
   }
 
-   Future<void> _loadMorePendingRequests(
+  Future<void> _loadMorePendingRequests(
     LoadMorePendingEvent event,
     Emitter<TreasuryState> emit,
   ) async {
     if (_hasReachedMax) return;
     _currentPage++;
     try {
-      final response = await repository.listOfPendingRequests(page: _currentPage);
+      final response = await repository.listOfPendingRequests(
+        page: _currentPage,
+      );
 
       _items.addAll(response.items);
 
@@ -178,15 +193,15 @@ class TreasuryBloc extends Bloc<TreasuryEvent, TreasuryState> {
       emit(UrgentIncomeSuccess(response: response));
     } on BaseApiException catch (error) {
       if (error.key == DioExceptionKey.unauthorised) {
-      return; 
-    }
+        return;
+      }
       emit(UrgentExpenseError(message: mapErrorMessage(error.key)));
     } catch (e) {
       emit(UrgentIncomeError(message: 'Error inesperado: $e'));
     }
   }
 
-    Future<void> _onRegisterUrgentExpense(
+  Future<void> _onRegisterUrgentExpense(
     RegisterUrgentExpenseEvent event,
     Emitter<TreasuryState> emit,
   ) async {
@@ -196,8 +211,8 @@ class TreasuryBloc extends Bloc<TreasuryEvent, TreasuryState> {
       emit(UrgentExpenseSuccess(response: response));
     } on BaseApiException catch (error) {
       if (error.key == DioExceptionKey.unauthorised) {
-      return; 
-    }
+        return;
+      }
       emit(UrgentExpenseError(message: error.message));
     } catch (e) {
       emit(UrgentExpenseError(message: 'Error inesperado: $e'));
@@ -211,15 +226,83 @@ class TreasuryBloc extends Bloc<TreasuryEvent, TreasuryState> {
     emit(CashRegistersLoading());
     try {
       final registers = await repository.getCashRegisters();
-      cashRegisters = registers; 
+      cashRegisters = registers;
       emit(CashRegistersLoaded(cashRegisters: registers));
     } on BaseApiException catch (error) {
-       if (error.key == DioExceptionKey.unauthorised) {
-      return; 
-    }
+      if (error.key == DioExceptionKey.unauthorised) {
+        return;
+      }
       emit(CashRegistersError(mapErrorMessage(error.key)));
     } catch (e) {
       emit(CashRegistersError('Error inesperado: $e'));
+    }
+  }
+
+  Future<void> _onFetchGoldDashboardData(
+    FetchGoldDashboardDataEvent event,
+    Emitter<TreasuryState> emit,
+  ) async {
+    if (event.isRefresh) {
+      _currentBatchPage = 1;
+      _hasReachedBatchMax = false;
+      _isLoadingMoreBatches = false;
+      _goldBatches.clear();
+      emit(GoldDashboardLoading());
+    }
+
+    try {
+      final responses = await Future.wait([
+        repository.getGoldInventory(),
+        repository.getGoldBatches(page: _currentBatchPage),
+      ]);
+
+      _goldInventory = responses[0] as GoldInventoryEntity;
+      final batchesData = responses[1] as PaginatedGoldBatchesEntity;
+
+      _goldBatches = batchesData.batches;
+      _hasReachedBatchMax = !batchesData.hasMore;
+
+      emit(
+        GoldDashboardLoaded(
+          inventory: _goldInventory!,
+          batches: List.from(_goldBatches),
+          hasReachedMax: _hasReachedBatchMax,
+        ),
+      );
+    } on BaseApiException catch (error) {
+      emit(GoldDashboardError(mapErrorMessage(error.key)));
+    } catch (e) {
+      emit(GoldDashboardError('Error inesperado: $e'));
+    }
+  }
+
+  Future<void> _onLoadMoreGoldBatches(
+    LoadMoreGoldBatchesEvent event,
+    Emitter<TreasuryState> emit,
+  ) async {
+    if (_hasReachedBatchMax || _goldInventory == null || _isLoadingMoreBatches) return;
+    _isLoadingMoreBatches = true;
+    _currentBatchPage++;
+
+    try {
+      final response = await repository.getGoldBatches(page: _currentBatchPage);
+      _goldBatches.addAll(response.batches);
+      _hasReachedBatchMax = !response.hasMore;
+
+      emit(
+        GoldDashboardLoaded(
+          inventory: _goldInventory!,
+          batches: List.from(_goldBatches),
+          hasReachedMax: _hasReachedBatchMax,
+        ),
+      );
+    } on BaseApiException catch (error) {
+      _currentBatchPage--;
+      emit(GoldDashboardError(mapErrorMessage(error.key)));
+    } catch (e) {
+      emit(GoldDashboardError('Error inesperado: $e'));
+    } finally {
+      _isLoadingMoreBatches = false;
     }
   }
 }
