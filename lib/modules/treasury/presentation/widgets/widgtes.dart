@@ -1,9 +1,9 @@
+export 'package:front_gestion_minera/modules/treasury/presentation/widgets/goldInventory/app_bar_home_widget.dart';
 export 'package:front_gestion_minera/modules/treasury/presentation/widgets/payment_history/filer_bottom_sheet_widget.dart';
 export 'package:front_gestion_minera/modules/treasury/presentation/widgets/payment_history/selector_row_widget.dart';
 export 'package:front_gestion_minera/modules/treasury/presentation/widgets/payment_history/summary_card_widget.dart';
 export 'package:front_gestion_minera/modules/treasury/presentation/widgets/payment_history/transaction_tile_widget.dart';
 export 'package:front_gestion_minera/modules/treasury/presentation/widgets/payment_history/year_selector_widget.dart';
-
 export 'package:front_gestion_minera/modules/treasury/presentation/widgets/home_dashboard/header_widget.dart';
 export 'package:front_gestion_minera/modules/treasury/presentation/widgets/home_dashboard/report_button_widget.dart';
 export 'package:front_gestion_minera/modules/treasury/presentation/widgets/home_dashboard/metric_card_widget.dart';

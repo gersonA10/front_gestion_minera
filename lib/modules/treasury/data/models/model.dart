@@ -1,6 +1,7 @@
+export 'package:front_gestion_minera/modules/treasury/data/models/gold_inventory.dart/gold_inventory_model.dart';
+
 export 'package:front_gestion_minera/modules/treasury/data/models/expense_request_model.dart';
 export 'package:front_gestion_minera/modules/treasury/data/models/expense_response_model.dart';
-
 export 'package:front_gestion_minera/modules/treasury/data/models/income_request_model.dart';
 export 'package:front_gestion_minera/modules/treasury/data/models/cash_register_model.dart';
 export 'package:front_gestion_minera/modules/treasury/data/models/income_response_model.dart';

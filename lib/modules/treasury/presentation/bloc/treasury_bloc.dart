@@ -18,6 +18,12 @@ class TreasuryBloc extends Bloc<TreasuryEvent, TreasuryState> {
 
   List<CashRegisterEntity> cashRegisters = [];
 
+  //onventario
+  int _currentBatchPage = 1;
+  bool _hasReachedBatchMax = false;
+  List<GoldBatchEntity> _goldBatches = [];
+  GoldInventoryEntity? _goldInventory;
+  bool _isLoadingMoreBatches = false;
   int _paymentHistoryPage = 1;
   bool _paymentHistoryReachedMax = false;
   int _paymentHistoryTotalRecords = 0;
@@ -38,6 +44,8 @@ class TreasuryBloc extends Bloc<TreasuryEvent, TreasuryState> {
     on<RejectAnApplicationEvent>(_rejectAnApplication);
 
     on<RegisterUrgentExpenseEvent>(_onRegisterUrgentExpense);
+    on<FetchGoldDashboardDataEvent>(_onFetchGoldDashboardData);
+    on<LoadMoreGoldBatchesEvent>(_onLoadMoreGoldBatches);
     on<GetPaymentHistoryEvent>(_onGetPaymentHistory);
     on<LoadMorePaymentHistoryEvent>(_onLoadMorePaymentHistory);
   }
@@ -350,6 +358,74 @@ class TreasuryBloc extends Bloc<TreasuryEvent, TreasuryState> {
       emit(PaymentHistoryError(mapErrorMessage(error.key)));
     } catch (e) {
       emit(PaymentHistoryError('Error inesperado: $e'));
+    }
+  }
+
+    Future<void> _onFetchGoldDashboardData(
+    FetchGoldDashboardDataEvent event,
+    Emitter<TreasuryState> emit,
+  ) async {
+    if (event.isRefresh) {
+      _currentBatchPage = 1;
+      _hasReachedBatchMax = false;
+      _isLoadingMoreBatches = false;
+      _goldBatches.clear();
+      emit(GoldDashboardLoading());
+    }
+
+    try {
+      final responses = await Future.wait([
+        repository.getGoldInventory(),
+        repository.getGoldBatches(page: _currentBatchPage),
+      ]);
+
+      _goldInventory = responses[0] as GoldInventoryEntity;
+      final batchesData = responses[1] as PaginatedGoldBatchesEntity;
+
+      _goldBatches = batchesData.batches;
+      _hasReachedBatchMax = !batchesData.hasMore;
+
+      emit(
+        GoldDashboardLoaded(
+          inventory: _goldInventory!,
+          batches: List.from(_goldBatches),
+          hasReachedMax: _hasReachedBatchMax,
+        ),
+      );
+    } on BaseApiException catch (error) {
+      emit(GoldDashboardError(mapErrorMessage(error.key)));
+    } catch (e) {
+      emit(GoldDashboardError('Error inesperado: $e'));
+    }
+  }
+
+  Future<void> _onLoadMoreGoldBatches(
+    LoadMoreGoldBatchesEvent event,
+    Emitter<TreasuryState> emit,
+  ) async {
+    if (_hasReachedBatchMax || _goldInventory == null || _isLoadingMoreBatches) return;
+    _isLoadingMoreBatches = true;
+    _currentBatchPage++;
+
+    try {
+      final response = await repository.getGoldBatches(page: _currentBatchPage);
+      _goldBatches.addAll(response.batches);
+      _hasReachedBatchMax = !response.hasMore;
+
+      emit(
+        GoldDashboardLoaded(
+          inventory: _goldInventory!,
+          batches: List.from(_goldBatches),
+          hasReachedMax: _hasReachedBatchMax,
+        ),
+      );
+    } on BaseApiException catch (error) {
+      _currentBatchPage--;
+      emit(GoldDashboardError(mapErrorMessage(error.key)));
+    } catch (e) {
+      emit(GoldDashboardError('Error inesperado: $e'));
+    } finally {
+      _isLoadingMoreBatches = false;
     }
   }
 }

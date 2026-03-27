@@ -204,7 +204,9 @@ class _TreasuryScreenState extends State<TreasuryScreen> {
                           icon: Icons.savings_outlined,
                           iconColor: const Color(0xFFD97706),
                           bgColor: const Color(0xFFFEF3C7),
-                          onTap: () {},
+                          onTap: () {
+                            context.router.push(GoldDashboardRoute());
+                          },
                         ),
                         _buildModuleCard(
                           context,

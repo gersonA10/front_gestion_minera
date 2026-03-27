@@ -138,6 +138,35 @@ class TreasuryDatasource {
     return ConfirmPaymentResponseModel.fromJson(response);
   }
 
+    Future<GoldInventoryModel> getGoldInventory() async {
+    final response = await apiClient.get(
+      '/api/treasury/gold',
+      operationName: 'getGoldInventory',
+    );
+    return GoldInventoryModel.fromJson(response['data']);
+  }
+
+  Future<PaginatedGoldBatchesEntity> getGoldBatches({
+    int page = 1,
+    int limit = 10,
+  }) async {
+    final queryParameters = {'page': page, 'limit': limit};
+    final response = await apiClient.get(
+      '/api/treasury/batches',
+      operationName: 'getGoldBatches',
+      queryParameters: queryParameters,
+    );
+
+    final List<dynamic> data = response['data'] ?? [];
+    final Map<String, dynamic> meta = response['meta'] ?? {};
+
+    return PaginatedGoldBatchesEntity(
+      batches: data.map((item) => GoldBatchModel.fromJson(item)).toList(),
+      hasMore: meta['has_more'] ?? false,
+      totalRecords: meta['total_records'] ?? 0,
+    );
+  }
+
   Future<RejectAnApplicationResponseEntity> rejectAnApplication(
     String idCash,
     String reason,
@@ -160,9 +189,9 @@ class TreasuryDatasource {
         {
           'name': 'evidencia',
           'path': expenseRequestModel.evidenceUrlPath,
-          'filename': expenseRequestModel.evidenceUrlPath.split('/').last
-        }
-      ]
+          'filename': expenseRequestModel.evidenceUrlPath.split('/').last,
+        },
+      ],
     );
 
     return ExpenseResponseModel.fromJson(response['data']);
