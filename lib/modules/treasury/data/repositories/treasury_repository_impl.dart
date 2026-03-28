@@ -116,6 +116,17 @@ class TreasuryRepositoryImpl implements TreasuryRepository {
       totalRecords: result['total_records'] as int? ?? 0,
     );
   }
+  
+  @override
+  Future<InternalLoansResponseEntity> internalLoans({int page = 1, int limit = 10}) async{
+    final result = await datasource.internalLoans(page: page, limit: limit);
+    final models = result['items'] as List<InternalLoansResponseModel>;
+    return InternalLoansResponseEntity(
+      items: models.map((model) => model.toEntity()).toList(),
+      hasMore: result['has_more'] as bool,
+      totalRecords: result['total_records'] as int? ?? 0,
+    );
+  }
 
 
 }

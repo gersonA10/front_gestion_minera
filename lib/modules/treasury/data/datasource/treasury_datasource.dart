@@ -1,3 +1,4 @@
+
 import '../../../../core/networking/http_services.dart';
 import '../../domain/entity/entity.dart';
 import '../models/model.dart';
@@ -218,6 +219,27 @@ class TreasuryDatasource {
           .map((item) => PaymentHistoryItemModel.fromJson(item))
           .toList(),
       'summary': PaymentHistorySummaryModel.fromJson(summary),
+      'has_more_data': meta['has_more_data'] ?? false,
+      'total_records': meta['total_records'] ?? 0,
+    };
+  }
+   Future<Map<String, dynamic>> internalLoans({
+    int page = 1,
+    int limit = 10,
+  }) async {
+    final Map<String, dynamic> queryParameters = {'page': page, 'limit': limit};
+
+    final response = await apiClient.get(
+      '/api/treasury/corporate-loan',
+      operationName: 'internalLoans',
+      queryParameters: queryParameters,
+    );
+    final List<dynamic> data = response['data'] ?? [];
+    final Map<String, dynamic> meta = response['meta'] ?? {};
+    return {
+      'items': data
+          .map((item) => InternalLoansResponseModel.fromJson(item))
+          .toList(),
       'has_more_data': meta['has_more_data'] ?? false,
       'total_records': meta['total_records'] ?? 0,
     };
