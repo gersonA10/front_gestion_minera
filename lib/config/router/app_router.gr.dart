@@ -45,17 +45,17 @@ import 'package:front_gestion_minera/modules/treasury/presentation/screens/goldI
     as _i8;
 import 'package:front_gestion_minera/modules/treasury/presentation/screens/loans/loans_home_screen.dart'
     as _i14;
-import 'package:front_gestion_minera/modules/treasury/presentation/screens/payment%20history/payment_history_screen.dart'
+import 'package:front_gestion_minera/modules/treasury/presentation/screens/goldInventory/payment_history_screen.dart'
     as _i17;
-import 'package:front_gestion_minera/modules/treasury/presentation/screens/pending_applications/pending_applications_screen.dart'
+import 'package:front_gestion_minera/modules/treasury/presentation/screens/financialManagment/pending_applications_screen.dart'
     as _i18;
 import 'package:front_gestion_minera/modules/treasury/presentation/screens/reports/financial_reports_screen.dart'
     as _i7;
-import 'package:front_gestion_minera/modules/treasury/presentation/screens/transactionDetails/transaction_details_screen.dart'
+import 'package:front_gestion_minera/modules/treasury/presentation/screens/financialManagment/transaction_details_screen.dart'
     as _i20;
 import 'package:front_gestion_minera/modules/treasury/presentation/screens/treasury_screen.dart'
     as _i21;
-import 'package:front_gestion_minera/modules/treasury/presentation/screens/view_request_details/view_request_detail_screen.dart'
+import 'package:front_gestion_minera/modules/treasury/presentation/screens/financialManagment/view_request_detail_screen.dart'
     as _i23;
 
 /// generated route for

@@ -2,7 +2,7 @@ import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:front_gestion_minera/config/router/app_router.gr.dart';
 import 'package:front_gestion_minera/config/theme/extension_theme.dart';
-import 'package:front_gestion_minera/modules/treasury/presentation/screens/payment%20history/payment_history_screen.dart';
+import 'package:front_gestion_minera/modules/treasury/presentation/screens/goldInventory/payment_history_screen.dart';
 import 'package:intl/intl.dart';
 
 import '../../../domain/entity/entity.dart';
@@ -14,9 +14,10 @@ class TransactionTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final timeStr = DateFormat('HH:mm').format(item.fecha);
-    final amountStr =
-        '-${NumberFormat('#,##0.00', 'en_US').format(item.monto)} Bs';
+    DateTime fechaDb = DateTime.parse("2026-03-28T19:32:43.554Z");
+    DateTime fechaLocal = fechaDb.toLocal();
+    final String timeStr = DateFormat('HH:mm').format(fechaLocal);
+    final amountStr =  '-${NumberFormat('#,##0.00', 'en_US').format(item.monto)} Bs';
     final iconData = iconForTransaction(item.operationType, item.destinoDinero);
     final iconColor = iconColorForTransaction(
       item.operationType,

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:front_gestion_minera/modules/treasury/presentation/screens/payment%20history/payment_history_screen.dart';
+import 'package:front_gestion_minera/modules/treasury/presentation/screens/goldInventory/payment_history_screen.dart';
 import 'package:intl/intl.dart';
 
 import '../widgtes.dart';
