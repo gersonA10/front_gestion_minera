@@ -51,8 +51,12 @@ class _HomeSurveillanceScreenState extends State<HomeSurveillanceScreen> {
     }
   }
 
-  void _fetchHistory({bool isRefresh = false}) {
+  Future<void> _fetchHistory({bool isRefresh = false}) async {
     _surveillanceBloc.add(MonitoringTrayEvent(isRefresh: isRefresh));
+
+    await _surveillanceBloc.stream.firstWhere(
+      (state) => state is SurveillanceSuccess || state is SurveillanceError,
+    );
   }
 
   @override
@@ -88,7 +92,10 @@ class _HomeSurveillanceScreenState extends State<HomeSurveillanceScreen> {
             ],
           ),
         ),
-        body: _buildBody(smallSpacing, topPadding),
+        body: RefreshIndicator(
+          onRefresh: () => _fetchHistory(isRefresh: true),
+          child: _buildBody(smallSpacing, topPadding),
+        ),
         bottomNavigationBar: BottomNavigationBar(
           items: const <BottomNavigationBarItem>[
             BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Inicio'),
@@ -117,116 +124,110 @@ class _HomeSurveillanceScreenState extends State<HomeSurveillanceScreen> {
           }
 
           if (state is SurveillanceError) {
-            return RefreshIndicator(
-              onRefresh: () async {
-                _fetchHistory();
-              },
-              child: ListView(
-                physics: const AlwaysScrollableScrollPhysics(),
-                padding: const EdgeInsets.all(24),
-                children: [
-                  const SizedBox(height: 120),
-                  Center(
-                    child: Text(
-                      state.message,
-                      textAlign: TextAlign.center,
-                      style: AppTextStyles.mainStyle12(
-                        context,
-                      ).copyWith(color: Theme.of(context).colorScheme.red),
-                    ),
+            return ListView(
+              physics: const AlwaysScrollableScrollPhysics(),
+              padding: const EdgeInsets.all(24),
+              children: [
+                const SizedBox(height: 120),
+                Center(
+                  child: Text(
+                    state.message,
+                    textAlign: TextAlign.center,
+                    style: AppTextStyles.mainStyle12(
+                      context,
+                    ).copyWith(color: Theme.of(context).colorScheme.red),
                   ),
-                ],
-              ),
+                ),
+              ],
             );
           }
 
           if (state is SurveillanceSuccess) {
             final items = state.list;
-            return RefreshIndicator(
-              onRefresh: () async {
-                _fetchHistory(isRefresh: true);
-              },
-              child: Padding(
-                padding: EdgeInsets.symmetric(horizontal: topPadding * 0.08),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    SizedBox(height: smallSpacing * 0.5),
-                    Row(
-                      children: [
-                        Text(
-                          "PENDIENTES (${state.totalRecords})",
-                          style: AppTextStyles.mainStyleGrey12Bold(context),
+            return Padding(
+              padding: EdgeInsets.symmetric(horizontal: topPadding * 0.08),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  SizedBox(height: smallSpacing * 0.5),
+                  Row(
+                    children: [
+                      Text(
+                        "PENDIENTES (${state.totalRecords})",
+                        style: AppTextStyles.mainStyleGrey12Bold(context),
+                      ),
+                      SizedBox(width: smallSpacing * 0.8),
+                      Expanded(
+                        child: Container(
+                          height: 1,
+                          color: Colors.grey.shade300,
                         ),
-                        SizedBox(width: smallSpacing * 0.8),
-                        Expanded(
-                          child: Container(
-                            height: 1,
-                            color: Colors.grey.shade300,
-                          ),
-                        ),
-                      ],
-                    ),
-                    SizedBox(height: smallSpacing * 0.5),
-                    Expanded(
-                      child: items.isEmpty
-                          ? const Center(
-                              child: Text('No hay solicitudes pendientes'),
-                            )
-                          : ListView.builder(
-                              controller: _scrollController,
-                              itemCount: items.length + 1,
-                              itemBuilder: (context, index) {
-                                if (index == items.length &&
-                                    !state.hasReachedMax) {
-                                  return Padding(
-                                    padding: const EdgeInsets.symmetric(
-                                      vertical: 24.0,
-                                    ),
-                                    child: Center(
-                                      child: Column(
-                                        children: [
-                                          CircularProgressIndicator(),
-                                          SizedBox(height: 10),
-                                          Text(
-                                            'Cargando mas registros...',
-                                            style: AppTextStyles.mainStyle12(
-                                              context,
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                  );
-                                }
-                                if (index == state.list.length) {
-                                  return Padding(
-                                    padding: const EdgeInsets.symmetric(
-                                      vertical: 16.0,
-                                    ),
-                                    child: Center(
-                                      child: Text(
-                                        'Mostrando todas las solicitudes.',
-                                        style: AppTextStyles.mainStyle10(
-                                          context,
-                                        ),
-                                      ),
-                                    ),
-                                  );
-                                }
-                                final item = items[index];
-                                return RequestCard(
-                                  date: formatDate(item.createdAt),
-                                  name: item.name,
-                                  area: item.rol,
-                                  small: smallSpacing,
-                                  item: item,
-                                );
-                              },
+                      ),
+                    ],
+                  ),
+                  SizedBox(height: smallSpacing * 0.5),
+                  Expanded(
+                    child: items.isEmpty
+                        ? SingleChildScrollView(
+                            physics: const AlwaysScrollableScrollPhysics(),
+                            child: Container(
+                              height: 400,
+                              alignment: Alignment.center,
+                              child: const Text('No hay solicitudes pendientes'),
                             ),
-                    ),
-                  ],
-                ),
+                          )
+                        : ListView.builder(
+                          physics: const AlwaysScrollableScrollPhysics(),
+                            controller: _scrollController,
+                            itemCount: items.length + 1,
+                            itemBuilder: (context, index) {
+                              if (index == items.length &&
+                                  !state.hasReachedMax) {
+                                return Padding(
+                                  padding: const EdgeInsets.symmetric(
+                                    vertical: 24.0,
+                                  ),
+                                  child: Center(
+                                    child: Column(
+                                      children: [
+                                        CircularProgressIndicator(),
+                                        SizedBox(height: 10),
+                                        Text(
+                                          'Cargando mas registros...',
+                                          style: AppTextStyles.mainStyle12(
+                                            context,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                );
+                              }
+                              if (index == state.list.length) {
+                                return Padding(
+                                  padding: const EdgeInsets.symmetric(
+                                    vertical: 16.0,
+                                  ),
+                                  child: Center(
+                                    child: Text(
+                                      'Mostrando todas las solicitudes.',
+                                      style: AppTextStyles.mainStyle10(context),
+                                    ),
+                                  ),
+                                );
+                              }
+                              final item = items[index];
+                              return RequestCard(
+                                date: formatDate(item.createdAt),
+                                name: item.name,
+                                area: item.rol,
+                                small: smallSpacing,
+                                item: item,
+                              );
+                            },
+                          ),
+                  ),
+                ],
               ),
             );
           }
