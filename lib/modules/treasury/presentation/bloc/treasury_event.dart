@@ -83,3 +83,8 @@ class TransactionDetailsEvent extends TreasuryEvent {
   final String idTransaction;
   TransactionDetailsEvent({required this.idTransaction});
 }
+///new tranction
+class NewExtractionEvent extends TreasuryEvent {
+  final NewExtractionRequetsEntity newExtractionRequets;
+  NewExtractionEvent({ required this.newExtractionRequets});
+}

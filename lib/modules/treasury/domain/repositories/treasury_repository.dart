@@ -47,4 +47,7 @@ abstract class TreasuryRepository {
    Future<TransactionDetailsResponseEntity> getTransactionDetails(
     String idTansaction,
   );
+  Future<NewExtractionResponseEntiy> newExtraction(
+    NewExtractionRequetsEntity newExtractionRequets,
+  );
 }

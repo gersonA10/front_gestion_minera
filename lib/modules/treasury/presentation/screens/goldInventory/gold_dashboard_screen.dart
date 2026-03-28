@@ -1,6 +1,8 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:front_gestion_minera/config/router/app_router.dart';
+import 'package:front_gestion_minera/config/router/app_router.gr.dart';
 import 'package:front_gestion_minera/injector_container.dart';
 
 import '../../../domain/entity/entity.dart';
@@ -108,11 +110,15 @@ class _GoldDashboardScreenState extends State<GoldDashboardScreen> {
                       child: RefreshIndicator(
                         onRefresh: () async {
                           // Disparamos el evento de refresco
-                          context.read<TreasuryBloc>().add(FetchGoldDashboardDataEvent(isRefresh: true));
-                          
+                          context.read<TreasuryBloc>().add(
+                            FetchGoldDashboardDataEvent(isRefresh: true),
+                          );
+
                           // Esperamos a que el bloc emita un estado diferente a Loading
                           await context.read<TreasuryBloc>().stream.firstWhere(
-                            (state) => state is GoldDashboardLoaded || state is GoldDashboardError,
+                            (state) =>
+                                state is GoldDashboardLoaded ||
+                                state is GoldDashboardError,
                           );
                         },
                         child: SingleChildScrollView(
@@ -124,7 +130,8 @@ class _GoldDashboardScreenState extends State<GoldDashboardScreen> {
                               const SizedBox(height: 16),
                               ValueEstimateWigdet(
                                 estimateValue: state.inventory.estimateValue,
-                                totalGramsVault: state.inventory.totalGramsVault,
+                                totalGramsVault:
+                                    state.inventory.totalGramsVault,
                               ),
                               const SizedBox(height: 16),
                               _buildFilterTabs(),
@@ -162,7 +169,12 @@ class _GoldDashboardScreenState extends State<GoldDashboardScreen> {
           ),
         ),
         floatingActionButton: FloatingActionButton(
-          onPressed: () {},
+          onPressed: () async {
+            await InjectorContainer.getIt<AppRouter>().push(NewExtractionRoute());
+            if (context.mounted) {
+              _treasuryBloc.add(FetchGoldDashboardDataEvent());
+            }
+          },
           backgroundColor: const Color(0xFF2563EB),
           elevation: 4,
           child: const Icon(Icons.add, color: Colors.white, size: 28),
@@ -171,7 +183,7 @@ class _GoldDashboardScreenState extends State<GoldDashboardScreen> {
       ),
     );
   }
-  
+
   Widget _buildFilterTabs() {
     return Container(
       height: 40,
@@ -304,7 +316,7 @@ class _GoldDashboardScreenState extends State<GoldDashboardScreen> {
                 ),
               ],
             ),
-             const SizedBox(height: 12),
+            const SizedBox(height: 12),
             Row(
               children: [
                 Expanded(

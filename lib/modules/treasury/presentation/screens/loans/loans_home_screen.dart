@@ -234,7 +234,6 @@ class _LoansHomeScreenState extends State<LoansHomeScreen> {
           ),
         ),
       ),
-
       body: SafeArea(
         child: Column(
           children: [

@@ -1,4 +1,3 @@
-
 import '../../domain/entity/entity.dart';
 import '../../domain/entity/income_request_entity.dart';
 import '../../domain/repositories/repository.dart';
@@ -31,22 +30,27 @@ class TreasuryRepositoryImpl implements TreasuryRepository {
   ) async {
     return await datasource.getDetailsofanapplication(id);
   }
-  
+
   @override
-  Future<CashResponseEntity> getCash()async {
+  Future<CashResponseEntity> getCash() async {
     return await datasource.getCash();
   }
-  
+
   @override
-  Future<ListOfPendingRequestsResponseEntity> listOfPendingRequests({int page = 1, int limit = 10}) async {
-    final result = await datasource.listOfPendingRequests(page: page, limit: limit);
+  Future<ListOfPendingRequestsResponseEntity> listOfPendingRequests({
+    int page = 1,
+    int limit = 10,
+  }) async {
+    final result = await datasource.listOfPendingRequests(
+      page: page,
+      limit: limit,
+    );
     final models = result['items'] as List<ListOfPendingRequestsResponseModel>;
     return ListOfPendingRequestsResponseEntity(
       items: models.map((model) => model.toEntity()).toList(),
       hasMoreData: result['has_more_data'] as bool,
       totalRecords: result['total_records'] as int? ?? 0,
     );
-    
   }
 
   @override
@@ -66,43 +70,58 @@ class TreasuryRepositoryImpl implements TreasuryRepository {
   }
 
   @override
-  Future<IncomeResponseEntity> registerUrgentIncome(IncomeRequestEntity request) async {
+  Future<IncomeResponseEntity> registerUrgentIncome(
+    IncomeRequestEntity request,
+  ) async {
     final requestModel = IncomeRequestModel.fromEntity(request);
     final response = await datasource.registerUrgentIncome(requestModel);
     return response;
   }
-  
+
   @override
-  Future<ConfirmPaymentResponseEntity> confirmPayment(String idCash, ConfirmPaymentRequetsEntity confirmPaymentRequets)async {
-    final requestModel = ConfirmPaymentRequestModel.fromEntity(confirmPaymentRequets);
+  Future<ConfirmPaymentResponseEntity> confirmPayment(
+    String idCash,
+    ConfirmPaymentRequetsEntity confirmPaymentRequets,
+  ) async {
+    final requestModel = ConfirmPaymentRequestModel.fromEntity(
+      confirmPaymentRequets,
+    );
     final response = await datasource.confirmPayment(idCash, requestModel);
     return response;
   }
-  
+
   @override
-  Future<RejectAnApplicationResponseEntity> rejectAnApplication(String idCash, String reason)async {
-   return await  datasource.rejectAnApplication(idCash, reason);
+  Future<RejectAnApplicationResponseEntity> rejectAnApplication(
+    String idCash,
+    String reason,
+  ) async {
+    return await datasource.rejectAnApplication(idCash, reason);
   }
-  
-  
-  Future<ExpenseResponseEntity> registerUrgentExpense(ExpenseRequestEntity request) async {
+
+  @override
+  Future<ExpenseResponseEntity> registerUrgentExpense(
+    ExpenseRequestEntity request,
+  ) async {
     final requestModel = ExpenseRequestModel.fromEntity(request);
     final response = await datasource.registerUrgentExpense(requestModel);
     return response;
   }
-  
+
   @override
   Future<GoldInventoryEntity> getGoldInventory() async {
     return await datasource.getGoldInventory();
   }
-  
+
   @override
-  Future<PaginatedGoldBatchesEntity> getGoldBatches({int page = 1, int limit = 10}) async {
+  Future<PaginatedGoldBatchesEntity> getGoldBatches({
+    int page = 1,
+    int limit = 10,
+  }) async {
     final result = await datasource.getGoldBatches(page: page, limit: limit);
     return result;
   }
 
-    @override
+  @override
   Future<PaymentHistoryResponseEntity> getPaymentHistory({
     int page = 1,
     int limit = 10,
@@ -116,11 +135,22 @@ class TreasuryRepositoryImpl implements TreasuryRepository {
       totalRecords: result['total_records'] as int? ?? 0,
     );
   }
-  
+
   @override
-  Future<TransactionDetailsResponseEntity> getTransactionDetails(String idTansaction)async {
+  Future<TransactionDetailsResponseEntity> getTransactionDetails(
+    String idTansaction,
+  ) async {
     return await datasource.getTransactionDetails(idTansaction);
   }
 
-
+  @override
+  Future<NewExtractionResponseEntiy> newExtraction(
+    NewExtractionRequetsEntity newExtractionRequets,
+  ) async {
+    final requestModel = NewExtractionRequestModel.fromEntity(
+      newExtractionRequets,
+    );
+    final response = await datasource.newExtraction( requestModel);
+    return response;
+  }
 }

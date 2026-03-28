@@ -49,6 +49,8 @@ class TreasuryBloc extends Bloc<TreasuryEvent, TreasuryState> {
     on<GetPaymentHistoryEvent>(_onGetPaymentHistory);
     on<LoadMorePaymentHistoryEvent>(_onLoadMorePaymentHistory);
     on<TransactionDetailsEvent>(_onTransactionDetails);
+    on<NewExtractionEvent>(_onNewExtraction);
+
 
   }
 
@@ -443,6 +445,22 @@ class TreasuryBloc extends Bloc<TreasuryEvent, TreasuryState> {
       emit(TransactionDetailsError(mapErrorMessage(error.key)));
     } catch (e) {
       emit(TransactionDetailsError('Error inesperado: $e'));
+    }
+  }
+    Future<void> _onNewExtraction(
+    NewExtractionEvent event,
+    Emitter<TreasuryState> emit,
+  ) async {
+    emit(NewExtractionLoading());
+    try {
+      final response = await repository.newExtraction(
+        event.newExtractionRequets,
+      );
+      emit(NewExtractionLoaded(newExtraction: response));
+    } on BaseApiException catch (error) {
+      emit(NewExtractionError(message: error.message));
+    } catch (e) {
+      emit(NewExtractionError(message: 'Error inesperado: $e'));
     }
   }
 }
