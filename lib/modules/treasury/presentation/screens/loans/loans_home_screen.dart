@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:front_gestion_minera/config/theme/extension_theme.dart';
 import 'package:intl/intl.dart';
 
-
 enum LoanFilter { todos, activos, enMora, finalizado }
 
 extension LoanFilterExt on LoanFilter {
@@ -111,7 +110,6 @@ class Loan {
   int get progresoInt => progreso.round();
 }
 
-
 @RoutePage()
 class LoansHomeScreen extends StatefulWidget {
   const LoansHomeScreen({super.key});
@@ -177,9 +175,11 @@ class _LoansHomeScreenState extends State<LoansHomeScreen> {
     if (_searchQuery.isNotEmpty) {
       final q = _searchQuery.toLowerCase();
       loans = loans
-          .where((l) =>
-              l.empresa.toLowerCase().contains(q) ||
-              l.loanId.toLowerCase().contains(q))
+          .where(
+            (l) =>
+                l.empresa.toLowerCase().contains(q) ||
+                l.loanId.toLowerCase().contains(q),
+          )
           .toList();
     }
 
@@ -209,41 +209,35 @@ class _LoansHomeScreenState extends State<LoansHomeScreen> {
     return Scaffold(
       backgroundColor: const Color(0xFFF8F9FB),
       floatingActionButton: FloatingActionButton(
-        onPressed: () {
-        },
+        onPressed: () {},
         backgroundColor: const Color(0xFF3B82F6),
         elevation: 2,
         child: const Icon(Icons.add, color: Colors.white, size: 20),
       ),
+      appBar: AppBar(
+        backgroundColor: color.white,
+        surfaceTintColor: color.white,
+        centerTitle: true,
+        title: Text(
+          'Préstamos Internos',
+          style: TextStyle(
+            fontSize: 16,
+            fontWeight: FontWeight.w600,
+            color: Color(0xFF1F2937),
+          ),
+        ),
+        bottom: PreferredSize(
+          preferredSize: const Size.fromHeight(1),
+          child: Container(
+            color: const Color(0xFFE5E7EB),
+            height: 1,
+          ),
+        ),
+      ),
+
       body: SafeArea(
         child: Column(
           children: [
-            Container(
-              color: Colors.white,
-              padding: const EdgeInsets.fromLTRB(4, 4, 8, 0),
-              child: Row(
-                children: [
-                  IconButton(
-                    icon:  Icon(Icons.arrow_back,
-                        color: Color(0xFF1F2937), size: 20,),
-                    onPressed: () => context.router.back(),
-                    
-                  ),
-                  const Expanded(
-                    child: Text(
-                      'Préstamos Internos',
-                      textAlign: TextAlign.center,
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w600,
-                        color: Color(0xFF1F2937),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            Divider(color: color.lead,radius: BorderRadius.zero),
             Container(
               color: Colors.white,
               padding: const EdgeInsets.fromLTRB(16, 12, 16, 14),
@@ -265,7 +259,9 @@ class _LoansHomeScreenState extends State<LoansHomeScreen> {
                       ),
                       decoration: const InputDecoration(
                         contentPadding: EdgeInsets.symmetric(
-                            horizontal: 5, vertical: 5),
+                          horizontal: 5,
+                          vertical: 5,
+                        ),
                         border: InputBorder.none,
                         hintText: 'Buscar prestamo',
                         hintStyle: TextStyle(
@@ -282,22 +278,22 @@ class _LoansHomeScreenState extends State<LoansHomeScreen> {
                   ),
                   const SizedBox(height: 10),
                   SizedBox(
-                    height: 30,
+                    height: 35,
                     child: ListView.separated(
                       scrollDirection: Axis.horizontal,
                       itemCount: LoanFilter.values.length,
-                      separatorBuilder: (_, __) =>
-                          const SizedBox(width: 8),
+                      separatorBuilder: (_, __) => const SizedBox(width: 8),
                       itemBuilder: (_, i) {
                         final filter = LoanFilter.values[i];
                         final isActive = _selectedFilter == filter;
                         return GestureDetector(
-                          onTap: () =>
-                              setState(() => _selectedFilter = filter),
+                          onTap: () => setState(() => _selectedFilter = filter),
                           child: AnimatedContainer(
                             duration: const Duration(milliseconds: 200),
                             padding: const EdgeInsets.symmetric(
-                                horizontal: 10, vertical: 6),
+                              horizontal: 10,
+                              vertical: 6,
+                            ),
                             decoration: BoxDecoration(
                               color: isActive
                                   ? const Color(0xFF1F2937)
@@ -314,7 +310,7 @@ class _LoansHomeScreenState extends State<LoansHomeScreen> {
                               children: [
                                 Icon(
                                   filter.icon,
-                                  size: 14,
+                                  size: 16,
                                   color: isActive
                                       ? Colors.white
                                       : filter.activeIconColor,
@@ -323,7 +319,7 @@ class _LoansHomeScreenState extends State<LoansHomeScreen> {
                                 Text(
                                   filter.label,
                                   style: TextStyle(
-                                    fontSize: 10,
+                                    fontSize: 12,
                                     fontWeight: FontWeight.w600,
                                     color: isActive
                                         ? Colors.white
@@ -347,8 +343,11 @@ class _LoansHomeScreenState extends State<LoansHomeScreen> {
                       child: Column(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          const Icon(Icons.inbox_rounded,
-                              size: 56, color: Color(0xFFD1D5DB)),
+                          const Icon(
+                            Icons.inbox_rounded,
+                            size: 56,
+                            color: Color(0xFFD1D5DB),
+                          ),
                           const SizedBox(height: 12),
                           Text(
                             _searchQuery.isNotEmpty
@@ -366,8 +365,7 @@ class _LoansHomeScreenState extends State<LoansHomeScreen> {
                   : ListView.separated(
                       padding: const EdgeInsets.fromLTRB(16, 12, 16, 80),
                       itemCount: loans.length,
-                      separatorBuilder: (_, __) =>
-                          const SizedBox(height: 14),
+                      separatorBuilder: (_, __) => const SizedBox(height: 14),
                       itemBuilder: (_, i) => _LoanCard(
                         loan: loans[i],
                         formatCurrency: _formatCurrency,
@@ -381,7 +379,6 @@ class _LoansHomeScreenState extends State<LoansHomeScreen> {
     );
   }
 }
-
 
 class _LoanCard extends StatelessWidget {
   final Loan loan;
@@ -410,13 +407,13 @@ class _LoanCard extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Container(
-                padding: const EdgeInsets.symmetric(
-                    horizontal: 5, vertical: 4),
+                padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 4),
                 decoration: BoxDecoration(
                   color: loan.status.bgColor,
                   borderRadius: BorderRadius.circular(8),
-                  border:
-                      Border.all(color: loan.status.color.withValues(alpha:  0.3)),
+                  border: Border.all(
+                    color: loan.status.color.withValues(alpha: 0.3),
+                  ),
                 ),
                 child: Text(
                   loan.status.label,
@@ -536,8 +533,7 @@ class _LoanCard extends StatelessWidget {
               value: loan.progreso / 100,
               minHeight: 6,
               backgroundColor: const Color(0xFFE5E7EB),
-              valueColor:
-                  AlwaysStoppedAnimation<Color>(loan.status.color),
+              valueColor: AlwaysStoppedAnimation<Color>(loan.status.color),
             ),
           ),
           const SizedBox(height: 10),
@@ -552,8 +548,11 @@ class _LoanCard extends StatelessWidget {
       case LoanStatus.activo:
         return Row(
           children: [
-            const Icon(Icons.calendar_today_rounded,
-                size: 14, color: Color(0xFF9CA3AF)),
+            const Icon(
+              Icons.calendar_today_rounded,
+              size: 14,
+              color: Color(0xFF9CA3AF),
+            ),
             const SizedBox(width: 5),
             Expanded(
               child: RichText(
@@ -565,7 +564,7 @@ class _LoanCard extends StatelessWidget {
                       style: TextStyle(
                         fontWeight: FontWeight.w500,
                         color: Color(0xFF6B7280),
-                        fontSize: 10
+                        fontSize: 10,
                       ),
                     ),
                     TextSpan(
@@ -575,7 +574,7 @@ class _LoanCard extends StatelessWidget {
                       style: const TextStyle(
                         fontWeight: FontWeight.w700,
                         color: Color(0xFF374151),
-                        fontSize: 10
+                        fontSize: 10,
                       ),
                     ),
                   ],
@@ -588,8 +587,11 @@ class _LoanCard extends StatelessWidget {
       case LoanStatus.enMora:
         return Row(
           children: [
-            const Icon(Icons.error_outline_rounded,
-                size: 15, color: Color(0xFFEF4444)),
+            const Icon(
+              Icons.error_outline_rounded,
+              size: 15,
+              color: Color(0xFFEF4444),
+            ),
             const SizedBox(width: 6),
             Expanded(
               child: RichText(
@@ -597,13 +599,11 @@ class _LoanCard extends StatelessWidget {
                   style: const TextStyle(fontSize: 13, height: 1),
                   children: [
                     TextSpan(
-                      text:
-                          'Vencido hace ${loan.diasVencido ?? 0} días: ',
+                      text: 'Vencido hace ${loan.diasVencido ?? 0} días: ',
                       style: const TextStyle(
                         fontWeight: FontWeight.w600,
                         color: Color(0xFFEF4444),
-                        fontSize: 10
-
+                        fontSize: 10,
                       ),
                     ),
                     TextSpan(
@@ -613,8 +613,7 @@ class _LoanCard extends StatelessWidget {
                       style: const TextStyle(
                         fontWeight: FontWeight.w700,
                         color: Color(0xFF374151),
-                        fontSize: 10
-
+                        fontSize: 10,
                       ),
                     ),
                   ],
@@ -627,8 +626,11 @@ class _LoanCard extends StatelessWidget {
       case LoanStatus.finalizado:
         return Row(
           children: [
-            const Icon(Icons.check_circle_outline_rounded,
-                size: 15, color: Color(0xFF16A34A)),
+            const Icon(
+              Icons.check_circle_outline_rounded,
+              size: 15,
+              color: Color(0xFF16A34A),
+            ),
             const SizedBox(width: 6),
             Expanded(
               child: RichText(
@@ -640,8 +642,7 @@ class _LoanCard extends StatelessWidget {
                       style: TextStyle(
                         fontWeight: FontWeight.w600,
                         color: Color(0xFF16A34A),
-                        fontSize: 10
-
+                        fontSize: 10,
                       ),
                     ),
                     TextSpan(
@@ -651,8 +652,7 @@ class _LoanCard extends StatelessWidget {
                       style: const TextStyle(
                         fontWeight: FontWeight.w700,
                         color: Color(0xFF374151),
-                        fontSize: 10
-
+                        fontSize: 10,
                       ),
                     ),
                   ],
