@@ -4,16 +4,23 @@ import 'package:front_gestion_minera/utils/constants/color.constant.dart';
 import 'package:front_gestion_minera/utils/session/user_session.dart';
 import 'package:front_gestion_minera/utils/text_util.dart';
 
-class HeaderWidget extends StatelessWidget {
+class HeaderWidget extends StatefulWidget {
   const HeaderWidget({super.key, required this.treasuryBloc});
 
   final TreasuryBloc treasuryBloc;
 
   @override
+  State<HeaderWidget> createState() => _HeaderWidgetState();
+}
+
+class _HeaderWidgetState extends State<HeaderWidget> {
+  @override
+  void initState() {
+    super.initState();
+    
+  }
+  @override
   Widget build(BuildContext context) {
-        final userName = UserSession.userName.isEmpty
-        ? ''
-        : UserSession.userName;
 
     return Stack(
       clipBehavior: Clip.none,
@@ -45,7 +52,7 @@ class HeaderWidget extends StatelessWidget {
                   const SizedBox(height: 4),
                   const SizedBox(height: 18),
                   Text(
-                    'Hola, $userName',
+                    'Hola, ${UserSession.userName}',
                     style: AppTextStyles.mainStyleWhite20Bold(
                       context,
                     ).copyWith(fontSize: 22, fontWeight: FontWeight.w800),
@@ -64,7 +71,7 @@ class HeaderWidget extends StatelessWidget {
               Spacer(),
               GestureDetector(
                 onTap: () {
-                  treasuryBloc.add(FetchTreasuryMetricsEvent());
+                  widget.treasuryBloc.add(FetchTreasuryMetricsEvent());
                 },
                 child: Container(
                   padding: EdgeInsets.all(10),

@@ -44,4 +44,7 @@ abstract class TreasuryRepository {
     int page = 1,
     int limit = 10,
   });
+   Future<TransactionDetailsResponseEntity> getTransactionDetails(
+    String idTansaction,
+  );
 }

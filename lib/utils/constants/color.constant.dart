@@ -9,7 +9,6 @@ class TColors {
 
   //Color Se
   static const appSecondaryColor = Color(0xFF0C3052);
-  
 
   static const appDisabledColor = Color.fromARGB(255, 77, 94, 97);
   static const appDisabledDarkColor = Color.fromARGB(255, 77, 94, 97);
@@ -49,6 +48,8 @@ class TColors {
   static const starUnrated = Color(0xFFDDDEDE);
   static const disabled = Color(0xFF8E8A8A);
   static const red = Color(0xFFFF0000);
+  static const danger = Color(0xFFE53E3E);
+  static const dangerLight = Color(0xFFFFF5F5);
 
   // Status Account
   static const enabledAccount = Color(0xFF1BC073);

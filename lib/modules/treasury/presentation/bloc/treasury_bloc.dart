@@ -48,6 +48,8 @@ class TreasuryBloc extends Bloc<TreasuryEvent, TreasuryState> {
     on<LoadMoreGoldBatchesEvent>(_onLoadMoreGoldBatches);
     on<GetPaymentHistoryEvent>(_onGetPaymentHistory);
     on<LoadMorePaymentHistoryEvent>(_onLoadMorePaymentHistory);
+    on<TransactionDetailsEvent>(_onTransactionDetails);
+
   }
 
   Future<void> _onFetchTreasuryMetrics(
@@ -426,6 +428,21 @@ class TreasuryBloc extends Bloc<TreasuryEvent, TreasuryState> {
       emit(GoldDashboardError('Error inesperado: $e'));
     } finally {
       _isLoadingMoreBatches = false;
+    }
+  }
+
+  Future<void> _onTransactionDetails(
+    TransactionDetailsEvent event,
+    Emitter<TreasuryState> emit,
+  ) async {
+    emit(TransactionDetailsLoading());
+    try {
+      final response = await repository.getTransactionDetails(event.idTransaction);
+      emit(TransactionDetailsLoaded(transactionDetails: response));
+    } on BaseApiException catch (error) {
+      emit(TransactionDetailsError(mapErrorMessage(error.key)));
+    } catch (e) {
+      emit(TransactionDetailsError('Error inesperado: $e'));
     }
   }
 }

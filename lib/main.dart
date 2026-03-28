@@ -6,13 +6,10 @@ import 'package:front_gestion_minera/injector_container.dart';
 import 'package:front_gestion_minera/config/router/app_router.dart';
 import 'package:front_gestion_minera/utils/session/user_session.dart';
 import 'package:intl/date_symbol_data_local.dart';
-//import 'package:shared_preferences/shared_preferences.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await UserSession.loadSession();
-  //final prefs = await SharedPreferences.getInstance();
-  //await prefs.clear();
   await dotenv.load(fileName: '.env');
   InjectorContainer.setupGetIt();
   await initializeDateFormatting('es');
@@ -25,28 +22,19 @@ class MainApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final appRouter = InjectorContainer.getIt<AppRouter>();
-return MaterialApp.router(
-  debugShowCheckedModeBanner: false,
-
-  locale: const Locale('es'),
-
-  supportedLocales: const [
-    Locale('es'),
-    Locale('en'), 
-  ],
-
-  localizationsDelegates: const [
-    GlobalMaterialLocalizations.delegate,
-    GlobalWidgetsLocalizations.delegate,
-    GlobalCupertinoLocalizations.delegate,
-  ],
-
-  themeMode: ThemeMode.system,
-  theme: TAppTheme.lightTheme,
-  darkTheme: TAppTheme.dartTheme,
-
-  routerConfig: appRouter.config(),
-);
-
+    return MaterialApp.router(
+      debugShowCheckedModeBanner: false,
+      locale: const Locale('es'),
+      supportedLocales: const [Locale('es'), Locale('en')],
+      localizationsDelegates: const [
+        GlobalMaterialLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+      ],
+      themeMode: ThemeMode.system,
+      theme: TAppTheme.lightTheme,
+      darkTheme: TAppTheme.dartTheme,
+      routerConfig: appRouter.config(),
+    );
   }
 }
