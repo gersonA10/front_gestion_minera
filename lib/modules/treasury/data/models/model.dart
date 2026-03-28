@@ -15,3 +15,4 @@ export 'package:front_gestion_minera/modules/treasury/data/models/confirm_paymen
 export 'package:front_gestion_minera/modules/treasury/data/models/financial_report_model.dart';
 export 'package:front_gestion_minera/modules/treasury/data/models/reject_an_application_model.dart';
 export 'package:front_gestion_minera/modules/treasury/data/models/transaction_details_model.dart';
+export 'package:front_gestion_minera/modules/treasury/data/models/gold_inventory.dart/new_extraction_model.dart';
