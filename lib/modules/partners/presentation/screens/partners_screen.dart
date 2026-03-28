@@ -6,7 +6,6 @@ import 'package:front_gestion_minera/config/router/app_router.gr.dart';
 import 'package:front_gestion_minera/core/widgets/logout_button_widget.dart';
 import 'package:front_gestion_minera/injector_container.dart';
 import 'package:front_gestion_minera/utils/greeting_util.dart';
-import 'package:front_gestion_minera/utils/session/session_actions.dart';
 import 'package:front_gestion_minera/utils/session/user_session.dart';
 
 class _AppColors {
