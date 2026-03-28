@@ -35,7 +35,7 @@ extension LoanFilterExt on LoanFilter {
   Color get activeIconColor {
     switch (this) {
       case LoanFilter.todos:
-        return Colors.white;
+        return Color(0xFF1F2937);
       case LoanFilter.activos:
         return const Color(0xFF3B82F6);
       case LoanFilter.enMora:
