@@ -56,39 +56,42 @@ class _MoneyRequestScreenState extends State<MoneyRequestScreen> {
     }
   }
 
-  void _showImageSourceSelector() {
-    showModalBottomSheet(
-      context: context,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-      ),
-      builder: (context) {
-        return SafeArea(
-          child: Wrap(
-            children: [
-              ListTile(
-                leading: const Icon(Icons.camera_alt),
-                title: const Text('Tomar foto'),
-                onTap: () {
-                  context.router.back();
-                  _pickImage(ImageSource.camera);
-                },
-              ),
-              ListTile(
-                leading: const Icon(Icons.photo_library),
-                title: const Text('Elegir de galería'),
-                onTap: () {
-                  context.router.back();
-                  _pickImage(ImageSource.gallery);
-                },
-              ),
-            ],
-          ),
-        );
-      },
-    );
-  }
+void _showImageSourceSelector() {
+  final parentContext = context; 
 
+  showModalBottomSheet(
+    context: parentContext,
+    shape: const RoundedRectangleBorder(
+      borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+    ),
+    builder: (sheetContext) {
+      return SafeArea(
+        child: Wrap(
+          children: [
+            ListTile(
+              leading: const Icon(Icons.camera_alt),
+              title: const Text('Tomar foto'),
+              onTap: () async {
+                Navigator.of(sheetContext).pop(); 
+                await Future.delayed(const Duration(milliseconds: 200));
+                await _pickImage(ImageSource.camera);
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.photo_library),
+              title: const Text('Elegir de galería'),
+              onTap: () async {
+                Navigator.of(sheetContext).pop(); 
+                await Future.delayed(const Duration(milliseconds: 200));
+                await _pickImage(ImageSource.gallery);
+              },
+            ),
+          ],
+        ),
+      );
+    },
+  );
+}
   @override
   void dispose() {
     _montoController.dispose();
