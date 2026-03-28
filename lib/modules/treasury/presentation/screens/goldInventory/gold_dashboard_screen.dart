@@ -108,54 +108,230 @@ class _GoldDashboardScreenState extends State<GoldDashboardScreen> {
                       child: RefreshIndicator(
                         onRefresh: () async {
                           // Disparamos el evento de refresco
-                          context.read<TreasuryBloc>().add(FetchGoldDashboardDataEvent(isRefresh: true));
-                          
+                          context.read<TreasuryBloc>().add(
+                            FetchGoldDashboardDataEvent(isRefresh: true),
+                          );
+
                           // Esperamos a que el bloc emita un estado diferente a Loading
                           await context.read<TreasuryBloc>().stream.firstWhere(
-                            (state) => state is GoldDashboardLoaded || state is GoldDashboardError,
+                            (state) =>
+                                state is GoldDashboardLoaded ||
+                                state is GoldDashboardError,
                           );
                         },
                         child: _selectedNav == 0
-                        ? SingleChildScrollView(
-                          controller: _scrollController,
-                          padding: const EdgeInsets.symmetric(horizontal: 16),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              const SizedBox(height: 16),
-                              ValueEstimateWigdet(
-                                estimateValue: state.inventory.estimateValue,
-                                totalGramsVault: state.inventory.totalGramsVault,
-                              ),
-                              const SizedBox(height: 16),
-                              _buildFilterTabs(),
-                              const SizedBox(height: 20),
-                              const Text(
-                                'Lotes',
-                                style: TextStyle(
-                                  fontSize: 20,
-                                  fontWeight: FontWeight.bold,
-                                  color: Color(0xFF1A1A2E),
+                            ? SingleChildScrollView(
+                                controller: _scrollController,
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 16,
+                                ),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    const SizedBox(height: 16),
+                                    ValueEstimateWigdet(
+                                      estimateValue:
+                                          state.inventory.estimateValue,
+                                      totalGramsVault:
+                                          state.inventory.totalGramsVault,
+                                    ),
+                                    const SizedBox(height: 16),
+                                    _buildFilterTabs(),
+                                    const SizedBox(height: 20),
+                                    const Text(
+                                      'Lotes',
+                                      style: TextStyle(
+                                        fontSize: 20,
+                                        fontWeight: FontWeight.bold,
+                                        color: Color(0xFF1A1A2E),
+                                      ),
+                                    ),
+                                    const SizedBox(height: 12),
+                                    ...filteredLotes.map(
+                                      (lote) => _buildLoteCard(lote),
+                                    ),
+                                    if (!state.hasReachedMax)
+                                      const Center(
+                                        child: Padding(
+                                          padding: EdgeInsets.all(8.0),
+                                          child: CircularProgressIndicator(),
+                                        ),
+                                      ),
+                                    const SizedBox(height: 80),
+                                  ],
+                                ),
+                              )
+                            : SingleChildScrollView(
+                                child: Column(
+                                  children: [
+                                    const SizedBox(height: 16),
+                                    Container(
+                                      height: 120,
+                                      decoration: BoxDecoration(
+                                        color: Colors.transparent,
+                                      ),
+                                      child: ListView(
+                                        scrollDirection: Axis.horizontal,
+                                        children: [
+                                          Container(
+                                            margin: const EdgeInsets.only(
+                                              left: 20,
+                                              right: 10,
+                                            ),
+                                            padding: const EdgeInsets.all(16),
+                                            decoration: BoxDecoration(
+                                              color: Colors.white,
+                                              borderRadius:
+                                                  BorderRadius.circular(20),
+                                            ),
+                                            child: Column(
+                                              crossAxisAlignment:
+                                                  CrossAxisAlignment.start,
+                                              children: [
+                                                Row(
+                                                  children: [
+                                                    Icon(
+                                                      Icons
+                                                          .calendar_month_outlined,
+                                                      color: Colors.blue,
+                                                    ),
+                                                    SizedBox(width: 5),
+                                                    Text('Vendido este mes'),
+                                                  ],
+                                                ),
+                                                SizedBox(height: 12),
+                                                Row(
+                                                  children: [
+                                                    Text(
+                                                      '12.5 kg',
+                                                      style: TextStyle(
+                                                        fontSize: 30,
+                                                        fontWeight:
+                                                            FontWeight.bold,
+                                                      ),
+                                                    ),
+                                                    SizedBox(width: 10),
+                                                    Container(
+                                                      padding:
+                                                          EdgeInsets.symmetric(
+                                                            horizontal: 7,
+                                                          ),
+                                                      decoration: BoxDecoration(
+                                                        color: Colors
+                                                            .green
+                                                            .shade100,
+                                                        borderRadius:
+                                                            BorderRadius.circular(
+                                                              20,
+                                                            ),
+                                                      ),
+                                                      child: Row(
+                                                        children: [
+                                                          Icon(
+                                                            Icons.trending_up,
+                                                            size: 15,
+                                                          ),
+                                                          Text(
+                                                            '5.2 %',
+                                                            style: TextStyle(
+                                                              fontSize: 10,
+                                                            ),
+                                                          ),
+                                                        ],
+                                                      ),
+                                                    ),
+                                                  ],
+                                                ),
+                                              ],
+                                            ),
+                                          ),
+                                          Container(
+                                            margin: const EdgeInsets.only(
+                                              left: 10,
+                                              right: 20,
+                                            ),
+                                            padding: const EdgeInsets.all(16),
+                                            decoration: BoxDecoration(
+                                              color: Colors.white,
+                                              borderRadius:
+                                                  BorderRadius.circular(20),
+                                            ),
+                                            child: Column(
+                                              crossAxisAlignment:
+                                                  CrossAxisAlignment.start,
+                                              children: [
+                                                Row(
+                                                  children: [
+                                                    Icon(
+                                                      Icons.leaderboard,
+                                                      color: Colors.blue,
+                                                    ),
+                                                    SizedBox(width: 5),
+                                                    Text('Vendido del año'),
+                                                  ],
+                                                ),
+                                                SizedBox(height: 12),
+                                                Row(
+                                                  children: [
+                                                    Text(
+                                                      '145.2 kg',
+                                                      style: TextStyle(
+                                                        fontSize: 30,
+                                                        fontWeight:
+                                                            FontWeight.bold,
+                                                      ),
+                                                    ),
+                                                    Container(
+                                                      padding:
+                                                          EdgeInsets.symmetric(
+                                                            horizontal: 7,
+                                                          ),
+                                                      decoration: BoxDecoration(
+                                                        color: Colors
+                                                            .green
+                                                            .shade100,
+                                                        borderRadius:
+                                                            BorderRadius.circular(
+                                                              20,
+                                                            ),
+                                                      ),
+                                                      child: Row(
+                                                        children: [
+                                                          Icon(
+                                                            Icons.trending_up,
+                                                            size: 15,
+                                                          ),
+                                                          // Text('5.2 %',style: TextStyle(fontSize: 10),)
+                                                        ],
+                                                      ),
+                                                    ),
+                                                  ],
+                                                ),
+                                              ],
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                    Container(
+                                      padding: EdgeInsets.symmetric(
+                                        horizontal: 15,
+                                        vertical: 10,
+                                      ),
+                                      child: Row(
+                                        children: [
+                                          Text('Transacciones reciente'),
+                                          Expanded(child: Text('')),
+                                          IconButton(
+                                            onPressed: () {},
+                                            icon: Icon(Icons.filter_alt),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ],
                                 ),
                               ),
-                              const SizedBox(height: 12),
-                              ...filteredLotes.map(
-                                (lote) => _buildLoteCard(lote),
-                              ),
-                              if (!state.hasReachedMax)
-                                const Center(
-                                  child: Padding(
-                                    padding: EdgeInsets.all(8.0),
-                                    child: CircularProgressIndicator(),
-                                  ),
-                                ),
-                              const SizedBox(height: 80),
-                            ],
-                          ),
-                        )
-                        : SingleChildScrollView(
-                          child: Text('historial')
-                        ),
                       ),
                     ),
                   ],
@@ -318,7 +494,7 @@ class _GoldDashboardScreenState extends State<GoldDashboardScreen> {
                 ),
               ],
             ),
-             const SizedBox(height: 12),
+            const SizedBox(height: 12),
             Row(
               children: [
                 Expanded(
