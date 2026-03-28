@@ -1,6 +1,7 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:front_gestion_minera/config/router/app_router.gr.dart';
 import 'package:front_gestion_minera/injector_container.dart';
 
 import '../../../domain/entity/entity.dart';
@@ -162,7 +163,9 @@ class _GoldDashboardScreenState extends State<GoldDashboardScreen> {
           ),
         ),
         floatingActionButton: FloatingActionButton(
-          onPressed: () {},
+          onPressed: () {
+            context. router.push( NewExtractionRoute());
+          },
           backgroundColor: const Color(0xFF2563EB),
           elevation: 4,
           child: const Icon(Icons.add, color: Colors.white, size: 28),

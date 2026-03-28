@@ -1,4 +1,5 @@
 
+
 import '../../../../core/networking/http_services.dart';
 import '../../domain/entity/entity.dart';
 import '../models/model.dart';
@@ -232,6 +233,24 @@ class TreasuryDatasource {
       operationName: 'getTransactionDetails',
     );
     return TransactionDetailsResponseModel.fromJson(response['data']);
+  }
+
+   Future<NewExtractionResponseModel> newExtraction(
+    NewExtractionRequestModel newExtractionRequest,
+  ) async {
+    final response = await apiClient.postFormData(
+      '/api/treasury/batches',
+      data: newExtractionRequest.toFormDataMap(),
+      operationName: 'newExtraction',
+      files: [
+        {
+          'name': 'evidencia',
+          'path': newExtractionRequest.evidencia,
+          'filename': newExtractionRequest.evidencia.split('/').last,
+        },
+      ],
+    );
+    return NewExtractionResponseModel.fromJson(response);
   }
 
 }
