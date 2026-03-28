@@ -365,7 +365,7 @@ class ContributionSummaryCard extends StatelessWidget {
           ),
           const SizedBox(height: 4),
           Text(
-            "\$${metrics.totalAportado.toStringAsFixed(2)}",
+            "${metrics.totalAportado.toStringAsFixed(2)} Bs",
             style: AppTextStyles.mainStyle25Bold(context).copyWith(color: colors.white, fontSize: 32),
           ),
           const SizedBox(height: 20),
@@ -387,7 +387,7 @@ class ContributionSummaryCard extends StatelessWidget {
                       ),
                       const SizedBox(height: 4),
                       Text(
-                        "\$${metrics.totalConfirmado.toStringAsFixed(2)}",
+                        "${metrics.totalConfirmado.toStringAsFixed(2)} Bs",
                         style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 14),
                       ),
                     ],
@@ -411,7 +411,7 @@ class ContributionSummaryCard extends StatelessWidget {
                       ),
                       const SizedBox(height: 4),
                       Text(
-                        "\$${metrics.totalPendiente.toStringAsFixed(2)}",
+                        "${metrics.totalPendiente.toStringAsFixed(2)} Bs",
                         style: const TextStyle(color: Color(0xFFFFD54F), fontWeight: FontWeight.bold, fontSize: 14),
                       ),
                     ],
@@ -501,7 +501,7 @@ class ContributionCard extends StatelessWidget {
                     const SizedBox(height: 12),
                     Text("MONTO", style: AppTextStyles.mainStyleGrey10(context)),
                     Text(
-                      "\$${item.monto.toStringAsFixed(2)}",
+                      "${item.monto.toStringAsFixed(2)} Bs",
                       style: AppTextStyles.mainStyle20Bold(context).copyWith(color: colors.blue),
                     ),
                   ],
