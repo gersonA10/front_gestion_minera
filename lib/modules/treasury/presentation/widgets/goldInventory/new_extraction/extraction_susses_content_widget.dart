@@ -1,16 +1,17 @@
 
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
+import 'package:front_gestion_minera/core/widgets/custom_alert_widget.dart';
 
 class ExtractionSuccessContent extends StatelessWidget {
   final String loteId;
   final String pesoGramos;
-  final VoidCallback onVolverInventario;
+  final String message;
 
   const ExtractionSuccessContent({super.key, 
     required this.loteId,
     required this.pesoGramos,
-    required this.onVolverInventario,
+    required this.message
   });
 
   @override
@@ -200,7 +201,14 @@ class ExtractionSuccessContent extends StatelessWidget {
             child: ElevatedButton(
               onPressed: () {
                 context.router.back();
-                onVolverInventario();
+                 WidgetsBinding.instance.addPostFrameCallback((_) {
+                  CustomAlert.show(
+                    context,
+                    title: 'Error',
+                    message: message,
+                    type: AlertType.success,
+                  );
+                });
               },
               style: ElevatedButton.styleFrom(
                 backgroundColor: const Color(0xFF3B82F6),

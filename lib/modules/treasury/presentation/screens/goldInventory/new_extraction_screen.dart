@@ -225,9 +225,7 @@ class _NewExtractionBodyState extends State<_NewExtractionBody> {
               context: context,
               loteId: state.newExtraction.batchCode,
               pesoGramos: _pesoTotal.toString(),
-              onVolverInventario: () {
-                context.router.maybePop(true);
-              },
+              message: state.newExtraction.message,
             );
           } else if (state is NewExtractionError) {
             CustomAlert.show(
@@ -788,21 +786,26 @@ class _NewExtractionBodyState extends State<_NewExtractionBody> {
           ],
         ),
         const SizedBox(height: 8),
-        Container(
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(12),
-            border: Border.all(color: const Color(0xFFE5E7EB)),
-          ),
-          child: TextField(
-            controller: _observacionesController,
-            maxLines: 4,
-            style: const TextStyle(fontSize: 14, color: Color(0xFF1F2937)),
-            decoration: const InputDecoration(
-              contentPadding: EdgeInsets.all(14),
-              border: InputBorder.none,
-              hintText: 'Detalles adicionales sobre la extracción...',
-              hintStyle: TextStyle(color: Color(0xFFD1D5DB)),
+        TapRegion(
+          onTapOutside: (event) {
+            FocusScope.of(context).unfocus();
+          },
+          child: Container(
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(color: const Color(0xFFE5E7EB)),
+            ),
+            child: TextField(
+              controller: _observacionesController,
+              maxLines: 4,
+              style: const TextStyle(fontSize: 14, color: Color(0xFF1F2937)),
+              decoration: const InputDecoration(
+                contentPadding: EdgeInsets.all(14),
+                border: InputBorder.none,
+                hintText: 'Detalles adicionales sobre la extracción...',
+                hintStyle: TextStyle(color: Color(0xFFD1D5DB)),
+              ),
             ),
           ),
         ),
@@ -873,12 +876,11 @@ class CalendarCell {
   });
 }
 
-
 void showExtractionSuccessDialog({
   required BuildContext context,
   required String loteId,
   required String pesoGramos,
-  required VoidCallback onVolverInventario,
+  required String message,
 }) {
   showGeneralDialog(
     context: context,
@@ -910,7 +912,7 @@ void showExtractionSuccessDialog({
             child: ExtractionSuccessContent(
               loteId: loteId,
               pesoGramos: pesoGramos,
-              onVolverInventario: onVolverInventario,
+              message: message,
             ),
           ),
         ),
