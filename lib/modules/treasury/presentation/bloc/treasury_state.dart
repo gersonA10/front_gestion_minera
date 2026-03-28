@@ -213,3 +213,31 @@ class InternalLoansError extends TreasuryState {
   final String message;
   InternalLoansError(this.message);
 }
+///
+class TransactionDetailsLoading extends TreasuryState {}
+
+class TransactionDetailsLoaded extends TreasuryState {
+  final TransactionDetailsResponseEntity transactionDetails;
+
+  TransactionDetailsLoaded({
+    required this.transactionDetails
+  });
+}
+
+class TransactionDetailsError extends TreasuryState {
+  final String message;
+  TransactionDetailsError(this.message);
+}
+//new extraction
+class NewExtractionLoading extends TreasuryState {}
+
+class NewExtractionLoaded extends TreasuryState {
+  final NewExtractionResponseEntiy newExtraction;
+  NewExtractionLoaded({required this.newExtraction});
+}
+
+class NewExtractionError extends TreasuryState {
+  final String message;
+
+  NewExtractionError( {required this.message});
+}

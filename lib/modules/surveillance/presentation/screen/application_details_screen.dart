@@ -51,7 +51,9 @@ class ApplicationDetailsScreen extends StatefulWidget {
           Expanded(
             child: Text(
               label,
-              style: AppTextStyles.mainStyleGrey12Bold(context).copyWith(fontSize: 10),
+              style: AppTextStyles.mainStyleGrey12Bold(
+                context,
+              ).copyWith(fontSize: 10),
             ),
           ),
           Text(
@@ -84,7 +86,7 @@ class _ApplicationDetailsScreenState extends State<ApplicationDetailsScreen> {
 
   Widget _buildStatus() {
     final s = widget.status.toLowerCase();
-    
+
     if (s == 'pending' || s == 'pendiente') {
       return _statusChip(text: "Pendiente de aprobación", color: Colors.amber);
     } else if (s == 'approved' || s == 'aprobado') {
@@ -156,17 +158,19 @@ class _ApplicationDetailsScreenState extends State<ApplicationDetailsScreen> {
             );
           }
           if (state is ApproveTheRequestSuccess) {
-            context.router.back(); 
-            context.router.maybePop(true); 
+            Navigator.of(context, rootNavigator: true).pop();
+
             CustomAlert.show(
               context,
               title: 'Éxito',
               message: "Solicitud procesada correctamente",
               type: AlertType.success,
             );
+
+            context.router.maybePop(true);
           }
           if (state is ApproveTheRequestError) {
-            context.router.back();
+            Navigator.of(context, rootNavigator: true).pop();
             CustomAlert.show(
               context,
               title: 'Error',
@@ -175,7 +179,7 @@ class _ApplicationDetailsScreenState extends State<ApplicationDetailsScreen> {
             );
           }
         },
-        
+
         child: Scaffold(
           backgroundColor: background,
           appBar: AppBar(
@@ -188,7 +192,7 @@ class _ApplicationDetailsScreenState extends State<ApplicationDetailsScreen> {
                 color: colors.white,
                 size: smallSpacing * 1,
               ),
-              onPressed: () => context.router.back()
+              onPressed: () => context.router.back(),
             ),
             title: Text(
               "Detalle de Solicitud",
@@ -202,12 +206,14 @@ class _ApplicationDetailsScreenState extends State<ApplicationDetailsScreen> {
               children: [
                 Text(
                   "ESTADO ACTUAL",
-                  style: AppTextStyles.mainStyleGrey12Bold(context).copyWith(fontSize: 10),
+                  style: AppTextStyles.mainStyleGrey12Bold(
+                    context,
+                  ).copyWith(fontSize: 10),
                 ),
                 SizedBox(height: smallSpacing * 0.5),
                 _buildStatus(),
                 SizedBox(height: smallSpacing * 1.5),
-                
+
                 // CAJA DE INFORMACIÓN
                 Container(
                   padding: EdgeInsets.all(topPadding * 0.08),
@@ -220,62 +226,112 @@ class _ApplicationDetailsScreenState extends State<ApplicationDetailsScreen> {
                     children: [
                       Row(
                         children: [
-                          Icon(Icons.info_outline, size: 16, color: colors.lead),
+                          Icon(
+                            Icons.info_outline,
+                            size: 16,
+                            color: colors.lead,
+                          ),
                           const SizedBox(width: 6),
                           Text(
                             "INFORMACIÓN GENERAL",
-                            style: AppTextStyles.mainStyleGrey12Bold(context).copyWith(fontSize: 10),
+                            style: AppTextStyles.mainStyleGrey12Bold(
+                              context,
+                            ).copyWith(fontSize: 10),
                           ),
                         ],
                       ),
                       SizedBox(height: smallSpacing * 0.8),
-                      ApplicationDetailsScreen._infoRow(context, "Fecha", formatDate(widget.createdAt)),
+                      ApplicationDetailsScreen._infoRow(
+                        context,
+                        "Fecha",
+                        formatDate(widget.createdAt),
+                      ),
                       const Divider(color: Colors.white12),
-                      ApplicationDetailsScreen._infoRow(context, "Área", widget.rol),
+                      ApplicationDetailsScreen._infoRow(
+                        context,
+                        "Área",
+                        widget.rol,
+                      ),
                       const Divider(color: Colors.white12),
-                      ApplicationDetailsScreen._infoRow(context, "Solicitante", widget.name),
+                      ApplicationDetailsScreen._infoRow(
+                        context,
+                        "Solicitante",
+                        widget.name,
+                      ),
                       const Divider(color: Colors.white12),
-                      ApplicationDetailsScreen._infoRow(context, "Monto", "${widget.amount} Bs.", highlight: true),
-                      
+                      ApplicationDetailsScreen._infoRow(
+                        context,
+                        "Monto",
+                        "${widget.amount} Bs.",
+                        highlight: true,
+                      ),
+
                       SizedBox(height: smallSpacing * 0.6),
-                      Text("Descripción", style: AppTextStyles.mainStyleGrey12Bold(context).copyWith(fontSize: 10)),
+                      Text(
+                        "Descripción",
+                        style: AppTextStyles.mainStyleGrey12Bold(
+                          context,
+                        ).copyWith(fontSize: 10),
+                      ),
                       SizedBox(height: smallSpacing * 0.5),
                       Container(
                         width: double.infinity,
                         padding: const EdgeInsets.all(14),
-                        decoration: BoxDecoration(color: const Color(0xff0f213e), borderRadius: BorderRadius.circular(12)),
+                        decoration: BoxDecoration(
+                          color: const Color(0xff0f213e),
+                          borderRadius: BorderRadius.circular(12),
+                        ),
                         child: Text(
                           widget.description,
-                          style: AppTextStyles.mainStyleWhite12(context).copyWith(fontSize: 10),
+                          style: AppTextStyles.mainStyleWhite12(
+                            context,
+                          ).copyWith(fontSize: 10),
                         ),
                       ),
 
-                      // MOTIVO DE RECHAZO 
-                      if (isRejected && widget.motivoRechazo != null && widget.motivoRechazo!.isNotEmpty) ...[
+                      // MOTIVO DE RECHAZO
+                      if (isRejected &&
+                          widget.motivoRechazo != null &&
+                          widget.motivoRechazo!.isNotEmpty) ...[
                         SizedBox(height: smallSpacing * 0.6),
-                        Text("Motivo de rechazo", style: AppTextStyles.mainStyleGrey12Bold(context).copyWith(fontSize: 10, color: Colors.red[300])),
+                        Text(
+                          "Motivo de rechazo",
+                          style: AppTextStyles.mainStyleGrey12Bold(
+                            context,
+                          ).copyWith(fontSize: 10, color: Colors.red[300]),
+                        ),
                         SizedBox(height: smallSpacing * 0.5),
                         Container(
                           width: double.infinity,
                           padding: const EdgeInsets.all(14),
-                          decoration: BoxDecoration(color: Colors.red.withValues(alpha: 0.1), borderRadius: BorderRadius.circular(12)),
+                          decoration: BoxDecoration(
+                            color: Colors.red.withValues(alpha: 0.1),
+                            borderRadius: BorderRadius.circular(12),
+                          ),
                           child: Text(
                             widget.motivoRechazo!,
-                            style: AppTextStyles.mainStyleWhite12(context).copyWith(fontSize: 10, color: Colors.red[200]),
+                            style: AppTextStyles.mainStyleWhite12(
+                              context,
+                            ).copyWith(fontSize: 10, color: Colors.red[200]),
                           ),
                         ),
-                      ]
+                      ],
                     ],
                   ),
                 ),
                 SizedBox(height: smallSpacing * 0.8),
                 Text(
                   "DOCUMENTACIÓN ADJUNTA",
-                  style: AppTextStyles.mainStyleGrey12Bold(context).copyWith(fontSize: 10),
+                  style: AppTextStyles.mainStyleGrey12Bold(
+                    context,
+                  ).copyWith(fontSize: 10),
                 ),
                 SizedBox(height: smallSpacing * 0.8),
                 Container(
-                  decoration: BoxDecoration(color: cardColor, borderRadius: BorderRadius.circular(16)),
+                  decoration: BoxDecoration(
+                    color: cardColor,
+                    borderRadius: BorderRadius.circular(16),
+                  ),
                   padding: const EdgeInsets.all(10),
                   child: Column(
                     children: [
@@ -287,7 +343,10 @@ class _ApplicationDetailsScreenState extends State<ApplicationDetailsScreen> {
                               backgroundColor: Colors.transparent,
                               child: GestureDetector(
                                 onTap: () => context.router.back(),
-                                child: Image.network(widget.evidencia, fit: BoxFit.contain),
+                                child: Image.network(
+                                  widget.evidencia,
+                                  fit: BoxFit.contain,
+                                ),
                               ),
                             ),
                           );
@@ -299,11 +358,17 @@ class _ApplicationDetailsScreenState extends State<ApplicationDetailsScreen> {
                             height: 120,
                             width: double.infinity,
                             fit: BoxFit.cover,
-                            errorBuilder: (context, error, stackTrace) => Container(
-                              height: 120,
-                              color: Colors.grey[800],
-                              child: const Center(child: Icon(Icons.image_not_supported, color: Colors.grey)),
-                            ),
+                            errorBuilder: (context, error, stackTrace) =>
+                                Container(
+                                  height: 120,
+                                  color: Colors.grey[800],
+                                  child: const Center(
+                                    child: Icon(
+                                      Icons.image_not_supported,
+                                      color: Colors.grey,
+                                    ),
+                                  ),
+                                ),
                           ),
                         ),
                       ),
@@ -311,7 +376,7 @@ class _ApplicationDetailsScreenState extends State<ApplicationDetailsScreen> {
                   ),
                 ),
                 SizedBox(height: smallSpacing * 1),
-                
+
                 if (isPending) ...[
                   Column(
                     children: [
@@ -327,9 +392,14 @@ class _ApplicationDetailsScreenState extends State<ApplicationDetailsScreen> {
                                 return CustomDialog(
                                   title: "Aprobar solicitud",
                                   isDanger: false,
-                                  content: const Text("La solicitud será aprobada y pasará al siguiente proceso."),
+                                  content: const Text(
+                                    "La solicitud será aprobada y pasará al siguiente proceso.",
+                                  ),
                                   onPressed: () {
-                                    context.router.back();
+                                    Navigator.of(
+                                      context,
+                                      rootNavigator: true,
+                                    ).pop();
                                     _bloc.add(
                                       ApproveTheRequestEvent(
                                         action: 'aprobado',
@@ -346,14 +416,25 @@ class _ApplicationDetailsScreenState extends State<ApplicationDetailsScreen> {
                             backgroundColor: const Color(0xfff2df1d),
                             foregroundColor: Colors.black,
                             elevation: 0,
-                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(14),
+                            ),
                           ),
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
-                              Icon(Icons.check_circle_outline, size: smallSpacing * 0.8),
+                              Icon(
+                                Icons.check_circle_outline,
+                                size: smallSpacing * 0.8,
+                              ),
                               const SizedBox(width: 8),
-                              const Text("Aprobar Solicitud", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12)),
+                              const Text(
+                                "Aprobar Solicitud",
+                                style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 12,
+                                ),
+                              ),
                             ],
                           ),
                         ),
@@ -375,25 +456,33 @@ class _ApplicationDetailsScreenState extends State<ApplicationDetailsScreen> {
                                         isDanger: true,
                                         content: TextFormField(
                                           controller: rejectedContoller,
-                                          style: AppTextStyles.mainStyleWhite12(context),
+                                          style: AppTextStyles.mainStyleWhite12(
+                                            context,
+                                          ),
                                           decoration: InputDecoration(
                                             hintText: "Motivo del rechazo",
-                                            hintStyle: AppTextStyles.mainStyleGrey10(context),
+                                            hintStyle:
+                                                AppTextStyles.mainStyleGrey10(
+                                                  context,
+                                                ),
                                             filled: true,
                                             fillColor: const Color(0xff0f213e),
                                             border: OutlineInputBorder(
-                                              borderRadius: BorderRadius.circular(10),
+                                              borderRadius:
+                                                  BorderRadius.circular(10),
                                               borderSide: BorderSide.none,
                                             ),
                                           ),
                                         ),
                                         onPressed: () {
-                                          final rejected = rejectedContoller.text;
+                                          final rejected =
+                                              rejectedContoller.text;
                                           if (rejected.isEmpty) {
                                             CustomAlert.show(
                                               context,
                                               title: 'Error',
-                                              message: 'Ingrese el motivo de rechazo.',
+                                              message:
+                                                  'Ingrese el motivo de rechazo.',
                                               type: AlertType.warning,
                                             );
                                             return;
@@ -415,9 +504,14 @@ class _ApplicationDetailsScreenState extends State<ApplicationDetailsScreen> {
                                 style: OutlinedButton.styleFrom(
                                   foregroundColor: colors.red,
                                   side: BorderSide(color: colors.red),
-                                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(12),
+                                  ),
                                 ),
-                                child: const Text("Rechazar", style: TextStyle(fontSize: 12)),
+                                child: const Text(
+                                  "Rechazar",
+                                  style: TextStyle(fontSize: 12),
+                                ),
                               ),
                             ),
                           ),
@@ -430,9 +524,17 @@ class _ApplicationDetailsScreenState extends State<ApplicationDetailsScreen> {
                                 style: OutlinedButton.styleFrom(
                                   foregroundColor: colors.lead,
                                   side: BorderSide(color: colors.lead),
-                                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(12),
+                                  ),
                                 ),
-                                child: const Text("Cancelar", style: TextStyle(color: Colors.grey, fontSize: 12)),
+                                child: const Text(
+                                  "Cancelar",
+                                  style: TextStyle(
+                                    color: Colors.grey,
+                                    fontSize: 12,
+                                  ),
+                                ),
                               ),
                             ),
                           ),

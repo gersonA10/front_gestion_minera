@@ -50,6 +50,7 @@ class _AuthScreenState extends State<AuthScreen> {
                 type: AlertType.success,
               );
             } else if (state is AuthSuccess) {
+              
               final role = state.data.roleName;
 
               if (role == 'hacienda') {

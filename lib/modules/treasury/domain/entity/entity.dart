@@ -13,3 +13,5 @@ export 'package:front_gestion_minera/modules/treasury/domain/entity/payment_hist
 export 'package:front_gestion_minera/modules/treasury/domain/entity/confirm_payment_entity.dart';
 export 'package:front_gestion_minera/modules/treasury/domain/entity/reject_an_application_entity.dart';
 export 'package:front_gestion_minera/modules/treasury/domain/entity/loans/loans_list_entity.dart';
+export 'package:front_gestion_minera/modules/treasury/domain/entity/transaction_details_entity.dart';
+export 'package:front_gestion_minera/modules/treasury/domain/entity/goldInventory/new_extraction_entity.dart';

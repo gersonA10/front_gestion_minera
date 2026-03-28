@@ -7,7 +7,7 @@ import 'package:front_gestion_minera/config/theme/extension_theme.dart';
 import 'package:front_gestion_minera/core/widgets/custom_alert_widget.dart';
 import 'package:front_gestion_minera/injector_container.dart';
 import 'package:front_gestion_minera/modules/treasury/presentation/bloc/treasury_bloc.dart';
-import 'package:front_gestion_minera/modules/treasury/presentation/screens/payment%20history/payment_history_screen.dart';
+import 'package:front_gestion_minera/modules/treasury/presentation/screens/goldInventory/payment_history_screen.dart';
 import 'package:front_gestion_minera/modules/treasury/presentation/widgets/financialManagment/cards_primary_and_secondary_widget.dart';
 import 'package:front_gestion_minera/modules/treasury/presentation/widgets/financialManagment/request_title_widget.dart';
 import 'package:front_gestion_minera/utils/session/user_session.dart';
@@ -37,7 +37,6 @@ class _HomeDashboardScreenState extends State<HomeDashboardScreen> {
     final List<Widget> pages = [
       HomeBody(colors: colors),
       PaymentHistoryScreen(),
-      const _ModulesBody(),
     ];
     return MultiBlocProvider(
       providers: [
@@ -100,13 +99,7 @@ class _HomeDashboardScreenState extends State<HomeDashboardScreen> {
                   ),
                   label: 'Historial',
                 ),
-                NavigationDestination(
-                  icon: Icon(
-                    Icons.person_outline,
-                    color: _selectedIndex == 2 ? colors.blue : Colors.grey,
-                  ),
-                  label: 'Modulos',
-                ),
+              
               ],
             ),
           );
@@ -116,33 +109,7 @@ class _HomeDashboardScreenState extends State<HomeDashboardScreen> {
   }
 }
 
-class _HistoryBody extends StatelessWidget {
-  const _HistoryBody();
 
-  @override
-  Widget build(BuildContext context) {
-    return const Center(
-      child: Text(
-        'Pantalla de Historial',
-        style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-      ),
-    );
-  }
-}
-
-class _ModulesBody extends StatelessWidget {
-  const _ModulesBody();
-
-  @override
-  Widget build(BuildContext context) {
-    return const Center(
-      child: Text(
-        'Pantalla de Módulos',
-        style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-      ),
-    );
-  }
-}
 
 class HomeBody extends StatelessWidget {
   const HomeBody({super.key, required this.colors});
@@ -152,9 +119,9 @@ class HomeBody extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final userName = UserSession.userName.isEmpty
-        ? ''
-        : UserSession.userName;
+    // final userName = UserSession.userName.isEmpty
+    //     ? ''
+    //     : UserSession.userName;
     return SafeArea(
       child: RefreshIndicator(
         onRefresh: () async {
@@ -169,7 +136,7 @@ class HomeBody extends StatelessWidget {
             children: [
               SizedBox(height: 4),
               Text(
-                'Hola, $userName',
+                'Hola, ${UserSession.userName}',
                 style: TextStyle(
                   fontSize: 20,
                   fontWeight: FontWeight.bold,

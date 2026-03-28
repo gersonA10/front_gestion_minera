@@ -50,4 +50,10 @@ abstract class TreasuryRepository {
     int limit = 10,
   });
 
+   Future<TransactionDetailsResponseEntity> getTransactionDetails(
+    String idTansaction,
+  );
+  Future<NewExtractionResponseEntiy> newExtraction(
+    NewExtractionRequetsEntity newExtractionRequets,
+  );
 }

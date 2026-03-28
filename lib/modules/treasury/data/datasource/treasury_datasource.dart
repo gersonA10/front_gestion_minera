@@ -1,4 +1,5 @@
 
+
 import '../../../../core/networking/http_services.dart';
 import '../../domain/entity/entity.dart';
 import '../models/model.dart';
@@ -139,7 +140,7 @@ class TreasuryDatasource {
     return ConfirmPaymentResponseModel.fromJson(response);
   }
 
-    Future<GoldInventoryModel> getGoldInventory() async {
+  Future<GoldInventoryModel> getGoldInventory() async {
     final response = await apiClient.get(
       '/api/treasury/gold',
       operationName: 'getGoldInventory',
@@ -178,8 +179,10 @@ class TreasuryDatasource {
       operationName: 'rejectAnApplication',
     );
 
-    return RejectAnApplicationResponseModel.fromJson(response);}
-    Future<ExpenseResponseModel> registerUrgentExpense(
+    return RejectAnApplicationResponseModel.fromJson(response);
+  }
+
+  Future<ExpenseResponseModel> registerUrgentExpense(
     ExpenseRequestModel expenseRequestModel,
   ) async {
     final response = await apiClient.postFormData(
@@ -198,7 +201,7 @@ class TreasuryDatasource {
     return ExpenseResponseModel.fromJson(response['data']);
   }
 
-      Future<Map<String, dynamic>> getPaymentHistory({
+  Future<Map<String, dynamic>> getPaymentHistory({
     int page = 1,
     int limit = 10,
   }) async {
@@ -244,4 +247,31 @@ class TreasuryDatasource {
       'total_records': meta['total_records'] ?? 0,
     };
   }
+
+   Future<TransactionDetailsResponseEntity> getTransactionDetails(String idTansaction) async {
+    final response = await apiClient.get(
+      '/api/treasury/transactions/$idTansaction',
+      operationName: 'getTransactionDetails',
+    );
+    return TransactionDetailsResponseModel.fromJson(response['data']);
+  }
+
+   Future<NewExtractionResponseModel> newExtraction(
+    NewExtractionRequestModel newExtractionRequest,
+  ) async {
+    final response = await apiClient.postFormData(
+      '/api/treasury/batches',
+      data: newExtractionRequest.toFormDataMap(),
+      operationName: 'newExtraction',
+      files: [
+        {
+          'name': 'evidencia',
+          'path': newExtractionRequest.evidencia,
+          'filename': newExtractionRequest.evidencia.split('/').last,
+        },
+      ],
+    );
+    return NewExtractionResponseModel.fromJson(response);
+  }
+
 }

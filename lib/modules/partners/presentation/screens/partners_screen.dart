@@ -1,226 +1,394 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:front_gestion_minera/config/router/app_router.dart';
 import 'package:front_gestion_minera/config/router/app_router.gr.dart';
-import 'package:front_gestion_minera/config/theme/extension_theme.dart';
+import 'package:front_gestion_minera/core/widgets/logout_button_widget.dart';
 import 'package:front_gestion_minera/injector_container.dart';
-import 'package:front_gestion_minera/modules/partners/presentation/widgets/custom_card_widget.dart';
-import 'package:front_gestion_minera/utils/assets.dart';
 import 'package:front_gestion_minera/utils/greeting_util.dart';
-import 'package:front_gestion_minera/utils/session/session_actions.dart';
 import 'package:front_gestion_minera/utils/session/user_session.dart';
-import 'package:front_gestion_minera/utils/text_util.dart';
 
+class _AppColors {
+  static const primary = Color(0xFF1A56FF);
+  static const primaryLight = Color(0xFFEEF2FF);
+  static const surface = Color(0xFFFFFFFF);
+  static const background = Color(0xFFF5F7FB);
+  static const textPrimary = Color(0xFF0D1B3E);
+  static const textSecondary = Color(0xFF6B7A99);
+
+  static const border = Color(0xFFE8EDF5);
+  static const cardShadow = Color(0x0A1A56FF);
+
+  static const accentGreen = Color(0xFF00C896);
+  static const accentOrange = Color(0xFFFF8C42);
+  static const accentPurple = Color(0xFF7C5CBF);
+  static const accentTeal = Color(0xFF00B4D8);
+  static const accentRose = Color(0xFFE83E8C);
+}
+
+class _MenuItem {
+  final String title;
+  final String subtitle;
+  final IconData icon;
+  final Color accent;
+  final VoidCallback onTap;
+
+  const _MenuItem({
+    required this.title,
+    required this.subtitle,
+    required this.icon,
+    required this.accent,
+    required this.onTap,
+  });
+}
+
+// ─── Screen ───────────────────────────────────────────────────────────────────
 @RoutePage()
-class PartnersScreen extends StatelessWidget {
+class PartnersScreen extends StatefulWidget {
   final String nombre;
   const PartnersScreen({super.key, required this.nombre});
 
   @override
+  State<PartnersScreen> createState() => _PartnersScreenState();
+}
+
+class _PartnersScreenState extends State<PartnersScreen>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _controller;
+  late final Animation<double> _fadeIn;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 600),
+    )..forward();
+    _fadeIn = CurvedAnimation(parent: _controller, curve: Curves.easeOut);
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  List<_MenuItem> _buildMenuItems(BuildContext context) => [
+        _MenuItem(
+          title: 'Registrar Préstamo',
+          subtitle: 'Nueva solicitud',
+          icon: Icons.add_card_rounded,
+          accent: _AppColors.primary,
+          onTap: () => InjectorContainer.getIt<AppRouter>().push(LoanRoute()),
+        ),
+        _MenuItem(
+          title: 'Historial de Préstamos',
+          subtitle: 'Seguimiento de cuotas',
+          icon: Icons.receipt_long_rounded,
+          accent: _AppColors.accentTeal,
+          onTap: () => context.router.push(LoanHistoryRoute()),
+        ),
+        _MenuItem(
+          title: 'Ingresos',
+          subtitle: 'Entradas de capital',
+          icon: Icons.trending_up_rounded,
+          accent: _AppColors.accentGreen,
+          onTap: () => context.router.push(DistributesRoute()),
+        ),
+        _MenuItem(
+          title: 'Solicitar Dinero',
+          subtitle: 'Solicitud de egreso',
+          icon: Icons.payments_rounded,
+          accent: _AppColors.accentOrange,
+          onTap: () => context.router.push(MoneyRequestRoute()),
+        ),
+        _MenuItem(
+          title: 'Historial de Aportes',
+          subtitle: 'Contribuciones totales',
+          icon: Icons.savings_rounded,
+          accent: _AppColors.accentPurple,
+          onTap: () => InjectorContainer.getIt<AppRouter>()
+              .push(const ContributeHistoryRoute()),
+        ),
+        _MenuItem(
+          title: 'Historial de Solicitudes',
+          subtitle: 'Seguimiento de solicitud',
+          icon: Icons.history_rounded,
+          accent: _AppColors.accentRose,
+          onTap: () => context.router.push(const RequestHistoryRoute()),
+        ),
+        _MenuItem(
+          title: 'Bandeja de Socios',
+          subtitle: 'Asistencia y actividades',
+          icon: Icons.groups_2_rounded,
+          accent: _AppColors.accentTeal,
+          onTap: () {},
+        ),
+      ];
+
+  @override
   Widget build(BuildContext context) {
-    final screenSize = MediaQuery.of(context).size;
-    final double smallSpacing = screenSize.height * 0.02;
-    final double topPadding = screenSize.height * 0.2;
+    final items = _buildMenuItems(context);
+
+    SystemChrome.setSystemUIOverlayStyle(const SystemUiOverlayStyle(
+      statusBarColor: Colors.transparent,
+      statusBarIconBrightness: Brightness.dark,
+    ));
 
     return Scaffold(
-      appBar: PreferredSize(
-        preferredSize: Size.fromHeight(150),
-        child: Container(
-          height: screenSize.height * 0.5,
-          color: Theme.of(context).colorScheme.white,
+      backgroundColor: _AppColors.background,
+      body: FadeTransition(
+        opacity: _fadeIn,
+        child: CustomScrollView(
+          physics: const BouncingScrollPhysics(),
+          slivers: [
+            _buildSliverHeader(context),
+            SliverPadding(
+              padding: const EdgeInsets.fromLTRB(20, 8, 20, 32),
+              sliver: SliverGrid(
+                delegate: SliverChildBuilderDelegate(
+                  (context, index) {
+                    final item = items[index];
+                    // Last item full width if odd count
+                    return _MenuCard(
+                      item: item,
+                      delay: Duration(milliseconds: 60 * index),
+                    );
+                  },
+                  childCount: items.length,
+                ),
+                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: 2,
+                  mainAxisSpacing: 14,
+                  crossAxisSpacing: 14,
+                  childAspectRatio: 1.05,
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildSliverHeader(BuildContext context) {
+    return SliverToBoxAdapter(
+      child: Container(
+        decoration: const BoxDecoration(
+          color: _AppColors.surface,
+          border: Border(
+            bottom: BorderSide(color: _AppColors.border, width: 1),
+          ),
+        ),
+        child: SafeArea(
+          bottom: false,
           child: Padding(
-            padding: EdgeInsets.all(topPadding * 0.05),
+            padding: const EdgeInsets.fromLTRB(20, 12, 20, 20),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                SizedBox(height: smallSpacing * 3),
+                // Top bar
                 Row(
                   children: [
+                    // Avatar
                     Container(
-                      width: 50,
-                      height: 50,
+                      width: 44,
+                      height: 44,
                       decoration: BoxDecoration(
-                        color: Theme.of(context).colorScheme.white,
-                        borderRadius: BorderRadius.circular(12),
+                        color: _AppColors.primaryLight,
+                        borderRadius: BorderRadius.circular(14),
                       ),
                       child: const Icon(
-                        Icons.account_balance,
-                        color: Colors.blue,
+                        Icons.account_balance_rounded,
+                        color: _AppColors.primary,
+                        size: 22,
                       ),
                     ),
-                    SizedBox(width: smallSpacing * 0.5),
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          GreetingUtil.getGreeting(),
-                          style: AppTextStyles.mainStyleGrey14(context),
-                        ),
-                        Text(
-                          UserSession.userName,
-                          style: AppTextStyles.mainStyle16Bold(context),
-                        ),
-                      ],
-                    ),
-                    Spacer(),
-                      SizedBox(
-                          height: 52,
-                          child: OutlinedButton.icon(
-                            onPressed: () {
-                              SessionActions.logout();
-                            },
-                            icon: const Icon(
-                              Icons.logout,
-                              color: Color(0xFFFF4D4F),
-                              size: 18,
-                            ),
-                            label: const Text(
-                              'Cerrar Sesión',
-                              style: TextStyle(
-                                color: Color(0xFFFF4D4F),
-                                fontWeight: FontWeight.w700,
-                                fontSize: 12,
-                              ),
-                            ),
-                            style: OutlinedButton.styleFrom(
-                              backgroundColor: Colors.transparent,
-                              side: const BorderSide(
-                                color: Color(0xFFFFC9C9),
-                                width: 1.2,
-                              ),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(14),
-                              ),
-                              elevation: 0,
+                    const SizedBox(width: 12),
+                    // Greeting + name
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            GreetingUtil.getGreeting(),
+                            style: const TextStyle(
+                              fontSize: 12,
+                              color: _AppColors.textSecondary,
+                              fontWeight: FontWeight.w500,
+                              letterSpacing: 0.2,
                             ),
                           ),
-                        ),
+                          Text(
+                            UserSession.userName,
+                            style: const TextStyle(
+                              fontSize: 15,
+                              color: _AppColors.textPrimary,
+                              fontWeight: FontWeight.w700,
+                              letterSpacing: -0.3,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    // Logout button
+                    LogoutButton(),
                   ],
                 ),
-                SizedBox(height: smallSpacing * 0.8),
-                Text(
+
+                const SizedBox(height: 20),
+                const Text(
                   'Los Tigresito',
-                  style: AppTextStyles.mainStyleBlue16Bold(context),
+                  style: TextStyle(
+                    fontSize: 24,
+                    fontWeight: FontWeight.w800,
+                    color: _AppColors.textPrimary,
+                    letterSpacing: -0.6,
+                    height: 1.1,
+                  ),
                 ),
-                Text(
-                  'Gestion de socios financiero',
-                  style: AppTextStyles.mainStyleGrey14(context),
+                const SizedBox(height: 4),
+                const Text(
+                  'Gestión de socios financiero',
+                  style: TextStyle(
+                    fontSize: 13,
+                    color: _AppColors.textSecondary,
+                    fontWeight: FontWeight.w400,
+                  ),
                 ),
               ],
             ),
           ),
         ),
       ),
-      body: Container(
-        color: Theme.of(context).colorScheme.bajo,
-        child: Padding(
-          padding: EdgeInsets.all(topPadding * 0.05),
-          child: ListView(
-            children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: [
-                  CustomCardWidget(
-                    onTap: () {
-                      InjectorContainer.getIt<AppRouter>().push(LoanRoute());
-                    },
-                    screenSize: screenSize,
-                    topPadding: topPadding,
-                    smallSpacing: smallSpacing,
-                    icon: AssetImageApp.getIconLoan2,
-                    title: 'Registrar prestamo',
-                    subtitle: 'Nueva solicitud de prestamo',
-                  ),
-                  CustomCardWidget(
-                    onTap: () {
-                      context.router.push(LoanHistoryRoute());
-                    },
-                    screenSize: screenSize,
-                    topPadding: topPadding,
-                    smallSpacing: smallSpacing,
-                    icon: AssetImageApp.getIconLoan,
-                    title: 'Historial de Prestamos',
-                    subtitle: 'Seguimiento de Cuotas',
-                  ),
-                ],
-              ),
-              SizedBox(height: smallSpacing * 0.5),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: [
-                  CustomCardWidget(
-                    onTap: () {
-                      context.router.push(DistributesRoute());
-                    },
-                    screenSize: screenSize,
-                    topPadding: topPadding,
-                    smallSpacing: smallSpacing,
-                    icon: AssetImageApp.getIconLoan4,
-                    title: 'Ingresos',
-                    subtitle: 'Entradas de Capital',
-                  ),
-                  CustomCardWidget(
-                    onTap: () {
-                      context.router.push(MoneyRequestRoute());
-                    },
-                    screenSize: screenSize,
-                    topPadding: topPadding,
-                    smallSpacing: smallSpacing,
-                    icon: AssetImageApp.getIconLoan3,
-                    title: 'Solicitar dinero',
-                    subtitle: 'Solicitud de Egreso',
-                  ),
-                ],
-              ),
-              SizedBox(height: smallSpacing * 0.5),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: [
-                  CustomCardWidget(
-                    onTap: () {
-                      InjectorContainer.getIt<AppRouter>().push(
-                        const ContributeHistoryRoute(),
-                      );
-                    },
-                    screenSize: screenSize,
-                    topPadding: topPadding,
-                    smallSpacing: smallSpacing,
-                    icon: AssetImageApp.getIconLoan3,
-                    title: 'Historial de Aportes',
-                    subtitle: 'Contribuciones Totales',
-                  ),
-                  CustomCardWidget(
-                    onTap: () {
-                      context.router.push(const RequestHistoryRoute());
-                    },
-                    screenSize: screenSize,
-                    topPadding: topPadding,
-                    smallSpacing: smallSpacing,
-                    icon: AssetImageApp.getIconLoan,
-                    title: 'Historial de Solicitudes',
-                    subtitle: 'Seguimiento de solicitud',
+    );
+  }
+}
+
+// ─── Menu card ────────────────────────────────────────────────────────────────
+class _MenuCard extends StatefulWidget {
+  final _MenuItem item;
+  final Duration delay;
+
+  const _MenuCard({required this.item, required this.delay});
+
+  @override
+  State<_MenuCard> createState() => _MenuCardState();
+}
+
+class _MenuCardState extends State<_MenuCard>
+    with SingleTickerProviderStateMixin {
+  bool _pressing = false;
+  late final AnimationController _entryCtrl;
+  late final Animation<double> _entryAnim;
+
+  @override
+  void initState() {
+    super.initState();
+    _entryCtrl = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 400),
+    );
+    _entryAnim = CurvedAnimation(parent: _entryCtrl, curve: Curves.easeOut);
+    Future.delayed(widget.delay, () {
+      if (mounted) _entryCtrl.forward();
+    });
+  }
+
+  @override
+  void dispose() {
+    _entryCtrl.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final accent = widget.item.accent;
+
+    return FadeTransition(
+      opacity: _entryAnim,
+      child: SlideTransition(
+        position: Tween<Offset>(
+          begin: const Offset(0, 0.15),
+          end: Offset.zero,
+        ).animate(_entryAnim),
+        child: GestureDetector(
+          onTapDown: (_) => setState(() => _pressing = true),
+          onTapUp: (_) {
+            setState(() => _pressing = false);
+            widget.item.onTap();
+          },
+          onTapCancel: () => setState(() => _pressing = false),
+          child: AnimatedScale(
+            scale: _pressing ? 0.96 : 1.0,
+            duration: const Duration(milliseconds: 120),
+            curve: Curves.easeOut,
+            child: Container(
+              decoration: BoxDecoration(
+                color: _AppColors.surface,
+                borderRadius: BorderRadius.circular(20),
+                border: Border.all(color: _AppColors.border, width: 1),
+                boxShadow: [
+                  BoxShadow(
+                    color: _AppColors.cardShadow,
+                    blurRadius: 16,
+                    offset: const Offset(0, 4),
                   ),
                 ],
               ),
-              SizedBox(height: smallSpacing * 0.5),
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                mainAxisAlignment: MainAxisAlignment.center,
+              padding: const EdgeInsets.all(18),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  CustomCardWidget(
-                    onTap: () {},
-                    screenSize: screenSize,
-                    topPadding: topPadding,
-                    smallSpacing: smallSpacing,
-                    icon: AssetImageApp.getIconLoan4,
-                    title: 'Bandeja de Socios',
-                    subtitle: 'Verifica tu asistencia y otras actividades',
+                  // Icon container
+                  Container(
+                    width: 46,
+                    height: 46,
+                    decoration: BoxDecoration(
+                      color: accent.withOpacity(0.12),
+                      borderRadius: BorderRadius.circular(14),
+                    ),
+                    child: Icon(widget.item.icon, color: accent, size: 22),
+                  ),
+                  const Spacer(),
+                  // Title
+                  Text(
+                    widget.item.title,
+                    style: const TextStyle(
+                      fontSize: 13.5,
+                      fontWeight: FontWeight.w700,
+                      color: _AppColors.textPrimary,
+                      height: 1.25,
+                      letterSpacing: -0.2,
+                    ),
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  const SizedBox(height: 3),
+                  // Subtitle
+                  Text(
+                    widget.item.subtitle,
+                    style: const TextStyle(
+                      fontSize: 11,
+                      color: _AppColors.textSecondary,
+                      fontWeight: FontWeight.w400,
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  const SizedBox(height: 10),
+                  // Accent bottom bar
+                  Container(
+                    height: 3,
+                    width: 28,
+                    decoration: BoxDecoration(
+                      color: accent,
+                      borderRadius: BorderRadius.circular(4),
+                    ),
                   ),
                 ],
               ),
-              SizedBox(height: smallSpacing * 1.5),
-            ],
+            ),
           ),
         ),
       ),

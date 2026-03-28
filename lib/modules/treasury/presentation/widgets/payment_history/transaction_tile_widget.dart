@@ -1,6 +1,8 @@
-
+import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
-import 'package:front_gestion_minera/modules/treasury/presentation/screens/payment%20history/payment_history_screen.dart';
+import 'package:front_gestion_minera/config/router/app_router.gr.dart';
+import 'package:front_gestion_minera/config/theme/extension_theme.dart';
+import 'package:front_gestion_minera/modules/treasury/presentation/screens/goldInventory/payment_history_screen.dart';
 import 'package:intl/intl.dart';
 
 import '../../../domain/entity/entity.dart';
@@ -12,16 +14,19 @@ class TransactionTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final timeStr = DateFormat('HH:mm').format(item.fecha);
-    final amountStr =
-        '-${NumberFormat('#,##0.00', 'en_US').format(item.monto)} Bs';
+    DateTime fechaDb = DateTime.parse("2026-03-28T19:32:43.554Z");
+    DateTime fechaLocal = fechaDb.toLocal();
+    final String timeStr = DateFormat('HH:mm').format(fechaLocal);
+    final amountStr =  '-${NumberFormat('#,##0.00', 'en_US').format(item.monto)} Bs';
     final iconData = iconForTransaction(item.operationType, item.destinoDinero);
-    final iconColor =
-        iconColorForTransaction(item.operationType, item.destinoDinero);
-    final iconBg =
-        iconBgForTransaction(item.operationType, item.destinoDinero);
-    final title =
-        item.description?.isNotEmpty == true ? item.description! : item.operationType;
+    final iconColor = iconColorForTransaction(
+      item.operationType,
+      item.destinoDinero,
+    );
+    final iconBg = iconBgForTransaction(item.operationType, item.destinoDinero);
+    final title = item.description?.isNotEmpty == true
+        ? item.description!
+        : item.operationType;
 
     return Container(
       padding: const EdgeInsets.all(14),
@@ -61,13 +66,18 @@ class TransactionTile extends StatelessWidget {
                 const SizedBox(height: 3),
                 Row(
                   children: [
-                    const Icon(Icons.access_time_rounded,
-                        size: 13, color: Color(0xFF9CA3AF)),
+                    const Icon(
+                      Icons.access_time_rounded,
+                      size: 13,
+                      color: Color(0xFF9CA3AF),
+                    ),
                     const SizedBox(width: 3),
                     Text(
                       timeStr,
                       style: const TextStyle(
-                          fontSize: 12, color: Color(0xFF9CA3AF)),
+                        fontSize: 12,
+                        color: Color(0xFF9CA3AF),
+                      ),
                     ),
                     const SizedBox(width: 6),
                     Container(
@@ -83,7 +93,9 @@ class TransactionTile extends StatelessWidget {
                       child: Text(
                         item.destinoDinero,
                         style: const TextStyle(
-                            fontSize: 12, color: Color(0xFF9CA3AF)),
+                          fontSize: 12,
+                          color: Color(0xFF9CA3AF),
+                        ),
                         overflow: TextOverflow.ellipsis,
                       ),
                     ),
@@ -94,13 +106,40 @@ class TransactionTile extends StatelessWidget {
           ),
           const SizedBox(width: 8),
           // Monto
-          Text(
-            amountStr,
-            style: const TextStyle(
-              fontSize: 14,
-              fontWeight: FontWeight.w700,
-              color: Color(0xFF1F2937),
-            ),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [
+              Text(
+                amountStr,
+                style: const TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w700,
+                  color: Color(0xFF1F2937),
+                ),
+              ),
+              TextButton(
+                onPressed: () {
+                  context.router.push(
+                    TransactionDetailsRoute(idTransaction: item.transactionId),
+                  );
+                },
+                style: TextButton.styleFrom(
+                  padding: EdgeInsets.zero,
+                  minimumSize: Size.zero,
+                  tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                ),
+                child: Text(
+                  'Ver detalle',
+                  style: TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w700,
+                    color: Theme.of(context).colorScheme.blue,
+                  ),
+
+                  textAlign: TextAlign.end,
+                ),
+              ),
+            ],
           ),
         ],
       ),
