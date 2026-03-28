@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:front_gestion_minera/config/router/app_router.gr.dart';
 import 'package:front_gestion_minera/config/theme/extension_theme.dart';
+import 'package:front_gestion_minera/core/widgets/logout_button_widget.dart';
 import 'package:front_gestion_minera/modules/surveillance/presentation/screen/register_contribution.dart';
 import 'package:front_gestion_minera/injector_container.dart';
 import 'package:front_gestion_minera/modules/surveillance/presentation/bloc/surveillance_bloc.dart';
@@ -40,11 +41,11 @@ class _HomeSurveillanceScreenState extends State<HomeSurveillanceScreen> {
     }
   }
 
-void _onItemTapped(int index) {
+  void _onItemTapped(int index) {
     setState(() {
       _selectedIndex = index;
     });
-    
+
     if (index == 0) {
       _surveillanceBloc.add(MonitoringTrayEvent(isRefresh: false));
     }
@@ -68,25 +69,24 @@ void _onItemTapped(int index) {
           backgroundColor: colors.white,
           elevation: 0,
           centerTitle: true,
-          title: Text(
-            "Bandeja de Solicitudes",
-            style: AppTextStyles.mainStyle16Bold(context),
-          ),
-          actions: [
-            Padding(
-              padding: const EdgeInsets.only(right: 16),
-              child: Center(
-                child: TextButton(
-                  onPressed: () =>
-                      context.router.push(const HistoryRequestsRoute()),
-                  child: Text(
-                    "Historial",
-                    style: AppTextStyles.mainStyleBlue12Bold(context),
-                  ),
+          title: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
+            children: [
+              TextButton(
+                onPressed: () =>
+                    context.router.push(const HistoryRequestsRoute()),
+                child: Text(
+                  "Historial",
+                  style: AppTextStyles.mainStyleBlue12Bold(context),
                 ),
               ),
-            ),
-          ],
+              Text(
+                "Bandeja de Solicitudes",
+                style: AppTextStyles.mainStyle16Bold(context),
+              ),
+              LogoutButton(),
+            ],
+          ),
         ),
         body: _buildBody(smallSpacing, topPadding),
         bottomNavigationBar: BottomNavigationBar(

@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:front_gestion_minera/config/router/app_router.dart';
 import 'package:front_gestion_minera/config/router/app_router.gr.dart';
+import 'package:front_gestion_minera/core/widgets/logout_button_widget.dart';
 import 'package:front_gestion_minera/injector_container.dart';
 import 'package:front_gestion_minera/utils/greeting_util.dart';
 import 'package:front_gestion_minera/utils/session/session_actions.dart';
@@ -15,8 +16,7 @@ class _AppColors {
   static const background = Color(0xFFF5F7FB);
   static const textPrimary = Color(0xFF0D1B3E);
   static const textSecondary = Color(0xFF6B7A99);
-  static const danger = Color(0xFFE53E3E);
-  static const dangerLight = Color(0xFFFFF5F5);
+
   static const border = Color(0xFFE8EDF5);
   static const cardShadow = Color(0x0A1A56FF);
 
@@ -233,7 +233,7 @@ class _PartnersScreenState extends State<PartnersScreen>
                       ),
                     ),
                     // Logout button
-                    _LogoutButton(),
+                    LogoutButton(),
                   ],
                 ),
 
@@ -259,60 +259,6 @@ class _PartnersScreenState extends State<PartnersScreen>
                 ),
               ],
             ),
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-// ─── Logout button ────────────────────────────────────────────────────────────
-class _LogoutButton extends StatefulWidget {
-  @override
-  State<_LogoutButton> createState() => _LogoutButtonState();
-}
-
-class _LogoutButtonState extends State<_LogoutButton> {
-  bool _pressing = false;
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTapDown: (_) => setState(() => _pressing = true),
-      onTapUp: (_) {
-        setState(() => _pressing = false);
-        SessionActions.logout();
-      },
-      onTapCancel: () => setState(() => _pressing = false),
-      child: AnimatedScale(
-        scale: _pressing ? 0.94 : 1.0,
-        duration: const Duration(milliseconds: 100),
-        child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-          decoration: BoxDecoration(
-            color: _AppColors.dangerLight,
-            borderRadius: BorderRadius.circular(12),
-            border: Border.all(
-              color: _AppColors.danger.withOpacity(0.2),
-              width: 1,
-            ),
-          ),
-          child: const Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(Icons.logout_rounded,
-                  color: _AppColors.danger, size: 16),
-              SizedBox(width: 6),
-              Text(
-                'Salir',
-                style: TextStyle(
-                  fontSize: 12,
-                  fontWeight: FontWeight.w700,
-                  color: _AppColors.danger,
-                  letterSpacing: 0.1,
-                ),
-              ),
-            ],
           ),
         ),
       ),
