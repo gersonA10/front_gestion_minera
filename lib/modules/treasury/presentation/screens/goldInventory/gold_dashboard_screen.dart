@@ -115,7 +115,8 @@ class _GoldDashboardScreenState extends State<GoldDashboardScreen> {
                             (state) => state is GoldDashboardLoaded || state is GoldDashboardError,
                           );
                         },
-                        child: SingleChildScrollView(
+                        child: _selectedNav == 0
+                        ? SingleChildScrollView(
                           controller: _scrollController,
                           padding: const EdgeInsets.symmetric(horizontal: 16),
                           child: Column(
@@ -151,6 +152,9 @@ class _GoldDashboardScreenState extends State<GoldDashboardScreen> {
                               const SizedBox(height: 80),
                             ],
                           ),
+                        )
+                        : SingleChildScrollView(
+                          child: Text('historial')
                         ),
                       ),
                     ),
