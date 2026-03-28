@@ -54,6 +54,7 @@ class UserSession {
     await preferences.setString(_emailKey, userData.email);
     await preferences.setString(_roleKey, userData.roleName);
     await preferences.setString(_accessTokenKey, userData.sessionToken);
+    userName = userData.fullName;
   }
 
   //  CLEAR
@@ -65,6 +66,8 @@ class UserSession {
     await preferences.remove(_roleKey);
     await preferences.remove(_accessTokenKey);
     await preferences.remove(_refreshTokenKey);
+
+    userName = '';
   }
 
   //  VALIDACIÓN DE SESIÓN
