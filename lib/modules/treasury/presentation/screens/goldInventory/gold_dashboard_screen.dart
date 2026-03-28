@@ -316,7 +316,7 @@ class _GoldDashboardScreenState extends State<GoldDashboardScreen> {
                                     Container(
                                       padding: EdgeInsets.symmetric(
                                         horizontal: 15,
-                                        vertical: 10,
+                                        vertical: 5,
                                       ),
                                       child: Row(
                                         children: [
