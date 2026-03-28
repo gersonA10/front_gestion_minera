@@ -37,7 +37,6 @@ class _HomeDashboardScreenState extends State<HomeDashboardScreen> {
     final List<Widget> pages = [
       HomeBody(colors: colors),
       PaymentHistoryScreen(),
-      const _ModulesBody(),
     ];
     return MultiBlocProvider(
       providers: [
@@ -100,13 +99,7 @@ class _HomeDashboardScreenState extends State<HomeDashboardScreen> {
                   ),
                   label: 'Historial',
                 ),
-                NavigationDestination(
-                  icon: Icon(
-                    Icons.person_outline,
-                    color: _selectedIndex == 2 ? colors.blue : Colors.grey,
-                  ),
-                  label: 'Modulos',
-                ),
+              
               ],
             ),
           );
@@ -116,33 +109,7 @@ class _HomeDashboardScreenState extends State<HomeDashboardScreen> {
   }
 }
 
-class _HistoryBody extends StatelessWidget {
-  const _HistoryBody();
 
-  @override
-  Widget build(BuildContext context) {
-    return const Center(
-      child: Text(
-        'Pantalla de Historial',
-        style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-      ),
-    );
-  }
-}
-
-class _ModulesBody extends StatelessWidget {
-  const _ModulesBody();
-
-  @override
-  Widget build(BuildContext context) {
-    return const Center(
-      child: Text(
-        'Pantalla de Módulos',
-        style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-      ),
-    );
-  }
-}
 
 class HomeBody extends StatelessWidget {
   const HomeBody({super.key, required this.colors});

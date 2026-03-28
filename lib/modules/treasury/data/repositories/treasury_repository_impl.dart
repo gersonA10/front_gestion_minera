@@ -116,6 +116,11 @@ class TreasuryRepositoryImpl implements TreasuryRepository {
       totalRecords: result['total_records'] as int? ?? 0,
     );
   }
+  
+  @override
+  Future<TransactionDetailsResponseEntity> getTransactionDetails(String idTansaction)async {
+    return await datasource.getTransactionDetails(idTansaction);
+  }
 
 
 }

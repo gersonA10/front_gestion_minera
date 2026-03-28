@@ -196,3 +196,18 @@ class GoldDashboardError extends TreasuryState {
   final String message;
   GoldDashboardError(this.message);
 }
+///
+class TransactionDetailsLoading extends TreasuryState {}
+
+class TransactionDetailsLoaded extends TreasuryState {
+  final TransactionDetailsResponseEntity transactionDetails;
+
+  TransactionDetailsLoaded({
+    required this.transactionDetails
+  });
+}
+
+class TransactionDetailsError extends TreasuryState {
+  final String message;
+  TransactionDetailsError(this.message);
+}
