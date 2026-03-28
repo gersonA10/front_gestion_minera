@@ -12,3 +12,4 @@ export 'package:front_gestion_minera/modules/treasury/presentation/widgets/pendi
 export 'package:front_gestion_minera/modules/treasury/presentation/widgets/financialManagment/cards_primary_and_secondary_widget.dart';
 export 'package:front_gestion_minera/modules/treasury/presentation/widgets/financialManagment/request_title_widget.dart';
 
+export 'package:front_gestion_minera/modules/treasury/presentation/widgets/transactionDetails/loaded_view_widget.dart';

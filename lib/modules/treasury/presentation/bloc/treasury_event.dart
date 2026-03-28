@@ -77,3 +77,9 @@ class FetchGoldDashboardDataEvent extends TreasuryEvent {
 }
 
 class LoadMoreGoldBatchesEvent extends TreasuryEvent {}
+
+///
+class TransactionDetailsEvent extends TreasuryEvent {
+  final String idTransaction;
+  TransactionDetailsEvent({required this.idTransaction});
+}
