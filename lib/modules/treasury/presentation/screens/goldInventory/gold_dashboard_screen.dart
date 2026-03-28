@@ -27,6 +27,10 @@ class _GoldDashboardScreenState extends State<GoldDashboardScreen> {
 
   late final TreasuryBloc _treasuryBloc;
 
+  bool _fabVisible = true;
+  double _lastScrollOffset = 0;
+  static const double _scrollThreshold = 10.0;
+
   List<GoldBatchEntity> _getFilteredLotes(List<GoldBatchEntity> lotes) {
     switch (_selectedFilter) {
       case 1:
@@ -67,8 +71,18 @@ class _GoldDashboardScreenState extends State<GoldDashboardScreen> {
   }
 
   void _onScroll() {
-    if (_scrollController.position.pixels >=
-        _scrollController.position.maxScrollExtent - 200) {
+    final current = _scrollController.position.pixels;
+    final diff = current - _lastScrollOffset;
+
+    if (diff > _scrollThreshold && _fabVisible) {
+      setState(() => _fabVisible = false);
+    } else if (diff < -_scrollThreshold && !_fabVisible) {
+      setState(() => _fabVisible = true);
+    }
+
+    _lastScrollOffset = current;
+
+    if (current >= _scrollController.position.maxScrollExtent - 200) {
       _treasuryBloc.add(LoadMoreGoldBatchesEvent());
     }
   }
@@ -168,16 +182,24 @@ class _GoldDashboardScreenState extends State<GoldDashboardScreen> {
             },
           ),
         ),
-        floatingActionButton: FloatingActionButton(
-          onPressed: () async {
-            await InjectorContainer.getIt<AppRouter>().push(NewExtractionRoute());
+        floatingActionButton: ScrollAwareFabs(
+          visible: _fabVisible,
+          onAddTap: () async {
+            await InjectorContainer.getIt<AppRouter>().push(
+              NewExtractionRoute(),
+            );
             if (context.mounted) {
               _treasuryBloc.add(FetchGoldDashboardDataEvent());
             }
           },
-          backgroundColor: const Color(0xFF2563EB),
-          elevation: 4,
-          child: const Icon(Icons.add, color: Colors.white, size: 28),
+          onMoneyTap: () async {
+            await InjectorContainer.getIt<AppRouter>().push(
+              NewExtractionRoute(),
+            );
+            if (context.mounted) {
+              _treasuryBloc.add(FetchGoldDashboardDataEvent());
+            }
+          },
         ),
         bottomNavigationBar: _buildBottomNav(),
       ),
@@ -394,9 +416,6 @@ class _GoldDashboardScreenState extends State<GoldDashboardScreen> {
     );
   }
 
-  // ─────────────────────────────────────────────
-  // Bottom Nav
-  // ─────────────────────────────────────────────
   Widget _buildBottomNav() {
     final items = [
       {
@@ -626,3 +645,4 @@ class ValueEstimateWigdet extends StatelessWidget {
     );
   }
 }
+

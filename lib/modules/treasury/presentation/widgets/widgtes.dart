@@ -1,3 +1,6 @@
+export 'package:front_gestion_minera/modules/treasury/presentation/widgets/goldInventory/fab_button_widget.dart';
+export 'package:front_gestion_minera/modules/treasury/presentation/widgets/goldInventory/scroll_aware_fabs_widget.dart';
+
 export 'package:front_gestion_minera/modules/treasury/presentation/widgets/goldInventory/app_bar_home_widget.dart';
 export 'package:front_gestion_minera/modules/treasury/presentation/widgets/payment_history/filer_bottom_sheet_widget.dart';
 export 'package:front_gestion_minera/modules/treasury/presentation/widgets/payment_history/selector_row_widget.dart';
