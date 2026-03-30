@@ -50,4 +50,10 @@ abstract class TreasuryRepository {
   Future<NewExtractionResponseEntiy> newExtraction(
     NewExtractionRequetsEntity newExtractionRequets,
   );
+
+  Future<SalePreviewResponseEntity> previewSale(double gramsToSell);
+
+  Future<RegisterSaleResponseEntity> registerSale(
+    RegisterSaleRequestEntity request,
+  );
 }
