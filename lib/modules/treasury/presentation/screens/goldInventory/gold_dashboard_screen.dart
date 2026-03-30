@@ -19,8 +19,15 @@ class GoldDashboardScreen extends StatefulWidget {
 
 class _GoldDashboardScreenState extends State<GoldDashboardScreen> {
   int _selectedFilter = 0;
+  int _selectedFilterRecord = 0;
   int _selectedNav = 0;
   final List<String> _filters = ['Todos', 'Disponible', 'Parcial', 'Agotado'];
+  final List<String> _filtersrecord = [
+    'Todos',
+    'Este Mes',
+    'Pendientes',
+    'Completados',
+  ];
   final ScrollController _scrollController = ScrollController();
 
   late final TreasuryBloc _treasuryBloc;
@@ -326,6 +333,145 @@ class _GoldDashboardScreenState extends State<GoldDashboardScreen> {
                                             onPressed: () {},
                                             icon: Icon(Icons.filter_alt),
                                           ),
+                                        ],
+                                      ),
+                                    ),
+                                    Container(
+                                      height: 30,
+                                      padding: EdgeInsets.only(left: 10),
+                                      decoration: BoxDecoration(
+                                        color: Colors.transparent,
+                                        borderRadius: BorderRadius.circular(20),
+                                      ),
+                                      child: ListView(
+                                        scrollDirection: Axis.horizontal,
+                                        children: List.generate(
+                                          _filtersrecord.length,
+                                          (index) {
+                                            final selected =
+                                                _selectedFilterRecord == index;
+                                            return GestureDetector(
+                                              onTap: () => setState(() {
+                                                _selectedFilterRecord = index;
+                                              }),
+                                              child: AnimatedContainer(
+                                                padding: EdgeInsets.symmetric(
+                                                  horizontal: 10,
+                                                ),
+                                                margin: EdgeInsets.symmetric(
+                                                  horizontal: 10,
+                                                ),
+                                                decoration: BoxDecoration(
+                                                  color: selected
+                                                      ? const Color(0xFF2563EB)
+                                                      : Colors.white,
+                                                  borderRadius:
+                                                      BorderRadius.circular(30),
+                                                  border: Border.all(
+                                                    color: Colors.grey.shade300,
+                                                  ),
+                                                ),
+                                                duration: const Duration(
+                                                  milliseconds: 200,
+                                                ),
+                                                alignment: Alignment.center,
+                                                child: Text(
+                                                  _filtersrecord[index],
+                                                  style: TextStyle(
+                                                    fontSize: 13,
+                                                    fontWeight: selected
+                                                        ? FontWeight.w600
+                                                        : FontWeight.w400,
+                                                    color: selected
+                                                        ? Colors.white
+                                                        : const Color(
+                                                            0xFF6B7280,
+                                                          ),
+                                                  ),
+                                                ),
+                                              ),
+                                            );
+                                          },
+                                        ),
+                                      ),
+                                    ),
+                                    Container(
+                                      margin: EdgeInsets.symmetric(
+                                        horizontal: 15,
+                                        vertical: 10,
+                                      ),
+                                      padding: EdgeInsets.all(10),
+                                      decoration: BoxDecoration(
+                                        color: Colors.white,
+                                        borderRadius: BorderRadius.circular(10),
+                                      ),
+                                      child: Column(
+                                        children: [
+                                          Row(
+                                            children: [
+                                              Container(
+                                                padding: EdgeInsets.all(5),
+                                                decoration: BoxDecoration(
+                                                  color: Colors.green.shade100,
+                                                  borderRadius:
+                                                      BorderRadius.circular(
+                                                        100,
+                                                      ),
+                                                ),
+                                                child: Icon(
+                                                  Icons
+                                                      .check_circle_outline_rounded,
+                                                  color: Colors.green.shade700,
+                                                ),
+                                              ),
+                                              SizedBox(width: 10),
+                                              Column(
+                                                crossAxisAlignment:
+                                                    CrossAxisAlignment.start,
+                                                children: [
+                                                  Text(
+                                                    'id:venta',
+                                                    style: TextStyle(
+                                                      fontWeight:
+                                                          FontWeight.bold,
+                                                    ),
+                                                  ),
+                                                  Text(
+                                                    'fecha',
+                                                    style: TextStyle(
+                                                      color: Colors.grey,
+                                                    ),
+                                                  ),
+                                                ],
+                                              ),
+                                              Expanded(child: Text('')),
+                                              Container(
+                                                padding: EdgeInsets.symmetric(
+                                                  vertical: 1,
+                                                  horizontal: 3,
+                                                ),
+                                                decoration: BoxDecoration(
+                                                  color: Colors.green.shade100,
+                                                  borderRadius:
+                                                      BorderRadius.circular(8),
+                                                  border: Border.all(
+                                                    color:
+                                                        Colors.green.shade400,
+                                                  ),
+                                                ),
+                                                child: Text(
+                                                  'Estado',
+                                                  style: TextStyle(
+                                                    color:
+                                                        Colors.green.shade900,
+                                                    fontSize: 12,
+                                                  ),
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                          Divider(color: Colors.grey.shade300,),
+                                          Row()
                                         ],
                                       ),
                                     ),
