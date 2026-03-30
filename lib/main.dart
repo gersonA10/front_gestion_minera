@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:front_gestion_minera/config/theme/app_theme.dart';
@@ -9,6 +10,16 @@ import 'package:intl/date_symbol_data_local.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+   await SystemChrome.setPreferredOrientations([
+    DeviceOrientation.portraitUp,
+  ]);
+
+  SystemChrome.setSystemUIOverlayStyle(
+    const SystemUiOverlayStyle(
+      statusBarColor: Colors.transparent,
+      statusBarIconBrightness: Brightness.dark,
+    ),
+  );
   await UserSession.loadSession();
   await dotenv.load(fileName: '.env');
   InjectorContainer.setupGetIt();
@@ -31,9 +42,9 @@ class MainApp extends StatelessWidget {
         GlobalWidgetsLocalizations.delegate,
         GlobalCupertinoLocalizations.delegate,
       ],
-      themeMode: ThemeMode.system,
+      themeMode: ThemeMode.light,
       theme: TAppTheme.lightTheme,
-      darkTheme: TAppTheme.dartTheme,
+      darkTheme: TAppTheme.lightTheme, // -- Habilitar cuando se tenga modo oscuro
       routerConfig: appRouter.config(),
     );
   }

@@ -2,7 +2,7 @@ import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:front_gestion_minera/config/router/app_router.gr.dart';
 import 'package:front_gestion_minera/config/theme/extension_theme.dart';
-import 'package:front_gestion_minera/modules/treasury/presentation/screens/goldInventory/payment_history_screen.dart';
+import 'package:front_gestion_minera/modules/treasury/presentation/screens/financialManagment/payment_history_screen.dart';
 import 'package:intl/intl.dart';
 
 import '../../../domain/entity/entity.dart';

@@ -241,3 +241,29 @@ class NewExtractionError extends TreasuryState {
 
   NewExtractionError( {required this.message});
 }
+
+// preview venta
+class SalePreviewLoading extends TreasuryState {}
+
+class SalePreviewLoaded extends TreasuryState {
+  final SalePreviewResponseEntity preview;
+  SalePreviewLoaded({required this.preview});
+}
+
+class SalePreviewError extends TreasuryState {
+  final String message;
+  SalePreviewError({required this.message});
+}
+
+// registrar venta
+class RegisterSaleLoading extends TreasuryState {}
+
+class RegisterSaleLoaded extends TreasuryState {
+  final RegisterSaleResponseEntity sale;
+  RegisterSaleLoaded({required this.sale});
+}
+
+class RegisterSaleError extends TreasuryState {
+  final String message;
+  RegisterSaleError({required this.message});
+}

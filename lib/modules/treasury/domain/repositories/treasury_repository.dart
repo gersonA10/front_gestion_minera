@@ -30,7 +30,7 @@ abstract class TreasuryRepository {
   Future<List<CashRegisterEntity>> getCashRegisters();
 
   Future<GoldInventoryEntity> getGoldInventory();
-  Future<PaginatedGoldBatchesEntity> getGoldBatches({int page = 1, int limit = 10});
+  Future<PaginatedGoldBatchesEntity> getGoldBatches({int page = 1, int limit = 10, String? status});
   Future<ConfirmPaymentResponseEntity> confirmPayment(
     String idCash,
     ConfirmPaymentRequetsEntity confirmPaymentRequets,
@@ -55,5 +55,11 @@ abstract class TreasuryRepository {
   );
   Future<NewExtractionResponseEntiy> newExtraction(
     NewExtractionRequetsEntity newExtractionRequets,
+  );
+
+  Future<SalePreviewResponseEntity> previewSale(double gramsToSell);
+
+  Future<RegisterSaleResponseEntity> registerSale(
+    RegisterSaleRequestEntity request,
   );
 }

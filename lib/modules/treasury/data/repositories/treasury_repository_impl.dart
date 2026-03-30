@@ -116,8 +116,9 @@ class TreasuryRepositoryImpl implements TreasuryRepository {
   Future<PaginatedGoldBatchesEntity> getGoldBatches({
     int page = 1,
     int limit = 10,
+    String? status,
   }) async {
-    final result = await datasource.getGoldBatches(page: page, limit: limit);
+    final result = await datasource.getGoldBatches(page: page, limit: limit, status: status);
     return result;
   }
 
@@ -161,7 +162,20 @@ class TreasuryRepositoryImpl implements TreasuryRepository {
     final requestModel = NewExtractionRequestModel.fromEntity(
       newExtractionRequets,
     );
-    final response = await datasource.newExtraction( requestModel);
+    final response = await datasource.newExtraction(requestModel);
     return response;
+  }
+
+  @override
+  Future<SalePreviewResponseEntity> previewSale(double gramsToSell) async {
+    return await datasource.previewSale(gramsToSell);
+  }
+
+  @override
+  Future<RegisterSaleResponseEntity> registerSale(
+    RegisterSaleRequestEntity request,
+  ) async {
+    final requestModel = RegisterSaleRequestModel.fromEntity(request);
+    return await datasource.registerSale(requestModel);
   }
 }

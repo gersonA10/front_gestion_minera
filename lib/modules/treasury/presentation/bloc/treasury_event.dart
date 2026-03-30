@@ -73,7 +73,8 @@ class CashRegistersLoading extends TreasuryState {}
 //eInventario eventos
 class FetchGoldDashboardDataEvent extends TreasuryEvent {
   final bool isRefresh;
-  FetchGoldDashboardDataEvent({this.isRefresh = true});
+  final String? status;
+  FetchGoldDashboardDataEvent({this.isRefresh = true, this.status});
 }
 
 class LoadMoreGoldBatchesEvent extends TreasuryEvent {}
@@ -95,4 +96,15 @@ class TransactionDetailsEvent extends TreasuryEvent {
 class NewExtractionEvent extends TreasuryEvent {
   final NewExtractionRequetsEntity newExtractionRequets;
   NewExtractionEvent({ required this.newExtractionRequets});
+}
+
+// venta de oro
+class PreviewSaleEvent extends TreasuryEvent {
+  final double gramsToSell;
+  PreviewSaleEvent({required this.gramsToSell});
+}
+
+class RegisterSaleEvent extends TreasuryEvent {
+  final RegisterSaleRequestEntity request;
+  RegisterSaleEvent({required this.request});
 }
