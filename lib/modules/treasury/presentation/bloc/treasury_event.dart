@@ -73,7 +73,8 @@ class CashRegistersLoading extends TreasuryState {}
 //eInventario eventos
 class FetchGoldDashboardDataEvent extends TreasuryEvent {
   final bool isRefresh;
-  FetchGoldDashboardDataEvent({this.isRefresh = true});
+  final String? status;
+  FetchGoldDashboardDataEvent({this.isRefresh = true, this.status});
 }
 
 class LoadMoreGoldBatchesEvent extends TreasuryEvent {}
