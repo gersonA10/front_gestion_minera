@@ -88,3 +88,14 @@ class NewExtractionEvent extends TreasuryEvent {
   final NewExtractionRequetsEntity newExtractionRequets;
   NewExtractionEvent({ required this.newExtractionRequets});
 }
+
+// venta de oro
+class PreviewSaleEvent extends TreasuryEvent {
+  final double gramsToSell;
+  PreviewSaleEvent({required this.gramsToSell});
+}
+
+class RegisterSaleEvent extends TreasuryEvent {
+  final RegisterSaleRequestEntity request;
+  RegisterSaleEvent({required this.request});
+}

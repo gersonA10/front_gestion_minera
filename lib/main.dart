@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:front_gestion_minera/config/theme/app_theme.dart';
@@ -8,6 +9,12 @@ import 'package:front_gestion_minera/utils/session/user_session.dart';
 import 'package:intl/date_symbol_data_local.dart';
 
 void main() async {
+  SystemChrome.setSystemUIOverlayStyle(
+    const SystemUiOverlayStyle(
+      statusBarColor: Colors.transparent,
+      statusBarIconBrightness: Brightness.dark,
+    ),
+  );
   WidgetsFlutterBinding.ensureInitialized();
   await UserSession.loadSession();
   await dotenv.load(fileName: '.env');

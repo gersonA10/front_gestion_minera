@@ -253,4 +253,31 @@ class TreasuryDatasource {
     return NewExtractionResponseModel.fromJson(response);
   }
 
+  Future<SalePreviewResponseEntity> previewSale(double gramsToSell) async {
+    final response = await apiClient.post(
+      '/api/treasury/sales/preview-fifo',
+      data: {'grams_to_sell': gramsToSell},
+      operationName: 'previewSale',
+    );
+    return SalePreviewResponseModel.fromJson(response['data']);
+  }
+
+  Future<RegisterSaleResponseEntity> registerSale(
+    RegisterSaleRequestModel request,
+  ) async {
+    final response = await apiClient.postFormData(
+      '/api/treasury/sales',
+      data: request.toFormDataMap(),
+      operationName: 'registerSale',
+      files: [
+        {
+          'name': 'comprobante',
+          'path': request.comprobante,
+          'filename': request.comprobante.split('/').last,
+        },
+      ],
+    );
+    return RegisterSaleResponseModel.fromJson(response['data']);
+  }
+
 }

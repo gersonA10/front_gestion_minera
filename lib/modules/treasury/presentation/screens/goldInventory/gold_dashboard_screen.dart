@@ -1,7 +1,5 @@
 import 'package:auto_route/auto_route.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:front_gestion_minera/config/router/app_router.dart';
 import 'package:front_gestion_minera/config/router/app_router.gr.dart';
 import 'package:front_gestion_minera/injector_container.dart';
 
@@ -185,7 +183,7 @@ class _GoldDashboardScreenState extends State<GoldDashboardScreen> {
         floatingActionButton: ScrollAwareFabs(
           visible: _fabVisible,
           onAddTap: () async {
-            await InjectorContainer.getIt<AppRouter>().push(
+            await context.router.push(
               NewExtractionRoute(),
             );
             if (context.mounted) {
@@ -193,8 +191,8 @@ class _GoldDashboardScreenState extends State<GoldDashboardScreen> {
             }
           },
           onMoneyTap: () async {
-            await InjectorContainer.getIt<AppRouter>().push(
-              NewExtractionRoute(),
+            await context.router.push(
+              RegisterSellRoute(),
             );
             if (context.mounted) {
               _treasuryBloc.add(FetchGoldDashboardDataEvent());
@@ -252,9 +250,6 @@ class _GoldDashboardScreenState extends State<GoldDashboardScreen> {
     );
   }
 
-  // ─────────────────────────────────────────────
-  // Lote Card
-  // ─────────────────────────────────────────────
   Widget _buildLoteCard(GoldBatchEntity lote) {
     final statusColor = _statusColor(lote.status);
 

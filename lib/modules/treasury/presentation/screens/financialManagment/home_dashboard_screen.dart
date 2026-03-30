@@ -7,7 +7,7 @@ import 'package:front_gestion_minera/config/theme/extension_theme.dart';
 import 'package:front_gestion_minera/core/widgets/custom_alert_widget.dart';
 import 'package:front_gestion_minera/injector_container.dart';
 import 'package:front_gestion_minera/modules/treasury/presentation/bloc/treasury_bloc.dart';
-import 'package:front_gestion_minera/modules/treasury/presentation/screens/goldInventory/payment_history_screen.dart';
+import 'package:front_gestion_minera/modules/treasury/presentation/screens/financialManagment/payment_history_screen.dart';
 import 'package:front_gestion_minera/modules/treasury/presentation/widgets/financialManagment/cards_primary_and_secondary_widget.dart';
 import 'package:front_gestion_minera/modules/treasury/presentation/widgets/financialManagment/request_title_widget.dart';
 import 'package:front_gestion_minera/utils/session/user_session.dart';

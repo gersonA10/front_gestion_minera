@@ -6,9 +6,6 @@ String mapErrorMessage(String key) {
     case 'dio_offline':
       return "No tienes conexión a internet.";
 
-    case 'dio_unauthorized':
-      return "Tu sesión ha expirado.";
-
     case 'dio_response':
       return "Error del servidor.";
 
