@@ -4,7 +4,6 @@ import 'package:front_gestion_minera/utils/error.dart';
 
 import '../../domain/entity/entity.dart';
 import '../../domain/repositories/repository.dart';
-import '../../domain/entity/surveillance_history_entity.dart';
 import '../../domain/repositories/surveillance_repository.dart';
 
 part 'surveillance_event.dart';
@@ -12,7 +11,9 @@ part 'surveillance_state.dart';
 
 class SurveillanceBloc extends Bloc<SurveillanceEvent, SurveillanceState> {
   final SurveillanceRepository repository;
+  
 
+  bool _isLoadingMore = false;
   int _currentPage = 1;
   bool _hasReachedMax = false;
   int _currentTotalRecords = 0;
@@ -79,8 +80,8 @@ class SurveillanceBloc extends Bloc<SurveillanceEvent, SurveillanceState> {
     LoadMoreSurveillanceHistoryEvent event,
     Emitter<SurveillanceState> emit,
   ) async {
-    if (_hasReachedMax || state is! SurveillanceHistoryLoaded) return;
-
+    if (_hasReachedMax || _isLoadingMore) return;
+    _isLoadingMore = true;
     _currentPage++;
     try {
       final paginatedData = await repository.getHistory(
@@ -100,7 +101,11 @@ class SurveillanceBloc extends Bloc<SurveillanceEvent, SurveillanceState> {
       );
     } on BaseApiException catch (e) {
       emit(SurveillanceHistoryError(e.message));
-    }
+    } catch (e) {
+      _currentPage--;
+    } finally {
+     _isLoadingMore = false;
+  }
   }
 
   Future<void> surveillanceBloc(
@@ -148,7 +153,8 @@ class SurveillanceBloc extends Bloc<SurveillanceEvent, SurveillanceState> {
     LoadMoreRequestEvent event,
     Emitter<SurveillanceState> emit,
   ) async {
-    if (_hasReachedMax) return;
+    if (_hasReachedMax || _isLoadingMore) return;
+    _isLoadingMore = true;
     _currentPage++;
     try {
       final response = await repository.monitoringTray(page: _currentPage);
@@ -166,7 +172,10 @@ class SurveillanceBloc extends Bloc<SurveillanceEvent, SurveillanceState> {
     } on BaseApiException catch (error) {
       emit(SurveillanceError(mapErrorMessage(error.key)));
     } catch (e) {
+      _currentPage--;
       emit(SurveillanceError('Error inesperado: $e'));
+    } finally {
+      _isLoadingMore = false;
     }
   }
 

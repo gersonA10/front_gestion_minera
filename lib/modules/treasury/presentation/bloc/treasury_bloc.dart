@@ -23,7 +23,11 @@ class TreasuryBloc extends Bloc<TreasuryEvent, TreasuryState> {
   bool _hasReachedBatchMax = false;
   List<GoldBatchEntity> _goldBatches = [];
   GoldInventoryEntity? _goldInventory;
+  //Evitar bombardeo a la api
   bool _isLoadingMoreBatches = false;
+  bool _isLoadingMorePending = false;
+  bool _isLoadingMorePayment = false;
+  //
   int _paymentHistoryPage = 1;
   bool _paymentHistoryReachedMax = false;
   int _paymentHistoryTotalRecords = 0;
@@ -168,7 +172,8 @@ class TreasuryBloc extends Bloc<TreasuryEvent, TreasuryState> {
     LoadMorePendingEvent event,
     Emitter<TreasuryState> emit,
   ) async {
-    if (_hasReachedMax) return;
+    if (_hasReachedMax || _isLoadingMorePending) return;
+    _isLoadingMorePending = true;
     _currentPage++;
     try {
       final response = await repository.listOfPendingRequests(
@@ -189,9 +194,13 @@ class TreasuryBloc extends Bloc<TreasuryEvent, TreasuryState> {
       if (error.key == DioExceptionKey.unauthorised) {
         return;
       }
+      _currentPage--;
       emit(ListOfPendingRequestsError(mapErrorMessage(error.key)));
     } catch (e) {
+      _currentPage--;
       emit(ListOfPendingRequestsError('Error inesperado: $e'));
+    } finally {
+      _isLoadingMorePending = false;
     }
   }
 
@@ -364,7 +373,8 @@ class TreasuryBloc extends Bloc<TreasuryEvent, TreasuryState> {
     LoadMorePaymentHistoryEvent event,
     Emitter<TreasuryState> emit,
   ) async {
-    if (_paymentHistoryReachedMax) return;
+    if (_paymentHistoryReachedMax || _isLoadingMorePayment) return;
+    _isLoadingMorePayment = true;
     _paymentHistoryPage++;
     try {
       final response = await repository.getPaymentHistory(
@@ -384,9 +394,13 @@ class TreasuryBloc extends Bloc<TreasuryEvent, TreasuryState> {
       if (error.key == DioExceptionKey.unauthorised) {
         return;
       }
+      _paymentHistoryPage--;
       emit(PaymentHistoryError(mapErrorMessage(error.key)));
     } catch (e) {
+        _paymentHistoryPage--;
       emit(PaymentHistoryError('Error inesperado: $e'));
+    } finally {
+      _isLoadingMorePayment = false;
     }
   }
 
