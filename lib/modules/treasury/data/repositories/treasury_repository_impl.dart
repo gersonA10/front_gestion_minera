@@ -116,8 +116,9 @@ class TreasuryRepositoryImpl implements TreasuryRepository {
   Future<PaginatedGoldBatchesEntity> getGoldBatches({
     int page = 1,
     int limit = 10,
+    String? status,
   }) async {
-    final result = await datasource.getGoldBatches(page: page, limit: limit);
+    final result = await datasource.getGoldBatches(page: page, limit: limit, status: status);
     return result;
   }
 

@@ -217,7 +217,7 @@ class _FinancialReportsScreenState extends State<FinancialReportsScreen> {
                   Positioned.fill(
                     child: IgnorePointer(
                       child: Container(
-                        color: colors.backgroundColor.withOpacity(0.3),
+                        color: colors.backgroundColor.withValues(alpha:  0.3),
                       ),
                     ),
                   ),

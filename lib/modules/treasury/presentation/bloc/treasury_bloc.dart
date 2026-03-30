@@ -29,6 +29,7 @@ class TreasuryBloc extends Bloc<TreasuryEvent, TreasuryState> {
   int _paymentHistoryTotalRecords = 0;
   List<PaymentHistoryItemEntity> _paymentHistoryItems = [];
   PaymentHistorySummaryEntity? _paymentHistorySummary;
+  String? _currentBatchStatus;
 
   TreasuryBloc({required this.repository}) : super(TreasuryInitial()) {
     on<FetchTreasuryMetricsEvent>(_onFetchTreasuryMetrics);
@@ -398,13 +399,14 @@ class TreasuryBloc extends Bloc<TreasuryEvent, TreasuryState> {
       _hasReachedBatchMax = false;
       _isLoadingMoreBatches = false;
       _goldBatches.clear();
+      _currentBatchStatus = event.status;
       emit(GoldDashboardLoading());
     }
 
     try {
       final responses = await Future.wait([
         repository.getGoldInventory(),
-        repository.getGoldBatches(page: _currentBatchPage),
+        repository.getGoldBatches(page: _currentBatchPage, status: _currentBatchStatus),
       ]);
 
       _goldInventory = responses[0] as GoldInventoryEntity;
@@ -431,13 +433,14 @@ class TreasuryBloc extends Bloc<TreasuryEvent, TreasuryState> {
     LoadMoreGoldBatchesEvent event,
     Emitter<TreasuryState> emit,
   ) async {
-    if (_hasReachedBatchMax || _goldInventory == null || _isLoadingMoreBatches)
+    if (_hasReachedBatchMax || _goldInventory == null || _isLoadingMoreBatches) {
       return;
+    }
     _isLoadingMoreBatches = true;
     _currentBatchPage++;
 
     try {
-      final response = await repository.getGoldBatches(page: _currentBatchPage);
+      final response = await repository.getGoldBatches(page: _currentBatchPage, status: _currentBatchStatus);
       _goldBatches.addAll(response.batches);
       _hasReachedBatchMax = !response.hasMore;
 

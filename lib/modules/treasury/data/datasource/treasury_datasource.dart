@@ -151,8 +151,9 @@ class TreasuryDatasource {
   Future<PaginatedGoldBatchesEntity> getGoldBatches({
     int page = 1,
     int limit = 10,
+    String? status
   }) async {
-    final queryParameters = {'page': page, 'limit': limit};
+    final queryParameters = {'page': page, 'limit': limit, 'status': ?status,};
     final response = await apiClient.get(
       '/api/treasury/batches',
       operationName: 'getGoldBatches',
