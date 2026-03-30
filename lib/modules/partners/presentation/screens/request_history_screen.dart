@@ -25,6 +25,10 @@ class _RequestHistoryScreenState extends State<RequestHistoryScreen>
 
   late final PartnersBloc _partnersBloc;
 
+  // 🔥 1. Variables de Caché
+  List<RequestHistoryEntity>? _cachedHistory;
+  bool _cachedHasReachedMax = false;
+
   final List<String> _tabs = const [
     'Todos',
     'Enviado',
@@ -37,7 +41,7 @@ class _RequestHistoryScreenState extends State<RequestHistoryScreen>
   void initState() {
     super.initState();
     _partnersBloc = InjectorContainer.getIt<PartnersBloc>()
-      ..add(GetHistoryEvent());
+      ..add(GetHistoryEvent(isRefresh: true)); // Buena práctica: Forzar refresh inicial
 
     _tabController = TabController(length: _tabs.length, vsync: this);
     _searchController = TextEditingController();
@@ -95,9 +99,8 @@ class _RequestHistoryScreenState extends State<RequestHistoryScreen>
               elevation: 0,
               centerTitle: true,
               leading: IconButton(
-                icon: Icon(Icons.arrow_back_ios_new, color: colors.blue),
-                onPressed: () => context.router.back()
-              ),
+                  icon: Icon(Icons.arrow_back_ios_new, color: colors.blue),
+                  onPressed: () => context.router.back()),
               title: Text(
                 'Historial de solicitudes',
                 style: AppTextStyles.mainStyle16Bold(
@@ -118,7 +121,7 @@ class _RequestHistoryScreenState extends State<RequestHistoryScreen>
                   tabs: _tabs.map((tab) => Tab(text: tab)).toList(),
                   onTap: (_) {
                     _searchController.clear();
-                    _fetchHistory();
+                    _fetchHistory(isRefresh: true); // 🔥 Asegurar que mande isRefresh: true
                   },
                 ),
               ),
@@ -130,7 +133,7 @@ class _RequestHistoryScreenState extends State<RequestHistoryScreen>
                   controller: _searchController,
                   onSearch: () {
                     FocusScope.of(context).unfocus();
-                    _fetchHistory();
+                    _fetchHistory(isRefresh: true);
                   },
                 ),
                 Padding(
@@ -146,129 +149,129 @@ class _RequestHistoryScreenState extends State<RequestHistoryScreen>
                 Expanded(
                   child: BlocBuilder<PartnersBloc, PartnersState>(
                     builder: (context, state) {
-                      if (state is RequestHistoryLoading) {
-                        return Center(
-                          child: CircularProgressIndicator(color: colors.blue),
-                        );
-                      }
-
-                      if (state is RequestHistoryError) {
-                        return RefreshIndicator(
-                          onRefresh: () async {
-                            _fetchHistory();
-                          },
-                          child: ListView(
-                            physics: const AlwaysScrollableScrollPhysics(),
-                            padding: const EdgeInsets.all(24),
-                            children: [
-                              const SizedBox(height: 120),
-                              Center(
-                                child: Text(
-                                  state.message,
-                                  textAlign: TextAlign.center,
-                                  style: AppTextStyles.mainStyle12(
-                                    context,
-                                  ).copyWith(color: colors.red),
-                                ),
-                              ),
-                            ],
-                          ),
-                        );
-                      }
+                      final bool isLoading = state is RequestHistoryLoading;
 
                       if (state is RequestHistoryLoaded) {
-                        return RefreshIndicator(
-                          onRefresh: () async {
-                            _fetchHistory(isRefresh: true);
-                          },
-                          child: state.history.isEmpty
-                              ? ListView(
-                                  physics:
-                                      const AlwaysScrollableScrollPhysics(),
-                                  children: const [
-                                    SizedBox(height: 120),
-                                    _EmptyRequestHistory(),
-                                  ],
-                                )
-                              : ListView.builder(
-                                  controller: _scrollController,
-                                  physics:
-                                      const AlwaysScrollableScrollPhysics(),
-                                  padding: const EdgeInsets.symmetric(
-                                    horizontal: 16.0,
-                                  ),
-                                  itemCount: state.history.length + 1,
-                                  itemBuilder: (context, index) {
-                                    if (index == state.history.length &&
-                                        !state.hasReachedMax) {
-                                      return Padding(
-                                        padding: const EdgeInsets.symmetric(
-                                          vertical: 24.0,
-                                        ),
-                                        child: Center(
-                                          child: Column(
-                                            children: [
-                                              CircularProgressIndicator(),
-                                              SizedBox(height: 10),
-                                              Text(
-                                                'Cargando mas registros...',
-                                                style:
-                                                    AppTextStyles.mainStyle12(
-                                                      context,
-                                                    ).copyWith(
-                                                      color: colors.lead,
-                                                    ),
-                                              ),
-                                            ],
-                                          ),
-                                        ),
-                                      );
-                                    }
-                                    if (index == state.history.length) {
-                                      return Padding(
-                                        padding: const EdgeInsets.symmetric(
-                                          vertical: 16.0,
-                                        ),
-                                        child: Center(
-                                          child: Column(
-                                            children: [
-                                              Icon(
-                                                Icons.history,
-                                                color: colors.lead.withValues(
-                                                  alpha: 0.5,
-                                                ),
-                                              ),
-                                              const SizedBox(height: 8),
-                                              Text(
-                                                'Mostrando los últimos 30 días de actividad',
-                                                style:
-                                                    AppTextStyles.mainStyle10(
-                                                      context,
-                                                    ).copyWith(
-                                                      color: colors.lead,
-                                                    ),
-                                              ),
-                                            ],
-                                          ),
-                                        ),
-                                      );
-                                    }
-
-                                    final item = state.history[index];
-                                    return _RequestCard(item: item);
-                                  },
-                                ),
-                        );
+                        _cachedHistory = state.history;
+                        _cachedHasReachedMax = state.hasReachedMax;
                       }
 
-                      return RefreshIndicator(
-                        onRefresh: () async {
-                          _fetchHistory();
-                        },
-                        child: ListView(
-                          physics: const AlwaysScrollableScrollPhysics(),
-                          children: const [SizedBox(height: 1)],
-                        ),
+                      if (_cachedHistory == null) {
+                        if (isLoading) {
+                          return Center(
+                            child: CircularProgressIndicator(color: colors.blue),
+                          );
+                        }
+                        if (state is RequestHistoryError) {
+                          return RefreshIndicator(
+                            onRefresh: () async => _fetchHistory(isRefresh: true),
+                            child: ListView(
+                              physics: const AlwaysScrollableScrollPhysics(),
+                              padding: const EdgeInsets.all(24),
+                              children: [
+                                const SizedBox(height: 120),
+                                Center(
+                                  child: Text(
+                                    state.message,
+                                    textAlign: TextAlign.center,
+                                    style: AppTextStyles.mainStyle12(
+                                      context,
+                                    ).copyWith(color: colors.red),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          );
+                        }
+                        return const SizedBox();
+                      }
+
+                      final history = _cachedHistory!;
+
+                      return Stack(
+                        children: [
+                          RefreshIndicator(
+                            onRefresh: () async {
+                              _fetchHistory(isRefresh: true);
+                            },
+                            child: history.isEmpty
+                                ? ListView(
+                                    physics: const AlwaysScrollableScrollPhysics(),
+                                    children: const [
+                                      SizedBox(height: 120),
+                                      _EmptyRequestHistory(),
+                                    ],
+                                  )
+                                : ListView.builder(
+                                    controller: _scrollController,
+                                    physics: const AlwaysScrollableScrollPhysics(),
+                                    padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                                    itemCount: history.length + 1,
+                                    itemBuilder: (context, index) {
+                                      if (index == history.length && !_cachedHasReachedMax) {
+                                        return Padding(
+                                          padding: const EdgeInsets.symmetric(vertical: 24.0),
+                                          child: Center(
+                                            child: Column(
+                                              children: [
+                                                const CircularProgressIndicator(),
+                                                const SizedBox(height: 10),
+                                                Text(
+                                                  'Cargando mas registros...',
+                                                  style: AppTextStyles.mainStyle12(
+                                                    context,
+                                                  ).copyWith(color: colors.lead),
+                                                ),
+                                              ],
+                                            ),
+                                          ),
+                                        );
+                                      }
+                                      if (index == history.length) {
+                                        return Padding(
+                                          padding: const EdgeInsets.symmetric(vertical: 16.0),
+                                          child: Center(
+                                            child: Column(
+                                              children: [
+                                                Icon(
+                                                  Icons.history,
+                                                  color: colors.lead.withValues(alpha: 0.5),
+                                                ),
+                                                const SizedBox(height: 8),
+                                                Text(
+                                                  'Mostrando los últimos 30 días de actividad',
+                                                  style: AppTextStyles.mainStyle10(
+                                                    context,
+                                                  ).copyWith(color: colors.lead),
+                                                ),
+                                              ],
+                                            ),
+                                          ),
+                                        );
+                                      }
+
+                                      final item = history[index];
+                                      return _RequestCard(item: item);
+                                    },
+                                  ),
+                          ),
+
+                          if (isLoading)
+                            Positioned(
+                              top: 0,
+                              left: 0,
+                              right: 0,
+                              child: LinearProgressIndicator(color: colors.blue),
+                            ),
+                          if (isLoading)
+                            Positioned.fill(
+                              child: IgnorePointer(
+                                child: Container(
+                                  color: colors.backgroundColor.withValues(alpha: 0.5),
+                                ),
+                              ),
+                            ),
+                        ],
                       );
                     },
                   ),
