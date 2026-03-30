@@ -1,6 +1,7 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:front_gestion_minera/core/widgets/custom_date_selector.dart';
 import 'package:front_gestion_minera/injector_container.dart';
 
 import '../../../domain/entity/entity.dart';
@@ -19,15 +20,12 @@ class GoldDashboardScreen extends StatefulWidget {
 
 class _GoldDashboardScreenState extends State<GoldDashboardScreen> {
   int _selectedFilter = 0;
-  int _selectedFilterRecord = 0;
   int _selectedNav = 0;
+  String _selectedFilterDate = "reciente";
+  String? _periodToFetch;
+  String? _exactDateToFetch;
   final List<String> _filters = ['Todos', 'Disponible', 'Parcial', 'Agotado'];
-  final List<String> _filtersrecord = [
-    'Todos',
-    'Este Mes',
-    'Pendientes',
-    'Completados',
-  ];
+
   final ScrollController _scrollController = ScrollController();
 
   late final TreasuryBloc _treasuryBloc;
@@ -44,7 +42,17 @@ class _GoldDashboardScreenState extends State<GoldDashboardScreen> {
         return lotes;
     }
   }
+  Future<void> _selectCustomDate() async {
+  final result = await CustomDateSelector.show(context);
 
+  if (result != null) {
+    setState(() {
+      _selectedFilterDate = "Personalizado"; 
+      _periodToFetch = result.period;
+      _exactDateToFetch = result.exactDate;
+    });
+  }
+  }
   String _formatDate(DateTime date) {
     const months = [
       'Ene',
@@ -172,6 +180,7 @@ class _GoldDashboardScreenState extends State<GoldDashboardScreen> {
                                 child: Column(
                                   children: [
                                     const SizedBox(height: 16),
+                                    // dashnoard
                                     Container(
                                       height: 120,
                                       decoration: BoxDecoration(
@@ -210,7 +219,7 @@ class _GoldDashboardScreenState extends State<GoldDashboardScreen> {
                                                 Row(
                                                   children: [
                                                     Text(
-                                                      '12.5 kg',
+                                                      '12.5 g',
                                                       style: TextStyle(
                                                         fontSize: 30,
                                                         fontWeight:
@@ -274,14 +283,14 @@ class _GoldDashboardScreenState extends State<GoldDashboardScreen> {
                                                       color: Colors.blue,
                                                     ),
                                                     SizedBox(width: 5),
-                                                    Text('Vendido del año'),
+                                                    Text('Vendido en Bs'),
                                                   ],
                                                 ),
                                                 SizedBox(height: 12),
                                                 Row(
                                                   children: [
                                                     Text(
-                                                      '145.2 kg',
+                                                      ' 1200Bs',
                                                       style: TextStyle(
                                                         fontSize: 30,
                                                         fontWeight:
@@ -320,6 +329,7 @@ class _GoldDashboardScreenState extends State<GoldDashboardScreen> {
                                         ],
                                       ),
                                     ),
+
                                     Container(
                                       padding: EdgeInsets.symmetric(
                                         horizontal: 15,
@@ -327,78 +337,27 @@ class _GoldDashboardScreenState extends State<GoldDashboardScreen> {
                                       ),
                                       child: Row(
                                         children: [
-                                          Text('Transacciones reciente'),
-                                          Expanded(child: Text('')),
+                                          Row(
+                                            children: [
+                                              Text('Transacciones: '),
+                                              Text(''),
+                                            ],
+                                          ),
+                                          Spacer(),
                                           IconButton(
-                                            onPressed: () {},
-                                            icon: Icon(Icons.filter_alt),
+                                            onPressed: () async {
+                                              final res= await CustomDateSelector.show(context);
+                                            },
+                                            icon: Icon(Icons.filter_list_sharp),
                                           ),
                                         ],
                                       ),
                                     ),
-                                    Container(
-                                      height: 30,
-                                      padding: EdgeInsets.only(left: 10),
-                                      decoration: BoxDecoration(
-                                        color: Colors.transparent,
-                                        borderRadius: BorderRadius.circular(20),
-                                      ),
-                                      child: ListView(
-                                        scrollDirection: Axis.horizontal,
-                                        children: List.generate(
-                                          _filtersrecord.length,
-                                          (index) {
-                                            final selected =
-                                                _selectedFilterRecord == index;
-                                            return GestureDetector(
-                                              onTap: () => setState(() {
-                                                _selectedFilterRecord = index;
-                                              }),
-                                              child: AnimatedContainer(
-                                                padding: EdgeInsets.symmetric(
-                                                  horizontal: 10,
-                                                ),
-                                                margin: EdgeInsets.symmetric(
-                                                  horizontal: 10,
-                                                ),
-                                                decoration: BoxDecoration(
-                                                  color: selected
-                                                      ? const Color(0xFF2563EB)
-                                                      : Colors.white,
-                                                  borderRadius:
-                                                      BorderRadius.circular(30),
-                                                  border: Border.all(
-                                                    color: Colors.grey.shade300,
-                                                  ),
-                                                ),
-                                                duration: const Duration(
-                                                  milliseconds: 200,
-                                                ),
-                                                alignment: Alignment.center,
-                                                child: Text(
-                                                  _filtersrecord[index],
-                                                  style: TextStyle(
-                                                    fontSize: 13,
-                                                    fontWeight: selected
-                                                        ? FontWeight.w600
-                                                        : FontWeight.w400,
-                                                    color: selected
-                                                        ? Colors.white
-                                                        : const Color(
-                                                            0xFF6B7280,
-                                                          ),
-                                                  ),
-                                                ),
-                                              ),
-                                            );
-                                          },
-                                        ),
-                                      ),
-                                    ),
+                                    // Card record
                                     Container(
                                       margin: EdgeInsets.symmetric(
                                         horizontal: 15,
-                                        vertical: 10,
+                                        vertical: 5,
                                       ),
                                       padding: EdgeInsets.all(10),
                                       decoration: BoxDecoration(
@@ -412,7 +371,8 @@ class _GoldDashboardScreenState extends State<GoldDashboardScreen> {
                                               Container(
                                                 padding: EdgeInsets.all(5),
                                                 decoration: BoxDecoration(
-                                                  color: Colors.green.shade100,
+                                                  color: Colors.green
+                                                      .withValues(alpha: 0.1),
                                                   borderRadius:
                                                       BorderRadius.circular(
                                                         100,
@@ -421,7 +381,8 @@ class _GoldDashboardScreenState extends State<GoldDashboardScreen> {
                                                 child: Icon(
                                                   Icons
                                                       .check_circle_outline_rounded,
-                                                  color: Colors.green.shade700,
+                                                  color: Colors.green
+                                                      .withValues(alpha: 0.9),
                                                 ),
                                               ),
                                               SizedBox(width: 10),
@@ -430,12 +391,14 @@ class _GoldDashboardScreenState extends State<GoldDashboardScreen> {
                                                     CrossAxisAlignment.start,
                                                 children: [
                                                   Text(
+                                                    // Campo para id venta
                                                     'id:venta',
                                                     style: TextStyle(
                                                       fontWeight:
                                                           FontWeight.bold,
                                                     ),
                                                   ),
+                                                  // Campo para fecha
                                                   Text(
                                                     'fecha',
                                                     style: TextStyle(
@@ -444,34 +407,118 @@ class _GoldDashboardScreenState extends State<GoldDashboardScreen> {
                                                   ),
                                                 ],
                                               ),
-                                              Expanded(child: Text('')),
+                                              Spacer(),
                                               Container(
                                                 padding: EdgeInsets.symmetric(
                                                   vertical: 1,
                                                   horizontal: 3,
                                                 ),
                                                 decoration: BoxDecoration(
-                                                  color: Colors.green.shade100,
+                                                  color: Colors.green
+                                                      .withValues(alpha: 0.2),
                                                   borderRadius:
                                                       BorderRadius.circular(8),
                                                   border: Border.all(
-                                                    color:
-                                                        Colors.green.shade400,
+                                                    color: Colors.green
+                                                        .withValues(alpha: 0.5),
                                                   ),
                                                 ),
-                                                child: Text(
-                                                  'Estado',
-                                                  style: TextStyle(
-                                                    color:
-                                                        Colors.green.shade900,
-                                                    fontSize: 12,
+                                                child:
+                                                    // Campo para estado de venta
+                                                    Text(
+                                                      'Estado',
+                                                      style: TextStyle(
+                                                        color: Colors.green
+                                                            .withValues(
+                                                              alpha: 0.9,
+                                                            ),
+                                                        fontSize: 12,
+                                                      ),
+                                                    ),
+                                              ),
+                                            ],
+                                          ),
+                                          Divider(color: Colors.grey.shade200),
+                                          Row(
+                                            children: [
+                                              Column(
+                                                crossAxisAlignment:
+                                                    CrossAxisAlignment.start,
+                                                children: [
+                                                  Text(
+                                                    'Peso Total',
+                                                    style: TextStyle(
+                                                      color: Colors.grey,
+                                                    ),
                                                   ),
+                                                  // Campo para peso de venta
+                                                  Text(
+                                                    '2,50000 kg',
+                                                    style: TextStyle(
+                                                      fontWeight:
+                                                          FontWeight.bold,
+                                                    ),
+                                                  ),
+                                                ],
+                                              ),
+                                              Spacer(),
+                                              Column(
+                                                crossAxisAlignment:
+                                                    CrossAxisAlignment.end,
+                                                children: [
+                                                  Text(
+                                                    'Monto Total',
+                                                    style: TextStyle(
+                                                      color: Colors.grey,
+                                                    ),
+                                                  ),
+                                                  // Campo para precio total
+                                                  Text(
+                                                    '\$ 155.000 usd',
+                                                    style: TextStyle(
+                                                      fontWeight:
+                                                          FontWeight.bold,
+                                                    ),
+                                                  ),
+                                                ],
+                                              ),
+                                            ],
+                                          ),
+                                          const SizedBox(height: 10),
+                                          Row(
+                                            children: [
+                                              //icono para cambiar
+                                              Icon(Icons.storefront),
+                                              SizedBox(width: 5),
+                                              // Campo para nombre vendedor
+                                              Text('Joyeria central'),
+                                              Spacer(),
+                                              GestureDetector(
+                                                onTap: () {
+                                                  print("verdetalle");
+                                                },
+                                                child: Row(
+                                                  children: [
+                                                    Text(
+                                                      'Ver detalle',
+                                                      style: TextStyle(
+                                                        color: const Color(
+                                                          0xFF2563EB,
+                                                        ),
+                                                      ),
+                                                    ),
+                                                    Icon(
+                                                      Icons.arrow_forward_ios,
+                                                      size: 12,
+                                                      color: const Color(
+                                                        0xFF2563EB,
+                                                      ),
+                                                    ),
+                                                  ],
                                                 ),
                                               ),
                                             ],
                                           ),
-                                          Divider(color: Colors.grey.shade300,),
-                                          Row()
                                         ],
                                       ),
                                     ),
