@@ -1,0 +1,2 @@
+export 'package:front_gestion_minera/modules/admin/presentation/screens/admin_home_screen.dart';
+export 'package:front_gestion_minera/modules/admin/presentation/screens/historial_requests_screen.dart';

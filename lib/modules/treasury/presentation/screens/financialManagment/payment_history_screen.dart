@@ -1,5 +1,4 @@
 import 'package:auto_route/auto_route.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:front_gestion_minera/modules/treasury/domain/entity/payment_history_entity.dart';
 import 'package:intl/intl.dart';
@@ -7,8 +6,6 @@ import 'package:intl/intl.dart';
 import '../../../../../injector_container.dart';
 import '../../bloc/treasury_bloc.dart';
 import '../../widgets/widgtes.dart';
-
-// ─── Enums de filtro ──────────────────────────────────────────────────────────
 
 enum DateFilterType { ultimos30Dias, dia, mes, anio }
 
@@ -26,8 +23,6 @@ extension DateFilterTypeExt on DateFilterType {
     }
   }
 }
-
-// ─── Helpers de ícono por destino/tipo ────────────────────────────────────────
 
 IconData iconForTransaction(String operationType, String destino) {
   if (operationType == 'INCOME') return Icons.arrow_downward_rounded;

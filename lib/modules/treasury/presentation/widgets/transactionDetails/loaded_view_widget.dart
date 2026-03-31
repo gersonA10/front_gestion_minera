@@ -1,7 +1,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:front_gestion_minera/core/widgets/custom_alert_widget.dart';
-import 'package:front_gestion_minera/modules/treasury/presentation/screens/transactionDetails/transaction_details_screen.dart';
+import 'package:front_gestion_minera/modules/treasury/presentation/screens/financialManagment/transaction_details_screen.dart';
 import 'package:front_gestion_minera/utils/date_util.dart';
 import 'package:share_plus/share_plus.dart';
 

@@ -23,6 +23,9 @@ class _LoanHistoryScreenState extends State<LoanHistoryScreen> {
   late FocusNode _searchFocusNode;
   late PartnersBloc _bloc;
 
+  //Guardar en cache
+  List<LoanHistoryDataEntity>? _cachedHistory;
+
   @override
   void initState() {
     super.initState();
@@ -85,12 +88,25 @@ class _LoanHistoryScreenState extends State<LoanHistoryScreen> {
                 state is LoanHistoryLoading ||
                 state is LoanHistoryStatusLoading;
 
-            List<LoanHistoryDataEntity>? historyData;
             if (state is LoanHistorySuccess) {
-              historyData = state.history;
+              _cachedHistory = state.history;
             } else if (state is LoanHistoryStatusSuccess) {
-              historyData = state.history;
+              _cachedHistory = state.history;
             }
+
+            if (_cachedHistory == null) {
+              if (isLoading) {
+                return const Center(child: CircularProgressIndicator());
+              }
+              if (state is LoanHistoryError || state is LoanHistoryStatusError) {
+                final errorMessage = state is LoanHistoryError
+                    ? state.message
+                    : (state as LoanHistoryStatusError).message;
+                return Center(child: Text('Error: $errorMessage'));
+              }
+              return const SizedBox();
+            }
+
             if (state is LoanHistoryError || state is LoanHistoryStatusError) {
               final errorMessage = state is LoanHistoryError
                   ? state.message
@@ -178,125 +194,153 @@ class _LoanHistoryScreenState extends State<LoanHistoryScreen> {
               );
             }
 
-            return Padding(
-              padding: EdgeInsets.all(topPadding * 0.05),
-              child: Column(
-                children: [
-                  Container(
-                    padding: EdgeInsets.symmetric(horizontal: 12),
-                    decoration: BoxDecoration(
-                      color: Theme.of(context).colorScheme.white,
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                    child: TextField(
-                      controller: _searchController,
-                      focusNode: _searchFocusNode,
-                      decoration: InputDecoration(
-                        suffixIcon: IconButton(
-                          icon: Icon(Icons.search, size: smallSpacing * 1),
-                          onPressed: () =>
-                              _performSearch(_searchController.text),
-                        ),
-                        hintText: 'Buscar por motivo',
-                        hintStyle: AppTextStyles.mainStyleGrey12(context),
-                        border: InputBorder.none,
-                      ),
-                    ),
-                  ),
-                  SizedBox(height: smallSpacing * 0.5),
+            final loansHistory = _cachedHistory!;
 
-                  // Reemplaza el Row de FilterButton por este bloque:
-                  SizedBox(
-                    height: 40,
-                    child: ListView(
-                      scrollDirection: Axis.horizontal,
-                      children: [
-                        FilterButton(
-                          text: 'Todos',
-                          active: _activeFilter == 'todos',
-                          onTap: () {
-                            _searchController.clear();
-                            _searchFocusNode.unfocus();
-                            setState(() => _activeFilter = 'todos');
-                            context.read<PartnersBloc>().add(LoanHistoryRequestEvent());
+            return Stack(
+              children: [
+                Padding(
+                  padding: EdgeInsets.all(topPadding * 0.05),
+                  child: Column(
+                    children: [
+                      Container(
+                        padding: EdgeInsets.symmetric(horizontal: 12),
+                        decoration: BoxDecoration(
+                          color: Theme.of(context).colorScheme.white,
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        child: TextField(
+                          controller: _searchController,
+                          focusNode: _searchFocusNode,
+                          decoration: InputDecoration(
+                            suffixIcon: IconButton(
+                              icon: Icon(Icons.search, size: smallSpacing * 1),
+                              onPressed: () =>
+                                  _performSearch(_searchController.text),
+                            ),
+                            hintText: 'Buscar por motivo',
+                            hintStyle: AppTextStyles.mainStyleGrey12(context),
+                            border: InputBorder.none,
+                          ),
+                        ),
+                      ),
+                      SizedBox(height: smallSpacing * 0.5),
+
+                      // Reemplaza el Row de FilterButton por este bloque:
+                      SizedBox(
+                        height: 40,
+                        child: ListView(
+                          scrollDirection: Axis.horizontal,
+                          children: [
+                            FilterButton(
+                              text: 'Todos',
+                              active: _activeFilter == 'todos',
+                              onTap: () {
+                                _searchController.clear();
+                                _searchFocusNode.unfocus();
+                                setState(() => _activeFilter = 'todos');
+                                context.read<PartnersBloc>().add(
+                                  LoanHistoryRequestEvent(),
+                                );
+                              },
+                            ),
+                            SizedBox(width: smallSpacing * 0.5),
+                            FilterButton(
+                              text: 'Pendiente',
+                              active:
+                                  _activeFilter == 'en revisión' ||
+                                  _activeFilter == 'pendiente',
+                              onTap: () {
+                                _searchController.clear();
+                                _searchFocusNode.unfocus();
+                                setState(() => _activeFilter = 'en revisión');
+                                context.read<PartnersBloc>().add(
+                                  LoanHistoryStatustEvent(
+                                    status: 'en revisión',
+                                  ),
+                                );
+                              },
+                            ),
+                            SizedBox(width: smallSpacing * 0.5),
+                            FilterButton(
+                              text: 'Aprobado',
+                              active: _activeFilter == 'aprobado',
+                              onTap: () {
+                                _searchController.clear();
+                                _searchFocusNode.unfocus();
+                                setState(() => _activeFilter = 'aprobado');
+                                context.read<PartnersBloc>().add(
+                                  LoanHistoryStatustEvent(status: 'aprobado'),
+                                );
+                              },
+                            ),
+                            SizedBox(width: smallSpacing * 0.5),
+                            FilterButton(
+                              text: 'Rechazado',
+                              active: _activeFilter == 'rechazado',
+                              onTap: () {
+                                _searchController.clear();
+                                _searchFocusNode.unfocus();
+                                setState(() => _activeFilter = 'rechazado');
+                                context.read<PartnersBloc>().add(
+                                  LoanHistoryStatustEvent(status: 'rechazado'),
+                                );
+                              },
+                            ),
+                            SizedBox(width: smallSpacing * 0.5),
+                            FilterButton(
+                              text: 'Pagado',
+                              active: _activeFilter == 'pagado',
+                              onTap: () {
+                                _searchController.clear();
+                                _searchFocusNode.unfocus();
+                                setState(() => _activeFilter = 'pagado');
+                                context.read<PartnersBloc>().add(
+                                  LoanHistoryStatustEvent(status: 'pagado'),
+                                );
+                              },
+                            ),
+                          ],
+                        ),
+                      ),
+                      SizedBox(height: smallSpacing * 0.5),
+                      Expanded(
+                        child: ListView.builder(
+                          itemCount: loansHistory.length,
+                          itemBuilder: (context, index) {
+                            final data = loansHistory[index];
+                            return LoanCard(
+                              small: smallSpacing,
+                              date: formatDate((data.createdAt)),
+                              reason: data.description,
+                              amount: data.amountOrQuantity,
+                              status: data.status,
+                              motivoRechazo: data.motivoRechazo,
+                              loanType: data.loanType,
+                            );
                           },
                         ),
-                        SizedBox(width: smallSpacing * 0.5),
-                        FilterButton(
-                          text: 'Pendiente',
-                          active: _activeFilter == 'en revisión' || _activeFilter == 'pendiente',
-                          onTap: () {
-                            _searchController.clear();
-                            _searchFocusNode.unfocus();
-                            setState(() => _activeFilter = 'en revisión');
-                            context.read<PartnersBloc>().add(LoanHistoryStatustEvent(status: 'en revisión'));
-                          },
-                        ),
-                        SizedBox(width: smallSpacing * 0.5),
-                        FilterButton(
-                          text: 'Aprobado',
-                          active: _activeFilter == 'aprobado',
-                          onTap: () {
-                            _searchController.clear();
-                            _searchFocusNode.unfocus();
-                            setState(() => _activeFilter = 'aprobado');
-                            context.read<PartnersBloc>().add(LoanHistoryStatustEvent(status: 'aprobado'));
-                          },
-                        ),
-                        SizedBox(width: smallSpacing * 0.5),
-                        FilterButton(
-                          text: 'Rechazado',
-                          active: _activeFilter == 'rechazado',
-                          onTap: () {
-                            _searchController.clear();
-                            _searchFocusNode.unfocus();
-                            setState(() => _activeFilter = 'rechazado');
-                            context.read<PartnersBloc>().add(LoanHistoryStatustEvent(status: 'rechazado'));
-                          },
-                        ),
-                        SizedBox(width: smallSpacing * 0.5),
-                        FilterButton(
-                          text: 'Pagado',
-                          active: _activeFilter == 'pagado',
-                          onTap: () {
-                            _searchController.clear();
-                            _searchFocusNode.unfocus();
-                            setState(() => _activeFilter = 'pagado');
-                            context.read<PartnersBloc>().add(LoanHistoryStatustEvent(status: 'pagado'));
-                          },
-                        ),
-                      ],
+                      ),
+                    ],
+                  ),
+                ),
+                if (isLoading)
+                  Positioned(
+                    top: 0,
+                    left: 0,
+                    right: 0,
+                    child: const LinearProgressIndicator(
+                      color: Color(0xFF2563EB),
                     ),
                   ),
-                  SizedBox(height: smallSpacing * 0.5),
-                  if (isLoading)
-                    Expanded(child: Center(child: CircularProgressIndicator()))
-                  else if (historyData == null || historyData.isEmpty)
-                    Expanded(
-                      child: Center(child: Text('No hay datos disponibles')),
-                    )
-                  else
-                    Expanded(
-                      child: ListView.builder(
-                        itemCount: historyData.length,
-                        itemBuilder: (context, index) {
-                          final data = historyData![index];
-                          // final bool isPaid =
-                          //     data.status.toLowerCase() == 'pagado';
-                          return LoanCard(
-                            small: smallSpacing,
-                            date: formatDate((data.createdAt)),
-                            reason: data.description,
-                            amount: data.amountOrQuantity,
-                            status: data.status,
-                            motivoRechazo: data.motivoRechazo, 
-                            loanType: data.loanType,
-                          );
-                        },
+                if (isLoading)
+                  Positioned.fill(
+                    child: IgnorePointer(
+                      child: Container(
+                        color: const Color(0xFFF5F5F7).withValues(alpha: 0.5),
                       ),
                     ),
-                ],
-              ),
+                  ),
+              ],
             );
           },
         ),

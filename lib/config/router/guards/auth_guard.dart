@@ -23,6 +23,8 @@ class AuthGuard extends AutoRouteGuard {
         router.replaceAll([PartnersRoute(nombre: '')]);
       case 'vigilancia':
         router.replaceAll([const HomeSurveillanceRoute()]);
+      case 'admin':
+        router.replaceAll([const AdminHomeRoute()]);
       
     default: 
        await UserSession.clear();

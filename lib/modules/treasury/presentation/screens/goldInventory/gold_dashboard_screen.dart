@@ -1,7 +1,7 @@
 import 'package:auto_route/auto_route.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:front_gestion_minera/core/widgets/custom_date_selector.dart';
+import 'package:front_gestion_minera/config/router/app_router.gr.dart';
 import 'package:front_gestion_minera/injector_container.dart';
 
 import '../../../domain/entity/entity.dart';
@@ -19,6 +19,11 @@ class GoldDashboardScreen extends StatefulWidget {
 }
 
 class _GoldDashboardScreenState extends State<GoldDashboardScreen> {
+  //Guardar datos en cache
+  GoldInventoryEntity? _cachedInventory;
+  List<GoldBatchEntity>? _cachedBatches;
+  bool _cachedHasReachedMax = false;
+
   int _selectedFilter = 0;
   int _selectedNav = 0;
   String _selectedFilterDate = "reciente";
@@ -29,6 +34,10 @@ class _GoldDashboardScreenState extends State<GoldDashboardScreen> {
   final ScrollController _scrollController = ScrollController();
 
   late final TreasuryBloc _treasuryBloc;
+
+  bool _fabVisible = true;
+  double _lastScrollOffset = 0;
+  static const double _scrollThreshold = 10.0;
 
   List<GoldBatchEntity> _getFilteredLotes(List<GoldBatchEntity> lotes) {
     switch (_selectedFilter) {
@@ -42,17 +51,19 @@ class _GoldDashboardScreenState extends State<GoldDashboardScreen> {
         return lotes;
     }
   }
-  Future<void> _selectCustomDate() async {
-  final result = await CustomDateSelector.show(context);
 
-  if (result != null) {
-    setState(() {
-      _selectedFilterDate = "Personalizado"; 
-      _periodToFetch = result.period;
-      _exactDateToFetch = result.exactDate;
-    });
+  Future<void> _selectCustomDate() async {
+    final result = await CustomDateSelector.show(context);
+
+    if (result != null) {
+      setState(() {
+        _selectedFilterDate = "Personalizado";
+        _periodToFetch = result.period;
+        _exactDateToFetch = result.exactDate;
+      });
+    }
   }
-  }
+
   String _formatDate(DateTime date) {
     const months = [
       'Ene',
@@ -80,8 +91,18 @@ class _GoldDashboardScreenState extends State<GoldDashboardScreen> {
   }
 
   void _onScroll() {
-    if (_scrollController.position.pixels >=
-        _scrollController.position.maxScrollExtent - 200) {
+    final current = _scrollController.position.pixels;
+    final diff = current - _lastScrollOffset;
+
+    if (diff > _scrollThreshold && _fabVisible) {
+      setState(() => _fabVisible = false);
+    } else if (diff < -_scrollThreshold && !_fabVisible) {
+      setState(() => _fabVisible = true);
+    }
+
+    _lastScrollOffset = current;
+
+    if (current >= _scrollController.position.maxScrollExtent - 200) {
       _treasuryBloc.add(LoadMoreGoldBatchesEvent());
     }
   }
@@ -99,84 +120,154 @@ class _GoldDashboardScreenState extends State<GoldDashboardScreen> {
       child: Scaffold(
         backgroundColor: const Color(0xFFF5F5F7),
         body: SafeArea(
-          child: BlocBuilder<TreasuryBloc, TreasuryState>(
-            buildWhen: (previous, current) =>
-                current is GoldDashboardLoading ||
-                current is GoldDashboardLoaded ||
-                current is GoldDashboardError,
-            builder: (context, state) {
-              if (state is GoldDashboardLoading) {
-                return const Center(child: CircularProgressIndicator());
-              }
+          child: _selectedNav == 0 ? _buildInicio() : _buildHistorial(),
+        ),
+        floatingActionButton: ScrollAwareFabs(
+          visible: _fabVisible,
+          onAddTap: () async {
+            await context.router.push(NewExtractionRoute());
+            if (context.mounted) {
+              _treasuryBloc.add(FetchGoldDashboardDataEvent());
+            }
+          },
+          onMoneyTap: () async {
+            await context.router.push(RegisterSellRoute());
+            if (context.mounted) {
+              _treasuryBloc.add(FetchGoldDashboardDataEvent());
+            }
+          },
+        ),
+        bottomNavigationBar: _buildBottomNav(),
+      ),
+    );
+  }
 
-              if (state is GoldDashboardError) {
-                return Center(child: Text(state.message));
-              }
+  Widget _buildInicio() {
+    return BlocBuilder<TreasuryBloc, TreasuryState>(
+      buildWhen: (previous, current) =>
+          current is GoldDashboardLoading ||
+          current is GoldDashboardLoaded ||
+          current is GoldDashboardError,
+      builder: (context, state) {
+        if (state is GoldDashboardLoaded) {
+          _cachedInventory = state.inventory;
+          _cachedBatches = state.batches;
+          _cachedHasReachedMax = state.hasReachedMax;
+        }
 
-              if (state is GoldDashboardLoaded) {
-                final filteredLotes = _getFilteredLotes(state.batches);
+        final bool isLoading = state is GoldDashboardLoading;
 
-                return Column(
-                  children: [
-                    AppBarDashboardGoldWidget(context: context),
-                    Expanded(
-                      child: RefreshIndicator(
-                        onRefresh: () async {
-                          // Disparamos el evento de refresco
-                          context.read<TreasuryBloc>().add(
-                            FetchGoldDashboardDataEvent(isRefresh: true),
-                          );
+        if (_cachedInventory == null) {
+          if (isLoading) {
+            return const Center(child: CircularProgressIndicator());
+          }
+          if (state is GoldDashboardError) {
+            return Center(child: Text(state.message));
+          }
+          return const SizedBox();
+        }
 
-                          // Esperamos a que el bloc emita un estado diferente a Loading
-                          await context.read<TreasuryBloc>().stream.firstWhere(
-                            (state) =>
-                                state is GoldDashboardLoaded ||
-                                state is GoldDashboardError,
-                          );
-                        },
-                        child: _selectedNav == 0
-                            ? SingleChildScrollView(
-                                controller: _scrollController,
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 16,
+        final inventory = _cachedInventory!;
+        final batches = _cachedBatches!;
+        final hasReachedMax = _cachedHasReachedMax;
+
+        return Column(
+          children: [
+            AppBarDashboardGoldWidget(context: context),
+            Expanded(
+              child: Stack(
+                children: [
+                  RefreshIndicator(
+                    onRefresh: () async {
+                      context.read<TreasuryBloc>().add(
+                        FetchGoldDashboardDataEvent(isRefresh: true),
+                      );
+                      await context.read<TreasuryBloc>().stream.firstWhere(
+                        (state) =>
+                            state is GoldDashboardLoaded ||
+                            state is GoldDashboardError,
+                      );
+                    },
+                    child: SingleChildScrollView(
+                      controller: _scrollController,
+                      padding: const EdgeInsets.symmetric(horizontal: 16),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const SizedBox(height: 16),
+                          ValueEstimateWigdet(
+                            estimateValue: inventory.estimateValue,
+                            totalGramsVault: inventory.totalGramsVault,
+                          ),
+                          const SizedBox(height: 16),
+                          _buildFilterTabs(),
+                          const SizedBox(height: 20),
+                          const Text(
+                            'Lotes',
+                            style: TextStyle(
+                              fontSize: 20,
+                              fontWeight: FontWeight.bold,
+                              color: Color(0xFF1A1A2E),
+                            ),
+                          ),
+                          const SizedBox(height: 12),
+                          ...batches.map((lote) => _buildLoteCard(lote)),
+                          if (batches.isEmpty)
+                            const Padding(
+                              padding: EdgeInsets.symmetric(vertical: 40),
+                              child: Center(
+                                child: Text(
+                                  'No hay lotes con este estado',
+                                  style: TextStyle(
+                                    color: Color(0xFF9CA3AF),
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.w500,
+                                  ),
                                 ),
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    const SizedBox(height: 16),
-                                    ValueEstimateWigdet(
-                                      estimateValue:
-                                          state.inventory.estimateValue,
-                                      totalGramsVault:
-                                          state.inventory.totalGramsVault,
-                                    ),
-                                    const SizedBox(height: 16),
-                                    _buildFilterTabs(),
-                                    const SizedBox(height: 20),
-                                    const Text(
-                                      'Lotes',
-                                      style: TextStyle(
-                                        fontSize: 20,
-                                        fontWeight: FontWeight.bold,
-                                        color: Color(0xFF1A1A2E),
-                                      ),
-                                    ),
-                                    const SizedBox(height: 12),
-                                    ...filteredLotes.map(
-                                      (lote) => _buildLoteCard(lote),
-                                    ),
-                                    if (!state.hasReachedMax)
-                                      const Center(
-                                        child: Padding(
-                                          padding: EdgeInsets.all(8.0),
-                                          child: CircularProgressIndicator(),
-                                        ),
-                                      ),
-                                    const SizedBox(height: 80),
-                                  ],
-                                ),
-                              )
-                            : SingleChildScrollView(
+                              ),
+                            ),
+                          if (!hasReachedMax && batches.isNotEmpty)
+                            const Center(
+                              child: Padding(
+                                padding: EdgeInsets.all(8.0),
+                                child: CircularProgressIndicator(),
+                              ),
+                            ),
+                          const SizedBox(height: 80),
+                        ],
+                      ),
+                    ),
+                  ),
+                  if (isLoading)
+                    const Positioned(
+                      top: 0,
+                      left: 0,
+                      right: 0,
+                      child: LinearProgressIndicator(color: Color(0xFF2563EB)),
+                    ),
+                  if (isLoading)
+                    Positioned.fill(
+                      child: IgnorePointer(
+                        child: Container(
+                          color: const Color(0xFFF5F5F7).withValues(alpha: 0.5),
+                        ),
+                      ),
+                    ),
+                ],
+              ),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  Widget _buildHistorial() {
+    return Column(
+      children: [
+        AppBarDashboardGoldWidget(context: context),
+        Expanded(
+          child: SingleChildScrollView(
                                 child: Column(
                                   children: [
                                     const SizedBox(height: 16),
@@ -525,36 +616,11 @@ class _GoldDashboardScreenState extends State<GoldDashboardScreen> {
                                   ],
                                 ),
                               ),
-                      ),
-                    ),
-                  ],
-                );
-              }
-              return const SizedBox();
-            },
-          ),
-        ),
-        floatingActionButton: FloatingActionButton(
-          onPressed: () {},
-          backgroundColor: const Color(0xFF2563EB),
-          elevation: 4,
-          child: const Icon(Icons.add, color: Colors.white, size: 28),
-        ),
-        bottomNavigationBar: _buildBottomNav(),
-      ),
+       ),
+      ],
     );
   }
-  // ─────────────────────────────────────────────
-  // Top Bar
-  // ─────────────────────────────────────────────
 
-  // ─────────────────────────────────────────────
-  // Stats Row
-  // ─────────────────────────────────────────────
-
-  // ─────────────────────────────────────────────
-  // Filter Tabs
-  // ─────────────────────────────────────────────
   Widget _buildFilterTabs() {
     return Container(
       height: 40,
@@ -574,7 +640,19 @@ class _GoldDashboardScreenState extends State<GoldDashboardScreen> {
           final selected = _selectedFilter == index;
           return Expanded(
             child: GestureDetector(
-              onTap: () => setState(() => _selectedFilter = index),
+              onTap: () {
+                setState(() => _selectedFilter = index);
+                String? statusFilter;
+                if (index == 1) statusFilter = 'Disponible';
+                if (index == 2) statusFilter = 'Parcial';
+                if (index == 3) statusFilter = 'Agotado';
+                _treasuryBloc.add(
+                  FetchGoldDashboardDataEvent(
+                    isRefresh: true,
+                    status: statusFilter,
+                  ),
+                );
+              },
               child: AnimatedContainer(
                 duration: const Duration(milliseconds: 200),
                 margin: const EdgeInsets.all(4),
@@ -601,19 +679,14 @@ class _GoldDashboardScreenState extends State<GoldDashboardScreen> {
     );
   }
 
-  // ─────────────────────────────────────────────
-  // Lote Card
-  // ─────────────────────────────────────────────
   Widget _buildLoteCard(GoldBatchEntity lote) {
     final statusColor = _statusColor(lote.status);
 
-    // Calcular el porcentaje disponible
     double disponibilidadPorcentaje = 0.0;
     if (lote.originalWeight > 0) {
       disponibilidadPorcentaje = lote.avilableWeight / lote.originalWeight;
     }
 
-    // Color específico para el peso disponible según el estado
     final disponibleColor = lote.status == 'Disponible'
         ? const Color(0xFF16A34A)
         : lote.status == 'Parcial'
@@ -765,9 +838,6 @@ class _GoldDashboardScreenState extends State<GoldDashboardScreen> {
     );
   }
 
-  // ─────────────────────────────────────────────
-  // Bottom Nav
-  // ─────────────────────────────────────────────
   Widget _buildBottomNav() {
     final items = [
       {

@@ -185,7 +185,9 @@ class _TreasuryScreenState extends State<TreasuryScreen> {
                           icon: Icons.fact_check_outlined,
                           iconColor: const Color(0xFF2563FF),
                           bgColor: const Color(0xFFEAF1FF),
-                          onTap: () {},
+                          onTap: () {
+                            context.router.push(LoansHomeRoute());
+                          },
                         ),
                         _buildModuleCard(
                           context,
