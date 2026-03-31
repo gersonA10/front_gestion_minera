@@ -1,5 +1,3 @@
-
-
 import '../../../../core/networking/http_services.dart';
 import '../../domain/entity/entity.dart';
 import '../models/model.dart';
@@ -151,9 +149,9 @@ class TreasuryDatasource {
   Future<PaginatedGoldBatchesEntity> getGoldBatches({
     int page = 1,
     int limit = 10,
-    String? status
+    String? status,
   }) async {
-    final queryParameters = {'page': page, 'limit': limit, 'status': ?status,};
+    final queryParameters = {'page': page, 'limit': limit, 'status': ?status};
     final response = await apiClient.get(
       '/api/treasury/batches',
       operationName: 'getGoldBatches',
@@ -227,12 +225,22 @@ class TreasuryDatasource {
       'total_records': meta['total_records'] ?? 0,
     };
   }
-   Future<Map<String, dynamic>> internalLoans({
+
+  Future<Map<String, dynamic>> internalLoans({
+    String? status,
+    String? search,
     int page = 1,
     int limit = 10,
   }) async {
     final Map<String, dynamic> queryParameters = {'page': page, 'limit': limit};
+    
+    if (status != null && status.toLowerCase() != 'todos') {
+      queryParameters['status'] = status.toLowerCase();
+    }
 
+    if (search != null && search.trim().isNotEmpty) {
+      queryParameters['search'] = search.trim();
+    }
     final response = await apiClient.get(
       '/api/treasury/corporate-loan',
       operationName: 'internalLoans',
@@ -249,7 +257,9 @@ class TreasuryDatasource {
     };
   }
 
-   Future<TransactionDetailsResponseEntity> getTransactionDetails(String idTansaction) async {
+  Future<TransactionDetailsResponseEntity> getTransactionDetails(
+    String idTansaction,
+  ) async {
     final response = await apiClient.get(
       '/api/treasury/transactions/$idTansaction',
       operationName: 'getTransactionDetails',
@@ -257,7 +267,7 @@ class TreasuryDatasource {
     return TransactionDetailsResponseModel.fromJson(response['data']);
   }
 
-   Future<NewExtractionResponseModel> newExtraction(
+  Future<NewExtractionResponseModel> newExtraction(
     NewExtractionRequestModel newExtractionRequest,
   ) async {
     final response = await apiClient.postFormData(
@@ -301,5 +311,4 @@ class TreasuryDatasource {
     );
     return RegisterSaleResponseModel.fromJson(response['data']);
   }
-
 }

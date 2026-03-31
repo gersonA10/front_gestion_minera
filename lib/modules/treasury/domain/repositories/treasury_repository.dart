@@ -45,7 +45,8 @@ abstract class TreasuryRepository {
     int limit = 10,
   });
 
-   Future<InternalLoansResponseEntity> internalLoans({
+   Future<InternalLoansResponseEntity> getInternalLoans({
+    String? status, String? search,
     int page = 1,
     int limit = 10,
   });

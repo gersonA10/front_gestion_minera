@@ -194,7 +194,7 @@ class GoldDashboardError extends TreasuryState {
   final String message;
   GoldDashboardError(this.message);
 }
-//
+// estado para el historial de prestamos
 
 class InternalLoansLoading extends TreasuryState {}
 

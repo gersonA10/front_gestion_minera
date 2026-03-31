@@ -29,6 +29,15 @@ class TreasuryBloc extends Bloc<TreasuryEvent, TreasuryState> {
   bool _isLoadingMoreBatches = false;
   bool _isLoadingMorePending = false;
   bool _isLoadingMorePayment = false;
+
+  // Variables dedicadas para préstamos internos (evitan colisión con pending)
+  int _currentLoansPage = 1;
+  bool _hasReachedLoansMax = false;
+  int _currentLoansTotalRecords = 0;
+  bool _isLoadingMoreLoans = false;
+
+  String? _currentStatus;
+  String? _currentSearch;
   //
   int _paymentHistoryPage = 1;
   bool _paymentHistoryReachedMax = false;
@@ -56,8 +65,8 @@ class TreasuryBloc extends Bloc<TreasuryEvent, TreasuryState> {
     on<GetPaymentHistoryEvent>(_onGetPaymentHistory);
     on<LoadMorePaymentHistoryEvent>(_onLoadMorePaymentHistory);
 
-    on<InternalLoansRequestsEvent>(_internalLoans);
-    on<InternalLoansEvent>(_internalLoansRequests);
+    on<InternalLoansRequestsEvent>(_onFechInternalLoans);
+    on<InternalLoansEvent>(_onLoadMoreInternalLoans);
     on<TransactionDetailsEvent>(_onTransactionDetails);
     on<NewExtractionEvent>(_onNewExtraction);
     on<PreviewSaleEvent>(_onPreviewSale);
@@ -484,40 +493,30 @@ class TreasuryBloc extends Bloc<TreasuryEvent, TreasuryState> {
   }
 
 
-  Future<void> _internalLoans(
+  Future<void> _onFechInternalLoans(
     InternalLoansRequestsEvent event,
     Emitter<TreasuryState> emit,
   ) async {
-    if (!event.isRefresh && _itemsLoans.isNotEmpty) {
-      emit(
-        InternalLoansLoaded(
-          list: List.from(_itemsLoans),
-          hasReachedMax: _hasReachedMax,
-          totalRecords: _currentTotalRecords,
-        ),
-      );
-      return;
-    }
-
-    if (event.isRefresh) {
-      _currentPage = 1;
-      _hasReachedMax = false;
-      _itemsLoans.clear();
-      emit(InternalLoansLoading());
-    }
-
+    _currentLoansPage = 1;
+    _hasReachedLoansMax = false;
+    _itemsLoans.clear();
+    _currentStatus = event.status;
+    _currentSearch = event.search;
+    emit(InternalLoansLoading());
     try {
-      final response = await repository.internalLoans(
-        page: _currentPage,
+      final response = await repository.getInternalLoans(
+        page: _currentLoansPage,
+        status: _currentStatus,
+        search: _currentSearch,
       );
       _itemsLoans = response.items;
-      _hasReachedMax = !response.hasMore;
-      _currentTotalRecords = response.totalRecords;
+      _hasReachedLoansMax = !response.hasMore;
+      _currentLoansTotalRecords = response.totalRecords;
       emit(
         InternalLoansLoaded(
           list: List.from(_itemsLoans),
-          hasReachedMax: _hasReachedMax,
-          totalRecords: _currentTotalRecords,
+          hasReachedMax: _hasReachedLoansMax,
+          totalRecords: _currentLoansTotalRecords,
         ),
       );
     } on BaseApiException catch (error) {
@@ -527,31 +526,36 @@ class TreasuryBloc extends Bloc<TreasuryEvent, TreasuryState> {
     }
   }
 
-  Future<void> _internalLoansRequests(
+  Future<void> _onLoadMoreInternalLoans(
     InternalLoansEvent event,
     Emitter<TreasuryState> emit,
   ) async {
-    if (_hasReachedMax) return;
-    _currentPage++;
+    if (_hasReachedLoansMax || _isLoadingMoreLoans) return;
+    _isLoadingMoreLoans = true;
+    _currentLoansPage++;
     try {
-      final response = await repository.internalLoans(
-        page: _currentPage,
+      final response = await repository.getInternalLoans(
+        status: _currentStatus,
+        search: _currentSearch,
+        page: _currentLoansPage,
       );
-
       _itemsLoans.addAll(response.items);
-
-      _hasReachedMax = !response.hasMore;
+      _hasReachedLoansMax = !response.hasMore;
       emit(
         InternalLoansLoaded(
-          list: _itemsLoans,
-          hasReachedMax: _hasReachedMax,
-          totalRecords: _currentTotalRecords,
+          list: List.from(_itemsLoans),
+          hasReachedMax: _hasReachedLoansMax,
+          totalRecords: _currentLoansTotalRecords,
         ),
       );
     } on BaseApiException catch (error) {
+      _currentLoansPage--;
       emit(InternalLoansError(mapErrorMessage(error.key)));
     } catch (e) {
+      _currentLoansPage--;
       emit(InternalLoansError('Error inesperado: $e'));
+    } finally {
+      _isLoadingMoreLoans = false;
     }
   }
 
