@@ -43,7 +43,7 @@ class BottomNavWidget extends StatelessWidget {
                     decoration: BoxDecoration(
                       color: selected
                           ? const Color(0xFFEFF6FF)
-                          : Colors.transparent,
+                          : const Color(0xFFEFF6FF).withOpacity(0.0),
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: Icon(

@@ -4,8 +4,10 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:front_gestion_minera/injector_container.dart';
 import 'package:front_gestion_minera/modules/admin/presentation/widgets/bottom_nav_widget.dart';
 import 'package:front_gestion_minera/modules/admin/presentation/bloc/admin_bloc.dart';
+import 'package:front_gestion_minera/utils/constants/color.constant.dart';
 
 import '../../../../core/widgets/logout_button_widget.dart';
+import '../../domain/entity/entity.dart';
 import '../widgets/widgets.dart';
 import 'screens.dart';
 
@@ -27,6 +29,7 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
   void initState() {
     super.initState();
     _adminBloc = InjectorContainer.getIt<AdminBloc>();
+
     _pages = [
       const _SolicitudesPendientesPage(),
       const HistorialRequestsScreen(),
@@ -40,7 +43,7 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
       value: _adminBloc,
       child: Scaffold(
         backgroundColor: const Color(0xFFF4F6FA),
-        body: _pages[_currentIndex],
+        body: IndexedStack(index: _currentIndex, children: _pages),
         bottomNavigationBar: BottomNavWidget(
           currentIndex: _currentIndex,
           onTap: (i) => setState(() => _currentIndex = i),
@@ -58,17 +61,26 @@ class _SolicitudesPendientesPage extends StatefulWidget {
       _SolicitudesPendientesPageState();
 }
 
-class _SolicitudesPendientesPageState extends State<_SolicitudesPendientesPage> {
+class _SolicitudesPendientesPageState  extends State<_SolicitudesPendientesPage> {
   final ScrollController _scrollController = ScrollController();
   late AdminBloc _adminBloc;
+
+  List<PendingRequestEntity> _cachedItems = [];
+  bool _hasMax = false;
+  int _totalRecords = 0;
 
   @override
   void initState() {
     super.initState();
     _scrollController.addListener(_onScroll);
+
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _adminBloc = context.read<AdminBloc>();
-      _adminBloc.add(GetPendingRequestsEvent(isRefresh: true));
+      final state = _adminBloc.state;
+      if (state is! AdminPendingRequestsLoaded &&
+          state is! AdminPendingRequestsLoading) {
+        _adminBloc.add(GetPendingRequestsEvent(isRefresh: true));
+      }
     });
   }
 
@@ -96,23 +108,96 @@ class _SolicitudesPendientesPageState extends State<_SolicitudesPendientesPage> 
   Widget build(BuildContext context) {
     return SafeArea(
       child: BlocBuilder<AdminBloc, AdminState>(
+        buildWhen: (previous, current) =>
+            current is AdminPendingRequestsLoading ||
+            current is AdminPendingRequestsLoaded ||
+            current is AdminPendingRequestsError,
         builder: (context, state) {
-          int totalRecords = 0;
+          bool isLoading =
+              state is AdminPendingRequestsLoading || state is AdminInitial;
+
           if (state is AdminPendingRequestsLoaded) {
-            totalRecords = state.totalRecords;
+            _cachedItems = state.items;
+            _hasMax = state.hasReachedMax;
+            _totalRecords = state.totalRecords;
           }
-      
-          return Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+
+          return Stack(
             children: [
-              _buildHeader(),
-              _buildTitleSection(totalRecords),
-              Expanded(child: _buildBody(state)),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  _buildHeader(),
+                  _buildTitleSection(_totalRecords),
+                  Expanded(
+                    child: RefreshIndicator(
+                      onRefresh: _onRefresh,
+                      color: const Color(0xFF1A3557),
+                      child: _buildBody(isLoading, state),
+                    ),
+                  ),
+                ],
+              ),
+
+              if (isLoading)
+                Positioned(
+                  top: 0,
+                  left: 0,
+                  right: 0,
+                  child: LinearProgressIndicator(color: TColors.appMainColor),
+                ),
+              if (isLoading)
+                Positioned.fill(
+                  child: IgnorePointer(
+                    child: Container(
+                      color: TColors.white.withValues(alpha: 0.5),
+                    ),
+                  ),
+                ),
             ],
           );
         },
       ),
     );
+  }
+
+  Widget _buildBody(bool isLoading, AdminState state) {
+    if (state is AdminPendingRequestsError && _cachedItems.isEmpty) {
+      return SingleChildScrollView(
+        physics: const AlwaysScrollableScrollPhysics(),
+        child: _buildError(state.message),
+      );
+    }
+
+    if (_cachedItems.isNotEmpty) {
+      return ListView.builder(
+        controller: _scrollController,
+        physics: const AlwaysScrollableScrollPhysics(),
+        padding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
+        itemCount: _hasMax ? _cachedItems.length : _cachedItems.length + 1,
+        itemBuilder: (context, index) {
+          if (index >= _cachedItems.length) {
+            return const Padding(
+              padding: EdgeInsets.symmetric(vertical: 20),
+              child: Center(child: CircularProgressIndicator(strokeWidth: 2)),
+            );
+          }
+          return SolicitudCard(solicitud: _cachedItems[index], index: index);
+        },
+      );
+    }
+
+    if (!isLoading && _cachedItems.isEmpty) {
+      return SingleChildScrollView(
+        physics: const AlwaysScrollableScrollPhysics(),
+        child: Padding(
+          padding: const EdgeInsets.only(top: 50),
+          child: _buildEmpty(),
+        ),
+      );
+    }
+
+    return const SizedBox();
   }
 
   Widget _buildHeader() {
@@ -183,47 +268,6 @@ class _SolicitudesPendientesPageState extends State<_SolicitudesPendientesPage> 
         ],
       ),
     );
-  }
-
-  // ── Body según el estado de BLoC ──
-  Widget _buildBody(AdminState state) {
-    if (state is AdminPendingRequestsLoading || state is AdminInitial) {
-      return _buildLoading();
-    }
-
-    if (state is AdminPendingRequestsError) {
-      return _buildError(state.message);
-    }
-
-    if (state is AdminPendingRequestsLoaded) {
-      if (state.items.isEmpty) return _buildEmpty();
-
-      return RefreshIndicator(
-        onRefresh: _onRefresh,
-        child: ListView.builder(
-          controller: _scrollController,
-          padding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
-          itemCount: state.hasReachedMax
-              ? state.items.length
-              : state.items.length + 1,
-          itemBuilder: (context, index) {
-            if (index >= state.items.length) {
-              return const Padding(
-                padding: EdgeInsets.symmetric(vertical: 20),
-                child: Center(child: CircularProgressIndicator(strokeWidth: 2)),
-              );
-            }
-            return SolicitudCard(solicitud: state.items[index], index: index);
-          },
-        ),
-      );
-    }
-
-    return const SizedBox();
-  }
-
-  Widget _buildLoading() {
-    return const Center(child: CircularProgressIndicator(strokeWidth: 2.5));
   }
 
   Widget _buildError(String errorMsg) {

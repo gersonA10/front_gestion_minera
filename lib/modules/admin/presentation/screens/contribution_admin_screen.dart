@@ -2,11 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:front_gestion_minera/utils/constants/color.constant.dart';
 import 'package:intl/intl.dart';
-
-// Importa tus rutas correspondientes:
 import '../../domain/entity/contribution_history_entity.dart';
 import '../bloc/admin_bloc.dart';
-// IMPORTANTE: Asegúrate de importar tu custom_date_selector.dart donde está la clase DateFilterResult
 import '../../../../core/widgets/custom_date_selector.dart';
 
 class ContributionAdminScreen extends StatefulWidget {
@@ -34,7 +31,6 @@ class _ContributionAdminScreenState extends State<ContributionAdminScreen> {
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final state = context.read<AdminBloc>().state;
-      // Disparamos si no estamos ya cargando o mostrando aportes
       if (state is! AdminContributionHistoryLoaded &&
           state is! AdminContributionHistoryLoading) {
         context.read<AdminBloc>().add(
@@ -134,7 +130,6 @@ class _ContributionAdminScreenState extends State<ContributionAdminScreen> {
                       const SliverToBoxAdapter(child: _HeaderAportes()),
                       const SliverToBoxAdapter(child: SizedBox(height: 16)),
 
-                      // ── Custom Date Selector (Botón en lugar del Widget) ──
                       SliverToBoxAdapter(
                         child: Padding(
                           padding: const EdgeInsets.symmetric(horizontal: 20),
@@ -142,7 +137,7 @@ class _ContributionAdminScreenState extends State<ContributionAdminScreen> {
                             children: [
                               Expanded(
                                 child: GestureDetector(
-                                  onTap: _openDateSelector, // Abre el modal
+                                  onTap: _openDateSelector,
                                   child: Container(
                                     padding: const EdgeInsets.symmetric(
                                       horizontal: 16,
@@ -221,7 +216,6 @@ class _ContributionAdminScreenState extends State<ContributionAdminScreen> {
                       ),
                       const SliverToBoxAdapter(child: SizedBox(height: 20)),
 
-                      // ── Mensaje de Error ──
                       if (state is AdminContributionHistoryError &&
                           _cachedItems.isEmpty)
                         SliverToBoxAdapter(
@@ -248,7 +242,6 @@ class _ContributionAdminScreenState extends State<ContributionAdminScreen> {
                           ),
                         ),
 
-                      // ── Lista usando la Caché ──
                       if (_cachedItems.isNotEmpty)
                         SliverPadding(
                           padding: const EdgeInsets.symmetric(horizontal: 20),
@@ -277,7 +270,6 @@ class _ContributionAdminScreenState extends State<ContributionAdminScreen> {
                           ),
                         ),
 
-                      // ── Estado Vacío ──
                       if (!isLoading &&
                           _cachedItems.isEmpty &&
                           state is! AdminContributionHistoryError)
@@ -309,7 +301,6 @@ class _ContributionAdminScreenState extends State<ContributionAdminScreen> {
                   ),
                 ),
 
-                // ── Overlay de Carga sobre la caché ──
                 if (isLoading)
                   Positioned(
                     top: 0,
