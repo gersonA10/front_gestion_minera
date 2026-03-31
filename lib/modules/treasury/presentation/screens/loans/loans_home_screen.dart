@@ -1,11 +1,12 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:front_gestion_minera/config/router/app_router.gr.dart';
 import 'package:front_gestion_minera/config/theme/extension_theme.dart';
 import 'package:front_gestion_minera/injector_container.dart';
-import 'package:front_gestion_minera/modules/treasury/domain/entity/loans/loans_list_entity.dart';
 import 'package:front_gestion_minera/modules/treasury/presentation/bloc/treasury_bloc.dart';
 import 'package:intl/intl.dart';
+import '../../../domain/entity/entity.dart';
 
 extension LoanStatusX on LoanStatus {
   Color get color {
@@ -116,25 +117,19 @@ class _LoansHomeScreenState extends State<LoansHomeScreen> {
       value: _treasuryBloc,
       child: Scaffold(
         backgroundColor: const Color(0xFFF8F9FB),
-        floatingActionButton: AnimatedSlide(
-          duration: const Duration(milliseconds: 200),
-          offset: _fabVisible ? Offset.zero : const Offset(0, 2),
-          child: AnimatedOpacity(
-            duration: const Duration(milliseconds: 200),
-            opacity: _fabVisible ? 1 : 0,
-            child: FloatingActionButton(
-              onPressed: () {},
-              backgroundColor: const Color(0xFF3B82F6),
-              elevation: 2,
-              child: const Icon(Icons.add, color: Colors.white, size: 20),
-            ),
-          ),
+        floatingActionButton: FloatingActionButton(
+          onPressed: () {
+            context.router.push(NewLoansRoute());
+          },
+          backgroundColor: const Color(0xFF3B82F6),
+          elevation: 2,
+          child: const Icon(Icons.add, color: Colors.white, size: 20),
         ),
         appBar: AppBar(
           backgroundColor: colors.white,
           surfaceTintColor: colors.white,
           centerTitle: true,
-          title: const Text(
+          title: Text(
             'Préstamos Internos',
             style: TextStyle(
               fontSize: 16,
