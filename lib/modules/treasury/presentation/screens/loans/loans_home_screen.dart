@@ -1,5 +1,6 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
+import 'package:front_gestion_minera/config/router/app_router.gr.dart';
 import 'package:front_gestion_minera/config/theme/extension_theme.dart';
 import 'package:intl/intl.dart';
 
@@ -210,7 +211,9 @@ class _LoansHomeScreenState extends State<LoansHomeScreen> {
     return Scaffold(
       backgroundColor: const Color(0xFFF8F9FB),
       floatingActionButton: FloatingActionButton(
-        onPressed: () {},
+        onPressed: () {
+          context.router.push(NewLoansRoute());
+        },
         backgroundColor: const Color(0xFF3B82F6),
         elevation: 2,
         child: const Icon(Icons.add, color: Colors.white, size: 20),
