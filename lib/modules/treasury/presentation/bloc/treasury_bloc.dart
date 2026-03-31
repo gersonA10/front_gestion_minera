@@ -13,6 +13,8 @@ class TreasuryBloc extends Bloc<TreasuryEvent, TreasuryState> {
   bool _hasReachedMax = false;
   int _currentTotalRecords = 0;
   List<ListOfPendingDataEntity> _items = [];
+  List<InternalLoansEntity> _itemsLoans = [];
+
 
   final TreasuryRepository repository;
 
@@ -27,6 +29,15 @@ class TreasuryBloc extends Bloc<TreasuryEvent, TreasuryState> {
   bool _isLoadingMoreBatches = false;
   bool _isLoadingMorePending = false;
   bool _isLoadingMorePayment = false;
+
+  // Variables dedicadas para préstamos internos (evitan colisión con pending)
+  int _currentLoansPage = 1;
+  bool _hasReachedLoansMax = false;
+  int _currentLoansTotalRecords = 0;
+  bool _isLoadingMoreLoans = false;
+
+  String? _currentStatus;
+  String? _currentSearch;
   //
   int _paymentHistoryPage = 1;
   bool _paymentHistoryReachedMax = false;
@@ -53,6 +64,9 @@ class TreasuryBloc extends Bloc<TreasuryEvent, TreasuryState> {
     on<LoadMoreGoldBatchesEvent>(_onLoadMoreGoldBatches);
     on<GetPaymentHistoryEvent>(_onGetPaymentHistory);
     on<LoadMorePaymentHistoryEvent>(_onLoadMorePaymentHistory);
+
+    on<InternalLoansRequestsEvent>(_onFechInternalLoans);
+    on<InternalLoansEvent>(_onLoadMoreInternalLoans);
     on<TransactionDetailsEvent>(_onTransactionDetails);
     on<NewExtractionEvent>(_onNewExtraction);
     on<PreviewSaleEvent>(_onPreviewSale);
@@ -121,7 +135,7 @@ class TreasuryBloc extends Bloc<TreasuryEvent, TreasuryState> {
       emit(DetailsofanapplicationError(message: 'Error inesperado: $e'));
     }
   }
-
+   
   Future<void> _listOfPending(
     ListOfPendingRequestsEvent event,
     Emitter<TreasuryState> emit,
@@ -475,6 +489,73 @@ class TreasuryBloc extends Bloc<TreasuryEvent, TreasuryState> {
       emit(GoldDashboardError('Error inesperado: $e'));
     } finally {
       _isLoadingMoreBatches = false;
+    }
+  }
+
+
+  Future<void> _onFechInternalLoans(
+    InternalLoansRequestsEvent event,
+    Emitter<TreasuryState> emit,
+  ) async {
+    _currentLoansPage = 1;
+    _hasReachedLoansMax = false;
+    _itemsLoans.clear();
+    _currentStatus = event.status;
+    _currentSearch = event.search;
+    emit(InternalLoansLoading());
+    try {
+      final response = await repository.getInternalLoans(
+        page: _currentLoansPage,
+        status: _currentStatus,
+        search: _currentSearch,
+      );
+      _itemsLoans = response.items;
+      _hasReachedLoansMax = !response.hasMore;
+      _currentLoansTotalRecords = response.totalRecords;
+      emit(
+        InternalLoansLoaded(
+          list: List.from(_itemsLoans),
+          hasReachedMax: _hasReachedLoansMax,
+          totalRecords: _currentLoansTotalRecords,
+        ),
+      );
+    } on BaseApiException catch (error) {
+      emit(InternalLoansError(mapErrorMessage(error.key)));
+    } catch (e) {
+      emit(InternalLoansError('Error inesperado: $e'));
+    }
+  }
+
+  Future<void> _onLoadMoreInternalLoans(
+    InternalLoansEvent event,
+    Emitter<TreasuryState> emit,
+  ) async {
+    if (_hasReachedLoansMax || _isLoadingMoreLoans) return;
+    _isLoadingMoreLoans = true;
+    _currentLoansPage++;
+    try {
+      final response = await repository.getInternalLoans(
+        status: _currentStatus,
+        search: _currentSearch,
+        page: _currentLoansPage,
+      );
+      _itemsLoans.addAll(response.items);
+      _hasReachedLoansMax = !response.hasMore;
+      emit(
+        InternalLoansLoaded(
+          list: List.from(_itemsLoans),
+          hasReachedMax: _hasReachedLoansMax,
+          totalRecords: _currentLoansTotalRecords,
+        ),
+      );
+    } on BaseApiException catch (error) {
+      _currentLoansPage--;
+      emit(InternalLoansError(mapErrorMessage(error.key)));
+    } catch (e) {
+      _currentLoansPage--;
+      emit(InternalLoansError('Error inesperado: $e'));
+    } finally {
+      _isLoadingMoreLoans = false;
     }
   }
 

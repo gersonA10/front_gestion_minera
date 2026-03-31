@@ -78,7 +78,13 @@ class FetchGoldDashboardDataEvent extends TreasuryEvent {
 }
 
 class LoadMoreGoldBatchesEvent extends TreasuryEvent {}
-
+//historial de prestamos 
+class InternalLoansRequestsEvent extends TreasuryEvent {
+  final String? status;
+  final String? search;
+  InternalLoansRequestsEvent({this.status, this.search});
+}
+class InternalLoansEvent extends TreasuryEvent {}
 ///
 class TransactionDetailsEvent extends TreasuryEvent {
   final String idTransaction;
