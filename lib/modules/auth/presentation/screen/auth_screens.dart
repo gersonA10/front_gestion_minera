@@ -59,6 +59,8 @@ class _AuthScreenState extends State<AuthScreen> {
                 context.router.replaceAll([PartnersRoute(nombre: '')]);
               } else if (role == 'vigilancia') {
                 context.router.replaceAll([const HomeSurveillanceRoute()]);
+              } else if (role == 'admin') {
+                context.router.replaceAll([const AdminHomeRoute()]);
               }
             }
           },

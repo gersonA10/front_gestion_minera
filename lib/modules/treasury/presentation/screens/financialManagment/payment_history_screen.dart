@@ -7,8 +7,6 @@ import '../../../../../injector_container.dart';
 import '../../bloc/treasury_bloc.dart';
 import '../../widgets/widgtes.dart';
 
-// ─── Enums de filtro ──────────────────────────────────────────────────────────
-
 enum DateFilterType { ultimos30Dias, dia, mes, anio }
 
 extension DateFilterTypeExt on DateFilterType {
@@ -25,8 +23,6 @@ extension DateFilterTypeExt on DateFilterType {
     }
   }
 }
-
-// ─── Helpers de ícono por destino/tipo ────────────────────────────────────────
 
 IconData iconForTransaction(String operationType, String destino) {
   if (operationType == 'INCOME') return Icons.arrow_downward_rounded;
