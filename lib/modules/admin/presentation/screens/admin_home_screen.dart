@@ -21,26 +21,31 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
   int _currentIndex = 0;
 
   late final List<Widget> _pages;
+  late final AdminBloc _adminBloc;
 
   @override
   void initState() {
     super.initState();
+    _adminBloc = InjectorContainer.getIt<AdminBloc>();
     _pages = [
       const _SolicitudesPendientesPage(),
       const HistorialRequestsScreen(),
       // const _AportesPage(),
-      Container()
+      Container(),
     ];
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: const Color(0xFFF4F6FA),
-      body: _pages[_currentIndex],
-      bottomNavigationBar: BottomNavWidget(
-        currentIndex: _currentIndex,
-        onTap: (i) => setState(() => _currentIndex = i),
+    return BlocProvider.value(
+      value: _adminBloc,
+      child: Scaffold(
+        backgroundColor: const Color(0xFFF4F6FA),
+        body: _pages[_currentIndex],
+        bottomNavigationBar: BottomNavWidget(
+          currentIndex: _currentIndex,
+          onTap: (i) => setState(() => _currentIndex = i),
+        ),
       ),
     );
   }
@@ -56,16 +61,16 @@ class _SolicitudesPendientesPage extends StatefulWidget {
 
 class _SolicitudesPendientesPageState extends State<_SolicitudesPendientesPage> {
   final ScrollController _scrollController = ScrollController();
-  late final AdminBloc _adminBloc;
-
+  late AdminBloc _adminBloc;
 
   @override
   void initState() {
     super.initState();
     _scrollController.addListener(_onScroll);
-    _adminBloc =  InjectorContainer.getIt<AdminBloc>()..add(
-      GetPendingRequestsEvent(isRefresh: true)
-   );
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _adminBloc = context.read<AdminBloc>();
+      _adminBloc.add(GetPendingRequestsEvent(isRefresh: true));
+    });
   }
 
   @override
@@ -75,7 +80,8 @@ class _SolicitudesPendientesPageState extends State<_SolicitudesPendientesPage> 
   }
 
   void _onScroll() {
-    if (_scrollController.position.pixels >= _scrollController.position.maxScrollExtent - 200) {
+    if (_scrollController.position.pixels >=
+        _scrollController.position.maxScrollExtent - 200) {
       final state = _adminBloc.state;
       if (state is AdminPendingRequestsLoaded && !state.hasReachedMax) {
         _adminBloc.add(LoadMorePendingRequestsEvent());
@@ -90,25 +96,22 @@ class _SolicitudesPendientesPageState extends State<_SolicitudesPendientesPage> 
   @override
   Widget build(BuildContext context) {
     return SafeArea(
-      child: BlocProvider.value(
-        value: _adminBloc,
-        child: BlocBuilder<AdminBloc, AdminState>(
-          builder: (context, state) {
-            int totalRecords = 0;
-            if (state is AdminPendingRequestsLoaded) {
-              totalRecords = state.totalRecords;
-            }
-        
-            return Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                _buildHeader(),
-                _buildTitleSection(totalRecords),
-                Expanded(child: _buildBody(state)),
-              ],
-            );
-          },
-        ),
+      child: BlocBuilder<AdminBloc, AdminState>(
+        builder: (context, state) {
+          int totalRecords = 0;
+          if (state is AdminPendingRequestsLoaded) {
+            totalRecords = state.totalRecords;
+          }
+      
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              _buildHeader(),
+              _buildTitleSection(totalRecords),
+              Expanded(child: _buildBody(state)),
+            ],
+          );
+        },
       ),
     );
   }
@@ -138,7 +141,7 @@ class _SolicitudesPendientesPageState extends State<_SolicitudesPendientesPage> 
             ),
           ),
           Spacer(),
-          LogoutButton()
+          LogoutButton(),
         ],
       ),
     );
@@ -183,7 +186,6 @@ class _SolicitudesPendientesPageState extends State<_SolicitudesPendientesPage> 
     );
   }
 
-
   // ── Body según el estado de BLoC ──
   Widget _buildBody(AdminState state) {
     if (state is AdminPendingRequestsLoading || state is AdminInitial) {
@@ -209,17 +211,10 @@ class _SolicitudesPendientesPageState extends State<_SolicitudesPendientesPage> 
             if (index >= state.items.length) {
               return const Padding(
                 padding: EdgeInsets.symmetric(vertical: 20),
-                child: Center(
-                  child: CircularProgressIndicator(
-                    strokeWidth: 2,
-                  ),
-                ),
+                child: Center(child: CircularProgressIndicator(strokeWidth: 2)),
               );
             }
-            return SolicitudCard(
-              solicitud: state.items[index],
-              index: index,
-            );
+            return SolicitudCard(solicitud: state.items[index], index: index);
           },
         ),
       );
@@ -229,11 +224,7 @@ class _SolicitudesPendientesPageState extends State<_SolicitudesPendientesPage> 
   }
 
   Widget _buildLoading() {
-    return const Center(
-      child: CircularProgressIndicator(
-        strokeWidth: 2.5,
-      ),
-    );
+    return const Center(child: CircularProgressIndicator(strokeWidth: 2.5));
   }
 
   Widget _buildError(String errorMsg) {
@@ -243,8 +234,11 @@ class _SolicitudesPendientesPageState extends State<_SolicitudesPendientesPage> 
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Icon(Icons.cloud_off_outlined,
-                size: 52, color: Color(0xFFCBD5E1)),
+            const Icon(
+              Icons.cloud_off_outlined,
+              size: 52,
+              color: Color(0xFFCBD5E1),
+            ),
             const SizedBox(height: 16),
             Text(
               errorMsg,
@@ -282,8 +276,11 @@ class _SolicitudesPendientesPageState extends State<_SolicitudesPendientesPage> 
               color: const Color(0xFFEFF6FF),
               borderRadius: BorderRadius.circular(20),
             ),
-            child: const Icon(Icons.inbox_outlined,
-                size: 36, color: Color(0xFF93C5FD)),
+            child: const Icon(
+              Icons.inbox_outlined,
+              size: 36,
+              color: Color(0xFF93C5FD),
+            ),
           ),
           const SizedBox(height: 16),
           const Text(
@@ -350,4 +347,3 @@ class _PendienteBadge extends StatelessWidget {
     );
   }
 }
-
