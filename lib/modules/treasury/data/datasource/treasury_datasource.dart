@@ -1,3 +1,5 @@
+
+
 import '../../../../core/networking/http_services.dart';
 import '../../domain/entity/entity.dart';
 import '../models/model.dart';
@@ -138,7 +140,7 @@ class TreasuryDatasource {
     return ConfirmPaymentResponseModel.fromJson(response);
   }
 
-    Future<GoldInventoryModel> getGoldInventory() async {
+  Future<GoldInventoryModel> getGoldInventory() async {
     final response = await apiClient.get(
       '/api/treasury/gold',
       operationName: 'getGoldInventory',
@@ -149,8 +151,9 @@ class TreasuryDatasource {
   Future<PaginatedGoldBatchesEntity> getGoldBatches({
     int page = 1,
     int limit = 10,
+    String? status
   }) async {
-    final queryParameters = {'page': page, 'limit': limit};
+    final queryParameters = {'page': page, 'limit': limit, 'status': ?status,};
     final response = await apiClient.get(
       '/api/treasury/batches',
       operationName: 'getGoldBatches',
@@ -177,8 +180,10 @@ class TreasuryDatasource {
       operationName: 'rejectAnApplication',
     );
 
-    return RejectAnApplicationResponseModel.fromJson(response);}
-    Future<ExpenseResponseModel> registerUrgentExpense(
+    return RejectAnApplicationResponseModel.fromJson(response);
+  }
+
+  Future<ExpenseResponseModel> registerUrgentExpense(
     ExpenseRequestModel expenseRequestModel,
   ) async {
     final response = await apiClient.postFormData(
@@ -197,7 +202,7 @@ class TreasuryDatasource {
     return ExpenseResponseModel.fromJson(response['data']);
   }
 
-      Future<Map<String, dynamic>> getPaymentHistory({
+  Future<Map<String, dynamic>> getPaymentHistory({
     int page = 1,
     int limit = 10,
   }) async {
@@ -222,4 +227,58 @@ class TreasuryDatasource {
       'total_records': meta['total_records'] ?? 0,
     };
   }
+
+   Future<TransactionDetailsResponseEntity> getTransactionDetails(String idTansaction) async {
+    final response = await apiClient.get(
+      '/api/treasury/transactions/$idTansaction',
+      operationName: 'getTransactionDetails',
+    );
+    return TransactionDetailsResponseModel.fromJson(response['data']);
+  }
+
+   Future<NewExtractionResponseModel> newExtraction(
+    NewExtractionRequestModel newExtractionRequest,
+  ) async {
+    final response = await apiClient.postFormData(
+      '/api/treasury/batches',
+      data: newExtractionRequest.toFormDataMap(),
+      operationName: 'newExtraction',
+      files: [
+        {
+          'name': 'evidencia',
+          'path': newExtractionRequest.evidencia,
+          'filename': newExtractionRequest.evidencia.split('/').last,
+        },
+      ],
+    );
+    return NewExtractionResponseModel.fromJson(response);
+  }
+
+  Future<SalePreviewResponseEntity> previewSale(double gramsToSell) async {
+    final response = await apiClient.post(
+      '/api/treasury/sales/preview-fifo',
+      data: {'grams_to_sell': gramsToSell},
+      operationName: 'previewSale',
+    );
+    return SalePreviewResponseModel.fromJson(response['data']);
+  }
+
+  Future<RegisterSaleResponseEntity> registerSale(
+    RegisterSaleRequestModel request,
+  ) async {
+    final response = await apiClient.postFormData(
+      '/api/treasury/sales',
+      data: request.toFormDataMap(),
+      operationName: 'registerSale',
+      files: [
+        {
+          'name': 'comprobante',
+          'path': request.comprobante,
+          'filename': request.comprobante.split('/').last,
+        },
+      ],
+    );
+    return RegisterSaleResponseModel.fromJson(response['data']);
+  }
+
 }

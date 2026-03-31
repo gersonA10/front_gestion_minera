@@ -50,6 +50,7 @@ class _AuthScreenState extends State<AuthScreen> {
                 type: AlertType.success,
               );
             } else if (state is AuthSuccess) {
+              
               final role = state.data.roleName;
 
               if (role == 'hacienda') {
@@ -58,6 +59,8 @@ class _AuthScreenState extends State<AuthScreen> {
                 context.router.replaceAll([PartnersRoute(nombre: '')]);
               } else if (role == 'vigilancia') {
                 context.router.replaceAll([const HomeSurveillanceRoute()]);
+              } else if (role == 'admin') {
+                context.router.replaceAll([const AdminHomeRoute()]);
               }
             }
           },

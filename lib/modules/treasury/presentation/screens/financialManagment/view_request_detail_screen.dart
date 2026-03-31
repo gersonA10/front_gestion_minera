@@ -97,6 +97,7 @@ class _ViewRequestDetailsScreenState extends State<ViewRequestDetailsScreen> {
     const String baseUrl = 'https://tu-servidor.com';
 
     return SafeArea(
+      top: false,
       bottom: true,
       child: BlocProvider(
         create: (context) =>

@@ -1,3 +1,11 @@
+export 'package:flutter/material.dart';
+export 'package:front_gestion_minera/modules/treasury/presentation/widgets/goldInventory/registerSell/field_label_widget.dart';
+export 'package:front_gestion_minera/modules/treasury/presentation/widgets/goldInventory/registerSell/tap_field_widget.dart';
+export 'package:front_gestion_minera/modules/treasury/presentation/widgets/goldInventory/registerSell/total_card_widget.dart';
+
+export 'package:front_gestion_minera/modules/treasury/presentation/widgets/goldInventory/fab_button_widget.dart';
+export 'package:front_gestion_minera/modules/treasury/presentation/widgets/goldInventory/scroll_aware_fabs_widget.dart';
+
 export 'package:front_gestion_minera/modules/treasury/presentation/widgets/goldInventory/app_bar_home_widget.dart';
 export 'package:front_gestion_minera/modules/treasury/presentation/widgets/payment_history/filer_bottom_sheet_widget.dart';
 export 'package:front_gestion_minera/modules/treasury/presentation/widgets/payment_history/selector_row_widget.dart';
@@ -11,4 +19,7 @@ export 'package:front_gestion_minera/modules/treasury/presentation/widgets/view_
 export 'package:front_gestion_minera/modules/treasury/presentation/widgets/pending_applications/request_detail_card_widget.dart';
 export 'package:front_gestion_minera/modules/treasury/presentation/widgets/financialManagment/cards_primary_and_secondary_widget.dart';
 export 'package:front_gestion_minera/modules/treasury/presentation/widgets/financialManagment/request_title_widget.dart';
-
+export 'package:front_gestion_minera/modules/treasury/presentation/widgets/transactionDetails/loaded_view_widget.dart';
+export 'package:front_gestion_minera/modules/treasury/presentation/widgets/goldInventory/new_extraction/dashed_border_painter_widget.dart';
+export 'package:front_gestion_minera/modules/treasury/presentation/widgets/goldInventory/new_extraction/extraction_susses_content_widget.dart';
+export 'package:front_gestion_minera/modules/treasury/presentation/widgets/goldInventory/new_extraction/image_source_option_widget.dart';

@@ -3,7 +3,6 @@ import 'package:front_gestion_minera/core/networking/base_api_exception.dart';
 import 'package:front_gestion_minera/utils/error.dart';
 import 'package:front_gestion_minera/modules/partners/domain/entity/money_request_entity.dart';
 import 'package:front_gestion_minera/modules/partners/domain/entity/request_history_entity.dart';
-import 'package:front_gestion_minera/modules/partners/domain/repositories/money_request_repository.dart';
 
 import '../../domain/entity/entity.dart';
 import '../../domain/repositories/repository.dart';
@@ -16,7 +15,8 @@ class PartnersBloc extends Bloc<PartnersEvent, PartnersState> {
   final LoanHistoryRepository loanHistoryRepository;
   final LoanRegisterRequestRepository loanRegisterRequestRepository;
   final DistributesRepository distributesRepository; 
-
+  
+  bool _isLoadingMore = false;
   int _currentPage = 1;
   bool _hasReachedMax = false;
   List<RequestHistoryEntity> _currentHistory = [];
@@ -196,8 +196,8 @@ class PartnersBloc extends Bloc<PartnersEvent, PartnersState> {
     LoadMoreRequestHistoryEvent event,
     Emitter<PartnersState> emit,
   ) async {
-    if (_hasReachedMax || state is! RequestHistoryLoaded) return;
-
+    if (_hasReachedMax || _isLoadingMore) return;
+    _isLoadingMore = true;
     _currentPage++;
     try {
       final paginatedData = await moneyRepository.getHistory(
@@ -217,6 +217,10 @@ class PartnersBloc extends Bloc<PartnersEvent, PartnersState> {
       );
     } on BaseApiException catch (_) {
       emit(RequestHistoryError('Ocurrió un error al cargar el historial.'));
+    } catch (e) {
+      _currentPage--;
+    } finally {
+       _isLoadingMore = false;
     }
   }
 
@@ -354,8 +358,8 @@ class PartnersBloc extends Bloc<PartnersEvent, PartnersState> {
     LoadMoreDistributesEvent event,
     Emitter<PartnersState> emit,
   ) async {
-    if (_distributesReachedMax || _currentDistributesMetrics == null) return;
-
+    if (_distributesReachedMax || _currentDistributesMetrics == null || _isLoadingMore) return;
+    _isLoadingMore = true;
     _distributesPage++;
     try {
       final historyResult = await distributesRepository.getHistory(
@@ -374,7 +378,13 @@ class PartnersBloc extends Bloc<PartnersEvent, PartnersState> {
         groupedHistory: _groupDistributesByMonth(_currentDistributesHistory),
         hasReachedMax: _distributesReachedMax,
       ));
-    } on BaseApiException catch (_) {
+    } on BaseApiException catch (error) {
+      emit(DistributesDataError(mapErrorMessage(error.key)));
+    } catch (e) {
+      _distributesPage--;
+      emit(DistributesDataError('Error inesperado: $e'));
+    } finally {
+     _isLoadingMore = false;
     }
   }
 

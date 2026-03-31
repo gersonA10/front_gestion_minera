@@ -1,6 +1,7 @@
 import 'package:auto_route/auto_route.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:front_gestion_minera/core/widgets/custom_date_selector.dart';
+import 'package:front_gestion_minera/config/router/app_router.gr.dart';
 import 'package:front_gestion_minera/injector_container.dart';
 
 import '../../../domain/entity/entity.dart';
@@ -18,12 +19,25 @@ class GoldDashboardScreen extends StatefulWidget {
 }
 
 class _GoldDashboardScreenState extends State<GoldDashboardScreen> {
+  //Guardar datos en cache
+  GoldInventoryEntity? _cachedInventory;
+  List<GoldBatchEntity>? _cachedBatches;
+  bool _cachedHasReachedMax = false;
+
   int _selectedFilter = 0;
   int _selectedNav = 0;
+  String _selectedFilterDate = "reciente";
+  String? _periodToFetch;
+  String? _exactDateToFetch;
   final List<String> _filters = ['Todos', 'Disponible', 'Parcial', 'Agotado'];
+
   final ScrollController _scrollController = ScrollController();
 
   late final TreasuryBloc _treasuryBloc;
+
+  bool _fabVisible = true;
+  double _lastScrollOffset = 0;
+  static const double _scrollThreshold = 10.0;
 
   List<GoldBatchEntity> _getFilteredLotes(List<GoldBatchEntity> lotes) {
     switch (_selectedFilter) {
@@ -35,6 +49,18 @@ class _GoldDashboardScreenState extends State<GoldDashboardScreen> {
         return lotes.where((l) => l.status == 'Agotado').toList();
       default:
         return lotes;
+    }
+  }
+
+  Future<void> _selectCustomDate() async {
+    final result = await CustomDateSelector.show(context);
+
+    if (result != null) {
+      setState(() {
+        _selectedFilterDate = "Personalizado";
+        _periodToFetch = result.period;
+        _exactDateToFetch = result.exactDate;
+      });
     }
   }
 
@@ -65,8 +91,18 @@ class _GoldDashboardScreenState extends State<GoldDashboardScreen> {
   }
 
   void _onScroll() {
-    if (_scrollController.position.pixels >=
-        _scrollController.position.maxScrollExtent - 200) {
+    final current = _scrollController.position.pixels;
+    final diff = current - _lastScrollOffset;
+
+    if (diff > _scrollThreshold && _fabVisible) {
+      setState(() => _fabVisible = false);
+    } else if (diff < -_scrollThreshold && !_fabVisible) {
+      setState(() => _fabVisible = true);
+    }
+
+    _lastScrollOffset = current;
+
+    if (current >= _scrollController.position.maxScrollExtent - 200) {
       _treasuryBloc.add(LoadMoreGoldBatchesEvent());
     }
   }
@@ -84,104 +120,507 @@ class _GoldDashboardScreenState extends State<GoldDashboardScreen> {
       child: Scaffold(
         backgroundColor: const Color(0xFFF5F5F7),
         body: SafeArea(
-          child: BlocBuilder<TreasuryBloc, TreasuryState>(
-            buildWhen: (previous, current) =>
-                current is GoldDashboardLoading ||
-                current is GoldDashboardLoaded ||
-                current is GoldDashboardError,
-            builder: (context, state) {
-              if (state is GoldDashboardLoading) {
-                return const Center(child: CircularProgressIndicator());
-              }
-
-              if (state is GoldDashboardError) {
-                return Center(child: Text(state.message));
-              }
-
-              if (state is GoldDashboardLoaded) {
-                final filteredLotes = _getFilteredLotes(state.batches);
-
-                return Column(
-                  children: [
-                    AppBarDashboardGoldWidget(context: context),
-                    Expanded(
-                      child: RefreshIndicator(
-                        onRefresh: () async {
-                          // Disparamos el evento de refresco
-                          context.read<TreasuryBloc>().add(FetchGoldDashboardDataEvent(isRefresh: true));
-                          
-                          // Esperamos a que el bloc emita un estado diferente a Loading
-                          await context.read<TreasuryBloc>().stream.firstWhere(
-                            (state) => state is GoldDashboardLoaded || state is GoldDashboardError,
-                          );
-                        },
-                        child: SingleChildScrollView(
-                          controller: _scrollController,
-                          padding: const EdgeInsets.symmetric(horizontal: 16),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              const SizedBox(height: 16),
-                              ValueEstimateWigdet(
-                                estimateValue: state.inventory.estimateValue,
-                                totalGramsVault: state.inventory.totalGramsVault,
-                              ),
-                              const SizedBox(height: 16),
-                              _buildFilterTabs(),
-                              const SizedBox(height: 20),
-                              const Text(
-                                'Lotes',
-                                style: TextStyle(
-                                  fontSize: 20,
-                                  fontWeight: FontWeight.bold,
-                                  color: Color(0xFF1A1A2E),
-                                ),
-                              ),
-                              const SizedBox(height: 12),
-                              ...filteredLotes.map(
-                                (lote) => _buildLoteCard(lote),
-                              ),
-                              if (!state.hasReachedMax)
-                                const Center(
-                                  child: Padding(
-                                    padding: EdgeInsets.all(8.0),
-                                    child: CircularProgressIndicator(),
-                                  ),
-                                ),
-                              const SizedBox(height: 80),
-                            ],
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
-                );
-              }
-              return const SizedBox();
-            },
-          ),
+          child: _selectedNav == 0 ? _buildInicio() : _buildHistorial(),
         ),
-        floatingActionButton: FloatingActionButton(
-          onPressed: () {},
-          backgroundColor: const Color(0xFF2563EB),
-          elevation: 4,
-          child: const Icon(Icons.add, color: Colors.white, size: 28),
+        floatingActionButton: ScrollAwareFabs(
+          visible: _fabVisible,
+          onAddTap: () async {
+            await context.router.push(NewExtractionRoute());
+            if (context.mounted) {
+              _treasuryBloc.add(FetchGoldDashboardDataEvent());
+            }
+          },
+          onMoneyTap: () async {
+            await context.router.push(RegisterSellRoute());
+            if (context.mounted) {
+              _treasuryBloc.add(FetchGoldDashboardDataEvent());
+            }
+          },
         ),
         bottomNavigationBar: _buildBottomNav(),
       ),
     );
   }
-  // ─────────────────────────────────────────────
-  // Top Bar
-  // ─────────────────────────────────────────────
 
-  // ─────────────────────────────────────────────
-  // Stats Row
-  // ─────────────────────────────────────────────
+  Widget _buildInicio() {
+    return BlocBuilder<TreasuryBloc, TreasuryState>(
+      buildWhen: (previous, current) =>
+          current is GoldDashboardLoading ||
+          current is GoldDashboardLoaded ||
+          current is GoldDashboardError,
+      builder: (context, state) {
+        if (state is GoldDashboardLoaded) {
+          _cachedInventory = state.inventory;
+          _cachedBatches = state.batches;
+          _cachedHasReachedMax = state.hasReachedMax;
+        }
 
-  // ─────────────────────────────────────────────
-  // Filter Tabs
-  // ─────────────────────────────────────────────
+        final bool isLoading = state is GoldDashboardLoading;
+
+        if (_cachedInventory == null) {
+          if (isLoading) {
+            return const Center(child: CircularProgressIndicator());
+          }
+          if (state is GoldDashboardError) {
+            return Center(child: Text(state.message));
+          }
+          return const SizedBox();
+        }
+
+        final inventory = _cachedInventory!;
+        final batches = _cachedBatches!;
+        final hasReachedMax = _cachedHasReachedMax;
+
+        return Column(
+          children: [
+            AppBarDashboardGoldWidget(context: context),
+            Expanded(
+              child: Stack(
+                children: [
+                  RefreshIndicator(
+                    onRefresh: () async {
+                      context.read<TreasuryBloc>().add(
+                        FetchGoldDashboardDataEvent(isRefresh: true),
+                      );
+                      await context.read<TreasuryBloc>().stream.firstWhere(
+                        (state) =>
+                            state is GoldDashboardLoaded ||
+                            state is GoldDashboardError,
+                      );
+                    },
+                    child: SingleChildScrollView(
+                      controller: _scrollController,
+                      padding: const EdgeInsets.symmetric(horizontal: 16),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const SizedBox(height: 16),
+                          ValueEstimateWigdet(
+                            estimateValue: inventory.estimateValue,
+                            totalGramsVault: inventory.totalGramsVault,
+                          ),
+                          const SizedBox(height: 16),
+                          _buildFilterTabs(),
+                          const SizedBox(height: 20),
+                          const Text(
+                            'Lotes',
+                            style: TextStyle(
+                              fontSize: 20,
+                              fontWeight: FontWeight.bold,
+                              color: Color(0xFF1A1A2E),
+                            ),
+                          ),
+                          const SizedBox(height: 12),
+                          ...batches.map((lote) => _buildLoteCard(lote)),
+                          if (batches.isEmpty)
+                            const Padding(
+                              padding: EdgeInsets.symmetric(vertical: 40),
+                              child: Center(
+                                child: Text(
+                                  'No hay lotes con este estado',
+                                  style: TextStyle(
+                                    color: Color(0xFF9CA3AF),
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.w500,
+                                  ),
+                                ),
+                              ),
+                            ),
+                          if (!hasReachedMax && batches.isNotEmpty)
+                            const Center(
+                              child: Padding(
+                                padding: EdgeInsets.all(8.0),
+                                child: CircularProgressIndicator(),
+                              ),
+                            ),
+                          const SizedBox(height: 80),
+                        ],
+                      ),
+                    ),
+                  ),
+                  if (isLoading)
+                    const Positioned(
+                      top: 0,
+                      left: 0,
+                      right: 0,
+                      child: LinearProgressIndicator(color: Color(0xFF2563EB)),
+                    ),
+                  if (isLoading)
+                    Positioned.fill(
+                      child: IgnorePointer(
+                        child: Container(
+                          color: const Color(0xFFF5F5F7).withValues(alpha: 0.5),
+                        ),
+                      ),
+                    ),
+                ],
+              ),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  Widget _buildHistorial() {
+    return Column(
+      children: [
+        AppBarDashboardGoldWidget(context: context),
+        Expanded(
+          child: SingleChildScrollView(
+                                child: Column(
+                                  children: [
+                                    const SizedBox(height: 16),
+                                    // dashnoard
+                                    Container(
+                                      height: 120,
+                                      decoration: BoxDecoration(
+                                        color: Colors.transparent,
+                                      ),
+                                      child: ListView(
+                                        scrollDirection: Axis.horizontal,
+                                        children: [
+                                          Container(
+                                            margin: const EdgeInsets.only(
+                                              left: 20,
+                                              right: 10,
+                                            ),
+                                            padding: const EdgeInsets.all(16),
+                                            decoration: BoxDecoration(
+                                              color: Colors.white,
+                                              borderRadius:
+                                                  BorderRadius.circular(20),
+                                            ),
+                                            child: Column(
+                                              crossAxisAlignment:
+                                                  CrossAxisAlignment.start,
+                                              children: [
+                                                Row(
+                                                  children: [
+                                                    Icon(
+                                                      Icons
+                                                          .calendar_month_outlined,
+                                                      color: Colors.blue,
+                                                    ),
+                                                    SizedBox(width: 5),
+                                                    Text('Vendido este mes'),
+                                                  ],
+                                                ),
+                                                SizedBox(height: 12),
+                                                Row(
+                                                  children: [
+                                                    Text(
+                                                      '12.5 g',
+                                                      style: TextStyle(
+                                                        fontSize: 30,
+                                                        fontWeight:
+                                                            FontWeight.bold,
+                                                      ),
+                                                    ),
+                                                    SizedBox(width: 10),
+                                                    Container(
+                                                      padding:
+                                                          EdgeInsets.symmetric(
+                                                            horizontal: 7,
+                                                          ),
+                                                      decoration: BoxDecoration(
+                                                        color: Colors
+                                                            .green
+                                                            .shade100,
+                                                        borderRadius:
+                                                            BorderRadius.circular(
+                                                              20,
+                                                            ),
+                                                      ),
+                                                      child: Row(
+                                                        children: [
+                                                          Icon(
+                                                            Icons.trending_up,
+                                                            size: 15,
+                                                          ),
+                                                          Text(
+                                                            '5.2 %',
+                                                            style: TextStyle(
+                                                              fontSize: 10,
+                                                            ),
+                                                          ),
+                                                        ],
+                                                      ),
+                                                    ),
+                                                  ],
+                                                ),
+                                              ],
+                                            ),
+                                          ),
+                                          Container(
+                                            margin: const EdgeInsets.only(
+                                              left: 10,
+                                              right: 20,
+                                            ),
+                                            padding: const EdgeInsets.all(16),
+                                            decoration: BoxDecoration(
+                                              color: Colors.white,
+                                              borderRadius:
+                                                  BorderRadius.circular(20),
+                                            ),
+                                            child: Column(
+                                              crossAxisAlignment:
+                                                  CrossAxisAlignment.start,
+                                              children: [
+                                                Row(
+                                                  children: [
+                                                    Icon(
+                                                      Icons.leaderboard,
+                                                      color: Colors.blue,
+                                                    ),
+                                                    SizedBox(width: 5),
+                                                    Text('Vendido en Bs'),
+                                                  ],
+                                                ),
+                                                SizedBox(height: 12),
+                                                Row(
+                                                  children: [
+                                                    Text(
+                                                      ' 1200Bs',
+                                                      style: TextStyle(
+                                                        fontSize: 30,
+                                                        fontWeight:
+                                                            FontWeight.bold,
+                                                      ),
+                                                    ),
+                                                    Container(
+                                                      padding:
+                                                          EdgeInsets.symmetric(
+                                                            horizontal: 7,
+                                                          ),
+                                                      decoration: BoxDecoration(
+                                                        color: Colors
+                                                            .green
+                                                            .shade100,
+                                                        borderRadius:
+                                                            BorderRadius.circular(
+                                                              20,
+                                                            ),
+                                                      ),
+                                                      child: Row(
+                                                        children: [
+                                                          Icon(
+                                                            Icons.trending_up,
+                                                            size: 15,
+                                                          ),
+                                                          // Text('5.2 %',style: TextStyle(fontSize: 10),)
+                                                        ],
+                                                      ),
+                                                    ),
+                                                  ],
+                                                ),
+                                              ],
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+
+                                    Container(
+                                      padding: EdgeInsets.symmetric(
+                                        horizontal: 15,
+                                        vertical: 5,
+                                      ),
+                                      child: Row(
+                                        children: [
+                                          Row(
+                                            children: [
+                                              Text('Transacciones: '),
+                                              Text(''),
+                                            ],
+                                          ),
+                                          Spacer(),
+                                          IconButton(
+                                            onPressed: () async {
+                                              final res= await CustomDateSelector.show(context);
+                                            },
+                                            icon: Icon(Icons.filter_list_sharp),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                    // Card record
+                                    Container(
+                                      margin: EdgeInsets.symmetric(
+                                        horizontal: 15,
+                                        vertical: 5,
+                                      ),
+                                      padding: EdgeInsets.all(10),
+                                      decoration: BoxDecoration(
+                                        color: Colors.white,
+                                        borderRadius: BorderRadius.circular(10),
+                                      ),
+                                      child: Column(
+                                        children: [
+                                          Row(
+                                            children: [
+                                              Container(
+                                                padding: EdgeInsets.all(5),
+                                                decoration: BoxDecoration(
+                                                  color: Colors.green
+                                                      .withValues(alpha: 0.1),
+                                                  borderRadius:
+                                                      BorderRadius.circular(
+                                                        100,
+                                                      ),
+                                                ),
+                                                child: Icon(
+                                                  Icons
+                                                      .check_circle_outline_rounded,
+                                                  color: Colors.green
+                                                      .withValues(alpha: 0.9),
+                                                ),
+                                              ),
+                                              SizedBox(width: 10),
+                                              Column(
+                                                crossAxisAlignment:
+                                                    CrossAxisAlignment.start,
+                                                children: [
+                                                  Text(
+                                                    // Campo para id venta
+                                                    'id:venta',
+                                                    style: TextStyle(
+                                                      fontWeight:
+                                                          FontWeight.bold,
+                                                    ),
+                                                  ),
+                                                  // Campo para fecha
+                                                  Text(
+                                                    'fecha',
+                                                    style: TextStyle(
+                                                      color: Colors.grey,
+                                                    ),
+                                                  ),
+                                                ],
+                                              ),
+                                              Spacer(),
+                                              Container(
+                                                padding: EdgeInsets.symmetric(
+                                                  vertical: 1,
+                                                  horizontal: 3,
+                                                ),
+                                                decoration: BoxDecoration(
+                                                  color: Colors.green
+                                                      .withValues(alpha: 0.2),
+                                                  borderRadius:
+                                                      BorderRadius.circular(8),
+                                                  border: Border.all(
+                                                    color: Colors.green
+                                                        .withValues(alpha: 0.5),
+                                                  ),
+                                                ),
+                                                child:
+                                                    // Campo para estado de venta
+                                                    Text(
+                                                      'Estado',
+                                                      style: TextStyle(
+                                                        color: Colors.green
+                                                            .withValues(
+                                                              alpha: 0.9,
+                                                            ),
+                                                        fontSize: 12,
+                                                      ),
+                                                    ),
+                                              ),
+                                            ],
+                                          ),
+                                          Divider(color: Colors.grey.shade200),
+                                          Row(
+                                            children: [
+                                              Column(
+                                                crossAxisAlignment:
+                                                    CrossAxisAlignment.start,
+                                                children: [
+                                                  Text(
+                                                    'Peso Total',
+                                                    style: TextStyle(
+                                                      color: Colors.grey,
+                                                    ),
+                                                  ),
+                                                  // Campo para peso de venta
+                                                  Text(
+                                                    '2,50000 kg',
+                                                    style: TextStyle(
+                                                      fontWeight:
+                                                          FontWeight.bold,
+                                                    ),
+                                                  ),
+                                                ],
+                                              ),
+                                              Spacer(),
+                                              Column(
+                                                crossAxisAlignment:
+                                                    CrossAxisAlignment.end,
+                                                children: [
+                                                  Text(
+                                                    'Monto Total',
+                                                    style: TextStyle(
+                                                      color: Colors.grey,
+                                                    ),
+                                                  ),
+                                                  // Campo para precio total
+                                                  Text(
+                                                    '\$ 155.000 usd',
+                                                    style: TextStyle(
+                                                      fontWeight:
+                                                          FontWeight.bold,
+                                                    ),
+                                                  ),
+                                                ],
+                                              ),
+                                            ],
+                                          ),
+                                          const SizedBox(height: 10),
+                                          Row(
+                                            children: [
+                                              //icono para cambiar
+                                              Icon(Icons.storefront),
+                                              SizedBox(width: 5),
+                                              // Campo para nombre vendedor
+                                              Text('Joyeria central'),
+                                              Spacer(),
+                                              GestureDetector(
+                                                onTap: () {
+                                                  print("verdetalle");
+                                                },
+                                                child: Row(
+                                                  children: [
+                                                    Text(
+                                                      'Ver detalle',
+                                                      style: TextStyle(
+                                                        color: const Color(
+                                                          0xFF2563EB,
+                                                        ),
+                                                      ),
+                                                    ),
+                                                    Icon(
+                                                      Icons.arrow_forward_ios,
+                                                      size: 12,
+                                                      color: const Color(
+                                                        0xFF2563EB,
+                                                      ),
+                                                    ),
+                                                  ],
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+       ),
+      ],
+    );
+  }
+
   Widget _buildFilterTabs() {
     return Container(
       height: 40,
@@ -201,7 +640,19 @@ class _GoldDashboardScreenState extends State<GoldDashboardScreen> {
           final selected = _selectedFilter == index;
           return Expanded(
             child: GestureDetector(
-              onTap: () => setState(() => _selectedFilter = index),
+              onTap: () {
+                setState(() => _selectedFilter = index);
+                String? statusFilter;
+                if (index == 1) statusFilter = 'Disponible';
+                if (index == 2) statusFilter = 'Parcial';
+                if (index == 3) statusFilter = 'Agotado';
+                _treasuryBloc.add(
+                  FetchGoldDashboardDataEvent(
+                    isRefresh: true,
+                    status: statusFilter,
+                  ),
+                );
+              },
               child: AnimatedContainer(
                 duration: const Duration(milliseconds: 200),
                 margin: const EdgeInsets.all(4),
@@ -228,19 +679,14 @@ class _GoldDashboardScreenState extends State<GoldDashboardScreen> {
     );
   }
 
-  // ─────────────────────────────────────────────
-  // Lote Card
-  // ─────────────────────────────────────────────
   Widget _buildLoteCard(GoldBatchEntity lote) {
     final statusColor = _statusColor(lote.status);
 
-    // Calcular el porcentaje disponible
     double disponibilidadPorcentaje = 0.0;
     if (lote.originalWeight > 0) {
       disponibilidadPorcentaje = lote.avilableWeight / lote.originalWeight;
     }
 
-    // Color específico para el peso disponible según el estado
     final disponibleColor = lote.status == 'Disponible'
         ? const Color(0xFF16A34A)
         : lote.status == 'Parcial'
@@ -314,7 +760,7 @@ class _GoldDashboardScreenState extends State<GoldDashboardScreen> {
                 ),
               ],
             ),
-             const SizedBox(height: 12),
+            const SizedBox(height: 12),
             Row(
               children: [
                 Expanded(
@@ -392,9 +838,6 @@ class _GoldDashboardScreenState extends State<GoldDashboardScreen> {
     );
   }
 
-  // ─────────────────────────────────────────────
-  // Bottom Nav
-  // ─────────────────────────────────────────────
   Widget _buildBottomNav() {
     final items = [
       {

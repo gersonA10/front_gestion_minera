@@ -23,12 +23,17 @@ class TreasuryBloc extends Bloc<TreasuryEvent, TreasuryState> {
   bool _hasReachedBatchMax = false;
   List<GoldBatchEntity> _goldBatches = [];
   GoldInventoryEntity? _goldInventory;
+  //Evitar bombardeo a la api
   bool _isLoadingMoreBatches = false;
+  bool _isLoadingMorePending = false;
+  bool _isLoadingMorePayment = false;
+  //
   int _paymentHistoryPage = 1;
   bool _paymentHistoryReachedMax = false;
   int _paymentHistoryTotalRecords = 0;
   List<PaymentHistoryItemEntity> _paymentHistoryItems = [];
   PaymentHistorySummaryEntity? _paymentHistorySummary;
+  String? _currentBatchStatus;
 
   TreasuryBloc({required this.repository}) : super(TreasuryInitial()) {
     on<FetchTreasuryMetricsEvent>(_onFetchTreasuryMetrics);
@@ -48,6 +53,10 @@ class TreasuryBloc extends Bloc<TreasuryEvent, TreasuryState> {
     on<LoadMoreGoldBatchesEvent>(_onLoadMoreGoldBatches);
     on<GetPaymentHistoryEvent>(_onGetPaymentHistory);
     on<LoadMorePaymentHistoryEvent>(_onLoadMorePaymentHistory);
+    on<TransactionDetailsEvent>(_onTransactionDetails);
+    on<NewExtractionEvent>(_onNewExtraction);
+    on<PreviewSaleEvent>(_onPreviewSale);
+    on<RegisterSaleEvent>(_onRegisterSale);
   }
 
   Future<void> _onFetchTreasuryMetrics(
@@ -59,6 +68,9 @@ class TreasuryBloc extends Bloc<TreasuryEvent, TreasuryState> {
       final metrics = await repository.getMetrics();
       emit(TreasuryMetricsLoaded(metrics: metrics));
     } on BaseApiException catch (error) {
+      if (error.key == DioExceptionKey.unauthorised) {
+        return;
+      }
       emit(TreasuryMetricsError(mapErrorMessage(error.key)));
     } catch (e) {
       emit(TreasuryMetricsError('Error inesperado: $e'));
@@ -80,6 +92,9 @@ class TreasuryBloc extends Bloc<TreasuryEvent, TreasuryState> {
         ),
       );
     } on BaseApiException catch (error) {
+      if (error.key == DioExceptionKey.unauthorised) {
+        return;
+      }
       emit(DashboardDataError(message: mapErrorMessage(error.key)));
     } catch (e) {
       emit(DashboardDataError(message: 'Error inesperado: $e'));
@@ -98,6 +113,9 @@ class TreasuryBloc extends Bloc<TreasuryEvent, TreasuryState> {
         DetailsofanapplicationSuccess(data: response.data, cash: responseCash),
       );
     } on BaseApiException catch (error) {
+      if (error.key == DioExceptionKey.unauthorised) {
+        return;
+      }
       emit(DetailsofanapplicationError(message: mapErrorMessage(error.key)));
     } catch (e) {
       emit(DetailsofanapplicationError(message: 'Error inesperado: $e'));
@@ -141,6 +159,9 @@ class TreasuryBloc extends Bloc<TreasuryEvent, TreasuryState> {
         ),
       );
     } on BaseApiException catch (error) {
+      if (error.key == DioExceptionKey.unauthorised) {
+        return;
+      }
       emit(ListOfPendingRequestsError(mapErrorMessage(error.key)));
     } catch (e) {
       emit(ListOfPendingRequestsError('Error inesperado: $e'));
@@ -151,7 +172,8 @@ class TreasuryBloc extends Bloc<TreasuryEvent, TreasuryState> {
     LoadMorePendingEvent event,
     Emitter<TreasuryState> emit,
   ) async {
-    if (_hasReachedMax) return;
+    if (_hasReachedMax || _isLoadingMorePending) return;
+    _isLoadingMorePending = true;
     _currentPage++;
     try {
       final response = await repository.listOfPendingRequests(
@@ -169,9 +191,16 @@ class TreasuryBloc extends Bloc<TreasuryEvent, TreasuryState> {
         ),
       );
     } on BaseApiException catch (error) {
+      if (error.key == DioExceptionKey.unauthorised) {
+        return;
+      }
+      _currentPage--;
       emit(ListOfPendingRequestsError(mapErrorMessage(error.key)));
     } catch (e) {
+      _currentPage--;
       emit(ListOfPendingRequestsError('Error inesperado: $e'));
+    } finally {
+      _isLoadingMorePending = false;
     }
   }
 
@@ -281,6 +310,9 @@ class TreasuryBloc extends Bloc<TreasuryEvent, TreasuryState> {
       );
       emit(RejectAnApplicationLoaded(data: response));
     } on BaseApiException catch (error) {
+      if (error.key == DioExceptionKey.unauthorised) {
+        return;
+      }
       emit(RejectAnApplicationError(message: mapErrorMessage(error.key)));
     } catch (e) {
       emit(RejectAnApplicationError(message: 'Error inesperado: $e'));
@@ -328,6 +360,9 @@ class TreasuryBloc extends Bloc<TreasuryEvent, TreasuryState> {
         ),
       );
     } on BaseApiException catch (error) {
+      if (error.key == DioExceptionKey.unauthorised) {
+        return;
+      }
       emit(PaymentHistoryError(mapErrorMessage(error.key)));
     } catch (e) {
       emit(PaymentHistoryError('Error inesperado: $e'));
@@ -338,7 +373,8 @@ class TreasuryBloc extends Bloc<TreasuryEvent, TreasuryState> {
     LoadMorePaymentHistoryEvent event,
     Emitter<TreasuryState> emit,
   ) async {
-    if (_paymentHistoryReachedMax) return;
+    if (_paymentHistoryReachedMax || _isLoadingMorePayment) return;
+    _isLoadingMorePayment = true;
     _paymentHistoryPage++;
     try {
       final response = await repository.getPaymentHistory(
@@ -355,13 +391,20 @@ class TreasuryBloc extends Bloc<TreasuryEvent, TreasuryState> {
         ),
       );
     } on BaseApiException catch (error) {
+      if (error.key == DioExceptionKey.unauthorised) {
+        return;
+      }
+      _paymentHistoryPage--;
       emit(PaymentHistoryError(mapErrorMessage(error.key)));
     } catch (e) {
+        _paymentHistoryPage--;
       emit(PaymentHistoryError('Error inesperado: $e'));
+    } finally {
+      _isLoadingMorePayment = false;
     }
   }
 
-    Future<void> _onFetchGoldDashboardData(
+  Future<void> _onFetchGoldDashboardData(
     FetchGoldDashboardDataEvent event,
     Emitter<TreasuryState> emit,
   ) async {
@@ -370,13 +413,14 @@ class TreasuryBloc extends Bloc<TreasuryEvent, TreasuryState> {
       _hasReachedBatchMax = false;
       _isLoadingMoreBatches = false;
       _goldBatches.clear();
+      _currentBatchStatus = event.status;
       emit(GoldDashboardLoading());
     }
 
     try {
       final responses = await Future.wait([
         repository.getGoldInventory(),
-        repository.getGoldBatches(page: _currentBatchPage),
+        repository.getGoldBatches(page: _currentBatchPage, status: _currentBatchStatus),
       ]);
 
       _goldInventory = responses[0] as GoldInventoryEntity;
@@ -403,12 +447,14 @@ class TreasuryBloc extends Bloc<TreasuryEvent, TreasuryState> {
     LoadMoreGoldBatchesEvent event,
     Emitter<TreasuryState> emit,
   ) async {
-    if (_hasReachedBatchMax || _goldInventory == null || _isLoadingMoreBatches) return;
+    if (_hasReachedBatchMax || _goldInventory == null || _isLoadingMoreBatches) {
+      return;
+    }
     _isLoadingMoreBatches = true;
     _currentBatchPage++;
 
     try {
-      final response = await repository.getGoldBatches(page: _currentBatchPage);
+      final response = await repository.getGoldBatches(page: _currentBatchPage, status: _currentBatchStatus);
       _goldBatches.addAll(response.batches);
       _hasReachedBatchMax = !response.hasMore;
 
@@ -421,11 +467,90 @@ class TreasuryBloc extends Bloc<TreasuryEvent, TreasuryState> {
       );
     } on BaseApiException catch (error) {
       _currentBatchPage--;
+      if (error.key == DioExceptionKey.unauthorised) {
+        return;
+      }
       emit(GoldDashboardError(mapErrorMessage(error.key)));
     } catch (e) {
       emit(GoldDashboardError('Error inesperado: $e'));
     } finally {
       _isLoadingMoreBatches = false;
+    }
+  }
+
+  Future<void> _onTransactionDetails(
+    TransactionDetailsEvent event,
+    Emitter<TreasuryState> emit,
+  ) async {
+    emit(TransactionDetailsLoading());
+    try {
+      final response = await repository.getTransactionDetails(
+        event.idTransaction,
+      );
+      emit(TransactionDetailsLoaded(transactionDetails: response));
+    } on BaseApiException catch (error) {
+      if (error.key == DioExceptionKey.unauthorised) {
+        return;
+      }
+      emit(TransactionDetailsError(mapErrorMessage(error.key)));
+    } catch (e) {
+      emit(TransactionDetailsError('Error inesperado: $e'));
+    }
+  }
+
+  Future<void> _onNewExtraction(
+    NewExtractionEvent event,
+    Emitter<TreasuryState> emit,
+  ) async {
+    emit(NewExtractionLoading());
+    try {
+      final response = await repository.newExtraction(
+        event.newExtractionRequets,
+      );
+      emit(NewExtractionLoaded(newExtraction: response));
+    } on BaseApiException catch (error) {
+      if (error.key == DioExceptionKey.unauthorised) {
+        return;
+      }
+      emit(NewExtractionError(message: error.message));
+    } catch (e) {
+      emit(NewExtractionError(message: 'Error inesperado: $e'));
+    }
+  }
+
+  Future<void> _onPreviewSale(
+    PreviewSaleEvent event,
+    Emitter<TreasuryState> emit,
+  ) async {
+    emit(SalePreviewLoading());
+    try {
+      final response = await repository.previewSale(event.gramsToSell);
+      emit(SalePreviewLoaded(preview: response));
+    } on BaseApiException catch (error) {
+      if (error.key == DioExceptionKey.unauthorised) {
+        return;
+      }
+      emit(SalePreviewError(message: mapErrorMessage(error.key)));
+    } catch (e) {
+      emit(SalePreviewError(message: 'Error inesperado: $e'));
+    }
+  }
+
+  Future<void> _onRegisterSale(
+    RegisterSaleEvent event,
+    Emitter<TreasuryState> emit,
+  ) async {
+    emit(RegisterSaleLoading());
+    try {
+      final response = await repository.registerSale(event.request);
+      emit(RegisterSaleLoaded(sale: response));
+    } on BaseApiException catch (error) {
+      if (error.key == DioExceptionKey.unauthorised) {
+        return;
+      }
+      emit(RegisterSaleError(message: mapErrorMessage(error.key)));
+    } catch (e) {
+      emit(RegisterSaleError(message: 'Error inesperado: $e'));
     }
   }
 }
