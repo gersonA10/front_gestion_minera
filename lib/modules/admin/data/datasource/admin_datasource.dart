@@ -21,9 +21,33 @@ class AdminDatasource {
     final Map<String, dynamic> meta = response['meta'] ?? {};
 
     return {
-      'items': data
-          .map((item) => PendingRequestModel.fromJson(item))
-          .toList(),
+      'items': data.map((item) => PendingRequestModel.fromJson(item)).toList(),
+      'has_more_data': meta['has_more_data'] ?? false,
+      'total_records': meta['total_records'] ?? 0,
+    };
+  }
+
+  Future<Map<String, dynamic>> getRequestHistory({
+    int page = 1,
+    int limit = 10,
+    String? status,
+  }) async {
+    final queryParams = <String, dynamic>{'page': page, 'limit': limit};
+    if (status != null && status != 'todos') {
+      queryParams['status'] = status;
+    }
+
+    final response = await apiClient.get(
+      '/api/admin/requests/history',
+      operationName: 'getRequestHistory',
+      queryParameters: queryParams,
+    );
+
+    final List<dynamic> data = response['data'] ?? [];
+    final Map<String, dynamic> meta = response['meta'] ?? {};
+
+    return {
+      'items': data.map((item) => RequestHistoryModelAdmin.fromJson(item)).toList(),
       'has_more_data': meta['has_more_data'] ?? false,
       'total_records': meta['total_records'] ?? 0,
     };

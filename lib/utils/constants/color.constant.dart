@@ -5,7 +5,7 @@ class TColors {
   static const appNewDarkMainColor = Color(0xFF10353a);
   // Color Primary
   static const appMainColor = Color(0xFF1152D4);
-  static const appMainDarkColor = Color(0xFF1152D4);
+  static const appMainDarkColor = Color.fromARGB(255, 8, 31, 77);
 
   //Color Se
   static const appSecondaryColor = Color(0xFF0C3052);
