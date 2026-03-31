@@ -1,0 +1,8 @@
+import '../entity/entity.dart';
+
+abstract class AdminRepository {
+  Future<PaginatedPendingRequestEntity> getPendingRequests({
+    int page = 1,
+    int limit = 10,
+  });
+}
