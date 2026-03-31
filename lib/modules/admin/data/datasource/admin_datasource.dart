@@ -47,7 +47,52 @@ class AdminDatasource {
     final Map<String, dynamic> meta = response['meta'] ?? {};
 
     return {
-      'items': data.map((item) => RequestHistoryModelAdmin.fromJson(item)).toList(),
+      'items': data
+          .map((item) => RequestHistoryModelAdmin.fromJson(item))
+          .toList(),
+      'has_more_data': meta['has_more_data'] ?? false,
+      'total_records': meta['total_records'] ?? 0,
+    };
+  }
+
+Future<Map<String, dynamic>> getContributesHistory({
+    int page = 1,
+    int limit = 10,
+    String? period,     
+    String? exactDate,  
+  }) async {
+    final queryParams = <String, dynamic>{
+      'page': page.toString(),
+      'limit': limit.toString(),
+    };
+
+    if (exactDate != null && exactDate.isNotEmpty && period != null) {
+      final parts = exactDate.split('-'); 
+      final year = parts[0];
+
+      if (period == 'day') {
+        queryParams['exact_date'] = exactDate; 
+      } 
+      else if (period == 'month') {
+        queryParams['month'] = parts[1]; 
+        queryParams['year'] = year;
+      } 
+      else if (period == 'year') {
+        queryParams['year'] = year;
+      }
+    }
+
+    final response = await apiClient.get(
+      '/api/admin/contributions/history',
+      operationName: 'getContributionHistory',
+      queryParameters: queryParams,
+    );
+
+    final List<dynamic> data = response['data'] ?? [];
+    final Map<String, dynamic> meta = response['meta'] ?? {};
+
+    return {
+      'items': data.map((item) => ContributionHistoryModel.fromJson(item)).toList(),
       'has_more_data': meta['has_more_data'] ?? false,
       'total_records': meta['total_records'] ?? 0,
     };
