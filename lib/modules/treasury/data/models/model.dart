@@ -14,6 +14,7 @@ export 'package:front_gestion_minera/modules/treasury/data/models/payment_histor
 export 'package:front_gestion_minera/modules/treasury/data/models/confirm_payment_model.dart';
 export 'package:front_gestion_minera/modules/treasury/data/models/financial_report_model.dart';
 export 'package:front_gestion_minera/modules/treasury/data/models/reject_an_application_model.dart';
+export 'package:front_gestion_minera/modules/treasury/data/models/loans/loans_list_model.dart';
 export 'package:front_gestion_minera/modules/treasury/data/models/transaction_details_model.dart';
 export 'package:front_gestion_minera/modules/treasury/data/models/gold_inventory.dart/new_extraction_model.dart';
 export 'package:front_gestion_minera/modules/treasury/data/models/gold_inventory.dart/gold_sale_model.dart';

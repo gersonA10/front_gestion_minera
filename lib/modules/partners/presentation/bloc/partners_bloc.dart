@@ -215,12 +215,14 @@ class PartnersBloc extends Bloc<PartnersEvent, PartnersState> {
           hasReachedMax: _hasReachedMax,
         ),
       );
-    } on BaseApiException catch (_) {
-      emit(RequestHistoryError('Ocurrió un error al cargar el historial.'));
+    } on BaseApiException catch 
+    (error) {
+      emit(RequestHistoryError(mapErrorMessage(error.key)));
     } catch (e) {
       _currentPage--;
+      emit(RequestHistoryError('Error inesperado: $e'));
     } finally {
-       _isLoadingMore = false;
+     _isLoadingMore = false;
     }
   }
 

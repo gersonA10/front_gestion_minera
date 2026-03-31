@@ -95,7 +95,6 @@ class UrgentIncomeSuccess extends TreasuryState {
   UrgentIncomeSuccess({required this.response});
 }
 
-
 class CashRegistersLoaded extends TreasuryState {
   final List<CashRegisterEntity> cashRegisters;
   CashRegistersLoaded({required this.cashRegisters});
@@ -138,7 +137,7 @@ class ConfirmPaymentLoaded extends TreasuryState {
 class ConfirmPaymentError extends TreasuryState {
   final String message;
 
-  ConfirmPaymentError( {required this.message});
+  ConfirmPaymentError({required this.message});
 }
 
 //rechazar pago
@@ -152,7 +151,7 @@ class RejectAnApplicationLoaded extends TreasuryState {
 class RejectAnApplicationError extends TreasuryState {
   final String message;
 
-  RejectAnApplicationError( {required this.message});
+  RejectAnApplicationError({required this.message});
 }
 
 // Historial de pagos
@@ -177,7 +176,6 @@ class PaymentHistoryError extends TreasuryState {
   PaymentHistoryError(this.message);
 }
 
-
 class GoldDashboardLoading extends TreasuryState {}
 
 class GoldDashboardLoaded extends TreasuryState {
@@ -195,6 +193,25 @@ class GoldDashboardLoaded extends TreasuryState {
 class GoldDashboardError extends TreasuryState {
   final String message;
   GoldDashboardError(this.message);
+}
+// estado para el historial de prestamos
+
+class InternalLoansLoading extends TreasuryState {}
+
+class InternalLoansLoaded extends TreasuryState {
+  final List<InternalLoansEntity> list;
+  final bool hasReachedMax;
+  final int totalRecords;
+  InternalLoansLoaded({
+    required this.list,
+    required this.hasReachedMax,
+    required this.totalRecords,
+  });
+}
+
+class InternalLoansError extends TreasuryState {
+  final String message;
+  InternalLoansError(this.message);
 }
 ///
 class TransactionDetailsLoading extends TreasuryState {}
