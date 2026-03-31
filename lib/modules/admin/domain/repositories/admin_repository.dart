@@ -11,4 +11,11 @@ abstract class AdminRepository {
     int limit = 10,
     String? status,
   });
+
+  Future<PaginatedContributionHistoryEntity> getContributesHistory({
+    int page = 1,
+    int limit = 10,
+    String? exactDate,
+    String? period,
+  });
 }

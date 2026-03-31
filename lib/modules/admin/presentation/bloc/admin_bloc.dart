@@ -25,12 +25,24 @@ class AdminBloc extends Bloc<AdminEvent, AdminState> {
   String _currentHistoryStatus = 'todos';
   List<RequestHistoryEntity> _historyItems = [];
 
+  //variables historial aportes
+  bool _isLoadingMoreContribution = false;
+  int _currentContributionPage = 1;
+  bool _hasReachedMaxContribution = false;
+  int _totalContributionRecords = 0;
+  String? _currentContributionPeriod;
+  String? _currentContributionExactDate;
+  List<ContributionHistoryEntity> _contributionItems = [];
+
   AdminBloc({required this.repository}) : super(AdminInitial()) {
     on<GetPendingRequestsEvent>(_onGetPendingRequests);
     on<LoadMorePendingRequestsEvent>(_onLoadMore);
-
+    //Historial solicitudes
     on<GetRequestHistoryEvent>(_onGetRequestHistory);
     on<LoadMoreRequestHistoryEvent>(_onLoadMoreHistory);
+    //Historial aportes
+    on<GetContributionHistoryEvent>(_onGetContributionHistory);
+    on<LoadMoreContributionHistoryEvent>(_onLoadMoreContribution);
   }
 
   Future<void> _onGetPendingRequests(
@@ -91,6 +103,84 @@ class AdminBloc extends Bloc<AdminEvent, AdminState> {
       _currentPage--;
     } finally {
       _isLoadingMore = false;
+    }
+  }
+
+  //Historial aportes
+  Future<void> _onGetContributionHistory(
+    GetContributionHistoryEvent event,
+    Emitter<AdminState> emit,
+  ) async {
+    if (event.isRefresh ||
+        _currentContributionExactDate != event.exactDate ||
+        _currentContributionPeriod != event.period) {
+      _currentContributionPage = 1;
+      _hasReachedMaxContribution = false;
+      _contributionItems.clear();
+      _currentContributionExactDate = event.exactDate;
+      _currentContributionPeriod = event.period;
+      emit(AdminContributionHistoryLoading(_currentContributionExactDate));
+    }
+
+    try {
+      final result = await repository.getContributesHistory(
+        page: _currentContributionPage,
+        period: _currentContributionPeriod,
+        exactDate: _currentContributionExactDate,
+      );
+
+      _contributionItems = result.items;
+      _hasReachedMaxContribution = !result.hasMoreData;
+      _totalContributionRecords = result.totalRecords;
+
+      emit(
+        AdminContributionHistoryLoaded(
+          items: List.from(_contributionItems),
+          hasReachedMax: _hasReachedMaxContribution,
+          totalRecords: _totalContributionRecords,
+          currentDateFilter: _currentContributionExactDate,
+        ),
+      );
+    } on BaseApiException catch (e) {
+      emit(AdminContributionHistoryError(e.message));
+    } catch (_) {
+      emit(AdminContributionHistoryError('Ocurrió un error inesperado'));
+    }
+  }
+
+  Future<void> _onLoadMoreContribution(
+    LoadMoreContributionHistoryEvent event,
+    Emitter<AdminState> emit,
+  ) async {
+    if (_hasReachedMaxContribution || _isLoadingMoreContribution) return;
+    _isLoadingMoreContribution = true;
+    _currentContributionPage++;
+
+    try {
+      final result = await repository.getContributesHistory(
+        page: _currentContributionPage,
+        period: _currentContributionPeriod, 
+        exactDate: _currentContributionExactDate,
+      );
+
+      _contributionItems.addAll(result.items);
+      _hasReachedMaxContribution = !result.hasMoreData;
+
+      emit(
+        AdminContributionHistoryLoaded(
+          items: List.from(_contributionItems),
+          hasReachedMax: _hasReachedMaxContribution,
+          totalRecords: _totalContributionRecords,
+          currentDateFilter: _currentContributionExactDate,
+        ),
+      );
+    } on BaseApiException catch (e) {
+      _currentContributionPage--;
+      emit(AdminContributionHistoryError(e.message));
+    } catch (_) {
+      _currentContributionPage--;
+    } finally {
+      _isLoadingMoreContribution = false;
     }
   }
 

@@ -3,11 +3,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:front_gestion_minera/injector_container.dart';
 import 'package:front_gestion_minera/modules/admin/presentation/widgets/bottom_nav_widget.dart';
-import 'package:front_gestion_minera/modules/admin/presentation/screens/historial_requests_screen.dart';
 import 'package:front_gestion_minera/modules/admin/presentation/bloc/admin_bloc.dart';
 
 import '../../../../core/widgets/logout_button_widget.dart';
 import '../widgets/widgets.dart';
+import 'screens.dart';
 
 @RoutePage()
 class AdminHomeScreen extends StatefulWidget {
@@ -30,8 +30,7 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
     _pages = [
       const _SolicitudesPendientesPage(),
       const HistorialRequestsScreen(),
-      // const _AportesPage(),
-      Container(),
+      const ContributionAdminScreen(),
     ];
   }
 

@@ -40,3 +40,28 @@ final class AdminRequestHistoryError extends AdminState {
   final String currentFilter;
   AdminRequestHistoryError(this.message, this.currentFilter);
 }
+
+
+// Nuevos Estados Historial Aportes
+final class AdminContributionHistoryLoading extends AdminState {
+  final String? currentDateFilter;
+  AdminContributionHistoryLoading(this.currentDateFilter);
+}
+
+final class AdminContributionHistoryLoaded extends AdminState {
+  final List<ContributionHistoryEntity> items;
+  final bool hasReachedMax;
+  final int totalRecords;
+  final String? currentDateFilter;
+  
+  AdminContributionHistoryLoaded({
+    required this.items, 
+    required this.hasReachedMax, 
+    required this.totalRecords,
+    this.currentDateFilter
+  });
+}
+final class AdminContributionHistoryError extends AdminState {
+  final String message;
+  AdminContributionHistoryError(this.message);
+}

@@ -9,6 +9,8 @@ class GetPendingRequestsEvent extends AdminEvent {
 
 class LoadMorePendingRequestsEvent extends AdminEvent {}
 
+//Hsitorial de solicitudes
+
 class GetRequestHistoryEvent extends AdminEvent {
   final bool isRefresh;
   final String status; // 'todos', 'aprobado', 'rechazado'
@@ -17,3 +19,19 @@ class GetRequestHistoryEvent extends AdminEvent {
 }
 
 class LoadMoreRequestHistoryEvent extends AdminEvent {}
+
+//Historial de Aportes
+
+class GetContributionHistoryEvent extends AdminEvent {
+  final bool isRefresh;
+  final String? period;  
+  final String? exactDate; 
+  
+  GetContributionHistoryEvent({
+    this.isRefresh = true, 
+    this.period, 
+    this.exactDate
+  });
+}
+
+class LoadMoreContributionHistoryEvent extends AdminEvent {}

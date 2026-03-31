@@ -33,9 +33,34 @@ class AdminRepositoryImpl implements AdminRepository {
     int limit = 10,
     String? status,
   }) async {
-    final result = await datasource.getRequestHistory(page: page, limit: limit, status: status);
+    final result = await datasource.getRequestHistory(
+      page: page,
+      limit: limit,
+      status: status,
+    );
     final models = result['items'] as List<RequestHistoryModelAdmin>;
     return PaginatedRequestHistoryEntity(
+      items: models.map((model) => model.toEntity()).toList(),
+      hasMoreData: result['has_more_data'] as bool,
+      totalRecords: result['total_records'] as int? ?? 0,
+    );
+  }
+
+  @override
+  Future<PaginatedContributionHistoryEntity> getContributesHistory({
+    int page = 1,
+    int limit = 10,
+    String? exactDate,
+    String? period,
+  }) async {
+    final result = await datasource.getContributesHistory(
+      page: page,
+      limit: limit,
+      exactDate: exactDate,
+      period: period
+    );
+    final models = result['items'] as List<ContributionHistoryModel>;
+    return PaginatedContributionHistoryEntity(
       items: models.map((model) => model.toEntity()).toList(),
       hasMoreData: result['has_more_data'] as bool,
       totalRecords: result['total_records'] as int? ?? 0,
