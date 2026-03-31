@@ -206,7 +206,7 @@ class _LoansHomeScreenState extends State<LoansHomeScreen> {
                                 decoration: InputDecoration(
                                   isDense: true,
                                   border: InputBorder.none,
-                                  hintText: 'Buscar por socio o código...',
+                                  hintText: 'Buscar prestamo...',
                                   hintStyle: const TextStyle(
                                     color: Color(0xFF9CA3AF),
                                     fontSize: 13,
