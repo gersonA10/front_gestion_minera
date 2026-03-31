@@ -8,13 +8,24 @@ class SolicitudCard extends StatelessWidget {
   final PendingRequestEntity solicitud;
   final int index;
 
-  const SolicitudCard({super.key, required this.solicitud, required this.index});
-
+  const SolicitudCard({
+    super.key,
+    required this.solicitud,
+    required this.index,
+  });
 
   @override
   Widget build(BuildContext context) {
-    final dateFormatted = DateFormat('dd MMM, yyyy • hh:mm a', 'es').format(solicitud.fechaRegistro);
-    final montoFormatted = NumberFormat('#,##0.00', 'es').format(solicitud.monto);
+    final date = solicitud.fechaRegistro.toLocal();
+
+    final dateFormatted = DateFormat(
+      'dd MMM, yyyy • hh:mm a',
+      'es',
+    ).format(date);
+    final montoFormatted = NumberFormat(
+      '#,##0.00',
+      'es',
+    ).format(solicitud.monto);
 
     return Container(
       margin: const EdgeInsets.only(bottom: 14),
@@ -69,8 +80,11 @@ class SolicitudCard extends StatelessWidget {
 
             Row(
               children: [
-                const Icon(Icons.receipt_long_outlined,
-                    size: 15, color: Color(0xFF94A3B8)),
+                const Icon(
+                  Icons.receipt_long_outlined,
+                  size: 15,
+                  color: Color(0xFF94A3B8),
+                ),
                 const SizedBox(width: 6),
                 Expanded(
                   child: Text(
@@ -88,8 +102,11 @@ class SolicitudCard extends StatelessWidget {
             const SizedBox(height: 6),
             Row(
               children: [
-                const Icon(Icons.calendar_today_outlined,
-                    size: 13, color: Color(0xFF94A3B8)),
+                const Icon(
+                  Icons.calendar_today_outlined,
+                  size: 13,
+                  color: Color(0xFF94A3B8),
+                ),
                 const SizedBox(width: 6),
                 Text(
                   dateFormatted,
@@ -104,8 +121,11 @@ class SolicitudCard extends StatelessWidget {
             const SizedBox(height: 6),
             Row(
               children: [
-                const Icon(Icons.attach_money_outlined,
-                    size: 15, color: Color(0xFF94A3B8)),
+                const Icon(
+                  Icons.attach_money_outlined,
+                  size: 15,
+                  color: Color(0xFF94A3B8),
+                ),
                 const SizedBox(width: 4),
                 Text(
                   'Bs $montoFormatted',
@@ -154,7 +174,9 @@ class SolicitudCard extends StatelessWidget {
                   },
                   child: Container(
                     padding: const EdgeInsets.symmetric(
-                        horizontal: 18, vertical: 9),
+                      horizontal: 18,
+                      vertical: 9,
+                    ),
                     decoration: BoxDecoration(
                       color: const Color(0xFFF1F5F9),
                       borderRadius: BorderRadius.circular(10),
@@ -178,7 +200,6 @@ class SolicitudCard extends StatelessWidget {
     );
   }
 }
-
 
 class _StatusBadge extends StatelessWidget {
   final String label;
@@ -205,4 +226,3 @@ class _StatusBadge extends StatelessWidget {
     );
   }
 }
-

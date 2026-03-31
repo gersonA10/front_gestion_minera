@@ -19,7 +19,10 @@ class HistorialCard extends StatelessWidget {
     return Container(
       decoration: BoxDecoration(
         color: TColors.white,
-        borderRadius: BorderRadius.only(topRight: Radius.circular(20), bottomRight: Radius.circular(20)),
+        borderRadius: BorderRadius.only(
+          topRight: Radius.circular(20),
+          bottomRight: Radius.circular(20),
+        ),
         boxShadow: const [
           BoxShadow(
             color: Color(0x14000000),
@@ -125,7 +128,8 @@ class _CardInfoSection extends StatelessWidget {
   const _CardInfoSection({required this.item});
 
   String _formatDate(DateTime date) {
-    return DateFormat("dd MMM, yyyy • HH:mm", "es").format(date);
+    final localDate = date.toLocal();
+    return DateFormat("dd MMM, yyyy • HH:mm", "es").format(localDate);
   }
 
   String _money(double value) {
@@ -237,7 +241,6 @@ class HistorialInfoLabel extends StatelessWidget {
     );
   }
 }
-
 
 class HistorialStatusBadge extends StatelessWidget {
   final bool isApproved;

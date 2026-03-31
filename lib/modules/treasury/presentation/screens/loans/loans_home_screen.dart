@@ -192,7 +192,8 @@ class _LoansHomeScreenState extends State<LoansHomeScreen> {
   }
 
   String _formatDate(DateTime date) {
-    return DateFormat("d MMM yyyy", 'es').format(date);
+    final localDate = date.toLocal();
+    return DateFormat("dd MMM, yyyy • HH:mm", "es").format(localDate);
   }
 
   @override
@@ -228,10 +229,7 @@ class _LoansHomeScreenState extends State<LoansHomeScreen> {
         ),
         bottom: PreferredSize(
           preferredSize: const Size.fromHeight(1),
-          child: Container(
-            color: const Color(0xFFE5E7EB),
-            height: 1,
-          ),
+          child: Container(color: const Color(0xFFE5E7EB), height: 1),
         ),
       ),
       body: SafeArea(
