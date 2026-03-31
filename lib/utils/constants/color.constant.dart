@@ -81,4 +81,13 @@ class TColors {
   static const successLight = Color(0xFFDCFCE7);
   static const warning = Color(0xFFD97706);
   static const warningLight = Color(0xFFFEF3C7);
+//Custom
+    static const bgColor = Color(0xFF1A1A1A);
+  static const cardColor = Color(0xFF2A2A2A);
+  static const amber = Color(0xFFD4A017);
+  static const amberLight = Color(0x33D4A017);
+  static const textPrimaryWhite = Color(0xFFE0E0E0);
+  static const textSecondary1 = Color(0xFFA0A0A0);
+  static const inputBg = Color(0xFF333333);
+  static const borderColor = Color(0xFF4A4A2A);
 }

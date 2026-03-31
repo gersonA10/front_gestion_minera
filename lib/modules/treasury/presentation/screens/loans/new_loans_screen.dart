@@ -1,5 +1,6 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
+import 'package:front_gestion_minera/utils/constants/color.constant.dart';
  
 
  @RoutePage()
@@ -19,7 +20,7 @@ class _NewLoansScreenState extends State<NewLoansScreen> {
   String _tipoInteres = 'Simple';
 
   late final DateTime _fechaInicio;
-
+final colors = TColors;
   @override
   void initState() {
     super.initState();
@@ -30,14 +31,7 @@ class _NewLoansScreenState extends State<NewLoansScreen> {
       '${_fechaInicio.month.toString().padLeft(2, '0')}/${_fechaInicio.day.toString().padLeft(2, '0')}/${_fechaInicio.year}';
 
   // Colors matching the design
-  static const _bgColor = Color(0xFF1A1A1A);
-  static const _cardColor = Color(0xFF2A2A2A);
-  static const _amber = Color(0xFFD4A017);
-  static const _amberLight = Color(0x33D4A017);
-  static const _textPrimary = Color(0xFFE0E0E0);
-  static const _textSecondary = Color(0xFFA0A0A0);
-  static const _inputBg = Color(0xFF333333);
-  static const _borderColor = Color(0xFF4A4A2A);
+
 
   @override
   void dispose() {
@@ -51,23 +45,23 @@ class _NewLoansScreenState extends State<NewLoansScreen> {
   InputDecoration _inputDecoration({String? hint, Widget? prefix, Widget? suffix}) {
     return InputDecoration(
       hintText: hint,
-      hintStyle: const TextStyle(color: _textSecondary, fontSize: 14),
+      hintStyle: const TextStyle(color: TColors.textSecondary1, fontSize: 14),
       prefixIcon: prefix,
       suffixIcon: suffix,
       filled: true,
-      fillColor: _inputBg,
+      fillColor: TColors.inputBg,
       contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
       border: OutlineInputBorder(
         borderRadius: BorderRadius.circular(12),
-        borderSide: const BorderSide(color: _borderColor),
+        borderSide: const BorderSide(color: TColors.borderColor),
       ),
       enabledBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(12),
-        borderSide: const BorderSide(color: _borderColor),
+        borderSide: const BorderSide(color: TColors.borderColor),
       ),
       focusedBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(12),
-        borderSide: const BorderSide(color: _amber, width: 1.5),
+        borderSide: const BorderSide(color: TColors.amber, width: 1.5),
       ),
     );
   }
@@ -75,26 +69,26 @@ class _NewLoansScreenState extends State<NewLoansScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: _bgColor,
+      backgroundColor: TColors.bgColor,
       appBar: AppBar(
-        backgroundColor: _bgColor,
+        backgroundColor: TColors.bgColor,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: _textPrimary),
+          icon: const Icon(Icons.arrow_back, color: TColors.textPrimary),
           onPressed: () => Navigator.of(context).maybePop(),
         ),
         centerTitle: true,
         title: const Text(
           'Nuevo Préstamo',
           style: TextStyle(
-            color: _textPrimary,
+            color: TColors.textPrimary,
             fontWeight: FontWeight.bold,
             fontSize: 18,
           ),
         ),
         bottom: PreferredSize(
           preferredSize: const Size.fromHeight(1),
-          child: Container(height: 1, color: _amber.withValues(alpha: 0.3)),
+          child: Container(height: 1, color: TColors.amber.withValues(alpha: 0.3)),
         ),
       ),
       body: SingleChildScrollView(
@@ -108,7 +102,7 @@ class _NewLoansScreenState extends State<NewLoansScreen> {
             const SizedBox(height: 8),
             TextField(
               controller: _prestamista,
-              style: const TextStyle(color: _textPrimary),
+              style: const TextStyle(color: TColors.textPrimary),
               decoration: _inputDecoration(
                 hint: 'Ej. Banco Nacional, Juan Pérez',
               ),
@@ -128,11 +122,11 @@ class _NewLoansScreenState extends State<NewLoansScreen> {
                       TextField(
                         controller: _monto,
                         keyboardType: TextInputType.number,
-                        style: const TextStyle(color: _textPrimary),
+                        style: const TextStyle(color: TColors.textPrimary),
                         decoration: _inputDecoration(
                           prefix: const Padding(
                             padding: EdgeInsets.all(12),
-                            child: Text('\$ ', style: TextStyle(color: _textSecondary)),
+                            child: Text('\$ ', style: TextStyle(color: TColors.textSecondary)),
                           ),
                         ),
                       ),
@@ -150,17 +144,17 @@ class _NewLoansScreenState extends State<NewLoansScreen> {
                       Container(
                         padding: const EdgeInsets.symmetric(horizontal: 16),
                         decoration: BoxDecoration(
-                          color: _inputBg,
+                          color: TColors.inputBg,
                           borderRadius: BorderRadius.circular(12),
-                          border: Border.all(color: _borderColor),
+                          border: Border.all(color: TColors.borderColor),
                         ),
                         child: DropdownButtonHideUnderline(
                           child: DropdownButton<String>(
                             value: _moneda,
                             isExpanded: true,
-                            dropdownColor: _cardColor,
-                            style: const TextStyle(color: _textPrimary, fontSize: 14),
-                            icon: const Icon(Icons.keyboard_arrow_down, color: _textSecondary),
+                            dropdownColor: TColors.cardColor,
+                            style: const TextStyle(color: TColors.textPrimary, fontSize: 14),
+                            icon: const Icon(Icons.keyboard_arrow_down, color: TColors.textSecondary),
                             items: ['BOB']
                                 .map((e) => DropdownMenuItem(value: e, child: Text(e)))
                                 .toList(),
@@ -185,7 +179,7 @@ class _NewLoansScreenState extends State<NewLoansScreen> {
                       TextField(
                         controller: _plazo,
                         keyboardType: TextInputType.number,
-                        style: const TextStyle(color: _textPrimary),
+                        style: const TextStyle(color: TColors.textPrimary),
                         decoration: _inputDecoration(),
                       ),
                     ],
@@ -201,7 +195,7 @@ class _NewLoansScreenState extends State<NewLoansScreen> {
                       TextField(
                         controller: _tasa,
                         keyboardType: TextInputType.number,
-                        style: const TextStyle(color: _textPrimary),
+                        style: const TextStyle(color: TColors.textPrimary),
                         decoration: _inputDecoration(),
                       ),
                     ],
@@ -215,21 +209,21 @@ class _NewLoansScreenState extends State<NewLoansScreen> {
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
               decoration: BoxDecoration(
-                color: _inputBg,
+                color: TColors.inputBg,
                 borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: _borderColor),
+                border: Border.all(color: TColors.borderColor),
               ),
               child: Row(
                 children: [
-                  const Icon(Icons.calendar_today_outlined, color: _textSecondary, size: 18),
+                  const Icon(Icons.calendar_today_outlined, color: TColors.textSecondary, size: 18),
                   const SizedBox(width: 10),
                   Expanded(
                     child: Text(
                       _fechaFormateada,
-                      style: const TextStyle(color: _textPrimary, fontSize: 14),
+                      style: const TextStyle(color: TColors.textPrimary, fontSize: 14),
                     ),
                   ),
-                  const Icon(Icons.lock_outline, color: _textSecondary, size: 18),
+                  const Icon(Icons.lock_outline, color: TColors.textSecondary, size: 18),
                 ],
               ),
             ),
@@ -237,9 +231,9 @@ class _NewLoansScreenState extends State<NewLoansScreen> {
             Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: _amberLight,
+                color: TColors.amberLight,
                 borderRadius: BorderRadius.circular(16),
-                border: Border.all(color: _amber.withValues(alpha:  0.3)),
+                border: Border.all(color: TColors.amber.withValues(alpha:  0.3)),
               ),
               child: Row(
                 children: [
@@ -247,10 +241,10 @@ class _NewLoansScreenState extends State<NewLoansScreen> {
                     width: 44,
                     height: 44,
                     decoration: BoxDecoration(
-                      color: _amber.withValues(alpha:  0.25),
+                      color: TColors.amber.withValues(alpha:  0.25),
                       shape: BoxShape.circle,
                     ),
-                    child: const Icon(Icons.percent, color: _amber, size: 20),
+                    child: const Icon(Icons.percent, color: TColors.amber, size: 20),
                   ),
                   const SizedBox(width: 14),
                   Expanded(
@@ -260,7 +254,7 @@ class _NewLoansScreenState extends State<NewLoansScreen> {
                         Text(
                           'TIPO DE INTERÉS',
                           style: TextStyle(
-                            color: _textSecondary,
+                            color: TColors.textSecondary1,
                             fontSize: 11,
                             fontWeight: FontWeight.w600,
                             letterSpacing: 0.8,
@@ -270,7 +264,7 @@ class _NewLoansScreenState extends State<NewLoansScreen> {
                         Text(
                           _tipoInteres,
                           style: const TextStyle(
-                            color: _textPrimary,
+                            color: TColors.textPrimary,
                             fontSize: 16,
                             fontWeight: FontWeight.bold,
                           ),
@@ -278,7 +272,7 @@ class _NewLoansScreenState extends State<NewLoansScreen> {
                       ],
                     ),
                   ),
-                  const Icon(Icons.lock_outline, color: _textSecondary, size: 20),
+                  const Icon(Icons.lock_outline, color: TColors.textSecondary1, size: 20),
                 ],
               ),
             ),
@@ -286,24 +280,24 @@ class _NewLoansScreenState extends State<NewLoansScreen> {
             Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: _amberLight,
+                color: TColors.amberLight,
                 borderRadius: BorderRadius.circular(16),
-                border: Border.all(color: _amber.withValues(alpha: 0.2)),
+                border: Border.all(color: TColors.amber.withValues(alpha: 0.2)),
               ),
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Icon(Icons.info_outline, color: _amber, size: 22),
+                  const Icon(Icons.info_outline, color: TColors.amber, size: 22),
                   const SizedBox(width: 12),
                   Expanded(
                     child: RichText(
                       text: const TextSpan(
-                        style: TextStyle(color: _textSecondary, fontSize: 13, height: 1.5),
+                        style: TextStyle(color: TColors.textSecondary1, fontSize: 13, height: 1.5),
                         children: [
                           TextSpan(text: 'Este préstamo se calcula bajo '),
                           TextSpan(
                             text: 'interés simple',
-                            style: TextStyle(fontWeight: FontWeight.bold, color: _textPrimary),
+                            style: TextStyle(fontWeight: FontWeight.bold, color: TColors.textPrimary),
                           ),
                           TextSpan(
                             text: '. El interés se calcula únicamente sobre el capital inicial y no se capitaliza.',
@@ -334,7 +328,7 @@ class _NewLoansScreenState extends State<NewLoansScreen> {
                 style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
               ),
               style: ElevatedButton.styleFrom(
-                backgroundColor: _amber,
+                backgroundColor: TColors.amber,
                 foregroundColor: Colors.black,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(14),
@@ -351,12 +345,12 @@ class _NewLoansScreenState extends State<NewLoansScreen> {
   Widget _sectionHeader(IconData icon, String title) {
     return Row(
       children: [
-        Icon(icon, color: _amber, size: 22),
+        Icon(icon, color: TColors.amber, size: 22),
         const SizedBox(width: 8),
         Text(
           title,
           style: const TextStyle(
-            color: _textPrimary,
+            color: TColors.textPrimary,
             fontSize: 16,
             fontWeight: FontWeight.bold,
           ),
@@ -368,7 +362,7 @@ class _NewLoansScreenState extends State<NewLoansScreen> {
   Widget _label(String text) {
     return Text(
       text,
-      style: const TextStyle(color: _textSecondary, fontSize: 13),
+      style: const TextStyle(color: TColors.textSecondary1, fontSize: 13),
     );
   }
 }
