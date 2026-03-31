@@ -4,9 +4,9 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:front_gestion_minera/config/router/app_router.gr.dart';
 import 'package:front_gestion_minera/config/theme/extension_theme.dart';
 import 'package:front_gestion_minera/injector_container.dart';
-import 'package:front_gestion_minera/modules/treasury/domain/entity/loans/loans_list_entity.dart';
 import 'package:front_gestion_minera/modules/treasury/presentation/bloc/treasury_bloc.dart';
 import 'package:intl/intl.dart';
+import '../../../domain/entity/entity.dart';
 
 extension LoanStatusX on LoanStatus {
   Color get color {
@@ -113,28 +113,30 @@ class _LoansHomeScreenState extends State<LoansHomeScreen> {
   Widget build(BuildContext context) {
     final colors = Theme.of(context).colorScheme;
 
-    return Scaffold(
-      backgroundColor: const Color(0xFFF8F9FB),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          context.router.push(NewLoansRoute());
-        },
-        backgroundColor: const Color(0xFF3B82F6),
-        elevation: 2,
-        child: const Icon(Icons.add, color: Colors.white, size: 20),
-      ),
-      appBar: AppBar(
-        backgroundColor: colors.white,
-        surfaceTintColor: colors.white,
-        centerTitle: true,
-        title: Text(
-          'Préstamos Internos',
-          style: TextStyle(
-            fontSize: 16,
-            fontWeight: FontWeight.w600,
-            color: Color(0xFF1F2937),
-          ),
+    return BlocProvider.value(
+      value: _treasuryBloc,
+      child: Scaffold(
+        backgroundColor: const Color(0xFFF8F9FB),
+        floatingActionButton: FloatingActionButton(
+          onPressed: () {
+            context.router.push(NewLoansRoute());
+          },
+          backgroundColor: const Color(0xFF3B82F6),
+          elevation: 2,
+          child: const Icon(Icons.add, color: Colors.white, size: 20),
         ),
+        appBar: AppBar(
+          backgroundColor: colors.white,
+          surfaceTintColor: colors.white,
+          centerTitle: true,
+          title: Text(
+            'Préstamos Internos',
+            style: TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.w600,
+              color: Color(0xFF1F2937),
+            ),
+          ),
           bottom: PreferredSize(
             preferredSize: const Size.fromHeight(1),
             child: Container(color: const Color(0xFFE5E7EB), height: 1),
@@ -346,7 +348,8 @@ class _LoansHomeScreenState extends State<LoansHomeScreen> {
             },
           ),
         ),
-      );
+      ),
+    );
   }
 }
 
