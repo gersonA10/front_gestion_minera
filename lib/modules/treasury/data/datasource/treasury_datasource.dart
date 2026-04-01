@@ -151,9 +151,9 @@ class TreasuryDatasource {
   Future<PaginatedGoldBatchesEntity> getGoldBatches({
     int page = 1,
     int limit = 10,
-    String? status
+    String? status,
   }) async {
-    final queryParameters = {'page': page, 'limit': limit, 'status': ?status,};
+    final queryParameters = {'page': page, 'limit': limit, 'status': ?status};
     final response = await apiClient.get(
       '/api/treasury/batches',
       operationName: 'getGoldBatches',
@@ -167,6 +167,36 @@ class TreasuryDatasource {
       batches: data.map((item) => GoldBatchModel.fromJson(item)).toList(),
       hasMore: meta['has_more'] ?? false,
       totalRecords: meta['total_records'] ?? 0,
+    );
+  }
+
+  Future<StatsSaleHistoryModel> getStatsSalesHistory() async {
+    final response = await apiClient.get(
+      '/api/treasury/sales/history',
+      operationName: 'getStatsSalesHistory',
+    );
+    return StatsSaleHistoryModel.fromJson(response['meta']);
+  }
+
+  Future<PaginatedSalesHistoryEntity> getHistorySales({
+    int page = 1,
+    int limit = 10,
+    String? status,
+  }) async {
+    final queryParameters = {'page': page, 'limit': limit, 'status': ?status};
+    final response = await apiClient.get(
+      '/api/treasury/sales/history',
+      operationName: 'getStatsSalesHistory',
+      queryParameters: queryParameters,
+    );
+
+    final List<dynamic> data = response['data'];
+    final Map<String, dynamic> meta = response['meta'];
+
+    return PaginatedSalesHistoryEntity(
+      sales: data.map((item) => SaleHistoryModel.fromJson(item)).toList(),
+      hashMore: (meta['total_registro'] >= limit) ?? false,
+      totalRegistros: meta['total_registros'] ?? 0,
     );
   }
 
@@ -228,7 +258,9 @@ class TreasuryDatasource {
     };
   }
 
-   Future<TransactionDetailsResponseEntity> getTransactionDetails(String idTansaction) async {
+  Future<TransactionDetailsResponseEntity> getTransactionDetails(
+    String idTansaction,
+  ) async {
     final response = await apiClient.get(
       '/api/treasury/transactions/$idTansaction',
       operationName: 'getTransactionDetails',
@@ -236,7 +268,7 @@ class TreasuryDatasource {
     return TransactionDetailsResponseModel.fromJson(response['data']);
   }
 
-   Future<NewExtractionResponseModel> newExtraction(
+  Future<NewExtractionResponseModel> newExtraction(
     NewExtractionRequestModel newExtractionRequest,
   ) async {
     final response = await apiClient.postFormData(
@@ -280,5 +312,4 @@ class TreasuryDatasource {
     );
     return RegisterSaleResponseModel.fromJson(response['data']);
   }
-
 }
