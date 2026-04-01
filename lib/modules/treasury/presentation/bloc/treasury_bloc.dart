@@ -15,7 +15,6 @@ class TreasuryBloc extends Bloc<TreasuryEvent, TreasuryState> {
   List<ListOfPendingDataEntity> _items = [];
   List<InternalLoansEntity> _itemsLoans = [];
 
-
   final TreasuryRepository repository;
 
   List<CashRegisterEntity> cashRegisters = [];
@@ -71,6 +70,8 @@ class TreasuryBloc extends Bloc<TreasuryEvent, TreasuryState> {
     on<NewExtractionEvent>(_onNewExtraction);
     on<PreviewSaleEvent>(_onPreviewSale);
     on<RegisterSaleEvent>(_onRegisterSale);
+    on<NewLoansSimulateEvent>(_onNewLoansSimulate);
+
   }
 
   Future<void> _onFetchTreasuryMetrics(
@@ -135,7 +136,7 @@ class TreasuryBloc extends Bloc<TreasuryEvent, TreasuryState> {
       emit(DetailsofanapplicationError(message: 'Error inesperado: $e'));
     }
   }
-   
+
   Future<void> _listOfPending(
     ListOfPendingRequestsEvent event,
     Emitter<TreasuryState> emit,
@@ -411,7 +412,7 @@ class TreasuryBloc extends Bloc<TreasuryEvent, TreasuryState> {
       _paymentHistoryPage--;
       emit(PaymentHistoryError(mapErrorMessage(error.key)));
     } catch (e) {
-        _paymentHistoryPage--;
+      _paymentHistoryPage--;
       emit(PaymentHistoryError('Error inesperado: $e'));
     } finally {
       _isLoadingMorePayment = false;
@@ -434,7 +435,10 @@ class TreasuryBloc extends Bloc<TreasuryEvent, TreasuryState> {
     try {
       final responses = await Future.wait([
         repository.getGoldInventory(),
-        repository.getGoldBatches(page: _currentBatchPage, status: _currentBatchStatus),
+        repository.getGoldBatches(
+          page: _currentBatchPage,
+          status: _currentBatchStatus,
+        ),
       ]);
 
       _goldInventory = responses[0] as GoldInventoryEntity;
@@ -461,14 +465,19 @@ class TreasuryBloc extends Bloc<TreasuryEvent, TreasuryState> {
     LoadMoreGoldBatchesEvent event,
     Emitter<TreasuryState> emit,
   ) async {
-    if (_hasReachedBatchMax || _goldInventory == null || _isLoadingMoreBatches) {
+    if (_hasReachedBatchMax ||
+        _goldInventory == null ||
+        _isLoadingMoreBatches) {
       return;
     }
     _isLoadingMoreBatches = true;
     _currentBatchPage++;
 
     try {
-      final response = await repository.getGoldBatches(page: _currentBatchPage, status: _currentBatchStatus);
+      final response = await repository.getGoldBatches(
+        page: _currentBatchPage,
+        status: _currentBatchStatus,
+      );
       _goldBatches.addAll(response.batches);
       _hasReachedBatchMax = !response.hasMore;
 
@@ -491,7 +500,6 @@ class TreasuryBloc extends Bloc<TreasuryEvent, TreasuryState> {
       _isLoadingMoreBatches = false;
     }
   }
-
 
   Future<void> _onFechInternalLoans(
     InternalLoansRequestsEvent event,
@@ -632,6 +640,29 @@ class TreasuryBloc extends Bloc<TreasuryEvent, TreasuryState> {
       emit(RegisterSaleError(message: mapErrorMessage(error.key)));
     } catch (e) {
       emit(RegisterSaleError(message: 'Error inesperado: $e'));
+    }
+  }
+
+  Future<void> _onNewLoansSimulate(
+    NewLoansSimulateEvent event,
+    Emitter<TreasuryState> emit,
+  ) async {
+    emit(NewLoansSimulateLoading());
+    try {
+      final response = await repository.postNewLoansSimulate(
+        event.amount,
+        event.termMonths,
+        event.annualInterestRate,
+        event.startDate,
+      );
+      emit(NewLoansSimulateLoaded(loan: response));
+    } on BaseApiException catch (error) {
+      if (error.key == DioExceptionKey.unauthorised) {
+        return;
+      }
+      emit(NewLoansSimulateError(message: mapErrorMessage(error.key)));
+    } catch (e) {
+      emit(NewLoansSimulateError(message: 'Error inesperado: $e'));
     }
   }
 }

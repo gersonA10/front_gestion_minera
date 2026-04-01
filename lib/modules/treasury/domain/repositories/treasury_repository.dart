@@ -63,4 +63,5 @@ abstract class TreasuryRepository {
   Future<RegisterSaleResponseEntity> registerSale(
     RegisterSaleRequestEntity request,
   );
+  Future<NewLoansResponseEntity> postNewLoansSimulate(double amount, int termMonths, String annualInterestRate, String startDate);
 }

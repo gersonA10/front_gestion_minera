@@ -233,7 +233,7 @@ class TreasuryDatasource {
     int limit = 10,
   }) async {
     final Map<String, dynamic> queryParameters = {'page': page, 'limit': limit};
-    
+
     if (status != null && status.toLowerCase() != 'todos') {
       queryParameters['status'] = status.toLowerCase();
     }
@@ -310,5 +310,24 @@ class TreasuryDatasource {
       ],
     );
     return RegisterSaleResponseModel.fromJson(response['data']);
+  }
+
+  Future<NewLoansResponseEntity> postNewLoansSimulate(
+    double amount,
+    int termMonths,
+    String annualInterestRate,
+    String startDate,
+  ) async {
+    final response = await apiClient.post(
+      '/api/treasury/corporate-loans/simulate',
+      data: {
+        "amount": amount,
+        "term_months": termMonths,
+        "annual_interest_rate": annualInterestRate,
+        "start_date": startDate,
+      },
+      operationName: 'postNewLoansSimulate',
+    );
+    return NewLoansResponseModel.fromJson(response['data']);
   }
 }
