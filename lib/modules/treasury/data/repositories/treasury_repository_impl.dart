@@ -132,7 +132,7 @@ class TreasuryRepositoryImpl implements TreasuryRepository {
   }
 
   @override
-  Future<PaginatedSalesHistoryEntity> getHistorySales({
+  Future<PaginatedSalesHistoryEntity> getSalesHistory({
     int page = 1,
     int limit = 10,
     String? status,

@@ -79,6 +79,15 @@ class FetchGoldDashboardDataEvent extends TreasuryEvent {
 
 class LoadMoreGoldBatchesEvent extends TreasuryEvent {}
 
+// Historial venta Evento
+class FetchHistorySalesEvent extends TreasuryEvent {
+  final bool isRefresh;
+  final String? status;
+  FetchHistorySalesEvent({this.isRefresh = true, this.status});
+}
+
+class LoadMoreHistorySalesEvent extends TreasuryEvent {}
+
 ///
 class TransactionDetailsEvent extends TreasuryEvent {
   final String idTransaction;
