@@ -118,7 +118,30 @@ class TreasuryRepositoryImpl implements TreasuryRepository {
     int limit = 10,
     String? status,
   }) async {
-    final result = await datasource.getGoldBatches(page: page, limit: limit, status: status);
+    final result = await datasource.getGoldBatches(
+      page: page,
+      limit: limit,
+      status: status,
+    );
+    return result;
+  }
+
+  @override
+  Future<StatsSaleHistoryEntity> getStatsSalesHistory() async {
+    return await datasource.getStatsSalesHistory();
+  }
+
+  @override
+  Future<PaginatedSalesHistoryEntity> getHistorySales({
+    int page = 1,
+    int limit = 10,
+    String? status,
+  }) async {
+    final result = await datasource.getHistorySales(
+      page: page,
+      limit: limit,
+      status: status,
+    );
     return result;
   }
 
