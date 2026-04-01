@@ -1,12 +1,12 @@
 class SaleHistoryEntity {
-  String saleId;
-  String saleCode;
-  DateTime fecha;
-  String comprador;
-  double pesoTotalKg;
-  int pesoTotalG;
-  int montoTotalBs;
-  String estado;
+  final String saleId;
+  final String saleCode;
+  final DateTime fecha;
+  final String comprador;
+  final double pesoTotalKg;
+  final int pesoTotalG;
+  final int montoTotalBs;
+  final String estado;
 
   SaleHistoryEntity({
     required this.saleId,
@@ -21,11 +21,11 @@ class SaleHistoryEntity {
 }
 
 class StatsSaleHistoryEntity {
-  double vendidoEsteMesKg;
-  int vendidoEsteMesG;
-  String variacionMesPct;
-  double vendidoDelAnioKg;
-  int vendidoDelAnioG;
+  final double vendidoEsteMesKg;
+  final int vendidoEsteMesG;
+  final String variacionMesPct;
+  final double vendidoDelAnioKg;
+  final int vendidoDelAnioG;
 
   StatsSaleHistoryEntity({
     required this.vendidoEsteMesKg,
@@ -33,18 +33,6 @@ class StatsSaleHistoryEntity {
     required this.variacionMesPct,
     required this.vendidoDelAnioKg,
     required this.vendidoDelAnioG,
-  });
-}
-
-class HistorySaleEntity {
-  bool success;
-  StatsSaleHistoryEntity meta;
-  List<SaleHistoryEntity> data;
-
-  HistorySaleEntity({
-    required this.success,
-    required this.meta,
-    required this.data,
   });
 }
 

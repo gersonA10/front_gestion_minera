@@ -15,3 +15,4 @@ export 'package:front_gestion_minera/modules/treasury/domain/entity/reject_an_ap
 export 'package:front_gestion_minera/modules/treasury/domain/entity/transaction_details_entity.dart';
 export 'package:front_gestion_minera/modules/treasury/domain/entity/goldInventory/new_extraction_entity.dart';
 export 'package:front_gestion_minera/modules/treasury/domain/entity/goldInventory/gold_sale_entity.dart';
+export 'package:front_gestion_minera/modules/treasury/domain/entity/goldInventory/sale_history_entity.dart';

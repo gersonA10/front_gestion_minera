@@ -17,3 +17,4 @@ export 'package:front_gestion_minera/modules/treasury/data/models/reject_an_appl
 export 'package:front_gestion_minera/modules/treasury/data/models/transaction_details_model.dart';
 export 'package:front_gestion_minera/modules/treasury/data/models/gold_inventory.dart/new_extraction_model.dart';
 export 'package:front_gestion_minera/modules/treasury/data/models/gold_inventory.dart/gold_sale_model.dart';
+export 'package:front_gestion_minera/modules/treasury/data/models/gold_inventory.dart/sale_history_model.dart';
