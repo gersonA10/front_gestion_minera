@@ -321,7 +321,6 @@ final colors = TColors;
             height: 52,
             child: ElevatedButton.icon(
               onPressed: () {
-                context.router.push(const LoanSimulationRoute());
               },
               icon: const Icon(Icons.grid_view_rounded, size: 20),
               label: const Text(

@@ -1,5 +1,6 @@
+import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
-
+ @RoutePage()
 class LoanSimulationScreen extends StatelessWidget {
   const LoanSimulationScreen({super.key});
 
@@ -81,10 +82,6 @@ class LoanSimulationScreen extends StatelessWidget {
     );
   }
 }
-
-// ─────────────────────────────────────────────
-// Loan Summary Card
-// ─────────────────────────────────────────────
 
 class _LoanSummaryCard extends StatelessWidget {
   const _LoanSummaryCard();
@@ -232,10 +229,6 @@ class _SummaryItem extends StatelessWidget {
   }
 }
 
-// ─────────────────────────────────────────────
-// Payment Schedule Header
-// ─────────────────────────────────────────────
-
 class _PaymentScheduleHeader extends StatelessWidget {
   const _PaymentScheduleHeader();
 
@@ -267,11 +260,6 @@ class _PaymentScheduleHeader extends StatelessWidget {
     );
   }
 }
-
-// ─────────────────────────────────────────────
-// Payment Installment Card
-// ─────────────────────────────────────────────
-
 enum InstallmentStatus { pending, future, paid }
 
 class _PaymentInstallmentCard extends StatelessWidget {
@@ -444,10 +432,6 @@ class _PaymentInstallmentCard extends StatelessWidget {
     );
   }
 }
-
-// ─────────────────────────────────────────────
-// Totals Card
-// ─────────────────────────────────────────────
 
 class _TotalsCard extends StatelessWidget {
   const _TotalsCard();
