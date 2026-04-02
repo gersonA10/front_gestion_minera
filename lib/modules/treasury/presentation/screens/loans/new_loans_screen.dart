@@ -1,5 +1,6 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
+import 'package:front_gestion_minera/config/router/app_router.gr.dart';
 import 'package:front_gestion_minera/utils/constants/color.constant.dart';
  
 
@@ -320,7 +321,7 @@ final colors = TColors;
             height: 52,
             child: ElevatedButton.icon(
               onPressed: () {
-                // Simular préstamo
+                context.router.push(const LoanSimulationRoute());
               },
               icon: const Icon(Icons.grid_view_rounded, size: 20),
               label: const Text(
