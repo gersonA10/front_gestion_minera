@@ -178,4 +178,9 @@ class TreasuryRepositoryImpl implements TreasuryRepository {
     final requestModel = RegisterSaleRequestModel.fromEntity(request);
     return await datasource.registerSale(requestModel);
   }
+  
+  @override
+  Future<ApplyForALoanResponseEntity> applyForALoan(String lenderName, double amount, int termMonths, double annualInterestRate, String startDate, String cajaDestinoId)async {
+    return await datasource.postApplyForAloan(lenderName, amount, termMonths, annualInterestRate, startDate, cajaDestinoId);
+  }
 }

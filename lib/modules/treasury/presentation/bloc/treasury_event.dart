@@ -20,15 +20,15 @@ class ListOfPendingRequestsEvent extends TreasuryEvent {
   final bool isRefresh;
   ListOfPendingRequestsEvent({this.isRefresh = true});
 }
+
 class LoadMorePendingEvent extends TreasuryEvent {
   final bool isRefresh;
   LoadMorePendingEvent({this.isRefresh = true});
 }
 
-
 class GetFinancialReportEvent extends TreasuryEvent {
-  final String period; 
-  final String? exactDate; 
+  final String period;
+  final String? exactDate;
 
   GetFinancialReportEvent({required this.period, this.exactDate});
 }
@@ -47,16 +47,18 @@ class RegisterUrgentExpenseEvent extends TreasuryEvent {
 
 class GetCashRegistersEvent extends TreasuryEvent {}
 
-
 class ConfirmPaymentEvent extends TreasuryEvent {
   final String idRequest;
   final ConfirmPaymentRequetsEntity confirmPaymentRequets;
-  ConfirmPaymentEvent({required this.idRequest, required this.confirmPaymentRequets});
+  ConfirmPaymentEvent({
+    required this.idRequest,
+    required this.confirmPaymentRequets,
+  });
 }
 
 class RejectAnApplicationEvent extends TreasuryEvent {
-   final String idCash;
-   final String reason;
+  final String idCash;
+  final String reason;
   RejectAnApplicationEvent({required this.idCash, required this.reason});
 }
 
@@ -69,7 +71,6 @@ class LoadMorePaymentHistoryEvent extends TreasuryEvent {}
 
 class CashRegistersLoading extends TreasuryState {}
 
-
 //eInventario eventos
 class FetchGoldDashboardDataEvent extends TreasuryEvent {
   final bool isRefresh;
@@ -78,22 +79,26 @@ class FetchGoldDashboardDataEvent extends TreasuryEvent {
 }
 
 class LoadMoreGoldBatchesEvent extends TreasuryEvent {}
-//historial de prestamos 
+
+//historial de prestamos
 class InternalLoansRequestsEvent extends TreasuryEvent {
   final String? status;
   final String? search;
   InternalLoansRequestsEvent({this.status, this.search});
 }
+
 class InternalLoansEvent extends TreasuryEvent {}
+
 ///
 class TransactionDetailsEvent extends TreasuryEvent {
   final String idTransaction;
   TransactionDetailsEvent({required this.idTransaction});
 }
+
 ///new tranction
 class NewExtractionEvent extends TreasuryEvent {
   final NewExtractionRequetsEntity newExtractionRequets;
-  NewExtractionEvent({ required this.newExtractionRequets});
+  NewExtractionEvent({required this.newExtractionRequets});
 }
 
 // venta de oro
@@ -105,4 +110,21 @@ class PreviewSaleEvent extends TreasuryEvent {
 class RegisterSaleEvent extends TreasuryEvent {
   final RegisterSaleRequestEntity request;
   RegisterSaleEvent({required this.request});
+}
+
+class ApplyForALoanEvent extends TreasuryEvent {
+  final String lenderName;
+  final double amount;
+  final int termMonths;
+  final double annualInterestRate;
+  final String startDate;
+  final String cajaDestinoId;
+  ApplyForALoanEvent({
+    required this.lenderName,
+    required this.amount,
+    required this.termMonths,
+    required this.annualInterestRate,
+    required this.startDate,
+    required this.cajaDestinoId,
+  });
 }
