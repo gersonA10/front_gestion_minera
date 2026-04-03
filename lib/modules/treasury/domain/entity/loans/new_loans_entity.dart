@@ -14,7 +14,7 @@ class CronogramaEntity {
     final DateTime dueDate;
     final String status;
     final double principal;
-    final dynamic interest;
+    final double interest;
     final double totalInstallment;
 
     CronogramaEntity({

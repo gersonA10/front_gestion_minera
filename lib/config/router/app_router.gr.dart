@@ -385,11 +385,21 @@ class LoanSimulationRoute extends _i31.PageRouteInfo<LoanSimulationRouteArgs> {
   LoanSimulationRoute({
     _i32.Key? key,
     required _i33.NewLoansResponseEntity loan,
+    required _i33.CashResponseEntity cash,
     required String name,
+    required String date,
+    required double annualInterestRate,
     List<_i31.PageRouteInfo>? children,
   }) : super(
          LoanSimulationRoute.name,
-         args: LoanSimulationRouteArgs(key: key, loan: loan, name: name),
+         args: LoanSimulationRouteArgs(
+           key: key,
+           loan: loan,
+           cash: cash,
+           name: name,
+           date: date,
+           annualInterestRate: annualInterestRate,
+         ),
          initialChildren: children,
        );
 
@@ -402,7 +412,10 @@ class LoanSimulationRoute extends _i31.PageRouteInfo<LoanSimulationRouteArgs> {
       return _i15.LoanSimulationScreen(
         key: args.key,
         loan: args.loan,
+        cash: args.cash,
         name: args.name,
+        date: args.date,
+        annualInterestRate: args.annualInterestRate,
       );
     },
   );
@@ -412,18 +425,27 @@ class LoanSimulationRouteArgs {
   const LoanSimulationRouteArgs({
     this.key,
     required this.loan,
+    required this.cash,
     required this.name,
+    required this.date,
+    required this.annualInterestRate,
   });
 
   final _i32.Key? key;
 
   final _i33.NewLoansResponseEntity loan;
 
+  final _i33.CashResponseEntity cash;
+
   final String name;
+
+  final String date;
+
+  final double annualInterestRate;
 
   @override
   String toString() {
-    return 'LoanSimulationRouteArgs{key: $key, loan: $loan, name: $name}';
+    return 'LoanSimulationRouteArgs{key: $key, loan: $loan, cash: $cash, name: $name, date: $date, annualInterestRate: $annualInterestRate}';
   }
 }
 
