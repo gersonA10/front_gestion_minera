@@ -35,3 +35,9 @@ class GetContributionHistoryEvent extends AdminEvent {
 }
 
 class LoadMoreContributionHistoryEvent extends AdminEvent {}
+
+//Detail of request
+class GetRequestDetailEvent extends AdminEvent {
+  final String id;
+  GetRequestDetailEvent(this.id);
+}
