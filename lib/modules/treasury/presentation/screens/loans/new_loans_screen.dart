@@ -1,6 +1,7 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:front_gestion_minera/config/router/app_router.gr.dart';
 import 'package:front_gestion_minera/core/widgets/custom_alert_widget.dart';
 import 'package:front_gestion_minera/injector_container.dart';
 import 'package:front_gestion_minera/modules/treasury/presentation/bloc/treasury_bloc.dart';
@@ -15,7 +16,7 @@ class NewLoansScreen extends StatefulWidget {
 }
 
 class _NewLoansScreenState extends State<NewLoansScreen> {
-  final TextEditingController _prestamista = TextEditingController();
+  final TextEditingController prestamista = TextEditingController();
   final TextEditingController _monto = TextEditingController();
   final TextEditingController _plazo = TextEditingController();
   final TextEditingController _tasa = TextEditingController();
@@ -39,7 +40,7 @@ class _NewLoansScreenState extends State<NewLoansScreen> {
 
   @override
   void dispose() {
-    _prestamista.dispose();
+    prestamista.dispose();
     _monto.dispose();
     _plazo.dispose();
     _tasa.dispose();
@@ -108,23 +109,26 @@ class _NewLoansScreenState extends State<NewLoansScreen> {
           listener: (context, state) {
             if (state is NewLoansSimulateError) {
               CustomAlert.show(
-              context,
-              title: 'Error',
-              message: state.message,
-              type: AlertType.error,
-            );
+                context,
+                title: 'Error',
+                message: state.message,
+                type: AlertType.error,
+              );
             }
           },
           builder: (context, state) {
             if (state is NewLoansSimulateLoading) {
               return const Center(
-                child: CircularProgressIndicator(
-                  color: TColors.amber,
-                ),
+                child: CircularProgressIndicator(color: TColors.amber),
               );
             }
             if (state is NewLoansSimulateLoaded) {
-              
+              context.router.push(
+                LoanSimulationRoute(
+                  loan: state.loan,
+                  name: prestamista.text
+                ),
+              );
             }
             return SingleChildScrollView(
               padding: const EdgeInsets.all(20),
@@ -139,7 +143,7 @@ class _NewLoansScreenState extends State<NewLoansScreen> {
                   _label('Prestamista (Entidad / Persona)'),
                   const SizedBox(height: 8),
                   TextField(
-                    controller: _prestamista,
+                    controller: prestamista,
                     style: const TextStyle(color: TColors.textPrimaryWhite),
                     decoration: _inputDecoration(
                       hint: 'Ej. Banco Nacional, Juan Pérez',
@@ -427,39 +431,50 @@ class _NewLoansScreenState extends State<NewLoansScreen> {
             child: SizedBox(
               height: 52,
               child: ElevatedButton.icon(
-                onPressed: () async{
-                  if (_monto.text.isEmpty || int.tryParse(_monto.text.replaceAll(',', '')) == null) {
+                onPressed: () async {
+                  if (prestamista.text.isEmpty ) {
+                    CustomAlert.show(
+                      context,
+                      title: 'Error',
+                      message: 'Por favor ingrese el nombre del prestamista.',
+                      type: AlertType.error,
+                    );
+                    return;
+                  }
+                  if (_monto.text.isEmpty ||
+                      int.tryParse(_monto.text.replaceAll(',', '')) == null) {
                     CustomAlert.show(
                       context,
                       title: 'Error',
                       message: 'Por favor ingresa un monto válido.',
                       type: AlertType.error,
                     );
-                    return; 
+                    return;
                   }
-                  if (_plazo.text.isEmpty || int.tryParse(_plazo.text) == null) {
+                  if (_plazo.text.isEmpty ||
+                      int.tryParse(_plazo.text) == null) {
                     CustomAlert.show(
                       context,
                       title: 'Error',
                       message: 'Por favor ingresa un plazo válido.',
                       type: AlertType.error,
                     );
-                    return; 
-                    
+                    return;
                   }
-                  if (_tasa.text.isEmpty || double.tryParse(_tasa.text) == null) {
+                  if (_tasa.text.isEmpty ) {
                     CustomAlert.show(
                       context,
                       title: 'Error',
                       message: 'Por favor ingresa una tasa de interés válida.',
                       type: AlertType.error,
                     );
-                    return; 
+                    return;
                   }
                   _treasuryBloc.add(
                     NewLoansSimulateEvent(
                       amount:
-                          double.tryParse(_monto.text.replaceAll(',', '')) ?? 0.0,
+                          double.tryParse(_monto.text.replaceAll(',', '')) ??
+                          0.0,
                       termMonths: int.tryParse(_plazo.text) ?? 0,
                       annualInterestRate: _tasa.text,
                       startDate: _fechaInicio.toIso8601String(),
