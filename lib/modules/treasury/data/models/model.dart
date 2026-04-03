@@ -18,3 +18,4 @@ export 'package:front_gestion_minera/modules/treasury/data/models/loans/loans_li
 export 'package:front_gestion_minera/modules/treasury/data/models/transaction_details_model.dart';
 export 'package:front_gestion_minera/modules/treasury/data/models/gold_inventory.dart/new_extraction_model.dart';
 export 'package:front_gestion_minera/modules/treasury/data/models/gold_inventory.dart/gold_sale_model.dart';
+export 'package:front_gestion_minera/modules/treasury/data/models/loans/loan_details_model.dart';

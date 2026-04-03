@@ -1,0 +1,61 @@
+class LoanDetailsResponseEntity {
+    final bool success;
+    final LoanDetailsDataEntity data;
+
+    LoanDetailsResponseEntity({
+        required this.success,
+        required this.data,
+    });
+}
+
+class LoanDetailsDataEntity {
+    final CabeceraEntity cabecera;
+    final List<CronogramaEntity> cronograma;
+
+    LoanDetailsDataEntity({
+        required this.cabecera,
+        required this.cronograma,
+    });
+}
+
+class CabeceraEntity {
+    final String loanCode;
+    final String estadoEtiqueta;
+    final int montoPrincipal;
+    final String moneda;
+    final int interesTotal;
+    final int totalAPagar;
+    final int saldoPendiente;
+    final int progresoPagoPct;
+
+    CabeceraEntity({
+        required this.loanCode,
+        required this.estadoEtiqueta,
+        required this.montoPrincipal,
+        required this.moneda,
+        required this.interesTotal,
+        required this.totalAPagar,
+        required this.saldoPendiente,
+        required this.progresoPagoPct,
+    });
+}
+
+class CronogramaEntity {
+    final String quotaId;
+    final String mesEtiqueta;
+    final String diaEtiqueta;
+    final String textoCuota;
+    final String estadoCuota;
+    final int montoTotalCuota;
+    final bool permitePago;
+
+    CronogramaEntity({
+        required this.quotaId,
+        required this.mesEtiqueta,
+        required this.diaEtiqueta,
+        required this.textoCuota,
+        required this.estadoCuota,
+        required this.montoTotalCuota,
+        required this.permitePago,
+    });
+}

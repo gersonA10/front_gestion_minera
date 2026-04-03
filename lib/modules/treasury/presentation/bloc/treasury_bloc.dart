@@ -58,19 +58,18 @@ class TreasuryBloc extends Bloc<TreasuryEvent, TreasuryState> {
     on<GetCashRegistersEvent>(_onGetCashRegisters);
     on<ConfirmPaymentEvent>(_onConfirmPayment);
     on<RejectAnApplicationEvent>(_rejectAnApplication);
-
     on<RegisterUrgentExpenseEvent>(_onRegisterUrgentExpense);
     on<FetchGoldDashboardDataEvent>(_onFetchGoldDashboardData);
     on<LoadMoreGoldBatchesEvent>(_onLoadMoreGoldBatches);
     on<GetPaymentHistoryEvent>(_onGetPaymentHistory);
     on<LoadMorePaymentHistoryEvent>(_onLoadMorePaymentHistory);
-
     on<InternalLoansRequestsEvent>(_onFechInternalLoans);
     on<InternalLoansEvent>(_onLoadMoreInternalLoans);
     on<TransactionDetailsEvent>(_onTransactionDetails);
     on<NewExtractionEvent>(_onNewExtraction);
     on<PreviewSaleEvent>(_onPreviewSale);
     on<RegisterSaleEvent>(_onRegisterSale);
+    on<LoanDetailsEvent>(_onLoanDetails);
   }
 
   Future<void> _onFetchTreasuryMetrics(
@@ -632,6 +631,24 @@ class TreasuryBloc extends Bloc<TreasuryEvent, TreasuryState> {
       emit(RegisterSaleError(message: mapErrorMessage(error.key)));
     } catch (e) {
       emit(RegisterSaleError(message: 'Error inesperado: $e'));
+    }
+  }
+
+  Future<void> _onLoanDetails(
+    LoanDetailsEvent event,
+    Emitter<TreasuryState> emit,
+  ) async {
+    emit(LoanDetailsLoading());
+    try {
+      final response = await repository.getloanDatails(event.idLoan);
+      emit(LoanDetailsLoaded(loanDetails:  response));
+    } on BaseApiException catch (error) {
+      if (error.key == DioExceptionKey.unauthorised) {
+        return;
+      }
+      emit(LoanDetailsError(mapErrorMessage(error.key)));
+    } catch (e) {
+      emit(LoanDetailsError( 'Error inesperado: $e'));
     }
   }
 }

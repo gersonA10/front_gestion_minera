@@ -16,3 +16,4 @@ export 'package:front_gestion_minera/modules/treasury/domain/entity/loans/loans_
 export 'package:front_gestion_minera/modules/treasury/domain/entity/transaction_details_entity.dart';
 export 'package:front_gestion_minera/modules/treasury/domain/entity/goldInventory/new_extraction_entity.dart';
 export 'package:front_gestion_minera/modules/treasury/domain/entity/goldInventory/gold_sale_entity.dart';
+export 'package:front_gestion_minera/modules/treasury/domain/entity/loans/loan_details_entity.dart';

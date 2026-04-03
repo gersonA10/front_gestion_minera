@@ -106,3 +106,8 @@ class RegisterSaleEvent extends TreasuryEvent {
   final RegisterSaleRequestEntity request;
   RegisterSaleEvent({required this.request});
 }
+
+class LoanDetailsEvent extends TreasuryEvent {
+  final String idLoan;
+  LoanDetailsEvent({required this.idLoan});
+}

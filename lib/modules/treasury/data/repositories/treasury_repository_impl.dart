@@ -178,4 +178,9 @@ class TreasuryRepositoryImpl implements TreasuryRepository {
     final requestModel = RegisterSaleRequestModel.fromEntity(request);
     return await datasource.registerSale(requestModel);
   }
+  
+  @override
+  Future<LoanDetailsResponseEntity> getloanDatails(String idLoan) async{
+    return await datasource.getloanDatails(idLoan);
+  }
 }

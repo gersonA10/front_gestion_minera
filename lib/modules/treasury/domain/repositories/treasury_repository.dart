@@ -63,4 +63,7 @@ abstract class TreasuryRepository {
   Future<RegisterSaleResponseEntity> registerSale(
     RegisterSaleRequestEntity request,
   );
+  Future<LoanDetailsResponseEntity> getloanDatails(
+    String idLoan,
+  );
 }
