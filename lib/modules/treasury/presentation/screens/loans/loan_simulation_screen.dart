@@ -1,8 +1,18 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
- @RoutePage()
+import 'package:front_gestion_minera/utils/date_util.dart';
+
+import '../../../domain/entity/entity.dart';
+
+@RoutePage()
 class LoanSimulationScreen extends StatelessWidget {
-  const LoanSimulationScreen({super.key});
+  final NewLoansResponseEntity loan;
+  final String name;
+  const LoanSimulationScreen({
+    super.key,
+    required this.loan,
+    required this.name,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -10,12 +20,8 @@ class LoanSimulationScreen extends StatelessWidget {
       backgroundColor: const Color(0xFF0D1117),
       appBar: AppBar(
         backgroundColor: const Color(0xFF0D1117),
-        elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.white),
-          onPressed: () => Navigator.of(context).pop(),
-        ),
-        centerTitle: true,
+        foregroundColor: Colors.white,
+        iconTheme: const IconThemeData(color: Colors.white),
         title: const Text(
           'Simulación de Préstamo',
           style: TextStyle(
@@ -24,12 +30,6 @@ class LoanSimulationScreen extends StatelessWidget {
             fontWeight: FontWeight.w600,
           ),
         ),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.info_outline, color: Colors.white),
-            onPressed: () {},
-          ),
-        ],
       ),
       body: Column(
         children: [
@@ -39,38 +39,37 @@ class LoanSimulationScreen extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const _LoanSummaryCard(),
+                  LoanSummaryCard(loan: loan),
                   const SizedBox(height: 24),
-                  const _PaymentScheduleHeader(),
-                  const SizedBox(height: 12),
-                  _PaymentInstallmentCard(
-                    number: 1,
-                    dueDate: '15 Mayo 2024',
-                    amount: 933.33,
-                    capital: 833.33,
-                    interest: 100.00,
-                    status: InstallmentStatus.pending,
+                  const Text(
+                    'Cronograma de Pagos',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 14,
+                      fontWeight: FontWeight.w700,
+                    ),
                   ),
                   const SizedBox(height: 12),
-                  _PaymentInstallmentCard(
-                    number: 2,
-                    dueDate: '15 Jun 2024',
-                    amount: 933.33,
-                    capital: 833.33,
-                    interest: 100.00,
-                    status: InstallmentStatus.future,
+                  ListView.builder(
+                    shrinkWrap: true,
+                    physics: const NeverScrollableScrollPhysics(),
+                    itemCount: loan.cronograma.length,
+                    itemBuilder: (context, index) {
+                      final installment = loan.cronograma[index];
+                      return Padding(
+                        padding: EdgeInsets.symmetric(vertical: 4.0),
+                        child: PaymentInstallmentCard(
+                          number: installment.installmentNumber,
+                          dueDate: formatDate(installment.dueDate),
+                          amount: installment.totalInstallment,
+                          capital: installment.principal,
+                          interest: installment.interest,
+                          status: installment.status,
+                        ),
+                      );
+                    },
                   ),
-                  const SizedBox(height: 12),
-                  _PaymentInstallmentCard(
-                    number: 3,
-                    dueDate: '15 Jul 2024',
-                    amount: 933.33,
-                    capital: 833.33,
-                    interest: 100.00,
-                    status: InstallmentStatus.future,
-                  ),
-                  const SizedBox(height: 16),
-                  const _TotalsCard(),
+                  TotalsCard(loan: loan),
                   const SizedBox(height: 24),
                 ],
               ),
@@ -83,8 +82,9 @@ class LoanSimulationScreen extends StatelessWidget {
   }
 }
 
-class _LoanSummaryCard extends StatelessWidget {
-  const _LoanSummaryCard();
+class LoanSummaryCard extends StatelessWidget {
+  final NewLoansResponseEntity loan;
+  const LoanSummaryCard({super.key, required this.loan});
 
   @override
   Widget build(BuildContext context) {
@@ -107,8 +107,8 @@ class _LoanSummaryCard extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 8),
-          const Text(
-            '\$11,200.00',
+          Text(
+            loan.summary.totalPayable.toString(),
             style: TextStyle(
               color: Colors.white,
               fontSize: 16,
@@ -153,14 +153,14 @@ class _LoanSummaryCard extends StatelessWidget {
               Expanded(
                 child: _SummaryItem(
                   label: 'Capital Solicitado',
-                  value: '\$10,000.00',
+                  value: '${loan.summary.amount}',
                   valueColor: Colors.white,
                 ),
               ),
               Expanded(
                 child: _SummaryItem(
                   label: 'Interés Total',
-                  value: '\$1,200.00',
+                  value: '${loan.summary.totalInterest}',
                   valueColor: const Color(0xFF2EA043),
                 ),
               ),
@@ -172,14 +172,14 @@ class _LoanSummaryCard extends StatelessWidget {
               Expanded(
                 child: _SummaryItem(
                   label: 'Cuota Mensual',
-                  value: '\$933.33',
+                  value: '${loan.summary.monthlyInstallment}',
                   valueColor: Colors.white,
                 ),
               ),
               Expanded(
                 child: _SummaryItem(
                   label: 'Nº Cuotas',
-                  value: '12 Meses',
+                  value: '${loan.summary.termMonths} Meses',
                   valueColor: Colors.white,
                 ),
               ),
@@ -229,48 +229,16 @@ class _SummaryItem extends StatelessWidget {
   }
 }
 
-class _PaymentScheduleHeader extends StatelessWidget {
-  const _PaymentScheduleHeader();
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        const Text(
-          'Cronograma de Pagos',
-          style: TextStyle(
-            color: Colors.white,
-            fontSize: 14,
-            fontWeight: FontWeight.w700,
-          ),
-        ),
-        GestureDetector(
-          onTap: () {},
-          child: const Text(
-            'Ver todo',
-            style: TextStyle(
-              color: Color(0xFF3B82F6),
-              fontSize: 12,
-              fontWeight: FontWeight.w500,
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-}
-enum InstallmentStatus { pending, future, paid }
-
-class _PaymentInstallmentCard extends StatelessWidget {
+class PaymentInstallmentCard extends StatelessWidget {
   final int number;
   final String dueDate;
   final double amount;
   final double capital;
   final double interest;
-  final InstallmentStatus status;
+  final String status;
 
-  const _PaymentInstallmentCard({
+  const PaymentInstallmentCard({
+    super.key,
     required this.number,
     required this.dueDate,
     required this.amount,
@@ -278,28 +246,6 @@ class _PaymentInstallmentCard extends StatelessWidget {
     required this.interest,
     required this.status,
   });
-
-  Color get _statusColor {
-    switch (status) {
-      case InstallmentStatus.pending:
-        return const Color(0xFF2EA043);
-      case InstallmentStatus.future:
-        return Colors.grey;
-      case InstallmentStatus.paid:
-        return const Color(0xFF3B82F6);
-    }
-  }
-
-  String get _statusLabel {
-    switch (status) {
-      case InstallmentStatus.pending:
-        return 'Pendiente';
-      case InstallmentStatus.future:
-        return 'Futura';
-      case InstallmentStatus.paid:
-        return 'Pagada';
-    }
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -343,10 +289,7 @@ class _PaymentInstallmentCard extends StatelessWidget {
                     const SizedBox(height: 2),
                     Text(
                       'Vence: $dueDate',
-                      style: TextStyle(
-                        color: Colors.grey[500],
-                        fontSize: 11,
-                      ),
+                      style: TextStyle(color: Colors.grey[500], fontSize: 11),
                     ),
                   ],
                 ),
@@ -355,7 +298,7 @@ class _PaymentInstallmentCard extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
                   Text(
-                    '\$${amount.toStringAsFixed(2)}',
+                    amount.toStringAsFixed(2),
                     style: const TextStyle(
                       color: Colors.white,
                       fontSize: 14,
@@ -370,15 +313,23 @@ class _PaymentInstallmentCard extends StatelessWidget {
                         width: 8,
                         height: 8,
                         decoration: BoxDecoration(
-                          color: _statusColor,
+                          color: status == 'Pendiente'
+                              ? const Color(0xFF2EA043)
+                              : status == 'Futura'
+                              ? Colors.grey
+                              : const Color(0xFF3B82F6),
                           shape: BoxShape.circle,
                         ),
                       ),
                       const SizedBox(width: 6),
                       Text(
-                        _statusLabel,
+                        status,
                         style: TextStyle(
-                          color: _statusColor,
+                          color: status == 'Pendiente'
+                              ? const Color(0xFF2EA043)
+                              : status == 'Futura'
+                              ? Colors.grey
+                              : const Color(0xFF3B82F6),
                           fontSize: 11,
                           fontWeight: FontWeight.w500,
                         ),
@@ -396,13 +347,10 @@ class _PaymentInstallmentCard extends StatelessWidget {
             children: [
               Text(
                 'Capital: ',
-                style: TextStyle(
-                  color: Colors.grey[500],
-                  fontSize: 11,
-                ),
+                style: TextStyle(color: Colors.grey[500], fontSize: 11),
               ),
               Text(
-                '\$${capital.toStringAsFixed(2)}',
+                capital.toStringAsFixed(2),
                 style: const TextStyle(
                   color: Color(0xFF3B82F6),
                   fontSize: 11,
@@ -412,13 +360,10 @@ class _PaymentInstallmentCard extends StatelessWidget {
               const SizedBox(width: 24),
               Text(
                 'Interés: ',
-                style: TextStyle(
-                  color: Colors.grey[500],
-                  fontSize: 11,
-                ),
+                style: TextStyle(color: Colors.grey[500], fontSize: 11),
               ),
               Text(
-                '\$${interest.toStringAsFixed(2)}',
+                interest.toStringAsFixed(2),
                 style: const TextStyle(
                   color: Colors.white,
                   fontSize: 11,
@@ -433,8 +378,9 @@ class _PaymentInstallmentCard extends StatelessWidget {
   }
 }
 
-class _TotalsCard extends StatelessWidget {
-  const _TotalsCard();
+class TotalsCard extends StatelessWidget {
+  final NewLoansResponseEntity loan;
+  const TotalsCard({super.key, required this.loan});
 
   @override
   Widget build(BuildContext context) {
@@ -444,23 +390,20 @@ class _TotalsCard extends StatelessWidget {
       decoration: BoxDecoration(
         color: const Color(0xFF161B22),
         borderRadius: BorderRadius.circular(14),
-        border: Border.all(
-          color: Colors.grey[800]!,
-          width: 0.5,
-        ),
+        border: Border.all(color: Colors.grey[800]!, width: 0.5),
       ),
       child: Column(
         children: [
           _TotalRow(
             label: 'Total Capital',
-            value: '\$10,000.00',
+            value: '${loan.summary.amount}',
             valueColor: Colors.white,
             isBold: false,
           ),
           const SizedBox(height: 12),
           _TotalRow(
             label: 'Total Interés',
-            value: '\$1,200.00',
+            value: '${loan.summary.totalInterest}',
             valueColor: Colors.white,
             isBold: false,
           ),
@@ -469,7 +412,7 @@ class _TotalsCard extends StatelessWidget {
           const SizedBox(height: 14),
           _TotalRow(
             label: 'Total General',
-            value: '\$11,200.00',
+            value: '${loan.summary.totalPayable}',
             valueColor: const Color(0xFF2EA043),
             isBold: true,
           ),
@@ -536,10 +479,7 @@ class _ConfirmButton extends StatelessWidget {
         icon: const Icon(Icons.check, size: 20),
         label: const Text(
           'Confirmar',
-          style: TextStyle(
-            fontSize: 14,
-            fontWeight: FontWeight.w600,
-          ),
+          style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
         ),
         style: ElevatedButton.styleFrom(
           backgroundColor: const Color(0xFF2563EB),

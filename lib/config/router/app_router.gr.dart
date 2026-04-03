@@ -381,18 +381,50 @@ class LoanRoute extends _i31.PageRouteInfo<void> {
 
 /// generated route for
 /// [_i15.LoanSimulationScreen]
-class LoanSimulationRoute extends _i31.PageRouteInfo<void> {
-  const LoanSimulationRoute({List<_i31.PageRouteInfo>? children})
-    : super(LoanSimulationRoute.name, initialChildren: children);
+class LoanSimulationRoute extends _i31.PageRouteInfo<LoanSimulationRouteArgs> {
+  LoanSimulationRoute({
+    _i32.Key? key,
+    required _i33.NewLoansResponseEntity loan,
+    required String name,
+    List<_i31.PageRouteInfo>? children,
+  }) : super(
+         LoanSimulationRoute.name,
+         args: LoanSimulationRouteArgs(key: key, loan: loan, name: name),
+         initialChildren: children,
+       );
 
   static const String name = 'LoanSimulationRoute';
 
   static _i31.PageInfo page = _i31.PageInfo(
     name,
     builder: (data) {
-      return const _i15.LoanSimulationScreen();
+      final args = data.argsAs<LoanSimulationRouteArgs>();
+      return _i15.LoanSimulationScreen(
+        key: args.key,
+        loan: args.loan,
+        name: args.name,
+      );
     },
   );
+}
+
+class LoanSimulationRouteArgs {
+  const LoanSimulationRouteArgs({
+    this.key,
+    required this.loan,
+    required this.name,
+  });
+
+  final _i32.Key? key;
+
+  final _i33.NewLoansResponseEntity loan;
+
+  final String name;
+
+  @override
+  String toString() {
+    return 'LoanSimulationRouteArgs{key: $key, loan: $loan, name: $name}';
+  }
 }
 
 /// generated route for
