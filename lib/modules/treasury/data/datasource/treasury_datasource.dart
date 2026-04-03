@@ -2,6 +2,7 @@ import '../../../../core/networking/http_services.dart';
 import '../../domain/entity/entity.dart';
 import '../models/model.dart';
 
+
 class TreasuryDatasource {
   final ApiClient apiClient;
 
@@ -312,7 +313,25 @@ class TreasuryDatasource {
     return RegisterSaleResponseModel.fromJson(response['data']);
   }
 
-  Future<ApplyForALoanResponseEntity> postApplyForAloan(
+  Future<NewLoansResponseEntity> postNewLoansSimulate(
+    double amount,
+    int termMonths,
+    String annualInterestRate,
+    String startDate,
+  ) async {
+    final response = await apiClient.post(
+      '/api/treasury/corporate-loans/simulate',
+      data: {
+        "amount": amount,
+        "term_months": termMonths,
+        "annual_interest_rate": annualInterestRate,
+        "start_date": startDate,
+      },
+      operationName: 'postNewLoansSimulate',
+    );
+    return NewLoansResponseModel.fromJson(response['data']);
+  }
+    Future<ApplyForALoanResponseEntity> postApplyForAloan(
     String lenderName,
     double amount,
     int termMonths,

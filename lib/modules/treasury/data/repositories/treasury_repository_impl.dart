@@ -180,6 +180,10 @@ class TreasuryRepositoryImpl implements TreasuryRepository {
   }
   
   @override
+  Future<NewLoansResponseEntity> postNewLoansSimulate(double amount, int termMonths, String annualInterestRate, String startDate)async{
+    return await datasource.postNewLoansSimulate(amount, termMonths, annualInterestRate, startDate);
+  }
+  @override
   Future<ApplyForALoanResponseEntity> applyForALoan(String lenderName, double amount, int termMonths, double annualInterestRate, String startDate, String cajaDestinoId)async {
     return await datasource.postApplyForAloan(lenderName, amount, termMonths, annualInterestRate, startDate, cajaDestinoId);
   }

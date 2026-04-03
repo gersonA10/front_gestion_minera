@@ -71,6 +71,8 @@ class TreasuryBloc extends Bloc<TreasuryEvent, TreasuryState> {
     on<PreviewSaleEvent>(_onPreviewSale);
     on<RegisterSaleEvent>(_onRegisterSale);
     on<ApplyForALoanEvent>(_onApplyForALoan);
+    on<NewLoansSimulateEvent>(_onNewLoansSimulate);
+
   }
 
   Future<void> _onFetchTreasuryMetrics(
@@ -642,7 +644,29 @@ class TreasuryBloc extends Bloc<TreasuryEvent, TreasuryState> {
     }
   }
 
-  Future<void> _onApplyForALoan(
+  Future<void> _onNewLoansSimulate(
+    NewLoansSimulateEvent event,
+    Emitter<TreasuryState> emit,
+  ) async {
+    emit(NewLoansSimulateLoading());
+    try {
+      final response = await repository.postNewLoansSimulate(
+        event.amount,
+        event.termMonths,
+        event.annualInterestRate,
+        event.startDate,
+      );
+      emit(NewLoansSimulateLoaded(loan: response));
+    } on BaseApiException catch (error) {
+      if (error.key == DioExceptionKey.unauthorised) {
+        return;
+      }
+      emit(NewLoansSimulateError(message: mapErrorMessage(error.key)));
+    } catch (e) {
+      emit(NewLoansSimulateError(message: 'Error inesperado: $e'));
+    }
+  }
+    Future<void> _onApplyForALoan(
     ApplyForALoanEvent event,
     Emitter<TreasuryState> emit,
   ) async {

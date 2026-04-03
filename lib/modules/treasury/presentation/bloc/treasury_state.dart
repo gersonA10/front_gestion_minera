@@ -279,3 +279,15 @@ class ApplyForALoanError extends TreasuryState {
   final String message;
   ApplyForALoanError({required this.message});
 }
+// simulacion de nuevo prestamo
+class NewLoansSimulateLoading extends TreasuryState {}
+
+class NewLoansSimulateLoaded extends TreasuryState {
+  final NewLoansResponseEntity loan;
+  NewLoansSimulateLoaded({required this.loan});
+}
+
+class NewLoansSimulateError extends TreasuryState {
+  final String message;
+  NewLoansSimulateError({required this.message});
+}
