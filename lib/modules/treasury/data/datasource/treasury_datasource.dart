@@ -331,4 +331,27 @@ class TreasuryDatasource {
     );
     return NewLoansResponseModel.fromJson(response['data']);
   }
+    Future<ApplyForALoanResponseEntity> postApplyForAloan(
+    String lenderName,
+    double amount,
+    int termMonths,
+    double annualInterestRate,
+    String startDate,
+    String cajaDestinoId,
+  ) async {
+    final data =  {
+        "lender_name": lenderName,
+        "amount": amount,
+        "term_months": termMonths,
+        "annual_interest_rate": annualInterestRate,
+        "start_date": startDate,
+        "caja_destino_id": cajaDestinoId,
+      };
+    final response = await apiClient.post(
+      '/api/treasury/corporate-loans',
+      data:data,
+      operationName: 'postApplyForAloan',
+    );
+    return ApplyForALoanResponseModel.fromJson(response['data']);
+  }
 }
