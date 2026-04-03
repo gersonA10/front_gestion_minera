@@ -106,3 +106,16 @@ class RegisterSaleEvent extends TreasuryEvent {
   final RegisterSaleRequestEntity request;
   RegisterSaleEvent({required this.request});
 }
+
+//simulacion de nuevo prestamo
+class NewLoansSimulateEvent extends TreasuryEvent {
+  final double amount;
+  final int termMonths;
+  final String annualInterestRate;
+  final String startDate;
+  NewLoansSimulateEvent({
+    required this.amount,
+    required this.termMonths,
+    required this.annualInterestRate,
+    required this.startDate,
+  });}
