@@ -35,41 +35,29 @@ class LoanDetailsScreen extends StatelessWidget {
           children: [
             const _LoanInfoCard(),
             const SizedBox(height: 24),
-            const _PaymentScheduleHeader(),
-            const SizedBox(height: 12),
-            _buildInstallment(
-              month: 'JUL',
-              day: '15',
-              number: 0,
-              label: '(Ejemplo)',
-              amount: 4200.00,
-              status: InstallmentStatus.overdue,
+            Text(
+              'Cronograma de Pagos',
+              style: TextStyle(
+                color: TColors.white,
+                fontSize: 14,
+                fontWeight: FontWeight.w700,
+              ),
             ),
             const SizedBox(height: 12),
-            _buildInstallment(
-              month: 'AGO',
-              day: '15',
-              number: 1,
-              amount: 4200.00,
-              status: InstallmentStatus.paid,
+            ListView.builder(
+              shrinkWrap: true,
+              itemCount: 3,
+              itemBuilder: (context, index) {
+                return _buildInstallment(
+                  month: 'JUL',
+                  day: '15',
+                  number: 0,
+                  label: '(Ejemplo)',
+                  amount: 4200.00,
+                  status: InstallmentStatus.overdue,
+                );
+              },
             ),
-            const SizedBox(height: 12),
-            _buildInstallment(
-              month: 'SEP',
-              day: '15',
-              number: 2,
-              amount: 4200.00,
-              status: InstallmentStatus.pending,
-            ),
-            const SizedBox(height: 12),
-            _buildInstallment(
-              month: 'OCT',
-              day: '15',
-              number: 3,
-              amount: 4200.00,
-              status: InstallmentStatus.scheduled,
-            ),
-            const SizedBox(height: 32),
           ],
         ),
       ),
@@ -95,7 +83,6 @@ class LoanDetailsScreen extends StatelessWidget {
   }
 }
 
-
 class _LoanInfoCard extends StatelessWidget {
   const _LoanInfoCard();
 
@@ -106,10 +93,7 @@ class _LoanInfoCard extends StatelessWidget {
       decoration: BoxDecoration(
         color: TColors.cardBgDark,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(
-          color: TColors.cardBorderDark,
-          width: 1,
-        ),
+        border: Border.all(color: TColors.cardBorderDark, width: 1),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -133,56 +117,58 @@ class _LoanInfoCard extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Badge "Activo"
-                Align(
-                  alignment: Alignment.topRight,
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 10,
-                      vertical: 4,
-                    ),
-                    decoration: BoxDecoration(
-                      color: TColors.green.withValues(alpha: 0.15),
-                      borderRadius: BorderRadius.circular(20),
-                      border: Border.all(
-                        color: TColors.green.withValues(alpha: 0.3),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Container(
+                      width: 44,
+                      height: 44,
+                      decoration: BoxDecoration(
+                        color: TColors.amberLight,
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: const Icon(
+                        Icons.account_balance,
+                        color: TColors.amber,
+                        size: 22,
                       ),
                     ),
-                    child: const Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Icon(
-                          Icons.check_circle_outline,
-                          color: TColors.green,
-                          size: 13,
+                    Align(
+                      alignment: Alignment.topRight,
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 10,
+                          vertical: 4,
                         ),
-                        SizedBox(width: 4),
-                        Text(
-                          'Activo',
-                          style: TextStyle(
-                            color: TColors.green,
-                            fontSize: 11,
-                            fontWeight: FontWeight.w600,
+                        decoration: BoxDecoration(
+                          color: TColors.green.withValues(alpha: 0.15),
+                          borderRadius: BorderRadius.circular(20),
+                          border: Border.all(
+                            color: TColors.green.withValues(alpha: 0.3),
                           ),
                         ),
-                      ],
+                        child: const Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(
+                              Icons.check_circle_outline,
+                              color: TColors.green,
+                              size: 13,
+                            ),
+                            SizedBox(width: 4),
+                            Text(
+                              'Activo',
+                              style: TextStyle(
+                                color: TColors.green,
+                                fontSize: 11,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
                     ),
-                  ),
-                ),
-                const SizedBox(height: 8),
-                // Bank icon
-                Container(
-                  width: 44,
-                  height: 44,
-                  decoration: BoxDecoration(
-                    color: TColors.amberLight,
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: const Icon(
-                    Icons.account_balance,
-                    color: TColors.amber,
-                    size: 22,
-                  ),
+                  ],
                 ),
                 const SizedBox(height: 12),
                 const Text(
@@ -221,9 +207,8 @@ class _LoanInfoCard extends StatelessWidget {
               ],
             ),
           ),
-          // Interest & Total boxes
           Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16),
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
             child: Row(
               children: const [
                 Expanded(
@@ -244,8 +229,6 @@ class _LoanInfoCard extends StatelessWidget {
               ],
             ),
           ),
-          const SizedBox(height: 12),
-          // Saldo pendiente
           Padding(
             padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
             child: Container(
@@ -319,7 +302,6 @@ class _LoanInfoCard extends StatelessWidget {
   }
 }
 
-
 class _InfoBox extends StatelessWidget {
   final IconData icon;
   final String label;
@@ -381,39 +363,6 @@ class _InfoBox extends StatelessWidget {
 // ─────────────────────────────────────────────
 // Payment Schedule Header
 // ─────────────────────────────────────────────
-
-class _PaymentScheduleHeader extends StatelessWidget {
-  const _PaymentScheduleHeader();
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        const Text(
-          'Cronograma de Pagos',
-          style: TextStyle(
-            color: TColors.white,
-            fontSize: 14,
-            fontWeight: FontWeight.w700,
-          ),
-        ),
-        GestureDetector(
-          onTap: () {},
-          child: Text(
-            'Ver todo',
-            style: TextStyle(
-              color: TColors.amber.withValues(alpha: 0.8),
-              fontSize: 12,
-              fontWeight: FontWeight.w500,
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-}
-
 
 enum InstallmentStatus { overdue, paid, pending, scheduled }
 
@@ -504,200 +453,204 @@ class InstallmentCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final bool isPending = status == InstallmentStatus.pending;
 
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(14),
-      child: Container(
-        width: double.infinity,
-        decoration: BoxDecoration(
-          color: TColors.cardBgDark,
-          borderRadius: BorderRadius.circular(14),
-          border: Border.all(
-            color: TColors.cardBorderDark.withValues(alpha: 0.3),
+    return Padding(
+      padding: EdgeInsets.symmetric(vertical: 8),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(14),
+        child: Container(
+          width: double.infinity,
+          decoration: BoxDecoration(
+            color: TColors.cardBgDark,
+            borderRadius: BorderRadius.circular(14),
+            border: Border.all(
+              color: TColors.cardBorderDark.withValues(alpha: 0.3),
+            ),
           ),
-        ),
-        child: Stack(
-          children: [
-            Positioned(
-              left: 0,
-              top: 0,
-              bottom: 0,
-              child: Container(
-                width: 3,
-                decoration: BoxDecoration(
-                  color: _borderColor,
-                  borderRadius: const BorderRadius.only(
-                    topLeft: Radius.circular(14),
-                    bottomLeft: Radius.circular(14),
+          child: Stack(
+            children: [
+              Positioned(
+                left: 0,
+                top: 0,
+                bottom: 0,
+                child: Container(
+                  width: 3,
+                  decoration: BoxDecoration(
+                    color: _borderColor,
+                    borderRadius: const BorderRadius.only(
+                      topLeft: Radius.circular(14),
+                      bottomLeft: Radius.circular(14),
+                    ),
                   ),
                 ),
               ),
-            ),
-            Column(
-              children: [
-                if (isPending)
-                  Container(
-                    width: double.infinity,
-                    alignment: Alignment.centerRight,
-                    padding: const EdgeInsets.only(right: 12, top: 8),
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 10,
-                        vertical: 3,
-                      ),
-                      decoration: BoxDecoration(
-                        color: TColors.amber,
-                        borderRadius: BorderRadius.circular(4),
-                      ),
-                      child: const Text(
-                        'PRÓXIMO PAGO',
-                        style: TextStyle(
-                          color: TColors.bgColor,
-                          fontSize: 9,
-                          fontWeight: FontWeight.w700,
-                          letterSpacing: 0.5,
+              Column(
+                children: [
+                  if (isPending)
+                    Container(
+                      width: double.infinity,
+                      alignment: Alignment.centerRight,
+                      padding: const EdgeInsets.only(right: 12, top: 8),
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 10,
+                          vertical: 3,
+                        ),
+                        decoration: BoxDecoration(
+                          color: TColors.amber,
+                          borderRadius: BorderRadius.circular(4),
+                        ),
+                        child: const Text(
+                          'PRÓXIMO PAGO',
+                          style: TextStyle(
+                            color: TColors.bgColor,
+                            fontSize: 9,
+                            fontWeight: FontWeight.w700,
+                            letterSpacing: 0.5,
+                          ),
                         ),
                       ),
                     ),
-                  ),
-                Padding(
-                  padding: EdgeInsets.fromLTRB(
-                    16, 
-                    isPending ? 6 : 14,
-                    14,
-                    14,
-                  ),
-                  child: Row(
-                    children: [
-                      SizedBox(
-                        width: 44,
-                        child: Column(
-                          children: [
-                            Text(
-                              month,
-                              style: TextStyle(
-                                color: _statusColor,
-                                fontSize: 10,
-                                fontWeight: FontWeight.w700,
-                                letterSpacing: 0.5,
-                              ),
-                            ),
-                            Text(
-                              day,
-                              style: TextStyle(
-                                color: _statusColor,
-                                fontSize: 16,
-                                fontWeight: FontWeight.w700,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              'Cuota #$number${label != null ? ' $label' : ''}',
-                              style: const TextStyle(
-                                color: TColors.white,
-                                fontSize: 13,
-                                fontWeight: FontWeight.w600,
-                              ),
-                            ),
-                            const SizedBox(height: 3),
-                            Row(
-                              children: [
-                                Icon(
-                                  _statusIcon,
+                  Padding(
+                    padding: EdgeInsets.fromLTRB(
+                      16,
+                      isPending ? 6 : 14,
+                      14,
+                      14,
+                    ),
+                    child: Row(
+                      children: [
+                        SizedBox(
+                          width: 44,
+                          child: Column(
+                            children: [
+                              Text(
+                                month,
+                                style: TextStyle(
                                   color: _statusColor,
-                                  size: 12,
+                                  fontSize: 10,
+                                  fontWeight: FontWeight.w700,
+                                  letterSpacing: 0.5,
                                 ),
-                                const SizedBox(width: 4),
-                                Text(
-                                  _statusLabel,
-                                  style: TextStyle(
-                                    color: _statusColor,
-                                    fontSize: 11,
-                                    fontWeight: FontWeight.w500,
-                                  ),
+                              ),
+                              Text(
+                                day,
+                                style: TextStyle(
+                                  color: _statusColor,
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w700,
                                 ),
-                              ],
-                            ),
-                          ],
-                        ),
-                      ),
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.end,
-                        children: [
-                          Text(
-                            '\$${amount.toStringAsFixed(2)}',
-                            style: TextStyle(
-                              color: status == InstallmentStatus.overdue
-                                  ? TColors.danger
-                                  : TColors.white,
-                              fontSize: 14,
-                              fontWeight: FontWeight.w700,
-                            ),
+                              ),
+                            ],
                           ),
-                          if (_actionLabel != null) ...[
-                            const SizedBox(height: 3),
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                'Cuota #$number${label != null ? ' $label' : ''}',
+                                style: const TextStyle(
+                                  color: TColors.white,
+                                  fontSize: 13,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                              const SizedBox(height: 3),
+                              Row(
+                                children: [
+                                  Icon(
+                                    _statusIcon,
+                                    color: _statusColor,
+                                    size: 12,
+                                  ),
+                                  const SizedBox(width: 4),
+                                  Text(
+                                    _statusLabel,
+                                    style: TextStyle(
+                                      color: _statusColor,
+                                      fontSize: 11,
+                                      fontWeight: FontWeight.w500,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ),
+                        ),
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.end,
+                          children: [
                             Text(
-                              _actionLabel!,
+                              '\$${amount.toStringAsFixed(2)}',
                               style: TextStyle(
                                 color: status == InstallmentStatus.overdue
                                     ? TColors.danger
-                                    : TColors.textSecondary1,
-                                fontSize: 10,
-                                fontWeight: FontWeight.w500,
-                                decoration: status == InstallmentStatus.overdue
-                                    ? TextDecoration.underline
-                                    : TextDecoration.none,
-                                decorationColor: TColors.danger,
+                                    : TColors.white,
+                                fontSize: 14,
+                                fontWeight: FontWeight.w700,
                               ),
                             ),
+                            if (_actionLabel != null) ...[
+                              const SizedBox(height: 3),
+                              Text(
+                                _actionLabel!,
+                                style: TextStyle(
+                                  color: status == InstallmentStatus.overdue
+                                      ? TColors.danger
+                                      : TColors.textSecondary1,
+                                  fontSize: 10,
+                                  fontWeight: FontWeight.w500,
+                                  decoration:
+                                      status == InstallmentStatus.overdue
+                                      ? TextDecoration.underline
+                                      : TextDecoration.none,
+                                  decorationColor: TColors.danger,
+                                ),
+                              ),
+                            ],
                           ],
-                        ],
-                      ),
-                    ],
+                        ),
+                      ],
+                    ),
                   ),
-                ),
-                // Botón pago anticipado para pendiente
-                if (isPending)
-                  Padding(
-                    padding: const EdgeInsets.fromLTRB(14, 0, 14, 14),
-                    child: SizedBox(
-                      width: double.infinity,
-                      height: 40,
-                      child: OutlinedButton.icon(
-                        onPressed: () {},
-                        icon: const Icon(
-                          Icons.account_balance_wallet_outlined,
-                          size: 15,
-                        ),
-                        label: const Text(
-                          'Registrar Pago Anticipado',
-                          style: TextStyle(
-                            fontSize: 12,
-                            fontWeight: FontWeight.w600,
+                  // Botón pago anticipado para pendiente
+                  if (isPending)
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(14, 0, 14, 14),
+                      child: SizedBox(
+                        width: double.infinity,
+                        height: 40,
+                        child: OutlinedButton.icon(
+                          onPressed: () {},
+                          icon: const Icon(
+                            Icons.account_balance_wallet_outlined,
+                            size: 15,
                           ),
-                        ),
-                        style: OutlinedButton.styleFrom(
-                          foregroundColor: TColors.amber,
-                          side: BorderSide(
-                            color: TColors.amber.withValues(alpha: 0.4),
+                          label: const Text(
+                            'Registrar Pago Anticipado',
+                            style: TextStyle(
+                              fontSize: 12,
+                              fontWeight: FontWeight.w600,
+                            ),
                           ),
-                          backgroundColor: TColors.amberLight,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(10),
+                          style: OutlinedButton.styleFrom(
+                            foregroundColor: TColors.amber,
+                            side: BorderSide(
+                              color: TColors.amber.withValues(alpha: 0.4),
+                            ),
+                            backgroundColor: TColors.amberLight,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(10),
+                            ),
                           ),
                         ),
                       ),
                     ),
-                  ),
-              ],
-            ),
-          ],
+                ],
+              ),
+            ],
+          ),
         ),
       ),
     );
