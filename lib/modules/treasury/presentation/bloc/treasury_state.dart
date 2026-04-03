@@ -284,7 +284,8 @@ class NewLoansSimulateLoading extends TreasuryState {}
 
 class NewLoansSimulateLoaded extends TreasuryState {
   final NewLoansResponseEntity loan;
-  NewLoansSimulateLoaded({required this.loan});
+    final CashResponseEntity cash;
+  NewLoansSimulateLoaded({required this.loan, required this.cash});
 }
 
 class NewLoansSimulateError extends TreasuryState {
