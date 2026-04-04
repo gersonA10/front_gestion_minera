@@ -61,7 +61,8 @@ class _SolicitudesPendientesPage extends StatefulWidget {
       _SolicitudesPendientesPageState();
 }
 
-class _SolicitudesPendientesPageState  extends State<_SolicitudesPendientesPage> {
+class _SolicitudesPendientesPageState
+    extends State<_SolicitudesPendientesPage> {
   final ScrollController _scrollController = ScrollController();
   late AdminBloc _adminBloc;
 

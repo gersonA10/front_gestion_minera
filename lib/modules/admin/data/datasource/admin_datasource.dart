@@ -97,4 +97,12 @@ Future<Map<String, dynamic>> getContributesHistory({
       'total_records': meta['total_records'] ?? 0,
     };
   }
+
+  Future<RequestDetailModel> getRequestDetail(String id) async {
+    final response = await apiClient.get(
+      '/api/admin/requests/$id',
+      operationName: 'getRequestDetail',
+    );
+    return RequestDetailModel.fromJson(response['data']);
+  }
 }

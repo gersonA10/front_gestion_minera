@@ -66,4 +66,10 @@ class AdminRepositoryImpl implements AdminRepository {
       totalRecords: result['total_records'] as int? ?? 0,
     );
   }
+
+  @override
+  Future<RequestDetailEntity> getRequestDetail(String id) async {
+    final model = await datasource.getRequestDetail(id);
+    return model.toEntity();
+  }
 }
