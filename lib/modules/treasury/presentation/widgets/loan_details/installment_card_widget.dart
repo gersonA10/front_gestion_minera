@@ -1,5 +1,9 @@
+import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
+import 'package:front_gestion_minera/config/router/app_router.gr.dart';
 import 'package:front_gestion_minera/utils/constants/color.constant.dart';
+
+import '../../../domain/entity/entity.dart';
 
 class InstallmentCard extends StatelessWidget {
   final String month;
@@ -8,6 +12,8 @@ class InstallmentCard extends StatelessWidget {
   final String? label;
   final double amount;
   final String status;
+  final String quotaId; 
+final CashResponseEntity cash;
 
   const InstallmentCard({
     super.key,
@@ -17,6 +23,8 @@ class InstallmentCard extends StatelessWidget {
     this.label,
     required this.amount,
     required this.status,
+    required this.quotaId,
+    required this.cash,
   });
 
   @override
@@ -224,7 +232,14 @@ class InstallmentCard extends StatelessWidget {
                         width: double.infinity,
                         height: 40,
                         child: OutlinedButton.icon(
-                          onPressed: () {},
+                          onPressed: () {
+                            context.router.push(RecordPaymentRoute(
+                              quotaId: quotaId, // Reemplaza con el ID real de la cuota
+                              textoCuota: 'Cuota #$number', // Reemplaza con el texto real de la cuota
+                              montoTotalCuota: amount.toInt(), // Reemplaza con el monto real de la cuota
+                         cash: cash
+                            ));
+                          },
                           icon: const Icon(
                             Icons.account_balance_wallet_outlined,
                             size: 15,

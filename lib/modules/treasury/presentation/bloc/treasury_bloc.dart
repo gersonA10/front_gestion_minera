@@ -698,7 +698,8 @@ class TreasuryBloc extends Bloc<TreasuryEvent, TreasuryState> {
     emit(LoanDetailsLoading());
     try {
       final response = await repository.getloanDatails(event.idLoan);
-      emit(LoanDetailsLoaded(loanDetails:  response));
+      final responseCash = await repository.getCash();
+      emit(LoanDetailsLoaded(loanDetails:  response, cash: responseCash));
     } on BaseApiException catch (error) {
       if (error.key == DioExceptionKey.unauthorised) {
         return;
