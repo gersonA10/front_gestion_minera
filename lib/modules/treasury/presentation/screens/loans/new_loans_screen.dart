@@ -84,11 +84,9 @@ class _NewLoansScreenState extends State<NewLoansScreen> {
         appBar: AppBar(
           backgroundColor: TColors.bgColor,
           elevation: 0,
-          leading: IconButton(
-            icon: const Icon(Icons.arrow_back, color: TColors.textPrimaryWhite),
-            onPressed: () => Navigator.of(context).maybePop(),
-          ),
           centerTitle: true,
+          foregroundColor: Colors.white,
+          iconTheme: const IconThemeData(color: Colors.white),
           title: const Text(
             'Nuevo Préstamo',
             style: TextStyle(

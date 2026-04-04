@@ -141,3 +141,7 @@ class ApplyForALoanEvent extends TreasuryEvent {
     required this.cajaDestinoId,
   });
 }
+
+class LoanDetailsEvent extends TreasuryEvent {
+  final String idLoan;
+  LoanDetailsEvent({required this.idLoan});}

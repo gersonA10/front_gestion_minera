@@ -292,3 +292,18 @@ class NewLoansSimulateError extends TreasuryState {
   final String message;
   NewLoansSimulateError({required this.message});
 }
+// detalle de prestamo
+class LoanDetailsLoading extends TreasuryState {}
+
+class LoanDetailsLoaded extends TreasuryState {
+  final LoanDetailsResponseEntity loanDetails;
+
+  LoanDetailsLoaded({
+    required this.loanDetails
+  });
+}
+
+class LoanDetailsError extends TreasuryState {
+  final String message;
+  LoanDetailsError(this.message);
+}

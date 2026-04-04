@@ -351,18 +351,39 @@ class HomeSurveillanceRoute extends _i32.PageRouteInfo<void> {
 
 /// generated route for
 /// [_i13.LoanDetailsScreen]
-class LoanDetailsRoute extends _i32.PageRouteInfo<void> {
-  const LoanDetailsRoute({List<_i32.PageRouteInfo>? children})
-    : super(LoanDetailsRoute.name, initialChildren: children);
+class LoanDetailsRoute extends _i32.PageRouteInfo<LoanDetailsRouteArgs> {
+  LoanDetailsRoute({
+    _i33.Key? key,
+    required String idLoan,
+    List<_i32.PageRouteInfo>? children,
+  }) : super(
+         LoanDetailsRoute.name,
+         args: LoanDetailsRouteArgs(key: key, idLoan: idLoan),
+         initialChildren: children,
+       );
 
   static const String name = 'LoanDetailsRoute';
 
   static _i32.PageInfo page = _i32.PageInfo(
     name,
     builder: (data) {
-      return const _i13.LoanDetailsScreen();
+      final args = data.argsAs<LoanDetailsRouteArgs>();
+      return _i13.LoanDetailsScreen(key: args.key, idLoan: args.idLoan);
     },
   );
+}
+
+class LoanDetailsRouteArgs {
+  const LoanDetailsRouteArgs({this.key, required this.idLoan});
+
+  final _i33.Key? key;
+
+  final String idLoan;
+
+  @override
+  String toString() {
+    return 'LoanDetailsRouteArgs{key: $key, idLoan: $idLoan}';
+  }
 }
 
 /// generated route for

@@ -78,4 +78,7 @@ abstract class TreasuryRepository {
     String cajaDestinoId,
   );
   Future<NewLoansResponseEntity> postNewLoansSimulate(double amount, int termMonths, String annualInterestRate, String startDate);
+   Future<LoanDetailsResponseEntity> getloanDatails(
+    String idLoan,
+  );
 }

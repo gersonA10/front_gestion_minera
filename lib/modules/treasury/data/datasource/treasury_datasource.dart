@@ -1,3 +1,5 @@
+
+
 import '../../../../core/networking/http_services.dart';
 import '../../domain/entity/entity.dart';
 import '../models/model.dart';
@@ -353,5 +355,14 @@ class TreasuryDatasource {
       operationName: 'postApplyForAloan',
     );
     return ApplyForALoanResponseModel.fromJson(response['data']);
+  }
+   Future<LoanDetailsResponseEntity> getloanDatails(
+    String idLoan,
+  ) async {
+    final response = await apiClient.get(
+      '/api/treasury/corporate-loans/$idLoan',
+      operationName: 'getloanDatails',
+    );
+    return LoanDetailsResponseModel.fromJson(response);
   }
 }
