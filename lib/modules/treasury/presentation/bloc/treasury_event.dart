@@ -145,3 +145,9 @@ class ApplyForALoanEvent extends TreasuryEvent {
 class LoanDetailsEvent extends TreasuryEvent {
   final String idLoan;
   LoanDetailsEvent({required this.idLoan});}
+
+  class PayTheFeeEvent extends TreasuryEvent {
+  final PayTheFeeRequetsEntity payTheFeeRequest;
+  final  String idLoan;
+  final  String idQuota;
+  PayTheFeeEvent({required this.payTheFeeRequest, required this.idLoan, required this.idQuota});}

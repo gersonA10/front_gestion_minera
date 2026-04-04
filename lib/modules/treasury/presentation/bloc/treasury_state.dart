@@ -308,3 +308,16 @@ class LoanDetailsError extends TreasuryState {
   final String message;
   LoanDetailsError(this.message);
 }
+
+// pago cuota
+class PayTheFeeLoading extends TreasuryState {}
+
+class PayTheFeeLoaded extends TreasuryState {
+  final PayTheFeeResponseEntity payTheFee;
+  PayTheFeeLoaded({required this.payTheFee});
+}
+
+class PayTheFeeError extends TreasuryState {
+  final String message;
+  PayTheFeeError({required this.message});
+}

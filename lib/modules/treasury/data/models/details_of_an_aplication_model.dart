@@ -76,6 +76,6 @@ class CashDataModel extends  CashDataEntity{
     factory CashDataModel.fromJson(Map<String, dynamic> json) => CashDataModel(
         id: json["id"],
         nombre: json["nombre"],
-        saldoDisponible: json["saldo_disponible"],
+        saldoDisponible: json["saldo_disponible"] is int ? json["saldo_disponible"] : 0,
     );
 }

@@ -70,8 +70,8 @@ class TreasuryBloc extends Bloc<TreasuryEvent, TreasuryState> {
     on<RegisterSaleEvent>(_onRegisterSale);
     on<ApplyForALoanEvent>(_onApplyForALoan);
     on<NewLoansSimulateEvent>(_onNewLoansSimulate);
-     on<LoanDetailsEvent>(_onLoanDetails);
-
+    on<LoanDetailsEvent>(_onLoanDetails);
+    on<PayTheFeeEvent>(_onPayTheFee);
   }
 
   Future<void> _onFetchTreasuryMetrics(
@@ -666,7 +666,8 @@ class TreasuryBloc extends Bloc<TreasuryEvent, TreasuryState> {
       emit(NewLoansSimulateError(message: 'Error inesperado: $e'));
     }
   }
-    Future<void> _onApplyForALoan(
+
+  Future<void> _onApplyForALoan(
     ApplyForALoanEvent event,
     Emitter<TreasuryState> emit,
   ) async {
@@ -691,7 +692,7 @@ class TreasuryBloc extends Bloc<TreasuryEvent, TreasuryState> {
     }
   }
 
-   Future<void> _onLoanDetails(
+  Future<void> _onLoanDetails(
     LoanDetailsEvent event,
     Emitter<TreasuryState> emit,
   ) async {
@@ -699,14 +700,36 @@ class TreasuryBloc extends Bloc<TreasuryEvent, TreasuryState> {
     try {
       final response = await repository.getloanDatails(event.idLoan);
       final responseCash = await repository.getCash();
-      emit(LoanDetailsLoaded(loanDetails:  response, cash: responseCash));
+      emit(LoanDetailsLoaded(loanDetails: response, cash: responseCash));
     } on BaseApiException catch (error) {
       if (error.key == DioExceptionKey.unauthorised) {
         return;
       }
       emit(LoanDetailsError(mapErrorMessage(error.key)));
     } catch (e) {
-      emit(LoanDetailsError( 'Error inesperado: $e'));
+      emit(LoanDetailsError('Error inesperado: $e'));
+    }
+  }
+
+  Future<void> _onPayTheFee(
+    PayTheFeeEvent event,
+    Emitter<TreasuryState> emit,
+  ) async {
+    emit(PayTheFeeLoading());
+    try {
+      final response = await repository.payTheFee(
+        event.payTheFeeRequest,
+        event.idLoan,
+        event.idQuota,
+      );
+      emit(PayTheFeeLoaded(payTheFee: response));
+    } on BaseApiException catch (error) {
+      if (error.key == DioExceptionKey.unauthorised) {
+        return;
+      }
+      emit(PayTheFeeError(message: error.message));
+    } catch (e) {
+      emit(PayTheFeeError(message: 'Error inesperado: $e'));
     }
   }
 }

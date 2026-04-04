@@ -191,4 +191,15 @@ class TreasuryRepositoryImpl implements TreasuryRepository {
   Future<LoanDetailsResponseEntity> getloanDatails(String idLoan) async{
     return await datasource.getloanDatails(idLoan);
   }
+  
+  @override
+  Future<PayTheFeeResponseEntity> payTheFee(PayTheFeeRequetsEntity payTheFeeRequest, String idLoan, String idQuota)async {
+   
+   final requestModel = PayTheFeeRequestModel.fromEntity(
+      payTheFeeRequest,
+    );
+    final response = await datasource.payTheFee(requestModel, idLoan, idQuota);
+    return response;
+  }
+ 
 }

@@ -1,5 +1,6 @@
 
 
+
 import '../../../../core/networking/http_services.dart';
 import '../../domain/entity/entity.dart';
 import '../models/model.dart';
@@ -364,5 +365,26 @@ class TreasuryDatasource {
       operationName: 'getloanDatails',
     );
     return LoanDetailsResponseModel.fromJson(response);
+  }
+
+  Future<PayTheFeeResponseModel> payTheFee(
+    PayTheFeeRequestModel payTheFeeRequest,
+    String idLoan,
+    String idQuota,
+  ) async {
+    final response = await apiClient.postFormData(
+      '/api/treasury/corporate-loans/$idLoan/quotas/$idQuota/pay',
+      data: payTheFeeRequest.toFormDataMap(),
+      operationName: 'payTheFee',
+      files: [
+        {
+          'name': 'comprobante',
+          'path': payTheFeeRequest.comprobante,
+          'filename': payTheFeeRequest.comprobante.split('/').last,
+        },
+      ],
+    );
+
+    return PayTheFeeResponseModel.fromJson(response['data']);
   }
 }

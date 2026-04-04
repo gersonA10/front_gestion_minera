@@ -1,3 +1,4 @@
+
 import '../entity/entity.dart';
 import '../entity/income_request_entity.dart';
 
@@ -80,5 +81,10 @@ abstract class TreasuryRepository {
   Future<NewLoansResponseEntity> postNewLoansSimulate(double amount, int termMonths, String annualInterestRate, String startDate);
    Future<LoanDetailsResponseEntity> getloanDatails(
     String idLoan,
+  );
+  Future<PayTheFeeResponseEntity> payTheFee(
+    PayTheFeeRequetsEntity payTheFeeRequest,
+    String idLoan,
+    String idQuota,
   );
 }
