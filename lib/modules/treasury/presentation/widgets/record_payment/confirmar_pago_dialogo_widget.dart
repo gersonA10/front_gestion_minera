@@ -428,6 +428,16 @@ class _ConfirmarPagoDialogState extends State<ConfirmarPagoDialog> {
                               onPressed: isLoading
                                   ? null
                                   : () {
+                                      if (_imagenComprobante == null) {
+                                        CustomAlert.show(
+                                          context,
+                                          title: 'Comprobante requerido',
+                                          message:
+                                              'Por favor, sube una foto del comprobante para confirmar el pago.',
+                                          type: AlertType.warning,
+                                        );
+                                        return;
+                                      }
                                       final payRequest = PayTheFeeRequetsEntity(
                                         cajaOrigenId: widget.cajaOrigenId,
                                         metodoPago: widget.metodoPago,
