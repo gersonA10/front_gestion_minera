@@ -65,3 +65,14 @@ final class AdminContributionHistoryError extends AdminState {
   final String message;
   AdminContributionHistoryError(this.message);
 }
+
+//detail states
+final class AdminRequestDetailLoading extends AdminState {}
+final class AdminRequestDetailLoaded extends AdminState {
+  final RequestDetailEntity detail;
+  AdminRequestDetailLoaded(this.detail);
+}
+final class AdminRequestDetailError extends AdminState {
+  final String message;
+  AdminRequestDetailError(this.message);
+}

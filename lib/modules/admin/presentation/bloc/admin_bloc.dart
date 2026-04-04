@@ -43,6 +43,8 @@ class AdminBloc extends Bloc<AdminEvent, AdminState> {
     //Historial aportes
     on<GetContributionHistoryEvent>(_onGetContributionHistory);
     on<LoadMoreContributionHistoryEvent>(_onLoadMoreContribution);
+    //detalle solicitud
+    on<GetRequestDetailEvent>(_onGetRequestDetail);
   }
 
   Future<void> _onGetPendingRequests(
@@ -223,6 +225,21 @@ class AdminBloc extends Bloc<AdminEvent, AdminState> {
           _currentHistoryStatus,
         ),
       );
+    }
+  }
+
+  Future<void> _onGetRequestDetail(
+    GetRequestDetailEvent event,
+    Emitter<AdminState> emit,
+  ) async {
+    emit(AdminRequestDetailLoading());
+    try {
+      final detail = await repository.getRequestDetail(event.id);
+      emit(AdminRequestDetailLoaded(detail));
+    } on BaseApiException catch (e) {
+      emit(AdminRequestDetailError(e.message));
+    } catch (_) {
+      emit(AdminRequestDetailError('Ocurrió un error al cargar el detalle'));
     }
   }
 

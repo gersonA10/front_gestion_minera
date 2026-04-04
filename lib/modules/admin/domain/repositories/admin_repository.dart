@@ -18,4 +18,6 @@ abstract class AdminRepository {
     String? exactDate,
     String? period,
   });
+
+  Future<RequestDetailEntity> getRequestDetail(String id);
 }
