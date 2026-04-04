@@ -30,7 +30,11 @@ abstract class TreasuryRepository {
   Future<List<CashRegisterEntity>> getCashRegisters();
 
   Future<GoldInventoryEntity> getGoldInventory();
-  Future<PaginatedGoldBatchesEntity> getGoldBatches({int page = 1, int limit = 10, String? status});
+  Future<PaginatedGoldBatchesEntity> getGoldBatches({
+    int page = 1,
+    int limit = 10,
+    String? status,
+  });
   Future<ConfirmPaymentResponseEntity> confirmPayment(
     String idCash,
     ConfirmPaymentRequetsEntity confirmPaymentRequets,
@@ -45,13 +49,14 @@ abstract class TreasuryRepository {
     int limit = 10,
   });
 
-   Future<InternalLoansResponseEntity> getInternalLoans({
-    String? status, String? search,
+  Future<InternalLoansResponseEntity> getInternalLoans({
+    String? status,
+    String? search,
     int page = 1,
     int limit = 10,
   });
 
-   Future<TransactionDetailsResponseEntity> getTransactionDetails(
+  Future<TransactionDetailsResponseEntity> getTransactionDetails(
     String idTansaction,
   );
   Future<NewExtractionResponseEntiy> newExtraction(
@@ -63,5 +68,17 @@ abstract class TreasuryRepository {
   Future<RegisterSaleResponseEntity> registerSale(
     RegisterSaleRequestEntity request,
   );
+
+  Future<ApplyForALoanResponseEntity> applyForALoan(
+    String lenderName,
+    double amount,
+    int termMonths,
+    double annualInterestRate,
+    String startDate,
+    String cajaDestinoId,
+  );
   Future<NewLoansResponseEntity> postNewLoansSimulate(double amount, int termMonths, String annualInterestRate, String startDate);
+   Future<LoanDetailsResponseEntity> getloanDatails(
+    String idLoan,
+  );
 }

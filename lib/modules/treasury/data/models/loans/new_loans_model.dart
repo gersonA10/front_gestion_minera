@@ -1,4 +1,3 @@
-
 import '../../../domain/entity/entity.dart';
 
 class NewLoansResponseModel extends NewLoansResponseEntity{
@@ -30,7 +29,7 @@ class CronogramaModel  extends CronogramaEntity{
         dueDate: DateTime.parse(json["due_date"]),
         status: json["status"],
         principal: json["principal"].toDouble(),
-        interest: json["interest"],
+        interest: (json["interest"] is int ? json["interest"].toDouble() : json["interest"]),
         totalInstallment: json["total_installment"].toDouble(),
     );
 }
@@ -49,7 +48,7 @@ class SummaryModel extends SummaryEntity {
         amount: json["amount"].toDouble(),
         totalInterest: json["total_interest"].toDouble(),
         totalPayable: json["total_payable"].toDouble(),
-        termMonths: json["term_months"],
+        termMonths: (json["term_months"] is int ? json["term_months"] : json["term_months"].toInt()),
         monthlyInstallment: json["monthly_installment"].toDouble(),
     );
 }

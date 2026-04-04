@@ -17,8 +17,9 @@ class InternalLoansEntity {
   final String lenderName;
   final String loanCode;
   final String estadoEtiqueta;
-  final int totalPrestado;
-  final int pendiente;
+  final double montoPrestado;
+  final double totalAPagar;
+  final double pendiente;
   final int progresoPagoPct;
   final AlertaVencimientoEntity alertaVencimiento;
 
@@ -27,7 +28,8 @@ class InternalLoansEntity {
     required this.lenderName,
     required this.loanCode,
     required this.estadoEtiqueta,
-    required this.totalPrestado,
+    required this.montoPrestado,
+    required this.totalAPagar,
     required this.pendiente,
     required this.progresoPagoPct,
     required this.alertaVencimiento,
@@ -41,7 +43,7 @@ class InternalLoansEntity {
 
   double get progreso => progresoPagoPct.toDouble();
   int get progresoInt => progresoPagoPct;
-  int get totalPagado => totalPrestado - pendiente;
+  double get totalPagado => totalAPagar - pendiente;
 }
 
 class AlertaVencimientoEntity {

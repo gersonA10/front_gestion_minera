@@ -19,7 +19,7 @@ class _NewLoansScreenState extends State<NewLoansScreen> {
   final TextEditingController prestamista = TextEditingController();
   final TextEditingController _monto = TextEditingController();
   final TextEditingController _plazo = TextEditingController();
-  final TextEditingController _tasa = TextEditingController();
+  final TextEditingController tasa = TextEditingController();
   String _moneda = 'BOB';
   String tipoInteres = 'Simple';
   late TreasuryBloc _treasuryBloc;
@@ -43,7 +43,7 @@ class _NewLoansScreenState extends State<NewLoansScreen> {
     prestamista.dispose();
     _monto.dispose();
     _plazo.dispose();
-    _tasa.dispose();
+    tasa.dispose();
     super.dispose();
   }
 
@@ -84,11 +84,9 @@ class _NewLoansScreenState extends State<NewLoansScreen> {
         appBar: AppBar(
           backgroundColor: TColors.bgColor,
           elevation: 0,
-          leading: IconButton(
-            icon: const Icon(Icons.arrow_back, color: TColors.textPrimaryWhite),
-            onPressed: () => Navigator.of(context).maybePop(),
-          ),
           centerTitle: true,
+          foregroundColor: Colors.white,
+          iconTheme: const IconThemeData(color: Colors.white),
           title: const Text(
             'Nuevo Préstamo',
             style: TextStyle(
@@ -114,20 +112,22 @@ class _NewLoansScreenState extends State<NewLoansScreen> {
                 message: state.message,
                 type: AlertType.error,
               );
+            } else if (state is NewLoansSimulateLoaded) {
+              context.router.push(
+                LoanSimulationRoute(
+                  loan: state.loan,
+                  cash: state.cash,
+                  name: prestamista.text,
+                  date: _fechaFormateada,
+                  annualInterestRate: double.parse(tasa.text),
+                ),
+              );
             }
           },
           builder: (context, state) {
             if (state is NewLoansSimulateLoading) {
               return const Center(
                 child: CircularProgressIndicator(color: TColors.amber),
-              );
-            }
-            if (state is NewLoansSimulateLoaded) {
-              context.router.push(
-                LoanSimulationRoute(
-                  loan: state.loan,
-                  name: prestamista.text
-                ),
               );
             }
             return SingleChildScrollView(
@@ -261,7 +261,7 @@ class _NewLoansScreenState extends State<NewLoansScreen> {
                             _label('Tasa Anual (%)'),
                             const SizedBox(height: 8),
                             TextField(
-                              controller: _tasa,
+                              controller: tasa,
                               keyboardType: TextInputType.number,
                               style: const TextStyle(
                                 color: TColors.textPrimaryWhite,
@@ -461,7 +461,7 @@ class _NewLoansScreenState extends State<NewLoansScreen> {
                     );
                     return;
                   }
-                  if (_tasa.text.isEmpty ) {
+                  if (tasa.text.isEmpty ) {
                     CustomAlert.show(
                       context,
                       title: 'Error',
@@ -476,7 +476,7 @@ class _NewLoansScreenState extends State<NewLoansScreen> {
                           double.tryParse(_monto.text.replaceAll(',', '')) ??
                           0.0,
                       termMonths: int.tryParse(_plazo.text) ?? 0,
-                      annualInterestRate: _tasa.text,
+                      annualInterestRate: tasa.text,
                       startDate: _fechaInicio.toIso8601String(),
                     ),
                   );
