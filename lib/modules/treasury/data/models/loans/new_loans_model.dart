@@ -1,4 +1,3 @@
-
 import '../../../domain/entity/entity.dart';
 
 class NewLoansResponseModel extends NewLoansResponseEntity{

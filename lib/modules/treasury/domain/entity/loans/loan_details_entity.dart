@@ -10,7 +10,7 @@ class LoanDetailsResponseEntity {
 
 class LoanDetailsDataEntity {
     final CabeceraEntity cabecera;
-    final List<CronogramaEntity> cronograma;
+    final List<LoanDetailCronogramaEntity> cronograma;
 
     LoanDetailsDataEntity({
         required this.cabecera,
@@ -40,7 +40,7 @@ class CabeceraEntity {
     });
 }
 
-class CronogramaEntity {
+class LoanDetailCronogramaEntity {
     final String quotaId;
     final String mesEtiqueta;
     final String diaEtiqueta;
@@ -49,7 +49,7 @@ class CronogramaEntity {
     final int montoTotalCuota;
     final bool permitePago;
 
-    CronogramaEntity({
+    LoanDetailCronogramaEntity({
         required this.quotaId,
         required this.mesEtiqueta,
         required this.diaEtiqueta,

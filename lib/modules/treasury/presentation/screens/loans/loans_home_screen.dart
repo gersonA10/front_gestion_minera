@@ -5,8 +5,9 @@ import 'package:front_gestion_minera/config/router/app_router.gr.dart';
 import 'package:front_gestion_minera/config/theme/extension_theme.dart';
 import 'package:front_gestion_minera/injector_container.dart';
 import 'package:front_gestion_minera/modules/treasury/presentation/bloc/treasury_bloc.dart';
-import 'package:intl/intl.dart';
+
 import '../../../domain/entity/entity.dart';
+import '../../widgets/widgtes.dart';
 
 extension LoanStatusX on LoanStatus {
   Color get color {
@@ -43,16 +44,11 @@ class LoansHomeScreen extends StatefulWidget {
 class _LoansHomeScreenState extends State<LoansHomeScreen> {
   String _searchQuery = '';
   String _activeFilter = 'todos';
-  //static const double _scrollThreshold = 10.0;
 
   late final TreasuryBloc _treasuryBloc;
   late TextEditingController _searchController;
   late FocusNode _searchFocusNode;
   final ScrollController _scrollController = ScrollController();
-  // bool _fabVisible = true;
-  // double _lastScrollOffset = 0;
-
-  // Cache para mantener datos durante recargas (como GoldDashboardScreen)
   List<InternalLoansEntity>? _cachedList;
   bool _cachedHasReachedMax = false;
 
@@ -61,7 +57,6 @@ class _LoansHomeScreenState extends State<LoansHomeScreen> {
     super.initState();
     _treasuryBloc = InjectorContainer.getIt<TreasuryBloc>()
       ..add(InternalLoansRequestsEvent());
-    //_scrollController.addListener(_onScroll);
     _scrollController.addListener(() {
       if (_scrollController.position.pixels >= _scrollController.position.maxScrollExtent - 200) {
         _treasuryBloc.add(InternalLoansEvent());
@@ -89,22 +84,6 @@ class _LoansHomeScreenState extends State<LoansHomeScreen> {
     setState(() => _searchQuery = '');
     _treasuryBloc.add(InternalLoansRequestsEvent(status: filter));
   }
-
-  // void _onScroll() {
-  //   final current = _scrollController.position.pixels;
-  //   final diff = current - _lastScrollOffset;
-
-  //   if (diff > _scrollThreshold && _fabVisible) {
-  //     setState(() => _fabVisible = false);
-  //   } else if (diff < -_scrollThreshold && !_fabVisible) {
-  //     setState(() => _fabVisible = true);
-  //   }
-  //   _lastScrollOffset = current;
-
-  //   if (current >= _scrollController.position.maxScrollExtent - 200) {
-  //     _treasuryBloc.add(InternalLoansEvent());
-  //   }
-  // }
 
   @override
   void dispose() {
@@ -169,7 +148,7 @@ class _LoansHomeScreenState extends State<LoansHomeScreen> {
                   return const Center(child: CircularProgressIndicator());
                 }
                 if (state is InternalLoansError) {
-                  return _ErrorView(
+                  return ErrorView(
                     message: state.message,
                     onRetry: () =>
                         _treasuryBloc.add(InternalLoansRequestsEvent()),
@@ -187,7 +166,7 @@ class _LoansHomeScreenState extends State<LoansHomeScreen> {
                     children: [
                       Container(
                         color: Colors.white,
-                        padding: const EdgeInsets.fromLTRB(16, 12, 16, 14),
+                        padding:  EdgeInsets.fromLTRB(16, 12, 16, 14),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
@@ -235,12 +214,12 @@ class _LoansHomeScreenState extends State<LoansHomeScreen> {
                                 ),
                               ),
                             ),
-                            const SizedBox(height: 10),
+                             SizedBox(height: 10),
                             SingleChildScrollView(
                               scrollDirection: Axis.horizontal,
                               child: Row(
                                 children: [
-                                  _FilterChip(
+                                  FilterChip(
                                     label: 'Todos',
                                     icon: Icons.list_alt_rounded,
                                     isActive: _activeFilter == 'todos',
@@ -248,7 +227,7 @@ class _LoansHomeScreenState extends State<LoansHomeScreen> {
                                     onTap: () => _applyFilter('todos'),
                                   ),
                                   const SizedBox(width: 8),
-                                  _FilterChip(
+                                  FilterChip(
                                     label: 'Activos',
                                     icon: Icons.check_circle_outline,
                                     isActive: _activeFilter == 'activos',
@@ -256,7 +235,7 @@ class _LoansHomeScreenState extends State<LoansHomeScreen> {
                                     onTap: () => _applyFilter('activos'),
                                   ),
                                   const SizedBox(width: 8),
-                                  _FilterChip(
+                                  FilterChip(
                                     label: 'En Mora',
                                     icon: Icons.error_outline,
                                     isActive: _activeFilter == 'en mora',
@@ -264,7 +243,7 @@ class _LoansHomeScreenState extends State<LoansHomeScreen> {
                                     onTap: () => _applyFilter('en mora'),
                                   ),
                                   const SizedBox(width: 8),
-                                  _FilterChip(
+                                  FilterChip(
                                     label: 'Finalizado',
                                     icon: Icons.history,
                                     isActive: _activeFilter == 'finalizado',
@@ -328,7 +307,7 @@ class _LoansHomeScreenState extends State<LoansHomeScreen> {
                                       ),
                                     );
                                   }
-                                  return _LoanCard(loan: list[i]);
+                                  return LoanCard(loan: list[i]);
                                 },
                               ),
                       ),
@@ -361,45 +340,14 @@ class _LoansHomeScreenState extends State<LoansHomeScreen> {
   }
 }
 
-class _ErrorView extends StatelessWidget {
-  final String message;
-  final VoidCallback onRetry;
-
-  const _ErrorView({required this.message, required this.onRetry});
-
-  @override
-  Widget build(BuildContext context) {
-    return Center(
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          const Icon(
-            Icons.error_outline_rounded,
-            size: 48,
-            color: Color(0xFFEF4444),
-          ),
-          const SizedBox(height: 12),
-          Text(
-            message,
-            style: const TextStyle(color: Color(0xFF6B7280), fontSize: 14),
-            textAlign: TextAlign.center,
-          ),
-          const SizedBox(height: 16),
-          TextButton(onPressed: onRetry, child: const Text('Reintentar')),
-        ],
-      ),
-    );
-  }
-}
-
-class _FilterChip extends StatelessWidget {
+class FilterChip extends StatelessWidget {
   final String label;
   final IconData icon;
   final bool isActive;
   final VoidCallback onTap;
   final Color activeColor;
 
-  const _FilterChip({
+  const FilterChip({super.key, 
     required this.label,
     required this.icon,
     required this.isActive,
@@ -442,284 +390,5 @@ class _FilterChip extends StatelessWidget {
         ),
       ),
     );
-  }
-}
-
-class _LoanCard extends StatelessWidget {
-  final InternalLoansEntity loan;
-
-  const _LoanCard({required this.loan});
-
-  @override
-  Widget build(BuildContext context) {
-    final fmt = NumberFormat('#,##0', 'es_PE');
-
-    return GestureDetector(
-      onTap: () {
-        context.router.push(LoanDetailsRoute());
-      },
-      child: Container(
-        padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: const Color(0xFFF3F4F6)),
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                  decoration: BoxDecoration(
-                    color: loan.status.backgroundColor,
-                    borderRadius: BorderRadius.circular(8),
-                    border: Border.all(
-                      color: loan.status.color.withValues(alpha: 0.3),
-                    ),
-                  ),
-                  child: Text(
-                    loan.estadoEtiqueta,
-                    style: TextStyle(
-                      fontSize: 10,
-                      fontWeight: FontWeight.w700,
-                      color: loan.status.color,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 5),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      loan.lenderName,
-                      style: const TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w800,
-                        color: Color(0xFF111827),
-                      ),
-                    ),
-                    const SizedBox(height: 2),
-                    Text(
-                      'ID: ${loan.loanCode}',
-                      style: const TextStyle(
-                        fontSize: 12,
-                        fontWeight: FontWeight.w400,
-                        color: Color(0xFF9CA3AF),
-                      ),
-                    ),
-                  ],
-                ),
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.end,
-                  children: [
-                    const Text(
-                      'Total Prestado',
-                      style: TextStyle(
-                        fontSize: 10,
-                        fontWeight: FontWeight.w500,
-                        color: Color(0xFF9CA3AF),
-                      ),
-                    ),
-                    const SizedBox(height: 3),
-                    Text(
-                      fmt.format(loan.montoPrestado),
-                      style: const TextStyle(
-                        fontSize: 15,
-                        fontWeight: FontWeight.w800,
-                        color: Color(0xFF111827),
-                      ),
-                    ),
-                  ],
-                ),
-              ],
-            ),
-      
-            const SizedBox(height: 10),
-            Row(
-              children: [
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const Text(
-                        'Total a Pagar',
-                        style: TextStyle(
-                          fontSize: 10,
-                          fontWeight: FontWeight.w500,
-                          color: Color(0xFF9CA3AF),
-                        ),
-                      ),
-                      const SizedBox(height: 3),
-                      Text(
-                        fmt.format(loan.totalAPagar),
-                        style: const TextStyle(
-                          fontSize: 15,
-                          fontWeight: FontWeight.w800,
-                          color: Color(0xFF111827),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.end,
-                  children: [
-                    Text(
-                      loan.status == LoanStatus.finalizado
-                          ? 'Total Pagado'
-                          : 'Pendiente',
-                      style: const TextStyle(
-                        fontSize: 10,
-                        fontWeight: FontWeight.w500,
-                        color: Color(0xFF9CA3AF),
-                      ),
-                    ),
-                    const SizedBox(height: 3),
-                    Text(
-                      loan.status == LoanStatus.finalizado
-                          ? fmt.format(loan.totalPagado)
-                          : fmt.format(loan.pendiente),
-                      style: TextStyle(
-                        fontSize: 15,
-                        fontWeight: FontWeight.w800,
-                        color: loan.status == LoanStatus.finalizado
-                            ? const Color(0xFF16A34A)
-                            : const Color(0xFFEF4444),
-                      ),
-                    ),
-                  ],
-                ),
-              ],
-            ),
-            const SizedBox(height: 10),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  'Progreso de pago',
-                  style: TextStyle(
-                    fontSize: 10,
-                    fontWeight: FontWeight.w500,
-                    color: loan.status.color,
-                  ),
-                ),
-                Text(
-                  '${loan.progresoInt}%',
-                  style: const TextStyle(
-                    fontSize: 10,
-                    fontWeight: FontWeight.w700,
-                    color: Color(0xFF374151),
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 5),
-            ClipRRect(
-              borderRadius: BorderRadius.circular(6),
-              child: LinearProgressIndicator(
-                value: loan.progreso / 100,
-                minHeight: 6,
-                backgroundColor: const Color(0xFFE5E7EB),
-                valueColor: AlwaysStoppedAnimation<Color>(loan.status.color),
-              ),
-            ),
-            const SizedBox(height: 10),
-            _buildFooter(),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildFooter() {
-    final textoFecha = loan.alertaVencimiento.textoFecha;
-
-    switch (loan.status) {
-      case LoanStatus.activo:
-        return Row(
-          children: [
-            const Icon(
-              Icons.calendar_today_rounded,
-              size: 14,
-              color: Color(0xFF9CA3AF),
-            ),
-            const SizedBox(width: 5),
-            Expanded(
-              child: RichText(
-                text: TextSpan(
-                  children: [
-                    const TextSpan(
-                      text: 'Próximo vencimiento: ',
-                      style: TextStyle(
-                        fontWeight: FontWeight.w500,
-                        color: Color(0xFF6B7280),
-                        fontSize: 10,
-                      ),
-                    ),
-                    TextSpan(
-                      text: textoFecha.isNotEmpty ? textoFecha : '-',
-                      style: const TextStyle(
-                        fontWeight: FontWeight.w700,
-                        color: Color(0xFF374151),
-                        fontSize: 10,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ],
-        );
-
-      case LoanStatus.enMora:
-        return Row(
-          children: [
-            const Icon(
-              Icons.error_outline_rounded,
-              size: 15,
-              color: Color(0xFFEF4444),
-            ),
-            const SizedBox(width: 6),
-            Expanded(
-              child: Text(
-                textoFecha.isNotEmpty ? textoFecha : 'En mora',
-                style: const TextStyle(
-                  fontWeight: FontWeight.w600,
-                  color: Color(0xFFEF4444),
-                  fontSize: 10,
-                ),
-              ),
-            ),
-          ],
-        );
-
-      case LoanStatus.finalizado:
-        return Row(
-          children: [
-            const Icon(
-              Icons.check_circle_outline_rounded,
-              size: 15,
-              color: Color(0xFF16A34A),
-            ),
-            const SizedBox(width: 6),
-            const Text(
-              'Pagado totalmente',
-              style: TextStyle(
-                fontWeight: FontWeight.w600,
-                color: Color(0xFF16A34A),
-                fontSize: 10,
-              ),
-            ),
-          ],
-        );
-    }
   }
 }

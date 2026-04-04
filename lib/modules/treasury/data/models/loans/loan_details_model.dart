@@ -24,7 +24,7 @@ class LoanDetailsDataModel  extends LoanDetailsDataEntity{
 
     factory LoanDetailsDataModel.fromJson(Map<String, dynamic> json) => LoanDetailsDataModel(
         cabecera: CabeceraModel.fromJson(json["cabecera"]),
-        cronograma: List<CronogramaModel>.from(json["cronograma"].map((x) => CronogramaModel.fromJson(x))),
+        cronograma: List<LoanDetailCronogramaModel>.from(json["cronograma"].map((x) => LoanDetailCronogramaModel.fromJson(x))),
     );
 }
 
@@ -46,16 +46,16 @@ class CabeceraModel extends CabeceraEntity {
         estadoEtiqueta: json["estado_etiqueta"],
         montoPrincipal: json["monto_principal"],
         moneda: json["moneda"],
-        interesTotal: json["interes_total"],
-        totalAPagar: json["total_a_pagar"],
-        saldoPendiente: json["saldo_pendiente"],
+        interesTotal: json["interes_total"] is int ? json["interes_total"] : json["interes_total"].toInt(),
+        totalAPagar: json["total_a_pagar"] is int ? json["total_a_pagar"] : json["total_a_pagar"].toInt(),
+        saldoPendiente: json["saldo_pendiente"] is int ? json["saldo_pendiente"] : json["saldo_pendiente"].toInt(),
         progresoPagoPct: json["progreso_pago_pct"],
     );
 }
 
-class CronogramaModel extends CronogramaEntity {
+class LoanDetailCronogramaModel extends LoanDetailCronogramaEntity {
    
-    CronogramaModel({
+    LoanDetailCronogramaModel({
         required super.quotaId,
         required super.mesEtiqueta,
         required super.diaEtiqueta,
@@ -65,13 +65,13 @@ class CronogramaModel extends CronogramaEntity {
         required super.permitePago,
     });
 
-    factory CronogramaModel.fromJson(Map<String, dynamic> json) => CronogramaModel(
+    factory LoanDetailCronogramaModel.fromJson(Map<String, dynamic> json) => LoanDetailCronogramaModel(
         quotaId: json["quota_id"],
         mesEtiqueta: json["mes_etiqueta"],
         diaEtiqueta: json["dia_etiqueta"],
         textoCuota: json["texto_cuota"],
         estadoCuota: json["estado_cuota"],
-        montoTotalCuota: json["monto_total_cuota"],
+        montoTotalCuota: json["monto_total_cuota"] is int ? json["monto_total_cuota"] : json["monto_total_cuota"].toInt(),
         permitePago: json["permite_pago"],
     );
 }
