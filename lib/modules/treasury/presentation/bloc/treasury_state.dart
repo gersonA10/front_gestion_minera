@@ -267,6 +267,31 @@ class RegisterSaleError extends TreasuryState {
   final String message;
   RegisterSaleError({required this.message});
 }
+// registrar prestamo
+class ApplyForALoanLoading extends TreasuryState {}
+
+class ApplyForALoanLoaded extends TreasuryState {
+  final ApplyForALoanResponseEntity loan;
+  ApplyForALoanLoaded({required this.loan});
+}
+
+class ApplyForALoanError extends TreasuryState {
+  final String message;
+  ApplyForALoanError({required this.message});
+}
+// simulacion de nuevo prestamo
+class NewLoansSimulateLoading extends TreasuryState {}
+
+class NewLoansSimulateLoaded extends TreasuryState {
+  final NewLoansResponseEntity loan;
+    final CashResponseEntity cash;
+  NewLoansSimulateLoaded({required this.loan, required this.cash});
+}
+
+class NewLoansSimulateError extends TreasuryState {
+  final String message;
+  NewLoansSimulateError({required this.message});
+}
 // detalle de prestamo
 class LoanDetailsLoading extends TreasuryState {}
 

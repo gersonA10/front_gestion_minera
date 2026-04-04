@@ -43,14 +43,14 @@ class LoansHomeScreen extends StatefulWidget {
 class _LoansHomeScreenState extends State<LoansHomeScreen> {
   String _searchQuery = '';
   String _activeFilter = 'todos';
-  static const double _scrollThreshold = 10.0;
+  //static const double _scrollThreshold = 10.0;
 
   late final TreasuryBloc _treasuryBloc;
   late TextEditingController _searchController;
   late FocusNode _searchFocusNode;
   final ScrollController _scrollController = ScrollController();
-  bool _fabVisible = true;
-  double _lastScrollOffset = 0;
+  // bool _fabVisible = true;
+  // double _lastScrollOffset = 0;
 
   // Cache para mantener datos durante recargas (como GoldDashboardScreen)
   List<InternalLoansEntity>? _cachedList;
@@ -61,7 +61,12 @@ class _LoansHomeScreenState extends State<LoansHomeScreen> {
     super.initState();
     _treasuryBloc = InjectorContainer.getIt<TreasuryBloc>()
       ..add(InternalLoansRequestsEvent());
-    _scrollController.addListener(_onScroll);
+    //_scrollController.addListener(_onScroll);
+    _scrollController.addListener(() {
+      if (_scrollController.position.pixels >= _scrollController.position.maxScrollExtent - 200) {
+        _treasuryBloc.add(InternalLoansEvent());
+      }
+    });
     _searchController = TextEditingController();
     _searchFocusNode = FocusNode();
   }
@@ -85,21 +90,21 @@ class _LoansHomeScreenState extends State<LoansHomeScreen> {
     _treasuryBloc.add(InternalLoansRequestsEvent(status: filter));
   }
 
-  void _onScroll() {
-    final current = _scrollController.position.pixels;
-    final diff = current - _lastScrollOffset;
+  // void _onScroll() {
+  //   final current = _scrollController.position.pixels;
+  //   final diff = current - _lastScrollOffset;
 
-    if (diff > _scrollThreshold && _fabVisible) {
-      setState(() => _fabVisible = false);
-    } else if (diff < -_scrollThreshold && !_fabVisible) {
-      setState(() => _fabVisible = true);
-    }
-    _lastScrollOffset = current;
+  //   if (diff > _scrollThreshold && _fabVisible) {
+  //     setState(() => _fabVisible = false);
+  //   } else if (diff < -_scrollThreshold && !_fabVisible) {
+  //     setState(() => _fabVisible = true);
+  //   }
+  //   _lastScrollOffset = current;
 
-    if (current >= _scrollController.position.maxScrollExtent - 200) {
-      _treasuryBloc.add(InternalLoansEvent());
-    }
-  }
+  //   if (current >= _scrollController.position.maxScrollExtent - 200) {
+  //     _treasuryBloc.add(InternalLoansEvent());
+  //   }
+  // }
 
   @override
   void dispose() {
@@ -113,13 +118,16 @@ class _LoansHomeScreenState extends State<LoansHomeScreen> {
   Widget build(BuildContext context) {
     final colors = Theme.of(context).colorScheme;
 
-    return BlocProvider.value(
-      value: _treasuryBloc,
+    return BlocProvider(
+      create: (context) => _treasuryBloc,
       child: Scaffold(
         backgroundColor: const Color(0xFFF8F9FB),
         floatingActionButton: FloatingActionButton(
-          onPressed: () {
-            context.router.push(NewLoansRoute());
+          onPressed: () async {
+            await context.router.push(NewLoansRoute());
+            if (context.mounted) {
+              _treasuryBloc.add(InternalLoansRequestsEvent());
+            }
           },
           backgroundColor: const Color(0xFF3B82F6),
           elevation: 2,
@@ -446,63 +454,71 @@ class _LoanCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final fmt = NumberFormat('#,##0', 'es_PE');
 
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: const Color(0xFFF3F4F6)),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                decoration: BoxDecoration(
-                  color: loan.status.backgroundColor,
-                  borderRadius: BorderRadius.circular(8),
-                  border: Border.all(
-                    color: loan.status.color.withValues(alpha: 0.3),
+    return GestureDetector(
+      onTap: () {
+        context.router.push(LoanDetailsRoute());
+      },
+      child: Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: const Color(0xFFF3F4F6)),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: loan.status.backgroundColor,
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(
+                      color: loan.status.color.withValues(alpha: 0.3),
+                    ),
+                  ),
+                  child: Text(
+                    loan.estadoEtiqueta,
+                    style: TextStyle(
+                      fontSize: 10,
+                      fontWeight: FontWeight.w700,
+                      color: loan.status.color,
+                    ),
                   ),
                 ),
-                child: Text(
-                  loan.estadoEtiqueta,
-                  style: TextStyle(
-                    fontSize: 10,
-                    fontWeight: FontWeight.w700,
-                    color: loan.status.color,
-                  ),
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 5),
-          Text(
-            loan.lenderName,
-            style: const TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.w800,
-              color: Color(0xFF111827),
+              ],
             ),
-          ),
-          const SizedBox(height: 2),
-          Text(
-            'ID: ${loan.loanCode}',
-            style: const TextStyle(
-              fontSize: 12,
-              fontWeight: FontWeight.w400,
-              color: Color(0xFF9CA3AF),
-            ),
-          ),
-          const SizedBox(height: 10),
-          Row(
-            children: [
-              Expanded(
-                child: Column(
+            const SizedBox(height: 5),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      loan.lenderName,
+                      style: const TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w800,
+                        color: Color(0xFF111827),
+                      ),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      'ID: ${loan.loanCode}',
+                      style: const TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w400,
+                        color: Color(0xFF9CA3AF),
+                      ),
+                    ),
+                  ],
+                ),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.end,
                   children: [
                     const Text(
                       'Total Prestado',
@@ -514,7 +530,7 @@ class _LoanCard extends StatelessWidget {
                     ),
                     const SizedBox(height: 3),
                     Text(
-                      fmt.format(loan.totalPrestado),
+                      fmt.format(loan.montoPrestado),
                       style: const TextStyle(
                         fontSize: 15,
                         fontWeight: FontWeight.w800,
@@ -523,72 +539,102 @@ class _LoanCard extends StatelessWidget {
                     ),
                   ],
                 ),
-              ),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.end,
-                children: [
-                  Text(
-                    loan.status == LoanStatus.finalizado
-                        ? 'Total Pagado'
-                        : 'Pendiente',
-                    style: const TextStyle(
-                      fontSize: 10,
-                      fontWeight: FontWeight.w500,
-                      color: Color(0xFF9CA3AF),
-                    ),
-                  ),
-                  const SizedBox(height: 3),
-                  Text(
-                    loan.status == LoanStatus.finalizado
-                        ? fmt.format(loan.totalPagado)
-                        : fmt.format(loan.pendiente),
-                    style: TextStyle(
-                      fontSize: 15,
-                      fontWeight: FontWeight.w800,
-                      color: loan.status == LoanStatus.finalizado
-                          ? const Color(0xFF16A34A)
-                          : const Color(0xFFEF4444),
-                    ),
-                  ),
-                ],
-              ),
-            ],
-          ),
-          const SizedBox(height: 10),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                'Progreso de pago',
-                style: TextStyle(
-                  fontSize: 10,
-                  fontWeight: FontWeight.w500,
-                  color: loan.status.color,
-                ),
-              ),
-              Text(
-                '${loan.progresoInt}%',
-                style: const TextStyle(
-                  fontSize: 10,
-                  fontWeight: FontWeight.w700,
-                  color: Color(0xFF374151),
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 5),
-          ClipRRect(
-            borderRadius: BorderRadius.circular(6),
-            child: LinearProgressIndicator(
-              value: loan.progreso / 100,
-              minHeight: 6,
-              backgroundColor: const Color(0xFFE5E7EB),
-              valueColor: AlwaysStoppedAnimation<Color>(loan.status.color),
+              ],
             ),
-          ),
-          const SizedBox(height: 10),
-          _buildFooter(),
-        ],
+      
+            const SizedBox(height: 10),
+            Row(
+              children: [
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text(
+                        'Total a Pagar',
+                        style: TextStyle(
+                          fontSize: 10,
+                          fontWeight: FontWeight.w500,
+                          color: Color(0xFF9CA3AF),
+                        ),
+                      ),
+                      const SizedBox(height: 3),
+                      Text(
+                        fmt.format(loan.totalAPagar),
+                        style: const TextStyle(
+                          fontSize: 15,
+                          fontWeight: FontWeight.w800,
+                          color: Color(0xFF111827),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: [
+                    Text(
+                      loan.status == LoanStatus.finalizado
+                          ? 'Total Pagado'
+                          : 'Pendiente',
+                      style: const TextStyle(
+                        fontSize: 10,
+                        fontWeight: FontWeight.w500,
+                        color: Color(0xFF9CA3AF),
+                      ),
+                    ),
+                    const SizedBox(height: 3),
+                    Text(
+                      loan.status == LoanStatus.finalizado
+                          ? fmt.format(loan.totalPagado)
+                          : fmt.format(loan.pendiente),
+                      style: TextStyle(
+                        fontSize: 15,
+                        fontWeight: FontWeight.w800,
+                        color: loan.status == LoanStatus.finalizado
+                            ? const Color(0xFF16A34A)
+                            : const Color(0xFFEF4444),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+            const SizedBox(height: 10),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  'Progreso de pago',
+                  style: TextStyle(
+                    fontSize: 10,
+                    fontWeight: FontWeight.w500,
+                    color: loan.status.color,
+                  ),
+                ),
+                Text(
+                  '${loan.progresoInt}%',
+                  style: const TextStyle(
+                    fontSize: 10,
+                    fontWeight: FontWeight.w700,
+                    color: Color(0xFF374151),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 5),
+            ClipRRect(
+              borderRadius: BorderRadius.circular(6),
+              child: LinearProgressIndicator(
+                value: loan.progreso / 100,
+                minHeight: 6,
+                backgroundColor: const Color(0xFFE5E7EB),
+                valueColor: AlwaysStoppedAnimation<Color>(loan.status.color),
+              ),
+            ),
+            const SizedBox(height: 10),
+            _buildFooter(),
+          ],
+        ),
       ),
     );
   }

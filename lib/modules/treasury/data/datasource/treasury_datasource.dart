@@ -3,6 +3,7 @@ import '../../../../core/networking/http_services.dart';
 import '../../domain/entity/entity.dart';
 import '../models/model.dart';
 
+
 class TreasuryDatasource {
   final ApiClient apiClient;
 
@@ -234,7 +235,7 @@ class TreasuryDatasource {
     int limit = 10,
   }) async {
     final Map<String, dynamic> queryParameters = {'page': page, 'limit': limit};
-    
+
     if (status != null && status.toLowerCase() != 'todos') {
       queryParameters['status'] = status.toLowerCase();
     }
@@ -313,6 +314,7 @@ class TreasuryDatasource {
     return RegisterSaleResponseModel.fromJson(response['data']);
   }
 
+<<<<<<< HEAD
   Future<LoanDetailsResponseEntity> getloanDatails(
     String idLoan,
   ) async {
@@ -321,5 +323,47 @@ class TreasuryDatasource {
       operationName: 'getloanDatails',
     );
     return LoanDetailsResponseModel.fromJson(response);
+=======
+  Future<NewLoansResponseEntity> postNewLoansSimulate(
+    double amount,
+    int termMonths,
+    String annualInterestRate,
+    String startDate,
+  ) async {
+    final response = await apiClient.post(
+      '/api/treasury/corporate-loans/simulate',
+      data: {
+        "amount": amount,
+        "term_months": termMonths,
+        "annual_interest_rate": annualInterestRate,
+        "start_date": startDate,
+      },
+      operationName: 'postNewLoansSimulate',
+    );
+    return NewLoansResponseModel.fromJson(response['data']);
+  }
+    Future<ApplyForALoanResponseEntity> postApplyForAloan(
+    String lenderName,
+    double amount,
+    int termMonths,
+    double annualInterestRate,
+    String startDate,
+    String cajaDestinoId,
+  ) async {
+    final data =  {
+        "lender_name": lenderName,
+        "amount": amount,
+        "term_months": termMonths,
+        "annual_interest_rate": annualInterestRate,
+        "start_date": startDate,
+        "caja_destino_id": cajaDestinoId,
+      };
+    final response = await apiClient.post(
+      '/api/treasury/corporate-loans',
+      data:data,
+      operationName: 'postApplyForAloan',
+    );
+    return ApplyForALoanResponseModel.fromJson(response['data']);
+>>>>>>> origin/dev
   }
 }
