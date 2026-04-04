@@ -297,9 +297,10 @@ class LoanDetailsLoading extends TreasuryState {}
 
 class LoanDetailsLoaded extends TreasuryState {
   final LoanDetailsResponseEntity loanDetails;
-
+final CashResponseEntity cash;
   LoanDetailsLoaded({
-    required this.loanDetails
+    required this.loanDetails,
+    required this.cash,
   });
 }
 

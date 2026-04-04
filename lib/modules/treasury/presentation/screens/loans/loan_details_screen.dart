@@ -84,6 +84,8 @@ class LoanDetailsScreen extends StatelessWidget {
                           label: cuota.textoCuota,
                           amount: cuota.montoTotalCuota.toDouble(),
                           status: cuota.estadoCuota,
+                          quotaId: cuota.quotaId,
+                          cash: state.cash, // Pasa la información de cash aquí
                         );
                       },
                     ),
