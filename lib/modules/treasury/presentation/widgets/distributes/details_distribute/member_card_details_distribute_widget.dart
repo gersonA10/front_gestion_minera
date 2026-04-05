@@ -1,29 +1,26 @@
-import 'package:front_gestion_minera/modules/treasury/presentation/widgets/widgtes.dart';
+
+import 'package:flutter/material.dart';
 import 'package:front_gestion_minera/utils/constants/color.constant.dart';
 
 import '../../../../domain/entity/entity.dart';
 
-class DistributionCard extends StatelessWidget {
-  final DistributionHistoryItemEntity item;
+class MemberCard extends StatelessWidget {
+  final DistributionDetailMemberEntity member;
   final String Function(double) formatCurrency;
 
-  const DistributionCard(
-      {super.key, required this.item, required this.formatCurrency});
+  const MemberCard({super.key, required this.member, required this.formatCurrency});
 
-  bool get _isAbierto => item.status.toLowerCase() == 'abierto';
-
+  bool get _isPendiente => member.status.toLowerCase() == 'pendiente';
+  Color get _statusColor => _isPendiente ? TColors.warning : TColors.success;
   Color get _avatarBg =>
-      _isAbierto ? TColors.warningLight : TColors.successLight;
-  Color get _avatarText => _isAbierto ? TColors.warning : TColors.success;
-  Color get _statusColor => _isAbierto ? TColors.warning : TColors.success;
-  String get _statusLabel => _isAbierto ? 'Pendiente' : 'Pagado';
+      _isPendiente ? TColors.warningLight : TColors.successLight;
 
   String get _initials {
-    final parts = item.period.trim().split(' ');
+    final parts = member.fullName.trim().split(' ');
     if (parts.length >= 2) {
       return '${parts[0][0]}${parts[1][0]}'.toUpperCase();
     }
-    return item.period.substring(0, 2).toUpperCase();
+    return member.fullName.substring(0, 2).toUpperCase();
   }
 
   @override
@@ -50,14 +47,17 @@ class DistributionCard extends StatelessWidget {
               Container(
                 width: 40,
                 height: 40,
-                decoration: BoxDecoration(
-                    color: _avatarBg, shape: BoxShape.circle),
+                decoration:
+                    BoxDecoration(color: _avatarBg, shape: BoxShape.circle),
                 child: Center(
-                  child: Text(_initials,
-                      style: TextStyle(
-                          color: _avatarText,
-                          fontSize: 13,
-                          fontWeight: FontWeight.w700)),
+                  child: Text(
+                    _initials,
+                    style: TextStyle(
+                      color: _statusColor,
+                      fontSize: 13,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
                 ),
               ),
               const SizedBox(width: 10),
@@ -65,14 +65,20 @@ class DistributionCard extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(item.period,
+                    Text(
+                      member.fullName,
+                      style: const TextStyle(
+                        color: TColors.textPrimary,
+                        fontSize: 13,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                    if (member.paymentDate != null)
+                      Text(
+                        'Pagado: ${member.paymentDate}',
                         style: const TextStyle(
-                            color: TColors.textPrimary,
-                            fontSize: 13,
-                            fontWeight: FontWeight.w700)),
-                    Text('Registrado: ${item.registeredDate}',
-                        style: const TextStyle(
-                            color: TColors.textSecondary, fontSize: 11)),
+                            color: TColors.textSecondary, fontSize: 11),
+                      ),
                   ],
                 ),
               ),
@@ -84,15 +90,17 @@ class DistributionCard extends StatelessWidget {
                   borderRadius: BorderRadius.circular(6),
                   border: Border.all(color: _statusColor),
                 ),
-                child: Text(_statusLabel,
-                    style: TextStyle(
-                        color: _statusColor,
-                        fontSize: 11,
-                        fontWeight: FontWeight.w600)),
+                child: Text(
+                  member.status,
+                  style: TextStyle(
+                    color: _statusColor,
+                    fontSize: 11,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
               ),
             ],
           ),
-
           const SizedBox(height: 10),
           Divider(height: 1, color: TColors.border),
           const SizedBox(height: 10),
@@ -103,25 +111,29 @@ class DistributionCard extends StatelessWidget {
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text('MONTO',
-                      style: TextStyle(
-                          color: TColors.textSecondary,
-                          fontSize: 10,
-                          fontWeight: FontWeight.w600,
-                          letterSpacing: 0.4)),
+                  const Text(
+                    'MONTO ASIGNADO',
+                    style: TextStyle(
+                      color: TColors.textSecondary,
+                      fontSize: 10,
+                      fontWeight: FontWeight.w600,
+                      letterSpacing: 0.4,
+                    ),
+                  ),
                   const SizedBox(height: 2),
-                  Text(formatCurrency(item.registeredAmount),
-                      style: const TextStyle(
-                          color: TColors.textPrimary,
-                          fontSize: 13,
-                          fontWeight: FontWeight.w700)),
+                  Text(
+                    formatCurrency(member.assignedAmount),
+                    style: const TextStyle(
+                      color: TColors.textPrimary,
+                      fontSize: 13,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
                 ],
               ),
-
-              if (_isAbierto)
+              if (_isPendiente)
                 ElevatedButton(
-                  onPressed: () {
-                  },
+                  onPressed: () {},
                   style: ElevatedButton.styleFrom(
                     backgroundColor: TColors.primary,
                     foregroundColor: TColors.white,
@@ -138,20 +150,17 @@ class DistributionCard extends StatelessWidget {
                           fontSize: 12, fontWeight: FontWeight.w700)),
                 )
               else
-                GestureDetector(
-                  onTap: () {
-                  },
-                  child: Row(
-                    children: const [
-                      Icon(Icons.receipt_long_outlined,
-                          color: TColors.textSecondary, size: 15),
-                      SizedBox(width: 4),
-                      Text('Ver recibo',
-                          style: TextStyle(
-                              color: TColors.textSecondary,
-                              fontSize: 12,
-                              fontWeight: FontWeight.w600)),
-                    ],
+                TextButton.icon(
+                  onPressed: () {},
+                  icon: const Icon(Icons.receipt_long_outlined,
+                      color: TColors.textSecondary, size: 15),
+                  label: const Text(
+                    'Ver recibo',
+                    style: TextStyle(
+                      color: TColors.textSecondary,
+                      fontWeight: FontWeight.w600,
+                      fontSize: 12,
+                    ),
                   ),
                 ),
             ],

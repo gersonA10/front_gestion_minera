@@ -28,6 +28,7 @@ export 'package:front_gestion_minera/modules/treasury/presentation/widgets/loan_
 export 'package:front_gestion_minera/modules/treasury/presentation/widgets/loan_simulation/payment_intallment_card_widget.dart';
 export 'package:front_gestion_minera/modules/treasury/presentation/widgets/loan_home/error_view_widget.dart';
 export 'package:front_gestion_minera/modules/treasury/presentation/widgets/loan_home/loan_card_widget.dart';
-export 'package:front_gestion_minera/modules/treasury/presentation/widgets/distributes/distributes_home/counter_item_widget.dart';
-export 'package:front_gestion_minera/modules/treasury/presentation/widgets/distributes/distributes_home/distribution_card_widget.dart';
-export 'package:front_gestion_minera/modules/treasury/presentation/widgets/distributes/distributes_home/sumary_card1_widget.dart';
+export 'package:front_gestion_minera/modules/treasury/presentation/widgets/distributes/details_distribute/header_card_detail_distribute_widget.dart';
+export 'package:front_gestion_minera/modules/treasury/presentation/widgets/distributes/details_distribute/member_card_details_distribute_widget.dart';
+export 'package:front_gestion_minera/modules/treasury/presentation/widgets/distributes/details_distribute/sumary_card1_widget.dart';
+export 'package:front_gestion_minera/modules/treasury/presentation/widgets/distributes/details_distribute/counter_item_widget.dart';
