@@ -81,4 +81,15 @@ abstract class TreasuryRepository {
    Future<LoanDetailsResponseEntity> getloanDatails(
     String idLoan,
   );
+
+  Future<DistributionHistoryResponseEntity> getDistributionHistory({
+    int page = 1,
+    int limit = 10,
+  });
+
+  Future<DistributionDetailResponseEntity> getDistributionDetail(
+    String distributionId, {
+    int page = 1,
+    int limit = 10,
+  });
 }

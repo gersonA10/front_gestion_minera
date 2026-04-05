@@ -363,4 +363,51 @@ class TreasuryDatasource {
     );
     return LoanDetailsResponseModel.fromJson(response);
   }
+
+  Future<Map<String, dynamic>> getDistributionDetail(
+    String distributionId, {
+    int page = 1,
+    int limit = 10,
+  }) async {
+    final Map<String, dynamic> queryParameters = {'page': page, 'limit': limit};
+    final response = await apiClient.get(
+      '/api/treasury/distributions/$distributionId',
+      operationName: 'getDistributionDetail',
+      queryParameters: queryParameters,
+    );
+    final Map<String, dynamic> data = response['data'] ?? {};
+    final Map<String, dynamic> meta = response['meta'] ?? {};
+    final List<dynamic> membersList = data['members_list'] ?? [];
+    return {
+      'header': DistributionDetailHeaderModel.fromJson(
+          data['header'] as Map<String, dynamic>),
+      'members_list': membersList
+          .map((m) =>
+              DistributionDetailMemberModel.fromJson(m as Map<String, dynamic>))
+          .toList(),
+      'has_more': meta['has_more'] ?? false,
+      'total_records': meta['total_records'] ?? 0,
+    };
+  }
+
+  Future<Map<String, dynamic>> getDistributionHistory({
+    int page = 1,
+    int limit = 10,
+  }) async {
+    final Map<String, dynamic> queryParameters = {'page': page, 'limit': limit};
+    final response = await apiClient.get(
+      '/api/treasury/distributions/history',
+      operationName: 'getDistributionHistory',
+      queryParameters: queryParameters,
+    );
+    final List<dynamic> data = response['data'] ?? [];
+    final Map<String, dynamic> meta = response['meta'] ?? {};
+    return {
+      'items': data
+          .map((item) => DistributionHistoryItemModel.fromJson(item))
+          .toList(),
+      'has_more': meta['has_more'] ?? false,
+      'total_records': meta['total_records'] ?? 0,
+    };
+  }
 }
