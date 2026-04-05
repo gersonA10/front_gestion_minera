@@ -191,4 +191,21 @@ class TreasuryRepositoryImpl implements TreasuryRepository {
   Future<LoanDetailsResponseEntity> getloanDatails(String idLoan) async{
     return await datasource.getloanDatails(idLoan);
   }
+
+  @override
+  Future<DistributionHistoryResponseEntity> getDistributionHistory({
+    int page = 1,
+    int limit = 10,
+  }) async {
+    final result = await datasource.getDistributionHistory(
+      page: page,
+      limit: limit,
+    );
+    final models = result['items'] as List<DistributionHistoryItemModel>;
+    return DistributionHistoryResponseEntity(
+      items: models,
+      hasMore: result['has_more'] as bool,
+      totalRecords: result['total_records'] as int? ?? 0,
+    );
+  }
 }

@@ -37,6 +37,13 @@ class TreasuryBloc extends Bloc<TreasuryEvent, TreasuryState> {
 
   String? _currentStatus;
   String? _currentSearch;
+
+  // distribuciones
+  int _distributionHistoryPage = 1;
+  bool _distributionHistoryReachedMax = false;
+  int _distributionHistoryTotalRecords = 0;
+  List<DistributionHistoryItemEntity> _distributionHistoryItems = [];
+  bool _isLoadingMoreDistributionHistory = false;
   //
   int _paymentHistoryPage = 1;
   bool _paymentHistoryReachedMax = false;
@@ -71,7 +78,8 @@ class TreasuryBloc extends Bloc<TreasuryEvent, TreasuryState> {
     on<ApplyForALoanEvent>(_onApplyForALoan);
     on<NewLoansSimulateEvent>(_onNewLoansSimulate);
      on<LoanDetailsEvent>(_onLoanDetails);
-
+    on<GetDistributionHistoryEvent>(_onGetDistributionHistory);
+    on<LoadMoreDistributionHistoryEvent>(_onLoadMoreDistributionHistory);
   }
 
   Future<void> _onFetchTreasuryMetrics(
@@ -707,6 +715,76 @@ class TreasuryBloc extends Bloc<TreasuryEvent, TreasuryState> {
       emit(LoanDetailsError(mapErrorMessage(error.key)));
     } catch (e) {
       emit(LoanDetailsError( 'Error inesperado: $e'));
+    }
+  }
+
+  Future<void> _onGetDistributionHistory(
+    GetDistributionHistoryEvent event,
+    Emitter<TreasuryState> emit,
+  ) async {
+    if (!event.isRefresh && _distributionHistoryItems.isNotEmpty) {
+      emit(DistributionHistoryLoaded(
+        items: List.from(_distributionHistoryItems),
+        hasReachedMax: _distributionHistoryReachedMax,
+        totalRecords: _distributionHistoryTotalRecords,
+      ));
+      return;
+    }
+
+    if (event.isRefresh) {
+      _distributionHistoryPage = 1;
+      _distributionHistoryReachedMax = false;
+      _distributionHistoryItems.clear();
+      emit(DistributionHistoryLoading());
+    }
+
+    try {
+      final response = await repository.getDistributionHistory(
+        page: _distributionHistoryPage,
+      );
+      _distributionHistoryItems = response.items;
+      _distributionHistoryReachedMax = !response.hasMore;
+      _distributionHistoryTotalRecords = response.totalRecords;
+      emit(DistributionHistoryLoaded(
+        items: List.from(_distributionHistoryItems),
+        hasReachedMax: _distributionHistoryReachedMax,
+        totalRecords: _distributionHistoryTotalRecords,
+      ));
+    } on BaseApiException catch (error) {
+      if (error.key == DioExceptionKey.unauthorised) return;
+      emit(DistributionHistoryError(mapErrorMessage(error.key)));
+    } catch (e) {
+      emit(DistributionHistoryError('Error inesperado: $e'));
+    }
+  }
+
+  Future<void> _onLoadMoreDistributionHistory(
+    LoadMoreDistributionHistoryEvent event,
+    Emitter<TreasuryState> emit,
+  ) async {
+    if (_distributionHistoryReachedMax || _isLoadingMoreDistributionHistory) return;
+    _isLoadingMoreDistributionHistory = true;
+    _distributionHistoryPage++;
+    try {
+      final response = await repository.getDistributionHistory(
+        page: _distributionHistoryPage,
+      );
+      _distributionHistoryItems.addAll(response.items);
+      _distributionHistoryReachedMax = !response.hasMore;
+      emit(DistributionHistoryLoaded(
+        items: List.from(_distributionHistoryItems),
+        hasReachedMax: _distributionHistoryReachedMax,
+        totalRecords: _distributionHistoryTotalRecords,
+      ));
+    } on BaseApiException catch (error) {
+      _distributionHistoryPage--;
+      if (error.key == DioExceptionKey.unauthorised) return;
+      emit(DistributionHistoryError(mapErrorMessage(error.key)));
+    } catch (e) {
+      _distributionHistoryPage--;
+      emit(DistributionHistoryError('Error inesperado: $e'));
+    } finally {
+      _isLoadingMoreDistributionHistory = false;
     }
   }
 }

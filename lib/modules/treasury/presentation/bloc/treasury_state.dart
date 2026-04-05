@@ -308,3 +308,23 @@ class LoanDetailsError extends TreasuryState {
   final String message;
   LoanDetailsError(this.message);
 }
+
+// historial de distribuciones
+class DistributionHistoryLoading extends TreasuryState {}
+
+class DistributionHistoryLoaded extends TreasuryState {
+  final List<DistributionHistoryItemEntity> items;
+  final bool hasReachedMax;
+  final int totalRecords;
+
+  DistributionHistoryLoaded({
+    required this.items,
+    required this.hasReachedMax,
+    required this.totalRecords,
+  });
+}
+
+class DistributionHistoryError extends TreasuryState {
+  final String message;
+  DistributionHistoryError(this.message);
+}

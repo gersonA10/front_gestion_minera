@@ -7,7 +7,7 @@ export 'package:front_gestion_minera/modules/treasury/presentation/widgets/goldI
 export 'package:front_gestion_minera/modules/treasury/presentation/widgets/goldInventory/app_bar_home_widget.dart';
 export 'package:front_gestion_minera/modules/treasury/presentation/widgets/payment_history/filer_bottom_sheet_widget.dart';
 export 'package:front_gestion_minera/modules/treasury/presentation/widgets/payment_history/selector_row_widget.dart';
-export 'package:front_gestion_minera/modules/treasury/presentation/widgets/payment_history/summary_card_widget.dart';
+export 'package:front_gestion_minera/modules/treasury/presentation/widgets/payment_history/summary_card_payment_widget.dart';
 export 'package:front_gestion_minera/modules/treasury/presentation/widgets/payment_history/transaction_tile_widget.dart';
 export 'package:front_gestion_minera/modules/treasury/presentation/widgets/payment_history/year_selector_widget.dart';
 export 'package:front_gestion_minera/modules/treasury/presentation/widgets/home_dashboard/header_widget.dart';
@@ -28,3 +28,6 @@ export 'package:front_gestion_minera/modules/treasury/presentation/widgets/loan_
 export 'package:front_gestion_minera/modules/treasury/presentation/widgets/loan_simulation/payment_intallment_card_widget.dart';
 export 'package:front_gestion_minera/modules/treasury/presentation/widgets/loan_home/error_view_widget.dart';
 export 'package:front_gestion_minera/modules/treasury/presentation/widgets/loan_home/loan_card_widget.dart';
+export 'package:front_gestion_minera/modules/treasury/presentation/widgets/distributes/distributes_home/counter_item_widget.dart';
+export 'package:front_gestion_minera/modules/treasury/presentation/widgets/distributes/distributes_home/distribution_card_widget.dart';
+export 'package:front_gestion_minera/modules/treasury/presentation/widgets/distributes/distributes_home/sumary_card1_widget.dart';
