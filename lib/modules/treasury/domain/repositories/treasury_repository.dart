@@ -92,4 +92,13 @@ abstract class TreasuryRepository {
     int page = 1,
     int limit = 10,
   });
+
+   Future<NewLayoutResponseEntity> newLayoutPost(
+   String monthPeriod,
+    String yearPeriod,
+    double baseAmount
+  );
+  Future<SimulateDistributionResponseEntity> postSimulateDistribution(
+    double baseAmount
+  );
 }

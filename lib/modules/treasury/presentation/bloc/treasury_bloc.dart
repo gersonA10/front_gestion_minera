@@ -91,6 +91,8 @@ class TreasuryBloc extends Bloc<TreasuryEvent, TreasuryState> {
     on<LoadMoreDistributionHistoryEvent>(_onLoadMoreDistributionHistory);
     on<GetDistributionDetailEvent>(_onGetDistributionDetail);
     on<LoadMoreDistributionDetailEvent>(_onLoadMoreDistributionDetail);
+    on<NewLayoutEvent>(_onNewLayout);
+    on<SimulateDistributionEvent>(_onSimulateDistribution); 
   }
 
   Future<void> _onFetchTreasuryMetrics(
@@ -878,4 +880,40 @@ class TreasuryBloc extends Bloc<TreasuryEvent, TreasuryState> {
       _isLoadingMoreDistributionDetail = false;
     }
   }
+
+  Future<void> _onNewLayout(
+    NewLayoutEvent event,
+    Emitter<TreasuryState> emit,
+  ) async {
+    emit(NewLayoutLoading());
+    try {
+      final response = await repository.newLayoutPost(event.monthPeriod, event.yearPeriod, event.baseAmount);
+      emit(NewLayoutLoaded(newLayout:  response));
+    } on BaseApiException catch (error) {
+      if (error.key == DioExceptionKey.unauthorised) {
+        return;
+      }
+      emit(NewLayoutError(mapErrorMessage(error.key)));
+    } catch (e) {
+      emit(NewLayoutError( 'Error inesperado: $e'));
+    }
+   }
+
+   Future<void> _onSimulateDistribution(
+    SimulateDistributionEvent event,
+    Emitter<TreasuryState> emit,
+  ) async {
+    emit(SimulateDistributionLoading());
+    try {
+      final response = await repository.postSimulateDistribution(event.baseAmount);
+      emit(SimulateDistributionLoaded(simulateDistribution:  response));
+    } on BaseApiException catch (error) {
+      if (error.key == DioExceptionKey.unauthorised) {
+        return;
+      }
+      emit(SimulateDistributionError(mapErrorMessage(error.key)));
+    } catch (e) {
+      emit(SimulateDistributionError( 'Error inesperado: $e'));
+    }
+   }
 }

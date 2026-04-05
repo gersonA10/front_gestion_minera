@@ -118,7 +118,11 @@ class TreasuryRepositoryImpl implements TreasuryRepository {
     int limit = 10,
     String? status,
   }) async {
-    final result = await datasource.getGoldBatches(page: page, limit: limit, status: status);
+    final result = await datasource.getGoldBatches(
+      page: page,
+      limit: limit,
+      status: status,
+    );
     return result;
   }
 
@@ -136,10 +140,20 @@ class TreasuryRepositoryImpl implements TreasuryRepository {
       totalRecords: result['total_records'] as int? ?? 0,
     );
   }
-  
+
   @override
-  Future<InternalLoansResponseEntity> getInternalLoans({String? status, String? search, int page = 1, int limit = 10}) async{
-    final result = await datasource.internalLoans(status: status, search: search, page: page, limit: limit);
+  Future<InternalLoansResponseEntity> getInternalLoans({
+    String? status,
+    String? search,
+    int page = 1,
+    int limit = 10,
+  }) async {
+    final result = await datasource.internalLoans(
+      status: status,
+      search: search,
+      page: page,
+      limit: limit,
+    );
     final models = result['items'] as List<InternalLoansResponseModel>;
     return InternalLoansResponseEntity(
       items: models.map((model) => model.toEntity()).toList(),
@@ -178,17 +192,43 @@ class TreasuryRepositoryImpl implements TreasuryRepository {
     final requestModel = RegisterSaleRequestModel.fromEntity(request);
     return await datasource.registerSale(requestModel);
   }
-  
+
   @override
-  Future<NewLoansResponseEntity> postNewLoansSimulate(double amount, int termMonths, String annualInterestRate, String startDate)async{
-    return await datasource.postNewLoansSimulate(amount, termMonths, annualInterestRate, startDate);
+  Future<NewLoansResponseEntity> postNewLoansSimulate(
+    double amount,
+    int termMonths,
+    String annualInterestRate,
+    String startDate,
+  ) async {
+    return await datasource.postNewLoansSimulate(
+      amount,
+      termMonths,
+      annualInterestRate,
+      startDate,
+    );
   }
+
   @override
-  Future<ApplyForALoanResponseEntity> applyForALoan(String lenderName, double amount, int termMonths, double annualInterestRate, String startDate, String cajaDestinoId)async {
-    return await datasource.postApplyForAloan(lenderName, amount, termMonths, annualInterestRate, startDate, cajaDestinoId);
+  Future<ApplyForALoanResponseEntity> applyForALoan(
+    String lenderName,
+    double amount,
+    int termMonths,
+    double annualInterestRate,
+    String startDate,
+    String cajaDestinoId,
+  ) async {
+    return await datasource.postApplyForAloan(
+      lenderName,
+      amount,
+      termMonths,
+      annualInterestRate,
+      startDate,
+      cajaDestinoId,
+    );
   }
-    @override
-  Future<LoanDetailsResponseEntity> getloanDatails(String idLoan) async{
+
+  @override
+  Future<LoanDetailsResponseEntity> getloanDatails(String idLoan) async {
     return await datasource.getloanDatails(idLoan);
   }
 
@@ -227,5 +267,19 @@ class TreasuryRepositoryImpl implements TreasuryRepository {
       hasMore: result['has_more'] as bool,
       totalRecords: result['total_records'] as int? ?? 0,
     );
+  }
+
+  @override
+  Future<NewLayoutResponseEntity> newLayoutPost(
+    String monthPeriod,
+    String yearPeriod,
+    double baseAmount,
+  ) async {
+    return await datasource.newLayoutPost(monthPeriod, yearPeriod, baseAmount);
+  }
+  
+  @override
+  Future<SimulateDistributionResponseEntity> postSimulateDistribution(double baseAmount) async{
+    return await datasource.postSimulateDistribution(baseAmount);
   }
 }
