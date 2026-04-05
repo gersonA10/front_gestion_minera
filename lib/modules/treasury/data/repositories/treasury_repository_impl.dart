@@ -187,8 +187,13 @@ class TreasuryRepositoryImpl implements TreasuryRepository {
   Future<ApplyForALoanResponseEntity> applyForALoan(String lenderName, double amount, int termMonths, double annualInterestRate, String startDate, String cajaDestinoId)async {
     return await datasource.postApplyForAloan(lenderName, amount, termMonths, annualInterestRate, startDate, cajaDestinoId);
   }
-    @override
-  Future<LoanDetailsResponseEntity> getloanDatails(String idLoan) async{
+  @override
+  Future<LoanDetailsResponseEntity> getloanDatails(String idLoan) async {
     return await datasource.getloanDatails(idLoan);
+  }
+
+  @override
+  Future<LotDetailsDataEntity> getLotDetails(String batchId) async {
+    return await datasource.lotDetails(batchId);
   }
 }

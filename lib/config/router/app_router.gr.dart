@@ -213,18 +213,38 @@ class AuthRoute extends _i35.PageRouteInfo<void> {
 
 /// generated route for
 /// [_i4.BatchDetailScreen]
-class BatchDetailRoute extends _i35.PageRouteInfo<void> {
-  const BatchDetailRoute({List<_i35.PageRouteInfo>? children})
-    : super(BatchDetailRoute.name, initialChildren: children);
+class BatchDetailRoute extends _i35.PageRouteInfo<BatchDetailRouteArgs> {
+  BatchDetailRoute({
+    _i37.Key? key,
+    required String batchId,
+    List<_i35.PageRouteInfo>? children,
+  }) : super(
+         BatchDetailRoute.name,
+         args: BatchDetailRouteArgs(key: key, batchId: batchId),
+         initialChildren: children,
+       );
 
   static const String name = 'BatchDetailRoute';
 
   static _i35.PageInfo page = _i35.PageInfo(
     name,
     builder: (data) {
-      return const _i4.BatchDetailScreen();
+      final args = data.argsAs<BatchDetailRouteArgs>();
+      return _i4.BatchDetailScreen(key: args.key, batchId: args.batchId);
     },
   );
+}
+
+class BatchDetailRouteArgs {
+  const BatchDetailRouteArgs({this.key, required this.batchId});
+
+  final _i37.Key? key;
+  final String batchId;
+
+  @override
+  String toString() {
+    return 'BatchDetailRouteArgs{key: $key, batchId: $batchId}';
+  }
 }
 
 /// generated route for

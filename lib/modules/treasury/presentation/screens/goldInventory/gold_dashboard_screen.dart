@@ -695,7 +695,7 @@ class _GoldDashboardScreenState extends State<GoldDashboardScreen> {
 
     return GestureDetector(
       onTap: () {
-        context.router.push(BatchDetailRoute());
+        context.router.push(BatchDetailRoute(batchId: lote.batchId));
       },
       child: Container(
         margin: const EdgeInsets.only(bottom: 12),

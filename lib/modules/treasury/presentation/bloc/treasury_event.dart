@@ -144,4 +144,10 @@ class ApplyForALoanEvent extends TreasuryEvent {
 
 class LoanDetailsEvent extends TreasuryEvent {
   final String idLoan;
-  LoanDetailsEvent({required this.idLoan});}
+  LoanDetailsEvent({required this.idLoan});
+}
+
+class BatchLotDetailsEvent extends TreasuryEvent {
+  final String batchId;
+  BatchLotDetailsEvent({required this.batchId});
+}

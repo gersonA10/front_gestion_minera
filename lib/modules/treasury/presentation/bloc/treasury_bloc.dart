@@ -70,8 +70,8 @@ class TreasuryBloc extends Bloc<TreasuryEvent, TreasuryState> {
     on<RegisterSaleEvent>(_onRegisterSale);
     on<ApplyForALoanEvent>(_onApplyForALoan);
     on<NewLoansSimulateEvent>(_onNewLoansSimulate);
-     on<LoanDetailsEvent>(_onLoanDetails);
-
+    on<LoanDetailsEvent>(_onLoanDetails);
+    on<BatchLotDetailsEvent>(_onBatchLotDetails);
   }
 
   Future<void> _onFetchTreasuryMetrics(
@@ -691,7 +691,23 @@ class TreasuryBloc extends Bloc<TreasuryEvent, TreasuryState> {
     }
   }
 
-   Future<void> _onLoanDetails(
+  Future<void> _onBatchLotDetails(
+    BatchLotDetailsEvent event,
+    Emitter<TreasuryState> emit,
+  ) async {
+    emit(BatchLotDetailsLoading());
+    try {
+      final response = await repository.getLotDetails(event.batchId);
+      emit(BatchLotDetailsLoaded(lotDetails: response));
+    } on BaseApiException catch (error) {
+      if (error.key == DioExceptionKey.unauthorised) return;
+      emit(BatchLotDetailsError(mapErrorMessage(error.key)));
+    } catch (e) {
+      emit(BatchLotDetailsError('Error inesperado: $e'));
+    }
+  }
+
+  Future<void> _onLoanDetails(
     LoanDetailsEvent event,
     Emitter<TreasuryState> emit,
   ) async {
