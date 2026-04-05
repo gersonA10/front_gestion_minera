@@ -197,7 +197,7 @@ class _TreasuryScreenState extends State<TreasuryScreen> {
                           icon: Icons.payments_outlined,
                           iconColor: const Color(0xFFA855F7),
                           bgColor: const Color(0xFFF3E8FF),
-                          onTap: () {},
+                          onTap: () {context.router.push(DistributeHomeRoute());},
                         ),
                         _buildModuleCard(
                           context,
