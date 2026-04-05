@@ -152,3 +152,14 @@ class GetDistributionHistoryEvent extends TreasuryEvent {
 }
 
 class LoadMoreDistributionHistoryEvent extends TreasuryEvent {}
+
+class GetDistributionDetailEvent extends TreasuryEvent {
+  final String distributionId;
+  final bool isRefresh;
+  GetDistributionDetailEvent({
+    required this.distributionId,
+    this.isRefresh = true,
+  });
+}
+
+class LoadMoreDistributionDetailEvent extends TreasuryEvent {}

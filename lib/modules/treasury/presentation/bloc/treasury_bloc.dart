@@ -44,6 +44,15 @@ class TreasuryBloc extends Bloc<TreasuryEvent, TreasuryState> {
   int _distributionHistoryTotalRecords = 0;
   List<DistributionHistoryItemEntity> _distributionHistoryItems = [];
   bool _isLoadingMoreDistributionHistory = false;
+
+  // detalle de distribución
+  int _distributionDetailPage = 1;
+  bool _distributionDetailReachedMax = false;
+  int _distributionDetailTotalRecords = 0;
+  List<DistributionDetailMemberEntity> _distributionDetailMembers = [];
+  DistributionDetailHeaderEntity? _distributionDetailHeader;
+  bool _isLoadingMoreDistributionDetail = false;
+  String? _currentDistributionId;
   //
   int _paymentHistoryPage = 1;
   bool _paymentHistoryReachedMax = false;
@@ -80,6 +89,8 @@ class TreasuryBloc extends Bloc<TreasuryEvent, TreasuryState> {
      on<LoanDetailsEvent>(_onLoanDetails);
     on<GetDistributionHistoryEvent>(_onGetDistributionHistory);
     on<LoadMoreDistributionHistoryEvent>(_onLoadMoreDistributionHistory);
+    on<GetDistributionDetailEvent>(_onGetDistributionDetail);
+    on<LoadMoreDistributionDetailEvent>(_onLoadMoreDistributionDetail);
   }
 
   Future<void> _onFetchTreasuryMetrics(
@@ -785,6 +796,86 @@ class TreasuryBloc extends Bloc<TreasuryEvent, TreasuryState> {
       emit(DistributionHistoryError('Error inesperado: $e'));
     } finally {
       _isLoadingMoreDistributionHistory = false;
+    }
+  }
+
+  Future<void> _onGetDistributionDetail(
+    GetDistributionDetailEvent event,
+    Emitter<TreasuryState> emit,
+  ) async {
+    if (!event.isRefresh &&
+        _currentDistributionId == event.distributionId &&
+        _distributionDetailMembers.isNotEmpty) {
+      emit(DistributionDetailLoaded(
+        header: _distributionDetailHeader!,
+        membersList: List.from(_distributionDetailMembers),
+        hasReachedMax: _distributionDetailReachedMax,
+        totalRecords: _distributionDetailTotalRecords,
+      ));
+      return;
+    }
+
+    _currentDistributionId = event.distributionId;
+    _distributionDetailPage = 1;
+    _distributionDetailReachedMax = false;
+    _distributionDetailMembers.clear();
+    _distributionDetailHeader = null;
+    emit(DistributionDetailLoading());
+
+    try {
+      final response = await repository.getDistributionDetail(
+        event.distributionId,
+        page: _distributionDetailPage,
+      );
+      _distributionDetailHeader = response.header;
+      _distributionDetailMembers = List.from(response.membersList);
+      _distributionDetailReachedMax = !response.hasMore;
+      _distributionDetailTotalRecords = response.totalRecords;
+      emit(DistributionDetailLoaded(
+        header: _distributionDetailHeader!,
+        membersList: List.from(_distributionDetailMembers),
+        hasReachedMax: _distributionDetailReachedMax,
+        totalRecords: _distributionDetailTotalRecords,
+      ));
+    } on BaseApiException catch (error) {
+      if (error.key == DioExceptionKey.unauthorised) return;
+      emit(DistributionDetailError(mapErrorMessage(error.key)));
+    } catch (e) {
+      emit(DistributionDetailError('Error inesperado: $e'));
+    }
+  }
+
+  Future<void> _onLoadMoreDistributionDetail(
+    LoadMoreDistributionDetailEvent event,
+    Emitter<TreasuryState> emit,
+  ) async {
+    if (_distributionDetailReachedMax ||
+        _isLoadingMoreDistributionDetail ||
+        _currentDistributionId == null) { return; }
+    _isLoadingMoreDistributionDetail = true;
+    _distributionDetailPage++;
+    try {
+      final response = await repository.getDistributionDetail(
+        _currentDistributionId!,
+        page: _distributionDetailPage,
+      );
+      _distributionDetailMembers.addAll(response.membersList);
+      _distributionDetailReachedMax = !response.hasMore;
+      emit(DistributionDetailLoaded(
+        header: _distributionDetailHeader!,
+        membersList: List.from(_distributionDetailMembers),
+        hasReachedMax: _distributionDetailReachedMax,
+        totalRecords: _distributionDetailTotalRecords,
+      ));
+    } on BaseApiException catch (error) {
+      _distributionDetailPage--;
+      if (error.key == DioExceptionKey.unauthorised) return;
+      emit(DistributionDetailError(mapErrorMessage(error.key)));
+    } catch (e) {
+      _distributionDetailPage--;
+      emit(DistributionDetailError('Error inesperado: $e'));
+    } finally {
+      _isLoadingMoreDistributionDetail = false;
     }
   }
 }

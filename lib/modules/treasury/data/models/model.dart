@@ -21,3 +21,4 @@ export 'package:front_gestion_minera/modules/treasury/data/models/loans/loan_det
 export 'package:front_gestion_minera/modules/treasury/data/models/loans/apply_for_a_loan_model.dart';
 export 'package:front_gestion_minera/modules/treasury/data/models/loans/new_loans_model.dart';
 export 'package:front_gestion_minera/modules/treasury/data/models/distribute/distribution_history_model.dart';
+export 'package:front_gestion_minera/modules/treasury/data/models/distribute/distribution_detail_model.dart';

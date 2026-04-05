@@ -208,4 +208,24 @@ class TreasuryRepositoryImpl implements TreasuryRepository {
       totalRecords: result['total_records'] as int? ?? 0,
     );
   }
+
+  @override
+  Future<DistributionDetailResponseEntity> getDistributionDetail(
+    String distributionId, {
+    int page = 1,
+    int limit = 10,
+  }) async {
+    final result = await datasource.getDistributionDetail(
+      distributionId,
+      page: page,
+      limit: limit,
+    );
+    return DistributionDetailResponseEntity(
+      header: result['header'] as DistributionDetailHeaderModel,
+      membersList:
+          result['members_list'] as List<DistributionDetailMemberModel>,
+      hasMore: result['has_more'] as bool,
+      totalRecords: result['total_records'] as int? ?? 0,
+    );
+  }
 }

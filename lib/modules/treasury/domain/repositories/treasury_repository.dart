@@ -86,4 +86,10 @@ abstract class TreasuryRepository {
     int page = 1,
     int limit = 10,
   });
+
+  Future<DistributionDetailResponseEntity> getDistributionDetail(
+    String distributionId, {
+    int page = 1,
+    int limit = 10,
+  });
 }
