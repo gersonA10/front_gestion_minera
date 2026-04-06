@@ -1,5 +1,7 @@
+import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:front_gestion_minera/config/router/app_router.gr.dart';
 import 'package:front_gestion_minera/utils/constants/color.constant.dart';
 import 'package:intl/intl.dart';
 import '../../domain/entity/contribution_history_entity.dart';
@@ -319,6 +321,21 @@ class _ContributionAdminScreenState extends State<ContributionAdminScreen> {
               ],
             );
           },
+        ),
+      ),
+      floatingActionButton: FloatingActionButton.extended(
+        backgroundColor: const Color(0xFF1A3557),
+        onPressed: () async {
+          final result = await context.router.push(const CreateContributionRoute());
+          if (!context.mounted) return;
+          if (result == true) {
+            context.read<AdminBloc>().add(GetContributionHistoryEvent(isRefresh: true));
+          }
+        },
+        icon: const Icon(Icons.add, color: Colors.white),
+        label: const Text(
+          'Nuevo Aporte',
+          style: TextStyle(fontFamily: 'Poppins', fontWeight: FontWeight.bold, color: Colors.white),
         ),
       ),
     );

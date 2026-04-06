@@ -20,4 +20,23 @@ abstract class AdminRepository {
   });
 
   Future<RequestDetailEntity> getRequestDetail(String id);
+
+  Future<ProcessRequestResponseEntity> processRequest({
+    required String id,
+    required String action,
+    String? reason,
+  });
+
+  Future<CreateContributionResponseEntity> createContribution({
+    required String motivo,
+    required String periodMonth,
+    required String periodYear,
+    required double monto,
+    required String tipoCalculo,
+  });
+
+  Future<ContributionSimulationEntity> simulateContribution({
+    required double monto,
+    required String tipoCalculo,
+  });
 }
