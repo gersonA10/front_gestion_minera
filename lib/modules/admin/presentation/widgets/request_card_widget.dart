@@ -1,6 +1,8 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:front_gestion_minera/config/router/app_router.gr.dart';
+import 'package:front_gestion_minera/modules/admin/presentation/bloc/admin_bloc.dart';
 import 'package:front_gestion_minera/utils/constants/color.constant.dart';
 import 'package:intl/intl.dart';
 
@@ -50,7 +52,6 @@ class SolicitudCard extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // ── Fila superior: ID + badge ──
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
@@ -168,10 +169,19 @@ class SolicitudCard extends StatelessWidget {
                 ),
 
                 GestureDetector(
-                  onTap: () {
-                    context.router.push(
+                  onTap: () async {
+                    final result = await context.router.push(
                       RequestDetailRoute(requestId: solicitud.requestId),
                     );
+                    if (!context.mounted) return;
+                    if (result == true) {
+                      context.read<AdminBloc>().add(
+                        GetPendingRequestsEvent(isRefresh: true),
+                      );
+                      context.read<AdminBloc>().add(
+                        GetRequestHistoryEvent(status: 'todos'),
+                      );
+                    }
                   },
                   child: Container(
                     padding: const EdgeInsets.symmetric(

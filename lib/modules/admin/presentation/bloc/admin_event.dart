@@ -41,3 +41,42 @@ class GetRequestDetailEvent extends AdminEvent {
   final String id;
   GetRequestDetailEvent(this.id);
 }
+
+class ProcessAdminRequestEvent extends AdminEvent {
+  final String id;
+  final String action; // 'aprobado' o 'rechazado'
+  final String? reason;
+  
+  ProcessAdminRequestEvent({
+    required this.id,
+    required this.action,
+    this.reason,
+  });
+}
+
+//Aportes
+class CreateAdminContributionEvent extends AdminEvent {
+  final String motivo;
+  final String periodMonth;
+  final String periodYear;
+  final double monto;
+  final String tipoCalculo;
+
+  CreateAdminContributionEvent({
+    required this.motivo,
+    required this.periodMonth,
+    required this.periodYear,
+    required this.monto,
+    required this.tipoCalculo,
+  });
+}
+
+class SimulateAdminContributionEvent extends AdminEvent {
+  final double monto;
+  final String tipoCalculo;
+
+  SimulateAdminContributionEvent({
+    required this.monto,
+    required this.tipoCalculo,
+  });
+}
