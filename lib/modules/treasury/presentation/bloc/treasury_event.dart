@@ -145,3 +145,21 @@ class ApplyForALoanEvent extends TreasuryEvent {
 class LoanDetailsEvent extends TreasuryEvent {
   final String idLoan;
   LoanDetailsEvent({required this.idLoan});}
+
+class GetDistributionHistoryEvent extends TreasuryEvent {
+  final bool isRefresh;
+  GetDistributionHistoryEvent({this.isRefresh = true});
+}
+
+class LoadMoreDistributionHistoryEvent extends TreasuryEvent {}
+
+class GetDistributionDetailEvent extends TreasuryEvent {
+  final String distributionId;
+  final bool isRefresh;
+  GetDistributionDetailEvent({
+    required this.distributionId,
+    this.isRefresh = true,
+  });
+}
+
+class LoadMoreDistributionDetailEvent extends TreasuryEvent {}
