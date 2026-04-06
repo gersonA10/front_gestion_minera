@@ -1,5 +1,7 @@
 
 
+import 'dart:ffi';
+
 import '../../../../core/networking/http_services.dart';
 import '../../domain/entity/entity.dart';
 import '../models/model.dart';
@@ -180,7 +182,7 @@ class TreasuryDatasource {
 
   Future<PaginatedSalesHistoryEntity> getHistorySales({
     int page = 1,
-    int limit = 10,
+    int limit = 5,
     String? status,
   }) async {
     final queryParameters = {'page': page, 'limit': limit, 'status': ?status};
@@ -192,10 +194,10 @@ class TreasuryDatasource {
 
     final List<dynamic> data = response['data'];
     final Map<String, dynamic> meta = response['meta'];
-
+    final totalRegistro = meta['total_registros'];
     return PaginatedSalesHistoryEntity(
       sales: data.map((item) => SaleHistoryModel.fromJson(item)).toList(),
-      hashMore: (meta['total_registro'] >= limit) ?? false,
+      hashMore: ((page * limit) < totalRegistro),
       totalRegistros: meta['total_registros'] ?? 0,
     );
   }

@@ -59,6 +59,7 @@ class TreasuryBloc extends Bloc<TreasuryEvent, TreasuryState> {
     on<FetchGoldDashboardDataEvent>(_onFetchGoldDashboardData);
     on<LoadMoreGoldBatchesEvent>(_onLoadMoreGoldBatches);
     on<FetchHistorySalesEvent>(_onFetchHistorySalesEvent);
+    on<LoadMoreHistorySalesEvent>(_onLoadMoreSalesHistory);
     on<GetPaymentHistoryEvent>(_onGetPaymentHistory);
     on<LoadMorePaymentHistoryEvent>(_onLoadMorePaymentHistory);
     on<TransactionDetailsEvent>(_onTransactionDetails);
@@ -417,11 +418,11 @@ class TreasuryBloc extends Bloc<TreasuryEvent, TreasuryState> {
     Emitter<TreasuryState> emit,
   ) async {
     if (event.isRefresh) {
-      _currentBatchPage = 1;
-      _hasReachedBatchMax = false;
+      _currentSalesPage = 1;
+      _hasReachedSalesMax = false;
       _isLoadingMoreSales = false;
       _goldSales.clear();
-      _currentBatchStatus = event.status;
+      _currentSalesStatus = event.status;
       emit(SalesGHistoryLoading());
     }
     try {
@@ -449,6 +450,46 @@ class TreasuryBloc extends Bloc<TreasuryEvent, TreasuryState> {
       emit(SalesGHistoryError(mapErrorMessage(error.key)));
     } catch (e) {
       emit(SalesGHistoryError('Error inesperado: $e'));
+    }
+  }
+
+  Future<void> _onLoadMoreSalesHistory(
+    LoadMoreHistorySalesEvent event,
+    Emitter<TreasuryState> emit,
+  ) async {
+    if (_hasReachedSalesMax ||
+        _statsSales == null ||
+        _isLoadingMoreSales) {
+      return;
+    }
+    _isLoadingMoreSales = true;
+    _currentSalesPage++;
+
+    try {
+      final response = await repository.getSalesHistory(
+        page: _currentSalesPage,
+        status: _currentSalesStatus,
+      );
+      _goldSales.addAll(response.sales);
+      _hasReachedSalesMax = !response.hashMore;
+
+      emit(
+        SalesGHistoryLoaded(
+          stats: _statsSales!,
+          sales: List.from(_goldSales),
+          hasReachedMax: _hasReachedSalesMax,
+        ),
+      );
+    } on BaseApiException catch (error) {
+      _currentSalesPage--;
+      if (error.key == DioExceptionKey.unauthorised) {
+        return;
+      }
+      emit(SalesGHistoryError(mapErrorMessage(error.key)));
+    } catch (e) {
+      emit(SalesGHistoryError('Error inesperado: $e'));
+    } finally {
+      _isLoadingMoreSales = false;
     }
   }
 

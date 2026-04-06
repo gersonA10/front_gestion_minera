@@ -20,8 +20,8 @@ class SaleHistoryModel extends SaleHistoryEntity {
       comprador: json['comprador'] ?? '',
       pesoTotalKg: (json['peso_total_kg'] ?? 0).toDouble(),
       pesoTotalG: (json['peso_total_g'] ?? 0).toInt(),
-      montoTotalBs: (json['monto_total_bs'] ?? 0).toInt,
-      estado: json['estado'] ?? 'completado',
+      montoTotalBs: (json['monto_total_bs'] ?? 0).toInt(),
+      estado: json['estado'] ?? 'Completado',
     );
   }
 }
@@ -39,9 +39,9 @@ class StatsSaleHistoryModel extends StatsSaleHistoryEntity {
     return StatsSaleHistoryModel(
       vendidoEsteMesKg: (json['vendido_este_mes_kg'] ?? 0).toDouble() , 
       vendidoEsteMesG: (json['vendido_este_anio_g'] ?? 0).toInt(), 
-      variacionMesPct: json['varacion_mes_pct'] ?? '', 
-      vendidoDelAnioKg: (json['vendido_del_anio_kgg'] ?? 0).toDouble(), 
-      vendidoDelAnioG: (json['vendio_del_anio_g'] ?? 0).toInt()
+      variacionMesPct: json['variacion_mes_pct'] ?? '', 
+      vendidoDelAnioKg: (json['vendido_del_anio_kg'] ?? 0).toDouble(), 
+      vendidoDelAnioG: (json['vendido_del_anio_g'] ?? 0).toInt()
       );
   }
 }

@@ -24,10 +24,6 @@ class _GoldDashboardScreenState extends State<GoldDashboardScreen> {
   List<GoldBatchEntity>? _cachedBatches;
   bool _cachedHasReachedMax = false;
 
-  StatsSaleHistoryEntity? _cachedStatsSales;
-  List<SaleHistoryEntity>? _cachedSales;
-  bool _cachedHasReachedSalesMax = false;
-
   int _selectedFilter = 0;
   int _selectedNav = 0;
   String _selectedFilterDate = "reciente";
@@ -589,284 +585,471 @@ class HistoryWidget extends StatefulWidget {
 
 class _HistoryWidgetState extends State<HistoryWidget> {
   late final TreasuryBloc treasuryBloc;
+  final ScrollController _scrollController = ScrollController();
+
+  bool isLoadingMore = false;
+  bool _fabVisible = true;
+  double _lastScrollOffset = 0;
+  static const double _scrollThreshold = 10.0;
 
   @override
   void initState() {
     super.initState();
-    treasuryBloc = InjectorContainer.getIt<TreasuryBloc>()
-      ..add(FetchHistorySalesEvent());
+
+    _scrollController.addListener(_onScroll);
+
+    treasuryBloc = context.read<TreasuryBloc>()..add(FetchHistorySalesEvent());
+  }
+
+  void _onScroll() {
+    final current = _scrollController.position.pixels;
+    final diff = current - _lastScrollOffset;
+
+    if (diff > _scrollThreshold && _fabVisible) {
+      setState(() => _fabVisible = false);
+    } else if (diff < -_scrollThreshold && !_fabVisible) {
+      setState(() => _fabVisible = true);
+    }
+
+    _lastScrollOffset = current;
+
+    if (current >= _scrollController.position.maxScrollExtent - 200) {
+      treasuryBloc.add(LoadMoreHistorySalesEvent());
+    }
   }
 
   @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  StatsSaleHistoryEntity? _cachedStatsSales;
+  List<SaleHistoryEntity>? _cachedSales;
+  bool _cachedHasReachedSalesMax = false;
+
+  @override
   Widget build(BuildContext context) {
-    return Column(
-      children: [
-        AppBarDashboardGoldWidget(context: context),
-        Expanded(
-          child: SingleChildScrollView(
-            child: Column(
-              children: [
-                const SizedBox(height: 16),
-                // dashboard
-                Container(
-                  height: 120,
-                  decoration: BoxDecoration(color: Colors.transparent),
-                  child: ListView(
-                    scrollDirection: Axis.horizontal,
-                    children: [
-                      Container(
-                        margin: const EdgeInsets.only(left: 20, right: 10),
-                        padding: const EdgeInsets.all(16),
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(20),
-                        ),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Row(
-                              children: [
-                                Icon(
-                                  Icons.calendar_month_outlined,
-                                  color: Colors.blue,
-                                ),
-                                SizedBox(width: 5),
-                                Text('Vendido este mes'),
-                              ],
+    return BlocBuilder<TreasuryBloc, TreasuryState>(
+      buildWhen: (previous, current) =>
+          current is SalesGHistoryLoading ||
+          current is SalesGHistoryLoaded ||
+          current is SalesGHistoryError,
+      builder: (context, state) {
+        if (state is SalesGHistoryLoaded) {
+          _cachedStatsSales = state.stats;
+          _cachedSales = state.sales;
+          _cachedHasReachedSalesMax = state.hasReachedMax;
+
+          isLoadingMore = false;
+        }
+
+        final bool isLoading = state is SalesGHistoryLoading;
+
+        if (_cachedStatsSales == null) {
+          if (isLoading) {
+            return const Center(child: CircularProgressIndicator());
+          }
+          if (state is SalesGHistoryError) {
+            return Center(child: Text(state.message));
+          }
+        }
+        final statSales = _cachedStatsSales;
+        final sales = _cachedSales;
+        final hashReachedMax = _cachedHasReachedSalesMax;
+
+        return Column(
+          children: [
+            AppBarDashboardGoldWidget(context: context),
+            Expanded(
+              child: Stack(
+                children: [
+                  RefreshIndicator(
+                    onRefresh: () async {
+                      context.read<TreasuryBloc>().add(
+                        FetchHistorySalesEvent(isRefresh: true),
+                      );
+
+                      await treasuryBloc.stream.firstWhere(
+                        (state) =>
+                            state is SalesGHistoryLoaded ||
+                            state is SalesGHistoryError,
+                      );
+                    },
+                    child: SingleChildScrollView(
+                      controller: _scrollController,
+                      child: Column(
+                        children: [
+                          const SizedBox(height: 16),
+                          // dashboard
+                          Container(
+                            height: 120,
+                            decoration: BoxDecoration(
+                              color: Colors.transparent,
                             ),
-                            SizedBox(height: 12),
-                            Row(
+                            child: ListView(
+                              scrollDirection: Axis.horizontal,
                               children: [
-                                Text(
-                                  '12.5 g',
-                                  style: TextStyle(
-                                    fontSize: 30,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
-                                SizedBox(width: 10),
                                 Container(
-                                  padding: EdgeInsets.symmetric(horizontal: 7),
+                                  margin: const EdgeInsets.only(
+                                    left: 20,
+                                    right: 10,
+                                  ),
+                                  padding: const EdgeInsets.all(16),
                                   decoration: BoxDecoration(
-                                    color: Colors.green.shade100,
+                                    color: Colors.white,
                                     borderRadius: BorderRadius.circular(20),
                                   ),
-                                  child: Row(
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
                                     children: [
-                                      Icon(Icons.trending_up, size: 15),
-                                      Text(
-                                        '5.2 %',
-                                        style: TextStyle(fontSize: 10),
+                                      Row(
+                                        children: [
+                                          Icon(
+                                            Icons.calendar_month_outlined,
+                                            color: Colors.blue,
+                                          ),
+                                          SizedBox(width: 5),
+                                          Text('Vendido este mes'),
+                                        ],
+                                      ),
+                                      SizedBox(height: 12),
+                                      Row(
+                                        children: [
+                                          Text(
+                                            (statSales?.vendidoEsteMesG)
+                                                .toString(),
+                                            style: TextStyle(
+                                              fontSize: 30,
+                                              fontWeight: FontWeight.bold,
+                                            ),
+                                          ),
+                                          SizedBox(width: 10),
+                                          Container(
+                                            padding: EdgeInsets.symmetric(
+                                              horizontal: 7,
+                                            ),
+                                            decoration: BoxDecoration(
+                                              color: Colors.green.shade100,
+                                              borderRadius:
+                                                  BorderRadius.circular(20),
+                                            ),
+                                            child: Row(
+                                              children: [
+                                                Icon(
+                                                  Icons.trending_up,
+                                                  size: 15,
+                                                ),
+                                                Text(
+                                                  '5.2 %',
+                                                  style: TextStyle(
+                                                    fontSize: 10,
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                Container(
+                                  margin: const EdgeInsets.only(
+                                    left: 10,
+                                    right: 20,
+                                  ),
+                                  padding: const EdgeInsets.all(16),
+                                  decoration: BoxDecoration(
+                                    color: Colors.white,
+                                    borderRadius: BorderRadius.circular(20),
+                                  ),
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Row(
+                                        children: [
+                                          Icon(
+                                            Icons.leaderboard,
+                                            color: Colors.blue,
+                                          ),
+                                          SizedBox(width: 5),
+                                          Text('Vendido en Bs'),
+                                        ],
+                                      ),
+                                      SizedBox(height: 12),
+                                      Row(
+                                        children: [
+                                          Text(
+                                            (statSales?.vendidoDelAnioKg)
+                                                .toString(),
+                                            style: TextStyle(
+                                              fontSize: 30,
+                                              fontWeight: FontWeight.bold,
+                                            ),
+                                          ),
+                                          Container(
+                                            padding: EdgeInsets.symmetric(
+                                              horizontal: 7,
+                                            ),
+                                            decoration: BoxDecoration(
+                                              color: Colors.green.shade100,
+                                              borderRadius:
+                                                  BorderRadius.circular(20),
+                                            ),
+                                            child: Row(
+                                              children: [
+                                                Icon(
+                                                  Icons.trending_up,
+                                                  size: 15,
+                                                ),
+                                                // Text('5.2 %',style: TextStyle(fontSize: 10),)
+                                              ],
+                                            ),
+                                          ),
+                                        ],
                                       ),
                                     ],
                                   ),
                                 ),
                               ],
                             ),
-                          ],
-                        ),
-                      ),
-                      Container(
-                        margin: const EdgeInsets.only(left: 10, right: 20),
-                        padding: const EdgeInsets.all(16),
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(20),
-                        ),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Row(
-                              children: [
-                                Icon(Icons.leaderboard, color: Colors.blue),
-                                SizedBox(width: 5),
-                                Text('Vendido en Bs'),
-                              ],
-                            ),
-                            SizedBox(height: 12),
-                            Row(
-                              children: [
-                                Text(
-                                  ' 1200Bs',
-                                  style: TextStyle(
-                                    fontSize: 30,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
-                                Container(
-                                  padding: EdgeInsets.symmetric(horizontal: 7),
-                                  decoration: BoxDecoration(
-                                    color: Colors.green.shade100,
-                                    borderRadius: BorderRadius.circular(20),
-                                  ),
-                                  child: Row(
-                                    children: [
-                                      Icon(Icons.trending_up, size: 15),
-                                      // Text('5.2 %',style: TextStyle(fontSize: 10),)
-                                    ],
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
+                          ),
 
-                Container(
-                  padding: EdgeInsets.symmetric(horizontal: 15, vertical: 5),
-                  child: Row(
-                    children: [
-                      Row(children: [Text('Transacciones: '), Text('')]),
-                      Spacer(),
-                      IconButton(
-                        onPressed: () async {
-                          final res = await CustomDateSelector.show(context);
-                        },
-                        icon: Icon(Icons.filter_list_sharp),
-                      ),
-                    ],
-                  ),
-                ),
-                // Card record
-                Container(
-                  margin: EdgeInsets.symmetric(horizontal: 15, vertical: 5),
-                  padding: EdgeInsets.all(10),
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                  child: Column(
-                    children: [
-                      Row(
-                        children: [
-                          Container(
-                            padding: EdgeInsets.all(5),
-                            decoration: BoxDecoration(
-                              color: Colors.green.withValues(alpha: 0.1),
-                              borderRadius: BorderRadius.circular(100),
-                            ),
-                            child: Icon(
-                              Icons.check_circle_outline_rounded,
-                              color: Colors.green.withValues(alpha: 0.9),
-                            ),
-                          ),
-                          SizedBox(width: 10),
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                // Campo para id venta
-                                'id:venta',
-                                style: TextStyle(fontWeight: FontWeight.bold),
-                              ),
-                              // Campo para fecha
-                              Text(
-                                'fecha',
-                                style: TextStyle(color: Colors.grey),
-                              ),
-                            ],
-                          ),
-                          Spacer(),
                           Container(
                             padding: EdgeInsets.symmetric(
-                              vertical: 1,
-                              horizontal: 3,
+                              horizontal: 15,
+                              vertical: 5,
                             ),
-                            decoration: BoxDecoration(
-                              color: Colors.green.withValues(alpha: 0.2),
-                              borderRadius: BorderRadius.circular(8),
-                              border: Border.all(
-                                color: Colors.green.withValues(alpha: 0.5),
-                              ),
-                            ),
-                            child:
-                                // Campo para estado de venta
-                                Text(
-                                  'Estado',
-                                  style: TextStyle(
-                                    color: Colors.green.withValues(alpha: 0.9),
-                                    fontSize: 12,
-                                  ),
-                                ),
-                          ),
-                        ],
-                      ),
-                      Divider(color: Colors.grey.shade200),
-                      Row(
-                        children: [
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                'Peso Total',
-                                style: TextStyle(color: Colors.grey),
-                              ),
-                              // Campo para peso de venta
-                              Text(
-                                '2,50000 kg',
-                                style: TextStyle(fontWeight: FontWeight.bold),
-                              ),
-                            ],
-                          ),
-                          Spacer(),
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.end,
-                            children: [
-                              Text(
-                                'Monto Total',
-                                style: TextStyle(color: Colors.grey),
-                              ),
-                              // Campo para precio total
-                              Text(
-                                '\$ 155.000 usd',
-                                style: TextStyle(fontWeight: FontWeight.bold),
-                              ),
-                            ],
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 10),
-                      Row(
-                        children: [
-                          //icono para cambiar
-                          Icon(Icons.storefront),
-                          SizedBox(width: 5),
-                          // Campo para nombre vendedor
-                          Text('Joyeria central'),
-                          Spacer(),
-                          GestureDetector(
-                            onTap: () {
-                              print("verdetalle");
-                            },
                             child: Row(
                               children: [
-                                Text(
-                                  'Ver detalle',
-                                  style: TextStyle(
-                                    color: const Color(0xFF2563EB),
-                                  ),
+                                Row(
+                                  children: [Text('Transacciones: '), Text('')],
                                 ),
-                                Icon(
-                                  Icons.arrow_forward_ios,
-                                  size: 12,
-                                  color: const Color(0xFF2563EB),
+                                Spacer(),
+                                IconButton(
+                                  onPressed: () async {
+                                    final res = await CustomDateSelector.show(
+                                      context,
+                                    );
+                                  },
+                                  icon: Icon(Icons.filter_list_sharp),
                                 ),
                               ],
                             ),
                           ),
+                          // Card record
+                          ListView.builder(
+                            shrinkWrap: true,
+                            physics: NeverScrollableScrollPhysics(),
+                            itemCount:
+                                (sales?.length ?? 0) + (hashReachedMax ? 0 : 1),
+                            itemBuilder: (BuildContext context, int index) {
+                              if (index >= (sales?.length ?? 0)) {
+                                return const Padding(
+                                  padding: EdgeInsets.all(16),
+                                  child: Center(
+                                    child: CircularProgressIndicator(),
+                                  ),
+                                );
+                              }
+                              
+                              return Container(
+                                margin: EdgeInsets.symmetric(
+                                  horizontal: 15,
+                                  vertical: 5,
+                                ),
+                                padding: EdgeInsets.all(10),
+                                decoration: BoxDecoration(
+                                  color: Colors.white,
+                                  borderRadius: BorderRadius.circular(10),
+                                ),
+                                child: Column(
+                                  children: [
+                                    Row(
+                                      children: [
+                                        Container(
+                                          padding: EdgeInsets.all(5),
+                                          decoration: BoxDecoration(
+                                            color: Colors.green.withValues(
+                                              alpha: 0.1,
+                                            ),
+                                            borderRadius: BorderRadius.circular(
+                                              100,
+                                            ),
+                                          ),
+                                          child: Icon(
+                                            Icons.check_circle_outline_rounded,
+                                            color: Colors.green.withValues(
+                                              alpha: 0.9,
+                                            ),
+                                          ),
+                                        ),
+                                        SizedBox(width: 10),
+                                        Column(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
+                                          children: [
+                                            Text(
+                                              // Campo para id venta
+                                              'Venta ${sales?[index].saleCode}',
+                                              style: TextStyle(
+                                                fontWeight: FontWeight.bold,
+                                              ),
+                                            ),
+                                            // Campo para fecha
+                                            Text(
+                                              'fecha',
+                                              style: TextStyle(
+                                                color: Colors.grey,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                        Spacer(),
+                                        Container(
+                                          padding: EdgeInsets.symmetric(
+                                            vertical: 1,
+                                            horizontal: 3,
+                                          ),
+                                          decoration: BoxDecoration(
+                                            color: Colors.green.withValues(
+                                              alpha: 0.2,
+                                            ),
+                                            borderRadius: BorderRadius.circular(
+                                              8,
+                                            ),
+                                            border: Border.all(
+                                              color: Colors.green.withValues(
+                                                alpha: 0.5,
+                                              ),
+                                            ),
+                                          ),
+                                          child:
+                                              // Campo para estado de venta
+                                              Text(
+                                                '${sales?[index].estado}',
+                                                style: TextStyle(
+                                                  color: Colors.green
+                                                      .withValues(alpha: 0.9),
+                                                  fontSize: 12,
+                                                ),
+                                              ),
+                                        ),
+                                      ],
+                                    ),
+                                    Divider(color: Colors.grey.shade200),
+                                    Row(
+                                      children: [
+                                        Column(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
+                                          children: [
+                                            Text(
+                                              'Peso Total',
+                                              style: TextStyle(
+                                                color: Colors.grey,
+                                              ),
+                                            ),
+                                            // Campo para peso de venta
+                                            Text(
+                                              '${sales?[index].pesoTotalG} G',
+                                              style: TextStyle(
+                                                fontWeight: FontWeight.bold,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                        Spacer(),
+                                        Column(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.end,
+                                          children: [
+                                            Text(
+                                              'Monto Total',
+                                              style: TextStyle(
+                                                color: Colors.grey,
+                                              ),
+                                            ),
+                                            // Campo para precio total
+                                            Text(
+                                              '\$ ${sales?[index].montoTotalBs} usd',
+                                              style: TextStyle(
+                                                fontWeight: FontWeight.bold,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ],
+                                    ),
+                                    const SizedBox(height: 10),
+                                    Row(
+                                      children: [
+                                        //icono para cambiar
+                                        Icon(Icons.storefront),
+                                        SizedBox(width: 5),
+                                        // Campo para nombre vendedor
+                                        Text('${sales?[index].comprador}'),
+                                        Spacer(),
+                                        GestureDetector(
+                                          onTap: () {
+                                            print(
+                                              "idventa: ${sales?[index].saleId}",
+                                            );
+                                          },
+                                          child: Row(
+                                            children: [
+                                              Text(
+                                                'Ver detalle',
+                                                style: TextStyle(
+                                                  color: const Color(
+                                                    0xFF2563EB,
+                                                  ),
+                                                ),
+                                              ),
+                                              Icon(
+                                                Icons.arrow_forward_ios,
+                                                size: 12,
+                                                color: const Color(0xFF2563EB),
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ],
+                                ),
+                              );
+                            },
+                          ),
                         ],
                       ),
-                    ],
+                    ),
                   ),
-                ),
-              ],
+                  if (isLoading)
+                    const Positioned(
+                      top: 0,
+                      left: 0,
+                      right: 0,
+                      child: LinearProgressIndicator(color: Color(0xFF2563EB)),
+                    ),
+                  if (isLoading)
+                    Positioned.fill(
+                      child: IgnorePointer(
+                        child: Container(
+                          color: const Color(0xFFF5F5F7).withValues(alpha: 0.5),
+                        ),
+                      ),
+                    ),
+                  const SizedBox(height: 80)
+                ],
+              ),
             ),
-          ),
-        ),
-      ],
+          ],
+        );
+      },
     );
   }
 }
