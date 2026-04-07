@@ -27,6 +27,10 @@ abstract class TreasuryRepository {
     ExpenseRequestEntity request,
   );
 
+  Future<TransferResponseEntity> registerUrgentTransfer(
+    TransferRequestEntity request,
+  );
+
   Future<List<CashRegisterEntity>> getCashRegisters();
 
   Future<GoldInventoryEntity> getGoldInventory();

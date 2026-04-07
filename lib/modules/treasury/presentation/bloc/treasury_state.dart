@@ -126,6 +126,19 @@ class UrgentExpenseError extends TreasuryState {
   UrgentExpenseError({required this.message});
 }
 
+// Transferencia
+class UrgentTransferLoading extends TreasuryState {}
+
+class UrgentTransferSuccess extends TreasuryState {
+  final TransferResponseEntity response;
+  UrgentTransferSuccess({required this.response});
+}
+
+class UrgentTransferError extends TreasuryState {
+  final String message;
+  UrgentTransferError({required this.message});
+}
+
 //confirmar pago
 class ConfirmPaymentLoading extends TreasuryState {}
 

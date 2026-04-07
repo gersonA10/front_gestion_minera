@@ -1,3 +1,4 @@
+export 'package:front_gestion_minera/modules/treasury/domain/entity/transfer_request_entity.dart';
 export 'package:front_gestion_minera/modules/treasury/domain/entity/goldInventory/gold_inventory_entity.dart';
 export 'package:front_gestion_minera/modules/treasury/domain/entity/expense_request_entity.dart';
 export 'package:front_gestion_minera/modules/treasury/domain/entity/expense_response_entity.dart';

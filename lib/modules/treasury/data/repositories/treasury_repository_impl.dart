@@ -108,6 +108,14 @@ class TreasuryRepositoryImpl implements TreasuryRepository {
   }
 
   @override
+  Future<TransferResponseEntity> registerUrgentTransfer(
+    TransferRequestEntity request,
+  ) async {
+    final requestModel = TransferRequestModel.fromEntity(request);
+    return await datasource.registerUrgentTransfer(requestModel);
+  }
+
+  @override
   Future<GoldInventoryEntity> getGoldInventory() async {
     return await datasource.getGoldInventory();
   }

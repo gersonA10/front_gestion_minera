@@ -1,8 +1,10 @@
+import 'dart:async'; // <-- 1. Importante para usar Timer
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
-import 'package:in_app_update/in_app_update.dart'; // <-- 1. Importar el paquete
+import 'package:front_gestion_minera/utils/session/session_actions.dart';
+import 'package:in_app_update/in_app_update.dart'; 
 
 import 'package:front_gestion_minera/config/theme/app_theme.dart';
 import 'package:front_gestion_minera/injector_container.dart';
@@ -38,10 +40,54 @@ class MainApp extends StatefulWidget {
 
 class _MainAppState extends State<MainApp> {
   
+  late final AppLifecycleListener _lifecycleListener;
+  DateTime? _pausedTime;
+  
+  Timer? _inactivityTimer;
+  final int _timeoutMinutes = 5;
+
   @override
   void initState() {
     super.initState();
+    
+    _startInactivityTimer();
+    
+    _lifecycleListener = AppLifecycleListener(
+      onPause: () {
+        _pausedTime = DateTime.now();
+        _inactivityTimer?.cancel(); 
+      },
+      onResume: () {
+        if (_pausedTime != null) {
+          final diff = DateTime.now().difference(_pausedTime!);
+          if (diff.inMinutes >= _timeoutMinutes) {
+            SessionActions.logout(true);
+            return;
+          }
+        }
+        _startInactivityTimer();
+      },
+    );
+
     _checkForUpdate(); 
+  }
+
+  void _startInactivityTimer() {
+    _inactivityTimer?.cancel(); 
+    _inactivityTimer = Timer(Duration(minutes: _timeoutMinutes), () {
+      SessionActions.logout(true);
+    });
+  }
+
+  void _handleUserInteraction([_]) {
+    _startInactivityTimer();
+  }
+
+  @override
+  void dispose() {
+    _lifecycleListener.dispose();
+    _inactivityTimer?.cancel(); 
+    super.dispose();
   }
 
   Future<void> _checkForUpdate() async {
@@ -65,20 +111,26 @@ class _MainAppState extends State<MainApp> {
   @override
   Widget build(BuildContext context) {
     final appRouter = InjectorContainer.getIt<AppRouter>();
-    return MaterialApp.router(
-      title: 'Tigres Dorados',
-      debugShowCheckedModeBanner: false,
-      locale: const Locale('es'),
-      supportedLocales: const [Locale('es'), Locale('en')],
-      localizationsDelegates: const [
-        GlobalMaterialLocalizations.delegate,
-        GlobalWidgetsLocalizations.delegate,
-        GlobalCupertinoLocalizations.delegate,
-      ],
-      themeMode: ThemeMode.light,
-      theme: TAppTheme.lightTheme,
-      darkTheme: TAppTheme.lightTheme,
-      routerConfig: appRouter.config(),
+    
+    return Listener(
+      behavior: HitTestBehavior.translucent,
+      onPointerDown: _handleUserInteraction,
+      onPointerMove: _handleUserInteraction, 
+      child: MaterialApp.router(
+        title: 'Tigres Dorados',
+        debugShowCheckedModeBanner: false,
+        locale: const Locale('es'),
+        supportedLocales: const [Locale('es'), Locale('en')],
+        localizationsDelegates: const [
+          GlobalMaterialLocalizations.delegate,
+          GlobalWidgetsLocalizations.delegate,
+          GlobalCupertinoLocalizations.delegate,
+        ],
+        themeMode: ThemeMode.light,
+        theme: TAppTheme.lightTheme,
+        darkTheme: TAppTheme.lightTheme,
+        routerConfig: appRouter.config(),
+      ),
     );
   }
 }

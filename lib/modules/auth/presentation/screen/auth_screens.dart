@@ -3,11 +3,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:front_gestion_minera/config/router/app_router.gr.dart';
 import 'package:front_gestion_minera/config/theme/extension_theme.dart';
+import 'package:front_gestion_minera/core/services/biometric_service.dart';
+import 'package:front_gestion_minera/core/services/secure_credential_service.dart';
 import 'package:front_gestion_minera/core/widgets/custom_alert_widget.dart';
 import 'package:front_gestion_minera/injector_container.dart';
 import 'package:front_gestion_minera/modules/auth/presentation/bloc/auth_bloc.dart';
 import 'package:front_gestion_minera/utils/assets.dart';
 import 'package:front_gestion_minera/utils/text_util.dart';
+import 'package:local_auth/local_auth.dart';
 
 @RoutePage()
 class AuthScreen extends StatefulWidget {
@@ -18,25 +21,165 @@ class AuthScreen extends StatefulWidget {
 }
 
 class _AuthScreenState extends State<AuthScreen> {
-  final TextEditingController userController = TextEditingController(
-  );
-  final TextEditingController passwordController = TextEditingController(
-  );
-  bool obscurePassword = true;
-  bool rememberMe = false;
+  final TextEditingController _userController = TextEditingController();
+  final TextEditingController _passwordController = TextEditingController();
+
+  late final AuthBloc _authBloc;
+
+  bool _obscurePassword = true;
+  bool _biometricAvailable = false;
+  bool _biometricEnabled = false;
+  bool _isFaceId = false;
+
+  /// Distingue si el login actual fue iniciado por biometría o por el formulario.
+  bool _loginWithBiometric = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _authBloc = InjectorContainer.getIt<AuthBloc>();
+    _initBiometric();
+  }
+
+  @override
+  void dispose() {
+    _userController.dispose();
+    _passwordController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _initBiometric() async {
+    final available = await BiometricService.isAvailable();
+    if (!available) return;
+
+    final enabled = await SecureCredentialService.isBiometricEnabled();
+    final types = await BiometricService.getAvailableBiometrics();
+
+    if (!mounted) return;
+
+    setState(() {
+      _biometricAvailable = true;
+      _biometricEnabled = enabled;
+      _isFaceId = types.contains(BiometricType.face);
+    });
+
+    // Auto-prompt solo si el usuario ya activó el acceso biométrico
+    if (enabled) {
+      _loginWithBiometrics();
+    }
+  }
+
+  Future<void> _loginWithBiometrics() async {
+    final authenticated = await BiometricService.authenticate();
+    if (!authenticated || !mounted) return;
+
+    final credentials = await SecureCredentialService.getCredentials();
+    if (credentials == null || !mounted) return;
+
+    _loginWithBiometric = true;
+    _authBloc.add(AuthDataEvent(
+      username: credentials.username,
+      password: credentials.password,
+    ));
+  }
+
+  void _navigateByRole(String role) {
+    if (role == 'hacienda') {
+      context.router.replaceAll([const TreasuryRoute()]);
+    } else if (role == 'socios') {
+      context.router.replaceAll([PartnersRoute(nombre: '')]);
+    } else if (role == 'vigilancia') {
+      context.router.replaceAll([const HomeSurveillanceRoute()]);
+    } else if (role == 'admin') {
+      context.router.replaceAll([const AdminHomeRoute()]);
+    }
+  }
+
+  /// Muestra el dialog para activar la huella tras un login exitoso con formulario.
+  Future<void> _offerBiometricSetup(String role) async {
+    final label = _isFaceId ? 'Face ID' : 'huella dactilar';
+    final enable = await showDialog<bool>(
+      context: context,
+      barrierDismissible: false,
+      builder: (ctx) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        title: Row(
+          children: [
+            Icon(
+              _isFaceId ? Icons.face_outlined : Icons.fingerprint,
+              color: Theme.of(ctx).colorScheme.blue,
+            ),
+            const SizedBox(width: 10),
+            const Text(
+              'Acceso rápido',
+              style: TextStyle(
+                fontFamily: 'Poppins',
+                fontWeight: FontWeight.w700,
+                fontSize: 18,
+              ),
+            ),
+          ],
+        ),
+        content: Text(
+          '¿Deseas usar tu $label para ingresar más rápido en futuros accesos?',
+          style: const TextStyle(
+            fontFamily: 'Poppins',
+            fontSize: 14,
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: const Text(
+              'Ahora no',
+              style: TextStyle(fontFamily: 'Poppins'),
+            ),
+          ),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+            ),
+            onPressed: () => Navigator.pop(ctx, true),
+            child: const Text(
+              'Activar',
+              style: TextStyle(fontFamily: 'Poppins', fontWeight: FontWeight.w700),
+            ),
+          ),
+        ],
+      ),
+    );
+
+    if (enable == true) {
+      await SecureCredentialService.saveCredentials(
+        _userController.text,
+        _passwordController.text,
+      );
+      if (mounted) setState(() => _biometricEnabled = true);
+    }
+
+    if (mounted) _navigateByRole(role);
+  }
 
   @override
   Widget build(BuildContext context) {
     final screenSize = MediaQuery.of(context).size;
     final double smallSpacing = screenSize.height * 0.02;
 
-    return BlocProvider(
-      create: (context) => InjectorContainer.getIt<AuthBloc>(),
+    return BlocProvider.value(
+      value: _authBloc,
       child: Scaffold(
         backgroundColor: const Color(0xFFF3F5F7),
         body: BlocConsumer<AuthBloc, AuthState>(
           listener: (context, state) {
             if (state is AuthError) {
+              // Si falló el login biométrico, limpiamos las credenciales guardadas
+              if (_loginWithBiometric) {
+                _loginWithBiometric = false;
+                SecureCredentialService.clearCredentials();
+                setState(() => _biometricEnabled = false);
+              }
               CustomAlert.show(
                 context,
                 title: 'Error',
@@ -47,21 +190,21 @@ class _AuthScreenState extends State<AuthScreen> {
               CustomAlert.show(
                 context,
                 title: 'Cargando...',
-                message: 'Iniciando sesion, por favor espere...',
+                message: 'Iniciando sesión, por favor espere...',
                 type: AlertType.success,
               );
             } else if (state is AuthSuccess) {
-              
               final role = state.data.roleName;
 
-              if (role == 'hacienda') {
-                context.router.replaceAll([const TreasuryRoute()]);
-              } else if (role == 'socios') {
-                context.router.replaceAll([PartnersRoute(nombre: '')]);
-              } else if (role == 'vigilancia') {
-                context.router.replaceAll([const HomeSurveillanceRoute()]);
-              } else if (role == 'admin') {
-                context.router.replaceAll([const AdminHomeRoute()]);
+              if (_loginWithBiometric) {
+                // Login biométrico exitoso → navegar directo
+                _loginWithBiometric = false;
+                _navigateByRole(role);
+              } else if (_biometricAvailable && !_biometricEnabled) {
+                // Login con formulario → ofrecer activar biometría
+                _offerBiometricSetup(role);
+              } else {
+                _navigateByRole(role);
               }
             }
           },
@@ -120,13 +263,13 @@ class _AuthScreenState extends State<AuthScreen> {
                       ),
                       SizedBox(height: smallSpacing * 0.5),
                       TextFormField(
-                        controller: userController,
+                        controller: _userController,
                         keyboardType: TextInputType.emailAddress,
                         decoration: InputDecoration(
                           hintText: 'correo',
                           hintStyle: AppTextStyles.mainStyle12(context).copyWith(
-                                color: Theme.of(context).colorScheme.lead,
-                              ),
+                            color: Theme.of(context).colorScheme.lead,
+                          ),
                           prefixIcon: const Icon(Icons.person_outline),
                           filled: true,
                           fillColor: Theme.of(context).colorScheme.bajo,
@@ -146,25 +289,23 @@ class _AuthScreenState extends State<AuthScreen> {
                       ),
                       SizedBox(height: smallSpacing * 0.5),
                       TextFormField(
-                        controller: passwordController,
-                        obscureText: obscurePassword,
+                        controller: _passwordController,
+                        obscureText: _obscurePassword,
                         decoration: InputDecoration(
                           hintText: 'Ingrese su contraseña',
-                             hintStyle: AppTextStyles.mainStyle12(context).copyWith(
-                                color: Theme.of(context).colorScheme.lead,
-                              ),
+                          hintStyle: AppTextStyles.mainStyle12(context).copyWith(
+                            color: Theme.of(context).colorScheme.lead,
+                          ),
                           prefixIcon: const Icon(Icons.lock_outline),
                           suffixIcon: IconButton(
                             icon: Icon(
-                              obscurePassword
+                              _obscurePassword
                                   ? Icons.visibility_off
                                   : Icons.visibility,
                             ),
-                            onPressed: () {
-                              setState(() {
-                                obscurePassword = !obscurePassword;
-                              });
-                            },
+                            onPressed: () => setState(
+                              () => _obscurePassword = !_obscurePassword,
+                            ),
                           ),
                           filled: true,
                           fillColor: Theme.of(context).colorScheme.bajo,
@@ -180,7 +321,8 @@ class _AuthScreenState extends State<AuthScreen> {
                         height: 55,
                         child: ElevatedButton(
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: Theme.of(context).colorScheme.blue,
+                            backgroundColor:
+                                Theme.of(context).colorScheme.blue,
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(14),
                             ),
@@ -188,10 +330,11 @@ class _AuthScreenState extends State<AuthScreen> {
                           onPressed: state is AuthLoading
                               ? null
                               : () {
+                                  _loginWithBiometric = false;
                                   context.read<AuthBloc>().add(
                                     AuthDataEvent(
-                                      username: userController.text,
-                                      password: passwordController.text,
+                                      username: _userController.text,
+                                      password: _passwordController.text,
                                     ),
                                   );
                                 },
@@ -201,6 +344,20 @@ class _AuthScreenState extends State<AuthScreen> {
                           ),
                         ),
                       ),
+
+                      // ── Botón biométrico ──
+                      if (_biometricAvailable && _biometricEnabled) ...[
+                        SizedBox(height: smallSpacing * 1.5),
+                        _BiometricDivider(),
+                        SizedBox(height: smallSpacing * 1.5),
+                        _BiometricButton(
+                          isFaceId: _isFaceId,
+                          onTap: state is AuthLoading
+                              ? null
+                              : _loginWithBiometrics,
+                        ),
+                      ],
+
                       SizedBox(height: smallSpacing * 2),
                       Text(
                         'Desarrollado por XploreMore y Gicager Systems',
@@ -213,6 +370,77 @@ class _AuthScreenState extends State<AuthScreen> {
               ),
             );
           },
+        ),
+      ),
+    );
+  }
+}
+
+// ── Widgets auxiliares ──────────────────────────────────────────────────────
+
+class _BiometricDivider extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        Expanded(child: Divider(color: Colors.grey.shade300)),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 12),
+          child: Text(
+            'o continúa con',
+            style: TextStyle(
+              fontSize: 12,
+              color: Colors.grey.shade500,
+              fontFamily: 'Poppins',
+            ),
+          ),
+        ),
+        Expanded(child: Divider(color: Colors.grey.shade300)),
+      ],
+    );
+  }
+}
+
+class _BiometricButton extends StatelessWidget {
+  final bool isFaceId;
+  final VoidCallback? onTap;
+
+  const _BiometricButton({required this.isFaceId, required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Opacity(
+        opacity: onTap == null ? 0.5 : 1.0,
+        child: Container(
+          width: double.infinity,
+          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
+          decoration: BoxDecoration(
+            color: Theme.of(context).colorScheme.bajo,
+            borderRadius: BorderRadius.circular(14),
+            border: Border.all(color: Colors.grey.shade300),
+          ),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(
+                isFaceId ? Icons.face_outlined : Icons.fingerprint,
+                size: 28,
+                color: Theme.of(context).colorScheme.blue,
+              ),
+              const SizedBox(width: 10),
+              Text(
+                isFaceId ? 'Acceder con Face ID' : 'Acceder con Huella',
+                style: TextStyle(
+                  fontFamily: 'Poppins',
+                  fontSize: 14,
+                  fontWeight: FontWeight.w600,
+                  color: Theme.of(context).colorScheme.blue,
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );

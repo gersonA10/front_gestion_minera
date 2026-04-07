@@ -201,6 +201,17 @@ class TreasuryDatasource {
     return ExpenseResponseModel.fromJson(response['data']);
   }
 
+  Future<TransferResponseModel> registerUrgentTransfer(
+    TransferRequestModel request,
+  ) async {
+    final response = await apiClient.post(
+      '/api/treasury/urgent/transfer',
+      data: request.toJson(),
+      operationName: 'registerUrgentTransfer',
+    );
+    return TransferResponseModel.fromJson(response); 
+  }
+
   Future<Map<String, dynamic>> getPaymentHistory({
     int page = 1,
     int limit = 10,

@@ -78,6 +78,7 @@ class TreasuryBloc extends Bloc<TreasuryEvent, TreasuryState> {
     on<ConfirmPaymentEvent>(_onConfirmPayment);
     on<RejectAnApplicationEvent>(_rejectAnApplication);
     on<RegisterUrgentExpenseEvent>(_onRegisterUrgentExpense);
+    on<RegisterUrgentTransferEvent>(_onRegisterUrgentTransfer);
     on<FetchGoldDashboardDataEvent>(_onFetchGoldDashboardData);
     on<LoadMoreGoldBatchesEvent>(_onLoadMoreGoldBatches);
     on<GetPaymentHistoryEvent>(_onGetPaymentHistory);
@@ -293,6 +294,24 @@ class TreasuryBloc extends Bloc<TreasuryEvent, TreasuryState> {
       emit(UrgentExpenseError(message: error.message));
     } catch (e) {
       emit(UrgentExpenseError(message: 'Error inesperado: $e'));
+    }
+  }
+
+  Future<void> _onRegisterUrgentTransfer(
+    RegisterUrgentTransferEvent event,
+    Emitter<TreasuryState> emit,
+  ) async {
+    emit(UrgentTransferLoading());
+    try {
+      final response = await repository.registerUrgentTransfer(event.request);
+      emit(UrgentTransferSuccess(response: response));
+    } on BaseApiException catch (error) {
+      if (error.key == DioExceptionKey.unauthorised) {
+        return;
+      }
+      emit(UrgentTransferError(message: mapErrorMessage(error.key)));
+    } catch (e) {
+      emit(UrgentTransferError(message: 'Error inesperado: $e'));
     }
   }
 
