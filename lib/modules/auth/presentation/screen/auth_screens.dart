@@ -6,6 +6,7 @@ import 'package:front_gestion_minera/config/theme/extension_theme.dart';
 import 'package:front_gestion_minera/core/widgets/custom_alert_widget.dart';
 import 'package:front_gestion_minera/injector_container.dart';
 import 'package:front_gestion_minera/modules/auth/presentation/bloc/auth_bloc.dart';
+import 'package:front_gestion_minera/utils/assets.dart';
 import 'package:front_gestion_minera/utils/text_util.dart';
 
 @RoutePage()
@@ -89,25 +90,24 @@ class _AuthScreenState extends State<AuthScreen> {
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
                       Container(
-                        padding: const EdgeInsets.all(18),
+                        padding: const EdgeInsets.all(5),
                         decoration: BoxDecoration(
                           color: Theme.of(context).colorScheme.bajo,
                           borderRadius: BorderRadius.circular(16),
                         ),
-                        child: Icon(
-                          Icons.precision_manufacturing,
-                          size: 38,
-                          color: Theme.of(context).colorScheme.blue,
+                        child: Image.asset(
+                          height: 120,
+                          AssetImageApp.getLogoApp,
                         ),
                       ),
                       SizedBox(height: smallSpacing * 1.5),
                       Text(
-                        'Gestión Minera',
+                        'Tigres Dorados',
                         style: AppTextStyles.mainStyle25Bold(context),
                       ),
                       SizedBox(height: smallSpacing * 0.5),
                       Text(
-                        'Acceso al Sistema Corporativo',
+                        'Acceso al Sistema de Gestión Minera',
                         style: AppTextStyles.mainStyleGrey12(context),
                       ),
                       SizedBox(height: smallSpacing * 2),
