@@ -26,9 +26,6 @@ class _GoldDashboardScreenState extends State<GoldDashboardScreen> {
 
   int _selectedFilter = 0;
   int _selectedNav = 0;
-  String _selectedFilterDate = "reciente";
-  String? _periodToFetch;
-  String? _exactDateToFetch;
 
   final List<String> _filters = ['Todos', 'Disponible', 'Parcial', 'Agotado'];
 
@@ -50,18 +47,6 @@ class _GoldDashboardScreenState extends State<GoldDashboardScreen> {
         return lotes.where((l) => l.status == 'Agotado').toList();
       default:
         return lotes;
-    }
-  }
-
-  Future<void> _selectCustomDate() async {
-    final result = await CustomDateSelector.show(context);
-
-    if (result != null) {
-      setState(() {
-        _selectedFilterDate = "Personalizado";
-        _periodToFetch = result.period;
-        _exactDateToFetch = result.exactDate;
-      });
     }
   }
 
@@ -628,6 +613,65 @@ class _HistoryWidgetState extends State<HistoryWidget> {
   List<SaleHistoryEntity>? _cachedSales;
   bool _cachedHasReachedSalesMax = false;
 
+  String _selectedFilterDate = "Reciente";
+  String? _periodToFetch;
+  String? _exactDateToFetch;
+
+  List<SaleHistoryEntity> _applyFilter(List<SaleHistoryEntity> items) {
+    final date = DateTime.parse(_exactDateToFetch ?? DateTime.now().toString());
+    switch (_periodToFetch) {
+      case 'day':
+        return items
+            .where(
+              (t) =>
+                  t.fecha.year == date.year &&
+                  t.fecha.month == date.month &&
+                  t.fecha.day == date.day,
+            )
+            .toList();
+      case 'month':
+        return items
+            .where(
+              (t) => t.fecha.year == date.year && t.fecha.month == date.month,
+            )
+            .toList();
+      case 'year':
+        return items.where((t) => t.fecha.year == date.year).toList();
+      default:
+        return items;
+    }
+  }
+
+  String _dateview(SaleHistoryEntity item) {
+    const months = [
+      'Ene',
+      'Feb',
+      'Mar',
+      'Abr',
+      'May',
+      'Jun',
+      'Jul',
+      'Ago',
+      'Sep',
+      'Oct',
+      'Nov',
+      'Dic',
+    ];
+    return '${item.fecha.day} ${months[item.fecha.month]} ${item.fecha.year}';
+  }
+
+  Future<void> _selectCustomDate() async {
+    final result = await CustomDateSelector.show(context);
+
+    if (result != null) {
+      setState(() {
+        _selectedFilterDate = result.displayTitle;
+        _periodToFetch = result.period;
+        _exactDateToFetch = result.exactDate;
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return BlocBuilder<TreasuryBloc, TreasuryState>(
@@ -655,7 +699,7 @@ class _HistoryWidgetState extends State<HistoryWidget> {
           }
         }
         final statSales = _cachedStatsSales;
-        final sales = _cachedSales;
+        final sales = _applyFilter(_cachedSales ?? []);
         final hashReachedMax = _cachedHasReachedSalesMax;
 
         return Column(
@@ -710,11 +754,11 @@ class _HistoryWidgetState extends State<HistoryWidget> {
                                             Icons.calendar_month_outlined,
                                             color: Colors.blue,
                                           ),
-                                          SizedBox(width: 5),
+                                          const SizedBox(width: 5),
                                           Text('Vendido este mes'),
                                         ],
                                       ),
-                                      SizedBox(height: 12),
+                                      const SizedBox(height: 12),
                                       Row(
                                         children: [
                                           Text(
@@ -725,7 +769,7 @@ class _HistoryWidgetState extends State<HistoryWidget> {
                                               fontWeight: FontWeight.bold,
                                             ),
                                           ),
-                                          SizedBox(width: 10),
+                                          const SizedBox(width: 10),
                                           Container(
                                             padding: EdgeInsets.symmetric(
                                               horizontal: 7,
@@ -740,12 +784,6 @@ class _HistoryWidgetState extends State<HistoryWidget> {
                                                 Icon(
                                                   Icons.trending_up,
                                                   size: 15,
-                                                ),
-                                                Text(
-                                                  '5.2 %',
-                                                  style: TextStyle(
-                                                    fontSize: 10,
-                                                  ),
                                                 ),
                                               ],
                                             ),
@@ -775,15 +813,15 @@ class _HistoryWidgetState extends State<HistoryWidget> {
                                             Icons.leaderboard,
                                             color: Colors.blue,
                                           ),
-                                          SizedBox(width: 5),
+                                          const SizedBox(width: 5),
                                           Text('Vendido en Bs'),
                                         ],
                                       ),
-                                      SizedBox(height: 12),
+                                      const SizedBox(height: 12),
                                       Row(
                                         children: [
                                           Text(
-                                            (statSales?.vendidoDelAnioKg)
+                                            (statSales?.vendidoDelAnioG)
                                                 .toString(),
                                             style: TextStyle(
                                               fontSize: 30,
@@ -826,15 +864,14 @@ class _HistoryWidgetState extends State<HistoryWidget> {
                             child: Row(
                               children: [
                                 Row(
-                                  children: [Text('Transacciones: '), Text('')],
+                                  children: [
+                                    Text('Transacciones: '),
+                                    Text(' $_selectedFilterDate'),
+                                  ],
                                 ),
                                 Spacer(),
                                 IconButton(
-                                  onPressed: () async {
-                                    final res = await CustomDateSelector.show(
-                                      context,
-                                    );
-                                  },
+                                  onPressed: _selectCustomDate,
                                   icon: Icon(Icons.filter_list_sharp),
                                 ),
                               ],
@@ -845,9 +882,9 @@ class _HistoryWidgetState extends State<HistoryWidget> {
                             shrinkWrap: true,
                             physics: NeverScrollableScrollPhysics(),
                             itemCount:
-                                (sales?.length ?? 0) + (hashReachedMax ? 0 : 1),
+                                (sales.length) + (hashReachedMax ? 0 : 1),
                             itemBuilder: (BuildContext context, int index) {
-                              if (index >= (sales?.length ?? 0)) {
+                              if (index >= (sales.length)) {
                                 return const Padding(
                                   padding: EdgeInsets.all(16),
                                   child: Center(
@@ -855,7 +892,6 @@ class _HistoryWidgetState extends State<HistoryWidget> {
                                   ),
                                 );
                               }
-                              
                               return Container(
                                 margin: EdgeInsets.symmetric(
                                   horizontal: 15,
@@ -887,21 +923,21 @@ class _HistoryWidgetState extends State<HistoryWidget> {
                                             ),
                                           ),
                                         ),
-                                        SizedBox(width: 10),
+                                        const SizedBox(width: 10),
                                         Column(
                                           crossAxisAlignment:
                                               CrossAxisAlignment.start,
                                           children: [
                                             Text(
                                               // Campo para id venta
-                                              'Venta ${sales?[index].saleCode}',
+                                              'Venta ${sales[index].saleCode}',
                                               style: TextStyle(
                                                 fontWeight: FontWeight.bold,
                                               ),
                                             ),
                                             // Campo para fecha
                                             Text(
-                                              'fecha',
+                                              _dateview(sales[index]),
                                               style: TextStyle(
                                                 color: Colors.grey,
                                               ),
@@ -930,7 +966,7 @@ class _HistoryWidgetState extends State<HistoryWidget> {
                                           child:
                                               // Campo para estado de venta
                                               Text(
-                                                '${sales?[index].estado}',
+                                                '${sales[index].estado}',
                                                 style: TextStyle(
                                                   color: Colors.green
                                                       .withValues(alpha: 0.9),
@@ -955,7 +991,7 @@ class _HistoryWidgetState extends State<HistoryWidget> {
                                             ),
                                             // Campo para peso de venta
                                             Text(
-                                              '${sales?[index].pesoTotalG} G',
+                                              '${sales[index].pesoTotalG} G',
                                               style: TextStyle(
                                                 fontWeight: FontWeight.bold,
                                               ),
@@ -975,7 +1011,7 @@ class _HistoryWidgetState extends State<HistoryWidget> {
                                             ),
                                             // Campo para precio total
                                             Text(
-                                              '\$ ${sales?[index].montoTotalBs} usd',
+                                              '\$ ${sales[index].montoTotalBs} usd',
                                               style: TextStyle(
                                                 fontWeight: FontWeight.bold,
                                               ),
@@ -991,12 +1027,12 @@ class _HistoryWidgetState extends State<HistoryWidget> {
                                         Icon(Icons.storefront),
                                         SizedBox(width: 5),
                                         // Campo para nombre vendedor
-                                        Text('${sales?[index].comprador}'),
+                                        Text('${sales[index].comprador}'),
                                         Spacer(),
                                         GestureDetector(
                                           onTap: () {
                                             print(
-                                              "idventa: ${sales?[index].saleId}",
+                                              "idventa: ${sales[index].saleId}",
                                             );
                                           },
                                           child: Row(
@@ -1043,7 +1079,7 @@ class _HistoryWidgetState extends State<HistoryWidget> {
                         ),
                       ),
                     ),
-                  const SizedBox(height: 80)
+                  const SizedBox(height: 80),
                 ],
               ),
             ),
