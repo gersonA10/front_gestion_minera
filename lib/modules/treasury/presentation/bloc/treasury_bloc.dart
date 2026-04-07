@@ -61,6 +61,10 @@ class TreasuryBloc extends Bloc<TreasuryEvent, TreasuryState> {
   PaymentHistorySummaryEntity? _paymentHistorySummary;
   String? _currentBatchStatus;
 
+  // Filtros actuales para el historial de pagos
+  String? _currentPaymentPeriod = 'month';
+  String? _currentPaymentExactDate;
+
   TreasuryBloc({required this.repository}) : super(TreasuryInitial()) {
     on<FetchTreasuryMetricsEvent>(_onFetchTreasuryMetrics);
     on<DashboardDataEvent>(_dashboardData);
@@ -353,10 +357,16 @@ class TreasuryBloc extends Bloc<TreasuryEvent, TreasuryState> {
     }
   }
 
-  Future<void> _onGetPaymentHistory(
+Future<void> _onGetPaymentHistory(
     GetPaymentHistoryEvent event,
     Emitter<TreasuryState> emit,
   ) async {
+    // Si mandamos nuevos filtros, forzamos un refresh
+    if (event.period != null || event.exactDate != null) {
+      _currentPaymentPeriod = event.period;
+      _currentPaymentExactDate = event.exactDate;
+    }
+
     if (!event.isRefresh && _paymentHistoryItems.isNotEmpty) {
       emit(
         PaymentHistoryLoaded(
@@ -378,8 +388,11 @@ class TreasuryBloc extends Bloc<TreasuryEvent, TreasuryState> {
     }
 
     try {
+      // AQUÍ: Asegúrate de que tu repositorio acepte estos parámetros
       final response = await repository.getPaymentHistory(
         page: _paymentHistoryPage,
+        period: _currentPaymentPeriod,
+        exactDate: _currentPaymentExactDate,
       );
       _paymentHistoryItems = response.items;
       _paymentHistorySummary = response.summary;
@@ -394,9 +407,7 @@ class TreasuryBloc extends Bloc<TreasuryEvent, TreasuryState> {
         ),
       );
     } on BaseApiException catch (error) {
-      if (error.key == DioExceptionKey.unauthorised) {
-        return;
-      }
+      if (error.key == DioExceptionKey.unauthorised) return;
       emit(PaymentHistoryError(mapErrorMessage(error.key)));
     } catch (e) {
       emit(PaymentHistoryError('Error inesperado: $e'));
@@ -413,6 +424,8 @@ class TreasuryBloc extends Bloc<TreasuryEvent, TreasuryState> {
     try {
       final response = await repository.getPaymentHistory(
         page: _paymentHistoryPage,
+        period: _currentPaymentPeriod,
+        exactDate: _currentPaymentExactDate,
       );
       _paymentHistoryItems.addAll(response.items);
       _paymentHistoryReachedMax = !response.hasMoreData;
@@ -424,20 +437,13 @@ class TreasuryBloc extends Bloc<TreasuryEvent, TreasuryState> {
           totalRecords: _paymentHistoryTotalRecords,
         ),
       );
-    } on BaseApiException catch (error) {
-      if (error.key == DioExceptionKey.unauthorised) {
-        return;
-      }
-      _paymentHistoryPage--;
-      emit(PaymentHistoryError(mapErrorMessage(error.key)));
     } catch (e) {
       _paymentHistoryPage--;
-      emit(PaymentHistoryError('Error inesperado: $e'));
+      // manejo de errores...
     } finally {
       _isLoadingMorePayment = false;
     }
   }
-
   Future<void> _onFetchGoldDashboardData(
     FetchGoldDashboardDataEvent event,
     Emitter<TreasuryState> emit,

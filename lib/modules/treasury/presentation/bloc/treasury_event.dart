@@ -64,7 +64,14 @@ class RejectAnApplicationEvent extends TreasuryEvent {
 
 class GetPaymentHistoryEvent extends TreasuryEvent {
   final bool isRefresh;
-  GetPaymentHistoryEvent({this.isRefresh = true});
+  final String? period;
+  final String? exactDate;
+  
+  GetPaymentHistoryEvent({
+    this.isRefresh = true, 
+    this.period, 
+    this.exactDate
+  });
 }
 
 class LoadMorePaymentHistoryEvent extends TreasuryEvent {}

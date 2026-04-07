@@ -204,8 +204,10 @@ class TreasuryDatasource {
   Future<Map<String, dynamic>> getPaymentHistory({
     int page = 1,
     int limit = 10,
+    String? period,
+    String? exactDate,
   }) async {
-    final Map<String, dynamic> queryParameters = {'page': page, 'limit': limit};
+    final Map<String, dynamic> queryParameters = {'page': page, 'limit': limit, 'period': period, 'exact_date': exactDate};
 
     final response = await apiClient.get(
       '/api/treasury/transactions/history',

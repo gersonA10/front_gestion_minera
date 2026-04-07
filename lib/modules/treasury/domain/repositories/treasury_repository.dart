@@ -47,6 +47,8 @@ abstract class TreasuryRepository {
   Future<PaymentHistoryResponseEntity> getPaymentHistory({
     int page = 1,
     int limit = 10,
+    String? period,
+    String? exactDate
   });
 
   Future<InternalLoansResponseEntity> getInternalLoans({

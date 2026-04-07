@@ -126,8 +126,10 @@ class TreasuryRepositoryImpl implements TreasuryRepository {
   Future<PaymentHistoryResponseEntity> getPaymentHistory({
     int page = 1,
     int limit = 10,
+    String? period,
+    String? exactDate,
   }) async {
-    final result = await datasource.getPaymentHistory(page: page, limit: limit);
+    final result = await datasource.getPaymentHistory(page: page, limit: limit, period: period, exactDate: exactDate);
     final models = result['items'] as List<PaymentHistoryItemModel>;
     return PaymentHistoryResponseEntity(
       summary: result['summary'] as PaymentHistorySummaryEntity,
