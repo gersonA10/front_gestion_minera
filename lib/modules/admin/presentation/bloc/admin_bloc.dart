@@ -166,7 +166,7 @@ class AdminBloc extends Bloc<AdminEvent, AdminState> {
     try {
       final result = await repository.getContributesHistory(
         page: _currentContributionPage,
-        period: _currentContributionPeriod, 
+        period: _currentContributionPeriod,
         exactDate: _currentContributionExactDate,
       );
 
@@ -195,13 +195,25 @@ class AdminBloc extends Bloc<AdminEvent, AdminState> {
     GetRequestHistoryEvent event,
     Emitter<AdminState> emit,
   ) async {
-    if (event.isRefresh || _currentHistoryStatus != event.status) {
-      _currentHistoryPage = 1;
-      _hasReachedMaxHistory = false;
-      _historyItems.clear();
-      _currentHistoryStatus = event.status;
-      emit(AdminRequestHistoryLoading(_currentHistoryStatus));
+    bool isChangingTabOrRefresh =  event.isRefresh || _currentHistoryStatus != event.status;
+
+    if (!isChangingTabOrRefresh && _historyItems.isNotEmpty) {
+      emit(
+        AdminRequestHistoryLoaded(
+          items: List.from(_historyItems),
+          hasReachedMax: _hasReachedMaxHistory,
+          totalRecords: _totalHistoryRecords,
+          currentFilter: _currentHistoryStatus,
+        ),
+      );
+      return; 
     }
+
+    _currentHistoryPage = 1;
+    _hasReachedMaxHistory = false;
+    _historyItems.clear();
+    _currentHistoryStatus = event.status;
+    emit(AdminRequestHistoryLoading(_currentHistoryStatus));
 
     try {
       final result = await repository.getRequestHistory(
@@ -222,7 +234,9 @@ class AdminBloc extends Bloc<AdminEvent, AdminState> {
         ),
       );
     } on BaseApiException catch (e) {
-      emit(AdminRequestHistoryError(mapErrorMessage(e.key), _currentHistoryStatus));
+      emit(
+        AdminRequestHistoryError(mapErrorMessage(e.key), _currentHistoryStatus),
+      );
     } catch (_) {
       emit(
         AdminRequestHistoryError(
@@ -230,6 +244,44 @@ class AdminBloc extends Bloc<AdminEvent, AdminState> {
           _currentHistoryStatus,
         ),
       );
+    }
+  }
+
+  Future<void> _onLoadMoreHistory(
+    LoadMoreRequestHistoryEvent event,
+    Emitter<AdminState> emit,
+  ) async {
+    if (_hasReachedMaxHistory || _isLoadingMoreHistory) return;
+
+    _isLoadingMoreHistory = true;
+    _currentHistoryPage++; // Avanzamos a la página n
+
+    try {
+      final result = await repository.getRequestHistory(
+        page: _currentHistoryPage,
+        status: _currentHistoryStatus,
+      );
+
+      // SUMAMOS los nuevos n ítems a los m que ya teníamos
+      _historyItems.addAll(result.items);
+      _hasReachedMaxHistory = !result.hasMoreData;
+
+      emit(
+        AdminRequestHistoryLoaded(
+          items: List.from(
+            _historyItems,
+          ), 
+          hasReachedMax: _hasReachedMaxHistory,
+          totalRecords:  _totalHistoryRecords,
+          currentFilter: _currentHistoryStatus,
+        ),
+      );
+    } on BaseApiException {
+      _currentHistoryPage--; 
+    } catch (_) {
+      _currentHistoryPage--;
+    } finally {
+      _isLoadingMoreHistory = false;
     }
   }
 
@@ -248,42 +300,7 @@ class AdminBloc extends Bloc<AdminEvent, AdminState> {
     }
   }
 
-  Future<void> _onLoadMoreHistory(
-    LoadMoreRequestHistoryEvent event,
-    Emitter<AdminState> emit,
-  ) async {
-    if (_hasReachedMaxHistory || _isLoadingMoreHistory) return;
-    _isLoadingMoreHistory = true;
-    _currentHistoryPage++;
-
-    try {
-      final result = await repository.getRequestHistory(
-        page: _currentHistoryPage,
-        status: _currentHistoryStatus,
-      );
-
-      _historyItems.addAll(result.items);
-      _hasReachedMaxHistory = !result.hasMoreData;
-
-      emit(
-        AdminRequestHistoryLoaded(
-          items: List.from(_historyItems),
-          hasReachedMax: _hasReachedMaxHistory,
-          totalRecords: _totalHistoryRecords,
-          currentFilter: _currentHistoryStatus,
-        ),
-      );
-    } on BaseApiException catch (e) {
-      _currentHistoryPage--;
-      emit(AdminRequestHistoryError(e.message, _currentHistoryStatus));
-    } catch (_) {
-      _currentHistoryPage--;
-    } finally {
-      _isLoadingMoreHistory = false;
-    }
-  }
-
-Future<void> _onProcessRequest(
+  Future<void> _onProcessRequest(
     ProcessAdminRequestEvent event,
     Emitter<AdminState> emit,
   ) async {
