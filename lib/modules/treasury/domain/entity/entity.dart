@@ -20,6 +20,7 @@ export 'package:front_gestion_minera/modules/treasury/domain/entity/goldInventor
 export 'package:front_gestion_minera/modules/treasury/domain/entity/loans/loan_details_entity.dart';
 export 'package:front_gestion_minera/modules/treasury/domain/entity/loans/apply_for_a_loan_entity.dart';
 export 'package:front_gestion_minera/modules/treasury/domain/entity/loans/new_loans_entity.dart';
+export 'package:front_gestion_minera/modules/treasury/domain/entity/loans/payment_process_entity.dart';
 export 'package:front_gestion_minera/modules/treasury/domain/entity/distribute/distribution_history_entity.dart';
 export 'package:front_gestion_minera/modules/treasury/domain/entity/distribute/distribution_detail_entity.dart';
 export 'package:front_gestion_minera/modules/treasury/domain/entity/goldInventory/lot_details_entity.dart';

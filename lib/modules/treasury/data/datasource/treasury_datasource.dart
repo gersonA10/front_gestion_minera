@@ -1,6 +1,7 @@
 import '../../../../core/networking/http_services.dart';
 import '../../domain/entity/entity.dart';
 import '../models/model.dart';
+
 class TreasuryDatasource {
   final ApiClient apiClient;
 
@@ -207,7 +208,7 @@ class TreasuryDatasource {
       data: request.toJson(),
       operationName: 'registerUrgentTransfer',
     );
-    return TransferResponseModel.fromJson(response); 
+    return TransferResponseModel.fromJson(response);
   }
 
   Future<Map<String, dynamic>> getPaymentHistory({
@@ -216,7 +217,12 @@ class TreasuryDatasource {
     String? period,
     String? exactDate,
   }) async {
-    final Map<String, dynamic> queryParameters = {'page': page, 'limit': limit, 'period': period, 'exact_date': exactDate};
+    final Map<String, dynamic> queryParameters = {
+      'page': page,
+      'limit': limit,
+      'period': period,
+      'exact_date': exactDate,
+    };
 
     final response = await apiClient.get(
       '/api/treasury/transactions/history',
@@ -342,7 +348,8 @@ class TreasuryDatasource {
     );
     return NewLoansResponseModel.fromJson(response['data']);
   }
-    Future<ApplyForALoanResponseEntity> postApplyForAloan(
+
+  Future<ApplyForALoanResponseEntity> postApplyForAloan(
     String lenderName,
     double amount,
     int termMonths,
@@ -350,24 +357,23 @@ class TreasuryDatasource {
     String startDate,
     String cajaDestinoId,
   ) async {
-    final data =  {
-        "lender_name": lenderName,
-        "amount": amount,
-        "term_months": termMonths,
-        "annual_interest_rate": annualInterestRate,
-        "start_date": startDate,
-        "caja_destino_id": cajaDestinoId,
-      };
+    final data = {
+      "lender_name": lenderName,
+      "amount": amount,
+      "term_months": termMonths,
+      "annual_interest_rate": annualInterestRate,
+      "start_date": startDate,
+      "caja_destino_id": cajaDestinoId,
+    };
     final response = await apiClient.post(
       '/api/treasury/corporate-loans',
-      data:data,
+      data: data,
       operationName: 'postApplyForAloan',
     );
     return ApplyForALoanResponseModel.fromJson(response['data']);
   }
-   Future<LoanDetailsResponseEntity> getloanDatails(
-    String idLoan,
-  ) async {
+
+  Future<LoanDetailsResponseEntity> getloanDatails(String idLoan) async {
     final response = await apiClient.get(
       '/api/treasury/corporate-loans/$idLoan',
       operationName: 'getloanDatails',
@@ -391,10 +397,14 @@ class TreasuryDatasource {
     final List<dynamic> membersList = data['members_list'] ?? [];
     return {
       'header': DistributionDetailHeaderModel.fromJson(
-          data['header'] as Map<String, dynamic>),
+        data['header'] as Map<String, dynamic>,
+      ),
       'members_list': membersList
-          .map((m) =>
-              DistributionDetailMemberModel.fromJson(m as Map<String, dynamic>))
+          .map(
+            (m) => DistributionDetailMemberModel.fromJson(
+              m as Map<String, dynamic>,
+            ),
+          )
           .toList(),
       'has_more': meta['has_more'] ?? false,
       'total_records': meta['total_records'] ?? 0,
@@ -428,5 +438,26 @@ class TreasuryDatasource {
       operationName: 'lotDetails',
     );
     return LotDetailsDataModel.fromJson(response['data']);
+  }
+
+  Future<PayTheFeeResponseModel> payTheFee(
+    PayTheFeeRequestModel payTheFeeRequest,
+    String idLoan,
+    String idQuota,
+  ) async {
+    final response = await apiClient.postFormData(
+      '/api/treasury/corporate-loans/$idLoan/quotas/$idQuota/pay',
+      data: payTheFeeRequest.toFormDataMap(),
+      operationName: 'payTheFee',
+      files: [
+        {
+          'name': 'comprobante',
+          'path': payTheFeeRequest.comprobante,
+          'filename': payTheFeeRequest.comprobante.split('/').last,
+        },
+      ],
+    );
+
+    return PayTheFeeResponseModel.fromJson(response['data']);
   }
 }

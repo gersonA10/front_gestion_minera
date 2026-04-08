@@ -1,8 +1,5 @@
-import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
-import 'package:front_gestion_minera/config/router/app_router.gr.dart';
 import 'package:front_gestion_minera/utils/constants/color.constant.dart';
-
 import '../../../domain/entity/entity.dart';
 
 class InstallmentCard extends StatelessWidget {
@@ -12,9 +9,10 @@ class InstallmentCard extends StatelessWidget {
   final String? label;
   final double amount;
   final String status;
-  final String quotaId; 
-final CashResponseEntity cash;
-
+  final String quotaId;
+  final String idLoan;
+  final CashResponseEntity cash;
+final VoidCallback? onTap;
   const InstallmentCard({
     super.key,
     required this.month,
@@ -25,11 +23,12 @@ final CashResponseEntity cash;
     required this.status,
     required this.quotaId,
     required this.cash,
+    required this.idLoan,
+    required this.onTap,
   });
 
   @override
   Widget build(BuildContext context) {
-
     return Padding(
       padding: EdgeInsets.symmetric(vertical: 8),
       child: ClipRRect(
@@ -55,10 +54,10 @@ final CashResponseEntity cash;
                     color: status == 'Atrasado'
                         ? TColors.danger
                         : status == 'Pagado'
-                            ? TColors.green
-                            : status == 'Pendiente'
-                                ? TColors.pendingYellow
-                                : TColors.disabled,
+                        ? TColors.green
+                        : status == 'Pendiente'
+                        ? TColors.pendingYellow
+                        : TColors.disabled,
                     borderRadius: const BorderRadius.only(
                       topLeft: Radius.circular(14),
                       bottomLeft: Radius.circular(14),
@@ -150,17 +149,17 @@ final CashResponseEntity cash;
                                     status == 'Atrasado'
                                         ? Icons.warning_amber_rounded
                                         : status == 'Pagado'
-                                            ? Icons.check_circle_outline
-                                            : status == 'Pendiente'
-                                                ? Icons.access_time
-                                                : Icons.calendar_today_outlined,
+                                        ? Icons.check_circle_outline
+                                        : status == 'Pendiente'
+                                        ? Icons.access_time
+                                        : Icons.calendar_today_outlined,
                                     color: status == 'Atrasado'
                                         ? TColors.danger
                                         : status == 'Pagado'
-                                            ? TColors.green
-                                            : status == 'Pendiente'
-                                                ? TColors.pendingYellow
-                                                : TColors.textSecondary1,
+                                        ? TColors.green
+                                        : status == 'Pendiente'
+                                        ? TColors.pendingYellow
+                                        : TColors.textSecondary1,
                                     size: 12,
                                   ),
                                   const SizedBox(width: 4),
@@ -168,18 +167,18 @@ final CashResponseEntity cash;
                                     status == 'Atrasado'
                                         ? 'Atrasado'
                                         : status == 'Pagado'
-                                            ? 'Pagado'
-                                            : status == 'Pendiente'
-                                                ? 'Pendiente'
-                                                : 'Programado',
+                                        ? 'Pagado'
+                                        : status == 'Pendiente'
+                                        ? 'Pendiente'
+                                        : 'Programado',
                                     style: TextStyle(
                                       color: status == 'Atrasado'
                                           ? TColors.danger
                                           : status == 'Pagado'
-                                              ? TColors.green
-                                              : status == 'Pendiente'
-                                                  ? TColors.pendingYellow
-                                                  : TColors.textSecondary1,
+                                          ? TColors.green
+                                          : status == 'Pendiente'
+                                          ? TColors.pendingYellow
+                                          : TColors.textSecondary1,
                                       fontSize: 11,
                                       fontWeight: FontWeight.w500,
                                     ),
@@ -212,8 +211,7 @@ final CashResponseEntity cash;
                                       : TColors.textSecondary1,
                                   fontSize: 10,
                                   fontWeight: FontWeight.w500,
-                                  decoration:
-                                      status == 'Atrasado'
+                                  decoration: status == 'Atrasado'
                                       ? TextDecoration.underline
                                       : TextDecoration.none,
                                   decorationColor: TColors.danger,
@@ -232,14 +230,7 @@ final CashResponseEntity cash;
                         width: double.infinity,
                         height: 40,
                         child: OutlinedButton.icon(
-                          onPressed: () {
-                            context.router.push(RecordPaymentRoute(
-                              quotaId: quotaId, // Reemplaza con el ID real de la cuota
-                              textoCuota: 'Cuota #$number', // Reemplaza con el texto real de la cuota
-                              montoTotalCuota: amount.toInt(), // Reemplaza con el monto real de la cuota
-                         cash: cash
-                            ));
-                          },
+                          onPressed: onTap,
                           icon: const Icon(
                             Icons.account_balance_wallet_outlined,
                             size: 15,

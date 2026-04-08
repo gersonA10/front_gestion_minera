@@ -52,7 +52,7 @@ abstract class TreasuryRepository {
     int page = 1,
     int limit = 10,
     String? period,
-    String? exactDate
+    String? exactDate,
   });
 
   Future<InternalLoansResponseEntity> getInternalLoans({
@@ -83,10 +83,13 @@ abstract class TreasuryRepository {
     String startDate,
     String cajaDestinoId,
   );
-  Future<NewLoansResponseEntity> postNewLoansSimulate(double amount, int termMonths, String annualInterestRate, String startDate);
-   Future<LoanDetailsResponseEntity> getloanDatails(
-    String idLoan,
-  ); 
+  Future<NewLoansResponseEntity> postNewLoansSimulate(
+    double amount,
+    int termMonths,
+    String annualInterestRate,
+    String startDate,
+  );
+  Future<LoanDetailsResponseEntity> getloanDatails(String idLoan);
 
   Future<DistributionHistoryResponseEntity> getDistributionHistory({
     int page = 1,
@@ -100,4 +103,10 @@ abstract class TreasuryRepository {
   });
 
   Future<LotDetailsDataEntity> getLotDetails(String batchId);
+
+  Future<PayTheFeeResponseEntity> payTheFee(
+    PayTheFeeRequetsEntity payTheFeeRequest,
+    String idLoan,
+    String idQuota,
+  );
 }
