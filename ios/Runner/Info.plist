@@ -30,6 +30,8 @@
 	<string>Esta aplicación necesita acceso a la cámara para tomar fotos como comprobante.</string>
 	<key>NSPhotoLibraryAddUsageDescription</key>
 	<string>Esta aplicación necesita guardar imágenes en tu galería.</string>
+  <key>NSFaceIDUsageDescription</key>
+  <string>Usa Face ID para acceder de forma segura al sistema.</string>
 	<key>NSPhotoLibraryUsageDescription</key>
 	<string>Esta aplicación necesita acceso a la galería para seleccionar imágenes como comprobante.</string>
 	<key>UIApplicationSceneManifest</key>

@@ -10,7 +10,8 @@ class RequestHistoryModelAdmin extends RequestHistoryEntity {
     required super.monto,
     super.evidenciaUrl,
     required super.estadoGlobalActual,
-    super.motivoRechazo,
+    super.motivoRechazo, 
+    required super.decisionTomada,
   });
 
   factory RequestHistoryModelAdmin.fromJson(Map<String, dynamic> json) {
@@ -24,6 +25,7 @@ class RequestHistoryModelAdmin extends RequestHistoryEntity {
       evidenciaUrl: json['evidencia_url'] as String?,
       estadoGlobalActual: json['estado_global_actual'] ?? json['status'] ?? 'UNKNOWN',
       motivoRechazo: json['motivo_rechazo'] as String?,
+       decisionTomada: json['decision_tomada'],
     );
   }
 
@@ -37,7 +39,8 @@ class RequestHistoryModelAdmin extends RequestHistoryEntity {
       monto: monto,
       evidenciaUrl: evidenciaUrl,
       estadoGlobalActual: estadoGlobalActual,
-      motivoRechazo: motivoRechazo,
+      motivoRechazo: motivoRechazo, 
+      decisionTomada: decisionTomada,
     );
   }
 }

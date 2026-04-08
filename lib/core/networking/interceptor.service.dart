@@ -8,10 +8,7 @@ class InterceptorService extends Interceptor {
   InterceptorService(this._dio);
 
   @override
-  void onRequest(
-    RequestOptions options,
-    RequestInterceptorHandler handler,
-  ) async {
+  void onRequest(RequestOptions options, RequestInterceptorHandler handler) async {
     final token = await UserSession.getAccessToken();
     if (token.isNotEmpty && !options.headers.containsKey('Authorization')) {
       options.headers.addAll({'Authorization': token});
@@ -20,7 +17,7 @@ class InterceptorService extends Interceptor {
   }
 
   @override
-  void onResponse(Response response, ResponseInterceptorHandler handler) async {
+  void onResponse(Response response, ResponseInterceptorHandler handler) {
     handler.next(response);
   }
 
@@ -32,10 +29,7 @@ class InterceptorService extends Interceptor {
       if (!isLoginRequest) {
         await SessionActions.logout(true);
       }
-
-      return handler.next(err);
     } 
-    
     return handler.next(err);
   }
 }

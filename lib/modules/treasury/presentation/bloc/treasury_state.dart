@@ -126,6 +126,19 @@ class UrgentExpenseError extends TreasuryState {
   UrgentExpenseError({required this.message});
 }
 
+// Transferencia
+class UrgentTransferLoading extends TreasuryState {}
+
+class UrgentTransferSuccess extends TreasuryState {
+  final TransferResponseEntity response;
+  UrgentTransferSuccess({required this.response});
+}
+
+class UrgentTransferError extends TreasuryState {
+  final String message;
+  UrgentTransferError({required this.message});
+}
+
 //confirmar pago
 class ConfirmPaymentLoading extends TreasuryState {}
 
@@ -308,6 +321,49 @@ class LoanDetailsError extends TreasuryState {
   final String message;
   LoanDetailsError(this.message);
 }
+
+// historial de distribuciones
+class DistributionHistoryLoading extends TreasuryState {}
+
+class DistributionHistoryLoaded extends TreasuryState {
+  final List<DistributionHistoryItemEntity> items;
+  final bool hasReachedMax;
+  final int totalRecords;
+
+  DistributionHistoryLoaded({
+    required this.items,
+    required this.hasReachedMax,
+    required this.totalRecords,
+  });
+}
+
+class DistributionHistoryError extends TreasuryState {
+  final String message;
+  DistributionHistoryError(this.message);
+}
+
+// detalle de distribución
+class DistributionDetailLoading extends TreasuryState {}
+
+class DistributionDetailLoaded extends TreasuryState {
+  final DistributionDetailHeaderEntity header;
+  final List<DistributionDetailMemberEntity> membersList;
+  final bool hasReachedMax;
+  final int totalRecords;
+
+  DistributionDetailLoaded({
+    required this.header,
+    required this.membersList,
+    required this.hasReachedMax,
+    required this.totalRecords,
+  });
+}
+
+class DistributionDetailError extends TreasuryState {
+  final String message;
+  DistributionDetailError(this.message);
+}
+
 
 // detalle de lote (inventario de oro)
 class BatchLotDetailsLoading extends TreasuryState {}
