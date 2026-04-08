@@ -10,9 +10,9 @@ class BondBalanceResponseModel extends BondBalanceResponseEntity {
 
   factory BondBalanceResponseModel.fromJson(Map<String, dynamic> json) =>
       BondBalanceResponseModel(
-        cajaMayor: json["caja_mayor"],
-        cajaChica: json["caja_chica"],
-        aDesembolsar: json["a_desembolsar"],
-        saldoDisponibleReal: json["saldo_disponible_real"],
+        cajaMayor: (json["caja_mayor"] as num).toDouble(),
+        cajaChica: (json["caja_chica"] as num).toDouble(),
+        aDesembolsar: (json["a_desembolsar"] as num).toDouble(),
+        saldoDisponibleReal: (json["saldo_disponible_real"] as num).toDouble(),
       );
 }

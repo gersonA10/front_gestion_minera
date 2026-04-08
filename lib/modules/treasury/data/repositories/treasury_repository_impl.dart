@@ -108,6 +108,14 @@ class TreasuryRepositoryImpl implements TreasuryRepository {
   }
 
   @override
+  Future<TransferResponseEntity> registerUrgentTransfer(
+    TransferRequestEntity request,
+  ) async {
+    final requestModel = TransferRequestModel.fromEntity(request);
+    return await datasource.registerUrgentTransfer(requestModel);
+  }
+
+  @override
   Future<GoldInventoryEntity> getGoldInventory() async {
     return await datasource.getGoldInventory();
   }
@@ -118,7 +126,11 @@ class TreasuryRepositoryImpl implements TreasuryRepository {
     int limit = 10,
     String? status,
   }) async {
-    final result = await datasource.getGoldBatches(page: page, limit: limit, status: status);
+    final result = await datasource.getGoldBatches(
+      page: page,
+      limit: limit,
+      status: status,
+    );
     return result;
   }
 
@@ -126,8 +138,15 @@ class TreasuryRepositoryImpl implements TreasuryRepository {
   Future<PaymentHistoryResponseEntity> getPaymentHistory({
     int page = 1,
     int limit = 10,
+    String? period,
+    String? exactDate,
   }) async {
-    final result = await datasource.getPaymentHistory(page: page, limit: limit);
+    final result = await datasource.getPaymentHistory(
+      page: page,
+      limit: limit,
+      period: period,
+      exactDate: exactDate,
+    );
     final models = result['items'] as List<PaymentHistoryItemModel>;
     return PaymentHistoryResponseEntity(
       summary: result['summary'] as PaymentHistorySummaryEntity,
@@ -136,10 +155,20 @@ class TreasuryRepositoryImpl implements TreasuryRepository {
       totalRecords: result['total_records'] as int? ?? 0,
     );
   }
-  
+
   @override
-  Future<InternalLoansResponseEntity> getInternalLoans({String? status, String? search, int page = 1, int limit = 10}) async{
-    final result = await datasource.internalLoans(status: status, search: search, page: page, limit: limit);
+  Future<InternalLoansResponseEntity> getInternalLoans({
+    String? status,
+    String? search,
+    int page = 1,
+    int limit = 10,
+  }) async {
+    final result = await datasource.internalLoans(
+      status: status,
+      search: search,
+      page: page,
+      limit: limit,
+    );
     final models = result['items'] as List<InternalLoansResponseModel>;
     return InternalLoansResponseEntity(
       items: models.map((model) => model.toEntity()).toList(),
@@ -178,28 +207,96 @@ class TreasuryRepositoryImpl implements TreasuryRepository {
     final requestModel = RegisterSaleRequestModel.fromEntity(request);
     return await datasource.registerSale(requestModel);
   }
-  
+
   @override
-  Future<NewLoansResponseEntity> postNewLoansSimulate(double amount, int termMonths, String annualInterestRate, String startDate)async{
-    return await datasource.postNewLoansSimulate(amount, termMonths, annualInterestRate, startDate);
+  Future<NewLoansResponseEntity> postNewLoansSimulate(
+    double amount,
+    int termMonths,
+    String annualInterestRate,
+    String startDate,
+  ) async {
+    return await datasource.postNewLoansSimulate(
+      amount,
+      termMonths,
+      annualInterestRate,
+      startDate,
+    );
   }
+
   @override
-  Future<ApplyForALoanResponseEntity> applyForALoan(String lenderName, double amount, int termMonths, double annualInterestRate, String startDate, String cajaDestinoId)async {
-    return await datasource.postApplyForAloan(lenderName, amount, termMonths, annualInterestRate, startDate, cajaDestinoId);
+  Future<ApplyForALoanResponseEntity> applyForALoan(
+    String lenderName,
+    double amount,
+    int termMonths,
+    double annualInterestRate,
+    String startDate,
+    String cajaDestinoId,
+  ) async {
+    return await datasource.postApplyForAloan(
+      lenderName,
+      amount,
+      termMonths,
+      annualInterestRate,
+      startDate,
+      cajaDestinoId,
+    );
   }
-    @override
-  Future<LoanDetailsResponseEntity> getloanDatails(String idLoan) async{
+
+  @override
+  Future<LoanDetailsResponseEntity> getloanDatails(String idLoan) async {
     return await datasource.getloanDatails(idLoan);
   }
-  
+
   @override
-  Future<PayTheFeeResponseEntity> payTheFee(PayTheFeeRequetsEntity payTheFeeRequest, String idLoan, String idQuota)async {
-   
-   final requestModel = PayTheFeeRequestModel.fromEntity(
-      payTheFeeRequest,
+  Future<DistributionHistoryResponseEntity> getDistributionHistory({
+    int page = 1,
+    int limit = 10,
+  }) async {
+    final result = await datasource.getDistributionHistory(
+      page: page,
+      limit: limit,
     );
+    final models = result['items'] as List<DistributionHistoryItemModel>;
+    return DistributionHistoryResponseEntity(
+      items: models,
+      hasMore: result['has_more'] as bool,
+      totalRecords: result['total_records'] as int? ?? 0,
+    );
+  }
+
+  @override
+  Future<DistributionDetailResponseEntity> getDistributionDetail(
+    String distributionId, {
+    int page = 1,
+    int limit = 10,
+  }) async {
+    final result = await datasource.getDistributionDetail(
+      distributionId,
+      page: page,
+      limit: limit,
+    );
+    return DistributionDetailResponseEntity(
+      header: result['header'] as DistributionDetailHeaderModel,
+      membersList:
+          result['members_list'] as List<DistributionDetailMemberModel>,
+      hasMore: result['has_more'] as bool,
+      totalRecords: result['total_records'] as int? ?? 0,
+    );
+  }
+
+  @override
+  Future<LotDetailsDataEntity> getLotDetails(String batchId) async {
+    return await datasource.lotDetails(batchId);
+  }
+
+  @override
+  Future<PayTheFeeResponseEntity> payTheFee(
+    PayTheFeeRequetsEntity payTheFeeRequest,
+    String idLoan,
+    String idQuota,
+  ) async {
+    final requestModel = PayTheFeeRequestModel.fromEntity(payTheFeeRequest);
     final response = await datasource.payTheFee(requestModel, idLoan, idQuota);
     return response;
   }
- 
 }

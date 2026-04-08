@@ -45,6 +45,11 @@ class RegisterUrgentExpenseEvent extends TreasuryEvent {
   RegisterUrgentExpenseEvent({required this.request});
 }
 
+class RegisterUrgentTransferEvent extends TreasuryEvent {
+  final TransferRequestEntity request;
+  RegisterUrgentTransferEvent({required this.request});
+}
+
 class GetCashRegistersEvent extends TreasuryEvent {}
 
 class ConfirmPaymentEvent extends TreasuryEvent {
@@ -64,7 +69,10 @@ class RejectAnApplicationEvent extends TreasuryEvent {
 
 class GetPaymentHistoryEvent extends TreasuryEvent {
   final bool isRefresh;
-  GetPaymentHistoryEvent({this.isRefresh = true});
+  final String? period;
+  final String? exactDate;
+
+  GetPaymentHistoryEvent({this.isRefresh = true, this.period, this.exactDate});
 }
 
 class LoadMorePaymentHistoryEvent extends TreasuryEvent {}
@@ -123,7 +131,8 @@ class NewLoansSimulateEvent extends TreasuryEvent {
     required this.termMonths,
     required this.annualInterestRate,
     required this.startDate,
-  });}
+  });
+}
 
 class ApplyForALoanEvent extends TreasuryEvent {
   final String lenderName;
@@ -144,10 +153,39 @@ class ApplyForALoanEvent extends TreasuryEvent {
 
 class LoanDetailsEvent extends TreasuryEvent {
   final String idLoan;
-  LoanDetailsEvent({required this.idLoan});}
+  LoanDetailsEvent({required this.idLoan});
+}
 
-  class PayTheFeeEvent extends TreasuryEvent {
+class GetDistributionHistoryEvent extends TreasuryEvent {
+  final bool isRefresh;
+  GetDistributionHistoryEvent({this.isRefresh = true});
+}
+
+class LoadMoreDistributionHistoryEvent extends TreasuryEvent {}
+
+class GetDistributionDetailEvent extends TreasuryEvent {
+  final String distributionId;
+  final bool isRefresh;
+  GetDistributionDetailEvent({
+    required this.distributionId,
+    this.isRefresh = true,
+  });
+}
+
+class LoadMoreDistributionDetailEvent extends TreasuryEvent {}
+
+class BatchLotDetailsEvent extends TreasuryEvent {
+  final String batchId;
+  BatchLotDetailsEvent({required this.batchId});
+}
+
+class PayTheFeeEvent extends TreasuryEvent {
   final PayTheFeeRequetsEntity payTheFeeRequest;
-  final  String idLoan;
-  final  String idQuota;
-  PayTheFeeEvent({required this.payTheFeeRequest, required this.idLoan, required this.idQuota});}
+  final String idLoan;
+  final String idQuota;
+  PayTheFeeEvent({
+    required this.payTheFeeRequest,
+    required this.idLoan,
+    required this.idQuota,
+  });
+}

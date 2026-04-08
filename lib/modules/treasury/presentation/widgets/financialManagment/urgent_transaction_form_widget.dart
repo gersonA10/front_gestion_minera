@@ -23,7 +23,13 @@ class _UrgentTransactionFormWidgetState
   final _formKey = GlobalKey<FormState>();
 
   String _selectedType = 'Ingreso';
+  
+  // Variables para Ingreso/Egreso
   String? _selectedCajaId;
+  
+  // Variables para Transferencia
+  String? _selectedCajaOrigenId;
+  String? _selectedCajaDestinoId;
 
   // Controladores
   final TextEditingController _montoController = TextEditingController();
@@ -36,6 +42,7 @@ class _UrgentTransactionFormWidgetState
   @override
   void initState() {
     super.initState();
+    // Llamamos al servicio para obtener las cajas
     context.read<TreasuryBloc>().add(GetCashRegistersEvent());
   }
 
@@ -101,6 +108,29 @@ class _UrgentTransactionFormWidgetState
   void _submitForm() {
     if (!_formKey.currentState!.validate()) return;
 
+    // 1. SI ES TRANSFERENCIA
+    if (_selectedType == 'Transferencia') {
+      if (_selectedCajaOrigenId == null || _selectedCajaDestinoId == null) {
+        CustomAlert.show(context, title: 'Error', message: 'Debes seleccionar caja origen y destino.', type: AlertType.error);
+        return;
+      }
+      if (_selectedCajaOrigenId == _selectedCajaDestinoId) {
+        CustomAlert.show(context, title: 'Error', message: 'La caja origen y destino no pueden ser la misma.', type: AlertType.error);
+        return;
+      }
+
+      // COMPLETAMENTE DESCOMENTADO Y FUNCIONANDO
+      final request = TransferRequestEntity(
+        monto: double.parse(_montoController.text),
+        cajaOrigenId: _selectedCajaOrigenId!,
+        cajaDestinoId: _selectedCajaDestinoId!,
+        concepto: _conceptoController.text,
+      );
+      context.read<TreasuryBloc>().add(RegisterUrgentTransferEvent(request: request));
+      return;
+    }
+
+    // 2. SI ES INGRESO O EGRESO
     if (_selectedCajaId == null) {
       CustomAlert.show(
         context, title: 'Error', message: 'Debes seleccionar una caja ${_selectedType == 'Ingreso' ? 'destino' : 'origen'}.', type: AlertType.error);
@@ -113,7 +143,6 @@ class _UrgentTransactionFormWidgetState
       return;
     }
 
-    // 1. SI ES INGRESO
     if (_selectedType == 'Ingreso') {
       final request = IncomeRequestEntity(
         monto: double.parse(_montoController.text),
@@ -122,9 +151,7 @@ class _UrgentTransactionFormWidgetState
         evidenceUrlPath: _evidenciaFile!.path,
       );
       context.read<TreasuryBloc>().add(RegisterUrgentIncomeEvent(request: request));
-    } 
-    // 2. SI ES EGRESO
-    else if (_selectedType == 'Egreso') {
+    } else if (_selectedType == 'Egreso') {
       final request = ExpenseRequestEntity(
         monto: double.parse(_montoController.text),
         cajaOrigenId: _selectedCajaId!,
@@ -139,25 +166,21 @@ class _UrgentTransactionFormWidgetState
   Widget build(BuildContext context) {
     return BlocConsumer<TreasuryBloc, TreasuryState>(
       listener: (context, state) {
-        if (state is UrgentIncomeSuccess || state is UrgentExpenseSuccess) {
-          final esIngreso = state is UrgentIncomeSuccess;
-          CustomAlert.show(
-            context,
-            title: 'Éxito',
-            message: esIngreso 
-                ? 'El ingreso se ha registrado correctamente' 
-                : 'El egreso se ha registrado correctamente',
-            type: AlertType.success,
-          );
+        // AGREGADO EL SUCESO Y ERROR DE TRANSFERENCIA
+        if (state is UrgentIncomeSuccess || state is UrgentExpenseSuccess || state is UrgentTransferSuccess) {
+          String mensaje = 'Transacción registrada correctamente';
+          if (state is UrgentIncomeSuccess) mensaje = 'El ingreso se ha registrado correctamente';
+          if (state is UrgentExpenseSuccess) mensaje = 'El egreso se ha registrado correctamente';
+          if (state is UrgentTransferSuccess) mensaje = 'La transferencia se ha registrado correctamente';
+          
+          CustomAlert.show(context, title: 'Éxito', message: mensaje, type: AlertType.success);
           Navigator.pop(context);
         } else if (state is UrgentIncomeError) {
-          CustomAlert.show(
-            context, title: 'Error',  message: state.message, type: AlertType.error);
-
-        }  else if (state is UrgentExpenseError){
-             CustomAlert.show(
-            context, title: 'Error', message: state.message, type: AlertType.error);
-
+          CustomAlert.show(context, title: 'Error', message: state.message, type: AlertType.error);
+        } else if (state is UrgentExpenseError) {
+          CustomAlert.show(context, title: 'Error', message: state.message, type: AlertType.error);
+        } else if (state is UrgentTransferError) {
+          CustomAlert.show(context, title: 'Error', message: state.message, type: AlertType.error);
         }
       },
       builder: (context, state) {
@@ -172,81 +195,93 @@ class _UrgentTransactionFormWidgetState
                   setState(() {
                     _selectedType = value;
                     _evidenciaFile = null;
+                    // Limpiamos las selecciones al cambiar de tipo
                     _selectedCajaId = null; 
+                    _selectedCajaOrigenId = null;
+                    _selectedCajaDestinoId = null;
+
+                    // CORRECCIÓN ERROR 1: Limpiamos los controladores de texto
+                    _montoController.clear();
+                    _conceptoController.clear();
                   });
                 },
               ),
               const SizedBox(height: 24),
                   
-              if (_selectedType == 'Transferencia') ...[
-                TextFormField(
-                  decoration: InputDecoration(
-                    labelText: 'Caja Destino',
-                    hintText: 'Ej. Caja Chica',
-                    prefixIcon: const Icon(
-                      Icons.account_balance_wallet_outlined,
-                    ),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                  ),
-                ),
-              ],
+              // SECTOR DE CAJAS ALIMENTADO POR EL BLOC
+              BlocBuilder<TreasuryBloc, TreasuryState>(
+                buildWhen: (previous, current) =>
+                    current is CashRegistersLoading ||
+                    current is CashRegistersLoaded ||
+                    current is CashRegistersError,
+                builder: (context, state) {
+                  if (state is CashRegistersLoading) {
+                    return const Center(child: CircularProgressIndicator());
+                  }
                   
-              if (_selectedType == 'Ingreso' || _selectedType == 'Egreso') ...[
-                BlocBuilder<TreasuryBloc, TreasuryState>(
-                  buildWhen: (previous, current) =>
-                      current is CashRegistersLoading ||
-                      current is CashRegistersLoaded ||
-                      current is CashRegistersError,
-                  builder: (context, state) {
-                    if (state is CashRegistersLoading) {
-                      return const Center(
-                        child: CircularProgressIndicator(),
-                      );
-                    }
+                  final cajas = context.read<TreasuryBloc>().cashRegisters;
                   
-                    final cajas = context.read<TreasuryBloc>().cashRegisters;
-                  
+                  // Generamos la lista de items para los dropdowns
+                  final dropdownItems = cajas.map((caja) {
+                    return DropdownMenuItem(
+                      value: caja.id,
+                      child: Text('${caja.nombre} (Bs. ${caja.saldoDisponible})'),
+                    );
+                  }).toList();
+
+                  // SI ES TRANSFERENCIA, MOSTRAMOS DOS DROPDOWNS
+                  if (_selectedType == 'Transferencia') {
+                    return Column(
+                      children: [
+                        DropdownButtonFormField<String>(
+                          value: _selectedCajaOrigenId,
+                          decoration: InputDecoration(
+                            labelText: 'Caja Origen',
+                            prefixIcon: const Icon(Icons.outbox_rounded),
+                            border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                          ),
+                          items: dropdownItems,
+                          onChanged: (value) => setState(() => _selectedCajaOrigenId = value),
+                          validator: (value) => value == null ? 'Selecciona la caja origen' : null,
+                        ),
+                        const SizedBox(height: 20),
+                        DropdownButtonFormField<String>(
+                          value: _selectedCajaDestinoId,
+                          decoration: InputDecoration(
+                            labelText: 'Caja Destino',
+                            prefixIcon: const Icon(Icons.move_to_inbox_rounded),
+                            border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                          ),
+                          items: dropdownItems,
+                          onChanged: (value) => setState(() => _selectedCajaDestinoId = value),
+                          validator: (value) => value == null ? 'Selecciona la caja destino' : null,
+                        ),
+                      ],
+                    );
+                  } 
+                  // SI ES INGRESO O EGRESO, MOSTRAMOS UN DROPDOWN
+                  else {
                     return DropdownButtonFormField<String>(
-                      initialValue: _selectedCajaId,
+                      value: _selectedCajaId,
                       decoration: InputDecoration(
                         labelText: _selectedType == 'Ingreso' ? 'Caja Destino' : 'Caja Origen',
                         prefixIcon: const Icon(Icons.wallet),
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
+                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
                       ),
-                      items: cajas.map((caja) {
-                        return DropdownMenuItem(
-                          value: caja.id,
-                          child: Text(
-                            '${caja.nombre} (Bs. ${caja.saldoDisponible})',
-                          ),
-                        );
-                      }).toList(),
-                      onChanged: (value) {
-                        setState(() {
-                          _selectedCajaId = value;
-                        });
-                      },
-                      validator: (value) => value == null
-                          ? 'Por favor, selecciona una caja'
-                          : null,
+                      items: dropdownItems,
+                      onChanged: (value) => setState(() => _selectedCajaId = value),
+                      validator: (value) => value == null ? 'Por favor, selecciona una caja' : null,
                     );
-                  },
-                ),
-              ],
+                  }
+                },
+              ),
                   
               const SizedBox(height: 20),
                   
               TextFormField(
                 controller: _montoController,
-                keyboardType: const TextInputType.numberWithOptions(
-                  decimal: true,
-                ),
-                validator: (value) =>
-                    value == null || value.isEmpty ? 'Requerido' : null,
+                keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                validator: (value) => value == null || value.isEmpty ? 'Requerido' : null,
                 decoration: InputDecoration(
                   labelText: 'Monto (Bs.)',
                   hintText: '0.00',
@@ -262,8 +297,7 @@ class _UrgentTransactionFormWidgetState
               TextFormField(
                 controller: _conceptoController,
                 maxLines: 3,
-                validator: (value) =>
-                    value == null || value.isEmpty ? 'Requerido' : null,
+                validator: (value) => value == null || value.isEmpty ? 'Requerido' : null,
                 decoration: InputDecoration(
                   labelText: 'Concepto / Motivo',
                   hintText: 'Describe el motivo de la transacción...',
@@ -276,7 +310,7 @@ class _UrgentTransactionFormWidgetState
                   
               const SizedBox(height: 20),
                   
-              // CORRECCIÓN 2: Mostrar el selector de Evidencia para ambos
+              // Evidencia requerida SOLO para Ingreso o Egreso
               if (_selectedType == 'Ingreso' || _selectedType == 'Egreso') ...[
                 Text(
                   'Evidencia (Requerida)',
@@ -321,15 +355,8 @@ class _UrgentTransactionFormWidgetState
                 if (_evidenciaFile != null)
                   TextButton.icon(
                     onPressed: () => setState(() => _evidenciaFile = null),
-                    icon: const Icon(
-                      Icons.delete,
-                      color: Colors.red,
-                      size: 20,
-                    ),
-                    label: const Text(
-                      'Eliminar foto',
-                      style: TextStyle(color: Colors.red),
-                    ),
+                    icon: const Icon(Icons.delete, color: Colors.red, size: 20),
+                    label: const Text('Eliminar foto', style: TextStyle(color: Colors.red)),
                   ),
               ],
                   
@@ -337,7 +364,7 @@ class _UrgentTransactionFormWidgetState
                   
               TransactionActionButtonsWidget(
                 onCancel: () => Navigator.pop(context),
-                onSubmit: (state is UrgentIncomeLoading || state is UrgentExpenseLoading)
+                onSubmit: (state is UrgentIncomeLoading || state is UrgentExpenseLoading || state is UrgentTransferLoading)
                     ? null
                     : _submitForm, 
               ),

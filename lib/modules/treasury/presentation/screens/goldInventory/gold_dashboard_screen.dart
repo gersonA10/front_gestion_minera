@@ -179,9 +179,18 @@ class _GoldDashboardScreenState extends State<GoldDashboardScreen> {
                 children: [
                   RefreshIndicator(
                     onRefresh: () async {
+                      String? currentStatus;
+                      if (_selectedFilter == 1) currentStatus = 'Disponible';
+                      if (_selectedFilter == 2) currentStatus = 'Parcial';
+                      if (_selectedFilter == 3) currentStatus = 'Agotado';
+
                       context.read<TreasuryBloc>().add(
-                        FetchGoldDashboardDataEvent(isRefresh: true),
+                        FetchGoldDashboardDataEvent(
+                          isRefresh: true,
+                          status: currentStatus, 
+                        ),
                       );
+                      
                       await context.read<TreasuryBloc>().stream.firstWhere(
                         (state) =>
                             state is GoldDashboardLoaded ||
@@ -693,102 +702,107 @@ class _GoldDashboardScreenState extends State<GoldDashboardScreen> {
         ? const Color(0xFFF59E0B)
         : const Color(0xFF6B7280);
 
-    return Container(
-      margin: const EdgeInsets.only(bottom: 12),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        border: Border(left: BorderSide(color: statusColor, width: 4)),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.04),
-            blurRadius: 8,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
-      child: Padding(
-        padding: const EdgeInsets.fromLTRB(14, 12, 12, 14),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                _buildStatusBadge(lote.status, statusColor),
-                const SizedBox(width: 8),
-                Text(
-                  lote.batchCode,
-                  style: const TextStyle(
-                    fontSize: 11,
-                    color: Color(0xFF9CA3AF),
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
-                const Spacer(),
-                Text(
-                  _formatDate(lote.extractionDate),
-                  style: const TextStyle(
-                    fontSize: 11,
-                    color: Color(0xFF9CA3AF),
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 12),
-
-            const SizedBox(height: 12),
-            const Divider(height: 1, color: Color(0xFFF3F4F6)),
-            const SizedBox(height: 12),
-            Row(
-              children: [
-                _buildStatCol(
-                  'PESO ORIG.',
-                  '${_formatGrams(lote.originalWeight)} g',
-                  const Color(0xFF374151),
-                ),
-                const SizedBox(width: 24),
-                _buildStatCol(
-                  'DISPONIBLE',
-                  '${_formatGrams(lote.avilableWeight)} g',
-                  disponibleColor,
-                ),
-                const SizedBox(width: 24),
-                _buildStatCol(
-                  'PUREZA',
-                  '${lote.purity}%',
-                  const Color(0xFF374151),
-                ),
-              ],
-            ),
-            const SizedBox(height: 12),
-            Row(
-              children: [
-                Expanded(
-                  child: ClipRRect(
-                    borderRadius: BorderRadius.circular(4),
-                    child: LinearProgressIndicator(
-                      value: disponibilidadPorcentaje,
-                      backgroundColor: const Color(0xFFF3F4F6),
-                      valueColor: AlwaysStoppedAnimation<Color>(
-                        disponibleColor,
-                      ),
-                      minHeight: 5,
-                    ),
-                  ),
-                ),
-                const SizedBox(width: 10),
-                Text(
-                  // Mostramos el porcentaje entero (multiplicado por 100)
-                  '${(disponibilidadPorcentaje * 100).toStringAsFixed(0)}%',
-                  style: TextStyle(
-                    fontSize: 12,
-                    fontWeight: FontWeight.bold,
-                    color: disponibleColor,
-                  ),
-                ),
-              ],
+    return GestureDetector(
+      onTap: () {
+        context.router.push(BatchDetailRoute(batchId: lote.batchId));
+      },
+      child: Container(
+        margin: const EdgeInsets.only(bottom: 12),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(16),
+          border: Border(left: BorderSide(color: statusColor, width: 4)),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.04),
+              blurRadius: 8,
+              offset: const Offset(0, 2),
             ),
           ],
+        ),
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(14, 12, 12, 14),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  _buildStatusBadge(lote.status, statusColor),
+                  const SizedBox(width: 8),
+                  Text(
+                    lote.batchCode,
+                    style: const TextStyle(
+                      fontSize: 11,
+                      color: Color(0xFF9CA3AF),
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                  const Spacer(),
+                  Text(
+                    _formatDate(lote.extractionDate),
+                    style: const TextStyle(
+                      fontSize: 11,
+                      color: Color(0xFF9CA3AF),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 12),
+      
+              const SizedBox(height: 12),
+              const Divider(height: 1, color: Color(0xFFF3F4F6)),
+              const SizedBox(height: 12),
+              Row(
+                children: [
+                  _buildStatCol(
+                    'PESO ORIG.',
+                    '${_formatGrams(lote.originalWeight)} g',
+                    const Color(0xFF374151),
+                  ),
+                  const SizedBox(width: 24),
+                  _buildStatCol(
+                    'DISPONIBLE',
+                    '${_formatGrams(lote.avilableWeight)} g',
+                    disponibleColor,
+                  ),
+                  const SizedBox(width: 24),
+                  _buildStatCol(
+                    'PUREZA',
+                    '${lote.purity}%',
+                    const Color(0xFF374151),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 12),
+              Row(
+                children: [
+                  Expanded(
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(4),
+                      child: LinearProgressIndicator(
+                        value: disponibilidadPorcentaje,
+                        backgroundColor: const Color(0xFFF3F4F6),
+                        valueColor: AlwaysStoppedAnimation<Color>(
+                          disponibleColor,
+                        ),
+                        minHeight: 5,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 10),
+                  Text(
+                    // Mostramos el porcentaje entero (multiplicado por 100)
+                    '${(disponibilidadPorcentaje * 100).toStringAsFixed(0)}%',
+                    style: TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.bold,
+                      color: disponibleColor,
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
         ),
       ),
     );
