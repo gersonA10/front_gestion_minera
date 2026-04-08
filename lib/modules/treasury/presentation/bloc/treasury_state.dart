@@ -363,3 +363,17 @@ class DistributionDetailError extends TreasuryState {
   final String message;
   DistributionDetailError(this.message);
 }
+
+
+// detalle de lote (inventario de oro)
+class BatchLotDetailsLoading extends TreasuryState {}
+
+class BatchLotDetailsLoaded extends TreasuryState {
+  final LotDetailsDataEntity lotDetails;
+  BatchLotDetailsLoaded({required this.lotDetails});
+}
+
+class BatchLotDetailsError extends TreasuryState {
+  final String message;
+  BatchLotDetailsError(this.message);
+}

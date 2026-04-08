@@ -1,5 +1,3 @@
-
-
 import '../../../../core/networking/http_services.dart';
 import '../../domain/entity/entity.dart';
 import '../models/model.dart';
@@ -422,5 +420,13 @@ class TreasuryDatasource {
       'has_more': meta['has_more'] ?? false,
       'total_records': meta['total_records'] ?? 0,
     };
+  }
+
+  Future<LotDetailsDataEntity> lotDetails(String batchId) async {
+    final response = await apiClient.get(
+      '/api/treasury/batches/$batchId',
+      operationName: 'lotDetails',
+    );
+    return LotDetailsDataModel.fromJson(response['data']);
   }
 }

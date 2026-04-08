@@ -175,3 +175,9 @@ class GetDistributionDetailEvent extends TreasuryEvent {
 }
 
 class LoadMoreDistributionDetailEvent extends TreasuryEvent {}
+
+
+class BatchLotDetailsEvent extends TreasuryEvent {
+  final String batchId;
+  BatchLotDetailsEvent({required this.batchId});
+}
