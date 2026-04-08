@@ -210,11 +210,17 @@ class _AuthScreenState extends State<AuthScreen> {
                 // Login biométrico exitoso → navegar directo
                 _loginWithBiometric = false;
                 _navigateByRole(role);
-              } else if (_biometricAvailable && !_biometricEnabled) {
-                // Login con formulario → ofrecer activar biometría
-                _offerBiometricSetup(role);
               } else {
-                _navigateByRole(role);
+                // Login con formulario → limpiar credenciales previas (puede ser otro usuario)
+                // y ofrecer guardar las nuevas
+                SecureCredentialService.clearCredentials();
+                setState(() => _biometricEnabled = false);
+
+                if (_biometricAvailable) {
+                  _offerBiometricSetup(role);
+                } else {
+                  _navigateByRole(role);
+                }
               }
             }
           },

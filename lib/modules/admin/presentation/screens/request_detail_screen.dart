@@ -62,19 +62,20 @@ class _RequestDetailScreenState extends State<RequestDetailScreen> {
           ),
           ElevatedButton(
             style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xFF10B981), 
+              backgroundColor: const Color(0xFF10B981),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(10),
               ),
             ),
             onPressed: () {
-              Navigator.pop(ctx); 
-              
+              Navigator.pop(ctx);
 
-                _adminBloc.add(
-                  ProcessAdminRequestEvent(id: widget.requestId, action: 'aprobado'),
-                );
-              
+              _adminBloc.add(
+                ProcessAdminRequestEvent(
+                  id: widget.requestId,
+                  action: 'aprobado',
+                ),
+              );
             },
             child: const Text(
               'Confirmar Aprobación',
@@ -186,18 +187,18 @@ class _RequestDetailScreenState extends State<RequestDetailScreen> {
             current is AdminActionSuccess || current is AdminActionError,
         listener: (context, state) {
           if (state is AdminActionError) {
-             CustomAlert.show(
-              context, 
-              title: 'Error', 
-              message: state.message, 
-              type: AlertType.error
+            CustomAlert.show(
+              context,
+              title: 'Error',
+              message: state.message,
+              type: AlertType.error,
             );
           } else if (state is AdminActionSuccess) {
             CustomAlert.show(
-              context, 
-              title: 'Éxito', 
-              message: state.response.message, 
-              type: AlertType.success
+              context,
+              title: 'Éxito',
+              message: state.response.message,
+              type: AlertType.success,
             );
             context.router.maybePop(true);
           }
@@ -226,12 +227,12 @@ class _RequestDetailScreenState extends State<RequestDetailScreen> {
                 ),
               ),
             ),
-           body: AppLoadingOverlay(
-            isLoading: isLoading,
-            message: 'Procesando solicitud...',
-            loader: const ExcavatorLoader(),
-            child: _buildBody(state),
-          ),
+            body: AppLoadingOverlay(
+              isLoading: isLoading,
+              message: 'Procesando solicitud...',
+              loader: const ExcavatorLoader(),
+              child: _buildBody(state),
+            ),
           );
         },
       ),
@@ -465,52 +466,55 @@ class _RequestDetailScreenState extends State<RequestDetailScreen> {
                   ),
           ),
           const SizedBox(height: 32),
-          Row(
-            children: [
-              Expanded(
-                child: OutlinedButton(
-                  style: OutlinedButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(vertical: 16),
-                    side: const BorderSide(color: Color(0xFFE8533F)),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
+          if (detail.estadoAdministracion.toLowerCase() == 'pendiente') ...[
+            Row(
+              children: [
+                Expanded(
+                  child: OutlinedButton(
+                    style: OutlinedButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(vertical: 16),
+                      side: const BorderSide(color: Color(0xFFE8533F)),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
                     ),
-                  ),
-                  onPressed: _showRejectDialog,
-                  child: const Text(
-                    'Rechazar',
-                    style: TextStyle(
-                      fontFamily: 'Poppins',
-                      fontWeight: FontWeight.w600,
-                      color: Color(0xFFE8533F),
-                    ),
-                  ),
-                ),
-              ),
-              const SizedBox(width: 16),
-              Expanded(
-                child: ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(vertical: 16),
-                    backgroundColor: const Color(0xFF10B981),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    elevation: 0,
-                  ),
-                  onPressed: _showApproveDialog,
-                  child: const Text(
-                    'Aprobar',
-                    style: TextStyle(
-                      fontFamily: 'Poppins',
-                      fontWeight: FontWeight.w600,
-                      color: Colors.white,
+                    onPressed: _showRejectDialog,
+                    child: const Text(
+                      'Rechazar',
+                      style: TextStyle(
+                        fontFamily: 'Poppins',
+                        fontWeight: FontWeight.w600,
+                        color: Color(0xFFE8533F),
+                      ),
                     ),
                   ),
                 ),
-              ),
-            ],
-          ),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(vertical: 16),
+                      backgroundColor: const Color(0xFF10B981),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      elevation: 0,
+                    ),
+                    onPressed: _showApproveDialog,
+                    child: const Text(
+                      'Aprobar',
+                      style: TextStyle(
+                        fontFamily: 'Poppins',
+                        fontWeight: FontWeight.w600,
+                        color: Colors.white,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ],
+
           const SizedBox(height: 32),
         ],
       ),
