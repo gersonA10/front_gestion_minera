@@ -60,6 +60,7 @@ class _MainAppState extends State<MainApp> {
       onResume: () {
         if (_pausedTime != null) {
           final diff = DateTime.now().difference(_pausedTime!);
+          _pausedTime = null; // Siempre resetear antes de actuar
           if (diff.inMinutes >= _timeoutMinutes) {
             SessionActions.logout(true);
             return;
