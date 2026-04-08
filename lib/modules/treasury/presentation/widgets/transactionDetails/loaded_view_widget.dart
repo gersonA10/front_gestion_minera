@@ -5,8 +5,10 @@ import 'package:front_gestion_minera/modules/treasury/presentation/screens/finan
 import 'package:front_gestion_minera/utils/date_util.dart';
 import 'package:share_plus/share_plus.dart';
 
+import '../../../domain/entity/entity.dart';
+
 class LoadedView extends StatefulWidget {
-  final dynamic details;
+  final TransactionDetailsResponseEntity details;
 
   const LoadedView({super.key, required this.details});
 
@@ -75,10 +77,12 @@ class _LoadedViewState extends State<LoadedView> {
                   referencia: res.referencia,
                 ),
                 const SizedBox(height: 24),
-                _AttachmentsSection(
+                res.comprobantesAdjuntos!.isEmpty || res.comprobantesAdjuntos == null 
+                ? Center(child: Text(
+                  'Esta Transaccion no tiene comprobante/evidencia o es una transaccion de tipo:\nTransferencia', textAlign: TextAlign.center, style: TextStyle(fontWeight: FontWeight.bold),),)
+                : _AttachmentsSection(
                   imageUrls:
-                      (res.comprobantesAdjuntos != null &&
-                          res.comprobantesAdjuntos.toString().isNotEmpty)
+                      (res.comprobantesAdjuntos != null && res.comprobantesAdjuntos.toString().isNotEmpty)
                       ? res.comprobantesAdjuntos
                             .toString()
                             .split(',')
@@ -330,7 +334,7 @@ class _AttachmentsSection extends StatelessWidget {
                                 ),
                               );
                             },
-                            errorBuilder: (_, __, ___) => const Center(
+                            errorBuilder: (_, _, _) => const Center(
                               child: Column(
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
@@ -376,6 +380,7 @@ class _AttachmentsSection extends StatelessWidget {
             ],
           ),
         ),
+     
       ],
     );
   }
