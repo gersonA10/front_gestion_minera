@@ -6,6 +6,7 @@ import 'package:front_gestion_minera/config/theme/extension_theme.dart';
 import 'package:front_gestion_minera/core/services/biometric_service.dart';
 import 'package:front_gestion_minera/core/services/secure_credential_service.dart';
 import 'package:front_gestion_minera/core/widgets/custom_alert_widget.dart';
+import 'package:front_gestion_minera/core/widgets/loadin_overlay.widget.dart';
 import 'package:front_gestion_minera/injector_container.dart';
 import 'package:front_gestion_minera/modules/auth/presentation/bloc/auth_bloc.dart';
 import 'package:front_gestion_minera/utils/assets.dart';
@@ -33,6 +34,12 @@ class _AuthScreenState extends State<AuthScreen> {
 
   /// Distingue si el login actual fue iniciado por biometría o por el formulario.
   bool _loginWithBiometric = false;
+
+  /// Evita lanzar el prompt biométrico más de una vez por ciclo de vida del widget.
+  bool _hasAutoTriggered = false;
+
+  /// Evita llamadas concurrentes al prompt biométrico.
+  bool _isAuthenticating = false;
 
   @override
   void initState() {
@@ -64,23 +71,33 @@ class _AuthScreenState extends State<AuthScreen> {
     });
 
     // Auto-prompt solo si el usuario ya activó el acceso biométrico
-    if (enabled) {
+    if (enabled && !_hasAutoTriggered) {
+      _hasAutoTriggered = true;
       _loginWithBiometrics();
     }
   }
 
   Future<void> _loginWithBiometrics() async {
-    final authenticated = await BiometricService.authenticate();
-    if (!authenticated || !mounted) return;
+    if (_isAuthenticating) return;
+    _isAuthenticating = true;
 
-    final credentials = await SecureCredentialService.getCredentials();
-    if (credentials == null || !mounted) return;
+    try {
+      final authenticated = await BiometricService.authenticate();
+      if (!authenticated || !mounted) return;
 
-    _loginWithBiometric = true;
-    _authBloc.add(AuthDataEvent(
-      username: credentials.username,
-      password: credentials.password,
-    ));
+      final credentials = await SecureCredentialService.getCredentials();
+      if (credentials == null || !mounted) return;
+
+      _loginWithBiometric = true;
+      _authBloc.add(
+        AuthDataEvent(
+          username: credentials.username,
+          password: credentials.password,
+        ),
+      );
+    } finally {
+      _isAuthenticating = false;
+    }
   }
 
   void _navigateByRole(String role) {
@@ -122,10 +139,7 @@ class _AuthScreenState extends State<AuthScreen> {
         ),
         content: Text(
           '¿Deseas usar tu $label para ingresar más rápido en futuros accesos?',
-          style: const TextStyle(
-            fontFamily: 'Poppins',
-            fontSize: 14,
-          ),
+          style: const TextStyle(fontFamily: 'Poppins', fontSize: 14),
         ),
         actions: [
           TextButton(
@@ -144,7 +158,10 @@ class _AuthScreenState extends State<AuthScreen> {
             onPressed: () => Navigator.pop(ctx, true),
             child: const Text(
               'Activar',
-              style: TextStyle(fontFamily: 'Poppins', fontWeight: FontWeight.w700),
+              style: TextStyle(
+                fontFamily: 'Poppins',
+                fontWeight: FontWeight.w700,
+              ),
             ),
           ),
         ],
@@ -186,13 +203,6 @@ class _AuthScreenState extends State<AuthScreen> {
                 message: state.message,
                 type: AlertType.error,
               );
-            } else if (state is AuthLoading) {
-              CustomAlert.show(
-                context,
-                title: 'Cargando...',
-                message: 'Iniciando sesión, por favor espere...',
-                type: AlertType.success,
-              );
             } else if (state is AuthSuccess) {
               final role = state.data.roleName;
 
@@ -209,165 +219,177 @@ class _AuthScreenState extends State<AuthScreen> {
             }
           },
           builder: (context, state) {
-            return Center(
-              child: SingleChildScrollView(
-                child: Container(
-                  constraints: const BoxConstraints(maxWidth: 450),
-                  width: screenSize.width * 0.9,
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 30,
-                    vertical: 40,
-                  ),
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(20),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Theme.of(context).colorScheme.lead,
-                        blurRadius: 20,
-                        offset: const Offset(0, 10),
-                      ),
-                    ],
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      Container(
-                        padding: const EdgeInsets.all(5),
-                        decoration: BoxDecoration(
-                          color: Theme.of(context).colorScheme.bajo,
-                          borderRadius: BorderRadius.circular(16),
-                        ),
-                        child: Image.asset(
-                          height: 120,
-                          AssetImageApp.getLogoApp,
-                        ),
-                      ),
-                      SizedBox(height: smallSpacing * 1.5),
-                      Text(
-                        'Tigres Dorados',
-                        style: AppTextStyles.mainStyle25Bold(context),
-                      ),
-                      SizedBox(height: smallSpacing * 0.5),
-                      Text(
-                        'Acceso al Sistema de Gestión Minera',
-                        style: AppTextStyles.mainStyleGrey12(context),
-                      ),
-                      SizedBox(height: smallSpacing * 2),
-                      Align(
-                        alignment: Alignment.centerLeft,
-                        child: Text(
-                          'Usuario o Correo',
-                          style: AppTextStyles.mainStyle12Bold(context),
-                        ),
-                      ),
-                      SizedBox(height: smallSpacing * 0.5),
-                      TextFormField(
-                        controller: _userController,
-                        keyboardType: TextInputType.emailAddress,
-                        decoration: InputDecoration(
-                          hintText: 'correo',
-                          hintStyle: AppTextStyles.mainStyle12(context).copyWith(
-                            color: Theme.of(context).colorScheme.lead,
-                          ),
-                          prefixIcon: const Icon(Icons.person_outline),
-                          filled: true,
-                          fillColor: Theme.of(context).colorScheme.bajo,
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(12),
-                            borderSide: BorderSide.none,
-                          ),
-                        ),
-                      ),
-                      SizedBox(height: smallSpacing * 0.5),
-                      Align(
-                        alignment: Alignment.centerLeft,
-                        child: Text(
-                          'Contraseña',
-                          style: AppTextStyles.mainStyle12Bold(context),
-                        ),
-                      ),
-                      SizedBox(height: smallSpacing * 0.5),
-                      TextFormField(
-                        controller: _passwordController,
-                        obscureText: _obscurePassword,
-                        decoration: InputDecoration(
-                          hintText: 'Ingrese su contraseña',
-                          hintStyle: AppTextStyles.mainStyle12(context).copyWith(
-                            color: Theme.of(context).colorScheme.lead,
-                          ),
-                          prefixIcon: const Icon(Icons.lock_outline),
-                          suffixIcon: IconButton(
-                            icon: Icon(
-                              _obscurePassword
-                                  ? Icons.visibility_off
-                                  : Icons.visibility,
-                            ),
-                            onPressed: () => setState(
-                              () => _obscurePassword = !_obscurePassword,
-                            ),
-                          ),
-                          filled: true,
-                          fillColor: Theme.of(context).colorScheme.bajo,
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(12),
-                            borderSide: BorderSide.none,
-                          ),
-                        ),
-                      ),
-                      SizedBox(height: smallSpacing * 0.5),
-                      SizedBox(
-                        width: double.infinity,
-                        height: 55,
-                        child: ElevatedButton(
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor:
-                                Theme.of(context).colorScheme.blue,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(14),
-                            ),
-                          ),
-                          onPressed: state is AuthLoading
-                              ? null
-                              : () {
-                                  _loginWithBiometric = false;
-                                  context.read<AuthBloc>().add(
-                                    AuthDataEvent(
-                                      username: _userController.text,
-                                      password: _passwordController.text,
-                                    ),
-                                  );
-                                },
-                          child: Text(
-                            'Iniciar Sesión',
-                            style: AppTextStyles.mainStyleWhite14Bold(context),
-                          ),
-                        ),
-                      ),
+            final isLoading = state is AuthLoading;
 
-                      // ── Botón biométrico ──
-                      if (_biometricAvailable && _biometricEnabled) ...[
-                        SizedBox(height: smallSpacing * 1.5),
-                        _BiometricDivider(),
-                        SizedBox(height: smallSpacing * 1.5),
-                        _BiometricButton(
-                          isFaceId: _isFaceId,
-                          onTap: state is AuthLoading
-                              ? null
-                              : _loginWithBiometrics,
-                        ),
-                      ],
-
-                      SizedBox(height: smallSpacing * 2),
-                      Text(
-                        'Desarrollado por XploreMore y Gicager Systems',
-                        style: AppTextStyles.mainStyleGrey10(context),
-                        textAlign: TextAlign.center,
+            return Stack(
+              children: [
+                Center(
+                  child: SingleChildScrollView(
+                    child: Container(
+                      constraints: const BoxConstraints(maxWidth: 450),
+                      width: screenSize.width * 0.9,
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 30,
+                        vertical: 40,
                       ),
-                    ],
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(20),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Theme.of(context).colorScheme.lead,
+                            blurRadius: 20,
+                            offset: const Offset(0, 10),
+                          ),
+                        ],
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.all(5),
+                            decoration: BoxDecoration(
+                              color: Theme.of(context).colorScheme.bajo,
+                              borderRadius: BorderRadius.circular(16),
+                            ),
+                            child: Image.asset(
+                              height: 120,
+                              AssetImageApp.getLogoApp,
+                            ),
+                          ),
+                          SizedBox(height: smallSpacing * 1.5),
+                          Text(
+                            'Tigres Dorados',
+                            style: AppTextStyles.mainStyle25Bold(context),
+                          ),
+                          SizedBox(height: smallSpacing * 0.5),
+                          Text(
+                            'Acceso al Sistema de Gestión Minera',
+                            style: AppTextStyles.mainStyleGrey12(context),
+                          ),
+                          SizedBox(height: smallSpacing * 2),
+                          Align(
+                            alignment: Alignment.centerLeft,
+                            child: Text(
+                              'Usuario o Correo',
+                              style: AppTextStyles.mainStyle12Bold(context),
+                            ),
+                          ),
+                          SizedBox(height: smallSpacing * 0.5),
+                          TextFormField(
+                            controller: _userController,
+                            keyboardType: TextInputType.emailAddress,
+                            decoration: InputDecoration(
+                              hintText: 'correo',
+                              hintStyle: AppTextStyles.mainStyle12(context)
+                                  .copyWith(
+                                    color: Theme.of(context).colorScheme.lead,
+                                  ),
+                              prefixIcon: const Icon(Icons.person_outline),
+                              filled: true,
+                              fillColor: Theme.of(context).colorScheme.bajo,
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(12),
+                                borderSide: BorderSide.none,
+                              ),
+                            ),
+                          ),
+                          SizedBox(height: smallSpacing * 0.5),
+                          Align(
+                            alignment: Alignment.centerLeft,
+                            child: Text(
+                              'Contraseña',
+                              style: AppTextStyles.mainStyle12Bold(context),
+                            ),
+                          ),
+                          SizedBox(height: smallSpacing * 0.5),
+                          TextFormField(
+                            controller: _passwordController,
+                            obscureText: _obscurePassword,
+                            decoration: InputDecoration(
+                              hintText: 'Ingrese su contraseña',
+                              hintStyle: AppTextStyles.mainStyle12(context)
+                                  .copyWith(
+                                    color: Theme.of(context).colorScheme.lead,
+                                  ),
+                              prefixIcon: const Icon(Icons.lock_outline),
+                              suffixIcon: IconButton(
+                                icon: Icon(
+                                  _obscurePassword
+                                      ? Icons.visibility_off
+                                      : Icons.visibility,
+                                ),
+                                onPressed: () => setState(
+                                  () => _obscurePassword = !_obscurePassword,
+                                ),
+                              ),
+                              filled: true,
+                              fillColor: Theme.of(context).colorScheme.bajo,
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(12),
+                                borderSide: BorderSide.none,
+                              ),
+                            ),
+                          ),
+                          SizedBox(height: smallSpacing * 0.5),
+                          SizedBox(
+                            width: double.infinity,
+                            height: 55,
+                            child: ElevatedButton(
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: Theme.of(
+                                  context,
+                                ).colorScheme.blue,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(14),
+                                ),
+                              ),
+                              onPressed: state is AuthLoading
+                                  ? null
+                                  : () {
+                                      _loginWithBiometric = false;
+                                      context.read<AuthBloc>().add(
+                                        AuthDataEvent(
+                                          username: _userController.text,
+                                          password: _passwordController.text,
+                                        ),
+                                      );
+                                    },
+                              child: Text(
+                                'Iniciar Sesión',
+                                style: AppTextStyles.mainStyleWhite14Bold(
+                                  context,
+                                ),
+                              ),
+                            ),
+                          ),
+
+                          // ── Botón biométrico ──
+                          if (_biometricAvailable && _biometricEnabled) ...[
+                            SizedBox(height: smallSpacing * 1.5),
+                            _BiometricDivider(),
+                            SizedBox(height: smallSpacing * 1.5),
+                            _BiometricButton(
+                              isFaceId: _isFaceId,
+                              onTap: state is AuthLoading
+                                  ? null
+                                  : _loginWithBiometrics,
+                            ),
+                          ],
+
+                          SizedBox(height: smallSpacing * 2),
+                          Text(
+                            'Desarrollado por XploreMore y Gicager Systems',
+                            style: AppTextStyles.mainStyleGrey10(context),
+                            textAlign: TextAlign.center,
+                          ),
+                        ],
+                      ),
+                    ),
                   ),
                 ),
-              ),
+                if (isLoading) const LoginLoadingOverlay(),
+              ],
             );
           },
         ),

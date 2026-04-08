@@ -32,7 +32,7 @@ class BiometricService {
       return await _auth.authenticate(
         localizedReason: 'Usa tu huella para acceder al sistema',
         biometricOnly: false,
-        persistAcrossBackgrounding: true,
+        persistAcrossBackgrounding: false,
         authMessages: const [
           AndroidAuthMessages(
             signInTitle: 'Verificar identidad',
