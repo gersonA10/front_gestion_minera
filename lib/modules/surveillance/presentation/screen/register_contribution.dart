@@ -116,81 +116,87 @@ class _RegisterContributionsViewState extends State<RegisterContributionsView> {
       builder: (context, state) {
         final isLoading = state is SurveillanceCalculateLoading;
 
-        return Padding(
-          padding: const EdgeInsets.all(24.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                "Registro de Aporte",
-                style: AppTextStyles.mainStyle16Bold(context).copyWith(fontSize: 20),
-              ),
-              SizedBox(height: smallSpacing * 0.5),
-              Text(
-                "Ingrese el monto que será procesado para el cálculo de aportes por persona.",
-                style: AppTextStyles.mainStyle12(context).copyWith(color: colors.lead),
-              ),
-              
-              SizedBox(height: smallSpacing * 1.5),
-              
-              // CAMPO: MONTO
-              Text(
-                "Monto Total (Bs.)",
-                style: AppTextStyles.mainStyle12Bold(context).copyWith(color: colors.black.withValues(alpha: 0.8)),
-              ),
-              const SizedBox(height: 8),
-              AmountInputField(controller: _amountController, colors: colors),
-              
-              SizedBox(height: smallSpacing * 1.5),
-              
-              // CAMPO: MOTIVO (NUEVO)
-              Text(
-                "Motivo / Descripción (Opcional)",
-                style: AppTextStyles.mainStyle12Bold(context).copyWith(color: colors.black.withValues(alpha: 0.8)),
-              ),
-              const SizedBox(height: 8),
-              Container(
-                decoration: BoxDecoration(
-                  color: colors.white,
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: colors.lead.withValues(alpha: 0.3)),
+        return GestureDetector(
+          onTap: () {
+            FocusManager.instance.primaryFocus?.unfocus();
+          },
+          child: Padding(
+            padding: const EdgeInsets.all(24.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  "Registro de Aporte",
+                  style: AppTextStyles.mainStyle16Bold(context).copyWith(fontSize: 20),
                 ),
-                child: TextField(
-                  controller: _reasonController,
-                  maxLines: 2,
-                  style: AppTextStyles.mainStyle14(context).copyWith(color: colors.black),
-                  decoration: InputDecoration(
-                    hintText: 'Ej. Compra de repuestos para excavadora',
-                    hintStyle: AppTextStyles.mainStyle14(context).copyWith(color: colors.lead.withValues(alpha: 0.5)),
-                    border: InputBorder.none,
-                    contentPadding: const EdgeInsets.all(16),
+                SizedBox(height: smallSpacing * 0.5),
+                Text(
+                  "Ingrese el monto que será procesado para el cálculo de aportes por persona.",
+                  style: AppTextStyles.mainStyle12(context).copyWith(color: colors.lead),
+                ),
+                
+                SizedBox(height: smallSpacing * 1.5),
+                
+                // CAMPO: MONTO
+                Text(
+                  "Monto Total (Bs.)",
+                  style: AppTextStyles.mainStyle12Bold(context).copyWith(color: colors.black.withValues(alpha: 0.8)),
+                ),
+                const SizedBox(height: 8),
+                AmountInputField(controller: _amountController, colors: colors),
+                
+                SizedBox(height: smallSpacing * 1.5),
+                
+                // CAMPO: MOTIVO (NUEVO)
+                Text(
+                  "Motivo / Descripción (Opcional)",
+                  style: AppTextStyles.mainStyle12Bold(context).copyWith(color: colors.black.withValues(alpha: 0.8)),
+                ),
+                const SizedBox(height: 8),
+                Container(
+                  decoration: BoxDecoration(
+                    color: colors.white,
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(color: colors.lead.withValues(alpha: 0.3)),
                   ),
-                ),
-              ),
-
-              const Spacer(),
-
-              SizedBox(
-                width: double.infinity,
-                height: 52,
-                child: ElevatedButton(
-                  onPressed: isLoading ? null : _onCalculatePressed,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: colors.blue,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
+                  child: TextField(
+                    controller: _reasonController,
+                    maxLines: 2,
+                    textInputAction: TextInputAction.done,
+                    style: AppTextStyles.mainStyle14(context).copyWith(color: colors.black),
+                    decoration: InputDecoration(
+                      hintText: 'Ej. Compra de repuestos para excavadora',
+                      hintStyle: AppTextStyles.mainStyle14(context).copyWith(color: colors.lead.withValues(alpha: 0.5)),
+                      border: InputBorder.none,
+                      contentPadding: const EdgeInsets.all(16),
                     ),
-                    elevation: 0,
                   ),
-                  child: isLoading
-                      ? SizedBox(height: 24, width: 24, child: CircularProgressIndicator(color: colors.white, strokeWidth: 3))
-                      : Text(
-                          'Calcular',
-                          style: AppTextStyles.mainStyle14Bold(context).copyWith(color: colors.white),
-                        ),
                 ),
-              ),
-            ],
+          
+                const Spacer(),
+          
+                SizedBox(
+                  width: double.infinity,
+                  height: 52,
+                  child: ElevatedButton(
+                    onPressed: isLoading ? null : _onCalculatePressed,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: colors.blue,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      elevation: 0,
+                    ),
+                    child: isLoading
+                        ? SizedBox(height: 24, width: 24, child: CircularProgressIndicator(color: colors.white, strokeWidth: 3))
+                        : Text(
+                            'Calcular',
+                            style: AppTextStyles.mainStyle14Bold(context).copyWith(color: colors.white),
+                          ),
+                  ),
+                ),
+              ],
+            ),
           ),
         );
       },
