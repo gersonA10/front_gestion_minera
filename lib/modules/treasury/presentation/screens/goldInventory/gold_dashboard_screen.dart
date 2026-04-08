@@ -249,7 +249,14 @@ class _GoldDashboardScreenState extends State<GoldDashboardScreen> {
   }
 
   Widget _buildHistorial() {
-    return HistoryWidget(context: context);
+    return HistoryWidget(
+      context: context,
+      onFabVisibilityChanged: (isvible) {
+        setState(() {
+          _fabVisible = isvible;
+        });
+      },
+    );
   }
 
   Widget _buildFilterTabs() {
@@ -560,10 +567,14 @@ class _GoldDashboardScreenState extends State<GoldDashboardScreen> {
 }
 
 class HistoryWidget extends StatefulWidget {
-  const HistoryWidget({super.key, required this.context});
+  const HistoryWidget({
+    super.key,
+    required this.context,
+    required this.onFabVisibilityChanged,
+  });
 
   final BuildContext context;
-
+  final void Function(bool) onFabVisibilityChanged;
   @override
   State<HistoryWidget> createState() => _HistoryWidgetState();
 }
@@ -590,12 +601,18 @@ class _HistoryWidgetState extends State<HistoryWidget> {
     final current = _scrollController.position.pixels;
     final diff = current - _lastScrollOffset;
 
-    if (diff > _scrollThreshold && _fabVisible) {
-      setState(() => _fabVisible = false);
-    } else if (diff < -_scrollThreshold && !_fabVisible) {
-      setState(() => _fabVisible = true);
+    bool newFabVisible = _fabVisible;
+
+    if (diff > _scrollThreshold) {
+      newFabVisible = false;
+    } else if (diff < -_scrollThreshold) {
+      setState(() => newFabVisible = true);
     }
 
+    if (newFabVisible != _fabVisible) {
+      setState(() => _fabVisible = newFabVisible);
+      widget.onFabVisibilityChanged.call(newFabVisible);
+    }
     _lastScrollOffset = current;
 
     if (current >= _scrollController.position.maxScrollExtent - 200) {
@@ -657,7 +674,7 @@ class _HistoryWidgetState extends State<HistoryWidget> {
       'Nov',
       'Dic',
     ];
-    return '${item.fecha.day} ${months[item.fecha.month]} ${item.fecha.year}';
+    return '${item.fecha.day} ${months[item.fecha.month - 1]} ${item.fecha.year}';
   }
 
   Future<void> _selectCustomDate() async {
@@ -669,6 +686,7 @@ class _HistoryWidgetState extends State<HistoryWidget> {
         _periodToFetch = result.period;
         _exactDateToFetch = result.exactDate;
       });
+      treasuryBloc.add(FetchHistorySalesEvent(isRefresh: true));
     }
   }
 
@@ -700,7 +718,10 @@ class _HistoryWidgetState extends State<HistoryWidget> {
         }
         final statSales = _cachedStatsSales;
         final sales = _applyFilter(_cachedSales ?? []);
-        final hashReachedMax = _cachedHasReachedSalesMax;
+        if (sales.isEmpty && !(_cachedHasReachedSalesMax)) {
+          treasuryBloc.add(LoadMoreHistorySalesEvent());
+        }
+        final hashReachedMax = sales.isEmpty ? true : _cachedHasReachedSalesMax;
 
         return Column(
           children: [
@@ -722,6 +743,7 @@ class _HistoryWidgetState extends State<HistoryWidget> {
                     },
                     child: SingleChildScrollView(
                       controller: _scrollController,
+                      physics: AlwaysScrollableScrollPhysics(),
                       child: Column(
                         children: [
                           const SizedBox(height: 16),
@@ -870,6 +892,22 @@ class _HistoryWidgetState extends State<HistoryWidget> {
                                   ],
                                 ),
                                 Spacer(),
+                                if (_selectedFilterDate != 'Reciente')
+                                  IconButton(
+                                    onPressed: () {
+                                      setState(() {
+                                        _exactDateToFetch = null;
+                                        _periodToFetch = null;
+                                        _selectedFilterDate = 'Reciente';
+                                        isLoadingMore = true;
+                                      });
+
+                                      treasuryBloc.add(
+                                        FetchHistorySalesEvent(isRefresh: true),
+                                      );
+                                    },
+                                    icon: Icon(Icons.delete_forever_sharp),
+                                  ),
                                 IconButton(
                                   onPressed: _selectCustomDate,
                                   icon: Icon(Icons.filter_list_sharp),
@@ -878,187 +916,264 @@ class _HistoryWidgetState extends State<HistoryWidget> {
                             ),
                           ),
                           // Card record
-                          ListView.builder(
-                            shrinkWrap: true,
-                            physics: NeverScrollableScrollPhysics(),
-                            itemCount:
-                                (sales.length) + (hashReachedMax ? 0 : 1),
-                            itemBuilder: (BuildContext context, int index) {
-                              if (index >= (sales.length)) {
-                                return const Padding(
-                                  padding: EdgeInsets.all(16),
-                                  child: Center(
-                                    child: CircularProgressIndicator(),
-                                  ),
-                                );
-                              }
-                              return Container(
-                                margin: EdgeInsets.symmetric(
-                                  horizontal: 15,
-                                  vertical: 5,
-                                ),
-                                padding: EdgeInsets.all(10),
-                                decoration: BoxDecoration(
-                                  color: Colors.white,
-                                  borderRadius: BorderRadius.circular(10),
-                                ),
-                                child: Column(
-                                  children: [
-                                    Row(
+                          ConstrainedBox(
+                            constraints: BoxConstraints(
+                              minHeight: MediaQuery.of(context).size.height,
+                            ),
+                            child: Column(
+                              children: [
+                                if (sales.isEmpty)
+                                  const Center(
+                                    child: Column(
+                                      mainAxisSize: MainAxisSize.min,
                                       children: [
-                                        Container(
-                                          padding: EdgeInsets.all(5),
-                                          decoration: BoxDecoration(
-                                            color: Colors.green.withValues(
-                                              alpha: 0.1,
-                                            ),
-                                            borderRadius: BorderRadius.circular(
-                                              100,
-                                            ),
-                                          ),
-                                          child: Icon(
-                                            Icons.check_circle_outline_rounded,
-                                            color: Colors.green.withValues(
-                                              alpha: 0.9,
-                                            ),
+                                        SizedBox(height: 200),
+                                        Icon(
+                                          Icons.inbox_rounded,
+                                          size: 56,
+                                          color: Color(0xFFD1D5DB),
+                                        ),
+                                        SizedBox(height: 12),
+                                        Text(
+                                          'No hay transacciones',
+                                          style: TextStyle(
+                                            color: Color(0xFF9CA3AF),
+                                            fontSize: 15,
+                                            fontWeight: FontWeight.w500,
                                           ),
                                         ),
-                                        const SizedBox(width: 10),
-                                        Column(
-                                          crossAxisAlignment:
-                                              CrossAxisAlignment.start,
-                                          children: [
-                                            Text(
-                                              // Campo para id venta
-                                              'Venta ${sales[index].saleCode}',
-                                              style: TextStyle(
-                                                fontWeight: FontWeight.bold,
-                                              ),
-                                            ),
-                                            // Campo para fecha
-                                            Text(
-                                              _dateview(sales[index]),
-                                              style: TextStyle(
-                                                color: Colors.grey,
-                                              ),
-                                            ),
-                                          ],
+                                        SizedBox(height: 4),
+                                        Text(
+                                          'Intenta con otro filtro de fecha',
+                                          style: TextStyle(
+                                            color: Color(0xFFD1D5DB),
+                                            fontSize: 13,
+                                          ),
                                         ),
-                                        Spacer(),
-                                        Container(
-                                          padding: EdgeInsets.symmetric(
-                                            vertical: 1,
-                                            horizontal: 3,
-                                          ),
-                                          decoration: BoxDecoration(
-                                            color: Colors.green.withValues(
-                                              alpha: 0.2,
-                                            ),
-                                            borderRadius: BorderRadius.circular(
-                                              8,
-                                            ),
-                                            border: Border.all(
-                                              color: Colors.green.withValues(
-                                                alpha: 0.5,
-                                              ),
-                                            ),
-                                          ),
-                                          child:
-                                              // Campo para estado de venta
-                                              Text(
-                                                '${sales[index].estado}',
-                                                style: TextStyle(
+                                      ],
+                                    ),
+                                  ),
+                                ListView.builder(
+                                  shrinkWrap: true,
+                                  physics: NeverScrollableScrollPhysics(),
+                                  itemCount:
+                                      (sales.length) + (hashReachedMax ? 0 : 1),
+                                  itemBuilder: (BuildContext context, int index) {
+                                    if (index >= (sales.length)) {
+                                      return const Padding(
+                                        padding: EdgeInsets.all(16),
+                                        child: Center(
+                                          child: CircularProgressIndicator(),
+                                        ),
+                                      );
+                                    }
+                                    return Container(
+                                      margin: EdgeInsets.symmetric(
+                                        horizontal: 15,
+                                        vertical: 5,
+                                      ),
+                                      padding: EdgeInsets.all(10),
+                                      decoration: BoxDecoration(
+                                        color: Colors.white,
+                                        borderRadius: BorderRadius.circular(10),
+                                      ),
+                                      child: Column(
+                                        children: [
+                                          Row(
+                                            children: [
+                                              Container(
+                                                padding: EdgeInsets.all(5),
+                                                decoration: BoxDecoration(
+                                                  color: Colors.green
+                                                      .withValues(alpha: 0.1),
+                                                  borderRadius:
+                                                      BorderRadius.circular(
+                                                        100,
+                                                      ),
+                                                ),
+                                                child: Icon(
+                                                  Icons
+                                                      .check_circle_outline_rounded,
                                                   color: Colors.green
                                                       .withValues(alpha: 0.9),
-                                                  fontSize: 12,
                                                 ),
                                               ),
-                                        ),
-                                      ],
-                                    ),
-                                    Divider(color: Colors.grey.shade200),
-                                    Row(
-                                      children: [
-                                        Column(
-                                          crossAxisAlignment:
-                                              CrossAxisAlignment.start,
-                                          children: [
-                                            Text(
-                                              'Peso Total',
-                                              style: TextStyle(
-                                                color: Colors.grey,
+                                              const SizedBox(width: 10),
+                                              Column(
+                                                crossAxisAlignment:
+                                                    CrossAxisAlignment.start,
+                                                children: [
+                                                  Text(
+                                                    // Campo para id venta
+                                                    'Venta ${sales[index].saleCode}',
+                                                    style: TextStyle(
+                                                      fontWeight:
+                                                          FontWeight.bold,
+                                                    ),
+                                                  ),
+                                                  // Campo para fecha
+                                                  Text(
+                                                    _dateview(sales[index]),
+                                                    style: TextStyle(
+                                                      color: Colors.grey,
+                                                    ),
+                                                  ),
+                                                ],
                                               ),
-                                            ),
-                                            // Campo para peso de venta
-                                            Text(
-                                              '${sales[index].pesoTotalG} G',
-                                              style: TextStyle(
-                                                fontWeight: FontWeight.bold,
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                        Spacer(),
-                                        Column(
-                                          crossAxisAlignment:
-                                              CrossAxisAlignment.end,
-                                          children: [
-                                            Text(
-                                              'Monto Total',
-                                              style: TextStyle(
-                                                color: Colors.grey,
-                                              ),
-                                            ),
-                                            // Campo para precio total
-                                            Text(
-                                              '\$ ${sales[index].montoTotalBs} usd',
-                                              style: TextStyle(
-                                                fontWeight: FontWeight.bold,
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                      ],
-                                    ),
-                                    const SizedBox(height: 10),
-                                    Row(
-                                      children: [
-                                        //icono para cambiar
-                                        Icon(Icons.storefront),
-                                        SizedBox(width: 5),
-                                        // Campo para nombre vendedor
-                                        Text('${sales[index].comprador}'),
-                                        Spacer(),
-                                        GestureDetector(
-                                          onTap: () {
-                                            print(
-                                              "idventa: ${sales[index].saleId}",
-                                            );
-                                          },
-                                          child: Row(
-                                            children: [
-                                              Text(
-                                                'Ver detalle',
-                                                style: TextStyle(
-                                                  color: const Color(
-                                                    0xFF2563EB,
+                                              Spacer(),
+                                              Container(
+                                                padding: EdgeInsets.symmetric(
+                                                  vertical: 1,
+                                                  horizontal: 3,
+                                                ),
+                                                decoration: BoxDecoration(
+                                                  color: Colors.green
+                                                      .withValues(alpha: 0.2),
+                                                  borderRadius:
+                                                      BorderRadius.circular(8),
+                                                  border: Border.all(
+                                                    color: Colors.green
+                                                        .withValues(alpha: 0.5),
                                                   ),
                                                 ),
-                                              ),
-                                              Icon(
-                                                Icons.arrow_forward_ios,
-                                                size: 12,
-                                                color: const Color(0xFF2563EB),
+                                                child:
+                                                    // Campo para estado de venta
+                                                    Text(
+                                                      '${sales[index].estado}',
+                                                      style: TextStyle(
+                                                        color: Colors.green
+                                                            .withValues(
+                                                              alpha: 0.9,
+                                                            ),
+                                                        fontSize: 12,
+                                                      ),
+                                                    ),
                                               ),
                                             ],
                                           ),
-                                        ),
-                                      ],
-                                    ),
-                                  ],
+                                          Divider(color: Colors.grey.shade200),
+                                          Row(
+                                            children: [
+                                              Column(
+                                                crossAxisAlignment:
+                                                    CrossAxisAlignment.start,
+                                                children: [
+                                                  Text(
+                                                    'Peso Total',
+                                                    style: TextStyle(
+                                                      color: Colors.grey,
+                                                    ),
+                                                  ),
+                                                  // Campo para peso de venta
+                                                  Text(
+                                                    '${sales[index].pesoTotalG} G',
+                                                    style: TextStyle(
+                                                      fontWeight:
+                                                          FontWeight.bold,
+                                                    ),
+                                                  ),
+                                                ],
+                                              ),
+                                              Spacer(),
+                                              Column(
+                                                crossAxisAlignment:
+                                                    CrossAxisAlignment.end,
+                                                children: [
+                                                  Text(
+                                                    'Monto Total',
+                                                    style: TextStyle(
+                                                      color: Colors.grey,
+                                                    ),
+                                                  ),
+                                                  // Campo para precio total
+                                                  Text(
+                                                    '\$ ${sales[index].montoTotalBs} usd',
+                                                    style: TextStyle(
+                                                      fontWeight:
+                                                          FontWeight.bold,
+                                                    ),
+                                                  ),
+                                                ],
+                                              ),
+                                            ],
+                                          ),
+                                          const SizedBox(height: 10),
+                                          Row(
+                                            children: [
+                                              //icono para cambiar
+                                              Icon(Icons.storefront),
+                                              SizedBox(width: 5),
+                                              // Campo para nombre vendedor
+                                              Text(sales[index].comprador),
+                                              Spacer(),
+                                              GestureDetector(
+                                                onTap: () {
+                                                  showDialog(
+                                                    context: context,
+                                                    builder: (context) {
+                                                      return Center(
+                                                        child: Container(
+                                                          padding:
+                                                              const EdgeInsets.all(
+                                                                16,
+                                                              ),
+                                                          decoration: BoxDecoration(
+                                                            color: Colors.white,
+                                                            borderRadius:
+                                                                BorderRadius.circular(
+                                                                  8,
+                                                                ),
+                                                          ),
+                                                          child: TextButton(
+                                                            onPressed: () {
+                                                              Navigator.of(
+                                                                context,
+                                                              ).pop(); // cierra el diálogo
+                                                            },
+                                                            style: ElevatedButton.styleFrom(
+                                                              backgroundColor:
+                                                                  Colors.red,
+                                                              foregroundColor:
+                                                                  Colors.white,
+                                                            ),
+                                                            child: const Text(
+                                                              "Cerrar",
+                                                            ),
+                                                          ),
+                                                        ),
+                                                      );
+                                                    },
+                                                  );
+                                                },
+                                                child: Row(
+                                                  children: [
+                                                    Text(
+                                                      'Ver detalle',
+                                                      style: TextStyle(
+                                                        color: const Color(
+                                                          0xFF2563EB,
+                                                        ),
+                                                      ),
+                                                    ),
+                                                    Icon(
+                                                      Icons.arrow_forward_ios,
+                                                      size: 12,
+                                                      color: const Color(
+                                                        0xFF2563EB,
+                                                      ),
+                                                    ),
+                                                  ],
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        ],
+                                      ),
+                                    );
+                                  },
                                 ),
-                              );
-                            },
+                              ],
+                            ),
                           ),
                         ],
                       ),
