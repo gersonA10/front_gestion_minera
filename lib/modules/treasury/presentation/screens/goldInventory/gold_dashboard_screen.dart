@@ -179,9 +179,18 @@ class _GoldDashboardScreenState extends State<GoldDashboardScreen> {
                 children: [
                   RefreshIndicator(
                     onRefresh: () async {
+                      String? currentStatus;
+                      if (_selectedFilter == 1) currentStatus = 'Disponible';
+                      if (_selectedFilter == 2) currentStatus = 'Parcial';
+                      if (_selectedFilter == 3) currentStatus = 'Agotado';
+
                       context.read<TreasuryBloc>().add(
-                        FetchGoldDashboardDataEvent(isRefresh: true),
+                        FetchGoldDashboardDataEvent(
+                          isRefresh: true,
+                          status: currentStatus, 
+                        ),
                       );
+                      
                       await context.read<TreasuryBloc>().stream.firstWhere(
                         (state) =>
                             state is GoldDashboardLoaded ||
