@@ -163,3 +163,19 @@ class GetDistributionDetailEvent extends TreasuryEvent {
 }
 
 class LoadMoreDistributionDetailEvent extends TreasuryEvent {}
+
+class PayDividendEvent extends TreasuryEvent {
+  final String distributionId;
+  final String memberId;
+  final String cashRegisterId;
+  final String period;
+  final String evidenciaPath;
+
+  PayDividendEvent({
+    required this.distributionId,
+    required this.memberId,
+    required this.cashRegisterId,
+    required this.period,
+    required this.evidenciaPath,
+  });
+}

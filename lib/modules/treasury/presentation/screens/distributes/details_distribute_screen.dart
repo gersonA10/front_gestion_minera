@@ -1,5 +1,7 @@
 import 'package:auto_route/auto_route.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:front_gestion_minera/config/router/app_router.gr.dart';
 import 'package:front_gestion_minera/core/widgets/excavator_loader.dart';
 import 'package:front_gestion_minera/injector_container.dart';
 import 'package:front_gestion_minera/modules/treasury/presentation/bloc/treasury_bloc.dart';
@@ -36,7 +38,8 @@ class _DividendDistributionDetailsScreenState
       ..add(GetDistributionDetailEvent(
         distributionId: widget.distributionId,
         isRefresh: true,
-      ));
+      ))
+      ..add(GetCashRegistersEvent());
     _scrollController.addListener(() {
       if (_scrollController.position.pixels >=
           _scrollController.position.maxScrollExtent - 200) {
@@ -91,12 +94,39 @@ class _DividendDistributionDetailsScreenState
             ),
           ),
         ),
-        body: BlocBuilder<TreasuryBloc, TreasuryState>(
-          buildWhen: (_, curr) =>
-              curr is DistributionDetailLoading ||
-              curr is DistributionDetailLoaded ||
-              curr is DistributionDetailError,
-          builder: (context, state) {
+        body: BlocListener<TreasuryBloc, TreasuryState>(
+          listener: (context, state) {
+            if (state is PayDividendSuccess) {
+              final data = state.data;
+              final formatted = NumberFormat.currency(
+                locale: 'es_BO',
+                symbol: 'Bs',
+                decimalDigits: 2,
+              ).format(data.paidAmount);
+              context.router.push(PaymentSuccessDistributionRoute(
+                beneficiario: data.memberName,
+                montoPagado: formatted,
+                periodo: data.period,
+                fechaHora: data.dateTime,
+                cajaOrigen: data.affectedCashbox,
+                saldoRestante: 'N/D',
+              ));
+              _bloc.add(GetDistributionDetailEvent(
+                distributionId: widget.distributionId,
+                isRefresh: true,
+              ));
+            } else if (state is PayDividendError) {
+              
+            }
+          },
+          child: Stack(
+            children: [
+              BlocBuilder<TreasuryBloc, TreasuryState>(
+                buildWhen: (_, curr) =>
+                    curr is DistributionDetailLoading ||
+                    curr is DistributionDetailLoaded ||
+                    curr is DistributionDetailError,
+                builder: (context, state) {
             if (state is DistributionDetailLoading) {
               return const Center(child: ExcavatorLoader());
             }
@@ -290,6 +320,8 @@ class _DividendDistributionDetailsScreenState
                         ...filtered.map((member) => MemberCard(
                               member: member,
                               formatCurrency: _formatCurrency,
+                              distributionId: widget.distributionId,
+                              distributionPeriod: header.period,
                             )),
 
                       if (!state.hasReachedMax)
@@ -308,6 +340,21 @@ class _DividendDistributionDetailsScreenState
 
             return const SizedBox.shrink();
           },
+        ),
+              BlocBuilder<TreasuryBloc, TreasuryState>(
+                buildWhen: (_, curr) => curr is PayDividendLoading || curr is PayDividendSuccess || curr is PayDividendError,
+                builder: (context, state) {
+                  if (state is PayDividendLoading) {
+                    return Container(
+                      color: Colors.black.withValues(alpha: 0.3),
+                      child: const Center(child: ExcavatorLoader()),
+                    );
+                  }
+                  return const SizedBox.shrink();
+                },
+              ),
+            ],
+          ),
         ),
       ),
     );

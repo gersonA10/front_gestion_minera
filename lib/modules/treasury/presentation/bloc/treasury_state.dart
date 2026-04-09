@@ -350,3 +350,15 @@ class DistributionDetailError extends TreasuryState {
   final String message;
   DistributionDetailError(this.message);
 }
+
+class PayDividendLoading extends TreasuryState {}
+
+class PayDividendSuccess extends TreasuryState {
+  final DividendPaymentResponseEntity data;
+  PayDividendSuccess({required this.data});
+}
+
+class PayDividendError extends TreasuryState {
+  final String message;
+  PayDividendError(this.message);
+}

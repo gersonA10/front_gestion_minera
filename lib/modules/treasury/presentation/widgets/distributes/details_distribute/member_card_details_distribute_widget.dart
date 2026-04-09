@@ -1,19 +1,28 @@
+import 'dart:io';
+
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:front_gestion_minera/config/router/app_router.gr.dart';
 import 'package:front_gestion_minera/utils/constants/color.constant.dart';
-import 'package:front_gestion_minera/utils/date_util.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:intl/intl.dart';
 
 import '../../../../domain/entity/entity.dart';
+import '../../../bloc/treasury_bloc.dart';
 
 class MemberCard extends StatelessWidget {
   final DistributionDetailMemberEntity member;
   final String Function(double) formatCurrency;
+  final String distributionId;
+  final String distributionPeriod;
 
   const MemberCard({
     super.key,
     required this.member,
     required this.formatCurrency,
+    required this.distributionId,
+    required this.distributionPeriod,
   });
 
   bool get _isPendiente => member.status.toLowerCase() == 'pendiente';
@@ -146,13 +155,21 @@ class MemberCard extends StatelessWidget {
               if (_isPendiente)
                 ElevatedButton(
                   onPressed: () {
+                    final bloc = context.read<TreasuryBloc>();
                     showConfirmarPagoDialog(
                       context: context,
                       nombreSocio: member.fullName,
-                      monto: member.assignedAmount.toString(),
-                      periodo: member.paymentDate != null ? formatDate(DateTime.parse(member.paymentDate!)) : '',
-                      onConfirmar: () {
-                        
+                      monto: formatCurrency(member.assignedAmount),
+                      periodo: distributionPeriod,
+                      cashRegisters: bloc.cashRegisters,
+                      onConfirmar: (cashRegisterId, evidenciaPath) {
+                        bloc.add(PayDividendEvent(
+                          distributionId: distributionId,
+                          memberId: member.memberId,
+                          cashRegisterId: cashRegisterId,
+                          period: distributionPeriod,
+                          evidenciaPath: evidenciaPath,
+                        ));
                       },
                     );
                   },
@@ -180,11 +197,11 @@ class MemberCard extends StatelessWidget {
                   onPressed: () {
                     context.router.push(PaymentSuccessDistributionRoute(
                       beneficiario: member.fullName,
-                      montoPagado: member.assignedAmount.toString(),
-                      periodo: member.paymentDate != null ? formatDate(DateTime.parse(member.paymentDate!)) : '',
-                      fechaHora: DateTime.now().toString(),
-                      cajaOrigen: member.detailId   ,//ojo
-                      saldoRestante: member.assignedAmount.toString(),//ojo
+                      montoPagado: formatCurrency(member.assignedAmount),
+                      periodo: member.paymentDate ?? distributionPeriod,
+                      fechaHora: member.paymentDate ?? DateTime.now().toString(),
+                      cajaOrigen: '',
+                      saldoRestante: 'N/D',
                     ));
                   },
                   icon: const Icon(
@@ -214,7 +231,9 @@ void showConfirmarPagoDialog({
   required String nombreSocio,
   required String monto,
   required String periodo,
-  required VoidCallback onConfirmar,
+  required List<CashRegisterEntity> cashRegisters,
+  required void Function(String cashRegisterId, String evidenciaPath)
+      onConfirmar,
 }) {
   showDialog(
     context: context,
@@ -223,148 +242,288 @@ void showConfirmarPagoDialog({
       nombreSocio: nombreSocio,
       monto: monto,
       periodo: periodo,
+      cashRegisters: cashRegisters,
       onConfirmar: onConfirmar,
     ),
   );
 }
 
-class ConfirmarPagoDistribucionDialog extends StatelessWidget {
+class ConfirmarPagoDistribucionDialog extends StatefulWidget {
   final String nombreSocio;
   final String monto;
   final String periodo;
-  final VoidCallback onConfirmar;
+  final List<CashRegisterEntity> cashRegisters;
+  final void Function(String cashRegisterId, String evidenciaPath) onConfirmar;
 
   const ConfirmarPagoDistribucionDialog({
     super.key,
     required this.nombreSocio,
     required this.monto,
     required this.periodo,
+    required this.cashRegisters,
     required this.onConfirmar,
   });
 
   @override
+  State<ConfirmarPagoDistribucionDialog> createState() =>
+      _ConfirmarPagoDistribucionDialogState();
+}
+
+class _ConfirmarPagoDistribucionDialogState
+    extends State<ConfirmarPagoDistribucionDialog> {
+  String? _selectedCajaId;
+  File? _evidenciaFile;
+  final ImagePicker _picker = ImagePicker();
+
+  Future<void> _pickImage() async {
+    final XFile? picked = await _picker.pickImage(
+      source: ImageSource.gallery,
+      imageQuality: 80,
+    );
+    if (picked != null) {
+      setState(() => _evidenciaFile = File(picked.path));
+    }
+  }
+
+  String _formatCurrency(double value) => NumberFormat.currency(
+        locale: 'es_BO',
+        symbol: 'Bs',
+        decimalDigits: 2,
+      ).format(value);
+
+  @override
   Widget build(BuildContext context) {
+    final bool canConfirm =
+        _selectedCajaId != null && _evidenciaFile != null;
+
     return Dialog(
       backgroundColor: TColors.surface,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
-      insetPadding: const EdgeInsets.symmetric(horizontal: 28, vertical: 40),
-      child: Padding(
-        padding: const EdgeInsets.fromLTRB(24, 32, 24, 24),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            // ─── Ícono ───
-            Container(
-              width: 72,
-              height: 72,
-              decoration: BoxDecoration(
-                color: TColors.primary.withValues(alpha: 0.12),
-                shape: BoxShape.circle,
-              ),
-              child: const Icon(
-                Icons.payments_outlined,
-                color: TColors.primary,
-                size: 34,
-              ),
-            ),
-            const SizedBox(height: 20),
-
-            // ─── Título ───
-            const Text(
-              'Confirmar Pago',
-              style: TextStyle(
-                color: TColors.textPrimary,
-                fontSize: 22,
-                fontWeight: FontWeight.w800,
-              ),
-            ),
-            const SizedBox(height: 14),
-
-            // ─── Descripción ───
-            RichText(
-              textAlign: TextAlign.center,
-              text: TextSpan(
-                style: const TextStyle(fontSize: 15, height: 1.55),
-                children: [
-                  const TextSpan(
-                    text: 'Está a punto de pagar ',
-                    style: TextStyle(color: TColors.primary),
+      shape:
+          RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+      insetPadding:
+          const EdgeInsets.symmetric(horizontal: 28, vertical: 40),
+      child: SingleChildScrollView(
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(24, 32, 24, 24),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Center(
+                child: Container(
+                  width: 64,
+                  height: 64,
+                  decoration: BoxDecoration(
+                    color: TColors.primary.withValues(alpha: 0.12),
+                    shape: BoxShape.circle,
                   ),
-                  TextSpan(
-                    text: monto,
-                    style: const TextStyle(
-                      color: TColors.textPrimary,
-                      fontWeight: FontWeight.w700,
-                    ),
-                  ),
-                  const TextSpan(
-                    text: ' a ',
-                    style: TextStyle(color: TColors.primary),
-                  ),
-                  TextSpan(
-                    text: nombreSocio,
-                    style: const TextStyle(
-                      color: TColors.textPrimary,
-                      fontWeight: FontWeight.w800,
-                    ),
-                  ),
-                  const TextSpan(
-                    text: ' correspondiente a la distribución ',
-                    style: TextStyle(color: TColors.primary),
-                  ),
-                  TextSpan(
-                    text: '$periodo.',
-                    style: const TextStyle(
-                      color: TColors.primary,
-                      fontWeight: FontWeight.w700,
-                    ),
-                  ),
-                  const TextSpan(
-                    text: ' ¿Desea continuar?',
-                    style: TextStyle(color: TColors.primary),
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(height: 28),
-            SizedBox(
-              width: double.infinity,
-              height: 52,
-              child: ElevatedButton(
-                onPressed: () {
-                  Navigator.pop(context);
-                  onConfirmar();
-                },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: TColors.primary,
-                  foregroundColor: TColors.white,
-                  elevation: 0,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(16),
+                  child: const Icon(
+                    Icons.payments_outlined,
+                    color: TColors.primary,
+                    size: 30,
                   ),
                 ),
-                child: const Text(
+              ),
+              const SizedBox(height: 16),
+              const Center(
+                child: Text(
                   'Confirmar Pago',
-                  style: TextStyle(fontSize: 15, fontWeight: FontWeight.w700),
+                  style: TextStyle(
+                    color: TColors.textPrimary,
+                    fontSize: 20,
+                    fontWeight: FontWeight.w800,
+                  ),
                 ),
               ),
-            ),
-            const SizedBox(height: 14),
-            TextButton(
-              onPressed: () => Navigator.pop(context),
-              style: TextButton.styleFrom(
-                foregroundColor: TColors.textSecondary,
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 24,
-                  vertical: 10,
+              const SizedBox(height: 6),
+              Center(
+                child: Text(
+                  '${widget.nombreSocio} · ${widget.monto}',
+                  style: const TextStyle(
+                    color: TColors.textSecondary,
+                    fontSize: 13,
+                  ),
+                  textAlign: TextAlign.center,
                 ),
               ),
-              child: const Text(
-                'Cancelar',
-                style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
+              const SizedBox(height: 24),
+              const Text(
+                'CAJA ORIGEN',
+                style: TextStyle(
+                  color: TColors.textSecondary,
+                  fontSize: 11,
+                  fontWeight: FontWeight.w700,
+                  letterSpacing: 0.4,
+                ),
               ),
-            ),
-          ],
+              const SizedBox(height: 8),
+              Container(
+                decoration: BoxDecoration(
+                  color: TColors.background,
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: TColors.border),
+                ),
+                child: DropdownButtonHideUnderline(
+                  child: DropdownButton<String>(
+                    value: _selectedCajaId,
+                    isExpanded: true,
+                    hint: const Padding(
+                      padding: EdgeInsets.symmetric(horizontal: 14),
+                      child: Text(
+                        'Seleccionar caja',
+                        style: TextStyle(
+                          color: TColors.textSecondary,
+                          fontSize: 13,
+                        ),
+                      ),
+                    ),
+                    icon: const Padding(
+                      padding: EdgeInsets.only(right: 12),
+                      child: Icon(Icons.keyboard_arrow_down_rounded,
+                          color: TColors.textSecondary),
+                    ),
+                    dropdownColor: TColors.surface,
+                    borderRadius: BorderRadius.circular(12),
+                    items: widget.cashRegisters
+                        .map(
+                          (c) => DropdownMenuItem(
+                            value: c.id,
+                            child: Padding(
+                              padding:
+                                  const EdgeInsets.symmetric(horizontal: 14),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Text(
+                                    c.nombre,
+                                    style: const TextStyle(
+                                      color: TColors.textPrimary,
+                                      fontSize: 13,
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                  ),
+                                  Text(
+                                    _formatCurrency(c.saldoDisponible),
+                                    style: const TextStyle(
+                                      color: TColors.textSecondary,
+                                      fontSize: 11,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        )
+                        .toList(),
+                    onChanged: (val) =>
+                        setState(() => _selectedCajaId = val),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 16),
+
+              const Text(
+                'EVIDENCIA',
+                style: TextStyle(
+                  color: TColors.textSecondary,
+                  fontSize: 11,
+                  fontWeight: FontWeight.w700,
+                  letterSpacing: 0.4,
+                ),
+              ),
+              const SizedBox(height: 8),
+              GestureDetector(
+                onTap: _pickImage,
+                child: Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.symmetric(
+                      horizontal: 14, vertical: 14),
+                  decoration: BoxDecoration(
+                    color: TColors.background,
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(
+                      color: _evidenciaFile != null
+                          ? TColors.success
+                          : TColors.border,
+                    ),
+                  ),
+                  child: Row(
+                    children: [
+                      Icon(
+                        _evidenciaFile != null
+                            ? Icons.check_circle_outline_rounded
+                            : Icons.attach_file_rounded,
+                        color: _evidenciaFile != null
+                            ? TColors.success
+                            : TColors.textSecondary,
+                        size: 18,
+                      ),
+                      const SizedBox(width: 10),
+                      Expanded(
+                        child: Text(
+                          _evidenciaFile != null
+                              ? _evidenciaFile!.path.split('/').last
+                              : 'Seleccionar imagen',
+                          style: TextStyle(
+                            color: _evidenciaFile != null
+                                ? TColors.textPrimary
+                                : TColors.textSecondary,
+                            fontSize: 13,
+                          ),
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              const SizedBox(height: 28),
+              SizedBox(
+                width: double.infinity,
+                height: 52,
+                child: ElevatedButton(
+                  onPressed: canConfirm
+                      ? () {
+                          context.router.back();
+                          widget.onConfirmar(
+                              _selectedCajaId!, _evidenciaFile!.path);
+                        }
+                      : null,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: TColors.primary,
+                    disabledBackgroundColor:
+                        TColors.primary.withValues(alpha: 0.4),
+                    foregroundColor: TColors.white,
+                    elevation: 0,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                  ),
+                  child: const Text(
+                    'Confirmar Pago',
+                    style:
+                        TextStyle(fontSize: 15, fontWeight: FontWeight.w700),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 10),
+              SizedBox(
+                width: double.infinity,
+                child: TextButton(
+                  onPressed: () => Navigator.pop(context),
+                  style: TextButton.styleFrom(
+                    foregroundColor: TColors.textSecondary,
+                  ),
+                  child: const Text(
+                    'Cancelar',
+                    style:
+                        TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
+                  ),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );

@@ -91,6 +91,7 @@ class TreasuryBloc extends Bloc<TreasuryEvent, TreasuryState> {
     on<LoadMoreDistributionHistoryEvent>(_onLoadMoreDistributionHistory);
     on<GetDistributionDetailEvent>(_onGetDistributionDetail);
     on<LoadMoreDistributionDetailEvent>(_onLoadMoreDistributionDetail);
+    on<PayDividendEvent>(_onPayDividend);
   }
 
   Future<void> _onFetchTreasuryMetrics(
@@ -842,6 +843,28 @@ class TreasuryBloc extends Bloc<TreasuryEvent, TreasuryState> {
       emit(DistributionDetailError(mapErrorMessage(error.key)));
     } catch (e) {
       emit(DistributionDetailError('Error inesperado: $e'));
+    }
+  }
+
+  Future<void> _onPayDividend(
+    PayDividendEvent event,
+    Emitter<TreasuryState> emit,
+  ) async {
+    emit(PayDividendLoading());
+    try {
+      final response = await repository.payDividend(
+        event.distributionId,
+        event.memberId,
+        event.cashRegisterId,
+        event.period,
+        event.evidenciaPath,
+      );
+      emit(PayDividendSuccess(data: response));
+    } on BaseApiException catch (error) {
+      if (error.key == DioExceptionKey.unauthorised) return;
+      emit(PayDividendError(mapErrorMessage(error.key)));
+    } catch (e) {
+      emit(PayDividendError('Error inesperado: $e'));
     }
   }
 

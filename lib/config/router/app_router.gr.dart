@@ -300,7 +300,7 @@ class DistributesRoute extends _i37.PageRouteInfo<void> {
 class DividendDistributionDetailsRoute
     extends _i37.PageRouteInfo<DividendDistributionDetailsRouteArgs> {
   DividendDistributionDetailsRoute({
-    _i39.Key? key,
+    _i38.Key? key,
     required String distributionId,
     List<_i37.PageRouteInfo>? children,
   }) : super(
@@ -332,7 +332,7 @@ class DividendDistributionDetailsRouteArgs {
     required this.distributionId,
   });
 
-  final _i39.Key? key;
+  final _i38.Key? key;
 
   final String distributionId;
 

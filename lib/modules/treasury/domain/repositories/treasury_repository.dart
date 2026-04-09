@@ -92,4 +92,12 @@ abstract class TreasuryRepository {
     int page = 1,
     int limit = 10,
   });
+
+  Future<DividendPaymentResponseEntity> payDividend(
+    String distributionId,
+    String memberId,
+    String cashRegisterId,
+    String period,
+    String evidenciaPath,
+  );
 }
