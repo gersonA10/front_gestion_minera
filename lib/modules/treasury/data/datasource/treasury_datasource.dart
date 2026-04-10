@@ -474,7 +474,7 @@ class TreasuryDatasource {
       },
       operationName: 'newLayoutPost',
     );
-    return NewLayoutResponseModel.fromJson(response);
+    return NewLayoutResponseModel.fromJson(response['data']);
   }
   Future<SimulateDistributionResponseEntity> postSimulateDistribution(
     double baseAmount,
