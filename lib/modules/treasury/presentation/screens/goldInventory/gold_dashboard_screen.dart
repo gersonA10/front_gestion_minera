@@ -612,23 +612,13 @@ class _HistoryWidgetState extends State<HistoryWidget> {
     return BlocListener<TreasuryBloc, TreasuryState>(
       listener: (context, state) {
         if (state is RegistersaleGetSucces) {
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) =>
-                  SellSummaryScreen(saleData: state.data, isFromHistory: true),
-            ),
-          );
+          context.router.push(SellSummaryRoute(saleData: state.data, isFromHistory: true));
         }
       },
       child: BlocBuilder<TreasuryBloc, TreasuryState>(
         buildWhen: (previous, current) =>
             current is RegisterSaleError || current is RegistersaleGetSucces,
         builder: (context, state) {
-          if (state is RegistersaleGetSucces) {
-            print(state.data.saleId);
-          }
-
           return Column(
             children: [
               AppBarDashboardGoldWidget(context: context),
@@ -884,7 +874,7 @@ class _HistoryWidgetState extends State<HistoryWidget> {
                                     ),
                                     // Campo para precio total
                                     Text(
-                                      '\$ 155.000 usd',
+                                      '155.000 Bs',
                                       style: TextStyle(
                                         fontWeight: FontWeight.bold,
                                       ),
@@ -904,9 +894,6 @@ class _HistoryWidgetState extends State<HistoryWidget> {
                                 Spacer(),
                                 GestureDetector(
                                   onTap: () {
-                                    print(
-                                      "049f788e-2072-44b3-8591-6d530c69ffc7",
-                                    );
                                     fromHistoryClick = true;
                                     treasuryBloc.add(
                                       GetSaleDetailEvent(idSale: idSale),

@@ -996,10 +996,15 @@ class SellSummaryRoute extends _i38.PageRouteInfo<SellSummaryRouteArgs> {
   SellSummaryRoute({
     _i39.Key? key,
     required _i41.RegisterSaleResponseEntity saleData,
+    bool isFromHistory = false,
     List<_i38.PageRouteInfo>? children,
   }) : super(
          SellSummaryRoute.name,
-         args: SellSummaryRouteArgs(key: key, saleData: saleData),
+         args: SellSummaryRouteArgs(
+           key: key,
+           saleData: saleData,
+           isFromHistory: isFromHistory,
+         ),
          initialChildren: children,
        );
 
@@ -1009,21 +1014,31 @@ class SellSummaryRoute extends _i38.PageRouteInfo<SellSummaryRouteArgs> {
     name,
     builder: (data) {
       final args = data.argsAs<SellSummaryRouteArgs>();
-      return _i33.SellSummaryScreen(key: args.key, saleData: args.saleData);
+      return _i33.SellSummaryScreen(
+        key: args.key,
+        saleData: args.saleData,
+        isFromHistory: args.isFromHistory,
+      );
     },
   );
 }
 
 class SellSummaryRouteArgs {
-  const SellSummaryRouteArgs({this.key, required this.saleData});
+  const SellSummaryRouteArgs({
+    this.key,
+    required this.saleData,
+    this.isFromHistory = false,
+  });
 
   final _i39.Key? key;
 
   final _i41.RegisterSaleResponseEntity saleData;
 
+  final bool isFromHistory;
+
   @override
   String toString() {
-    return 'SellSummaryRouteArgs{key: $key, saleData: $saleData}';
+    return 'SellSummaryRouteArgs{key: $key, saleData: $saleData, isFromHistory: $isFromHistory}';
   }
 }
 
