@@ -4,6 +4,8 @@ import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:front_gestion_minera/config/router/app_router.gr.dart';
+import 'package:front_gestion_minera/core/widgets/custom_alert_widget.dart';
+import 'package:front_gestion_minera/injector_container.dart';
 import 'package:front_gestion_minera/utils/constants/color.constant.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
@@ -40,188 +42,211 @@ class MemberCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 10),
-      padding: const EdgeInsets.all(14),
-      decoration: BoxDecoration(
-        color: TColors.surface,
-        borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: TColors.border),
-        boxShadow: [
-          BoxShadow(
-            color: TColors.textPrimary.withValues(alpha: 0.03),
-            blurRadius: 6,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
-      child: Column(
-        children: [
-          Row(
-            children: [
-              Container(
-                width: 40,
-                height: 40,
-                decoration: BoxDecoration(
-                  color: _avatarBg,
-                  shape: BoxShape.circle,
-                ),
-                child: Center(
-                  child: Text(
-                    _initials,
-                    style: TextStyle(
-                      color: _statusColor,
-                      fontSize: 13,
-                      fontWeight: FontWeight.w700,
-                    ),
-                  ),
-                ),
-              ),
-              const SizedBox(width: 10),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      member.fullName,
-                      style: const TextStyle(
-                        color: TColors.textPrimary,
-                        fontSize: 13,
-                        fontWeight: FontWeight.w700,
-                      ),
-                    ),
-                    if (member.paymentDate != null)
-                      Text(
-                        'Pagado: ${member.paymentDate}',
-                        style: const TextStyle(
-                          color: TColors.textSecondary,
-                          fontSize: 11,
-                        ),
-                      ),
-                  ],
-                ),
-              ),
-              Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 10,
-                  vertical: 4,
-                ),
-                decoration: BoxDecoration(
-                  color: TColors.surface,
-                  borderRadius: BorderRadius.circular(6),
-                  border: Border.all(color: _statusColor),
-                ),
-                child: Text(
-                  member.status,
-                  style: TextStyle(
-                    color: _statusColor,
-                    fontSize: 11,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
+    return BlocConsumer<TreasuryBloc, TreasuryState>(
+      listener: (context, state) {
+        if (state is PayDividendSuccess) {
+          context.router.push(
+            PaymentSuccessDistributionRoute(
+              receiptId: state.data.transactionId,
+            ),
+          );
+        }
+        if (state is PayDividendError) {
+          CustomAlert.show(
+            context,
+            title: 'Error',
+            message: state.message,
+            type: AlertType.error,
+          );
+        }
+      },
+      builder: (context, state) {
+        return Container(
+          margin: const EdgeInsets.only(bottom: 10),
+          padding: const EdgeInsets.all(14),
+          decoration: BoxDecoration(
+            color: TColors.surface,
+            borderRadius: BorderRadius.circular(14),
+            border: Border.all(color: TColors.border),
+            boxShadow: [
+              BoxShadow(
+                color: TColors.textPrimary.withValues(alpha: 0.03),
+                blurRadius: 6,
+                offset: const Offset(0, 2),
               ),
             ],
           ),
-          const SizedBox(height: 10),
-          Divider(height: 1, color: TColors.border),
-          const SizedBox(height: 10),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            crossAxisAlignment: CrossAxisAlignment.end,
+          child: Column(
             children: [
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+              Row(
                 children: [
-                  const Text(
-                    'MONTO ASIGNADO',
-                    style: TextStyle(
-                      color: TColors.textSecondary,
-                      fontSize: 10,
-                      fontWeight: FontWeight.w600,
-                      letterSpacing: 0.4,
+                  Container(
+                    width: 40,
+                    height: 40,
+                    decoration: BoxDecoration(
+                      color: _avatarBg,
+                      shape: BoxShape.circle,
+                    ),
+                    child: Center(
+                      child: Text(
+                        _initials,
+                        style: TextStyle(
+                          color: _statusColor,
+                          fontSize: 13,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
                     ),
                   ),
-                  const SizedBox(height: 2),
-                  Text(
-                    formatCurrency(member.assignedAmount),
-                    style: const TextStyle(
-                      color: TColors.textPrimary,
-                      fontSize: 13,
-                      fontWeight: FontWeight.w700,
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          member.fullName,
+                          style: const TextStyle(
+                            color: TColors.textPrimary,
+                            fontSize: 13,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                        if (member.paymentDate != null)
+                          Text(
+                            'Pagado: ${member.paymentDate}',
+                            style: const TextStyle(
+                              color: TColors.textSecondary,
+                              fontSize: 11,
+                            ),
+                          ),
+                      ],
+                    ),
+                  ),
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 10,
+                      vertical: 4,
+                    ),
+                    decoration: BoxDecoration(
+                      color: TColors.surface,
+                      borderRadius: BorderRadius.circular(6),
+                      border: Border.all(color: _statusColor),
+                    ),
+                    child: Text(
+                      member.status,
+                      style: TextStyle(
+                        color: _statusColor,
+                        fontSize: 11,
+                        fontWeight: FontWeight.w600,
+                      ),
                     ),
                   ),
                 ],
               ),
-              if (_isPendiente)
-                ElevatedButton(
-                  onPressed: () {
-                    final bloc = context.read<TreasuryBloc>();
-                    showConfirmarPagoDialog(
-                      context: context,
-                      nombreSocio: member.fullName,
-                      monto: formatCurrency(member.assignedAmount),
-                      periodo: distributionPeriod,
-                      cashRegisters: bloc.cashRegisters,
-                      onConfirmar: (cashRegisterId, evidenciaPath) {
-                        bloc.add(PayDividendEvent(
-                          distributionId: distributionId,
-                          memberId: member.memberId,
-                          cashRegisterId: cashRegisterId,
-                          period: distributionPeriod,
-                          evidenciaPath: evidenciaPath,
-                        ));
+              const SizedBox(height: 10),
+              Divider(height: 1, color: TColors.border),
+              const SizedBox(height: 10),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text(
+                        'MONTO ASIGNADO',
+                        style: TextStyle(
+                          color: TColors.textSecondary,
+                          fontSize: 10,
+                          fontWeight: FontWeight.w600,
+                          letterSpacing: 0.4,
+                        ),
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        formatCurrency(member.assignedAmount),
+                        style: const TextStyle(
+                          color: TColors.textPrimary,
+                          fontSize: 13,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                    ],
+                  ),
+                  if (_isPendiente)
+                    ElevatedButton(
+                      onPressed: () {
+                        final bloc = context.read<TreasuryBloc>();
+                        showConfirmarPagoDialog(
+                          context: context,
+                          nombreSocio: member.fullName,
+                          monto: formatCurrency(member.assignedAmount),
+                          periodo: distributionPeriod,
+                          cashRegisters: bloc.cashRegisters,
+                          onConfirmar: (cashRegisterId, evidenciaPath) {
+                            bloc.add(
+                              PayDividendEvent(
+                                distributionId: distributionId,
+                                memberId: member.memberId,
+                                cashRegisterId: cashRegisterId,
+                                period: distributionPeriod,
+                                evidenciaPath: evidenciaPath,
+                              ),
+                            );
+                          },
+                        );
                       },
-                    );
-                  },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: TColors.primary,
-                    foregroundColor: TColors.white,
-                    elevation: 0,
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 22,
-                      vertical: 10,
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: TColors.primary,
+                        foregroundColor: TColors.white,
+                        elevation: 0,
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 22,
+                          vertical: 10,
+                        ),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        minimumSize: Size.zero,
+                        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                      ),
+                      child: const Text(
+                        'Pagar',
+                        style: TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                    )
+                  else
+                    TextButton.icon(
+                      onPressed: () {
+                        context.router.push(
+                          PaymentSuccessDistributionRoute(
+                            receiptId: member.transactionId ?? '',
+                          ),
+                        );
+                      },
+                      icon: const Icon(
+                        Icons.receipt_long_outlined,
+                        color: TColors.textSecondary,
+                        size: 15,
+                      ),
+                      label: const Text(
+                        'Ver recibo',
+                        style: TextStyle(
+                          color: TColors.textSecondary,
+                          fontWeight: FontWeight.w600,
+                          fontSize: 12,
+                        ),
+                      ),
                     ),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                    minimumSize: Size.zero,
-                    tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                  ),
-                  child: const Text(
-                    'Pagar',
-                    style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700),
-                  ),
-                )
-              else
-                TextButton.icon(
-                  onPressed: () {
-                    context.router.push(PaymentSuccessDistributionRoute(
-                      beneficiario: member.fullName,
-                      montoPagado: formatCurrency(member.assignedAmount),
-                      periodo: member.paymentDate ?? distributionPeriod,
-                      fechaHora: member.paymentDate ?? DateTime.now().toString(),
-                      cajaOrigen: '',
-                      saldoRestante: 'N/D',
-                    ));
-                  },
-                  icon: const Icon(
-                    Icons.receipt_long_outlined,
-                    color: TColors.textSecondary,
-                    size: 15,
-                  ),
-                  label: const Text(
-                    'Ver recibo',
-                    style: TextStyle(
-                      color: TColors.textSecondary,
-                      fontWeight: FontWeight.w600,
-                      fontSize: 12,
-                    ),
-                  ),
-                ),
+                ],
+              ),
             ],
           ),
-        ],
-      ),
+        );
+      },
     );
   }
 }
@@ -233,7 +258,7 @@ void showConfirmarPagoDialog({
   required String periodo,
   required List<CashRegisterEntity> cashRegisters,
   required void Function(String cashRegisterId, String evidenciaPath)
-      onConfirmar,
+  onConfirmar,
 }) {
   showDialog(
     context: context,
@@ -286,22 +311,19 @@ class _ConfirmarPagoDistribucionDialogState
   }
 
   String _formatCurrency(double value) => NumberFormat.currency(
-        locale: 'es_BO',
-        symbol: 'Bs',
-        decimalDigits: 2,
-      ).format(value);
+    locale: 'es_BO',
+    symbol: 'Bs',
+    decimalDigits: 2,
+  ).format(value);
 
   @override
   Widget build(BuildContext context) {
-    final bool canConfirm =
-        _selectedCajaId != null && _evidenciaFile != null;
+    final bool canConfirm = _selectedCajaId != null && _evidenciaFile != null;
 
     return Dialog(
       backgroundColor: TColors.surface,
-      shape:
-          RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
-      insetPadding:
-          const EdgeInsets.symmetric(horizontal: 28, vertical: 40),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+      insetPadding: const EdgeInsets.symmetric(horizontal: 28, vertical: 40),
       child: SingleChildScrollView(
         child: Padding(
           padding: const EdgeInsets.fromLTRB(24, 32, 24, 24),
@@ -379,8 +401,10 @@ class _ConfirmarPagoDistribucionDialogState
                     ),
                     icon: const Padding(
                       padding: EdgeInsets.only(right: 12),
-                      child: Icon(Icons.keyboard_arrow_down_rounded,
-                          color: TColors.textSecondary),
+                      child: Icon(
+                        Icons.keyboard_arrow_down_rounded,
+                        color: TColors.textSecondary,
+                      ),
                     ),
                     dropdownColor: TColors.surface,
                     borderRadius: BorderRadius.circular(12),
@@ -389,8 +413,9 @@ class _ConfirmarPagoDistribucionDialogState
                           (c) => DropdownMenuItem(
                             value: c.id,
                             child: Padding(
-                              padding:
-                                  const EdgeInsets.symmetric(horizontal: 14),
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 14,
+                              ),
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 mainAxisSize: MainAxisSize.min,
@@ -416,8 +441,7 @@ class _ConfirmarPagoDistribucionDialogState
                           ),
                         )
                         .toList(),
-                    onChanged: (val) =>
-                        setState(() => _selectedCajaId = val),
+                    onChanged: (val) => setState(() => _selectedCajaId = val),
                   ),
                 ),
               ),
@@ -438,7 +462,9 @@ class _ConfirmarPagoDistribucionDialogState
                 child: Container(
                   width: double.infinity,
                   padding: const EdgeInsets.symmetric(
-                      horizontal: 14, vertical: 14),
+                    horizontal: 14,
+                    vertical: 14,
+                  ),
                   decoration: BoxDecoration(
                     color: TColors.background,
                     borderRadius: BorderRadius.circular(12),
@@ -485,15 +511,17 @@ class _ConfirmarPagoDistribucionDialogState
                 child: ElevatedButton(
                   onPressed: canConfirm
                       ? () {
-                          context.router.back();
                           widget.onConfirmar(
-                              _selectedCajaId!, _evidenciaFile!.path);
+                            _selectedCajaId!,
+                            _evidenciaFile!.path,
+                          );
                         }
                       : null,
                   style: ElevatedButton.styleFrom(
                     backgroundColor: TColors.primary,
-                    disabledBackgroundColor:
-                        TColors.primary.withValues(alpha: 0.4),
+                    disabledBackgroundColor: TColors.primary.withValues(
+                      alpha: 0.4,
+                    ),
                     foregroundColor: TColors.white,
                     elevation: 0,
                     shape: RoundedRectangleBorder(
@@ -502,8 +530,7 @@ class _ConfirmarPagoDistribucionDialogState
                   ),
                   child: const Text(
                     'Confirmar Pago',
-                    style:
-                        TextStyle(fontSize: 15, fontWeight: FontWeight.w700),
+                    style: TextStyle(fontSize: 15, fontWeight: FontWeight.w700),
                   ),
                 ),
               ),
@@ -517,8 +544,7 @@ class _ConfirmarPagoDistribucionDialogState
                   ),
                   child: const Text(
                     'Cancelar',
-                    style:
-                        TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
+                    style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
                   ),
                 ),
               ),

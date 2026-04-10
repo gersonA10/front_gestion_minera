@@ -285,7 +285,21 @@ class TreasuryRepositoryImpl implements TreasuryRepository {
   }
 
   @override
-<<<<<<< HEAD
+  Future<LotDetailsDataEntity> getLotDetails(String batchId) async {
+    return await datasource.lotDetails(batchId);
+  }
+
+  @override
+  Future<PayTheFeeResponseEntity> payTheFee(
+    PayTheFeeRequetsEntity payTheFeeRequest,
+    String idLoan,
+    String idQuota,
+  ) async {
+    final requestModel = PayTheFeeRequestModel.fromEntity(payTheFeeRequest);
+    final response = await datasource.payTheFee(requestModel, idLoan, idQuota);
+    return response;
+  }
+   @override
   Future<DividendPaymentResponseEntity> payDividend(
     String distributionId,
     String memberId,
@@ -300,20 +314,10 @@ class TreasuryRepositoryImpl implements TreasuryRepository {
       period,
       evidenciaPath,
     );
-=======
-  Future<LotDetailsDataEntity> getLotDetails(String batchId) async {
-    return await datasource.lotDetails(batchId);
   }
-
+  
   @override
-  Future<PayTheFeeResponseEntity> payTheFee(
-    PayTheFeeRequetsEntity payTheFeeRequest,
-    String idLoan,
-    String idQuota,
-  ) async {
-    final requestModel = PayTheFeeRequestModel.fromEntity(payTheFeeRequest);
-    final response = await datasource.payTheFee(requestModel, idLoan, idQuota);
-    return response;
->>>>>>> origin/dev
+  Future<ReceiptResponseEneity> getReceipt(String transactionId) {
+    return datasource.receiptDetails(transactionId);
   }
 }

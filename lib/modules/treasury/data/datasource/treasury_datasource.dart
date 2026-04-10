@@ -420,10 +420,7 @@ class TreasuryDatasource {
   ) async {
     final response = await apiClient.postFormData(
       '/api/treasury/distributions/$distributionId/members/$memberId/pay',
-      data: {
-        'cash_register_id': cashRegisterId,
-        'period': period,
-      },
+      data: {'cash_register_id': cashRegisterId, 'period': period},
       operationName: 'payDividend',
       files: [
         {
@@ -433,7 +430,7 @@ class TreasuryDatasource {
         },
       ],
     );
-    return DividendPaymentResponseModel.fromJson(response['data']);
+    return DividendPaymentResponseModel.fromJson(response);
   }
 
   Future<Map<String, dynamic>> getDistributionHistory({
@@ -484,5 +481,13 @@ class TreasuryDatasource {
     );
 
     return PayTheFeeResponseModel.fromJson(response['data']);
+  }
+
+  Future<ReceiptResponseEneity> receiptDetails(String receiptId) async {
+    final response = await apiClient.get(
+      '/api/treasury/distributions/receipt/$receiptId',
+      operationName: 'receiptDetails',
+    );
+    return ReceiptResponseModel.fromJson(response['data']);
   }
 }

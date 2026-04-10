@@ -364,18 +364,6 @@ class DistributionDetailError extends TreasuryState {
   DistributionDetailError(this.message);
 }
 
-<<<<<<< HEAD
-class PayDividendLoading extends TreasuryState {}
-
-class PayDividendSuccess extends TreasuryState {
-  final DividendPaymentResponseEntity data;
-  PayDividendSuccess({required this.data});
-}
-
-class PayDividendError extends TreasuryState {
-  final String message;
-  PayDividendError(this.message);
-=======
 
 // detalle de lote (inventario de oro)
 class BatchLotDetailsLoading extends TreasuryState {}
@@ -402,5 +390,29 @@ class PayTheFeeLoaded extends TreasuryState {
 class PayTheFeeError extends TreasuryState {
   final String message;
   PayTheFeeError({required this.message});
->>>>>>> origin/dev
+}
+
+class PayDividendLoading extends TreasuryState {}
+
+class PayDividendSuccess extends TreasuryState {
+  final DividendPaymentResponseEntity data;
+  PayDividendSuccess({required this.data});
+}
+
+class PayDividendError extends TreasuryState {
+  final String message;
+  PayDividendError(this.message);
+}
+
+///
+class ReceiptLoading extends TreasuryState {}
+
+class ReceiptSuccess extends TreasuryState {
+  final ReceiptResponseEneity data;
+  ReceiptSuccess({required this.data});
+}
+
+class ReceiptError extends TreasuryState {
+  final String message;
+  ReceiptError(this.message);
 }

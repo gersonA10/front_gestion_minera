@@ -727,23 +727,13 @@ class PaymentSuccessDistributionRoute
     extends _i39.PageRouteInfo<PaymentSuccessDistributionRouteArgs> {
   PaymentSuccessDistributionRoute({
     _i40.Key? key,
-    required String beneficiario,
-    required String montoPagado,
-    required String periodo,
-    required String fechaHora,
-    required String cajaOrigen,
-    required String saldoRestante,
+    required String receiptId,
     List<_i39.PageRouteInfo>? children,
   }) : super(
          PaymentSuccessDistributionRoute.name,
          args: PaymentSuccessDistributionRouteArgs(
            key: key,
-           beneficiario: beneficiario,
-           montoPagado: montoPagado,
-           periodo: periodo,
-           fechaHora: fechaHora,
-           cajaOrigen: cajaOrigen,
-           saldoRestante: saldoRestante,
+           receiptId: receiptId,
          ),
          initialChildren: children,
        );
@@ -756,12 +746,7 @@ class PaymentSuccessDistributionRoute
       final args = data.argsAs<PaymentSuccessDistributionRouteArgs>();
       return _i26.PaymentSuccessDistributionScreen(
         key: args.key,
-        beneficiario: args.beneficiario,
-        montoPagado: args.montoPagado,
-        periodo: args.periodo,
-        fechaHora: args.fechaHora,
-        cajaOrigen: args.cajaOrigen,
-        saldoRestante: args.saldoRestante,
+        receiptId: args.receiptId,
       );
     },
   );
@@ -770,31 +755,16 @@ class PaymentSuccessDistributionRoute
 class PaymentSuccessDistributionRouteArgs {
   const PaymentSuccessDistributionRouteArgs({
     this.key,
-    required this.beneficiario,
-    required this.montoPagado,
-    required this.periodo,
-    required this.fechaHora,
-    required this.cajaOrigen,
-    required this.saldoRestante,
+    required this.receiptId,
   });
 
   final _i40.Key? key;
 
-  final String beneficiario;
-
-  final String montoPagado;
-
-  final String periodo;
-
-  final String fechaHora;
-
-  final String cajaOrigen;
-
-  final String saldoRestante;
+  final String receiptId;
 
   @override
   String toString() {
-    return 'PaymentSuccessDistributionRouteArgs{key: $key, beneficiario: $beneficiario, montoPagado: $montoPagado, periodo: $periodo, fechaHora: $fechaHora, cajaOrigen: $cajaOrigen, saldoRestante: $saldoRestante}';
+    return 'PaymentSuccessDistributionRouteArgs{key: $key, receiptId: $receiptId}';
   }
 }
 

@@ -174,23 +174,6 @@ class GetDistributionDetailEvent extends TreasuryEvent {
 
 class LoadMoreDistributionDetailEvent extends TreasuryEvent {}
 
-<<<<<<< HEAD
-class PayDividendEvent extends TreasuryEvent {
-  final String distributionId;
-  final String memberId;
-  final String cashRegisterId;
-  final String period;
-  final String evidenciaPath;
-
-  PayDividendEvent({
-    required this.distributionId,
-    required this.memberId,
-    required this.cashRegisterId,
-    required this.period,
-    required this.evidenciaPath,
-  });
-}
-=======
 class BatchLotDetailsEvent extends TreasuryEvent {
   final String batchId;
   BatchLotDetailsEvent({required this.batchId});
@@ -206,4 +189,23 @@ class PayTheFeeEvent extends TreasuryEvent {
     required this.idQuota,
   });
 }
->>>>>>> origin/dev
+class PayDividendEvent extends TreasuryEvent {
+  final String distributionId;
+  final String memberId;
+  final String cashRegisterId;
+  final String period;
+  final String evidenciaPath;
+
+  PayDividendEvent({
+    required this.distributionId,
+    required this.memberId,
+    required this.cashRegisterId,
+    required this.period,
+    required this.evidenciaPath,
+  });
+}
+
+class ReceiptEvent extends TreasuryEvent {
+  final String transactionId;
+  ReceiptEvent({required this.transactionId});
+}

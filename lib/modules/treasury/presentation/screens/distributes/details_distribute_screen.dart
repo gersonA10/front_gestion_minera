@@ -1,11 +1,9 @@
 import 'package:auto_route/auto_route.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:front_gestion_minera/config/router/app_router.gr.dart';
+import 'package:front_gestion_minera/core/widgets/custom_alert_widget.dart';
 import 'package:front_gestion_minera/core/widgets/excavator_loader.dart';
 import 'package:front_gestion_minera/injector_container.dart';
 import 'package:front_gestion_minera/modules/treasury/presentation/bloc/treasury_bloc.dart';
-
 import 'package:front_gestion_minera/utils/constants/color.constant.dart';
 import 'package:intl/intl.dart';
 import '../../../domain/entity/entity.dart';
@@ -96,28 +94,6 @@ class _DividendDistributionDetailsScreenState
         ),
         body: BlocListener<TreasuryBloc, TreasuryState>(
           listener: (context, state) {
-            if (state is PayDividendSuccess) {
-              final data = state.data;
-              final formatted = NumberFormat.currency(
-                locale: 'es_BO',
-                symbol: 'Bs',
-                decimalDigits: 2,
-              ).format(data.paidAmount);
-              context.router.push(PaymentSuccessDistributionRoute(
-                beneficiario: data.memberName,
-                montoPagado: formatted,
-                periodo: data.period,
-                fechaHora: data.dateTime,
-                cajaOrigen: data.affectedCashbox,
-                saldoRestante: 'N/D',
-              ));
-              _bloc.add(GetDistributionDetailEvent(
-                distributionId: widget.distributionId,
-                isRefresh: true,
-              ));
-            } else if (state is PayDividendError) {
-              
-            }
           },
           child: Stack(
             children: [
@@ -132,35 +108,13 @@ class _DividendDistributionDetailsScreenState
             }
 
             if (state is DistributionDetailError) {
-              return Center(
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    const Icon(Icons.error_outline,
-                        color: TColors.danger, size: 48),
-                    const SizedBox(height: 12),
-                    Text(state.message,
-                        style: const TextStyle(
-                            color: TColors.textSecondary, fontSize: 13),
-                        textAlign: TextAlign.center),
-                    const SizedBox(height: 16),
-                    ElevatedButton(
-                      onPressed: () => _bloc.add(GetDistributionDetailEvent(
-                        distributionId: widget.distributionId,
-                        isRefresh: true,
-                      )),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: TColors.primary,
-                        foregroundColor: TColors.white,
-                        elevation: 0,
-                        shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(10)),
-                      ),
-                      child: const Text('Reintentar'),
-                    ),
-                  ],
-                ),
-              );
+             context.router.back();
+                CustomAlert.show(
+                  context,
+                  title: 'Error',
+                  message: state.message,
+                  type: AlertType.error,
+                );
             }
 
             if (state is DistributionDetailLoaded) {
