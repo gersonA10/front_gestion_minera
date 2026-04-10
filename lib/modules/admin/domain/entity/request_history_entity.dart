@@ -7,6 +7,7 @@ class RequestHistoryEntity {
   final double monto;
   final String? evidenciaUrl;
   final String estadoGlobalActual;
+  final String decisionTomada;
   final String? motivoRechazo;
 
   RequestHistoryEntity({
@@ -16,13 +17,14 @@ class RequestHistoryEntity {
     required this.rol,
     required this.descripcion,
     required this.monto,
+    required this.decisionTomada,
     this.evidenciaUrl,
     required this.estadoGlobalActual,
     this.motivoRechazo,
   });
 
-  bool get isApproved => estadoGlobalActual.toUpperCase() == 'APPROVED' || estadoGlobalActual.toUpperCase() == 'APROBADO';
-  bool get isRejected => estadoGlobalActual.toUpperCase() == 'REJECTED' || estadoGlobalActual.toUpperCase() == 'RECHAZADO';
+  bool get isApproved => decisionTomada.toUpperCase() == 'APPROVED' || decisionTomada.toUpperCase() == 'APROBADO';
+  bool get isRejected => decisionTomada.toUpperCase() == 'REJECTED' || decisionTomada.toUpperCase() == 'RECHAZADO';
 
   String get shortCode {
     final clean = requestId.replaceAll('-', '');

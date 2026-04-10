@@ -1,8 +1,8 @@
 class BondBalanceResponseEntity {
-  final int cajaMayor;
-  final int cajaChica;
-  final int aDesembolsar;
-  final int saldoDisponibleReal;
+  final double cajaMayor;
+  final double cajaChica;
+  final double aDesembolsar;
+  final double saldoDisponibleReal;
 
   BondBalanceResponseEntity({
     required this.cajaMayor,

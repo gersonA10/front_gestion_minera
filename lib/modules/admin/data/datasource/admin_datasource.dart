@@ -105,4 +105,63 @@ Future<Map<String, dynamic>> getContributesHistory({
     );
     return RequestDetailModel.fromJson(response['data']);
   }
+
+Future<ProcessRequestResponseModel> processRequest({
+    required String id,
+    required String action,
+    String? reason,
+  }) async {
+    final body = <String, dynamic>{'action': action};
+    
+    if (action == 'rechazado' && reason != null && reason.isNotEmpty) {
+      body['reason'] = reason;
+    }
+
+    final response = await apiClient.post(
+      '/api/admin/requests/$id/process',
+      operationName: 'processAdminRequest',
+      data: body,
+    );
+
+    return ProcessRequestResponseModel.fromJson(response);
+  }
+
+  Future<CreateContributionResponseModel> createContribution({
+    required String motivo,
+    required String periodMonth,
+    required String periodYear,
+    required double monto,
+    required String tipoCalculo,
+  }) async {
+    final body = {
+      "motivo": motivo,
+      "period_month": periodMonth,
+      "period_year": periodYear,
+      "monto": monto.toString(), 
+      "tipo_calculo": tipoCalculo,
+    };
+
+    final response = await apiClient.post(
+      '/api/admin/contributions',
+      operationName: 'createContribution',
+      data: body,
+    );
+
+    return CreateContributionResponseModel.fromJson(response);
+  }
+
+  Future<ContributionSimulationModel> simulateContribution({
+    required double monto,
+    required String tipoCalculo,
+  }) async {
+    final response = await apiClient.post(
+      '/api/admin/contributions/simulate',
+      operationName: 'simulateContribution',
+      data: {
+        "monto": monto,
+        "tipo_calculo": tipoCalculo
+      },
+    );
+    return ContributionSimulationModel.fromJson(response['data']);
+  }
 }

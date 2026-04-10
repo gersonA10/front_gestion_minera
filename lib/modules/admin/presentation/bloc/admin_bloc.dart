@@ -1,5 +1,6 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:front_gestion_minera/core/networking/base_api_exception.dart';
+import 'package:front_gestion_minera/utils/error.dart';
 
 import '../../domain/entity/entity.dart';
 import '../../domain/repositories/repository.dart';
@@ -43,8 +44,12 @@ class AdminBloc extends Bloc<AdminEvent, AdminState> {
     //Historial aportes
     on<GetContributionHistoryEvent>(_onGetContributionHistory);
     on<LoadMoreContributionHistoryEvent>(_onLoadMoreContribution);
+    on<CreateAdminContributionEvent>(_onCreateContribution);
+    on<SimulateAdminContributionEvent>(_onSimulateContribution);
     //detalle solicitud
     on<GetRequestDetailEvent>(_onGetRequestDetail);
+    //aprobar o rechazar:
+    on<ProcessAdminRequestEvent>(_onProcessRequest);
   }
 
   Future<void> _onGetPendingRequests(
@@ -72,7 +77,7 @@ class AdminBloc extends Bloc<AdminEvent, AdminState> {
         ),
       );
     } on BaseApiException catch (e) {
-      emit(AdminPendingRequestsError(e.message));
+      emit(AdminPendingRequestsError(mapErrorMessage(e.key)));
     } catch (_) {
       emit(AdminPendingRequestsError('Ocurrió un error inesperado'));
     }
@@ -100,7 +105,7 @@ class AdminBloc extends Bloc<AdminEvent, AdminState> {
       );
     } on BaseApiException catch (e) {
       _currentPage--;
-      emit(AdminPendingRequestsError(e.message));
+      emit(AdminPendingRequestsError(mapErrorMessage(e.key)));
     } catch (_) {
       _currentPage--;
     } finally {
@@ -144,7 +149,7 @@ class AdminBloc extends Bloc<AdminEvent, AdminState> {
         ),
       );
     } on BaseApiException catch (e) {
-      emit(AdminContributionHistoryError(e.message));
+      emit(AdminContributionHistoryError(mapErrorMessage(e.key)));
     } catch (_) {
       emit(AdminContributionHistoryError('Ocurrió un error inesperado'));
     }
@@ -161,7 +166,7 @@ class AdminBloc extends Bloc<AdminEvent, AdminState> {
     try {
       final result = await repository.getContributesHistory(
         page: _currentContributionPage,
-        period: _currentContributionPeriod, 
+        period: _currentContributionPeriod,
         exactDate: _currentContributionExactDate,
       );
 
@@ -190,13 +195,25 @@ class AdminBloc extends Bloc<AdminEvent, AdminState> {
     GetRequestHistoryEvent event,
     Emitter<AdminState> emit,
   ) async {
-    if (event.isRefresh || _currentHistoryStatus != event.status) {
-      _currentHistoryPage = 1;
-      _hasReachedMaxHistory = false;
-      _historyItems.clear();
-      _currentHistoryStatus = event.status;
-      emit(AdminRequestHistoryLoading(_currentHistoryStatus));
+    bool isChangingTabOrRefresh =  event.isRefresh || _currentHistoryStatus != event.status;
+
+    if (!isChangingTabOrRefresh && _historyItems.isNotEmpty) {
+      emit(
+        AdminRequestHistoryLoaded(
+          items: List.from(_historyItems),
+          hasReachedMax: _hasReachedMaxHistory,
+          totalRecords: _totalHistoryRecords,
+          currentFilter: _currentHistoryStatus,
+        ),
+      );
+      return; 
     }
+
+    _currentHistoryPage = 1;
+    _hasReachedMaxHistory = false;
+    _historyItems.clear();
+    _currentHistoryStatus = event.status;
+    emit(AdminRequestHistoryLoading(_currentHistoryStatus));
 
     try {
       final result = await repository.getRequestHistory(
@@ -217,7 +234,9 @@ class AdminBloc extends Bloc<AdminEvent, AdminState> {
         ),
       );
     } on BaseApiException catch (e) {
-      emit(AdminRequestHistoryError(e.message, _currentHistoryStatus));
+      emit(
+        AdminRequestHistoryError(mapErrorMessage(e.key), _currentHistoryStatus),
+      );
     } catch (_) {
       emit(
         AdminRequestHistoryError(
@@ -225,6 +244,44 @@ class AdminBloc extends Bloc<AdminEvent, AdminState> {
           _currentHistoryStatus,
         ),
       );
+    }
+  }
+
+  Future<void> _onLoadMoreHistory(
+    LoadMoreRequestHistoryEvent event,
+    Emitter<AdminState> emit,
+  ) async {
+    if (_hasReachedMaxHistory || _isLoadingMoreHistory) return;
+
+    _isLoadingMoreHistory = true;
+    _currentHistoryPage++; // Avanzamos a la página n
+
+    try {
+      final result = await repository.getRequestHistory(
+        page: _currentHistoryPage,
+        status: _currentHistoryStatus,
+      );
+
+      // SUMAMOS los nuevos n ítems a los m que ya teníamos
+      _historyItems.addAll(result.items);
+      _hasReachedMaxHistory = !result.hasMoreData;
+
+      emit(
+        AdminRequestHistoryLoaded(
+          items: List.from(
+            _historyItems,
+          ), 
+          hasReachedMax: _hasReachedMaxHistory,
+          totalRecords:  _totalHistoryRecords,
+          currentFilter: _currentHistoryStatus,
+        ),
+      );
+    } on BaseApiException {
+      _currentHistoryPage--; 
+    } catch (_) {
+      _currentHistoryPage--;
+    } finally {
+      _isLoadingMoreHistory = false;
     }
   }
 
@@ -237,44 +294,67 @@ class AdminBloc extends Bloc<AdminEvent, AdminState> {
       final detail = await repository.getRequestDetail(event.id);
       emit(AdminRequestDetailLoaded(detail));
     } on BaseApiException catch (e) {
-      emit(AdminRequestDetailError(e.message));
+      emit(AdminRequestDetailError(mapErrorMessage(e.key)));
     } catch (_) {
       emit(AdminRequestDetailError('Ocurrió un error al cargar el detalle'));
     }
   }
 
-  Future<void> _onLoadMoreHistory(
-    LoadMoreRequestHistoryEvent event,
+  Future<void> _onProcessRequest(
+    ProcessAdminRequestEvent event,
     Emitter<AdminState> emit,
   ) async {
-    if (_hasReachedMaxHistory || _isLoadingMoreHistory) return;
-    _isLoadingMoreHistory = true;
-    _currentHistoryPage++;
-
+    emit(AdminActionLoading());
     try {
-      final result = await repository.getRequestHistory(
-        page: _currentHistoryPage,
-        status: _currentHistoryStatus,
+      final responseEntity = await repository.processRequest(
+        id: event.id,
+        action: event.action,
+        reason: event.reason,
       );
-
-      _historyItems.addAll(result.items);
-      _hasReachedMaxHistory = !result.hasMoreData;
-
-      emit(
-        AdminRequestHistoryLoaded(
-          items: List.from(_historyItems),
-          hasReachedMax: _hasReachedMaxHistory,
-          totalRecords: _totalHistoryRecords,
-          currentFilter: _currentHistoryStatus,
-        ),
-      );
+      emit(AdminActionSuccess(responseEntity));
     } on BaseApiException catch (e) {
-      _currentHistoryPage--;
-      emit(AdminRequestHistoryError(e.message, _currentHistoryStatus));
+      emit(AdminActionError(mapErrorMessage(e.key)));
     } catch (_) {
-      _currentHistoryPage--;
-    } finally {
-      _isLoadingMoreHistory = false;
+      emit(AdminActionError('Ocurrió un error al procesar la solicitud'));
+    }
+  }
+
+  Future<void> _onCreateContribution(
+    CreateAdminContributionEvent event,
+    Emitter<AdminState> emit,
+  ) async {
+    emit(CreateContributionLoading());
+    try {
+      final response = await repository.createContribution(
+        motivo: event.motivo,
+        periodMonth: event.periodMonth,
+        periodYear: event.periodYear,
+        monto: event.monto,
+        tipoCalculo: event.tipoCalculo,
+      );
+      emit(CreateContributionSuccess(response));
+    } on BaseApiException catch (e) {
+      emit(CreateContributionError(mapErrorMessage(e.key)));
+    } catch (_) {
+      emit(CreateContributionError('Ocurrió un error al crear el aporte.'));
+    }
+  }
+
+  Future<void> _onSimulateContribution(
+    SimulateAdminContributionEvent event,
+    Emitter<AdminState> emit,
+  ) async {
+    emit(AdminSimulationLoading());
+    try {
+      final simulation = await repository.simulateContribution(
+        monto: event.monto,
+        tipoCalculo: event.tipoCalculo,
+      );
+      emit(AdminSimulationSuccess(simulation));
+    } on BaseApiException catch (e) {
+      emit(AdminSimulationError(mapErrorMessage(e.key)));
+    } catch (_) {
+      emit(AdminSimulationError('Error al simular el cálculo'));
     }
   }
 }

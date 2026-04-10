@@ -1,5 +1,7 @@
+import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:front_gestion_minera/config/router/app_router.gr.dart';
 import 'package:front_gestion_minera/utils/constants/color.constant.dart';
 import '../../domain/entity/request_history_entity.dart';
 import '../bloc/admin_bloc.dart';
@@ -150,7 +152,13 @@ class _HistorialRequestsScreenState extends State<HistorialRequestsScreen> {
                               }
                               return HistorialCard(
                                 item: _cachedItems[index],
-                                onTapDetail: () {},
+                                onTapDetail: () {
+                                  context.router.push(
+                                    RequestDetailRoute(
+                                      requestId: _cachedItems[index].requestId,
+                                    ),
+                                  );
+                                },
                               );
                             },
                             separatorBuilder: (_, _) => const SizedBox(height: 18),

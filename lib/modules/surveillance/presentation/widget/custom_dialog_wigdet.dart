@@ -68,7 +68,7 @@ class CustomDialog extends StatelessWidget {
                   child: OutlinedButton(
                     onPressed: () {
                       text?.clear();
-                      context.router.back();
+                      Navigator.pop(context);
                     },
                     style: OutlinedButton.styleFrom(
                       foregroundColor: Colors.white70,

@@ -54,7 +54,7 @@ class CashResponseEntity {
 class CashDataEntity {
     final String id;
     final String nombre;
-    final int saldoDisponible;
+    final double saldoDisponible;
 
     CashDataEntity({
         required this.id,

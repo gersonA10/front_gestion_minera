@@ -8,7 +8,7 @@ class TransactionDetailsResponseEntity {
     final String cajaAfectada;
     final String responsablePago;
     final String solicitanteOriginal;
-    final String comprobantesAdjuntos;
+    final String? comprobantesAdjuntos;
 
     TransactionDetailsResponseEntity({
         required this.transactionId,
