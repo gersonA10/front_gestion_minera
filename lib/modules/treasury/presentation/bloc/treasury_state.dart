@@ -280,6 +280,12 @@ class RegisterSaleError extends TreasuryState {
   final String message;
   RegisterSaleError({required this.message});
 }
+
+class RegistersaleGetSucces extends TreasuryState {
+  final RegisterSaleResponseEntity data;
+
+  RegistersaleGetSucces({required this.data});
+}
 // registrar prestamo
 class ApplyForALoanLoading extends TreasuryState {}
 

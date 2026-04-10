@@ -75,6 +75,8 @@ abstract class TreasuryRepository {
     RegisterSaleRequestEntity request,
   );
 
+  Future<RegisterSaleResponseEntity> getSaleById(String idSale);
+
   Future<ApplyForALoanResponseEntity> applyForALoan(
     String lenderName,
     double amount,

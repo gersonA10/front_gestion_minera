@@ -7,9 +7,10 @@ import 'package:front_gestion_minera/utils/constants/color.constant.dart';
 @RoutePage()
 class SellSummaryScreen extends StatelessWidget {
   final RegisterSaleResponseEntity saleData;
-
-  const SellSummaryScreen({super.key, required this.saleData});
-
+  final bool isFromHistory;
+  
+  const SellSummaryScreen({super.key, required this.saleData, this.isFromHistory = false});
+  
   @override
   Widget build(BuildContext context) {
     SystemChrome.setSystemUIOverlayStyle(const SystemUiOverlayStyle(
@@ -42,8 +43,13 @@ class SellSummaryScreen extends StatelessWidget {
           const SizedBox(height: 32),
           _BackButton(
             onTap: () {
-              Navigator.of(context).popUntil((route) => route.isFirst);
+              if (isFromHistory) {
+                Navigator.of(context).pop();
+              } else {
+                Navigator.of(context).popUntil((route) => route.isFirst);
+              }
             },
+            isFromHistory: isFromHistory,
           ),
         ],
       ),
@@ -345,7 +351,8 @@ class _LotCard extends StatelessWidget {
 
 class _BackButton extends StatelessWidget {
   final VoidCallback onTap;
-  const _BackButton({required this.onTap});
+  final bool isFromHistory;
+  const _BackButton({required this.onTap, required this.isFromHistory});
 
   @override
   Widget build(BuildContext context) {
@@ -365,14 +372,14 @@ class _BackButton extends StatelessWidget {
             ),
           ],
         ),
-        child: const Row(
+        child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.home_rounded, color: Colors.white, size: 20),
-            SizedBox(width: 10),
+            const Icon(Icons.home_rounded, color: Colors.white, size: 20),
+            const SizedBox(width: 10),
             Text(
-              'Volver al Inicio',
-              style: TextStyle(
+              isFromHistory ? 'Volver A Historial': 'Volver al Inicio',
+              style: const TextStyle(
                 fontSize: 15,
                 fontWeight: FontWeight.w800,
                 color: Colors.white,
