@@ -45,6 +45,11 @@ class RegisterUrgentExpenseEvent extends TreasuryEvent {
   RegisterUrgentExpenseEvent({required this.request});
 }
 
+class RegisterUrgentTransferEvent extends TreasuryEvent {
+  final TransferRequestEntity request;
+  RegisterUrgentTransferEvent({required this.request});
+}
+
 class GetCashRegistersEvent extends TreasuryEvent {}
 
 class ConfirmPaymentEvent extends TreasuryEvent {
@@ -64,7 +69,10 @@ class RejectAnApplicationEvent extends TreasuryEvent {
 
 class GetPaymentHistoryEvent extends TreasuryEvent {
   final bool isRefresh;
-  GetPaymentHistoryEvent({this.isRefresh = true});
+  final String? period;
+  final String? exactDate;
+
+  GetPaymentHistoryEvent({this.isRefresh = true, this.period, this.exactDate});
 }
 
 class LoadMorePaymentHistoryEvent extends TreasuryEvent {}
@@ -123,7 +131,8 @@ class NewLoansSimulateEvent extends TreasuryEvent {
     required this.termMonths,
     required this.annualInterestRate,
     required this.startDate,
-  });}
+  });
+}
 
 class ApplyForALoanEvent extends TreasuryEvent {
   final String lenderName;
@@ -144,7 +153,8 @@ class ApplyForALoanEvent extends TreasuryEvent {
 
 class LoanDetailsEvent extends TreasuryEvent {
   final String idLoan;
-  LoanDetailsEvent({required this.idLoan});}
+  LoanDetailsEvent({required this.idLoan});
+}
 
 class GetDistributionHistoryEvent extends TreasuryEvent {
   final bool isRefresh;
@@ -163,6 +173,22 @@ class GetDistributionDetailEvent extends TreasuryEvent {
 }
 
 class LoadMoreDistributionDetailEvent extends TreasuryEvent {}
+
+class BatchLotDetailsEvent extends TreasuryEvent {
+  final String batchId;
+  BatchLotDetailsEvent({required this.batchId});
+}
+
+class PayTheFeeEvent extends TreasuryEvent {
+  final PayTheFeeRequetsEntity payTheFeeRequest;
+  final String idLoan;
+  final String idQuota;
+  PayTheFeeEvent({
+    required this.payTheFeeRequest,
+    required this.idLoan,
+    required this.idQuota,
+  });
+}
 
 ///
 class NewLayoutEvent extends TreasuryEvent {

@@ -27,6 +27,10 @@ abstract class TreasuryRepository {
     ExpenseRequestEntity request,
   );
 
+  Future<TransferResponseEntity> registerUrgentTransfer(
+    TransferRequestEntity request,
+  );
+
   Future<List<CashRegisterEntity>> getCashRegisters();
 
   Future<GoldInventoryEntity> getGoldInventory();
@@ -47,6 +51,8 @@ abstract class TreasuryRepository {
   Future<PaymentHistoryResponseEntity> getPaymentHistory({
     int page = 1,
     int limit = 10,
+    String? period,
+    String? exactDate,
   });
 
   Future<InternalLoansResponseEntity> getInternalLoans({
@@ -77,10 +83,13 @@ abstract class TreasuryRepository {
     String startDate,
     String cajaDestinoId,
   );
-  Future<NewLoansResponseEntity> postNewLoansSimulate(double amount, int termMonths, String annualInterestRate, String startDate);
-   Future<LoanDetailsResponseEntity> getloanDatails(
-    String idLoan,
+  Future<NewLoansResponseEntity> postNewLoansSimulate(
+    double amount,
+    int termMonths,
+    String annualInterestRate,
+    String startDate,
   );
+  Future<LoanDetailsResponseEntity> getloanDatails(String idLoan);
 
   Future<DistributionHistoryResponseEntity> getDistributionHistory({
     int page = 1,
@@ -93,7 +102,15 @@ abstract class TreasuryRepository {
     int limit = 10,
   });
 
-   Future<NewLayoutResponseEntity> newLayoutPost(
+  Future<LotDetailsDataEntity> getLotDetails(String batchId);
+
+  Future<PayTheFeeResponseEntity> payTheFee(
+    PayTheFeeRequetsEntity payTheFeeRequest,
+    String idLoan,
+    String idQuota,
+  );
+
+  Future<NewLayoutResponseEntity> newLayoutPost(
    String monthPeriod,
     String yearPeriod,
     double baseAmount

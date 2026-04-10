@@ -108,6 +108,14 @@ class TreasuryRepositoryImpl implements TreasuryRepository {
   }
 
   @override
+  Future<TransferResponseEntity> registerUrgentTransfer(
+    TransferRequestEntity request,
+  ) async {
+    final requestModel = TransferRequestModel.fromEntity(request);
+    return await datasource.registerUrgentTransfer(requestModel);
+  }
+
+  @override
   Future<GoldInventoryEntity> getGoldInventory() async {
     return await datasource.getGoldInventory();
   }
@@ -130,8 +138,15 @@ class TreasuryRepositoryImpl implements TreasuryRepository {
   Future<PaymentHistoryResponseEntity> getPaymentHistory({
     int page = 1,
     int limit = 10,
+    String? period,
+    String? exactDate,
   }) async {
-    final result = await datasource.getPaymentHistory(page: page, limit: limit);
+    final result = await datasource.getPaymentHistory(
+      page: page,
+      limit: limit,
+      period: period,
+      exactDate: exactDate,
+    );
     final models = result['items'] as List<PaymentHistoryItemModel>;
     return PaymentHistoryResponseEntity(
       summary: result['summary'] as PaymentHistorySummaryEntity,
@@ -269,6 +284,21 @@ class TreasuryRepositoryImpl implements TreasuryRepository {
     );
   }
 
+  @override
+  Future<LotDetailsDataEntity> getLotDetails(String batchId) async {
+    return await datasource.lotDetails(batchId);
+  }
+
+  @override
+  Future<PayTheFeeResponseEntity> payTheFee(
+    PayTheFeeRequetsEntity payTheFeeRequest,
+    String idLoan,
+    String idQuota,
+  ) async {
+    final requestModel = PayTheFeeRequestModel.fromEntity(payTheFeeRequest);
+    final response = await datasource.payTheFee(requestModel, idLoan, idQuota);
+    return response;
+  }
   @override
   Future<NewLayoutResponseEntity> newLayoutPost(
     String monthPeriod,

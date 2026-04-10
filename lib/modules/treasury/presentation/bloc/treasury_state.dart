@@ -126,6 +126,19 @@ class UrgentExpenseError extends TreasuryState {
   UrgentExpenseError({required this.message});
 }
 
+// Transferencia
+class UrgentTransferLoading extends TreasuryState {}
+
+class UrgentTransferSuccess extends TreasuryState {
+  final TransferResponseEntity response;
+  UrgentTransferSuccess({required this.response});
+}
+
+class UrgentTransferError extends TreasuryState {
+  final String message;
+  UrgentTransferError({required this.message});
+}
+
 //confirmar pago
 class ConfirmPaymentLoading extends TreasuryState {}
 
@@ -349,6 +362,34 @@ class DistributionDetailLoaded extends TreasuryState {
 class DistributionDetailError extends TreasuryState {
   final String message;
   DistributionDetailError(this.message);
+}
+
+
+// detalle de lote (inventario de oro)
+class BatchLotDetailsLoading extends TreasuryState {}
+
+class BatchLotDetailsLoaded extends TreasuryState {
+  final LotDetailsDataEntity lotDetails;
+  BatchLotDetailsLoaded({required this.lotDetails});
+}
+
+class BatchLotDetailsError extends TreasuryState {
+  final String message;
+  BatchLotDetailsError(this.message);
+}
+
+
+// pago cuota
+class PayTheFeeLoading extends TreasuryState {}
+
+class PayTheFeeLoaded extends TreasuryState {
+  final PayTheFeeResponseEntity payTheFee;
+  PayTheFeeLoaded({required this.payTheFee});
+}
+
+class PayTheFeeError extends TreasuryState {
+  final String message;
+  PayTheFeeError({required this.message});
 }
 
 // nueva  distribución

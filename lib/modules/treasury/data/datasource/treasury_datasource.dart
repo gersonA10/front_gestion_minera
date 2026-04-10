@@ -1,4 +1,3 @@
-
 import '../../../../core/networking/http_services.dart';
 import '../../domain/entity/entity.dart';
 import '../models/model.dart';
@@ -201,11 +200,29 @@ class TreasuryDatasource {
     return ExpenseResponseModel.fromJson(response['data']);
   }
 
+  Future<TransferResponseModel> registerUrgentTransfer(
+    TransferRequestModel request,
+  ) async {
+    final response = await apiClient.post(
+      '/api/treasury/urgent/transfer',
+      data: request.toJson(),
+      operationName: 'registerUrgentTransfer',
+    );
+    return TransferResponseModel.fromJson(response);
+  }
+
   Future<Map<String, dynamic>> getPaymentHistory({
     int page = 1,
     int limit = 10,
+    String? period,
+    String? exactDate,
   }) async {
-    final Map<String, dynamic> queryParameters = {'page': page, 'limit': limit};
+    final Map<String, dynamic> queryParameters = {
+      'page': page,
+      'limit': limit,
+      'period': period,
+      'exact_date': exactDate,
+    };
 
     final response = await apiClient.get(
       '/api/treasury/transactions/history',
@@ -415,7 +432,35 @@ class TreasuryDatasource {
     };
   }
 
-  Future<NewLayoutResponseEntity> newLayoutPost(
+  Future<LotDetailsDataEntity> lotDetails(String batchId) async {
+    final response = await apiClient.get(
+      '/api/treasury/batches/$batchId',
+      operationName: 'lotDetails',
+    );
+    return LotDetailsDataModel.fromJson(response['data']);
+  }
+
+  Future<PayTheFeeResponseModel> payTheFee(
+    PayTheFeeRequestModel payTheFeeRequest,
+    String idLoan,
+    String idQuota,
+  ) async {
+    final response = await apiClient.postFormData(
+      '/api/treasury/corporate-loans/$idLoan/quotas/$idQuota/pay',
+      data: payTheFeeRequest.toFormDataMap(),
+      operationName: 'payTheFee',
+      files: [
+        {
+          'name': 'comprobante',
+          'path': payTheFeeRequest.comprobante,
+          'filename': payTheFeeRequest.comprobante.split('/').last,
+        },
+      ],
+    );
+
+    return PayTheFeeResponseModel.fromJson(response['data']);
+  }
+    Future<NewLayoutResponseEntity> newLayoutPost(
     String monthPeriod,
     String yearPeriod,
     double baseAmount,

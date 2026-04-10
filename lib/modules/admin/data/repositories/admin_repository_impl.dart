@@ -72,4 +72,45 @@ class AdminRepositoryImpl implements AdminRepository {
     final model = await datasource.getRequestDetail(id);
     return model.toEntity();
   }
+
+  @override
+  Future<ProcessRequestResponseEntity> processRequest({
+    required String id,
+    required String action,
+    String? reason,
+  }) async {
+    final model = await datasource.processRequest(
+      id: id, 
+      action: action, 
+      reason: reason,
+    );
+    return model.toEntity();
+  }
+
+  @override
+  Future<CreateContributionResponseEntity> createContribution({
+    required String motivo,
+    required String periodMonth,
+    required String periodYear,
+    required double monto,
+    required String tipoCalculo,
+  }) async {
+    final model = await datasource.createContribution(
+      motivo: motivo,
+      periodMonth: periodMonth,
+      periodYear: periodYear,
+      monto: monto,
+      tipoCalculo: tipoCalculo,
+    );
+    return model.toEntity();
+  }
+
+  @override
+  Future<ContributionSimulationEntity> simulateContribution({
+    required double monto,
+    required String tipoCalculo,
+  }) async {
+    final model = await datasource.simulateContribution(monto: monto, tipoCalculo: tipoCalculo);
+    return model.toEntity();
+  }
 }

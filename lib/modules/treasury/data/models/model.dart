@@ -1,3 +1,4 @@
+export 'package:front_gestion_minera/modules/treasury/data/models/transfer_request_model.dart';
 export 'package:front_gestion_minera/modules/treasury/data/models/gold_inventory.dart/gold_inventory_model.dart';
 export 'package:front_gestion_minera/modules/treasury/data/models/expense_request_model.dart';
 export 'package:front_gestion_minera/modules/treasury/data/models/expense_response_model.dart';
@@ -20,7 +21,9 @@ export 'package:front_gestion_minera/modules/treasury/data/models/gold_inventory
 export 'package:front_gestion_minera/modules/treasury/data/models/loans/loan_details_model.dart';
 export 'package:front_gestion_minera/modules/treasury/data/models/loans/apply_for_a_loan_model.dart';
 export 'package:front_gestion_minera/modules/treasury/data/models/loans/new_loans_model.dart';
+export 'package:front_gestion_minera/modules/treasury/data/models/loans/payment_process_model.dart';
 export 'package:front_gestion_minera/modules/treasury/data/models/distribute/distribution_history_model.dart';
 export 'package:front_gestion_minera/modules/treasury/data/models/distribute/distribution_detail_model.dart';
+export 'package:front_gestion_minera/modules/treasury/data/models/gold_inventory.dart/lot_details_model.dart';
 export 'package:front_gestion_minera/modules/treasury/data/models/distribute/new_layout_model.dart';
 export 'package:front_gestion_minera/modules/treasury/data/models/distribute/simulate_distribution_Model.dart';

@@ -27,6 +27,6 @@ class TransactionDetailsResponseModel extends  TransactionDetailsResponseEntity{
         cajaAfectada: json["caja_afectada"],
         responsablePago: json["responsable_pago"],
         solicitanteOriginal: json["solicitante_original"],
-        comprobantesAdjuntos: json["comprobantes_adjuntos"],
+        comprobantesAdjuntos: json["comprobantes_adjuntos"] ?? '',
     );
 }

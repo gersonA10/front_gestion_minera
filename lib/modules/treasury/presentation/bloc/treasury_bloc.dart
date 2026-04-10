@@ -61,6 +61,10 @@ class TreasuryBloc extends Bloc<TreasuryEvent, TreasuryState> {
   PaymentHistorySummaryEntity? _paymentHistorySummary;
   String? _currentBatchStatus;
 
+  // Filtros actuales para el historial de pagos
+  String? _currentPaymentPeriod = 'month';
+  String? _currentPaymentExactDate;
+
   TreasuryBloc({required this.repository}) : super(TreasuryInitial()) {
     on<FetchTreasuryMetricsEvent>(_onFetchTreasuryMetrics);
     on<DashboardDataEvent>(_dashboardData);
@@ -74,6 +78,7 @@ class TreasuryBloc extends Bloc<TreasuryEvent, TreasuryState> {
     on<ConfirmPaymentEvent>(_onConfirmPayment);
     on<RejectAnApplicationEvent>(_rejectAnApplication);
     on<RegisterUrgentExpenseEvent>(_onRegisterUrgentExpense);
+    on<RegisterUrgentTransferEvent>(_onRegisterUrgentTransfer);
     on<FetchGoldDashboardDataEvent>(_onFetchGoldDashboardData);
     on<LoadMoreGoldBatchesEvent>(_onLoadMoreGoldBatches);
     on<GetPaymentHistoryEvent>(_onGetPaymentHistory);
@@ -86,11 +91,13 @@ class TreasuryBloc extends Bloc<TreasuryEvent, TreasuryState> {
     on<RegisterSaleEvent>(_onRegisterSale);
     on<ApplyForALoanEvent>(_onApplyForALoan);
     on<NewLoansSimulateEvent>(_onNewLoansSimulate);
-     on<LoanDetailsEvent>(_onLoanDetails);
+    on<LoanDetailsEvent>(_onLoanDetails);
     on<GetDistributionHistoryEvent>(_onGetDistributionHistory);
     on<LoadMoreDistributionHistoryEvent>(_onLoadMoreDistributionHistory);
     on<GetDistributionDetailEvent>(_onGetDistributionDetail);
     on<LoadMoreDistributionDetailEvent>(_onLoadMoreDistributionDetail);
+    on<BatchLotDetailsEvent>(_onBatchLotDetails);
+    on<PayTheFeeEvent>(_onPayTheFee);
     on<NewLayoutEvent>(_onNewLayout);
     on<SimulateDistributionEvent>(_onSimulateDistribution); 
   }
@@ -294,6 +301,24 @@ class TreasuryBloc extends Bloc<TreasuryEvent, TreasuryState> {
     }
   }
 
+  Future<void> _onRegisterUrgentTransfer(
+    RegisterUrgentTransferEvent event,
+    Emitter<TreasuryState> emit,
+  ) async {
+    emit(UrgentTransferLoading());
+    try {
+      final response = await repository.registerUrgentTransfer(event.request);
+      emit(UrgentTransferSuccess(response: response));
+    } on BaseApiException catch (error) {
+      if (error.key == DioExceptionKey.unauthorised) {
+        return;
+      }
+      emit(UrgentTransferError(message: mapErrorMessage(error.key)));
+    } catch (e) {
+      emit(UrgentTransferError(message: 'Error inesperado: $e'));
+    }
+  }
+
   Future<void> _onGetCashRegisters(
     GetCashRegistersEvent event,
     Emitter<TreasuryState> emit,
@@ -359,6 +384,12 @@ class TreasuryBloc extends Bloc<TreasuryEvent, TreasuryState> {
     GetPaymentHistoryEvent event,
     Emitter<TreasuryState> emit,
   ) async {
+    // Si mandamos nuevos filtros, forzamos un refresh
+    if (event.period != null || event.exactDate != null) {
+      _currentPaymentPeriod = event.period;
+      _currentPaymentExactDate = event.exactDate;
+    }
+
     if (!event.isRefresh && _paymentHistoryItems.isNotEmpty) {
       emit(
         PaymentHistoryLoaded(
@@ -380,8 +411,11 @@ class TreasuryBloc extends Bloc<TreasuryEvent, TreasuryState> {
     }
 
     try {
+      // AQUÍ: Asegúrate de que tu repositorio acepte estos parámetros
       final response = await repository.getPaymentHistory(
         page: _paymentHistoryPage,
+        period: _currentPaymentPeriod,
+        exactDate: _currentPaymentExactDate,
       );
       _paymentHistoryItems = response.items;
       _paymentHistorySummary = response.summary;
@@ -396,9 +430,7 @@ class TreasuryBloc extends Bloc<TreasuryEvent, TreasuryState> {
         ),
       );
     } on BaseApiException catch (error) {
-      if (error.key == DioExceptionKey.unauthorised) {
-        return;
-      }
+      if (error.key == DioExceptionKey.unauthorised) return;
       emit(PaymentHistoryError(mapErrorMessage(error.key)));
     } catch (e) {
       emit(PaymentHistoryError('Error inesperado: $e'));
@@ -415,6 +447,8 @@ class TreasuryBloc extends Bloc<TreasuryEvent, TreasuryState> {
     try {
       final response = await repository.getPaymentHistory(
         page: _paymentHistoryPage,
+        period: _currentPaymentPeriod,
+        exactDate: _currentPaymentExactDate,
       );
       _paymentHistoryItems.addAll(response.items);
       _paymentHistoryReachedMax = !response.hasMoreData;
@@ -426,15 +460,9 @@ class TreasuryBloc extends Bloc<TreasuryEvent, TreasuryState> {
           totalRecords: _paymentHistoryTotalRecords,
         ),
       );
-    } on BaseApiException catch (error) {
-      if (error.key == DioExceptionKey.unauthorised) {
-        return;
-      }
-      _paymentHistoryPage--;
-      emit(PaymentHistoryError(mapErrorMessage(error.key)));
     } catch (e) {
       _paymentHistoryPage--;
-      emit(PaymentHistoryError('Error inesperado: $e'));
+      // manejo de errores...
     } finally {
       _isLoadingMorePayment = false;
     }
@@ -687,7 +715,8 @@ class TreasuryBloc extends Bloc<TreasuryEvent, TreasuryState> {
       emit(NewLoansSimulateError(message: 'Error inesperado: $e'));
     }
   }
-    Future<void> _onApplyForALoan(
+
+  Future<void> _onApplyForALoan(
     ApplyForALoanEvent event,
     Emitter<TreasuryState> emit,
   ) async {
@@ -712,7 +741,23 @@ class TreasuryBloc extends Bloc<TreasuryEvent, TreasuryState> {
     }
   }
 
-   Future<void> _onLoanDetails(
+  Future<void> _onBatchLotDetails(
+    BatchLotDetailsEvent event,
+    Emitter<TreasuryState> emit,
+  ) async {
+    emit(BatchLotDetailsLoading());
+    try {
+      final response = await repository.getLotDetails(event.batchId);
+      emit(BatchLotDetailsLoaded(lotDetails: response));
+    } on BaseApiException catch (error) {
+      if (error.key == DioExceptionKey.unauthorised) return;
+      emit(BatchLotDetailsError(mapErrorMessage(error.key)));
+    } catch (e) {
+      emit(BatchLotDetailsError('Error inesperado: $e'));
+    }
+  }
+
+  Future<void> _onLoanDetails(
     LoanDetailsEvent event,
     Emitter<TreasuryState> emit,
   ) async {
@@ -720,14 +765,36 @@ class TreasuryBloc extends Bloc<TreasuryEvent, TreasuryState> {
     try {
       final response = await repository.getloanDatails(event.idLoan);
       final responseCash = await repository.getCash();
-      emit(LoanDetailsLoaded(loanDetails:  response, cash: responseCash));
+      emit(LoanDetailsLoaded(loanDetails: response, cash: responseCash));
     } on BaseApiException catch (error) {
       if (error.key == DioExceptionKey.unauthorised) {
         return;
       }
       emit(LoanDetailsError(mapErrorMessage(error.key)));
     } catch (e) {
-      emit(LoanDetailsError( 'Error inesperado: $e'));
+      emit(LoanDetailsError('Error inesperado: $e'));
+    }
+  }
+
+  Future<void> _onPayTheFee(
+    PayTheFeeEvent event,
+    Emitter<TreasuryState> emit,
+  ) async {
+    emit(PayTheFeeLoading());
+    try {
+      final response = await repository.payTheFee(
+        event.payTheFeeRequest,
+        event.idLoan,
+        event.idQuota,
+      );
+      emit(PayTheFeeLoaded(payTheFee: response));
+    } on BaseApiException catch (error) {
+      if (error.key == DioExceptionKey.unauthorised) {
+        return;
+      }
+      emit(PayTheFeeError(message: error.message));
+    } catch (e) {
+      emit(PayTheFeeError(message: 'Error inesperado: $e'));
     }
   }
 
@@ -736,11 +803,13 @@ class TreasuryBloc extends Bloc<TreasuryEvent, TreasuryState> {
     Emitter<TreasuryState> emit,
   ) async {
     if (!event.isRefresh && _distributionHistoryItems.isNotEmpty) {
-      emit(DistributionHistoryLoaded(
-        items: List.from(_distributionHistoryItems),
-        hasReachedMax: _distributionHistoryReachedMax,
-        totalRecords: _distributionHistoryTotalRecords,
-      ));
+      emit(
+        DistributionHistoryLoaded(
+          items: List.from(_distributionHistoryItems),
+          hasReachedMax: _distributionHistoryReachedMax,
+          totalRecords: _distributionHistoryTotalRecords,
+        ),
+      );
       return;
     }
 
@@ -758,11 +827,13 @@ class TreasuryBloc extends Bloc<TreasuryEvent, TreasuryState> {
       _distributionHistoryItems = response.items;
       _distributionHistoryReachedMax = !response.hasMore;
       _distributionHistoryTotalRecords = response.totalRecords;
-      emit(DistributionHistoryLoaded(
-        items: List.from(_distributionHistoryItems),
-        hasReachedMax: _distributionHistoryReachedMax,
-        totalRecords: _distributionHistoryTotalRecords,
-      ));
+      emit(
+        DistributionHistoryLoaded(
+          items: List.from(_distributionHistoryItems),
+          hasReachedMax: _distributionHistoryReachedMax,
+          totalRecords: _distributionHistoryTotalRecords,
+        ),
+      );
     } on BaseApiException catch (error) {
       if (error.key == DioExceptionKey.unauthorised) return;
       emit(DistributionHistoryError(mapErrorMessage(error.key)));
@@ -775,7 +846,8 @@ class TreasuryBloc extends Bloc<TreasuryEvent, TreasuryState> {
     LoadMoreDistributionHistoryEvent event,
     Emitter<TreasuryState> emit,
   ) async {
-    if (_distributionHistoryReachedMax || _isLoadingMoreDistributionHistory) return;
+    if (_distributionHistoryReachedMax || _isLoadingMoreDistributionHistory)
+      return;
     _isLoadingMoreDistributionHistory = true;
     _distributionHistoryPage++;
     try {
@@ -784,11 +856,13 @@ class TreasuryBloc extends Bloc<TreasuryEvent, TreasuryState> {
       );
       _distributionHistoryItems.addAll(response.items);
       _distributionHistoryReachedMax = !response.hasMore;
-      emit(DistributionHistoryLoaded(
-        items: List.from(_distributionHistoryItems),
-        hasReachedMax: _distributionHistoryReachedMax,
-        totalRecords: _distributionHistoryTotalRecords,
-      ));
+      emit(
+        DistributionHistoryLoaded(
+          items: List.from(_distributionHistoryItems),
+          hasReachedMax: _distributionHistoryReachedMax,
+          totalRecords: _distributionHistoryTotalRecords,
+        ),
+      );
     } on BaseApiException catch (error) {
       _distributionHistoryPage--;
       if (error.key == DioExceptionKey.unauthorised) return;
@@ -808,12 +882,14 @@ class TreasuryBloc extends Bloc<TreasuryEvent, TreasuryState> {
     if (!event.isRefresh &&
         _currentDistributionId == event.distributionId &&
         _distributionDetailMembers.isNotEmpty) {
-      emit(DistributionDetailLoaded(
-        header: _distributionDetailHeader!,
-        membersList: List.from(_distributionDetailMembers),
-        hasReachedMax: _distributionDetailReachedMax,
-        totalRecords: _distributionDetailTotalRecords,
-      ));
+      emit(
+        DistributionDetailLoaded(
+          header: _distributionDetailHeader!,
+          membersList: List.from(_distributionDetailMembers),
+          hasReachedMax: _distributionDetailReachedMax,
+          totalRecords: _distributionDetailTotalRecords,
+        ),
+      );
       return;
     }
 
@@ -833,12 +909,14 @@ class TreasuryBloc extends Bloc<TreasuryEvent, TreasuryState> {
       _distributionDetailMembers = List.from(response.membersList);
       _distributionDetailReachedMax = !response.hasMore;
       _distributionDetailTotalRecords = response.totalRecords;
-      emit(DistributionDetailLoaded(
-        header: _distributionDetailHeader!,
-        membersList: List.from(_distributionDetailMembers),
-        hasReachedMax: _distributionDetailReachedMax,
-        totalRecords: _distributionDetailTotalRecords,
-      ));
+      emit(
+        DistributionDetailLoaded(
+          header: _distributionDetailHeader!,
+          membersList: List.from(_distributionDetailMembers),
+          hasReachedMax: _distributionDetailReachedMax,
+          totalRecords: _distributionDetailTotalRecords,
+        ),
+      );
     } on BaseApiException catch (error) {
       if (error.key == DioExceptionKey.unauthorised) return;
       emit(DistributionDetailError(mapErrorMessage(error.key)));
@@ -853,7 +931,9 @@ class TreasuryBloc extends Bloc<TreasuryEvent, TreasuryState> {
   ) async {
     if (_distributionDetailReachedMax ||
         _isLoadingMoreDistributionDetail ||
-        _currentDistributionId == null) { return; }
+        _currentDistributionId == null) {
+      return;
+    }
     _isLoadingMoreDistributionDetail = true;
     _distributionDetailPage++;
     try {
@@ -863,12 +943,14 @@ class TreasuryBloc extends Bloc<TreasuryEvent, TreasuryState> {
       );
       _distributionDetailMembers.addAll(response.membersList);
       _distributionDetailReachedMax = !response.hasMore;
-      emit(DistributionDetailLoaded(
-        header: _distributionDetailHeader!,
-        membersList: List.from(_distributionDetailMembers),
-        hasReachedMax: _distributionDetailReachedMax,
-        totalRecords: _distributionDetailTotalRecords,
-      ));
+      emit(
+        DistributionDetailLoaded(
+          header: _distributionDetailHeader!,
+          membersList: List.from(_distributionDetailMembers),
+          hasReachedMax: _distributionDetailReachedMax,
+          totalRecords: _distributionDetailTotalRecords,
+        ),
+      );
     } on BaseApiException catch (error) {
       _distributionDetailPage--;
       if (error.key == DioExceptionKey.unauthorised) return;
