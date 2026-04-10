@@ -189,6 +189,25 @@ class PayTheFeeEvent extends TreasuryEvent {
     required this.idQuota,
   });
 }
+
+///
+class NewLayoutEvent extends TreasuryEvent {
+  final  String monthPeriod;
+  final  String yearPeriod;
+  final  double baseAmount;
+  NewLayoutEvent({
+    required this.monthPeriod,
+    required this.yearPeriod,
+    required this.baseAmount,
+  });
+}
+
+class SimulateDistributionEvent extends TreasuryEvent {
+  final  double baseAmount;
+  SimulateDistributionEvent({
+    required this.baseAmount,
+  });
+}
 class PayDividendEvent extends TreasuryEvent {
   final String distributionId;
   final String memberId;

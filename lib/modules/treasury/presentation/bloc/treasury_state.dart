@@ -392,6 +392,37 @@ class PayTheFeeError extends TreasuryState {
   PayTheFeeError({required this.message});
 }
 
+// nueva  distribución
+class NewLayoutLoading extends TreasuryState {}
+
+class NewLayoutLoaded extends TreasuryState {
+  final NewLayoutResponseEntity newLayout;
+
+  NewLayoutLoaded({
+    required this.newLayout,
+  });
+}
+
+class NewLayoutError extends TreasuryState {
+  final String message;
+  NewLayoutError(this.message);
+}
+
+// simulación de distribución
+class SimulateDistributionLoading extends TreasuryState {}
+
+class SimulateDistributionLoaded extends TreasuryState {
+  final SimulateDistributionResponseEntity simulateDistribution;
+  SimulateDistributionLoaded({
+    required this.simulateDistribution,
+  });
+}
+
+class SimulateDistributionError extends TreasuryState {
+  final String message;
+  SimulateDistributionError(this.message);
+}
+
 class PayDividendLoading extends TreasuryState {}
 
 class PayDividendSuccess extends TreasuryState {

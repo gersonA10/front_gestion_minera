@@ -482,8 +482,35 @@ class TreasuryDatasource {
 
     return PayTheFeeResponseModel.fromJson(response['data']);
   }
-
-  Future<ReceiptResponseEneity> receiptDetails(String receiptId) async {
+    Future<NewLayoutResponseEntity> newLayoutPost(
+    String monthPeriod,
+    String yearPeriod,
+    double baseAmount,
+  ) async {
+    final response = await apiClient.post(
+      '/api/treasury/distributions',
+      data: {
+        "month_period": monthPeriod,
+        "year_period": yearPeriod,
+        "base_amount": baseAmount,
+      },
+      operationName: 'newLayoutPost',
+    );
+    return NewLayoutResponseModel.fromJson(response['data']);
+  }
+  Future<SimulateDistributionResponseEntity> postSimulateDistribution(
+    double baseAmount,
+  ) async {
+    final response = await apiClient.post(
+      '/api/treasury/distributions/simulate',
+      data: {
+        "base_amount": baseAmount,
+      },
+      operationName: 'postSimulateDistribution',
+    );
+    return SimulateDistributionResponseModel.fromJson(response);
+  }
+   Future<ReceiptResponseEneity> receiptDetails(String receiptId) async {
     final response = await apiClient.get(
       '/api/treasury/distributions/receipt/$receiptId',
       operationName: 'receiptDetails',

@@ -299,6 +299,19 @@ class TreasuryRepositoryImpl implements TreasuryRepository {
     final response = await datasource.payTheFee(requestModel, idLoan, idQuota);
     return response;
   }
+  @override
+  Future<NewLayoutResponseEntity> newLayoutPost(
+    String monthPeriod,
+    String yearPeriod,
+    double baseAmount,
+  ) async {
+    return await datasource.newLayoutPost(monthPeriod, yearPeriod, baseAmount);
+  }
+  
+  @override
+  Future<SimulateDistributionResponseEntity> postSimulateDistribution(double baseAmount) async{
+    return await datasource.postSimulateDistribution(baseAmount);
+  }
    @override
   Future<DividendPaymentResponseEntity> payDividend(
     String distributionId,

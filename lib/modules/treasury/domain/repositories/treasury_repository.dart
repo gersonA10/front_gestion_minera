@@ -110,6 +110,15 @@ abstract class TreasuryRepository {
     String idQuota,
   );
 
+  Future<NewLayoutResponseEntity> newLayoutPost(
+   String monthPeriod,
+    String yearPeriod,
+    double baseAmount
+  );
+  Future<SimulateDistributionResponseEntity> postSimulateDistribution(
+    double baseAmount
+  );
+
    Future<DividendPaymentResponseEntity> payDividend(
     String distributionId,
     String memberId,

@@ -1,7 +1,6 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:front_gestion_minera/config/router/app_router.gr.dart';
 import 'package:front_gestion_minera/config/router/guards/auth_guard.dart';
-import 'package:front_gestion_minera/modules/admin/home/presentation/screens/screens.dart';
 
 @AutoRouterConfig()
 class AppRouter extends RootStackRouter {
@@ -51,6 +50,7 @@ class AppRouter extends RootStackRouter {
     AutoRoute(page: PaymentSuccessRoute.page),
     AutoRoute(page: UserFormRoute.page),
     AutoRoute(page: UsersManagementRoute.page),
-    AutoRoute(page: PaymentSuccessDistributionRoute.page),
+     AutoRoute(page: NewDistributionRoute.page),
+     AutoRoute(page: PaymentSuccessDistributionRoute.page),
   ];
 }

@@ -1,5 +1,6 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:front_gestion_minera/config/router/app_router.gr.dart';
 import 'package:front_gestion_minera/core/widgets/excavator_loader.dart';
 import 'package:front_gestion_minera/injector_container.dart';
 import 'package:front_gestion_minera/modules/treasury/presentation/bloc/treasury_bloc.dart';
@@ -72,7 +73,9 @@ class _DistributeHomeScreenState extends State<DistributeHomeScreen> {
       child: Scaffold(
         backgroundColor: TColors.background,
         floatingActionButton: FloatingActionButton.extended(
-          onPressed: () {},
+          onPressed: () {
+            context.router.push(const NewDistributionRoute());
+          },
           backgroundColor: TColors.primary,
           foregroundColor: TColors.white,
           icon: const Icon(Icons.add, size: 18),
