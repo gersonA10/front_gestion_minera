@@ -7,26 +7,8 @@ import 'package:front_gestion_minera/core/widgets/custom_alert_widget.dart';
 import 'package:front_gestion_minera/config/router/app_router.gr.dart';
 import 'package:front_gestion_minera/modules/admin/users/domain/entity/user_entity.dart';
 import 'package:front_gestion_minera/modules/admin/users/presentation/bloc/admin_users_bloc.dart';
+import 'package:front_gestion_minera/utils/constants/color.constant.dart';
 
-// ─────────────────────────────────────────────────────────────────────────────
-// PALETA
-// ─────────────────────────────────────────────────────────────────────────────
-class _C {
-  static const bg       = Color(0xFFF7F8FC);
-  static const surface  = Color(0xFFFFFFFF);
-  static const primary  = Color(0xFF2563EB);
-  static const priLight = Color(0xFFEFF4FF);
-  static const textHigh = Color(0xFF111827);
-  static const textLow  = Color(0xFF9CA3AF);
-  static const border   = Color(0xFFE5E7EB);
-  static const green    = Color(0xFF10B981);
-  static const red      = Color(0xFFEF4444);
-  static const amber    = Color(0xFFF59E0B);
-}
-
-// ─────────────────────────────────────────────────────────────────────────────
-// PANTALLA
-// ─────────────────────────────────────────────────────────────────────────────
 @RoutePage()
 class UsersManagementScreen extends StatefulWidget {
   const UsersManagementScreen({super.key});
@@ -68,9 +50,9 @@ class _UsersManagementScreenState extends State<UsersManagementScreen> {
     return AnnotatedRegion<SystemUiOverlayStyle>(
       value: SystemUiOverlayStyle.dark,
       child: Scaffold(
-        backgroundColor: _C.bg,
+        backgroundColor: TColors.background,
         appBar: AppBar(
-          backgroundColor: _C.surface,
+          backgroundColor: TColors.surface,
           surfaceTintColor: Colors.transparent,
           elevation: 0,
           centerTitle: false,
@@ -79,7 +61,7 @@ class _UsersManagementScreenState extends State<UsersManagementScreen> {
             style: TextStyle(
               fontSize: 20,
               fontWeight: FontWeight.w700,
-              color: _C.textHigh,
+              color: TColors.textPrimary,
               letterSpacing: -0.4,
             ),
           ),
@@ -95,7 +77,7 @@ class _UsersManagementScreenState extends State<UsersManagementScreen> {
             preferredSize: const Size.fromHeight(97),
             child: Column(
               children: [
-                const Divider(height: 1, color: _C.border),
+                const Divider(height: 1, color: TColors.border),
                 Padding(
                   padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
                   child: _SearchBar(
@@ -146,8 +128,8 @@ class _UsersManagementScreenState extends State<UsersManagementScreen> {
             if (state is UsersLoaded) {
               if (state.users.isEmpty) return const _EmptyState();
               return RefreshIndicator(
-                color: _C.primary,
-                backgroundColor: _C.surface,
+                color: TColors.appMainDarkColor,
+                backgroundColor: TColors.surface,
                 onRefresh: () async {
                   ctx.read<AdminUsersBloc>().add(GetUsersListEvent(
                     search: _searchController.text,
@@ -158,7 +140,7 @@ class _UsersManagementScreenState extends State<UsersManagementScreen> {
                 child: ListView.separated(
                   padding: const EdgeInsets.fromLTRB(16, 16, 16, 32),
                   itemCount: state.users.length,
-                  separatorBuilder: (_, __) => const SizedBox(height: 8),
+                  separatorBuilder: (_, _) => const SizedBox(height: 8),
                   itemBuilder: (_, i) => _UserCard(
                     index: i,
                     user: state.users[i],
@@ -178,9 +160,7 @@ class _UsersManagementScreenState extends State<UsersManagementScreen> {
   }
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
-// BOTÓN AÑADIR (en AppBar)
-// ─────────────────────────────────────────────────────────────────────────────
+
 class _AddButton extends StatelessWidget {
   final VoidCallback onPressed;
   const _AddButton({required this.onPressed});
@@ -193,7 +173,7 @@ class _AddButton extends StatelessWidget {
         height: 36,
         padding: const EdgeInsets.symmetric(horizontal: 14),
         decoration: BoxDecoration(
-          color: _C.primary,
+          color: TColors.appMainDarkColor,
           borderRadius: BorderRadius.circular(10),
         ),
         child: const Row(
@@ -215,10 +195,6 @@ class _AddButton extends StatelessWidget {
     );
   }
 }
-
-// ─────────────────────────────────────────────────────────────────────────────
-// SEARCH BAR
-// ─────────────────────────────────────────────────────────────────────────────
 class _SearchBar extends StatelessWidget {
   final TextEditingController controller;
   final ValueChanged<String> onSubmitted;
@@ -237,30 +213,30 @@ class _SearchBar extends StatelessWidget {
       child: TextField(
         controller: controller,
         onSubmitted: onSubmitted,
-        style: const TextStyle(fontSize: 14, color: _C.textHigh),
+        style: const TextStyle(fontSize: 14, color: TColors.textPrimary),
         decoration: InputDecoration(
           hintText: 'Buscar...',
-          hintStyle: const TextStyle(color: _C.textLow, fontSize: 14),
-          prefixIcon: const Icon(Icons.search_rounded, color: _C.textLow, size: 18),
+          hintStyle: const TextStyle(color: TColors.textPrimary, fontSize: 14),
+          prefixIcon: const Icon(Icons.search_rounded, color: TColors.textPrimary, size: 18),
           suffixIcon: IconButton(
-            icon: const Icon(Icons.close_rounded, color: _C.textLow, size: 16),
+            icon: const Icon(Icons.close_rounded, color: TColors.textPrimary, size: 16),
             onPressed: onClear,
           ),
           filled: true,
-          fillColor: _C.bg,
+          fillColor: TColors.background,
           contentPadding: EdgeInsets.zero,
           isDense: true,
           border: OutlineInputBorder(
             borderRadius: BorderRadius.circular(10),
-            borderSide: const BorderSide(color: _C.border),
+            borderSide: const BorderSide(color: TColors.border),
           ),
           enabledBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(10),
-            borderSide: const BorderSide(color: _C.border),
+            borderSide: const BorderSide(color: TColors.border),
           ),
           focusedBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(10),
-            borderSide: const BorderSide(color: _C.primary, width: 1.5),
+            borderSide: const BorderSide(color: TColors.appMainDarkColor, width: 1.5),
           ),
         ),
       ),
@@ -268,9 +244,6 @@ class _SearchBar extends StatelessWidget {
   }
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
-// CHIP DE FILTRO
-// ─────────────────────────────────────────────────────────────────────────────
 class _FilterChip extends StatelessWidget {
   final String label;
   final bool selected;
@@ -286,16 +259,16 @@ class _FilterChip extends StatelessWidget {
         duration: const Duration(milliseconds: 180),
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
         decoration: BoxDecoration(
-          color: selected ? _C.primary : _C.surface,
+          color: selected ? TColors.appMainDarkColor : TColors.surface,
           borderRadius: BorderRadius.circular(8),
-          border: Border.all(color: selected ? _C.primary : _C.border),
+          border: Border.all(color: selected ? TColors.appMainDarkColor : TColors.border),
         ),
         child: Text(
           label,
           style: TextStyle(
             fontSize: 12,
             fontWeight: FontWeight.w600,
-            color: selected ? Colors.white : _C.textLow,
+            color: selected ? Colors.white : TColors.textPrimary,
           ),
         ),
       ),
@@ -303,9 +276,6 @@ class _FilterChip extends StatelessWidget {
   }
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
-// TARJETA DE USUARIO
-// ─────────────────────────────────────────────────────────────────────────────
 class _UserCard extends StatefulWidget {
   final int index;
   final UserEntity user;
@@ -351,11 +321,11 @@ class _UserCardState extends State<_UserCard> with SingleTickerProviderStateMixi
 
   static Color _roleColor(String role) {
     switch (role.toLowerCase()) {
-      case 'admin':      return _C.red;
-      case 'socios':     return _C.amber;
-      case 'hacienda':   return _C.green;
-      case 'vigilancia': return _C.primary;
-      default:           return _C.textLow;
+      case 'admin':      return TColors.red;
+      case 'socios':     return TColors.amber;
+      case 'hacienda':   return TColors.green;
+      case 'vigilancia': return TColors.primary;
+      default:           return TColors.appMainDarkColor;
     }
   }
 
@@ -368,22 +338,21 @@ class _UserCardState extends State<_UserCard> with SingleTickerProviderStateMixi
       child: SlideTransition(
         position: _slide,
         child: Material(
-          color: _C.surface,
+          color: TColors.surface,
           borderRadius: BorderRadius.circular(14),
           child: InkWell(
             borderRadius: BorderRadius.circular(14),
             onTap: widget.onTap,
-            splashColor: _C.priLight,
-            highlightColor: _C.priLight.withOpacity(0.4),
+            splashColor: TColors.appMainDarkColor.withValues(alpha:0.2),
+            highlightColor: TColors.appMainDarkColor.withValues(alpha:0.2),
             child: Container(
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(14),
-                border: Border.all(color: _C.border),
+                border: Border.all(color: TColors.border),
               ),
               padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
               child: Row(
                 children: [
-                  // Avatar
                   _Avatar(
                     name: widget.user.fullName,
                     color: rc,
@@ -401,7 +370,7 @@ class _UserCardState extends State<_UserCard> with SingleTickerProviderStateMixi
                           style: const TextStyle(
                             fontSize: 14,
                             fontWeight: FontWeight.w600,
-                            color: _C.textHigh,
+                            color: TColors.appMainDarkColor,
                           ),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
@@ -409,7 +378,7 @@ class _UserCardState extends State<_UserCard> with SingleTickerProviderStateMixi
                         const SizedBox(height: 2),
                         Text(
                           widget.user.email,
-                          style: const TextStyle(fontSize: 12, color: _C.textLow),
+                          style: const TextStyle(fontSize: 12, color: TColors.appSecondaryColor),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                         ),
@@ -422,7 +391,7 @@ class _UserCardState extends State<_UserCard> with SingleTickerProviderStateMixi
                               const SizedBox(width: 6),
                               _Badge(
                                 label: 'CI ${widget.user.identification}',
-                                color: _C.textLow,
+                                color: TColors.appMainDarkColor,
                                 outlined: true,
                               ),
                             ],
@@ -460,7 +429,7 @@ class _Avatar extends StatelessWidget {
           width: 44,
           height: 44,
           decoration: BoxDecoration(
-            color: color.withOpacity(0.1),
+            color: color.withValues(alpha:0.1),
             borderRadius: BorderRadius.circular(12),
           ),
           alignment: Alignment.center,
@@ -476,9 +445,9 @@ class _Avatar extends StatelessWidget {
             width: 12,
             height: 12,
             decoration: BoxDecoration(
-              color: active ? _C.green : _C.textLow,
+              color: active ? TColors.green : TColors.appSecondaryColor,
               shape: BoxShape.circle,
-              border: Border.all(color: _C.surface, width: 2),
+              border: Border.all(color: TColors.surface, width: 2),
             ),
           ),
         ),
@@ -499,14 +468,14 @@ class _Badge extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
       decoration: BoxDecoration(
-        color: outlined ? Colors.transparent : color.withOpacity(0.1),
+        color: outlined ? Colors.transparent : color.withValues(alpha:0.1),
         borderRadius: BorderRadius.circular(5),
-        border: outlined ? Border.all(color: _C.border) : null,
+        border: outlined ? Border.all(color: TColors.border) : null,
       ),
       child: Text(
         label.toUpperCase(),
         style: TextStyle(
-          color: outlined ? _C.textLow : color,
+          color: outlined ? TColors.appSecondaryColor : color,
           fontSize: 9,
           fontWeight: FontWeight.w700,
           letterSpacing: 0.4,
@@ -533,7 +502,7 @@ class _Toggle extends StatelessWidget {
         height: 24,
         padding: const EdgeInsets.all(3),
         decoration: BoxDecoration(
-          color: active ? _C.green : _C.border,
+          color: active ? TColors.green : TColors.border,
           borderRadius: BorderRadius.circular(12),
         ),
         child: AnimatedAlign(
@@ -596,7 +565,7 @@ class _SkeletonState extends State<_Skeleton> with SingleTickerProviderStateMixi
                   width: 44,
                   height: 44,
                   decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.55),
+                    color: Colors.white.withValues(alpha:0.55),
                     borderRadius: BorderRadius.circular(12),
                   ),
                 ),
@@ -609,7 +578,7 @@ class _SkeletonState extends State<_Skeleton> with SingleTickerProviderStateMixi
                       Container(
                         height: 11,
                         decoration: BoxDecoration(
-                          color: Colors.white.withOpacity(0.55),
+                          color: Colors.white.withValues(alpha:0.55),
                           borderRadius: BorderRadius.circular(4),
                         ),
                       ),
@@ -618,7 +587,7 @@ class _SkeletonState extends State<_Skeleton> with SingleTickerProviderStateMixi
                         height: 10,
                         width: 130,
                         decoration: BoxDecoration(
-                          color: Colors.white.withOpacity(0.55),
+                          color: Colors.white.withValues(alpha:0.55),
                           borderRadius: BorderRadius.circular(4),
                         ),
                       ),
@@ -647,21 +616,21 @@ class _EmptyState extends StatelessWidget {
             width: 64,
             height: 64,
             decoration: BoxDecoration(
-              color: _C.bg,
+              color: TColors.background,
               borderRadius: BorderRadius.circular(18),
-              border: Border.all(color: _C.border),
+              border: Border.all(color: TColors.border),
             ),
-            child: const Icon(Icons.inbox_rounded, size: 28, color: _C.textLow),
+            child: const Icon(Icons.inbox_rounded, size: 28, color: TColors.appMainDarkColor),
           ),
           const SizedBox(height: 14),
           const Text(
             'Sin resultados',
-            style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600, color: _C.textHigh),
+            style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600, color: TColors.appMainDarkColor),
           ),
           const SizedBox(height: 4),
           const Text(
             'Prueba con otro filtro o búsqueda',
-            style: TextStyle(fontSize: 13, color: _C.textLow),
+            style: TextStyle(fontSize: 13, color: TColors.appMainDarkColor),
           ),
         ],
       ),
@@ -685,16 +654,16 @@ class _ErrorState extends StatelessWidget {
               width: 64,
               height: 64,
               decoration: BoxDecoration(
-                color: _C.red.withOpacity(0.08),
+                color: TColors.red.withValues(alpha:0.08),
                 borderRadius: BorderRadius.circular(18),
               ),
-              child: const Icon(Icons.cloud_off_rounded, size: 28, color: _C.red),
+              child: const Icon(Icons.cloud_off_rounded, size: 28, color: TColors.red),
             ),
             const SizedBox(height: 14),
             Text(
               message,
               textAlign: TextAlign.center,
-              style: const TextStyle(fontSize: 13, color: _C.textLow),
+              style: const TextStyle(fontSize: 13, color: TColors.appMainDarkColor),
             ),
           ],
         ),
