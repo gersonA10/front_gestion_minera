@@ -122,6 +122,7 @@ class TreasuryBloc extends Bloc<TreasuryEvent, TreasuryState> {
     on<LoadMoreContributionsEvent>(_onLoadMoreContributions);
     on<GetContributionDetailEvent>(_onGetContributionDetail);
     on<LoadMoreContributionDetailEvent>(_onLoadMoreContributionDetail);
+    on<RecordContributionPaymentEvent>(_onRecordContributionPayment);
   }
 
   Future<void> _onFetchTreasuryMetrics(
@@ -1112,14 +1113,15 @@ class TreasuryBloc extends Bloc<TreasuryEvent, TreasuryState> {
     if (!event.isRefresh &&
         _currentContributionId == event.contributionId &&
         _contributionDetailMembers.isNotEmpty) {
-      emit(
-        ContributionDetailLoaded(
-          headerMetrics: _contributionDetailHeader!,
-          membersList: List.from(_contributionDetailMembers),
-          hasReachedMax: _contributionDetailReachedMax,
-          totalRecords: _contributionDetailTotalRecords,
-        ),
-      );
+      // emit(
+      //   ContributionDetailLoaded(
+      //     headerMetrics: _contributionDetailHeader!,
+      //     membersList: List.from(_contributionDetailMembers),
+      //     hasReachedMax: _contributionDetailReachedMax,
+      //     totalRecords: _contributionDetailTotalRecords,
+      //     cash: 
+      //   ),
+      // );
       return;
     }
 
@@ -1135,6 +1137,7 @@ class TreasuryBloc extends Bloc<TreasuryEvent, TreasuryState> {
         event.contributionId,
         page: _contributionDetailPage,
       );
+      final cahs = await repository.getCash();
       _contributionDetailHeader = response.headerMetrics;
       _contributionDetailMembers = List.from(response.membersList);
       _contributionDetailReachedMax = !response.hasMore;
@@ -1145,6 +1148,7 @@ class TreasuryBloc extends Bloc<TreasuryEvent, TreasuryState> {
           membersList: List.from(_contributionDetailMembers),
           hasReachedMax: _contributionDetailReachedMax,
           totalRecords: _contributionDetailTotalRecords,
+          cash: cahs,
         ),
       );
     } on BaseApiException catch (error) {
@@ -1171,6 +1175,7 @@ class TreasuryBloc extends Bloc<TreasuryEvent, TreasuryState> {
         _currentContributionId!,
         page: _contributionDetailPage,
       );
+      final cahs = await repository.getCash();
       _contributionDetailMembers.addAll(response.membersList);
       _contributionDetailReachedMax = !response.hasMore;
       emit(
@@ -1179,6 +1184,7 @@ class TreasuryBloc extends Bloc<TreasuryEvent, TreasuryState> {
           membersList: List.from(_contributionDetailMembers),
           hasReachedMax: _contributionDetailReachedMax,
           totalRecords: _contributionDetailTotalRecords,
+          cash: cahs
         ),
       );
     } on BaseApiException catch (error) {
@@ -1192,4 +1198,21 @@ class TreasuryBloc extends Bloc<TreasuryEvent, TreasuryState> {
       _isLoadingMoreContributionDetail = false;
     }
   }
+
+  Future<void> _onRecordContributionPayment(
+    RecordContributionPaymentEvent event,
+    Emitter<TreasuryState> emit,
+  ) async {
+    emit(RecordContributionPaymentLoading());
+    try {
+      final response = await repository.recordContributionPayment(event.recordContributionPaymentRequestModel);
+      emit(RecordContributionPaymentLoaded(recordContributionPayment: response));
+    } on BaseApiException catch (error) {
+      if (error.key == DioExceptionKey.unauthorised) {
+        return;
+      }
+      emit(RecordContributionPaymentError(mapErrorMessage(error.key)));
+    } catch (e) {
+      emit(RecordContributionPaymentError('Error inesperado: $e'));
+    }}
 }

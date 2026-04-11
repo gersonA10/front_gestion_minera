@@ -227,3 +227,10 @@ class GetContributionDetailEvent extends TreasuryEvent {
 }
 
 class LoadMoreContributionDetailEvent extends TreasuryEvent {}
+
+class RecordContributionPaymentEvent extends TreasuryEvent {
+  final RecordContributionPaymentRequestEntity recordContributionPaymentRequestModel;
+  RecordContributionPaymentEvent({
+    required this.recordContributionPaymentRequestModel,
+  });
+}

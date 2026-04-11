@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 import 'package:front_gestion_minera/utils/constants/color.constant.dart';
 
@@ -8,7 +7,11 @@ class MemberCard extends StatelessWidget {
   final DistributionDetailMemberEntity member;
   final String Function(double) formatCurrency;
 
-  const MemberCard({super.key, required this.member, required this.formatCurrency});
+  const MemberCard({
+    super.key,
+    required this.member,
+    required this.formatCurrency,
+  });
 
   bool get _isPendiente => member.status.toLowerCase() == 'pendiente';
   Color get _statusColor => _isPendiente ? TColors.warning : TColors.success;
@@ -47,8 +50,10 @@ class MemberCard extends StatelessWidget {
               Container(
                 width: 40,
                 height: 40,
-                decoration:
-                    BoxDecoration(color: _avatarBg, shape: BoxShape.circle),
+                decoration: BoxDecoration(
+                  color: _avatarBg,
+                  shape: BoxShape.circle,
+                ),
                 child: Center(
                   child: Text(
                     _initials,
@@ -77,14 +82,18 @@ class MemberCard extends StatelessWidget {
                       Text(
                         'Pagado: ${member.paymentDate}',
                         style: const TextStyle(
-                            color: TColors.textSecondary, fontSize: 11),
+                          color: TColors.textSecondary,
+                          fontSize: 11,
+                        ),
                       ),
                   ],
                 ),
               ),
               Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 10,
+                  vertical: 4,
+                ),
                 decoration: BoxDecoration(
                   color: TColors.surface,
                   borderRadius: BorderRadius.circular(6),
@@ -139,21 +148,28 @@ class MemberCard extends StatelessWidget {
                     foregroundColor: TColors.white,
                     elevation: 0,
                     padding: const EdgeInsets.symmetric(
-                        horizontal: 22, vertical: 10),
+                      horizontal: 22,
+                      vertical: 10,
+                    ),
                     shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10)),
+                      borderRadius: BorderRadius.circular(10),
+                    ),
                     minimumSize: Size.zero,
                     tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                   ),
-                  child: const Text('Pagar',
-                      style: TextStyle(
-                          fontSize: 12, fontWeight: FontWeight.w700)),
+                  child: const Text(
+                    'Pagar',
+                    style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700),
+                  ),
                 )
               else
                 TextButton.icon(
                   onPressed: () {},
-                  icon: const Icon(Icons.receipt_long_outlined,
-                      color: TColors.textSecondary, size: 15),
+                  icon: const Icon(
+                    Icons.receipt_long_outlined,
+                    color: TColors.textSecondary,
+                    size: 15,
+                  ),
                   label: const Text(
                     'Ver recibo',
                     style: TextStyle(

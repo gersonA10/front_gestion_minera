@@ -15,7 +15,7 @@ class AporteCard extends StatelessWidget {
     final progress = item.progressPercentage / 100.0;
     final collected = item.collectionGoal * progress;
     final pending = item.collectionGoal - collected;
-
+DateTime fechaConvertida = DateTime.parse(item.creationDate);
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -145,7 +145,7 @@ class AporteCard extends StatelessWidget {
           SizedBox(
             width: double.infinity,
             child: OutlinedButton(
-              onPressed: () {context.router.push(ContributesDetailRoute(contributionId: item.contributionId));},
+              onPressed: () {context.router.push(ContributesDetailRoute(contributionId: item.contributionId, dateContibution:  fechaConvertida, titleContibuton: item.reason));},
               style: OutlinedButton.styleFrom(
                 side: const BorderSide(color: TColors.border),
                 shape: RoundedRectangleBorder(

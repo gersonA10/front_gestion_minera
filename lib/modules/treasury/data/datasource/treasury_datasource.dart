@@ -1,3 +1,4 @@
+
 import '../../../../core/networking/http_services.dart';
 import '../../domain/entity/entity.dart';
 import '../models/model.dart';
@@ -543,5 +544,24 @@ class TreasuryDatasource {
       'has_more': meta['has_more'] ?? false,
       'total_records': meta['total_records'] ?? 0,
     };
+  }
+
+  Future<RecordContributionPaymentDataModel> recordContributionPayment(
+    RecordContributionPaymentRequestModel recordContributionPaymentRequestModel
+  ) async {
+    final response = await apiClient.postFormData(
+      '/api/treasury/contributions/pay',
+      data: recordContributionPaymentRequestModel.toFormDataMap(),
+      operationName: 'recordContributionPayment',
+      files: [
+        {
+          'name': 'evidencia',
+          'path': recordContributionPaymentRequestModel.evidencia,
+          'filename': recordContributionPaymentRequestModel.evidencia.split('/').last,
+        },
+      ],
+    );
+
+    return RecordContributionPaymentDataModel.fromJson(response['data']);
   }
 }

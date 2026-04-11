@@ -453,16 +453,31 @@ class ContributionDetailLoaded extends TreasuryState {
   final List<ContributionDetailMemberEntity> membersList;
   final bool hasReachedMax;
   final int totalRecords;
+  final CashResponseEntity cash;
 
   ContributionDetailLoaded({
     required this.headerMetrics,
     required this.membersList,
     required this.hasReachedMax,
     required this.totalRecords,
+    required this.cash,
   });
 }
 
 class ContributionDetailError extends TreasuryState {
   final String message;
   ContributionDetailError(this.message);
+}
+
+// registrar pago de aporte
+class RecordContributionPaymentLoading extends TreasuryState {}
+
+class RecordContributionPaymentLoaded extends TreasuryState {
+  final RecordContributionPaymentDataEntity recordContributionPayment;
+  RecordContributionPaymentLoaded({required this.recordContributionPayment});
+}
+
+class RecordContributionPaymentError extends TreasuryState {
+  final String message;
+  RecordContributionPaymentError(this.message);
 }
