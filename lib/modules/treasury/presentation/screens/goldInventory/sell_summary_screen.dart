@@ -44,7 +44,7 @@ class SellSummaryScreen extends StatelessWidget {
           _BackButton(
             onTap: () {
               if (isFromHistory) {
-                context.router.maybePop();
+                context.router.back();
               } else {
                 context.router.popUntil((route) => route.isFirst);
               }
