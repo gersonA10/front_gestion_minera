@@ -467,4 +467,88 @@ class TreasuryDatasource {
 
     return PayTheFeeResponseModel.fromJson(response['data']);
   }
+    Future<NewLayoutResponseEntity> newLayoutPost(
+    String monthPeriod,
+    String yearPeriod,
+    double baseAmount,
+  ) async {
+    final response = await apiClient.post(
+      '/api/treasury/distributions',
+      data: {
+        "month_period": monthPeriod,
+        "year_period": yearPeriod,
+        "base_amount": baseAmount,
+      },
+      operationName: 'newLayoutPost',
+    );
+    return NewLayoutResponseModel.fromJson(response['data']);
+  }
+  Future<SimulateDistributionResponseEntity> postSimulateDistribution(
+    double baseAmount,
+  ) async {
+    final response = await apiClient.post(
+      '/api/treasury/distributions/simulate',
+      data: {
+        "base_amount": baseAmount,
+      },
+      operationName: 'postSimulateDistribution',
+    );
+    return SimulateDistributionResponseModel.fromJson(response);
+  }
+
+  Future<Map<String, dynamic>> getContributionDetail(
+    String contributionId, {
+    int page = 1,
+    int limit = 10,
+  }) async {
+    final Map<String, dynamic> queryParameters = {'page': page, 'limit': limit};
+    final response = await apiClient.get(
+      '/api/treasury/contributions/$contributionId',
+      operationName: 'getContributionDetail',
+      queryParameters: queryParameters,
+    );
+    final Map<String, dynamic> headerMetrics =
+        response['header_metrics'] as Map<String, dynamic>;
+    final List<dynamic> membersList = response['members_list'] ?? [];
+    final Map<String, dynamic> meta = response['meta'] ?? {};
+    return {
+      'header_metrics': ContributionDetailHeaderMetricsModel.fromJson(
+        headerMetrics,
+      ),
+      'members_list': membersList
+          .map(
+            (m) => ContributionDetailMemberModel.fromJson(
+              m as Map<String, dynamic>,
+            ),
+          )
+          .toList(),
+      'has_more': meta['has_more'] ?? false,
+      'total_records': meta['total_records'] ?? 0,
+    };
+  }
+
+  Future<Map<String, dynamic>> getContributions({
+    int page = 1,
+    int limit = 10,
+    String? search,
+  }) async {
+    final Map<String, dynamic> queryParameters = {'page': page, 'limit': limit};
+    if (search != null && search.trim().isNotEmpty) {
+      queryParameters['search'] = search.trim();
+    }
+    final response = await apiClient.get(
+      '/api/treasury/contributions',
+      operationName: 'getContributions',
+      queryParameters: queryParameters,
+    );
+    final List<dynamic> data = response['data'] ?? [];
+    final Map<String, dynamic> meta = response['meta'] ?? {};
+    final Map<String, dynamic> metrics = response['metrics'] ?? {};
+    return {
+      'items': data.map((item) => ContributeItemModel.fromJson(item)).toList(),
+      'metrics': ContributeMetricsModel.fromJson(metrics),
+      'has_more': meta['has_more'] ?? false,
+      'total_records': meta['total_records'] ?? 0,
+    };
+  }
 }

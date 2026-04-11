@@ -1,3 +1,4 @@
+import '../entity/contributes/contribute_entity.dart';
 import '../entity/entity.dart';
 import '../entity/income_request_entity.dart';
 
@@ -111,4 +112,25 @@ abstract class TreasuryRepository {
     String idLoan,
     String idQuota,
   );
+
+  Future<NewLayoutResponseEntity> newLayoutPost(
+   String monthPeriod,
+    String yearPeriod,
+    double baseAmount
+  );
+  Future<SimulateDistributionResponseEntity> postSimulateDistribution(
+    double baseAmount
+  );
+
+  Future<ContributionsResponseEntity> getContributions({
+    int page = 1,
+    int limit = 10,
+    String? search,
+  });
+
+  Future<ContributionDetailResponseEntity> getContributionDetail(
+    String contributionId, {
+    int page = 1,
+    int limit = 10,
+  });
 }

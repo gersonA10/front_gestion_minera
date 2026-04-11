@@ -39,6 +39,24 @@ class TreasuryBloc extends Bloc<TreasuryEvent, TreasuryState> {
   String? _currentStatus;
   String? _currentSearch;
 
+  // aportes
+  int _contributionsPage = 1;
+  bool _contributionsReachedMax = false;
+  int _contributionsTotalRecords = 0;
+  List<ContributeItemEntity> _contributionItems = [];
+  ContributeMetricsEntity? _contributionMetrics;
+  bool _isLoadingMoreContributions = false;
+  String? _currentContributionsSearch;
+
+  // detalle de aporte
+  int _contributionDetailPage = 1;
+  bool _contributionDetailReachedMax = false;
+  int _contributionDetailTotalRecords = 0;
+  List<ContributionDetailMemberEntity> _contributionDetailMembers = [];
+  ContributionDetailHeaderMetricsEntity? _contributionDetailHeader;
+  bool _isLoadingMoreContributionDetail = false;
+  String? _currentContributionId;
+
   // distribuciones
   int _distributionHistoryPage = 1;
   bool _distributionHistoryReachedMax = false;
@@ -100,6 +118,12 @@ class TreasuryBloc extends Bloc<TreasuryEvent, TreasuryState> {
     on<LoadMoreDistributionDetailEvent>(_onLoadMoreDistributionDetail);
     on<BatchLotDetailsEvent>(_onBatchLotDetails);
     on<PayTheFeeEvent>(_onPayTheFee);
+    on<NewLayoutEvent>(_onNewLayout);
+    on<SimulateDistributionEvent>(_onSimulateDistribution);
+    on<GetContributionsEvent>(_onGetContributions);
+    on<LoadMoreContributionsEvent>(_onLoadMoreContributions);
+    on<GetContributionDetailEvent>(_onGetContributionDetail);
+    on<LoadMoreContributionDetailEvent>(_onLoadMoreContributionDetail);
   }
 
   Future<void> _onFetchTreasuryMetrics(
@@ -977,6 +1001,214 @@ class TreasuryBloc extends Bloc<TreasuryEvent, TreasuryState> {
       emit(DistributionDetailError('Error inesperado: $e'));
     } finally {
       _isLoadingMoreDistributionDetail = false;
+    }
+  }
+
+  Future<void> _onNewLayout(
+    NewLayoutEvent event,
+    Emitter<TreasuryState> emit,
+  ) async {
+    emit(NewLayoutLoading());
+    try {
+      final response = await repository.newLayoutPost(event.monthPeriod, event.yearPeriod, event.baseAmount);
+      emit(NewLayoutLoaded(newLayout:  response));
+    } on BaseApiException catch (error) {
+      if (error.key == DioExceptionKey.unauthorised) {
+        return;
+      }
+      emit(NewLayoutError(mapErrorMessage(error.key)));
+    } catch (e) {
+      emit(NewLayoutError( 'Error inesperado: $e'));
+    }
+   }
+
+   Future<void> _onSimulateDistribution(
+    SimulateDistributionEvent event,
+    Emitter<TreasuryState> emit,
+  ) async {
+    emit(SimulateDistributionLoading());
+    try {
+      final response = await repository.postSimulateDistribution(event.baseAmount);
+      emit(SimulateDistributionLoaded(simulateDistribution:  response));
+    } on BaseApiException catch (error) {
+      if (error.key == DioExceptionKey.unauthorised) {
+        return;
+      }
+      emit(SimulateDistributionError(mapErrorMessage(error.key)));
+    } catch (e) {
+      emit(SimulateDistributionError( 'Error inesperado: $e'));
+    }
+   }
+
+  Future<void> _onGetContributions(
+    GetContributionsEvent event,
+    Emitter<TreasuryState> emit,
+  ) async {
+    if (!event.isRefresh && _contributionItems.isNotEmpty) {
+      emit(
+        ContributionsLoaded(
+          items: List.from(_contributionItems),
+          metrics: _contributionMetrics!,
+          hasReachedMax: _contributionsReachedMax,
+          totalRecords: _contributionsTotalRecords,
+        ),
+      );
+      return;
+    }
+
+    if (event.isRefresh) {
+      _contributionsPage = 1;
+      _contributionsReachedMax = false;
+      _contributionItems.clear();
+      _contributionMetrics = null;
+      _currentContributionsSearch = event.search;
+      emit(ContributionsLoading());
+    }
+
+    try {
+      final response = await repository.getContributions(
+        page: _contributionsPage,
+        search: _currentContributionsSearch,
+      );
+      _contributionItems = response.items;
+      _contributionMetrics = response.metrics;
+      _contributionsReachedMax = !response.hasMore;
+      _contributionsTotalRecords = response.totalRecords;
+      emit(
+        ContributionsLoaded(
+          items: List.from(_contributionItems),
+          metrics: _contributionMetrics!,
+          hasReachedMax: _contributionsReachedMax,
+          totalRecords: _contributionsTotalRecords,
+        ),
+      );
+    } on BaseApiException catch (error) {
+      if (error.key == DioExceptionKey.unauthorised) return;
+      emit(ContributionsError(mapErrorMessage(error.key)));
+    } catch (e) {
+      emit(ContributionsError('Error inesperado: $e'));
+    }
+  }
+
+  Future<void> _onLoadMoreContributions(
+    LoadMoreContributionsEvent event,
+    Emitter<TreasuryState> emit,
+  ) async {
+    if (_contributionsReachedMax || _isLoadingMoreContributions) return;
+    _isLoadingMoreContributions = true;
+    _contributionsPage++;
+    try {
+      final response = await repository.getContributions(
+        page: _contributionsPage,
+        search: _currentContributionsSearch,
+      );
+      _contributionItems.addAll(response.items);
+      _contributionsReachedMax = !response.hasMore;
+      emit(
+        ContributionsLoaded(
+          items: List.from(_contributionItems),
+          metrics: _contributionMetrics!,
+          hasReachedMax: _contributionsReachedMax,
+          totalRecords: _contributionsTotalRecords,
+        ),
+      );
+    } on BaseApiException catch (error) {
+      _contributionsPage--;
+      if (error.key == DioExceptionKey.unauthorised) return;
+      emit(ContributionsError(mapErrorMessage(error.key)));
+    } catch (e) {
+      _contributionsPage--;
+      emit(ContributionsError('Error inesperado: $e'));
+    } finally {
+      _isLoadingMoreContributions = false;
+    }
+  }
+
+  Future<void> _onGetContributionDetail(
+    GetContributionDetailEvent event,
+    Emitter<TreasuryState> emit,
+  ) async {
+    if (!event.isRefresh &&
+        _currentContributionId == event.contributionId &&
+        _contributionDetailMembers.isNotEmpty) {
+      emit(
+        ContributionDetailLoaded(
+          headerMetrics: _contributionDetailHeader!,
+          membersList: List.from(_contributionDetailMembers),
+          hasReachedMax: _contributionDetailReachedMax,
+          totalRecords: _contributionDetailTotalRecords,
+        ),
+      );
+      return;
+    }
+
+    _currentContributionId = event.contributionId;
+    _contributionDetailPage = 1;
+    _contributionDetailReachedMax = false;
+    _contributionDetailMembers.clear();
+    _contributionDetailHeader = null;
+    emit(ContributionDetailLoading());
+
+    try {
+      final response = await repository.getContributionDetail(
+        event.contributionId,
+        page: _contributionDetailPage,
+      );
+      _contributionDetailHeader = response.headerMetrics;
+      _contributionDetailMembers = List.from(response.membersList);
+      _contributionDetailReachedMax = !response.hasMore;
+      _contributionDetailTotalRecords = response.totalRecords;
+      emit(
+        ContributionDetailLoaded(
+          headerMetrics: _contributionDetailHeader!,
+          membersList: List.from(_contributionDetailMembers),
+          hasReachedMax: _contributionDetailReachedMax,
+          totalRecords: _contributionDetailTotalRecords,
+        ),
+      );
+    } on BaseApiException catch (error) {
+      if (error.key == DioExceptionKey.unauthorised) return;
+      emit(ContributionDetailError(mapErrorMessage(error.key)));
+    } catch (e) {
+      emit(ContributionDetailError('Error inesperado: $e'));
+    }
+  }
+
+  Future<void> _onLoadMoreContributionDetail(
+    LoadMoreContributionDetailEvent event,
+    Emitter<TreasuryState> emit,
+  ) async {
+    if (_contributionDetailReachedMax ||
+        _isLoadingMoreContributionDetail ||
+        _currentContributionId == null) {
+      return;
+    }
+    _isLoadingMoreContributionDetail = true;
+    _contributionDetailPage++;
+    try {
+      final response = await repository.getContributionDetail(
+        _currentContributionId!,
+        page: _contributionDetailPage,
+      );
+      _contributionDetailMembers.addAll(response.membersList);
+      _contributionDetailReachedMax = !response.hasMore;
+      emit(
+        ContributionDetailLoaded(
+          headerMetrics: _contributionDetailHeader!,
+          membersList: List.from(_contributionDetailMembers),
+          hasReachedMax: _contributionDetailReachedMax,
+          totalRecords: _contributionDetailTotalRecords,
+        ),
+      );
+    } on BaseApiException catch (error) {
+      _contributionDetailPage--;
+      if (error.key == DioExceptionKey.unauthorised) return;
+      emit(ContributionDetailError(mapErrorMessage(error.key)));
+    } catch (e) {
+      _contributionDetailPage--;
+      emit(ContributionDetailError('Error inesperado: $e'));
+    } finally {
+      _isLoadingMoreContributionDetail = false;
     }
   }
 }

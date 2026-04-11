@@ -32,3 +32,9 @@ export 'package:front_gestion_minera/modules/treasury/presentation/widgets/distr
 export 'package:front_gestion_minera/modules/treasury/presentation/widgets/distributes/details_distribute/member_card_details_distribute_widget.dart';
 export 'package:front_gestion_minera/modules/treasury/presentation/widgets/distributes/details_distribute/sumary_card1_widget.dart';
 export 'package:front_gestion_minera/modules/treasury/presentation/widgets/distributes/details_distribute/counter_item_widget.dart';
+export 'package:front_gestion_minera/modules/treasury/presentation/widgets/contributes/mate_items_contribute_widget.dart';
+export 'package:front_gestion_minera/modules/treasury/presentation/widgets/contributes/aport_card_widget.dart';
+export 'package:front_gestion_minera/modules/treasury/presentation/widgets/contributes/sumary_card_contributes_widget.dart';
+export 'package:front_gestion_minera/modules/treasury/presentation/widgets/contributes/details_contribute/resumen_card_widget.dart';
+export 'package:front_gestion_minera/modules/treasury/presentation/widgets/contributes/details_contribute/socio_card_widget.dart';
+export 'package:front_gestion_minera/modules/treasury/presentation/widgets/contributes/details_contribute/tap_btn_widget.dart';

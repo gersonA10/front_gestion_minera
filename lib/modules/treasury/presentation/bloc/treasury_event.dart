@@ -196,3 +196,41 @@ class PayTheFeeEvent extends TreasuryEvent {
     required this.idQuota,
   });
 }
+
+///
+class NewLayoutEvent extends TreasuryEvent {
+  final  String monthPeriod;
+  final  String yearPeriod;
+  final  double baseAmount;
+  NewLayoutEvent({
+    required this.monthPeriod,
+    required this.yearPeriod,
+    required this.baseAmount,
+  });
+}
+
+class SimulateDistributionEvent extends TreasuryEvent {
+  final  double baseAmount;
+  SimulateDistributionEvent({
+    required this.baseAmount,
+  });
+}
+
+class GetContributionsEvent extends TreasuryEvent {
+  final bool isRefresh;
+  final String? search;
+  GetContributionsEvent({this.isRefresh = true, this.search});
+}
+
+class LoadMoreContributionsEvent extends TreasuryEvent {}
+
+class GetContributionDetailEvent extends TreasuryEvent {
+  final String contributionId;
+  final bool isRefresh;
+  GetContributionDetailEvent({
+    required this.contributionId,
+    this.isRefresh = true,
+  });
+}
+
+class LoadMoreContributionDetailEvent extends TreasuryEvent {}

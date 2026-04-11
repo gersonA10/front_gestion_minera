@@ -1,7 +1,9 @@
+import '../../domain/entity/contributes/contribute_entity.dart';
 import '../../domain/entity/entity.dart';
 import '../../domain/entity/income_request_entity.dart';
 import '../../domain/repositories/repository.dart';
 import '../datasource/datasource.dart';
+import '../models/contribute/contribute_model.dart';
 import '../models/model.dart';
 
 class TreasuryRepositoryImpl implements TreasuryRepository {
@@ -303,5 +305,55 @@ class TreasuryRepositoryImpl implements TreasuryRepository {
     final requestModel = PayTheFeeRequestModel.fromEntity(payTheFeeRequest);
     final response = await datasource.payTheFee(requestModel, idLoan, idQuota);
     return response;
+  }
+  @override
+  Future<NewLayoutResponseEntity> newLayoutPost(
+    String monthPeriod,
+    String yearPeriod,
+    double baseAmount,
+  ) async {
+    return await datasource.newLayoutPost(monthPeriod, yearPeriod, baseAmount);
+  }
+  
+  @override
+  Future<SimulateDistributionResponseEntity> postSimulateDistribution(double baseAmount) async{
+    return await datasource.postSimulateDistribution(baseAmount);
+  }
+
+  @override
+  Future<ContributionsResponseEntity> getContributions({
+    int page = 1,
+    int limit = 10,
+    String? search,
+  }) async {
+    final result = await datasource.getContributions(page: page, limit: limit, search: search);
+    final models = result['items'] as List<ContributeItemModel>;
+    return ContributionsResponseEntity(
+      items: models,
+      metrics: result['metrics'] as ContributeMetricsModel,
+      hasMore: result['has_more'] as bool,
+      totalRecords: result['total_records'] as int? ?? 0,
+    );
+  }
+
+  @override
+  Future<ContributionDetailResponseEntity> getContributionDetail(
+    String contributionId, {
+    int page = 1,
+    int limit = 10,
+  }) async {
+    final result = await datasource.getContributionDetail(
+      contributionId,
+      page: page,
+      limit: limit,
+    );
+    return ContributionDetailResponseEntity(
+      headerMetrics: result['header_metrics']
+          as ContributionDetailHeaderMetricsModel,
+      membersList:
+          result['members_list'] as List<ContributionDetailMemberModel>,
+      hasMore: result['has_more'] as bool,
+      totalRecords: result['total_records'] as int? ?? 0,
+    );
   }
 }
