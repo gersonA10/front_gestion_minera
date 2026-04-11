@@ -1,4 +1,3 @@
-import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:front_gestion_minera/utils/text_util.dart';
 
@@ -68,7 +67,7 @@ class CustomDialog extends StatelessWidget {
                   child: OutlinedButton(
                     onPressed: () {
                       text?.clear();
-                      context.router.back();
+                      Navigator.pop(context);
                     },
                     style: OutlinedButton.styleFrom(
                       foregroundColor: Colors.white70,

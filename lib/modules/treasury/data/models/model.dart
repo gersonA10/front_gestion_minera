@@ -1,5 +1,5 @@
+export 'package:front_gestion_minera/modules/treasury/data/models/transfer_request_model.dart';
 export 'package:front_gestion_minera/modules/treasury/data/models/gold_inventory.dart/gold_inventory_model.dart';
-
 export 'package:front_gestion_minera/modules/treasury/data/models/expense_request_model.dart';
 export 'package:front_gestion_minera/modules/treasury/data/models/expense_response_model.dart';
 export 'package:front_gestion_minera/modules/treasury/data/models/income_request_model.dart';
@@ -14,7 +14,21 @@ export 'package:front_gestion_minera/modules/treasury/data/models/payment_histor
 export 'package:front_gestion_minera/modules/treasury/data/models/confirm_payment_model.dart';
 export 'package:front_gestion_minera/modules/treasury/data/models/financial_report_model.dart';
 export 'package:front_gestion_minera/modules/treasury/data/models/reject_an_application_model.dart';
+export 'package:front_gestion_minera/modules/treasury/data/models/loans/loans_list_model.dart';
 export 'package:front_gestion_minera/modules/treasury/data/models/transaction_details_model.dart';
 export 'package:front_gestion_minera/modules/treasury/data/models/gold_inventory.dart/new_extraction_model.dart';
 export 'package:front_gestion_minera/modules/treasury/data/models/gold_inventory.dart/gold_sale_model.dart';
 export 'package:front_gestion_minera/modules/treasury/data/models/gold_inventory.dart/sale_history_model.dart';
+export 'package:front_gestion_minera/modules/treasury/data/models/loans/loan_details_model.dart';
+export 'package:front_gestion_minera/modules/treasury/data/models/loans/apply_for_a_loan_model.dart';
+export 'package:front_gestion_minera/modules/treasury/data/models/loans/new_loans_model.dart';
+export 'package:front_gestion_minera/modules/treasury/data/models/loans/payment_process_model.dart';
+export 'package:front_gestion_minera/modules/treasury/data/models/distribute/distribution_history_model.dart';
+export 'package:front_gestion_minera/modules/treasury/data/models/distribute/distribution_detail_model.dart';
+export 'package:front_gestion_minera/modules/treasury/data/models/gold_inventory.dart/lot_details_model.dart';
+export 'package:front_gestion_minera/modules/treasury/data/models/distribute/new_layout_model.dart';
+export 'package:front_gestion_minera/modules/treasury/data/models/distribute/simulate_distribution_Model.dart';
+export 'package:front_gestion_minera/modules/treasury/data/models/contribute/contribute_model.dart';
+export 'package:front_gestion_minera/modules/treasury/data/models/contribute/contribution_detail_model.dart';
+export 'package:front_gestion_minera/modules/treasury/data/models/distribute/receipt_model.dart';
+export 'package:front_gestion_minera/modules/treasury/data/models/contribute/contribution_receipt_model.dart';

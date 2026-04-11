@@ -1,7 +1,9 @@
+import '../../domain/entity/contributes/contribute_entity.dart';
 import '../../domain/entity/entity.dart';
 import '../../domain/entity/income_request_entity.dart';
 import '../../domain/repositories/repository.dart';
 import '../datasource/datasource.dart';
+import '../models/contribute/contribute_model.dart';
 import '../models/model.dart';
 
 class TreasuryRepositoryImpl implements TreasuryRepository {
@@ -108,6 +110,14 @@ class TreasuryRepositoryImpl implements TreasuryRepository {
   }
 
   @override
+  Future<TransferResponseEntity> registerUrgentTransfer(
+    TransferRequestEntity request,
+  ) async {
+    final requestModel = TransferRequestModel.fromEntity(request);
+    return await datasource.registerUrgentTransfer(requestModel);
+  }
+
+  @override
   Future<GoldInventoryEntity> getGoldInventory() async {
     return await datasource.getGoldInventory();
   }
@@ -127,6 +137,28 @@ class TreasuryRepositoryImpl implements TreasuryRepository {
   }
 
   @override
+  Future<PaymentHistoryResponseEntity> getPaymentHistory({
+    int page = 1,
+    int limit = 10,
+    String? period,
+    String? exactDate,
+  }) async {
+    final result = await datasource.getPaymentHistory(
+      page: page,
+      limit: limit,
+      period: period,
+      exactDate: exactDate,
+    );
+    final models = result['items'] as List<PaymentHistoryItemModel>;
+    return PaymentHistoryResponseEntity(
+      summary: result['summary'] as PaymentHistorySummaryEntity,
+      items: models,
+      hasMoreData: result['has_more_data'] as bool,
+      totalRecords: result['total_records'] as int? ?? 0,
+    );
+  }
+
+    @override
   Future<StatsSaleHistoryEntity> getStatsSalesHistory() async {
     return await datasource.getStatsSalesHistory();
   }
@@ -146,16 +178,22 @@ class TreasuryRepositoryImpl implements TreasuryRepository {
   }
 
   @override
-  Future<PaymentHistoryResponseEntity> getPaymentHistory({
+  Future<InternalLoansResponseEntity> getInternalLoans({
+    String? status,
+    String? search,
     int page = 1,
     int limit = 10,
   }) async {
-    final result = await datasource.getPaymentHistory(page: page, limit: limit);
-    final models = result['items'] as List<PaymentHistoryItemModel>;
-    return PaymentHistoryResponseEntity(
-      summary: result['summary'] as PaymentHistorySummaryEntity,
-      items: models,
-      hasMoreData: result['has_more_data'] as bool,
+    final result = await datasource.internalLoans(
+      status: status,
+      search: search,
+      page: page,
+      limit: limit,
+    );
+    final models = result['items'] as List<InternalLoansResponseModel>;
+    return InternalLoansResponseEntity(
+      items: models.map((model) => model.toEntity()).toList(),
+      hasMore: result['has_more_data'] as bool,
       totalRecords: result['total_records'] as int? ?? 0,
     );
   }
@@ -189,5 +227,191 @@ class TreasuryRepositoryImpl implements TreasuryRepository {
   ) async {
     final requestModel = RegisterSaleRequestModel.fromEntity(request);
     return await datasource.registerSale(requestModel);
+  }
+
+  @override
+  Future<RegisterSaleResponseEntity> getSaleById(String idSale) async{
+    return await datasource.getSaleById(idSale);
+  }
+
+  @override
+  Future<NewLoansResponseEntity> postNewLoansSimulate(
+    double amount,
+    int termMonths,
+    String annualInterestRate,
+    String startDate,
+  ) async {
+    return await datasource.postNewLoansSimulate(
+      amount,
+      termMonths,
+      annualInterestRate,
+      startDate,
+    );
+  }
+
+  @override
+  Future<ApplyForALoanResponseEntity> applyForALoan(
+    String lenderName,
+    double amount,
+    int termMonths,
+    double annualInterestRate,
+    String startDate,
+    String cajaDestinoId,
+  ) async {
+    return await datasource.postApplyForAloan(
+      lenderName,
+      amount,
+      termMonths,
+      annualInterestRate,
+      startDate,
+      cajaDestinoId,
+    );
+  }
+
+  @override
+  Future<LoanDetailsResponseEntity> getloanDatails(String idLoan) async {
+    return await datasource.getloanDatails(idLoan);
+  }
+
+  @override
+  Future<DistributionHistoryResponseEntity> getDistributionHistory({
+    int page = 1,
+    int limit = 10,
+  }) async {
+    final result = await datasource.getDistributionHistory(
+      page: page,
+      limit: limit,
+    );
+    final models = result['items'] as List<DistributionHistoryItemModel>;
+    return DistributionHistoryResponseEntity(
+      items: models,
+      hasMore: result['has_more'] as bool,
+      totalRecords: result['total_records'] as int? ?? 0,
+    );
+  }
+
+  @override
+  Future<DistributionDetailResponseEntity> getDistributionDetail(
+    String distributionId, {
+    int page = 1,
+    int limit = 10,
+  }) async {
+    final result = await datasource.getDistributionDetail(
+      distributionId,
+      page: page,
+      limit: limit,
+    );
+    return DistributionDetailResponseEntity(
+      header: result['header'] as DistributionDetailHeaderModel,
+      membersList:
+          result['members_list'] as List<DistributionDetailMemberModel>,
+      hasMore: result['has_more'] as bool,
+      totalRecords: result['total_records'] as int? ?? 0,
+    );
+  }
+
+  @override
+  Future<LotDetailsDataEntity> getLotDetails(String batchId) async {
+    return await datasource.lotDetails(batchId);
+  }
+
+  @override
+  Future<PayTheFeeResponseEntity> payTheFee(
+    PayTheFeeRequetsEntity payTheFeeRequest,
+    String idLoan,
+    String idQuota,
+  ) async {
+    final requestModel = PayTheFeeRequestModel.fromEntity(payTheFeeRequest);
+    final response = await datasource.payTheFee(requestModel, idLoan, idQuota);
+    return response;
+  }
+  @override
+  Future<NewLayoutResponseEntity> newLayoutPost(
+    String monthPeriod,
+    String yearPeriod,
+    double baseAmount,
+  ) async {
+    return await datasource.newLayoutPost(monthPeriod, yearPeriod, baseAmount);
+  }
+  
+  @override
+  Future<SimulateDistributionResponseEntity> postSimulateDistribution(double baseAmount) async{
+    return await datasource.postSimulateDistribution(baseAmount);
+  }
+
+  @override
+  Future<ContributionsResponseEntity> getContributions({
+    int page = 1,
+    int limit = 10,
+    String? search,
+  }) async {
+    final result = await datasource.getContributions(page: page, limit: limit, search: search);
+    final models = result['items'] as List<ContributeItemModel>;
+    return ContributionsResponseEntity(
+      items: models,
+      metrics: result['metrics'] as ContributeMetricsModel,
+      hasMore: result['has_more'] as bool,
+      totalRecords: result['total_records'] as int? ?? 0,
+    );
+  }
+
+  @override
+  Future<ContributionDetailResponseEntity> getContributionDetail(
+    String contributionId, {
+    int page = 1,
+    int limit = 10,
+  }) async {
+    final result = await datasource.getContributionDetail(
+      contributionId,
+      page: page,
+      limit: limit,
+    );
+    return ContributionDetailResponseEntity(
+      headerMetrics: result['header_metrics']
+          as ContributionDetailHeaderMetricsModel,
+      membersList:
+          result['members_list'] as List<ContributionDetailMemberModel>,
+      hasMore: result['has_more'] as bool,
+      totalRecords: result['total_records'] as int? ?? 0,
+    );
+  }
+   @override
+  Future<DividendPaymentResponseEntity> payDividend(
+    String distributionId,
+    String memberId,
+    String cashRegisterId,
+    String period,
+    String evidenciaPath,
+  ) async {
+    return await datasource.payDividend(
+      distributionId,
+      memberId,
+      cashRegisterId,
+      period,
+      evidenciaPath,
+    );
+  }
+  
+  @override
+  Future<ReceiptResponseEneity> getReceipt(String transactionId) {
+    return datasource.receiptDetails(transactionId);
+  }
+
+  @override
+  Future<ContributionReceiptsResponseEntity> getContributionReceipts(
+    String contributionId, {
+    int page = 1,
+    int limit = 10,
+  }) async {
+    final result = await datasource.getContributionReceipts(
+      contributionId,
+      page: page,
+      limit: limit,
+    );
+    return ContributionReceiptsResponseEntity(
+      receipts: result['receipts'] as List<ContributionReceiptModel>,
+      hasMore: result['has_more'] as bool,
+      totalRecords: result['total_records'] as int? ?? 0,
+    );
   }
 }

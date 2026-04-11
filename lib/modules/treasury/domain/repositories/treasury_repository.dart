@@ -1,3 +1,4 @@
+import '../entity/contributes/contribute_entity.dart';
 import '../entity/entity.dart';
 import '../entity/income_request_entity.dart';
 
@@ -27,14 +28,18 @@ abstract class TreasuryRepository {
     ExpenseRequestEntity request,
   );
 
+  Future<TransferResponseEntity> registerUrgentTransfer(
+    TransferRequestEntity request,
+  );
+
   Future<List<CashRegisterEntity>> getCashRegisters();
 
   Future<GoldInventoryEntity> getGoldInventory();
-  Future<PaginatedGoldBatchesEntity> getGoldBatches({int page = 1, int limit = 10, String? status});
-  
-  Future<StatsSaleHistoryEntity> getStatsSalesHistory();
-  Future<PaginatedSalesHistoryEntity> getSalesHistory({int page = 1, int limit = 5, String? status});
-  
+  Future<PaginatedGoldBatchesEntity> getGoldBatches({
+    int page = 1,
+    int limit = 10,
+    String? status,
+  });
   Future<ConfirmPaymentResponseEntity> confirmPayment(
     String idCash,
     ConfirmPaymentRequetsEntity confirmPaymentRequets,
@@ -47,8 +52,18 @@ abstract class TreasuryRepository {
   Future<PaymentHistoryResponseEntity> getPaymentHistory({
     int page = 1,
     int limit = 10,
+    String? period,
+    String? exactDate,
   });
-   Future<TransactionDetailsResponseEntity> getTransactionDetails(
+
+  Future<InternalLoansResponseEntity> getInternalLoans({
+    String? status,
+    String? search,
+    int page = 1,
+    int limit = 10,
+  });
+
+  Future<TransactionDetailsResponseEntity> getTransactionDetails(
     String idTansaction,
   );
   Future<NewExtractionResponseEntiy> newExtraction(
@@ -60,4 +75,84 @@ abstract class TreasuryRepository {
   Future<RegisterSaleResponseEntity> registerSale(
     RegisterSaleRequestEntity request,
   );
+
+  Future<RegisterSaleResponseEntity> getSaleById(String idSale);
+
+  Future<ApplyForALoanResponseEntity> applyForALoan(
+    String lenderName,
+    double amount,
+    int termMonths,
+    double annualInterestRate,
+    String startDate,
+    String cajaDestinoId,
+  );
+  Future<NewLoansResponseEntity> postNewLoansSimulate(
+    double amount,
+    int termMonths,
+    String annualInterestRate,
+    String startDate,
+  );
+  Future<LoanDetailsResponseEntity> getloanDatails(String idLoan);
+
+  Future<DistributionHistoryResponseEntity> getDistributionHistory({
+    int page = 1,
+    int limit = 10,
+  });
+
+  Future<DistributionDetailResponseEntity> getDistributionDetail(
+    String distributionId, {
+    int page = 1,
+    int limit = 10,
+  });
+
+  Future<LotDetailsDataEntity> getLotDetails(String batchId);
+
+  Future<PayTheFeeResponseEntity> payTheFee(
+    PayTheFeeRequetsEntity payTheFeeRequest,
+    String idLoan,
+    String idQuota,
+  );
+
+  Future<NewLayoutResponseEntity> newLayoutPost(
+   String monthPeriod,
+    String yearPeriod,
+    double baseAmount
+  );
+  Future<SimulateDistributionResponseEntity> postSimulateDistribution(
+    double baseAmount
+  );
+
+  Future<ContributionsResponseEntity> getContributions({
+    int page = 1,
+    int limit = 10,
+    String? search,
+  });
+
+  Future<ContributionDetailResponseEntity> getContributionDetail(
+    String contributionId, {
+    int page = 1,
+    int limit = 10,
+  });
+  Future<DividendPaymentResponseEntity> payDividend(
+    String distributionId,
+    String memberId,
+    String cashRegisterId,
+    String period,
+    String evidenciaPath,
+  );
+
+  Future<ReceiptResponseEneity> getReceipt(String transactionId);
+  Future<ContributionReceiptsResponseEntity> getContributionReceipts(
+    String contributionId, {
+    int page = 1,
+    int limit = 10,
+  });
+
+  Future<StatsSaleHistoryEntity> getStatsSalesHistory();
+  Future<PaginatedSalesHistoryEntity> getSalesHistory({int page = 1, int limit = 5, String? status});
+  
 }
+
+
+
+

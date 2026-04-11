@@ -126,6 +126,19 @@ class UrgentExpenseError extends TreasuryState {
   UrgentExpenseError({required this.message});
 }
 
+// Transferencia
+class UrgentTransferLoading extends TreasuryState {}
+
+class UrgentTransferSuccess extends TreasuryState {
+  final TransferResponseEntity response;
+  UrgentTransferSuccess({required this.response});
+}
+
+class UrgentTransferError extends TreasuryState {
+  final String message;
+  UrgentTransferError({required this.message});
+}
+
 //confirmar pago
 class ConfirmPaymentLoading extends TreasuryState {}
 
@@ -213,7 +226,25 @@ class SalesGHistoryError extends TreasuryState{
   final String message;
   SalesGHistoryError(this.message);
 }
+// estado para el historial de prestamos
 
+class InternalLoansLoading extends TreasuryState {}
+
+class InternalLoansLoaded extends TreasuryState {
+  final List<InternalLoansEntity> list;
+  final bool hasReachedMax;
+  final int totalRecords;
+  InternalLoansLoaded({
+    required this.list,
+    required this.hasReachedMax,
+    required this.totalRecords,
+  });
+}
+
+class InternalLoansError extends TreasuryState {
+  final String message;
+  InternalLoansError(this.message);
+}
 ///
 class TransactionDetailsLoading extends TreasuryState {}
 
@@ -266,4 +297,243 @@ class RegisterSaleLoaded extends TreasuryState {
 class RegisterSaleError extends TreasuryState {
   final String message;
   RegisterSaleError({required this.message});
+}
+
+class RegistersaleGetSucces extends TreasuryState {
+  final RegisterSaleResponseEntity data;
+
+  RegistersaleGetSucces({required this.data});
+}
+// registrar prestamo
+class ApplyForALoanLoading extends TreasuryState {}
+
+class ApplyForALoanLoaded extends TreasuryState {
+  final ApplyForALoanResponseEntity loan;
+  ApplyForALoanLoaded({required this.loan});
+}
+
+class ApplyForALoanError extends TreasuryState {
+  final String message;
+  ApplyForALoanError({required this.message});
+}
+// simulacion de nuevo prestamo
+class NewLoansSimulateLoading extends TreasuryState {}
+
+class NewLoansSimulateLoaded extends TreasuryState {
+  final NewLoansResponseEntity loan;
+    final CashResponseEntity cash;
+  NewLoansSimulateLoaded({required this.loan, required this.cash});
+}
+
+class NewLoansSimulateError extends TreasuryState {
+  final String message;
+  NewLoansSimulateError({required this.message});
+}
+// detalle de prestamo
+class LoanDetailsLoading extends TreasuryState {}
+
+class LoanDetailsLoaded extends TreasuryState {
+  final LoanDetailsResponseEntity loanDetails;
+final CashResponseEntity cash;
+  LoanDetailsLoaded({
+    required this.loanDetails,
+    required this.cash,
+  });
+}
+
+class LoanDetailsError extends TreasuryState {
+  final String message;
+  LoanDetailsError(this.message);
+}
+
+// historial de distribuciones
+class DistributionHistoryLoading extends TreasuryState {}
+
+class DistributionHistoryLoaded extends TreasuryState {
+  final List<DistributionHistoryItemEntity> items;
+  final bool hasReachedMax;
+  final int totalRecords;
+
+  DistributionHistoryLoaded({
+    required this.items,
+    required this.hasReachedMax,
+    required this.totalRecords,
+  });
+}
+
+class DistributionHistoryError extends TreasuryState {
+  final String message;
+  DistributionHistoryError(this.message);
+}
+
+// detalle de distribución
+class DistributionDetailLoading extends TreasuryState {}
+
+class DistributionDetailLoaded extends TreasuryState {
+  final DistributionDetailHeaderEntity header;
+  final List<DistributionDetailMemberEntity> membersList;
+  final bool hasReachedMax;
+  final int totalRecords;
+
+  DistributionDetailLoaded({
+    required this.header,
+    required this.membersList,
+    required this.hasReachedMax,
+    required this.totalRecords,
+  });
+}
+
+class DistributionDetailError extends TreasuryState {
+  final String message;
+  DistributionDetailError(this.message);
+}
+
+
+// detalle de lote (inventario de oro)
+class BatchLotDetailsLoading extends TreasuryState {}
+
+class BatchLotDetailsLoaded extends TreasuryState {
+  final LotDetailsDataEntity lotDetails;
+  BatchLotDetailsLoaded({required this.lotDetails});
+}
+
+class BatchLotDetailsError extends TreasuryState {
+  final String message;
+  BatchLotDetailsError(this.message);
+}
+
+
+// pago cuota
+class PayTheFeeLoading extends TreasuryState {}
+
+class PayTheFeeLoaded extends TreasuryState {
+  final PayTheFeeResponseEntity payTheFee;
+  PayTheFeeLoaded({required this.payTheFee});
+}
+
+class PayTheFeeError extends TreasuryState {
+  final String message;
+  PayTheFeeError({required this.message});
+}
+
+// nueva  distribución
+class NewLayoutLoading extends TreasuryState {}
+
+class NewLayoutLoaded extends TreasuryState {
+  final NewLayoutResponseEntity newLayout;
+
+  NewLayoutLoaded({
+    required this.newLayout,
+  });
+}
+
+class NewLayoutError extends TreasuryState {
+  final String message;
+  NewLayoutError(this.message);
+}
+
+// simulación de distribución
+class SimulateDistributionLoading extends TreasuryState {}
+
+class SimulateDistributionLoaded extends TreasuryState {
+  final SimulateDistributionResponseEntity simulateDistribution;
+  SimulateDistributionLoaded({
+    required this.simulateDistribution,
+  });
+}
+
+class SimulateDistributionError extends TreasuryState {
+  final String message;
+  SimulateDistributionError(this.message);
+}
+
+// aportes
+class ContributionsLoading extends TreasuryState {}
+
+class ContributionsLoaded extends TreasuryState {
+  final List<ContributeItemEntity> items;
+  final ContributeMetricsEntity metrics;
+  final bool hasReachedMax;
+  final int totalRecords;
+
+  ContributionsLoaded({
+    required this.items,
+    required this.metrics,
+    required this.hasReachedMax,
+    required this.totalRecords,
+  });
+}
+
+class ContributionsError extends TreasuryState {
+  final String message;
+  ContributionsError(this.message);
+}
+
+// detalle de aporte
+class ContributionDetailLoading extends TreasuryState {}
+
+class ContributionDetailLoaded extends TreasuryState {
+  final ContributionDetailHeaderMetricsEntity headerMetrics;
+  final List<ContributionDetailMemberEntity> membersList;
+  final bool hasReachedMax;
+  final int totalRecords;
+
+  ContributionDetailLoaded({
+    required this.headerMetrics,
+    required this.membersList,
+    required this.hasReachedMax,
+    required this.totalRecords,
+  });
+}
+
+
+class ContributionDetailError extends TreasuryState {
+  final String message;
+  ContributionDetailError(this.message);
+}
+
+class PayDividendLoading extends TreasuryState {}
+
+class PayDividendSuccess extends TreasuryState {
+  final DividendPaymentResponseEntity data;
+  PayDividendSuccess({required this.data});
+}
+
+class PayDividendError extends TreasuryState {
+  final String message;
+  PayDividendError(this.message);
+}
+
+///
+class ReceiptLoading extends TreasuryState {}
+
+class ReceiptSuccess extends TreasuryState {
+  final ReceiptResponseEneity data;
+  ReceiptSuccess({required this.data});
+}
+
+class ReceiptError extends TreasuryState {
+  final String message;
+  ReceiptError(this.message);
+}
+
+
+// historial de recibos de aporte
+class ContributionReceiptsLoading extends TreasuryState {}
+
+class ContributionReceiptsLoaded extends TreasuryState {
+  final List<ContributionReceiptEntity> receipts;
+  final bool hasReachedMax;
+  final int totalRecords;
+
+  ContributionReceiptsLoaded({
+    required this.receipts,
+    required this.hasReachedMax,
+    required this.totalRecords,
+  });
+}
+
+class ContributionReceiptsError extends TreasuryState {
+  final String message;
+  ContributionReceiptsError(this.message);
 }

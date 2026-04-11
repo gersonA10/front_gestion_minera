@@ -68,7 +68,6 @@ class TColors {
   static const colorInfo = Color(0xFFE2E8F0);
   static const colorBorderInfo = Color(0xFF94A3B8);
 
-
   //Custom
   static const primary = Color(0xFF1A56FF);
   static const primaryLight = Color(0xFFEEF2FF);
@@ -81,4 +80,19 @@ class TColors {
   static const successLight = Color(0xFFDCFCE7);
   static const warning = Color(0xFFD97706);
   static const warningLight = Color(0xFFFEF3C7);
+  //Custom
+  static const bgColor = Color(0xFF1A1A1A);
+  static const cardColor = Color(0xFF2A2A2A);
+  static const amber = Color(0xFFD4A017);
+  static const amberLight = Color(0x33D4A017);
+  static const textPrimaryWhite = Color(0xFFE0E0E0);
+  static const textSecondary1 = Color(0xFFA0A0A0);
+  static const inputBg = Color(0xFF333333);
+  static const borderColor = Color(0xFF4A4A2A);
+
+  static const cardBgDark = Color(0xFF2A2418); // Fondo cards con tono dorado
+  static const cardBorderDark = Color(0xFF3D3422); // Borde cards dorado sutil
+  static const cardInnerBg = Color(0xFF1E1B14); // Fondo cajas internas
+  static const green = Color(0xFF4CAF50); // Estado activo/pagado
+  static const pendingYellow = Color(0xFFFFB300); // Estado pendiente
 }

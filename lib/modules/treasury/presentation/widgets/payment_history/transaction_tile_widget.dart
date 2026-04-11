@@ -106,40 +106,35 @@ class TransactionTile extends StatelessWidget {
           ),
           const SizedBox(width: 8),
           // Monto
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.end,
-            children: [
-              Text(
-                amountStr,
-                style: const TextStyle(
-                  fontSize: 14,
-                  fontWeight: FontWeight.w700,
-                  color: Color(0xFF1F2937),
-                ),
-              ),
-              TextButton(
-                onPressed: () {
-                  context.router.push(
+          GestureDetector(
+            onTap: () {
+              context.router.push(
                     TransactionDetailsRoute(idTransaction: item.transactionId),
                   );
-                },
-                style: TextButton.styleFrom(
-                  padding: EdgeInsets.zero,
-                  minimumSize: Size.zero,
-                  tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+            },
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: [
+                Text(
+                  amountStr,
+                  style: const TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w700,
+                    color: Color(0xFF1F2937),
+                  ),
                 ),
-                child: Text(
+                Text(
                   'Ver detalle',
                   style: TextStyle(
                     fontSize: 14,
                     fontWeight: FontWeight.w700,
                     color: Theme.of(context).colorScheme.blue,
                   ),
-
+                            
                   textAlign: TextAlign.end,
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ],
       ),
