@@ -125,4 +125,10 @@ abstract class TreasuryRepository {
     int limit = 10,
     String? search,
   });
+
+  Future<ContributionDetailResponseEntity> getContributionDetail(
+    String contributionId, {
+    int page = 1,
+    int limit = 10,
+  });
 }

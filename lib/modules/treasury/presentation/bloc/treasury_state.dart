@@ -444,3 +444,25 @@ class ContributionsError extends TreasuryState {
   final String message;
   ContributionsError(this.message);
 }
+
+// detalle de aporte
+class ContributionDetailLoading extends TreasuryState {}
+
+class ContributionDetailLoaded extends TreasuryState {
+  final ContributionDetailHeaderMetricsEntity headerMetrics;
+  final List<ContributionDetailMemberEntity> membersList;
+  final bool hasReachedMax;
+  final int totalRecords;
+
+  ContributionDetailLoaded({
+    required this.headerMetrics,
+    required this.membersList,
+    required this.hasReachedMax,
+    required this.totalRecords,
+  });
+}
+
+class ContributionDetailError extends TreasuryState {
+  final String message;
+  ContributionDetailError(this.message);
+}

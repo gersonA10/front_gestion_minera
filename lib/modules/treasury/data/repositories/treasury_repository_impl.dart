@@ -330,4 +330,25 @@ class TreasuryRepositoryImpl implements TreasuryRepository {
       totalRecords: result['total_records'] as int? ?? 0,
     );
   }
+
+  @override
+  Future<ContributionDetailResponseEntity> getContributionDetail(
+    String contributionId, {
+    int page = 1,
+    int limit = 10,
+  }) async {
+    final result = await datasource.getContributionDetail(
+      contributionId,
+      page: page,
+      limit: limit,
+    );
+    return ContributionDetailResponseEntity(
+      headerMetrics: result['header_metrics']
+          as ContributionDetailHeaderMetricsModel,
+      membersList:
+          result['members_list'] as List<ContributionDetailMemberModel>,
+      hasMore: result['has_more'] as bool,
+      totalRecords: result['total_records'] as int? ?? 0,
+    );
+  }
 }

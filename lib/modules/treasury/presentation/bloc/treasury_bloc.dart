@@ -47,6 +47,15 @@ class TreasuryBloc extends Bloc<TreasuryEvent, TreasuryState> {
   bool _isLoadingMoreContributions = false;
   String? _currentContributionsSearch;
 
+  // detalle de aporte
+  int _contributionDetailPage = 1;
+  bool _contributionDetailReachedMax = false;
+  int _contributionDetailTotalRecords = 0;
+  List<ContributionDetailMemberEntity> _contributionDetailMembers = [];
+  ContributionDetailHeaderMetricsEntity? _contributionDetailHeader;
+  bool _isLoadingMoreContributionDetail = false;
+  String? _currentContributionId;
+
   // distribuciones
   int _distributionHistoryPage = 1;
   bool _distributionHistoryReachedMax = false;
@@ -111,6 +120,8 @@ class TreasuryBloc extends Bloc<TreasuryEvent, TreasuryState> {
     on<SimulateDistributionEvent>(_onSimulateDistribution);
     on<GetContributionsEvent>(_onGetContributions);
     on<LoadMoreContributionsEvent>(_onLoadMoreContributions);
+    on<GetContributionDetailEvent>(_onGetContributionDetail);
+    on<LoadMoreContributionDetailEvent>(_onLoadMoreContributionDetail);
   }
 
   Future<void> _onFetchTreasuryMetrics(
@@ -1091,6 +1102,94 @@ class TreasuryBloc extends Bloc<TreasuryEvent, TreasuryState> {
       emit(ContributionsError('Error inesperado: $e'));
     } finally {
       _isLoadingMoreContributions = false;
+    }
+  }
+
+  Future<void> _onGetContributionDetail(
+    GetContributionDetailEvent event,
+    Emitter<TreasuryState> emit,
+  ) async {
+    if (!event.isRefresh &&
+        _currentContributionId == event.contributionId &&
+        _contributionDetailMembers.isNotEmpty) {
+      emit(
+        ContributionDetailLoaded(
+          headerMetrics: _contributionDetailHeader!,
+          membersList: List.from(_contributionDetailMembers),
+          hasReachedMax: _contributionDetailReachedMax,
+          totalRecords: _contributionDetailTotalRecords,
+        ),
+      );
+      return;
+    }
+
+    _currentContributionId = event.contributionId;
+    _contributionDetailPage = 1;
+    _contributionDetailReachedMax = false;
+    _contributionDetailMembers.clear();
+    _contributionDetailHeader = null;
+    emit(ContributionDetailLoading());
+
+    try {
+      final response = await repository.getContributionDetail(
+        event.contributionId,
+        page: _contributionDetailPage,
+      );
+      _contributionDetailHeader = response.headerMetrics;
+      _contributionDetailMembers = List.from(response.membersList);
+      _contributionDetailReachedMax = !response.hasMore;
+      _contributionDetailTotalRecords = response.totalRecords;
+      emit(
+        ContributionDetailLoaded(
+          headerMetrics: _contributionDetailHeader!,
+          membersList: List.from(_contributionDetailMembers),
+          hasReachedMax: _contributionDetailReachedMax,
+          totalRecords: _contributionDetailTotalRecords,
+        ),
+      );
+    } on BaseApiException catch (error) {
+      if (error.key == DioExceptionKey.unauthorised) return;
+      emit(ContributionDetailError(mapErrorMessage(error.key)));
+    } catch (e) {
+      emit(ContributionDetailError('Error inesperado: $e'));
+    }
+  }
+
+  Future<void> _onLoadMoreContributionDetail(
+    LoadMoreContributionDetailEvent event,
+    Emitter<TreasuryState> emit,
+  ) async {
+    if (_contributionDetailReachedMax ||
+        _isLoadingMoreContributionDetail ||
+        _currentContributionId == null) {
+      return;
+    }
+    _isLoadingMoreContributionDetail = true;
+    _contributionDetailPage++;
+    try {
+      final response = await repository.getContributionDetail(
+        _currentContributionId!,
+        page: _contributionDetailPage,
+      );
+      _contributionDetailMembers.addAll(response.membersList);
+      _contributionDetailReachedMax = !response.hasMore;
+      emit(
+        ContributionDetailLoaded(
+          headerMetrics: _contributionDetailHeader!,
+          membersList: List.from(_contributionDetailMembers),
+          hasReachedMax: _contributionDetailReachedMax,
+          totalRecords: _contributionDetailTotalRecords,
+        ),
+      );
+    } on BaseApiException catch (error) {
+      _contributionDetailPage--;
+      if (error.key == DioExceptionKey.unauthorised) return;
+      emit(ContributionDetailError(mapErrorMessage(error.key)));
+    } catch (e) {
+      _contributionDetailPage--;
+      emit(ContributionDetailError('Error inesperado: $e'));
+    } finally {
+      _isLoadingMoreContributionDetail = false;
     }
   }
 }

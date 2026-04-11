@@ -1,4 +1,6 @@
 
+import 'package:auto_route/auto_route.dart';
+import 'package:front_gestion_minera/config/router/app_router.gr.dart';
 import 'package:front_gestion_minera/utils/constants/color.constant.dart';
 import '../../../domain/entity/entity.dart';
 import '../widgtes.dart';
@@ -143,7 +145,7 @@ class AporteCard extends StatelessWidget {
           SizedBox(
             width: double.infinity,
             child: OutlinedButton(
-              onPressed: () {},
+              onPressed: () {context.router.push(ContributesDetailRoute(contributionId: item.contributionId));},
               style: OutlinedButton.styleFrom(
                 side: const BorderSide(color: TColors.border),
                 shape: RoundedRectangleBorder(

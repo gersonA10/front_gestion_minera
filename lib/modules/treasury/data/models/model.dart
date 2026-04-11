@@ -28,3 +28,4 @@ export 'package:front_gestion_minera/modules/treasury/data/models/gold_inventory
 export 'package:front_gestion_minera/modules/treasury/data/models/distribute/new_layout_model.dart';
 export 'package:front_gestion_minera/modules/treasury/data/models/distribute/simulate_distribution_Model.dart';
 export 'package:front_gestion_minera/modules/treasury/data/models/contribute/contribute_model.dart';
+export 'package:front_gestion_minera/modules/treasury/data/models/contribute/contribution_detail_model.dart';
