@@ -127,12 +127,7 @@ class TreasuryRepositoryImpl implements TreasuryRepository {
   }
 
   @override
-  Future<StatsSaleHistoryEntity> getStatsSalesHistory() async {
-    return await datasource.getStatsSalesHistory();
-  }
-
-  @override
-  Future<PaginatedSalesHistoryEntity> getSalesHistory({
+  Future<SaleHistoryResponseEntity> getSalesHistory({
     int page = 1,
     int limit = 5,
     String? status,

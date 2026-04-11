@@ -685,6 +685,7 @@ class _HistoryWidgetState extends State<HistoryWidget> {
         _selectedFilterDate = result.displayTitle;
         _periodToFetch = result.period;
         _exactDateToFetch = result.exactDate;
+        _cachedSales = [];
       });
       treasuryBloc.add(FetchHistorySalesEvent(isRefresh: true));
     }
@@ -694,11 +695,11 @@ class _HistoryWidgetState extends State<HistoryWidget> {
   Widget build(BuildContext context) {
     return BlocBuilder<TreasuryBloc, TreasuryState>(
       buildWhen: (previous, current) =>
-          current is SalesGHistoryLoading ||
-          current is SalesGHistoryLoaded ||
-          current is SalesGHistoryError,
+          current is SalesGoldHistoryLoading ||
+          current is SalesGoldHistoryLoaded ||
+          current is SalesGoldHistoryError,
       builder: (context, state) {
-        if (state is SalesGHistoryLoaded) {
+        if (state is SalesGoldHistoryLoaded) {
           _cachedStatsSales = state.stats;
           _cachedSales = state.sales;
           _cachedHasReachedSalesMax = state.hasReachedMax;
@@ -706,13 +707,13 @@ class _HistoryWidgetState extends State<HistoryWidget> {
           isLoadingMore = false;
         }
 
-        final bool isLoading = state is SalesGHistoryLoading;
+        final bool isLoading = state is SalesGoldHistoryLoading;
 
         if (_cachedStatsSales == null) {
           if (isLoading) {
             return const Center(child: CircularProgressIndicator());
           }
-          if (state is SalesGHistoryError) {
+          if (state is SalesGoldHistoryError) {
             return Center(child: Text(state.message));
           }
         }
@@ -737,8 +738,8 @@ class _HistoryWidgetState extends State<HistoryWidget> {
 
                       await treasuryBloc.stream.firstWhere(
                         (state) =>
-                            state is SalesGHistoryLoaded ||
-                            state is SalesGHistoryError,
+                            state is SalesGoldHistoryLoaded ||
+                            state is SalesGoldHistoryError,
                       );
                     },
                     child: SingleChildScrollView(
@@ -791,25 +792,8 @@ class _HistoryWidgetState extends State<HistoryWidget> {
                                               fontWeight: FontWeight.bold,
                                             ),
                                           ),
-                                          const SizedBox(width: 10),
-                                          Container(
-                                            padding: EdgeInsets.symmetric(
-                                              horizontal: 7,
-                                            ),
-                                            decoration: BoxDecoration(
-                                              color: Colors.green.shade100,
-                                              borderRadius:
-                                                  BorderRadius.circular(20),
-                                            ),
-                                            child: Row(
-                                              children: [
-                                                Icon(
-                                                  Icons.trending_up,
-                                                  size: 15,
-                                                ),
-                                              ],
-                                            ),
-                                          ),
+                                          const SizedBox(width: 10),                                          
+                                          const Text('g', style: TextStyle(fontWeight: FontWeight.bold))
                                         ],
                                       ),
                                     ],
@@ -850,25 +834,8 @@ class _HistoryWidgetState extends State<HistoryWidget> {
                                               fontWeight: FontWeight.bold,
                                             ),
                                           ),
-                                          Container(
-                                            padding: EdgeInsets.symmetric(
-                                              horizontal: 7,
-                                            ),
-                                            decoration: BoxDecoration(
-                                              color: Colors.green.shade100,
-                                              borderRadius:
-                                                  BorderRadius.circular(20),
-                                            ),
-                                            child: Row(
-                                              children: [
-                                                Icon(
-                                                  Icons.trending_up,
-                                                  size: 15,
-                                                ),
-                                                // Text('5.2 %',style: TextStyle(fontSize: 10),)
-                                              ],
-                                            ),
-                                          ),
+                                          SizedBox(width: 10,),
+                                          const Text('Bs', style: TextStyle(fontWeight: FontWeight.bold))
                                         ],
                                       ),
                                     ],
@@ -892,14 +859,21 @@ class _HistoryWidgetState extends State<HistoryWidget> {
                                   ],
                                 ),
                                 Spacer(),
-                                if (_selectedFilterDate != 'Reciente')
-                                  IconButton(
+                                Visibility(
+                                  visible:  _selectedFilterDate != 'Reciente',
+                                  maintainSize: true,
+                                  maintainAnimation: true,
+                                  maintainState: true,
+                                  child: IconButton(
                                     onPressed: () {
                                       setState(() {
                                         _exactDateToFetch = null;
                                         _periodToFetch = null;
                                         _selectedFilterDate = 'Reciente';
-                                        isLoadingMore = true;
+                                        // isLoadingMore = true;
+
+                                        _cachedSales = [];
+                                        _cachedHasReachedSalesMax = true;
                                       });
 
                                       treasuryBloc.add(
@@ -908,6 +882,7 @@ class _HistoryWidgetState extends State<HistoryWidget> {
                                     },
                                     icon: Icon(Icons.delete_forever_sharp),
                                   ),
+                                ),
                                 IconButton(
                                   onPressed: _selectCustomDate,
                                   icon: Icon(Icons.filter_list_sharp),
@@ -923,8 +898,13 @@ class _HistoryWidgetState extends State<HistoryWidget> {
                             child: Column(
                               children: [
                                 if (sales.isEmpty)
-                                  const Center(
-                                    child: Column(
+                                  Center(
+                                    child: state is SalesGoldHistoryLoading
+                                    ? const Padding(
+                                        padding: EdgeInsets.only(top: 200),
+                                        child: CircularProgressIndicator(),
+                                      )
+                                    : const Column(
                                       mainAxisSize: MainAxisSize.min,
                                       children: [
                                         SizedBox(height: 200),
@@ -1066,7 +1046,7 @@ class _HistoryWidgetState extends State<HistoryWidget> {
                                                   ),
                                                   // Campo para peso de venta
                                                   Text(
-                                                    '${sales[index].pesoTotalG} G',
+                                                    '${sales[index].pesoTotalG} g',
                                                     style: TextStyle(
                                                       fontWeight:
                                                           FontWeight.bold,
@@ -1087,7 +1067,7 @@ class _HistoryWidgetState extends State<HistoryWidget> {
                                                   ),
                                                   // Campo para precio total
                                                   Text(
-                                                    '\$ ${sales[index].montoTotalBs} usd',
+                                                    '${sales[index].montoTotalBs} Bs',
                                                     style: TextStyle(
                                                       fontWeight:
                                                           FontWeight.bold,

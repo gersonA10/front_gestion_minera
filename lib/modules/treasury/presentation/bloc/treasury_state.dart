@@ -195,23 +195,23 @@ class GoldDashboardError extends TreasuryState {
   GoldDashboardError(this.message);
 }
 
-class SalesGHistoryLoading extends TreasuryState {}
+class SalesGoldHistoryLoading extends TreasuryState {}
 
-class SalesGHistoryLoaded extends TreasuryState {
+class SalesGoldHistoryLoaded extends TreasuryState {
   final StatsSaleHistoryEntity stats;
   final List<SaleHistoryEntity> sales;
   final bool hasReachedMax;
 
-  SalesGHistoryLoaded({
+  SalesGoldHistoryLoaded({
     required this.stats,
     required this.sales,
     required this.hasReachedMax,
   });
 }
 
-class SalesGHistoryError extends TreasuryState{
+class SalesGoldHistoryError extends TreasuryState{
   final String message;
-  SalesGHistoryError(this.message);
+  SalesGoldHistoryError(this.message);
 }
 
 ///

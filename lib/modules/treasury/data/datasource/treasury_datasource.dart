@@ -1,5 +1,3 @@
-
-
 import 'dart:ffi';
 
 import '../../../../core/networking/http_services.dart';
@@ -172,15 +170,7 @@ class TreasuryDatasource {
     );
   }
 
-  Future<StatsSaleHistoryModel> getStatsSalesHistory() async {
-    final response = await apiClient.get(
-      '/api/treasury/sales/history',
-      operationName: 'getStatsSalesHistory',
-    );
-    return StatsSaleHistoryModel.fromJson(response['meta']);
-  }
-
-  Future<PaginatedSalesHistoryEntity> getHistorySales({
+  Future<SaleHistoryResponseEntity> getHistorySales({
     int page = 1,
     int limit = 5,
     String? status,
@@ -194,11 +184,9 @@ class TreasuryDatasource {
 
     final List<dynamic> data = response['data'];
     final Map<String, dynamic> meta = response['meta'];
-    final totalRegistro = meta['total_registros'];
-    return PaginatedSalesHistoryEntity(
+    return SaleHistoryResponseEntity(
+      meta: StatsSaleHistoryModel.fromJson(meta),
       sales: data.map((item) => SaleHistoryModel.fromJson(item)).toList(),
-      hashMore: ((page * limit) < totalRegistro),
-      totalRegistros: meta['total_registros'] ?? 0,
     );
   }
 

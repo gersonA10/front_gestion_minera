@@ -4,8 +4,8 @@ class SaleHistoryEntity {
   final DateTime fecha;
   final String comprador;
   final double pesoTotalKg;
-  final int pesoTotalG;
-  final int montoTotalBs;
+  final double pesoTotalG;
+  final double montoTotalBs;
   final String estado;
 
   SaleHistoryEntity({
@@ -22,10 +22,12 @@ class SaleHistoryEntity {
 
 class StatsSaleHistoryEntity {
   final double vendidoEsteMesKg;
-  final int vendidoEsteMesG;
+  final double vendidoEsteMesG;
   final String variacionMesPct;
   final double vendidoDelAnioKg;
-  final int vendidoDelAnioG;
+  final double vendidoDelAnioG;
+  final int totalPaginas;
+  final int totalRegistros;
 
   StatsSaleHistoryEntity({
     required this.vendidoEsteMesKg,
@@ -33,17 +35,17 @@ class StatsSaleHistoryEntity {
     required this.variacionMesPct,
     required this.vendidoDelAnioKg,
     required this.vendidoDelAnioG,
+    required this.totalPaginas,
+    required this.totalRegistros,
   });
 }
 
-class PaginatedSalesHistoryEntity {
+class SaleHistoryResponseEntity {
+  final StatsSaleHistoryEntity meta;
   final List<SaleHistoryEntity> sales;
-  final bool hashMore;
-  final int totalRegistros;
 
-  PaginatedSalesHistoryEntity({
+  SaleHistoryResponseEntity({
+    required this.meta,
     required this.sales,
-    required this.hashMore,
-    required this.totalRegistros,
   });
 }

@@ -32,8 +32,7 @@ abstract class TreasuryRepository {
   Future<GoldInventoryEntity> getGoldInventory();
   Future<PaginatedGoldBatchesEntity> getGoldBatches({int page = 1, int limit = 10, String? status});
   
-  Future<StatsSaleHistoryEntity> getStatsSalesHistory();
-  Future<PaginatedSalesHistoryEntity> getSalesHistory({int page = 1, int limit = 5, String? status});
+  Future<SaleHistoryResponseEntity> getSalesHistory({int page = 1, int limit = 5, String? status});
   
   Future<ConfirmPaymentResponseEntity> confirmPayment(
     String idCash,
