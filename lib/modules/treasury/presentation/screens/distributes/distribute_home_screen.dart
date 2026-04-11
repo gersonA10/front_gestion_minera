@@ -73,8 +73,9 @@ class _DistributeHomeScreenState extends State<DistributeHomeScreen> {
       child: Scaffold(
         backgroundColor: TColors.background,
         floatingActionButton: FloatingActionButton.extended(
-          onPressed: () {
-            context.router.push(const NewDistributionRoute());
+          onPressed: () async{
+            await context.router.push(const NewDistributionRoute());
+              _bloc.add(GetDistributionHistoryEvent(isRefresh: true));
           },
           backgroundColor: TColors.primary,
           foregroundColor: TColors.white,
@@ -159,12 +160,15 @@ class _DistributeHomeScreenState extends State<DistributeHomeScreen> {
               return Column(
                 children: [
                   Container(
+                    width: double.infinity,
                     color: TColors.surface,
-                    padding:  EdgeInsets.symmetric(
-                        horizontal: 60, vertical: 12),
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 16, vertical: 12),
                     child: SingleChildScrollView(
                       scrollDirection: Axis.horizontal,
                       child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        mainAxisAlignment: MainAxisAlignment.center,
                         children: ['Todos', ...years].map((anio) {
                           final selected = _filtroAnio == anio;
                           return Padding(

@@ -115,6 +115,7 @@ class TreasuryBloc extends Bloc<TreasuryEvent, TreasuryState> {
     on<NewExtractionEvent>(_onNewExtraction);
     on<PreviewSaleEvent>(_onPreviewSale);
     on<RegisterSaleEvent>(_onRegisterSale);
+    on<GetSaleDetailEvent>(_getSaleDetail);
     on<ApplyForALoanEvent>(_onApplyForALoan);
     on<NewLoansSimulateEvent>(_onNewLoansSimulate);
     on<LoanDetailsEvent>(_onLoanDetails);
@@ -130,6 +131,8 @@ class TreasuryBloc extends Bloc<TreasuryEvent, TreasuryState> {
     on<LoadMoreContributionsEvent>(_onLoadMoreContributions);
     on<GetContributionDetailEvent>(_onGetContributionDetail);
     on<LoadMoreContributionDetailEvent>(_onLoadMoreContributionDetail);
+     on<PayDividendEvent>(_onPayDividend);
+    on<ReceiptEvent>(_getReceipt);
     on<GetContributionReceiptsEvent>(_onGetContributionReceipts);
     on<LoadMoreContributionReceiptsEvent>(_onLoadMoreContributionReceipts);
   }
@@ -724,6 +727,23 @@ class TreasuryBloc extends Bloc<TreasuryEvent, TreasuryState> {
     }
   }
 
+  Future<void> _getSaleDetail(
+    GetSaleDetailEvent event,
+    Emitter<TreasuryState> emit,
+  ) async {
+    try {
+      final response = await repository.getSaleById(event.idSale);
+      emit (RegistersaleGetSucces(data: response));
+    } on BaseApiException catch (error) {
+      if (error.key == DioExceptionKey.unauthorised) {
+        return;
+      }
+      emit(SalePreviewError(message: mapErrorMessage(error.key)));
+    } catch (e) {
+      emit(SalePreviewError(message: 'Error inesperado: $e'));
+    }
+  }
+
   Future<void> _onNewLoansSimulate(
     NewLoansSimulateEvent event,
     Emitter<TreasuryState> emit,
@@ -954,6 +974,28 @@ class TreasuryBloc extends Bloc<TreasuryEvent, TreasuryState> {
       emit(DistributionDetailError(mapErrorMessage(error.key)));
     } catch (e) {
       emit(DistributionDetailError('Error inesperado: $e'));
+    }
+  }
+
+  Future<void> _onPayDividend(
+    PayDividendEvent event,
+    Emitter<TreasuryState> emit,
+  ) async {
+    emit(PayDividendLoading());
+    try {
+      final response = await repository.payDividend(
+        event.distributionId,
+        event.memberId,
+        event.cashRegisterId,
+        event.period,
+        event.evidenciaPath,
+      );
+      emit(PayDividendSuccess(data: response));
+    } on BaseApiException catch (error) {
+      if (error.key == DioExceptionKey.unauthorised) return;
+      emit(PayDividendError(mapErrorMessage(error.key)));
+    } catch (e) {
+      emit(PayDividendError('Error inesperado: $e'));
     }
   }
 
@@ -1200,6 +1242,24 @@ class TreasuryBloc extends Bloc<TreasuryEvent, TreasuryState> {
       emit(ContributionDetailError('Error inesperado: $e'));
     } finally {
       _isLoadingMoreContributionDetail = false;
+    }
+  }
+
+  Future<void> _getReceipt(
+    ReceiptEvent event,
+    Emitter<TreasuryState> emit,
+  ) async {
+    emit(ReceiptLoading());
+    try {
+      final response = await repository.getReceipt(
+        event.transactionId,
+      );
+      emit(ReceiptSuccess(data: response));
+    } on BaseApiException catch (error) {
+      if (error.key == DioExceptionKey.unauthorised) return;
+      emit(ReceiptError(mapErrorMessage(error.key)));
+    } catch (e) {
+      emit(ReceiptError('Error inesperado: $e'));
     }
   }
 

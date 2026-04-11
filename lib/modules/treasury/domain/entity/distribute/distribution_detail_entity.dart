@@ -53,3 +53,23 @@ class DistributionDetailResponseEntity {
     required this.totalRecords,
   });
 }
+
+class DividendPaymentResponseEntity {
+  final String memberName;
+  final String period;
+  final double paidAmount;
+  final String reference;
+  final String dateTime;
+  final String affectedCashbox;
+  final String transactionId;
+
+  const DividendPaymentResponseEntity({
+    required this.memberName,
+    required this.period,
+    required this.paidAmount,
+    required this.reference,
+    required this.dateTime,
+    required this.affectedCashbox,
+    required this.transactionId,
+  });
+}

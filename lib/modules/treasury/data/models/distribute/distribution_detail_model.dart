@@ -1,5 +1,28 @@
 import '../../../domain/entity/distribute/distribution_detail_entity.dart';
 
+class DividendPaymentResponseModel extends DividendPaymentResponseEntity {
+  const DividendPaymentResponseModel({
+    required super.memberName,
+    required super.period,
+    required super.paidAmount,
+    required super.reference,
+    required super.dateTime,
+    required super.affectedCashbox,
+    required super.transactionId,
+  });
+
+  factory DividendPaymentResponseModel.fromJson(Map<String, dynamic> json) =>
+      DividendPaymentResponseModel(
+        memberName: json['member_name'] as String,
+        period: json['period'] as String,
+        paidAmount: (json['paid_amount'] as num).toDouble(),
+        reference: json['reference'] as String,
+        dateTime: json['date_time'] as String,
+        affectedCashbox: json['affected_cashbox'] as String,
+        transactionId: json['transaction_id'] as String,
+      );
+}
+
 class DistributionDetailHeaderModel extends DistributionDetailHeaderEntity {
   const DistributionDetailHeaderModel({
     required super.period,
