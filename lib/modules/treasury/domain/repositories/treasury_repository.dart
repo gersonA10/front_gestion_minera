@@ -131,4 +131,10 @@ abstract class TreasuryRepository {
     int page = 1,
     int limit = 10,
   });
+
+  Future<ContributionReceiptsResponseEntity> getContributionReceipts(
+    String contributionId, {
+    int page = 1,
+    int limit = 10,
+  });
 }

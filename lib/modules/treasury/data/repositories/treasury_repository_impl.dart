@@ -351,4 +351,22 @@ class TreasuryRepositoryImpl implements TreasuryRepository {
       totalRecords: result['total_records'] as int? ?? 0,
     );
   }
+
+  @override
+  Future<ContributionReceiptsResponseEntity> getContributionReceipts(
+    String contributionId, {
+    int page = 1,
+    int limit = 10,
+  }) async {
+    final result = await datasource.getContributionReceipts(
+      contributionId,
+      page: page,
+      limit: limit,
+    );
+    return ContributionReceiptsResponseEntity(
+      receipts: result['receipts'] as List<ContributionReceiptModel>,
+      hasMore: result['has_more'] as bool,
+      totalRecords: result['total_records'] as int? ?? 0,
+    );
+  }
 }

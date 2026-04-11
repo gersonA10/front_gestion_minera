@@ -29,3 +29,4 @@ export 'package:front_gestion_minera/modules/treasury/domain/entity/distribute/n
 export 'package:front_gestion_minera/modules/treasury/domain/entity/distribute/simulate_distribution_entity.dart';
 export 'package:front_gestion_minera/modules/treasury/domain/entity/contributes/contribute_entity.dart';
 export 'package:front_gestion_minera/modules/treasury/domain/entity/contributes/contribution_detail_entity.dart';
+export 'package:front_gestion_minera/modules/treasury/domain/entity/contributes/contribution_receipt_entity.dart';

@@ -1,5 +1,6 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:front_gestion_minera/config/router/app_router.gr.dart';
 import 'package:front_gestion_minera/injector_container.dart';
 import 'package:front_gestion_minera/modules/treasury/presentation/bloc/treasury_bloc.dart';
 import 'package:front_gestion_minera/utils/constants/color.constant.dart';
@@ -41,7 +42,7 @@ class _ContributesDetailScreenState extends State<ContributesDetailScreen> {
               color: TColors.appMainTextColor,
               size: 22,
             ),
-            onPressed: () => context.maybePop(),
+            onPressed: () => context.router.back(),
           ),
           title: const Text(
             'Detalle de Aporte',
@@ -51,6 +52,15 @@ class _ContributesDetailScreenState extends State<ContributesDetailScreen> {
               color: TColors.appMainTextColor,
             ),
           ),
+          actions: [
+            IconButton(
+              icon: const Icon(
+                Icons.history,
+                color: TColors.appMainTextColor,
+                size: 22,
+              ),
+              onPressed: () {context.router.push(ReceiptsHistoryRoute(contributionId: widget.contributionId));})
+          ],
           centerTitle: true,
         ),
         bottomNavigationBar: SafeArea(
