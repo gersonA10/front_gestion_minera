@@ -1,4 +1,3 @@
-import 'package:dio/dio.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:front_gestion_minera/modules/treasury/domain/entity/income_request_entity.dart';
 import 'package:front_gestion_minera/utils/error.dart';
@@ -124,6 +123,8 @@ class TreasuryBloc extends Bloc<TreasuryEvent, TreasuryState> {
     on<LoadMoreContributionsEvent>(_onLoadMoreContributions);
     on<GetContributionDetailEvent>(_onGetContributionDetail);
     on<LoadMoreContributionDetailEvent>(_onLoadMoreContributionDetail);
+     on<PayDividendEvent>(_onPayDividend);
+    on<ReceiptEvent>(_getReceipt);
   }
 
   Future<void> _onFetchTreasuryMetrics(
@@ -966,6 +967,28 @@ class TreasuryBloc extends Bloc<TreasuryEvent, TreasuryState> {
     }
   }
 
+  Future<void> _onPayDividend(
+    PayDividendEvent event,
+    Emitter<TreasuryState> emit,
+  ) async {
+    emit(PayDividendLoading());
+    try {
+      final response = await repository.payDividend(
+        event.distributionId,
+        event.memberId,
+        event.cashRegisterId,
+        event.period,
+        event.evidenciaPath,
+      );
+      emit(PayDividendSuccess(data: response));
+    } on BaseApiException catch (error) {
+      if (error.key == DioExceptionKey.unauthorised) return;
+      emit(PayDividendError(mapErrorMessage(error.key)));
+    } catch (e) {
+      emit(PayDividendError('Error inesperado: $e'));
+    }
+  }
+
   Future<void> _onLoadMoreDistributionDetail(
     LoadMoreDistributionDetailEvent event,
     Emitter<TreasuryState> emit,
@@ -1209,6 +1232,24 @@ class TreasuryBloc extends Bloc<TreasuryEvent, TreasuryState> {
       emit(ContributionDetailError('Error inesperado: $e'));
     } finally {
       _isLoadingMoreContributionDetail = false;
+    }
+  }
+
+  Future<void> _getReceipt(
+    ReceiptEvent event,
+    Emitter<TreasuryState> emit,
+  ) async {
+    emit(ReceiptLoading());
+    try {
+      final response = await repository.getReceipt(
+        event.transactionId,
+      );
+      emit(ReceiptSuccess(data: response));
+    } on BaseApiException catch (error) {
+      if (error.key == DioExceptionKey.unauthorised) return;
+      emit(ReceiptError(mapErrorMessage(error.key)));
+    } catch (e) {
+      emit(ReceiptError('Error inesperado: $e'));
     }
   }
 }

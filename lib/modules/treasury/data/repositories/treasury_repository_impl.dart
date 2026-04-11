@@ -356,4 +356,25 @@ class TreasuryRepositoryImpl implements TreasuryRepository {
       totalRecords: result['total_records'] as int? ?? 0,
     );
   }
+   @override
+  Future<DividendPaymentResponseEntity> payDividend(
+    String distributionId,
+    String memberId,
+    String cashRegisterId,
+    String period,
+    String evidenciaPath,
+  ) async {
+    return await datasource.payDividend(
+      distributionId,
+      memberId,
+      cashRegisterId,
+      period,
+      evidenciaPath,
+    );
+  }
+  
+  @override
+  Future<ReceiptResponseEneity> getReceipt(String transactionId) {
+    return datasource.receiptDetails(transactionId);
+  }
 }

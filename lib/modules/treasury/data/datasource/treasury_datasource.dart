@@ -418,6 +418,28 @@ class TreasuryDatasource {
     };
   }
 
+  Future<DividendPaymentResponseEntity> payDividend(
+    String distributionId,
+    String memberId,
+    String cashRegisterId,
+    String period,
+    String evidenciaPath,
+  ) async {
+    final response = await apiClient.postFormData(
+      '/api/treasury/distributions/$distributionId/members/$memberId/pay',
+      data: {'cash_register_id': cashRegisterId, 'period': period},
+      operationName: 'payDividend',
+      files: [
+        {
+          'name': 'evidencia',
+          'path': evidenciaPath,
+          'filename': evidenciaPath.split('/').last,
+        },
+      ],
+    );
+    return DividendPaymentResponseModel.fromJson(response['data']);
+  }
+
   Future<Map<String, dynamic>> getDistributionHistory({
     int page = 1,
     int limit = 10,
@@ -550,5 +572,12 @@ class TreasuryDatasource {
       'has_more': meta['has_more'] ?? false,
       'total_records': meta['total_records'] ?? 0,
     };
+  }
+  Future<ReceiptResponseEneity> receiptDetails(String receiptId) async {
+    final response = await apiClient.get(
+      '/api/treasury/distributions/receipt/$receiptId',
+      operationName: 'receiptDetails',
+    );
+    return ReceiptResponseModel.fromJson(response['data']);
   }
 }
