@@ -331,6 +331,13 @@ class TreasuryDatasource {
     return RegisterSaleResponseModel.fromJson(response['data']);
   }
 
+  Future<RegisterSaleResponseEntity> getSaleById(String idSale) async{
+    final response = await apiClient.get(
+      '/api/treasury/sales/$idSale', 
+      operationName: 'getSaleById');
+    return RegisterSaleResponseModel.fromJson(response['data']);
+  }
+
   Future<NewLoansResponseEntity> postNewLoansSimulate(
     double amount,
     int termMonths,
@@ -410,6 +417,28 @@ class TreasuryDatasource {
       'has_more': meta['has_more'] ?? false,
       'total_records': meta['total_records'] ?? 0,
     };
+  }
+
+  Future<DividendPaymentResponseEntity> payDividend(
+    String distributionId,
+    String memberId,
+    String cashRegisterId,
+    String period,
+    String evidenciaPath,
+  ) async {
+    final response = await apiClient.postFormData(
+      '/api/treasury/distributions/$distributionId/members/$memberId/pay',
+      data: {'cash_register_id': cashRegisterId, 'period': period},
+      operationName: 'payDividend',
+      files: [
+        {
+          'name': 'evidencia',
+          'path': evidenciaPath,
+          'filename': evidenciaPath.split('/').last,
+        },
+      ],
+    );
+    return DividendPaymentResponseModel.fromJson(response['data']);
   }
 
   Future<Map<String, dynamic>> getDistributionHistory({
@@ -521,6 +550,28 @@ class TreasuryDatasource {
     };
   }
 
+  Future<Map<String, dynamic>> getContributionReceipts(
+    String contributionId, {
+    int page = 1,
+    int limit = 10,
+  }) async {
+    final Map<String, dynamic> queryParameters = {'page': page, 'limit': limit};
+    final response = await apiClient.get(
+      '/api/treasury/contributions/$contributionId/receipts',
+      operationName: 'getContributionReceipts',
+      queryParameters: queryParameters,
+    );
+    final List<dynamic> data = response['data'] ?? [];
+    final Map<String, dynamic> meta = response['meta'] ?? {};
+    return {
+      'receipts': data
+          .map((r) => ContributionReceiptModel.fromJson(r as Map<String, dynamic>))
+          .toList(),
+      'has_more': meta['has_more'] ?? false,
+      'total_records': meta['total_records'] ?? 0,
+    };
+  }
+
   Future<Map<String, dynamic>> getContributions({
     int page = 1,
     int limit = 10,
@@ -545,7 +596,13 @@ class TreasuryDatasource {
       'total_records': meta['total_records'] ?? 0,
     };
   }
-
+  Future<ReceiptResponseEneity> receiptDetails(String receiptId) async {
+    final response = await apiClient.get(
+      '/api/treasury/distributions/receipt/$receiptId',
+      operationName: 'receiptDetails',
+    );
+    return ReceiptResponseModel.fromJson(response['data']);
+  }
   Future<RecordContributionPaymentDataModel> recordContributionPayment(
     RecordContributionPaymentRequestModel recordContributionPaymentRequestModel
   ) async {

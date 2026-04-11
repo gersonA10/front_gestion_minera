@@ -280,6 +280,12 @@ class RegisterSaleError extends TreasuryState {
   final String message;
   RegisterSaleError({required this.message});
 }
+
+class RegistersaleGetSucces extends TreasuryState {
+  final RegisterSaleResponseEntity data;
+
+  RegistersaleGetSucces({required this.data});
+}
 // registrar prestamo
 class ApplyForALoanLoading extends TreasuryState {}
 
@@ -464,11 +470,57 @@ class ContributionDetailLoaded extends TreasuryState {
   });
 }
 
+
 class ContributionDetailError extends TreasuryState {
   final String message;
   ContributionDetailError(this.message);
 }
 
+class PayDividendLoading extends TreasuryState {}
+
+class PayDividendSuccess extends TreasuryState {
+  final DividendPaymentResponseEntity data;
+  PayDividendSuccess({required this.data});
+}
+
+class PayDividendError extends TreasuryState {
+  final String message;
+  PayDividendError(this.message);
+}
+
+///
+class ReceiptLoading extends TreasuryState {}
+
+class ReceiptSuccess extends TreasuryState {
+  final ReceiptResponseEneity data;
+  ReceiptSuccess({required this.data});
+}
+
+class ReceiptError extends TreasuryState {
+  final String message;
+  ReceiptError(this.message);
+}
+
+
+// historial de recibos de aporte
+class ContributionReceiptsLoading extends TreasuryState {}
+
+class ContributionReceiptsLoaded extends TreasuryState {
+  final List<ContributionReceiptEntity> receipts;
+  final bool hasReachedMax;
+  final int totalRecords;
+
+  ContributionReceiptsLoaded({
+    required this.receipts,
+    required this.hasReachedMax,
+    required this.totalRecords,
+  });
+}
+
+class ContributionReceiptsError extends TreasuryState {
+  final String message;
+  ContributionReceiptsError(this.message);
+}
 // registrar pago de aporte
 class RecordContributionPaymentLoading extends TreasuryState {}
 

@@ -120,6 +120,13 @@ class RegisterSaleEvent extends TreasuryEvent {
   RegisterSaleEvent({required this.request});
 }
 
+class GetSaleDetailEvent extends TreasuryEvent {
+  final String idSale;
+
+  GetSaleDetailEvent({required this.idSale});
+
+}
+
 //simulacion de nuevo prestamo
 class NewLoansSimulateEvent extends TreasuryEvent {
   final double amount;
@@ -227,6 +234,38 @@ class GetContributionDetailEvent extends TreasuryEvent {
 }
 
 class LoadMoreContributionDetailEvent extends TreasuryEvent {}
+class PayDividendEvent extends TreasuryEvent {
+  final String distributionId;
+  final String memberId;
+  final String cashRegisterId;
+  final String period;
+  final String evidenciaPath;
+
+  PayDividendEvent({
+    required this.distributionId,
+    required this.memberId,
+    required this.cashRegisterId,
+    required this.period,
+    required this.evidenciaPath,
+  });
+}
+
+class ReceiptEvent extends TreasuryEvent {
+  final String transactionId;
+  ReceiptEvent({required this.transactionId});
+}
+
+
+class GetContributionReceiptsEvent extends TreasuryEvent {
+  final String contributionId;
+  final bool isRefresh;
+  GetContributionReceiptsEvent({
+    required this.contributionId,
+    this.isRefresh = true,
+  });
+}
+
+class LoadMoreContributionReceiptsEvent extends TreasuryEvent {}
 
 class RecordContributionPaymentEvent extends TreasuryEvent {
   final RecordContributionPaymentRequestEntity recordContributionPaymentRequestModel;

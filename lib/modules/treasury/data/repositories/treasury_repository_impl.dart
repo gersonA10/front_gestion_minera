@@ -209,6 +209,11 @@ class TreasuryRepositoryImpl implements TreasuryRepository {
   }
 
   @override
+  Future<RegisterSaleResponseEntity> getSaleById(String idSale) async{
+    return await datasource.getSaleById(idSale);
+  }
+
+  @override
   Future<NewLoansResponseEntity> postNewLoansSimulate(
     double amount,
     int termMonths,
@@ -349,7 +354,46 @@ class TreasuryRepositoryImpl implements TreasuryRepository {
       totalRecords: result['total_records'] as int? ?? 0,
     );
   }
+   @override
+  Future<DividendPaymentResponseEntity> payDividend(
+    String distributionId,
+    String memberId,
+    String cashRegisterId,
+    String period,
+    String evidenciaPath,
+  ) async {
+    return await datasource.payDividend(
+      distributionId,
+      memberId,
+      cashRegisterId,
+      period,
+      evidenciaPath,
+    );
+  }
   
+  @override
+  Future<ReceiptResponseEneity> getReceipt(String transactionId) {
+    return datasource.receiptDetails(transactionId);
+  }
+
+  @override
+  Future<ContributionReceiptsResponseEntity> getContributionReceipts(
+    String contributionId, {
+    int page = 1,
+    int limit = 10,
+  }) async {
+    final result = await datasource.getContributionReceipts(
+      contributionId,
+      page: page,
+      limit: limit,
+    );
+    return ContributionReceiptsResponseEntity(
+      receipts: result['receipts'] as List<ContributionReceiptModel>,
+      hasMore: result['has_more'] as bool,
+      totalRecords: result['total_records'] as int? ?? 0,
+    );
+  }
+
   @override
   Future<RecordContributionPaymentDataEntity> recordContributionPayment(RecordContributionPaymentRequestEntity recordContributionPaymentRequestModel) async{
       final requestModel = RecordContributionPaymentRequestModel.fromEntity(recordContributionPaymentRequestModel);
