@@ -216,3 +216,14 @@ class GetContributionsEvent extends TreasuryEvent {
 }
 
 class LoadMoreContributionsEvent extends TreasuryEvent {}
+
+class GetContributionDetailEvent extends TreasuryEvent {
+  final String contributionId;
+  final bool isRefresh;
+  GetContributionDetailEvent({
+    required this.contributionId,
+    this.isRefresh = true,
+  });
+}
+
+class LoadMoreContributionDetailEvent extends TreasuryEvent {}
