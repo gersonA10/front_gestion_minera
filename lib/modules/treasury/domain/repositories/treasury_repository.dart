@@ -1,3 +1,4 @@
+import '../entity/contributes/contribute_entity.dart';
 import '../entity/entity.dart';
 import '../entity/income_request_entity.dart';
 
@@ -75,6 +76,8 @@ abstract class TreasuryRepository {
     RegisterSaleRequestEntity request,
   );
 
+  Future<RegisterSaleResponseEntity> getSaleById(String idSale);
+
   Future<ApplyForALoanResponseEntity> applyForALoan(
     String lenderName,
     double amount,
@@ -119,7 +122,18 @@ abstract class TreasuryRepository {
     double baseAmount
   );
 
-   Future<DividendPaymentResponseEntity> payDividend(
+  Future<ContributionsResponseEntity> getContributions({
+    int page = 1,
+    int limit = 10,
+    String? search,
+  });
+
+  Future<ContributionDetailResponseEntity> getContributionDetail(
+    String contributionId, {
+    int page = 1,
+    int limit = 10,
+  });
+  Future<DividendPaymentResponseEntity> payDividend(
     String distributionId,
     String memberId,
     String cashRegisterId,
@@ -129,3 +143,4 @@ abstract class TreasuryRepository {
 
   Future<ReceiptResponseEneity> getReceipt(String transactionId);
 }
+

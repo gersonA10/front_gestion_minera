@@ -5,26 +5,8 @@ import 'package:front_gestion_minera/core/widgets/custom_alert_widget.dart';
 import 'package:front_gestion_minera/injector_container.dart';
 import 'package:front_gestion_minera/modules/admin/users/domain/entity/user_entity.dart';
 import 'package:front_gestion_minera/modules/admin/users/presentation/bloc/admin_users_bloc.dart';
+import 'package:front_gestion_minera/utils/constants/color.constant.dart';
 
-// ─────────────────────────────────────────────────────────────────────────────
-// PALETA (idéntica al management screen para coherencia)
-// ─────────────────────────────────────────────────────────────────────────────
-class _AppColors {
-  static const background    = Color(0xFFF7F8FC);
-  static const surface       = Colors.white;
-  static const primary       = Color(0xFF2563EB);
-  static const primaryLight  = Color(0xFFEFF4FF);
-  static const textPrimary   = Color(0xFF111827);
-  static const textSecondary = Color(0xFF6B7280);
-  static const divider       = Color(0xFFE5E7EB);
-  static const success       = Color(0xFF10B981);
-  static const error         = Color(0xFFEF4444);
-  static const amber         = Color(0xFFF59E0B);
-}
-
-// ─────────────────────────────────────────────────────────────────────────────
-// PANTALLA DEL FORMULARIO
-// ─────────────────────────────────────────────────────────────────────────────
 @RoutePage()
 class UserFormScreen extends StatefulWidget {
   final String? userId;
@@ -163,7 +145,7 @@ class _UserFormScreenState extends State<UserFormScreen>
           final isLoading = !_contentReady;
 
           return Scaffold(
-            backgroundColor: _AppColors.background,
+            backgroundColor: TColors.white,
             appBar: _buildAppBar(context),
             body: Stack(
               children: [
@@ -250,7 +232,7 @@ class _UserFormScreenState extends State<UserFormScreen>
                                     _obscurePassword
                                         ? Icons.visibility_off_outlined
                                         : Icons.visibility_outlined,
-                                    color: _AppColors.textSecondary,
+                                    color: TColors.appSecondaryColor,
                                     size: 20,
                                   ),
                                   onPressed: () => setState(
@@ -327,17 +309,17 @@ class _UserFormScreenState extends State<UserFormScreen>
                     opacity: isSaving ? 1 : 0,
                     duration: const Duration(milliseconds: 200),
                     child: Container(
-                      color: Colors.black.withOpacity(0.25),
+                      color: Colors.black.withValues(alpha:0.25),
                       child: Center(
                         child: Container(
                           width: 80,
                           height: 80,
                           decoration: BoxDecoration(
-                            color: _AppColors.surface,
+                            color: TColors.surface,
                             borderRadius: BorderRadius.circular(20),
                             boxShadow: [
                               BoxShadow(
-                                color: Colors.black.withOpacity(0.1),
+                                color: Colors.black.withValues(alpha:0.1),
                                 blurRadius: 20,
                                 offset: const Offset(0, 4),
                               ),
@@ -345,7 +327,7 @@ class _UserFormScreenState extends State<UserFormScreen>
                           ),
                           child: const Center(
                             child: CircularProgressIndicator(
-                              color: _AppColors.primary,
+                              color: TColors.appMainDarkColor,
                               strokeWidth: 2.5,
                             ),
                           ),
@@ -363,13 +345,13 @@ class _UserFormScreenState extends State<UserFormScreen>
 
   PreferredSizeWidget _buildAppBar(BuildContext context) {
     return AppBar(
-      backgroundColor: _AppColors.surface,
+      backgroundColor: TColors.surface,
       surfaceTintColor: Colors.transparent,
       elevation: 0,
       centerTitle: false,
       leading: IconButton(
         icon: const Icon(Icons.arrow_back_ios_new_rounded, size: 20),
-        color: _AppColors.textPrimary,
+        color: TColors.textPrimary,
         onPressed: () => context.router.back(),
       ),
       title: Column(
@@ -380,7 +362,7 @@ class _UserFormScreenState extends State<UserFormScreen>
             style: const TextStyle(
               fontSize: 17,
               fontWeight: FontWeight.w700,
-              color: _AppColors.textPrimary,
+              color: TColors.textPrimary,
               letterSpacing: -0.3,
             ),
           ),
@@ -388,23 +370,16 @@ class _UserFormScreenState extends State<UserFormScreen>
             _isEditMode ? 'Modifica los datos del usuario' : 'Completa el formulario',
             style: const TextStyle(
               fontSize: 12,
-              color: _AppColors.textSecondary,
+              color: TColors.textSecondary,
               fontWeight: FontWeight.w400,
             ),
           ),
         ],
       ),
-      bottom: PreferredSize(
-        preferredSize: const Size.fromHeight(1),
-        child: Divider(height: 1, color: _AppColors.divider),
-      ),
     );
   }
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
-// ENCABEZADO DE SECCIÓN
-// ─────────────────────────────────────────────────────────────────────────────
 class _SectionHeader extends StatelessWidget {
   final IconData icon;
   final String title;
@@ -419,10 +394,10 @@ class _SectionHeader extends StatelessWidget {
           width: 32,
           height: 32,
           decoration: BoxDecoration(
-            color: _AppColors.primaryLight,
+            color: TColors.primaryLight,
             borderRadius: BorderRadius.circular(8),
           ),
-          child: Icon(icon, color: _AppColors.primary, size: 16),
+          child: Icon(icon, color: TColors.appMainDarkColor, size: 16),
         ),
         const SizedBox(width: 10),
         Text(
@@ -430,7 +405,7 @@ class _SectionHeader extends StatelessWidget {
           style: const TextStyle(
             fontSize: 14,
             fontWeight: FontWeight.w700,
-            color: _AppColors.textPrimary,
+            color: TColors.textPrimary,
             letterSpacing: -0.1,
           ),
         ),
@@ -439,9 +414,6 @@ class _SectionHeader extends StatelessWidget {
   }
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
-// CAMPO DE TEXTO ESTILIZADO
-// ─────────────────────────────────────────────────────────────────────────────
 class _StyledTextField extends StatelessWidget {
   final TextEditingController controller;
   final String label;
@@ -467,34 +439,34 @@ class _StyledTextField extends StatelessWidget {
       controller: controller,
       obscureText: obscureText,
       keyboardType: keyboardType,
-      style: const TextStyle(fontSize: 14, color: _AppColors.textPrimary),
+      style: const TextStyle(fontSize: 14, color: TColors.textPrimary),
       decoration: InputDecoration(
         labelText: label,
-        labelStyle: const TextStyle(color: _AppColors.textSecondary, fontSize: 14),
-        prefixIcon: Icon(icon, color: _AppColors.textSecondary, size: 20),
+        labelStyle: const TextStyle(color: TColors.textSecondary, fontSize: 14),
+        prefixIcon: Icon(icon, color: TColors.textSecondary, size: 20),
         suffixIcon: suffixIcon,
         filled: true,
-        fillColor: _AppColors.surface,
+        fillColor: TColors.surface,
         contentPadding: const EdgeInsets.symmetric(vertical: 14, horizontal: 16),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(color: _AppColors.divider),
+          borderSide: const BorderSide(color: TColors.appMainDarkColor),
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(color: _AppColors.divider),
+          borderSide: const BorderSide(color: TColors.appMainDarkColor),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(color: _AppColors.primary, width: 1.5),
+          borderSide: const BorderSide(color: TColors.primary, width: 1.5),
         ),
         errorBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(color: _AppColors.error),
+          borderSide: const BorderSide(color: TColors.danger),
         ),
         focusedErrorBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(color: _AppColors.error, width: 1.5),
+          borderSide: const BorderSide(color: TColors.danger, width: 1.5),
         ),
       ),
       validator: validator,
@@ -502,9 +474,6 @@ class _StyledTextField extends StatelessWidget {
   }
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
-// DROPDOWN ESTILIZADO
-// ─────────────────────────────────────────────────────────────────────────────
 class _StyledDropdown extends StatelessWidget {
   final String label;
   final IconData icon;
@@ -529,39 +498,36 @@ class _StyledDropdown extends StatelessWidget {
       items: items,
       onChanged: onChanged,
       validator: validator,
-      style: const TextStyle(fontSize: 14, color: _AppColors.textPrimary),
-      dropdownColor: _AppColors.surface,
+      style: const TextStyle(fontSize: 14, color: TColors.textPrimary),
+      dropdownColor: TColors.surface,
       decoration: InputDecoration(
         labelText: label,
-        labelStyle: const TextStyle(color: _AppColors.textSecondary, fontSize: 14),
-        prefixIcon: Icon(icon, color: _AppColors.textSecondary, size: 20),
+        labelStyle: const TextStyle(color: TColors.textSecondary, fontSize: 14),
+        prefixIcon: Icon(icon, color: TColors.textSecondary, size: 20),
         filled: true,
-        fillColor: _AppColors.surface,
+        fillColor: TColors.surface,
         contentPadding: const EdgeInsets.symmetric(vertical: 14, horizontal: 16),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(color: _AppColors.divider),
+          borderSide: const BorderSide(color: TColors.appMainDarkColor),
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(color: _AppColors.divider),
+          borderSide: const BorderSide(color: TColors.appMainDarkColor),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(color: _AppColors.primary, width: 1.5),
+          borderSide: const BorderSide(color: TColors.primary, width: 1.5),
         ),
         errorBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(color: _AppColors.error),
+          borderSide: const BorderSide(color: TColors.danger),
         ),
       ),
     );
   }
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
-// ROW DE ESTADO (activo / inactivo) — solo modo edición
-// ─────────────────────────────────────────────────────────────────────────────
 class _StatusToggleRow extends StatelessWidget {
   final bool isActive;
   final ValueChanged<bool> onChanged;
@@ -575,20 +541,20 @@ class _StatusToggleRow extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
       decoration: BoxDecoration(
         color: isActive
-            ? _AppColors.success.withOpacity(0.06)
-            : _AppColors.divider.withOpacity(0.5),
+            ? TColors.success.withValues(alpha:0.06)
+            : TColors.appMainDarkColor.withValues(alpha:0.5),
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
           color: isActive
-              ? _AppColors.success.withOpacity(0.3)
-              : _AppColors.divider,
+              ? TColors.success.withValues(alpha:0.3)
+              : TColors.appMainDarkColor,
         ),
       ),
       child: Row(
         children: [
           Icon(
             isActive ? Icons.check_circle_outline_rounded : Icons.cancel_outlined,
-            color: isActive ? _AppColors.success : _AppColors.textSecondary,
+            color: isActive ? TColors.success : TColors.textSecondary,
             size: 22,
           ),
           const SizedBox(width: 12),
@@ -601,7 +567,7 @@ class _StatusToggleRow extends StatelessWidget {
                   style: TextStyle(
                     fontWeight: FontWeight.w600,
                     fontSize: 14,
-                    color: isActive ? _AppColors.success : _AppColors.textSecondary,
+                    color: isActive ? TColors.success : TColors.textSecondary,
                   ),
                 ),
                 Text(
@@ -610,7 +576,7 @@ class _StatusToggleRow extends StatelessWidget {
                       : 'Acceso al sistema deshabilitado',
                   style: const TextStyle(
                     fontSize: 12,
-                    color: _AppColors.textSecondary,
+                    color: TColors.textSecondary,
                   ),
                 ),
               ],
@@ -620,9 +586,9 @@ class _StatusToggleRow extends StatelessWidget {
             value: isActive,
             onChanged: onChanged,
             activeColor: Colors.white,
-            activeTrackColor: _AppColors.success,
+            activeTrackColor: TColors.success,
             inactiveThumbColor: Colors.white,
-            inactiveTrackColor: _AppColors.divider,
+            inactiveTrackColor: TColors.appMainDarkColor,
           ),
         ],
       ),
@@ -630,9 +596,6 @@ class _StatusToggleRow extends StatelessWidget {
   }
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
-// BOTÓN GUARDAR
-// ─────────────────────────────────────────────────────────────────────────────
 class _SaveButton extends StatelessWidget {
   final bool isLoading;
   final bool isEditMode;
@@ -651,9 +614,9 @@ class _SaveButton extends StatelessWidget {
       child: ElevatedButton(
         onPressed: isLoading ? null : onPressed,
         style: ElevatedButton.styleFrom(
-          backgroundColor: _AppColors.primary,
+          backgroundColor: TColors.appMainDarkColor,
           foregroundColor: Colors.white,
-          disabledBackgroundColor: _AppColors.primary.withOpacity(0.5),
+          disabledBackgroundColor: TColors.appMainDarkColor.withValues(alpha: 0.5),
           elevation: 0,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(14),
@@ -682,9 +645,7 @@ class _SaveButton extends StatelessWidget {
   }
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
-// SKELETON DEL FORMULARIO
-// ─────────────────────────────────────────────────────────────────────────────
+
 class _FormSkeleton extends StatefulWidget {
   const _FormSkeleton();
 

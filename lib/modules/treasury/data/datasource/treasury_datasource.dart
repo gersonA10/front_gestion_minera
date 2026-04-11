@@ -330,6 +330,13 @@ class TreasuryDatasource {
     return RegisterSaleResponseModel.fromJson(response['data']);
   }
 
+  Future<RegisterSaleResponseEntity> getSaleById(String idSale) async{
+    final response = await apiClient.get(
+      '/api/treasury/sales/$idSale', 
+      operationName: 'getSaleById');
+    return RegisterSaleResponseModel.fromJson(response['data']);
+  }
+
   Future<NewLoansResponseEntity> postNewLoansSimulate(
     double amount,
     int termMonths,
@@ -510,7 +517,63 @@ class TreasuryDatasource {
     );
     return SimulateDistributionResponseModel.fromJson(response);
   }
-   Future<ReceiptResponseEneity> receiptDetails(String receiptId) async {
+
+  Future<Map<String, dynamic>> getContributionDetail(
+    String contributionId, {
+    int page = 1,
+    int limit = 10,
+  }) async {
+    final Map<String, dynamic> queryParameters = {'page': page, 'limit': limit};
+    final response = await apiClient.get(
+      '/api/treasury/contributions/$contributionId',
+      operationName: 'getContributionDetail',
+      queryParameters: queryParameters,
+    );
+    final Map<String, dynamic> headerMetrics =
+        response['header_metrics'] as Map<String, dynamic>;
+    final List<dynamic> membersList = response['members_list'] ?? [];
+    final Map<String, dynamic> meta = response['meta'] ?? {};
+    return {
+      'header_metrics': ContributionDetailHeaderMetricsModel.fromJson(
+        headerMetrics,
+      ),
+      'members_list': membersList
+          .map(
+            (m) => ContributionDetailMemberModel.fromJson(
+              m as Map<String, dynamic>,
+            ),
+          )
+          .toList(),
+      'has_more': meta['has_more'] ?? false,
+      'total_records': meta['total_records'] ?? 0,
+    };
+  }
+
+  Future<Map<String, dynamic>> getContributions({
+    int page = 1,
+    int limit = 10,
+    String? search,
+  }) async {
+    final Map<String, dynamic> queryParameters = {'page': page, 'limit': limit};
+    if (search != null && search.trim().isNotEmpty) {
+      queryParameters['search'] = search.trim();
+    }
+    final response = await apiClient.get(
+      '/api/treasury/contributions',
+      operationName: 'getContributions',
+      queryParameters: queryParameters,
+    );
+    final List<dynamic> data = response['data'] ?? [];
+    final Map<String, dynamic> meta = response['meta'] ?? {};
+    final Map<String, dynamic> metrics = response['metrics'] ?? {};
+    return {
+      'items': data.map((item) => ContributeItemModel.fromJson(item)).toList(),
+      'metrics': ContributeMetricsModel.fromJson(metrics),
+      'has_more': meta['has_more'] ?? false,
+      'total_records': meta['total_records'] ?? 0,
+    };
+  }
+  Future<ReceiptResponseEneity> receiptDetails(String receiptId) async {
     final response = await apiClient.get(
       '/api/treasury/distributions/receipt/$receiptId',
       operationName: 'receiptDetails',

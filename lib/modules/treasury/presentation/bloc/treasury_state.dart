@@ -280,6 +280,12 @@ class RegisterSaleError extends TreasuryState {
   final String message;
   RegisterSaleError({required this.message});
 }
+
+class RegistersaleGetSucces extends TreasuryState {
+  final RegisterSaleResponseEntity data;
+
+  RegistersaleGetSucces({required this.data});
+}
 // registrar prestamo
 class ApplyForALoanLoading extends TreasuryState {}
 
@@ -421,6 +427,51 @@ class SimulateDistributionLoaded extends TreasuryState {
 class SimulateDistributionError extends TreasuryState {
   final String message;
   SimulateDistributionError(this.message);
+}
+
+// aportes
+class ContributionsLoading extends TreasuryState {}
+
+class ContributionsLoaded extends TreasuryState {
+  final List<ContributeItemEntity> items;
+  final ContributeMetricsEntity metrics;
+  final bool hasReachedMax;
+  final int totalRecords;
+
+  ContributionsLoaded({
+    required this.items,
+    required this.metrics,
+    required this.hasReachedMax,
+    required this.totalRecords,
+  });
+}
+
+class ContributionsError extends TreasuryState {
+  final String message;
+  ContributionsError(this.message);
+}
+
+// detalle de aporte
+class ContributionDetailLoading extends TreasuryState {}
+
+class ContributionDetailLoaded extends TreasuryState {
+  final ContributionDetailHeaderMetricsEntity headerMetrics;
+  final List<ContributionDetailMemberEntity> membersList;
+  final bool hasReachedMax;
+  final int totalRecords;
+
+  ContributionDetailLoaded({
+    required this.headerMetrics,
+    required this.membersList,
+    required this.hasReachedMax,
+    required this.totalRecords,
+  });
+}
+
+
+class ContributionDetailError extends TreasuryState {
+  final String message;
+  ContributionDetailError(this.message);
 }
 
 class PayDividendLoading extends TreasuryState {}

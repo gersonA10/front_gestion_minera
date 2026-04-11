@@ -120,6 +120,13 @@ class RegisterSaleEvent extends TreasuryEvent {
   RegisterSaleEvent({required this.request});
 }
 
+class GetSaleDetailEvent extends TreasuryEvent {
+  final String idSale;
+
+  GetSaleDetailEvent({required this.idSale});
+
+}
+
 //simulacion de nuevo prestamo
 class NewLoansSimulateEvent extends TreasuryEvent {
   final double amount;
@@ -208,6 +215,25 @@ class SimulateDistributionEvent extends TreasuryEvent {
     required this.baseAmount,
   });
 }
+
+class GetContributionsEvent extends TreasuryEvent {
+  final bool isRefresh;
+  final String? search;
+  GetContributionsEvent({this.isRefresh = true, this.search});
+}
+
+class LoadMoreContributionsEvent extends TreasuryEvent {}
+
+class GetContributionDetailEvent extends TreasuryEvent {
+  final String contributionId;
+  final bool isRefresh;
+  GetContributionDetailEvent({
+    required this.contributionId,
+    this.isRefresh = true,
+  });
+}
+
+class LoadMoreContributionDetailEvent extends TreasuryEvent {}
 class PayDividendEvent extends TreasuryEvent {
   final String distributionId;
   final String memberId;
