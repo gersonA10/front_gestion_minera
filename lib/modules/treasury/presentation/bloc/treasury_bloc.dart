@@ -1,3 +1,4 @@
+import 'package:dio/dio.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:front_gestion_minera/modules/treasury/domain/entity/income_request_entity.dart';
 import 'package:front_gestion_minera/utils/error.dart';
@@ -107,6 +108,7 @@ class TreasuryBloc extends Bloc<TreasuryEvent, TreasuryState> {
     on<NewExtractionEvent>(_onNewExtraction);
     on<PreviewSaleEvent>(_onPreviewSale);
     on<RegisterSaleEvent>(_onRegisterSale);
+    on<GetSaleDetailEvent>(_getSaleDetail);
     on<ApplyForALoanEvent>(_onApplyForALoan);
     on<NewLoansSimulateEvent>(_onNewLoansSimulate);
     on<LoanDetailsEvent>(_onLoanDetails);
@@ -711,6 +713,23 @@ class TreasuryBloc extends Bloc<TreasuryEvent, TreasuryState> {
       emit(RegisterSaleError(message: mapErrorMessage(error.key)));
     } catch (e) {
       emit(RegisterSaleError(message: 'Error inesperado: $e'));
+    }
+  }
+
+  Future<void> _getSaleDetail(
+    GetSaleDetailEvent event,
+    Emitter<TreasuryState> emit,
+  ) async {
+    try {
+      final response = await repository.getSaleById(event.idSale);
+      emit (RegistersaleGetSucces(data: response));
+    } on BaseApiException catch (error) {
+      if (error.key == DioExceptionKey.unauthorised) {
+        return;
+      }
+      emit(SalePreviewError(message: mapErrorMessage(error.key)));
+    } catch (e) {
+      emit(SalePreviewError(message: 'Error inesperado: $e'));
     }
   }
 

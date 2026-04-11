@@ -211,6 +211,11 @@ class TreasuryRepositoryImpl implements TreasuryRepository {
   }
 
   @override
+  Future<RegisterSaleResponseEntity> getSaleById(String idSale) async{
+    return await datasource.getSaleById(idSale);
+  }
+
+  @override
   Future<NewLoansResponseEntity> postNewLoansSimulate(
     double amount,
     int termMonths,

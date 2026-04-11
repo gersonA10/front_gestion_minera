@@ -285,7 +285,7 @@ class ContributeHistoryRoute extends _i42.PageRouteInfo<void> {
 class ContributesDetailRoute
     extends _i42.PageRouteInfo<ContributesDetailRouteArgs> {
   ContributesDetailRoute({
-    _i43.Key? key,
+    _i44.Key? key,
     required String contributionId,
     List<_i42.PageRouteInfo>? children,
   }) : super(
@@ -314,7 +314,7 @@ class ContributesDetailRoute
 class ContributesDetailRouteArgs {
   const ContributesDetailRouteArgs({this.key, required this.contributionId});
 
-  final _i43.Key? key;
+  final _i44.Key? key;
 
   final String contributionId;
 
@@ -1064,10 +1064,15 @@ class SellSummaryRoute extends _i42.PageRouteInfo<SellSummaryRouteArgs> {
   SellSummaryRoute({
     _i43.Key? key,
     required _i45.RegisterSaleResponseEntity saleData,
+    bool isFromHistory = false,
     List<_i42.PageRouteInfo>? children,
   }) : super(
          SellSummaryRoute.name,
-         args: SellSummaryRouteArgs(key: key, saleData: saleData),
+         args: SellSummaryRouteArgs(
+           key: key,
+           saleData: saleData,
+           isFromHistory: isFromHistory,
+         ),
          initialChildren: children,
        );
 
@@ -1077,21 +1082,31 @@ class SellSummaryRoute extends _i42.PageRouteInfo<SellSummaryRouteArgs> {
     name,
     builder: (data) {
       final args = data.argsAs<SellSummaryRouteArgs>();
-      return _i35.SellSummaryScreen(key: args.key, saleData: args.saleData);
+      return _i35.SellSummaryScreen(
+        key: args.key,
+        saleData: args.saleData,
+        isFromHistory: args.isFromHistory,
+      );
     },
   );
 }
 
 class SellSummaryRouteArgs {
-  const SellSummaryRouteArgs({this.key, required this.saleData});
+  const SellSummaryRouteArgs({
+    this.key,
+    required this.saleData,
+    this.isFromHistory = false,
+  });
 
   final _i43.Key? key;
 
   final _i45.RegisterSaleResponseEntity saleData;
 
+  final bool isFromHistory;
+
   @override
   String toString() {
-    return 'SellSummaryRouteArgs{key: $key, saleData: $saleData}';
+    return 'SellSummaryRouteArgs{key: $key, saleData: $saleData, isFromHistory: $isFromHistory}';
   }
 }
 

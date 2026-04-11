@@ -330,6 +330,13 @@ class TreasuryDatasource {
     return RegisterSaleResponseModel.fromJson(response['data']);
   }
 
+  Future<RegisterSaleResponseEntity> getSaleById(String idSale) async{
+    final response = await apiClient.get(
+      '/api/treasury/sales/$idSale', 
+      operationName: 'getSaleById');
+    return RegisterSaleResponseModel.fromJson(response['data']);
+  }
+
   Future<NewLoansResponseEntity> postNewLoansSimulate(
     double amount,
     int termMonths,

@@ -120,6 +120,13 @@ class RegisterSaleEvent extends TreasuryEvent {
   RegisterSaleEvent({required this.request});
 }
 
+class GetSaleDetailEvent extends TreasuryEvent {
+  final String idSale;
+
+  GetSaleDetailEvent({required this.idSale});
+
+}
+
 //simulacion de nuevo prestamo
 class NewLoansSimulateEvent extends TreasuryEvent {
   final double amount;
