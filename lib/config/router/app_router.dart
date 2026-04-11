@@ -53,5 +53,6 @@ class AppRouter extends RootStackRouter {
     AutoRoute(page: NewDistributionRoute.page),
     AutoRoute(page: ContributesDetailRoute.page),
     AutoRoute(page: PaymentSuccessDistributionRoute.page),
+     AutoRoute(page: ReceiptsHistoryRoute.page),
   ];
 }

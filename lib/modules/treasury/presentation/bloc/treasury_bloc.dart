@@ -56,6 +56,14 @@ class TreasuryBloc extends Bloc<TreasuryEvent, TreasuryState> {
   bool _isLoadingMoreContributionDetail = false;
   String? _currentContributionId;
 
+  // historial de recibos de aporte
+  int _contributionReceiptsPage = 1;
+  bool _contributionReceiptsReachedMax = false;
+  int _contributionReceiptsTotalRecords = 0;
+  List<ContributionReceiptEntity> _contributionReceiptItems = [];
+  bool _isLoadingMoreContributionReceipts = false;
+  String? _currentReceiptsContributionId;
+
   // distribuciones
   int _distributionHistoryPage = 1;
   bool _distributionHistoryReachedMax = false;
@@ -125,6 +133,8 @@ class TreasuryBloc extends Bloc<TreasuryEvent, TreasuryState> {
     on<LoadMoreContributionDetailEvent>(_onLoadMoreContributionDetail);
      on<PayDividendEvent>(_onPayDividend);
     on<ReceiptEvent>(_getReceipt);
+    on<GetContributionReceiptsEvent>(_onGetContributionReceipts);
+    on<LoadMoreContributionReceiptsEvent>(_onLoadMoreContributionReceipts);
   }
 
   Future<void> _onFetchTreasuryMetrics(
@@ -1250,6 +1260,84 @@ class TreasuryBloc extends Bloc<TreasuryEvent, TreasuryState> {
       emit(ReceiptError(mapErrorMessage(error.key)));
     } catch (e) {
       emit(ReceiptError('Error inesperado: $e'));
+    }
+  }
+
+  Future<void> _onGetContributionReceipts(
+    GetContributionReceiptsEvent event,
+    Emitter<TreasuryState> emit,
+  ) async {
+    if (!event.isRefresh &&
+        _currentReceiptsContributionId == event.contributionId &&
+        _contributionReceiptItems.isNotEmpty) {
+      return emit(
+        ContributionReceiptsLoaded(
+          receipts: List.from(_contributionReceiptItems),
+          hasReachedMax: _contributionReceiptsReachedMax,
+          totalRecords: _contributionReceiptsTotalRecords,
+        ),
+      );
+    }
+    emit(ContributionReceiptsLoading());
+    _contributionReceiptsPage = 1;
+    _contributionReceiptsReachedMax = false;
+    _contributionReceiptItems.clear();
+    _currentReceiptsContributionId = event.contributionId;
+    try {
+      final response = await repository.getContributionReceipts(
+        event.contributionId,
+        page: _contributionReceiptsPage,
+      );
+      _contributionReceiptItems = List.from(response.receipts);
+      _contributionReceiptsReachedMax = !response.hasMore;
+      _contributionReceiptsTotalRecords = response.totalRecords;
+      emit(
+        ContributionReceiptsLoaded(
+          receipts: List.from(_contributionReceiptItems),
+          hasReachedMax: _contributionReceiptsReachedMax,
+          totalRecords: _contributionReceiptsTotalRecords,
+        ),
+      );
+    } on BaseApiException catch (error) {
+      if (error.key == DioExceptionKey.unauthorised) return;
+      emit(ContributionReceiptsError(mapErrorMessage(error.key)));
+    } catch (e) {
+      emit(ContributionReceiptsError('Error inesperado: $e'));
+    }
+  }
+
+  Future<void> _onLoadMoreContributionReceipts(
+    LoadMoreContributionReceiptsEvent event,
+    Emitter<TreasuryState> emit,
+  ) async {
+    if (_contributionReceiptsReachedMax || _isLoadingMoreContributionReceipts) {
+      return;
+    }
+    _isLoadingMoreContributionReceipts = true;
+    _contributionReceiptsPage++;
+    try {
+      final response = await repository.getContributionReceipts(
+        _currentReceiptsContributionId!,
+        page: _contributionReceiptsPage,
+      );
+      _contributionReceiptItems.addAll(response.receipts);
+      _contributionReceiptsReachedMax = !response.hasMore;
+      emit(
+        ContributionReceiptsLoaded(
+          receipts: List.from(_contributionReceiptItems),
+          hasReachedMax: _contributionReceiptsReachedMax,
+          totalRecords: _contributionReceiptsTotalRecords,
+        ),
+      );
+    } on BaseApiException catch (error) {
+      _contributionReceiptsPage--;
+      if (error.key == DioExceptionKey.unauthorised) return;
+      emit(ContributionReceiptsError(mapErrorMessage(error.key)));
+    } catch (e) {
+      _contributionReceiptsPage--;
+      emit(ContributionReceiptsError('Error inesperado: $e'));
+    } finally {
+      _isLoadingMoreContributionReceipts = false;
     }
   }
 }

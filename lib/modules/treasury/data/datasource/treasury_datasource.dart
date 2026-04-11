@@ -549,6 +549,28 @@ class TreasuryDatasource {
     };
   }
 
+  Future<Map<String, dynamic>> getContributionReceipts(
+    String contributionId, {
+    int page = 1,
+    int limit = 10,
+  }) async {
+    final Map<String, dynamic> queryParameters = {'page': page, 'limit': limit};
+    final response = await apiClient.get(
+      '/api/treasury/contributions/$contributionId/receipts',
+      operationName: 'getContributionReceipts',
+      queryParameters: queryParameters,
+    );
+    final List<dynamic> data = response['data'] ?? [];
+    final Map<String, dynamic> meta = response['meta'] ?? {};
+    return {
+      'receipts': data
+          .map((r) => ContributionReceiptModel.fromJson(r as Map<String, dynamic>))
+          .toList(),
+      'has_more': meta['has_more'] ?? false,
+      'total_records': meta['total_records'] ?? 0,
+    };
+  }
+
   Future<Map<String, dynamic>> getContributions({
     int page = 1,
     int limit = 10,

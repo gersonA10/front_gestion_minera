@@ -254,3 +254,16 @@ class ReceiptEvent extends TreasuryEvent {
   final String transactionId;
   ReceiptEvent({required this.transactionId});
 }
+
+
+class GetContributionReceiptsEvent extends TreasuryEvent {
+  final String contributionId;
+  final bool isRefresh;
+  GetContributionReceiptsEvent({
+    required this.contributionId,
+    this.isRefresh = true,
+  });
+}
+
+class LoadMoreContributionReceiptsEvent extends TreasuryEvent {}
+

@@ -498,3 +498,24 @@ class ReceiptError extends TreasuryState {
   final String message;
   ReceiptError(this.message);
 }
+
+
+// historial de recibos de aporte
+class ContributionReceiptsLoading extends TreasuryState {}
+
+class ContributionReceiptsLoaded extends TreasuryState {
+  final List<ContributionReceiptEntity> receipts;
+  final bool hasReachedMax;
+  final int totalRecords;
+
+  ContributionReceiptsLoaded({
+    required this.receipts,
+    required this.hasReachedMax,
+    required this.totalRecords,
+  });
+}
+
+class ContributionReceiptsError extends TreasuryState {
+  final String message;
+  ContributionReceiptsError(this.message);
+}

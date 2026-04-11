@@ -30,3 +30,4 @@ export 'package:front_gestion_minera/modules/treasury/data/models/distribute/sim
 export 'package:front_gestion_minera/modules/treasury/data/models/contribute/contribute_model.dart';
 export 'package:front_gestion_minera/modules/treasury/data/models/contribute/contribution_detail_model.dart';
 export 'package:front_gestion_minera/modules/treasury/data/models/distribute/receipt_model.dart';
+export 'package:front_gestion_minera/modules/treasury/data/models/contribute/contribution_receipt_model.dart';
