@@ -430,7 +430,7 @@ class TreasuryDatasource {
         },
       ],
     );
-    return DividendPaymentResponseModel.fromJson(response);
+    return DividendPaymentResponseModel.fromJson(response['data']);
   }
 
   Future<Map<String, dynamic>> getDistributionHistory({

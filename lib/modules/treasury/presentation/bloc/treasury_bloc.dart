@@ -98,13 +98,10 @@ class TreasuryBloc extends Bloc<TreasuryEvent, TreasuryState> {
     on<LoadMoreDistributionDetailEvent>(_onLoadMoreDistributionDetail);
     on<BatchLotDetailsEvent>(_onBatchLotDetails);
     on<PayTheFeeEvent>(_onPayTheFee);
-<<<<<<< HEAD
-    on<PayDividendEvent>(_onPayDividend);
-    on<ReceiptEvent>(_getReceipt);
-=======
     on<NewLayoutEvent>(_onNewLayout);
     on<SimulateDistributionEvent>(_onSimulateDistribution); 
->>>>>>> origin/dev
+    on<PayDividendEvent>(_onPayDividend);
+    on<ReceiptEvent>(_getReceipt);
   }
 
   Future<void> _onFetchTreasuryMetrics(

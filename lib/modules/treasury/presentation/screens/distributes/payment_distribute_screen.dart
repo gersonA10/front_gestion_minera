@@ -2,7 +2,7 @@ import 'dart:io';
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:front_gestion_minera/injector_container.dart';
+import 'package:front_gestion_minera/core/widgets/excavator_loader.dart';
 import 'package:front_gestion_minera/modules/treasury/domain/entity/distribute/receipt_entity.dart';
 import 'package:front_gestion_minera/modules/treasury/presentation/bloc/treasury_bloc.dart';
 import 'package:front_gestion_minera/utils/constants/color.constant.dart';
@@ -14,8 +14,9 @@ import 'package:pdf/widgets.dart' as pw;
 
 @RoutePage()
 class PaymentSuccessDistributionScreen extends StatefulWidget {
+  final TreasuryBloc bloc;
   final String receiptId;
-  const PaymentSuccessDistributionScreen({super.key, required this.receiptId});
+  const PaymentSuccessDistributionScreen({super.key, required this.receiptId, required this.bloc});
 
   @override
   State<PaymentSuccessDistributionScreen> createState() =>
@@ -27,8 +28,13 @@ class _PaymentSuccessDistributionScreenState
   bool _isGenerating = false;
   ReceiptResponseEneity? _receipt;
 
-  String _formatAmount(int amount) =>
-      'S/ ${NumberFormat('#,##0', 'es_PE').format(amount)}';
+  @override
+  void initState() {
+    super.initState();
+    widget.bloc.add(ReceiptEvent(transactionId:  widget.receiptId));
+  }
+
+
 
   String _formatDate(DateTime date) =>
       DateFormat('dd/MM/yyyy HH:mm').format(date);
@@ -72,7 +78,7 @@ class _PaymentSuccessDistributionScreenState
                 pw.Divider(),
                 pw.SizedBox(height: 12),
                 _pdfRow('Beneficiario', receipt.memberName),
-                _pdfRow('Monto Pagado', _formatAmount(receipt.paidAmount)),
+                _pdfRow('Monto Pagado', receipt.paidAmount.toString()),
                 _pdfRow('Periodo', receipt.period),
                 _pdfRow('Fecha / Hora', _formatDate(receipt.paymentDate)),
                 _pdfRow('Caja Origen', receipt.affectedCashbox.toUpperCase()),
@@ -127,53 +133,41 @@ class _PaymentSuccessDistributionScreenState
 
   @override
   Widget build(BuildContext context) {
-    return BlocProvider(
-      create: (context) =>
-          InjectorContainer.getIt<TreasuryBloc>()
-            ..add(ReceiptEvent(transactionId: widget.receiptId)),
+    return BlocProvider.value(
+      value: widget.bloc,
       child: Scaffold(
         backgroundColor: TColors.surface,
         appBar: AppBar(
+          automaticallyImplyLeading: false,
           backgroundColor: TColors.surface,
           elevation: 0,
-          leading: IconButton(
-            icon: const Icon(
-              Icons.arrow_back_ios,
-              color: TColors.textPrimary,
-              size: 18,
-            ),
-            onPressed: () => context.router.back(),
-          ),
           centerTitle: true,
           title: const Text(
             'Confirmación',
             style: TextStyle(
               color: TColors.textPrimary,
-              fontSize: 15,
+              fontSize: 18,
               fontWeight: FontWeight.w600,
             ),
           ),
         ),
         body: BlocConsumer<TreasuryBloc, TreasuryState>(
+          listenWhen: (_, curr) =>
+              curr is ReceiptSuccess ||
+              curr is ReceiptLoading ||
+              curr is ReceiptError,
           listener: (context, state) {
             if (state is ReceiptSuccess) {
               setState(() => _receipt = state.data);
             }
           },
+          buildWhen: (_, curr) =>
+              curr is ReceiptLoading ||
+              curr is ReceiptSuccess ||
+              curr is ReceiptError,
           builder: (context, state) {
-            if (state is ReceiptLoading) {
-              return const Center(child: CircularProgressIndicator());
-            }
-            if (state is ReceiptError) {
-              return Center(
-                child: Text(
-                  state.message,
-                  style: const TextStyle(color: TColors.textSecondary),
-                ),
-              );
-            }
-            if (state is ReceiptSuccess) {
-              final res = state.data;
+            if (_receipt != null) {
+              final res = _receipt!;
               return Column(
                 children: [
                   Expanded(
@@ -272,7 +266,7 @@ class _PaymentSuccessDistributionScreenState
                                 ),
                                 _DetailRow(
                                   label: 'Monto Pagado',
-                                  value: _formatAmount(res.paidAmount),
+                                  value: res.paidAmount.toString(),
                                 ),
                                 Divider(
                                   height: 1,
@@ -391,7 +385,7 @@ class _PaymentSuccessDistributionScreenState
                           width: double.infinity,
                           height: 52,
                           child: OutlinedButton(
-                            onPressed: () => Navigator.pop(context),
+                            onPressed: () {context.router.back();context.router.back();} ,
                             style: OutlinedButton.styleFrom(
                               foregroundColor: TColors.textPrimary,
                               side: const BorderSide(color: TColors.border),
@@ -414,7 +408,17 @@ class _PaymentSuccessDistributionScreenState
                 ],
               );
             }
-            return const SizedBox.shrink();
+            if (state is ReceiptError) {
+              return Center(
+                child: Text(
+                  state.message,
+                  style: const TextStyle(color: TColors.textSecondary),
+                ),
+              );
+            }
+            return const Center(
+              child: ExcavatorLoader()
+            );
           },
         ),
       ),

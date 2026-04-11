@@ -5,11 +5,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:front_gestion_minera/config/router/app_router.gr.dart';
 import 'package:front_gestion_minera/core/widgets/custom_alert_widget.dart';
-import 'package:front_gestion_minera/injector_container.dart';
+import 'package:front_gestion_minera/core/widgets/excavator_loader.dart';
 import 'package:front_gestion_minera/utils/constants/color.constant.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
-
 import '../../../../domain/entity/entity.dart';
 import '../../../bloc/treasury_bloc.dart';
 
@@ -44,14 +43,32 @@ class MemberCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return BlocConsumer<TreasuryBloc, TreasuryState>(
       listener: (context, state) {
-        if (state is PayDividendSuccess) {
-          context.router.push(
-            PaymentSuccessDistributionRoute(
-              receiptId: state.data.transactionId,
+        if (state is PayDividendLoading) {
+          showDialog(
+            context: context,
+            barrierDismissible: false,
+            barrierColor: Colors.black.withValues(alpha: 0.5),
+            builder: (_) => const PopScope(
+              canPop: false,
+              child: Center(child: ExcavatorLoader()),
             ),
           );
         }
+        if (state is PayDividendSuccess) {
+          Navigator.of(context, rootNavigator: true).pop();
+          Future.delayed(const Duration(milliseconds: 300)).then((_) {
+            if (context.mounted) {
+              context.router.push(
+                PaymentSuccessDistributionRoute(
+                  bloc: context.read<TreasuryBloc>(),
+                  receiptId: member.detailId,
+                ),
+              );
+            }
+          });
+        }
         if (state is PayDividendError) {
+          context.router.back();
           CustomAlert.show(
             context,
             title: 'Error',
@@ -223,7 +240,8 @@ class MemberCard extends StatelessWidget {
                       onPressed: () {
                         context.router.push(
                           PaymentSuccessDistributionRoute(
-                            receiptId: member.transactionId ?? '',
+                            bloc: context.read<TreasuryBloc>(),
+                            receiptId: member.detailId,
                           ),
                         );
                       },

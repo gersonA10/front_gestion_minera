@@ -46,6 +46,8 @@ import 'package:front_gestion_minera/modules/surveillance/presentation/screen/ho
 import 'package:front_gestion_minera/modules/treasury/domain/entity/entity.dart'
     as _i45;
 import 'package:front_gestion_minera/modules/treasury/domain/entity/loans/payment_process_entity.dart'
+    as _i47;
+import 'package:front_gestion_minera/modules/treasury/presentation/bloc/treasury_bloc.dart'
     as _i46;
 import 'package:front_gestion_minera/modules/treasury/presentation/screens/contributes/contributes_home_screen.dart'
     as _i6;
@@ -750,12 +752,14 @@ class PaymentSuccessDistributionRoute
   PaymentSuccessDistributionRoute({
     _i43.Key? key,
     required String receiptId,
+    required _i46.TreasuryBloc bloc,
     List<_i42.PageRouteInfo>? children,
   }) : super(
          PaymentSuccessDistributionRoute.name,
          args: PaymentSuccessDistributionRouteArgs(
            key: key,
            receiptId: receiptId,
+           bloc: bloc,
          ),
          initialChildren: children,
        );
@@ -769,6 +773,7 @@ class PaymentSuccessDistributionRoute
       return _i27.PaymentSuccessDistributionScreen(
         key: args.key,
         receiptId: args.receiptId,
+        bloc: args.bloc,
       );
     },
   );
@@ -778,15 +783,18 @@ class PaymentSuccessDistributionRouteArgs {
   const PaymentSuccessDistributionRouteArgs({
     this.key,
     required this.receiptId,
+    required this.bloc,
   });
 
   final _i43.Key? key;
 
   final String receiptId;
 
+  final _i46.TreasuryBloc bloc;
+
   @override
   String toString() {
-    return 'PaymentSuccessDistributionRouteArgs{key: $key, receiptId: $receiptId}';
+    return 'PaymentSuccessDistributionRouteArgs{key: $key, receiptId: $receiptId, bloc: $bloc}';
   }
 }
 
@@ -795,7 +803,7 @@ class PaymentSuccessDistributionRouteArgs {
 class PaymentSuccessRoute extends _i42.PageRouteInfo<PaymentSuccessRouteArgs> {
   PaymentSuccessRoute({
     _i43.Key? key,
-    required _i46.PayTheFeeResponseEntity paymentData,
+    required _i47.PayTheFeeResponseEntity paymentData,
     List<_i42.PageRouteInfo>? children,
   }) : super(
          PaymentSuccessRoute.name,
@@ -822,7 +830,7 @@ class PaymentSuccessRouteArgs {
 
   final _i43.Key? key;
 
-  final _i46.PayTheFeeResponseEntity paymentData;
+  final _i47.PayTheFeeResponseEntity paymentData;
 
   @override
   String toString() {

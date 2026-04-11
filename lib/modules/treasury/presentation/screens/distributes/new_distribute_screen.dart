@@ -393,6 +393,7 @@ class _NewDistributionScreenState extends State<NewDistributionScreen> {
                                 ),
                         ),
                       );
+                     
                     },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: TColors.primary,
