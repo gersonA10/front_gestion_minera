@@ -31,3 +31,4 @@ export 'package:front_gestion_minera/modules/treasury/domain/entity/contributes/
 export 'package:front_gestion_minera/modules/treasury/domain/entity/contributes/record_contribution_payment_entity.dart';
 export 'package:front_gestion_minera/modules/treasury/domain/entity/contributes/contribution_detail_entity.dart';
 export 'package:front_gestion_minera/modules/treasury/domain/entity/contributes/contribution_receipt_entity.dart';
+export 'package:front_gestion_minera/modules/treasury/domain/entity/contributes/contribution_payment_receipt_entity.dart';

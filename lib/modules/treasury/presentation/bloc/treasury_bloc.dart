@@ -136,6 +136,7 @@ class TreasuryBloc extends Bloc<TreasuryEvent, TreasuryState> {
     on<GetContributionReceiptsEvent>(_onGetContributionReceipts);
     on<LoadMoreContributionReceiptsEvent>(_onLoadMoreContributionReceipts);
     on<RecordContributionPaymentEvent>(_onRecordContributionPayment);
+    on<GetContributionPaymentReceiptEvent>(_onGetContributionPaymentReceipt);
   }
 
   Future<void> _onFetchTreasuryMetrics(
@@ -1362,5 +1363,22 @@ class TreasuryBloc extends Bloc<TreasuryEvent, TreasuryState> {
       emit(RecordContributionPaymentError(mapErrorMessage(error.key)));
     } catch (e) {
       emit(RecordContributionPaymentError('Error inesperado: $e'));
-    }}
+    }
+  }
+
+  Future<void> _onGetContributionPaymentReceipt(
+    GetContributionPaymentReceiptEvent event,
+    Emitter<TreasuryState> emit,
+  ) async {
+    emit(ContributionPaymentReceiptLoading());
+    try {
+      final response = await repository.getContributionPaymentReceipt(event.transactionId);
+      emit(ContributionPaymentReceiptLoaded(receipt: response));
+    } on BaseApiException catch (error) {
+      if (error.key == DioExceptionKey.unauthorised) return;
+      emit(ContributionPaymentReceiptError(mapErrorMessage(error.key)));
+    } catch (e) {
+      emit(ContributionPaymentReceiptError('Error inesperado: $e'));
+    }
+  }
 }

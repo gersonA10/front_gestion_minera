@@ -2,7 +2,9 @@ import 'dart:io';
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:front_gestion_minera/config/router/app_router.gr.dart';
 import 'package:front_gestion_minera/core/widgets/custom_alert_widget.dart';
+import 'package:front_gestion_minera/core/widgets/excavator_loader.dart';
 import 'package:front_gestion_minera/injector_container.dart';
 import 'package:front_gestion_minera/modules/treasury/presentation/bloc/treasury_bloc.dart';
 import 'package:front_gestion_minera/utils/constants/color.constant.dart';
@@ -414,15 +416,15 @@ class _RecordContributionPaymentScreenState
                         child: BlocConsumer<TreasuryBloc, TreasuryState>(
                         listener: (context, state) {
                           if (state is RecordContributionPaymentLoaded) {
-                            CustomAlert.show(
-                              context,
-                              title: 'Éxito',
-                              message:
-                                  'El pago se ha registrado correctamente.',
-                              type: AlertType.success,
+                            context.router.push(
+                              PaymentConfirmationRoute(
+                                transactionId: widget.item.detailId,
+                                screen: true
+                              ),
                             );
                           }
                           if (state is RecordContributionPaymentError) {
+                            context.router.back();
                             CustomAlert.show(
                               context,
                               title: 'Error',
@@ -432,11 +434,16 @@ class _RecordContributionPaymentScreenState
                           }
                         },
                         builder: (context, state) {
+                          final isLoading =
+                              state is RecordContributionPaymentLoading;
                           return Dialog(
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(24.0),
                             ),
-                            child: Container(
+                            child: Stack(
+                              clipBehavior: Clip.none,
+                              children: [
+                                Container(
                               padding: const EdgeInsets.all(24.0),
                               decoration: BoxDecoration(
                                 color: Colors.white,
@@ -583,6 +590,18 @@ class _RecordContributionPaymentScreenState
                                   ),
                                 ],
                               ),
+                            ),
+                                if (isLoading)
+                                  const Positioned(
+                                    top: -60,
+                                    left: 0,
+                                    right: 0,
+                                    child: ExcavatorLoader(
+                                      width: 120,
+                                      height: 120,
+                                    ),
+                                  ),
+                              ],
                             ),
                           );
                         },

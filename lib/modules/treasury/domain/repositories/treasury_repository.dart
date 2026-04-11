@@ -150,5 +150,8 @@ abstract class TreasuryRepository {
   Future<RecordContributionPaymentDataEntity> recordContributionPayment(
     RecordContributionPaymentRequestEntity recordContributionPaymentRequestModel
   );
+  Future<ContributionPaymentReceiptEntity> getContributionPaymentReceipt(
+    String transactionId,
+  );
 }
 

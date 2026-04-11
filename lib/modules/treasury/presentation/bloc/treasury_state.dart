@@ -533,3 +533,16 @@ class RecordContributionPaymentError extends TreasuryState {
   final String message;
   RecordContributionPaymentError(this.message);
 }
+
+// recibo de pago de aporte
+class ContributionPaymentReceiptLoading extends TreasuryState {}
+
+class ContributionPaymentReceiptLoaded extends TreasuryState {
+  final ContributionPaymentReceiptEntity receipt;
+  ContributionPaymentReceiptLoaded({required this.receipt});
+}
+
+class ContributionPaymentReceiptError extends TreasuryState {
+  final String message;
+  ContributionPaymentReceiptError(this.message);
+}

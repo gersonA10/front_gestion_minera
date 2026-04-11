@@ -273,3 +273,8 @@ class RecordContributionPaymentEvent extends TreasuryEvent {
     required this.recordContributionPaymentRequestModel,
   });
 }
+
+class GetContributionPaymentReceiptEvent extends TreasuryEvent {
+  final String transactionId;
+  GetContributionPaymentReceiptEvent({required this.transactionId});
+}

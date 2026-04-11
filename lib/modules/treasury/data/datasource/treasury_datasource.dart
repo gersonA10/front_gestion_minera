@@ -603,6 +603,16 @@ class TreasuryDatasource {
     );
     return ReceiptResponseModel.fromJson(response['data']);
   }
+  Future<ContributionPaymentReceiptModel> getContributionPaymentReceipt(
+    String transactionId,
+  ) async {
+    final response = await apiClient.get(
+      '/api/treasury/contributions/receipt/$transactionId',
+      operationName: 'getContributionPaymentReceipt',
+    );
+    return ContributionPaymentReceiptModel.fromJson(response['data']);
+  }
+
   Future<RecordContributionPaymentDataModel> recordContributionPayment(
     RecordContributionPaymentRequestModel recordContributionPaymentRequestModel
   ) async {

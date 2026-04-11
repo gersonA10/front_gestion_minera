@@ -400,4 +400,11 @@ class TreasuryRepositoryImpl implements TreasuryRepository {
     final response = await datasource.recordContributionPayment(requestModel);
     return response;
   }
+
+  @override
+  Future<ContributionPaymentReceiptEntity> getContributionPaymentReceipt(
+    String transactionId,
+  ) async {
+    return await datasource.getContributionPaymentReceipt(transactionId);
+  }
 }

@@ -33,7 +33,7 @@ class SocioCard extends StatelessWidget {
       onTap: () {
         isPendiente
                         ? context.router.push(RecordContributionPaymentRoute(dateContibution: dateContibution, titleContibuton: titleContibuton, item: item , cash: cash))
-                        : context.router.push(RecordContributionPaymentRoute(dateContibution: dateContibution, titleContibuton: titleContibuton, item: item, cash: cash));
+                        : context.router.push(PaymentConfirmationRoute(transactionId: item.detailId, screen: false));
        
       },
       child: Container(
