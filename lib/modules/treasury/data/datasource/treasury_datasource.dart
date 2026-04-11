@@ -488,4 +488,29 @@ class TreasuryDatasource {
     );
     return SimulateDistributionResponseModel.fromJson(response);
   }
+
+  Future<Map<String, dynamic>> getContributions({
+    int page = 1,
+    int limit = 10,
+    String? search,
+  }) async {
+    final Map<String, dynamic> queryParameters = {'page': page, 'limit': limit};
+    if (search != null && search.trim().isNotEmpty) {
+      queryParameters['search'] = search.trim();
+    }
+    final response = await apiClient.get(
+      '/api/treasury/contributions',
+      operationName: 'getContributions',
+      queryParameters: queryParameters,
+    );
+    final List<dynamic> data = response['data'] ?? [];
+    final Map<String, dynamic> meta = response['meta'] ?? {};
+    final Map<String, dynamic> metrics = response['metrics'] ?? {};
+    return {
+      'items': data.map((item) => ContributeItemModel.fromJson(item)).toList(),
+      'metrics': ContributeMetricsModel.fromJson(metrics),
+      'has_more': meta['has_more'] ?? false,
+      'total_records': meta['total_records'] ?? 0,
+    };
+  }
 }

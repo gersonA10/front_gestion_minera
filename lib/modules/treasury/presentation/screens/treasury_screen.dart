@@ -1,5 +1,4 @@
 import 'package:auto_route/auto_route.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:front_gestion_minera/config/router/app_router.dart';
 import 'package:front_gestion_minera/config/router/app_router.gr.dart';
@@ -7,7 +6,6 @@ import 'package:front_gestion_minera/config/theme/extension_theme.dart';
 import 'package:front_gestion_minera/injector_container.dart';
 import 'package:front_gestion_minera/utils/session/session_actions.dart';
 import 'package:front_gestion_minera/utils/text_util.dart';
-
 import '../bloc/treasury_bloc.dart';
 import '../widgets/widgtes.dart';
 
@@ -218,7 +216,7 @@ class _TreasuryScreenState extends State<TreasuryScreen> {
                           icon: Icons.login_outlined,
                           iconColor: const Color(0xFF0F9D8A),
                           bgColor: const Color(0xFFE7F8F5),
-                          onTap: () {},
+                          onTap: () {context.router.push(ContributesHomeRoute());},
                         ),
 
                         const SizedBox(height: 22),
