@@ -155,6 +155,19 @@ class TreasuryRepositoryImpl implements TreasuryRepository {
       totalRecords: result['total_records'] as int? ?? 0,
     );
   }
+  @override
+  Future<SaleHistoryResponseEntity> getSalesHistory({
+    int page = 1,
+    int limit = 5,
+    String? status,
+  }) async {
+    final result = await datasource.getHistorySales(
+      page: page,
+      limit: limit,
+      status: status,
+    );
+    return result;
+  }
 
   @override
   Future<InternalLoansResponseEntity> getInternalLoans({

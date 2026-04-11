@@ -24,7 +24,14 @@ class TreasuryBloc extends Bloc<TreasuryEvent, TreasuryState> {
   bool _hasReachedBatchMax = false;
   List<GoldBatchEntity> _goldBatches = [];
   GoldInventoryEntity? _goldInventory;
+  //Sales History
+  int _currentSalesPage = 1;
+  bool _hasReachedSalesMax = false;
+  List<SaleHistoryEntity> _goldSales = [];
+  StatsSaleHistoryEntity? _statsSales;
+  String? _currentSalesStatus;
   //Evitar bombardeo a la api
+  bool _isLoadingMoreSales = false;
   bool _isLoadingMoreBatches = false;
   bool _isLoadingMorePending = false;
   bool _isLoadingMorePayment = false;
@@ -107,6 +114,8 @@ class TreasuryBloc extends Bloc<TreasuryEvent, TreasuryState> {
     on<RegisterUrgentTransferEvent>(_onRegisterUrgentTransfer);
     on<FetchGoldDashboardDataEvent>(_onFetchGoldDashboardData);
     on<LoadMoreGoldBatchesEvent>(_onLoadMoreGoldBatches);
+    on<FetchHistorySalesEvent>(_onFetchHistorySalesEvent);
+    on<LoadMoreHistorySalesEvent>(_onLoadMoreSalesHistory);
     on<GetPaymentHistoryEvent>(_onGetPaymentHistory);
     on<LoadMorePaymentHistoryEvent>(_onLoadMorePaymentHistory);
     on<InternalLoansRequestsEvent>(_onFechInternalLoans);
@@ -499,9 +508,92 @@ class TreasuryBloc extends Bloc<TreasuryEvent, TreasuryState> {
       );
     } catch (e) {
       _paymentHistoryPage--;
-      // manejo de errores...
+      emit(PaymentHistoryError('Error inesperado: $e'));
     } finally {
       _isLoadingMorePayment = false;
+    }
+  }
+
+  Future<void> _onFetchHistorySalesEvent(
+    FetchHistorySalesEvent event,
+    Emitter<TreasuryState> emit,
+  ) async {
+    if (event.isRefresh) {
+      _currentSalesPage = 1;
+      _hasReachedSalesMax = false;
+      _isLoadingMoreSales = false;
+      _goldSales.clear();
+      _currentSalesStatus = event.status;
+      emit(SalesGoldHistoryLoading());
+    }
+    try {
+      final response = await repository.getSalesHistory(
+        page: _currentSalesPage,
+        limit: event.limit,
+        status: _currentSalesStatus
+      );
+      _statsSales = response.meta;
+
+      if (_currentSalesPage == 1) {
+        _goldSales = response.sales;
+      } else{
+        _goldSales.addAll(response.sales);
+      }
+       _hasReachedSalesMax = _currentSalesPage >= response.meta.totalPaginas;
+      emit(
+        SalesGoldHistoryLoaded(
+          stats: _statsSales!,
+          sales: List.from(_goldSales),
+          hasReachedMax: _hasReachedSalesMax,
+        ),
+      );
+    } on BaseApiException catch (error) {
+      emit(SalesGoldHistoryError(mapErrorMessage(error.key)));
+    } catch (e) {
+      emit(SalesGoldHistoryError('Error inesperado: $e'));
+    }
+  }
+
+  Future<void> _onLoadMoreSalesHistory(
+    LoadMoreHistorySalesEvent event,
+    Emitter<TreasuryState> emit,
+  ) async {
+    if (_hasReachedSalesMax ||
+        _statsSales == null ||
+        _isLoadingMoreSales) {
+      return;
+    }
+    _isLoadingMoreSales = true;
+    _currentSalesPage++;
+
+    try {
+      final response = await repository.getSalesHistory(
+        page: _currentSalesPage,
+        limit: event.limit,
+        status: _currentSalesStatus,
+      );
+      
+      _goldSales.addAll(response.sales);
+      _statsSales = response.meta;
+      _hasReachedSalesMax = _currentSalesPage >= response.meta.totalPaginas;
+
+      emit(
+        SalesGoldHistoryLoaded(
+          stats: _statsSales!,
+          sales: List.from(_goldSales),
+          hasReachedMax: _hasReachedSalesMax,
+        ),
+      );
+    } on BaseApiException catch (error) {
+      _currentSalesPage--;
+      if (error.key == DioExceptionKey.unauthorised) {
+        return;
+      }
+      emit(SalesGoldHistoryError(mapErrorMessage(error.key)));
+    } catch (e) {
+      emit(SalesGoldHistoryError('Error inesperado: $e'));
+    } finally {
+      _isLoadingMoreSales = false;
     }
   }
 

@@ -169,6 +169,26 @@ class TreasuryDatasource {
     );
   }
 
+  Future<SaleHistoryResponseEntity> getHistorySales({
+    int page = 1,
+    int limit = 5,
+    String? status,
+  }) async {
+    final queryParameters = {'page': page, 'limit': limit, 'status': ?status};
+    final response = await apiClient.get(
+      '/api/treasury/sales/history',
+      operationName: 'getStatsSalesHistory',
+      queryParameters: queryParameters,
+    );
+
+    final List<dynamic> data = response['data'];
+    final Map<String, dynamic> meta = response['meta'];
+    return SaleHistoryResponseEntity(
+      meta: StatsSaleHistoryModel.fromJson(meta),
+      sales: data.map((item) => SaleHistoryModel.fromJson(item)).toList(),
+    );
+  }
+
   Future<RejectAnApplicationResponseEntity> rejectAnApplication(
     String idCash,
     String reason,
