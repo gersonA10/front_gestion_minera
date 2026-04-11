@@ -1,4 +1,3 @@
-import 'package:dio/dio.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:front_gestion_minera/modules/treasury/domain/entity/income_request_entity.dart';
 import 'package:front_gestion_minera/utils/error.dart';
