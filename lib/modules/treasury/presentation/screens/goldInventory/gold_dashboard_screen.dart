@@ -3,7 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:front_gestion_minera/core/widgets/custom_date_selector.dart';
 import 'package:front_gestion_minera/config/router/app_router.gr.dart';
 import 'package:front_gestion_minera/injector_container.dart';
-import 'package:front_gestion_minera/modules/treasury/presentation/screens/goldInventory/sell_summary_screen.dart';
+import 'package:front_gestion_minera/utils/constants/color.constant.dart';
 
 import '../../../domain/entity/entity.dart';
 import '../../bloc/treasury_bloc.dart';
@@ -598,9 +598,10 @@ class _HistoryWidgetState extends State<HistoryWidget> {
   late final TreasuryBloc treasuryBloc;
   final ScrollController _scrollController = ScrollController();
 
-  bool isLoadingMore = false;
   bool _fabVisible = true;
   double _lastScrollOffset = 0;
+  bool _isFiltering = false;
+
   static const double _scrollThreshold = 10.0;
 
   @override
@@ -697,9 +698,13 @@ class _HistoryWidgetState extends State<HistoryWidget> {
 
     if (result != null) {
       setState(() {
+        _isFiltering = true;
         _selectedFilterDate = result.displayTitle;
         _periodToFetch = result.period;
         _exactDateToFetch = result.exactDate;
+
+        _cachedSales = [];
+        _cachedHasReachedSalesMax = true;
       });
       treasuryBloc.add(FetchHistorySalesEvent(isRefresh: true));
     }
@@ -709,31 +714,35 @@ class _HistoryWidgetState extends State<HistoryWidget> {
   Widget build(BuildContext context) {
     return BlocBuilder<TreasuryBloc, TreasuryState>(
       buildWhen: (previous, current) =>
-          current is SalesGHistoryLoading ||
-          current is SalesGHistoryLoaded ||
-          current is SalesGHistoryError,
+          current is SalesGoldHistoryLoading ||
+          current is SalesGoldHistoryLoaded ||
+          current is SalesGoldHistoryError,
       builder: (context, state) {
-        if (state is SalesGHistoryLoaded) {
+        if (state is SalesGoldHistoryLoaded) {
+          _isFiltering = false;
           _cachedStatsSales = state.stats;
           _cachedSales = state.sales;
           _cachedHasReachedSalesMax = state.hasReachedMax;
-
-          isLoadingMore = false;
         }
 
-        final bool isLoading = state is SalesGHistoryLoading;
+        final bool isLoading = state is SalesGoldHistoryLoading;
 
         if (_cachedStatsSales == null) {
           if (isLoading) {
             return const Center(child: CircularProgressIndicator());
           }
-          if (state is SalesGHistoryError) {
+          if (state is SalesGoldHistoryError) {
             return Center(child: Text(state.message));
           }
         }
         final statSales = _cachedStatsSales;
-        final sales = _applyFilter(_cachedSales ?? []);
-        if (sales.isEmpty && !(_cachedHasReachedSalesMax)) {
+        final hasCache = (_cachedSales ?? []).isNotEmpty;
+
+        final sales = isLoading && !hasCache
+            ? <SaleHistoryEntity>[]
+            : _applyFilter(_cachedSales ?? []);
+
+        if (!isLoading && !_isFiltering && sales.isEmpty && !(_cachedHasReachedSalesMax)) {
           treasuryBloc.add(LoadMoreHistorySalesEvent());
         }
         final hashReachedMax = sales.isEmpty ? true : _cachedHasReachedSalesMax;
@@ -752,8 +761,8 @@ class _HistoryWidgetState extends State<HistoryWidget> {
 
                       await treasuryBloc.stream.firstWhere(
                         (state) =>
-                            state is SalesGHistoryLoaded ||
-                            state is SalesGHistoryError,
+                            state is SalesGoldHistoryLoaded ||
+                            state is SalesGoldHistoryError,
                       );
                     },
                     child: SingleChildScrollView(
@@ -778,7 +787,7 @@ class _HistoryWidgetState extends State<HistoryWidget> {
                                   ),
                                   padding: const EdgeInsets.all(16),
                                   decoration: BoxDecoration(
-                                    color: Colors.white,
+                                    color: TColors.white ,
                                     borderRadius: BorderRadius.circular(20),
                                   ),
                                   child: Column(
@@ -789,7 +798,7 @@ class _HistoryWidgetState extends State<HistoryWidget> {
                                         children: [
                                           Icon(
                                             Icons.calendar_month_outlined,
-                                            color: Colors.blue,
+                                            color: TColors.appMainColor,
                                           ),
                                           const SizedBox(width: 5),
                                           Text('Vendido este mes'),
@@ -807,22 +816,10 @@ class _HistoryWidgetState extends State<HistoryWidget> {
                                             ),
                                           ),
                                           const SizedBox(width: 10),
-                                          Container(
-                                            padding: EdgeInsets.symmetric(
-                                              horizontal: 7,
-                                            ),
-                                            decoration: BoxDecoration(
-                                              color: Colors.green.shade100,
-                                              borderRadius:
-                                                  BorderRadius.circular(20),
-                                            ),
-                                            child: Row(
-                                              children: [
-                                                Icon(
-                                                  Icons.trending_up,
-                                                  size: 15,
-                                                ),
-                                              ],
+                                          const Text(
+                                            'g',
+                                            style: TextStyle(
+                                              fontWeight: FontWeight.bold,
                                             ),
                                           ),
                                         ],
@@ -837,7 +834,7 @@ class _HistoryWidgetState extends State<HistoryWidget> {
                                   ),
                                   padding: const EdgeInsets.all(16),
                                   decoration: BoxDecoration(
-                                    color: Colors.white,
+                                    color: TColors.white,
                                     borderRadius: BorderRadius.circular(20),
                                   ),
                                   child: Column(
@@ -848,7 +845,7 @@ class _HistoryWidgetState extends State<HistoryWidget> {
                                         children: [
                                           Icon(
                                             Icons.leaderboard,
-                                            color: Colors.blue,
+                                            color: TColors.appMainColor,
                                           ),
                                           const SizedBox(width: 5),
                                           Text('Vendido en Bs'),
@@ -865,23 +862,11 @@ class _HistoryWidgetState extends State<HistoryWidget> {
                                               fontWeight: FontWeight.bold,
                                             ),
                                           ),
-                                          Container(
-                                            padding: EdgeInsets.symmetric(
-                                              horizontal: 7,
-                                            ),
-                                            decoration: BoxDecoration(
-                                              color: Colors.green.shade100,
-                                              borderRadius:
-                                                  BorderRadius.circular(20),
-                                            ),
-                                            child: Row(
-                                              children: [
-                                                Icon(
-                                                  Icons.trending_up,
-                                                  size: 15,
-                                                ),
-                                                // Text('5.2 %',style: TextStyle(fontSize: 10),)
-                                              ],
+                                          SizedBox(width: 10),
+                                          const Text(
+                                            'Bs',
+                                            style: TextStyle(
+                                              fontWeight: FontWeight.bold,
                                             ),
                                           ),
                                         ],
@@ -907,14 +892,21 @@ class _HistoryWidgetState extends State<HistoryWidget> {
                                   ],
                                 ),
                                 Spacer(),
-                                if (_selectedFilterDate != 'Reciente')
-                                  IconButton(
+                                Visibility(
+                                  visible: _selectedFilterDate != 'Reciente',
+                                  maintainSize: true,
+                                  maintainAnimation: true,
+                                  maintainState: true,
+                                  child: IconButton(
                                     onPressed: () {
                                       setState(() {
+                                        _isFiltering = true;
                                         _exactDateToFetch = null;
                                         _periodToFetch = null;
                                         _selectedFilterDate = 'Reciente';
-                                        isLoadingMore = true;
+
+                                        _cachedSales = [];
+                                        _cachedHasReachedSalesMax = true;
                                       });
 
                                       treasuryBloc.add(
@@ -923,6 +915,7 @@ class _HistoryWidgetState extends State<HistoryWidget> {
                                     },
                                     icon: Icon(Icons.delete_forever_sharp),
                                   ),
+                                ),
                                 IconButton(
                                   onPressed: _selectCustomDate,
                                   icon: Icon(Icons.filter_list_sharp),
@@ -938,35 +931,40 @@ class _HistoryWidgetState extends State<HistoryWidget> {
                             child: Column(
                               children: [
                                 if (sales.isEmpty)
-                                  const Center(
-                                    child: Column(
-                                      mainAxisSize: MainAxisSize.min,
-                                      children: [
-                                        SizedBox(height: 200),
-                                        Icon(
-                                          Icons.inbox_rounded,
-                                          size: 56,
-                                          color: Color(0xFFD1D5DB),
-                                        ),
-                                        SizedBox(height: 12),
-                                        Text(
-                                          'No hay transacciones',
-                                          style: TextStyle(
-                                            color: Color(0xFF9CA3AF),
-                                            fontSize: 15,
-                                            fontWeight: FontWeight.w500,
+                                  Center(
+                                    child: state is SalesGoldHistoryLoading
+                                        ? const Padding(
+                                            padding: EdgeInsets.only(top: 200),
+                                            child: CircularProgressIndicator(),
+                                          )
+                                        : const Column(
+                                            mainAxisSize: MainAxisSize.min,
+                                            children: [
+                                              SizedBox(height: 200),
+                                              Icon(
+                                                Icons.inbox_rounded,
+                                                size: 56,
+                                                color: Color(0xFFD1D5DB),
+                                              ),
+                                              SizedBox(height: 12),
+                                              Text(
+                                                'No hay transacciones',
+                                                style: TextStyle(
+                                                  color: Color(0xFF9CA3AF),
+                                                  fontSize: 15,
+                                                  fontWeight: FontWeight.w500,
+                                                ),
+                                              ),
+                                              SizedBox(height: 4),
+                                              Text(
+                                                'Intenta con otro filtro de fecha',
+                                                style: TextStyle(
+                                                  color: Color(0xFFD1D5DB),
+                                                  fontSize: 13,
+                                                ),
+                                              ),
+                                            ],
                                           ),
-                                        ),
-                                        SizedBox(height: 4),
-                                        Text(
-                                          'Intenta con otro filtro de fecha',
-                                          style: TextStyle(
-                                            color: Color(0xFFD1D5DB),
-                                            fontSize: 13,
-                                          ),
-                                        ),
-                                      ],
-                                    ),
                                   ),
                                 ListView.builder(
                                   shrinkWrap: true,
@@ -989,7 +987,7 @@ class _HistoryWidgetState extends State<HistoryWidget> {
                                       ),
                                       padding: EdgeInsets.all(10),
                                       decoration: BoxDecoration(
-                                        color: Colors.white,
+                                        color: TColors.white,
                                         borderRadius: BorderRadius.circular(10),
                                       ),
                                       child: Column(
@@ -999,7 +997,7 @@ class _HistoryWidgetState extends State<HistoryWidget> {
                                               Container(
                                                 padding: EdgeInsets.all(5),
                                                 decoration: BoxDecoration(
-                                                  color: Colors.green
+                                                  color: TColors.enabledAccount
                                                       .withValues(alpha: 0.1),
                                                   borderRadius:
                                                       BorderRadius.circular(
@@ -1009,7 +1007,7 @@ class _HistoryWidgetState extends State<HistoryWidget> {
                                                 child: Icon(
                                                   Icons
                                                       .check_circle_outline_rounded,
-                                                  color: Colors.green
+                                                  color: TColors.enabledAccount
                                                       .withValues(alpha: 0.9),
                                                 ),
                                               ),
@@ -1030,7 +1028,7 @@ class _HistoryWidgetState extends State<HistoryWidget> {
                                                   Text(
                                                     _dateview(sales[index]),
                                                     style: TextStyle(
-                                                      color: Colors.grey,
+                                                      color: TColors.greyText,
                                                     ),
                                                   ),
                                                 ],
@@ -1042,21 +1040,21 @@ class _HistoryWidgetState extends State<HistoryWidget> {
                                                   horizontal: 3,
                                                 ),
                                                 decoration: BoxDecoration(
-                                                  color: Colors.green
+                                                  color: TColors.enabledAccount
                                                       .withValues(alpha: 0.2),
                                                   borderRadius:
                                                       BorderRadius.circular(8),
                                                   border: Border.all(
-                                                    color: Colors.green
+                                                    color: TColors.enabledAccount
                                                         .withValues(alpha: 0.5),
                                                   ),
                                                 ),
                                                 child:
                                                     // Campo para estado de venta
                                                     Text(
-                                                      '${sales[index].estado}',
+                                                      sales[index].estado,
                                                       style: TextStyle(
-                                                        color: Colors.green
+                                                        color: TColors.enabledAccount
                                                             .withValues(
                                                               alpha: 0.9,
                                                             ),
@@ -1066,7 +1064,7 @@ class _HistoryWidgetState extends State<HistoryWidget> {
                                               ),
                                             ],
                                           ),
-                                          Divider(color: Colors.grey.shade200),
+                                          Divider(color: TColors.greyText.withValues(alpha: 0.2)),
                                           Row(
                                             children: [
                                               Column(
@@ -1076,12 +1074,12 @@ class _HistoryWidgetState extends State<HistoryWidget> {
                                                   Text(
                                                     'Peso Total',
                                                     style: TextStyle(
-                                                      color: Colors.grey,
+                                                      color: TColors.greyText
                                                     ),
                                                   ),
                                                   // Campo para peso de venta
                                                   Text(
-                                                    '${sales[index].pesoTotalG} G',
+                                                    '${sales[index].pesoTotalG} g',
                                                     style: TextStyle(
                                                       fontWeight:
                                                           FontWeight.bold,
@@ -1097,12 +1095,12 @@ class _HistoryWidgetState extends State<HistoryWidget> {
                                                   Text(
                                                     'Monto Total',
                                                     style: TextStyle(
-                                                      color: Colors.grey,
+                                                      color: TColors.greyText
                                                     ),
                                                   ),
                                                   // Campo para precio total
                                                   Text(
-                                                    '\$ ${sales[index].montoTotalBs} usd',
+                                                    '${sales[index].montoTotalBs} Bs',
                                                     style: TextStyle(
                                                       fontWeight:
                                                           FontWeight.bold,
@@ -1133,7 +1131,7 @@ class _HistoryWidgetState extends State<HistoryWidget> {
                                                                 16,
                                                               ),
                                                           decoration: BoxDecoration(
-                                                            color: Colors.white,
+                                                            color: TColors.white,
                                                             borderRadius:
                                                                 BorderRadius.circular(
                                                                   8,
@@ -1147,9 +1145,9 @@ class _HistoryWidgetState extends State<HistoryWidget> {
                                                             },
                                                             style: ElevatedButton.styleFrom(
                                                               backgroundColor:
-                                                                  Colors.red,
+                                                                  TColors.red,
                                                               foregroundColor:
-                                                                  Colors.white,
+                                                                  TColors.white,
                                                             ),
                                                             child: const Text(
                                                               "Cerrar",

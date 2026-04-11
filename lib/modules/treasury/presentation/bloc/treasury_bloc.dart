@@ -522,33 +522,33 @@ class TreasuryBloc extends Bloc<TreasuryEvent, TreasuryState> {
       _isLoadingMoreSales = false;
       _goldSales.clear();
       _currentSalesStatus = event.status;
-      emit(SalesGHistoryLoading());
+      emit(SalesGoldHistoryLoading());
     }
     try {
-      final response = await Future.wait([
-        repository.getStatsSalesHistory(),
-        repository.getSalesHistory(
-          page: _currentSalesPage,
-          status: _currentSalesStatus,
-        ),
-      ]);
-      _statsSales = response[0] as StatsSaleHistoryEntity;
-      final salesData = response[1] as PaginatedSalesHistoryEntity;
+      final response = await repository.getSalesHistory(
+        page: _currentSalesPage,
+        limit: event.limit,
+        status: _currentSalesStatus
+      );
+      _statsSales = response.meta;
 
-      _goldSales = salesData.sales;
-      _hasReachedSalesMax = !salesData.hashMore;
-
+      if (_currentSalesPage == 1) {
+        _goldSales = response.sales;
+      } else{
+        _goldSales.addAll(response.sales);
+      }
+       _hasReachedSalesMax = _currentSalesPage >= response.meta.totalPaginas;
       emit(
-        SalesGHistoryLoaded(
+        SalesGoldHistoryLoaded(
           stats: _statsSales!,
           sales: List.from(_goldSales),
           hasReachedMax: _hasReachedSalesMax,
         ),
       );
     } on BaseApiException catch (error) {
-      emit(SalesGHistoryError(mapErrorMessage(error.key)));
+      emit(SalesGoldHistoryError(mapErrorMessage(error.key)));
     } catch (e) {
-      emit(SalesGHistoryError('Error inesperado: $e'));
+      emit(SalesGoldHistoryError('Error inesperado: $e'));
     }
   }
 
@@ -567,13 +567,16 @@ class TreasuryBloc extends Bloc<TreasuryEvent, TreasuryState> {
     try {
       final response = await repository.getSalesHistory(
         page: _currentSalesPage,
+        limit: event.limit,
         status: _currentSalesStatus,
       );
+      
       _goldSales.addAll(response.sales);
-      _hasReachedSalesMax = !response.hashMore;
+      _statsSales = response.meta;
+      _hasReachedSalesMax = _currentSalesPage >= response.meta.totalPaginas;
 
       emit(
-        SalesGHistoryLoaded(
+        SalesGoldHistoryLoaded(
           stats: _statsSales!,
           sales: List.from(_goldSales),
           hasReachedMax: _hasReachedSalesMax,
@@ -584,9 +587,9 @@ class TreasuryBloc extends Bloc<TreasuryEvent, TreasuryState> {
       if (error.key == DioExceptionKey.unauthorised) {
         return;
       }
-      emit(SalesGHistoryError(mapErrorMessage(error.key)));
+      emit(SalesGoldHistoryError(mapErrorMessage(error.key)));
     } catch (e) {
-      emit(SalesGHistoryError('Error inesperado: $e'));
+      emit(SalesGoldHistoryError('Error inesperado: $e'));
     } finally {
       _isLoadingMoreSales = false;
     }
