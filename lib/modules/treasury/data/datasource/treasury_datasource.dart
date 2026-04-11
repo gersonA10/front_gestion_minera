@@ -1,3 +1,4 @@
+
 import '../../../../core/networking/http_services.dart';
 import '../../domain/entity/entity.dart';
 import '../models/model.dart';
@@ -621,5 +622,33 @@ class TreasuryDatasource {
       operationName: 'receiptDetails',
     );
     return ReceiptResponseModel.fromJson(response['data']);
+  }
+  Future<ContributionPaymentReceiptModel> getContributionPaymentReceipt(
+    String transactionId,
+  ) async {
+    final response = await apiClient.get(
+      '/api/treasury/contributions/receipt/$transactionId',
+      operationName: 'getContributionPaymentReceipt',
+    );
+    return ContributionPaymentReceiptModel.fromJson(response['data']);
+  }
+
+  Future<RecordContributionPaymentDataModel> recordContributionPayment(
+    RecordContributionPaymentRequestModel recordContributionPaymentRequestModel
+  ) async {
+    final response = await apiClient.postFormData(
+      '/api/treasury/contributions/pay',
+      data: recordContributionPaymentRequestModel.toFormDataMap(),
+      operationName: 'recordContributionPayment',
+      files: [
+        {
+          'name': 'evidencia',
+          'path': recordContributionPaymentRequestModel.evidencia,
+          'filename': recordContributionPaymentRequestModel.evidencia.split('/').last,
+        },
+      ],
+    );
+
+    return RecordContributionPaymentDataModel.fromJson(response['data']);
   }
 }

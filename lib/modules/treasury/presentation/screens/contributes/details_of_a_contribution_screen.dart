@@ -9,7 +9,14 @@ import '../../widgets/widgtes.dart';
 @RoutePage()
 class ContributesDetailScreen extends StatefulWidget {
   final String contributionId;
-  const ContributesDetailScreen({super.key, required this.contributionId});
+  final DateTime dateContibution;
+  final String titleContibuton;
+  const ContributesDetailScreen({
+    super.key,
+    required this.contributionId,
+    required this.dateContibution,
+    required this.titleContibuton,
+  });
 
   @override
   State<ContributesDetailScreen> createState() =>
@@ -120,6 +127,7 @@ class _ContributesDetailScreenState extends State<ContributesDetailScreen> {
                   .where((m) => m.status.toLowerCase() != 'pendiente')
                   .toList();
               final lista = _selectedTab == 0 ? pendientes : pagados;
+              final cahs = state.cash;
 
               return SingleChildScrollView(
                 padding: const EdgeInsets.symmetric(
@@ -231,6 +239,9 @@ class _ContributesDetailScreenState extends State<ContributesDetailScreen> {
                       itemBuilder: (_, i) => SocioCard(
                         item: lista[i],
                         isPendiente: _selectedTab == 0,
+                        dateContibution: widget.dateContibution,
+                        titleContibuton: widget.titleContibuton,
+                        cash: cahs,
                       ),
                     ),
                     const SizedBox(height: 100),

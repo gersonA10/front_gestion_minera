@@ -32,3 +32,5 @@ export 'package:front_gestion_minera/modules/treasury/data/models/contribute/con
 export 'package:front_gestion_minera/modules/treasury/data/models/contribute/contribution_detail_model.dart';
 export 'package:front_gestion_minera/modules/treasury/data/models/distribute/receipt_model.dart';
 export 'package:front_gestion_minera/modules/treasury/data/models/contribute/contribution_receipt_model.dart';
+export 'package:front_gestion_minera/modules/treasury/data/models/contribute/record_contribution_payment_model.dart';
+export 'package:front_gestion_minera/modules/treasury/data/models/contribute/contribution_payment_receipt_model.dart';

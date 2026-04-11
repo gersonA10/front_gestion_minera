@@ -1,9 +1,7 @@
-import '../../domain/entity/contributes/contribute_entity.dart';
 import '../../domain/entity/entity.dart';
 import '../../domain/entity/income_request_entity.dart';
 import '../../domain/repositories/repository.dart';
 import '../datasource/datasource.dart';
-import '../models/contribute/contribute_model.dart';
 import '../models/model.dart';
 
 class TreasuryRepositoryImpl implements TreasuryRepository {
@@ -407,5 +405,19 @@ class TreasuryRepositoryImpl implements TreasuryRepository {
       hasMore: result['has_more'] as bool,
       totalRecords: result['total_records'] as int? ?? 0,
     );
+  }
+
+  @override
+  Future<RecordContributionPaymentDataEntity> recordContributionPayment(RecordContributionPaymentRequestEntity recordContributionPaymentRequestModel) async{
+      final requestModel = RecordContributionPaymentRequestModel.fromEntity(recordContributionPaymentRequestModel);
+    final response = await datasource.recordContributionPayment(requestModel);
+    return response;
+  }
+
+  @override
+  Future<ContributionPaymentReceiptEntity> getContributionPaymentReceipt(
+    String transactionId,
+  ) async {
+    return await datasource.getContributionPaymentReceipt(transactionId);
   }
 }

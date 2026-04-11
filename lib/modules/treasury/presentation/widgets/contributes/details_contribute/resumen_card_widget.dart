@@ -1,13 +1,12 @@
-
-import 'package:front_gestion_minera/modules/treasury/presentation/widgets/widgtes.dart';
+import 'package:flutter/material.dart';
 import 'package:front_gestion_minera/utils/constants/color.constant.dart';
 
 class ResumenCardContributes extends StatelessWidget {
   final String label;
   final String amount;
   final Color accentColor;
-
-  const ResumenCardContributes({super.key, 
+  const ResumenCardContributes({
+    super.key,
     required this.label,
     required this.amount,
     required this.accentColor,

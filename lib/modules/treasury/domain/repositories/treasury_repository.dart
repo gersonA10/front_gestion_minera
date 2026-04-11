@@ -145,7 +145,12 @@ abstract class TreasuryRepository {
     int page = 1,
     int limit = 10,
   });
-  
+  Future<RecordContributionPaymentDataEntity> recordContributionPayment(
+    RecordContributionPaymentRequestEntity recordContributionPaymentRequestModel
+  );
+  Future<ContributionPaymentReceiptEntity> getContributionPaymentReceipt(
+    String transactionId,
+  );
 }
 
 

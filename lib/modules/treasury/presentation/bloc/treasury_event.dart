@@ -284,3 +284,14 @@ class GetContributionReceiptsEvent extends TreasuryEvent {
 
 class LoadMoreContributionReceiptsEvent extends TreasuryEvent {}
 
+class RecordContributionPaymentEvent extends TreasuryEvent {
+  final RecordContributionPaymentRequestEntity recordContributionPaymentRequestModel;
+  RecordContributionPaymentEvent({
+    required this.recordContributionPaymentRequestModel,
+  });
+}
+
+class GetContributionPaymentReceiptEvent extends TreasuryEvent {
+  final String transactionId;
+  GetContributionPaymentReceiptEvent({required this.transactionId});
+}
