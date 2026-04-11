@@ -1,7 +1,9 @@
+import '../../domain/entity/contributes/contribute_entity.dart';
 import '../../domain/entity/entity.dart';
 import '../../domain/entity/income_request_entity.dart';
 import '../../domain/repositories/repository.dart';
 import '../datasource/datasource.dart';
+import '../models/contribute/contribute_model.dart';
 import '../models/model.dart';
 
 class TreasuryRepositoryImpl implements TreasuryRepository {
@@ -311,5 +313,21 @@ class TreasuryRepositoryImpl implements TreasuryRepository {
   @override
   Future<SimulateDistributionResponseEntity> postSimulateDistribution(double baseAmount) async{
     return await datasource.postSimulateDistribution(baseAmount);
+  }
+
+  @override
+  Future<ContributionsResponseEntity> getContributions({
+    int page = 1,
+    int limit = 10,
+    String? search,
+  }) async {
+    final result = await datasource.getContributions(page: page, limit: limit, search: search);
+    final models = result['items'] as List<ContributeItemModel>;
+    return ContributionsResponseEntity(
+      items: models,
+      metrics: result['metrics'] as ContributeMetricsModel,
+      hasMore: result['has_more'] as bool,
+      totalRecords: result['total_records'] as int? ?? 0,
+    );
   }
 }

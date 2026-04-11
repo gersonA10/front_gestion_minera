@@ -422,3 +422,25 @@ class SimulateDistributionError extends TreasuryState {
   final String message;
   SimulateDistributionError(this.message);
 }
+
+// aportes
+class ContributionsLoading extends TreasuryState {}
+
+class ContributionsLoaded extends TreasuryState {
+  final List<ContributeItemEntity> items;
+  final ContributeMetricsEntity metrics;
+  final bool hasReachedMax;
+  final int totalRecords;
+
+  ContributionsLoaded({
+    required this.items,
+    required this.metrics,
+    required this.hasReachedMax,
+    required this.totalRecords,
+  });
+}
+
+class ContributionsError extends TreasuryState {
+  final String message;
+  ContributionsError(this.message);
+}

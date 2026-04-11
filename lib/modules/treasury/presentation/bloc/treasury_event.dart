@@ -208,3 +208,11 @@ class SimulateDistributionEvent extends TreasuryEvent {
     required this.baseAmount,
   });
 }
+
+class GetContributionsEvent extends TreasuryEvent {
+  final bool isRefresh;
+  final String? search;
+  GetContributionsEvent({this.isRefresh = true, this.search});
+}
+
+class LoadMoreContributionsEvent extends TreasuryEvent {}

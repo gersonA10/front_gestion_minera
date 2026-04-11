@@ -1,3 +1,4 @@
+import '../entity/contributes/contribute_entity.dart';
 import '../entity/entity.dart';
 import '../entity/income_request_entity.dart';
 
@@ -118,4 +119,10 @@ abstract class TreasuryRepository {
   Future<SimulateDistributionResponseEntity> postSimulateDistribution(
     double baseAmount
   );
+
+  Future<ContributionsResponseEntity> getContributions({
+    int page = 1,
+    int limit = 10,
+    String? search,
+  });
 }

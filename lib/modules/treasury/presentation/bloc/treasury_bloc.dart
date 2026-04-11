@@ -38,6 +38,15 @@ class TreasuryBloc extends Bloc<TreasuryEvent, TreasuryState> {
   String? _currentStatus;
   String? _currentSearch;
 
+  // aportes
+  int _contributionsPage = 1;
+  bool _contributionsReachedMax = false;
+  int _contributionsTotalRecords = 0;
+  List<ContributeItemEntity> _contributionItems = [];
+  ContributeMetricsEntity? _contributionMetrics;
+  bool _isLoadingMoreContributions = false;
+  String? _currentContributionsSearch;
+
   // distribuciones
   int _distributionHistoryPage = 1;
   bool _distributionHistoryReachedMax = false;
@@ -99,7 +108,9 @@ class TreasuryBloc extends Bloc<TreasuryEvent, TreasuryState> {
     on<BatchLotDetailsEvent>(_onBatchLotDetails);
     on<PayTheFeeEvent>(_onPayTheFee);
     on<NewLayoutEvent>(_onNewLayout);
-    on<SimulateDistributionEvent>(_onSimulateDistribution); 
+    on<SimulateDistributionEvent>(_onSimulateDistribution);
+    on<GetContributionsEvent>(_onGetContributions);
+    on<LoadMoreContributionsEvent>(_onLoadMoreContributions);
   }
 
   Future<void> _onFetchTreasuryMetrics(
@@ -998,4 +1009,88 @@ class TreasuryBloc extends Bloc<TreasuryEvent, TreasuryState> {
       emit(SimulateDistributionError( 'Error inesperado: $e'));
     }
    }
+
+  Future<void> _onGetContributions(
+    GetContributionsEvent event,
+    Emitter<TreasuryState> emit,
+  ) async {
+    if (!event.isRefresh && _contributionItems.isNotEmpty) {
+      emit(
+        ContributionsLoaded(
+          items: List.from(_contributionItems),
+          metrics: _contributionMetrics!,
+          hasReachedMax: _contributionsReachedMax,
+          totalRecords: _contributionsTotalRecords,
+        ),
+      );
+      return;
+    }
+
+    if (event.isRefresh) {
+      _contributionsPage = 1;
+      _contributionsReachedMax = false;
+      _contributionItems.clear();
+      _contributionMetrics = null;
+      _currentContributionsSearch = event.search;
+      emit(ContributionsLoading());
+    }
+
+    try {
+      final response = await repository.getContributions(
+        page: _contributionsPage,
+        search: _currentContributionsSearch,
+      );
+      _contributionItems = response.items;
+      _contributionMetrics = response.metrics;
+      _contributionsReachedMax = !response.hasMore;
+      _contributionsTotalRecords = response.totalRecords;
+      emit(
+        ContributionsLoaded(
+          items: List.from(_contributionItems),
+          metrics: _contributionMetrics!,
+          hasReachedMax: _contributionsReachedMax,
+          totalRecords: _contributionsTotalRecords,
+        ),
+      );
+    } on BaseApiException catch (error) {
+      if (error.key == DioExceptionKey.unauthorised) return;
+      emit(ContributionsError(mapErrorMessage(error.key)));
+    } catch (e) {
+      emit(ContributionsError('Error inesperado: $e'));
+    }
+  }
+
+  Future<void> _onLoadMoreContributions(
+    LoadMoreContributionsEvent event,
+    Emitter<TreasuryState> emit,
+  ) async {
+    if (_contributionsReachedMax || _isLoadingMoreContributions) return;
+    _isLoadingMoreContributions = true;
+    _contributionsPage++;
+    try {
+      final response = await repository.getContributions(
+        page: _contributionsPage,
+        search: _currentContributionsSearch,
+      );
+      _contributionItems.addAll(response.items);
+      _contributionsReachedMax = !response.hasMore;
+      emit(
+        ContributionsLoaded(
+          items: List.from(_contributionItems),
+          metrics: _contributionMetrics!,
+          hasReachedMax: _contributionsReachedMax,
+          totalRecords: _contributionsTotalRecords,
+        ),
+      );
+    } on BaseApiException catch (error) {
+      _contributionsPage--;
+      if (error.key == DioExceptionKey.unauthorised) return;
+      emit(ContributionsError(mapErrorMessage(error.key)));
+    } catch (e) {
+      _contributionsPage--;
+      emit(ContributionsError('Error inesperado: $e'));
+    } finally {
+      _isLoadingMoreContributions = false;
+    }
+  }
 }
