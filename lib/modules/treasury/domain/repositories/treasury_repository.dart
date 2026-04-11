@@ -1,4 +1,3 @@
-import '../entity/contributes/contribute_entity.dart';
 import '../entity/entity.dart';
 import '../entity/income_request_entity.dart';
 
@@ -35,11 +34,10 @@ abstract class TreasuryRepository {
   Future<List<CashRegisterEntity>> getCashRegisters();
 
   Future<GoldInventoryEntity> getGoldInventory();
-  Future<PaginatedGoldBatchesEntity> getGoldBatches({
-    int page = 1,
-    int limit = 10,
-    String? status,
-  });
+  Future<PaginatedGoldBatchesEntity> getGoldBatches({int page = 1, int limit = 10, String? status});
+  
+  Future<SaleHistoryResponseEntity> getSalesHistory({int page = 1, int limit = 5, String? status});
+  
   Future<ConfirmPaymentResponseEntity> confirmPayment(
     String idCash,
     ConfirmPaymentRequetsEntity confirmPaymentRequets,
@@ -147,5 +145,9 @@ abstract class TreasuryRepository {
     int page = 1,
     int limit = 10,
   });
+  
 }
+
+
+
 

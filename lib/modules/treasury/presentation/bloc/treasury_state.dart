@@ -207,6 +207,25 @@ class GoldDashboardError extends TreasuryState {
   final String message;
   GoldDashboardError(this.message);
 }
+
+class SalesGoldHistoryLoading extends TreasuryState {}
+
+class SalesGoldHistoryLoaded extends TreasuryState {
+  final StatsSaleHistoryEntity stats;
+  final List<SaleHistoryEntity> sales;
+  final bool hasReachedMax;
+
+  SalesGoldHistoryLoaded({
+    required this.stats,
+    required this.sales,
+    required this.hasReachedMax,
+  });
+}
+
+class SalesGoldHistoryError extends TreasuryState{
+  final String message;
+  SalesGoldHistoryError(this.message);
+}
 // estado para el historial de prestamos
 
 class InternalLoansLoading extends TreasuryState {}
@@ -232,15 +251,14 @@ class TransactionDetailsLoading extends TreasuryState {}
 class TransactionDetailsLoaded extends TreasuryState {
   final TransactionDetailsResponseEntity transactionDetails;
 
-  TransactionDetailsLoaded({
-    required this.transactionDetails
-  });
+  TransactionDetailsLoaded({required this.transactionDetails});
 }
 
 class TransactionDetailsError extends TreasuryState {
   final String message;
   TransactionDetailsError(this.message);
 }
+
 //new extraction
 class NewExtractionLoading extends TreasuryState {}
 
@@ -252,7 +270,7 @@ class NewExtractionLoaded extends TreasuryState {
 class NewExtractionError extends TreasuryState {
   final String message;
 
-  NewExtractionError( {required this.message});
+  NewExtractionError({required this.message});
 }
 
 // preview venta

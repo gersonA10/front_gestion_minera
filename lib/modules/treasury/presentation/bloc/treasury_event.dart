@@ -88,6 +88,23 @@ class FetchGoldDashboardDataEvent extends TreasuryEvent {
 
 class LoadMoreGoldBatchesEvent extends TreasuryEvent {}
 
+
+// Historial venta Evento
+class FetchHistorySalesEvent extends TreasuryEvent {
+  final bool isRefresh;
+  final String? status;
+  final int limit;
+  FetchHistorySalesEvent({this.isRefresh = true, this.status, this.limit = 5});
+}
+
+class LoadMoreHistorySalesEvent extends TreasuryEvent {
+  final int limit;
+
+  LoadMoreHistorySalesEvent({
+    this.limit = 5,
+  });
+}
+
 //historial de prestamos
 class InternalLoansRequestsEvent extends TreasuryEvent {
   final String? status;
