@@ -1,7 +1,5 @@
 import 'package:auto_route/auto_route.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:front_gestion_minera/config/router/app_router.gr.dart';
 import 'package:front_gestion_minera/core/widgets/custom_alert_widget.dart';
 import 'package:front_gestion_minera/core/widgets/excavator_loader.dart';
 import 'package:front_gestion_minera/injector_container.dart';
@@ -91,7 +89,7 @@ class _DividendDistributionDetailsScreenState
             onPressed: () => context.router.back(),
           ),
           title: const Text(
-            'Detalle de Distribución\nde Dividendos',
+            'Detalle del Dividendo',
             style: TextStyle(
               color: TColors.textPrimary,
               fontSize: 15,

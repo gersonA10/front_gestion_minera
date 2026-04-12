@@ -33,27 +33,6 @@ class ExtractionSuccessContent extends StatelessWidget {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Align(
-            alignment: Alignment.topRight,
-            child: GestureDetector(
-              onTap: () => Navigator.of(context).pop(),
-              child: Container(
-                width: 34,
-                height: 34,
-                decoration: BoxDecoration(
-                  color: const Color(0xFFF3F4F6),
-                  shape: BoxShape.circle,
-                ),
-                child: const Icon(
-                  Icons.close_rounded,
-                  size: 18,
-                  color: Color(0xFF9CA3AF),
-                ),
-              ),
-            ),
-          ),
-          const SizedBox(height: 4),
-
           Container(
             width: 80,
             height: 80,

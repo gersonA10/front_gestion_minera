@@ -81,7 +81,7 @@ class _DistributeHomeScreenState extends State<DistributeHomeScreen> {
           foregroundColor: TColors.white,
           icon: const Icon(Icons.add, size: 18),
           label: const Text(
-            'Nueva Distribución',
+            'Nuevo Dividendo',
             style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700),
           ),
           shape: RoundedRectangleBorder(
@@ -98,7 +98,7 @@ class _DistributeHomeScreenState extends State<DistributeHomeScreen> {
           ),
           centerTitle: true,
           title: const Text(
-            'Distribuciones',
+            'Dividendos',
             style: TextStyle(
               color: TColors.textPrimary,
               fontSize: 16,

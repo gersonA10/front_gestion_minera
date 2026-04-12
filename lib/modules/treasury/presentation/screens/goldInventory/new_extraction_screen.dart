@@ -3,6 +3,7 @@ import 'package:auto_route/auto_route.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:front_gestion_minera/core/widgets/custom_alert_widget.dart';
+import 'package:front_gestion_minera/core/widgets/excavator_loader.dart';
 import 'package:front_gestion_minera/injector_container.dart';
 import 'package:front_gestion_minera/modules/treasury/presentation/bloc/treasury_bloc.dart';
 
@@ -42,6 +43,7 @@ class _NewExtractionBodyState extends State<_NewExtractionBody> {
   final _observacionesController = TextEditingController();
 
   File? _selectedImage;
+  bool _isSubmitting = false;
 
   @override
   void initState() {
@@ -176,7 +178,8 @@ class _NewExtractionBodyState extends State<_NewExtractionBody> {
   }
 
   void _submit() {
-    if (!_isFormValid) return;
+    if (!_isFormValid || _isSubmitting) return;
+    setState(() => _isSubmitting = true);
 
     final formData = NewExtractionRequetsEntity(
       extractionDate: DateFormat('yyyy-MM-dd').format(_selectedDate),
@@ -278,7 +281,7 @@ class _NewExtractionBodyState extends State<_NewExtractionBody> {
                   Container(
                     color: Colors.black.withValues(alpha: 0.1),
                     child: const Center(
-                      child: CircularProgressIndicator(color: Color(0xFF3B82F6)),
+                      child: ExcavatorLoader(),
                     ),
                   ),
               ],
@@ -481,7 +484,12 @@ class _NewExtractionBodyState extends State<_NewExtractionBody> {
             controller: _pesoController,
             keyboardType: const TextInputType.numberWithOptions(decimal: true),
             inputFormatters: [
-              FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d{0,2}')),
+              TextInputFormatter.withFunction((oldValue, newValue) {
+                final text = newValue.text;
+                if (text.isEmpty) return newValue;
+                final regex = RegExp(r'^\d*\.?\d{0,2}$');
+                return regex.hasMatch(text) ? newValue : oldValue;
+              }),
             ],
             onChanged: (_) => setState(() {}),
             style: const TextStyle(
@@ -819,7 +827,7 @@ class _NewExtractionBodyState extends State<_NewExtractionBody> {
       width: double.infinity,
       height: 52,
       child: ElevatedButton(
-        onPressed: (_isFormValid && !isLoading) ? _submit : null,
+        onPressed: (_isFormValid && !isLoading && !_isSubmitting) ? _submit : null,
         style: ElevatedButton.styleFrom(
           backgroundColor: const Color(0xFF3B82F6),
           disabledBackgroundColor: const Color(0xFFBFDBFE),
@@ -830,26 +838,7 @@ class _NewExtractionBodyState extends State<_NewExtractionBody> {
             borderRadius: BorderRadius.circular(14),
           ),
         ),
-        child: isLoading
-            ? const Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  SizedBox(
-                    width: 20,
-                    height: 20,
-                    child: CircularProgressIndicator(
-                      color: Colors.white,
-                      strokeWidth: 2,
-                    ),
-                  ),
-                  SizedBox(width: 12),
-                  Text(
-                    'Registrando...',
-                    style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600),
-                  ),
-                ],
-              )
-            : const Row(
+        child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Icon(Icons.save_rounded, size: 20),
@@ -885,7 +874,7 @@ void showExtractionSuccessDialog({
 }) {
   showGeneralDialog(
     context: context,
-    barrierDismissible: true,
+    barrierDismissible: false,
     barrierLabel: 'Cerrar',
     barrierColor: Colors.black.withValues(alpha: 0.5),
     transitionDuration: const Duration(milliseconds: 300),
