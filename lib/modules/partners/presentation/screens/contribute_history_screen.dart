@@ -220,13 +220,7 @@ Future<void> _selectCustomDate() async {
                           Icon(Icons.inbox_outlined, size: 64, color: Colors.grey.shade300),
                           const SizedBox(height: 12),
                           Text(
-                            switch (_selectedFilter) {
-                              'Confirmados' => 'No tienes aportes confirmados',
-                              'Pendientes'  => 'No tienes aportes pendientes',
-                              'Este mes'    => 'No tienes aportes este mes',
-                              'Personalizado' => 'No se encontraron aportes en ese período',
-                              _ => 'Aún no tienes aportes',
-                            },
+                            'Aún no tienes aportes',
                             style: TextStyle(
                               color: Colors.grey.shade500,
                               fontSize: 15,
