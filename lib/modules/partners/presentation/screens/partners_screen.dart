@@ -205,7 +205,6 @@ class _PartnersScreenState extends State<PartnersScreen>
                       ),
                     ),
                     const SizedBox(width: 12),
-                    // Greeting + name
                     Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -231,14 +230,13 @@ class _PartnersScreenState extends State<PartnersScreen>
                         ],
                       ),
                     ),
-                    // Logout button
                     LogoutButton(),
                   ],
                 ),
 
                 const SizedBox(height: 20),
                 const Text(
-                  'Los Tigresito',
+                  'Tigres Dorados',
                   style: TextStyle(
                     fontSize: 24,
                     fontWeight: FontWeight.w800,
@@ -265,7 +263,6 @@ class _PartnersScreenState extends State<PartnersScreen>
   }
 }
 
-// ─── Menu card ────────────────────────────────────────────────────────────────
 class _MenuCard extends StatefulWidget {
   final _MenuItem item;
   final Duration delay;

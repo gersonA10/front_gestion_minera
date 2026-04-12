@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:front_gestion_minera/config/theme/extension_theme.dart';
 import 'package:front_gestion_minera/core/widgets/custom_date_selector.dart';
+import 'package:front_gestion_minera/core/widgets/excavator_loader.dart';
 import 'package:front_gestion_minera/injector_container.dart';
 import 'package:front_gestion_minera/modules/partners/domain/entity/partners_entity.dart';
 import 'package:front_gestion_minera/modules/partners/presentation/bloc/partners_bloc.dart';
@@ -191,7 +192,6 @@ Future<void> _selectCustomDate() async {
     );
   }
 
-  // --- CONTENIDO DEL HISTORIAL ---
   Widget _buildHistoryContent(ColorScheme colors, bool isLoading) {
     return RefreshIndicator(
       onRefresh: () async => _fetchData(),
@@ -214,9 +214,27 @@ Future<void> _selectCustomDate() async {
                   Center(
                     child: Padding(
                       padding: const EdgeInsets.all(40.0),
-                      child: Text(
-                        'No se encontraron aportes.',
-                        style: AppTextStyles.mainStyle12(context).copyWith(color: colors.lead),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(Icons.inbox_outlined, size: 64, color: Colors.grey.shade300),
+                          const SizedBox(height: 12),
+                          Text(
+                            switch (_selectedFilter) {
+                              'Confirmados' => 'No tienes aportes confirmados',
+                              'Pendientes'  => 'No tienes aportes pendientes',
+                              'Este mes'    => 'No tienes aportes este mes',
+                              'Personalizado' => 'No se encontraron aportes en ese período',
+                              _ => 'Aún no tienes aportes',
+                            },
+                            style: TextStyle(
+                              color: Colors.grey.shade500,
+                              fontSize: 15,
+                              fontWeight: FontWeight.w500,
+                            ),
+                            textAlign: TextAlign.center,
+                          ),
+                        ],
                       ),
                     ),
                   )
@@ -291,15 +309,12 @@ Future<void> _selectCustomDate() async {
       ),
       body: Column(
         children: [
-          // 1. Controles Superiores Fijos (Buscador, Filtros, Fecha)
           _buildTopControls(colors),
 
-          // 2. Lista de Aportes y Métricas (Dinámico)
           Expanded(
             child: BlocConsumer<PartnersBloc, PartnersState>(
               bloc: _bloc,
               listener: (context, state) {
-                // Cuando los datos cargan exitosamente, guardamos una copia local
                 if (state is ContributeDataLoaded) {
                   _currentMetrics = state.metrics;
                   _currentHistory = state.groupedHistory;
@@ -309,12 +324,10 @@ Future<void> _selectCustomDate() async {
                 final isLoading = state is ContributeDataLoading;
                 final hasData = _currentMetrics != null && _currentHistory != null;
 
-                // Primera carga de la pantalla (no hay datos previos, mostramos el circulo normal)
                 if (isLoading && !hasData) {
-                  return Center(child: CircularProgressIndicator(color: colors.blue));
+                  return Center(child: ExcavatorLoader());
                 }
 
-                // Error en primera carga
                 if (state is ContributeDataError && !hasData) {
                   return Center(
                     child: Padding(
@@ -366,7 +379,7 @@ class ContributionSummaryCard extends StatelessWidget {
           const SizedBox(height: 4),
           Text(
             "${metrics.totalAportado.toStringAsFixed(2)} Bs",
-            style: AppTextStyles.mainStyle25Bold(context).copyWith(color: colors.white, fontSize: 32),
+            style: AppTextStyles.mainStyle20Bold(context).copyWith(color: colors.white, fontSize: 20),
           ),
           const SizedBox(height: 20),
           Row(
@@ -388,7 +401,7 @@ class ContributionSummaryCard extends StatelessWidget {
                       const SizedBox(height: 4),
                       Text(
                         "${metrics.totalConfirmado.toStringAsFixed(2)} Bs",
-                        style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 14),
+                        style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 12),
                       ),
                     ],
                   ),
@@ -412,7 +425,7 @@ class ContributionSummaryCard extends StatelessWidget {
                       const SizedBox(height: 4),
                       Text(
                         "${metrics.totalPendiente.toStringAsFixed(2)} Bs",
-                        style: const TextStyle(color: Color(0xFFFFD54F), fontWeight: FontWeight.bold, fontSize: 14),
+                        style: const TextStyle(color: Color(0xFFFFD54F), fontWeight: FontWeight.bold, fontSize: 12),
                       ),
                     ],
                   ),
@@ -461,7 +474,7 @@ class ContributionCard extends StatelessWidget {
             children: [
               Row(
                 children: [
-                  Icon(Icons.calendar_today_outlined, size: 14, color: colors.green),
+                  Icon(Icons.calendar_today_outlined, size: 12, color: colors.green),
                   const SizedBox(width: 6),
                   Text(dateStr, style: AppTextStyles.mainStyle12(context).copyWith(color: colors.lead)),
                 ],
@@ -487,7 +500,7 @@ class ContributionCard extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text("MOTIVO", style: AppTextStyles.mainStyleGrey10(context)),
-                    Text(item.motivo, style: AppTextStyles.mainStyle14Bold(context)),
+                    Text(item.motivo, style: AppTextStyles.mainStyle12Bold(context)),
                     const SizedBox(height: 12),
                     Text("CAJA", style: AppTextStyles.mainStyleGrey10(context)),
                     Text("Caja Principal", style: AppTextStyles.mainStyle12Bold(context)), 
@@ -502,7 +515,7 @@ class ContributionCard extends StatelessWidget {
                     Text("MONTO", style: AppTextStyles.mainStyleGrey10(context)),
                     Text(
                       "${item.monto.toStringAsFixed(2)} Bs",
-                      style: AppTextStyles.mainStyle20Bold(context).copyWith(color: colors.blue),
+                      style: AppTextStyles.mainStyle16Bold(context).copyWith(color: colors.blue),
                     ),
                   ],
                 ),

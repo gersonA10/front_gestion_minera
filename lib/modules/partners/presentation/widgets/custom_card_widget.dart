@@ -1,9 +1,12 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:front_gestion_minera/config/theme/extension_theme.dart';
+import 'package:front_gestion_minera/core/widgets/zoomable_evidence_image.dart';
 import 'package:front_gestion_minera/modules/partners/domain/entity/partners_entity.dart';
+import 'package:front_gestion_minera/utils/session/user_session.dart';
 import 'package:front_gestion_minera/utils/text_util.dart';
 
 class CustomCardWidget extends StatelessWidget {
@@ -138,15 +141,15 @@ class LoanCard extends StatelessWidget {
   Color _getStatusColor(String statusText) {
     switch (statusText.toLowerCase()) {
       case 'pagado':
-        return const Color(0xff17A05D); 
+        return const Color(0xff17A05D);
       case 'aprobado':
-        return const Color(0xff2457C5); 
+        return const Color(0xff2457C5);
       case 'rechazado':
-        return const Color(0xffD32F2F); 
+        return const Color(0xffD32F2F);
       case 'en revisión':
       case 'pendiente':
       default:
-        return const Color(0xffC47A00); 
+        return const Color(0xffC47A00);
     }
   }
 
@@ -171,7 +174,9 @@ class LoanCard extends StatelessWidget {
       builder: (dialogContext) {
         return Dialog(
           backgroundColor: colors.white,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20),
+          ),
           child: Padding(
             padding: const EdgeInsets.all(20.0),
             child: Column(
@@ -184,12 +189,18 @@ class LoanCard extends StatelessWidget {
                     color: colors.red.withValues(alpha: 0.12),
                     borderRadius: BorderRadius.circular(16),
                   ),
-                  child: Icon(Icons.info_outline_rounded, color: colors.red, size: 28),
+                  child: Icon(
+                    Icons.info_outline_rounded,
+                    color: colors.red,
+                    size: 28,
+                  ),
                 ),
                 const SizedBox(height: 16),
                 Text(
                   'Motivo de rechazo',
-                  style: AppTextStyles.mainStyle16Bold(context).copyWith(color: colors.black),
+                  style: AppTextStyles.mainStyle16Bold(
+                    context,
+                  ).copyWith(color: colors.black),
                   textAlign: TextAlign.center,
                 ),
                 const SizedBox(height: 12),
@@ -199,11 +210,15 @@ class LoanCard extends StatelessWidget {
                   decoration: BoxDecoration(
                     color: colors.red.withValues(alpha: 0.06),
                     borderRadius: BorderRadius.circular(14),
-                    border: Border.all(color: colors.red.withValues(alpha: 0.18)),
+                    border: Border.all(
+                      color: colors.red.withValues(alpha: 0.18),
+                    ),
                   ),
                   child: Text(
                     motivoRechazo ?? 'Sin motivo especificado.',
-                    style: AppTextStyles.mainStyle12(context).copyWith(color: colors.black, height: 1.4),
+                    style: AppTextStyles.mainStyle12(
+                      context,
+                    ).copyWith(color: colors.black, height: 1.4),
                   ),
                 ),
                 const SizedBox(height: 18),
@@ -213,9 +228,16 @@ class LoanCard extends StatelessWidget {
                     onPressed: () => Navigator.of(dialogContext).pop(),
                     style: ElevatedButton.styleFrom(
                       backgroundColor: colors.blue,
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(14),
+                      ),
                     ),
-                    child: Text('Entendido', style: AppTextStyles.mainStyle12Bold(context).copyWith(color: colors.white)),
+                    child: Text(
+                      'Entendido',
+                      style: AppTextStyles.mainStyle12Bold(
+                        context,
+                      ).copyWith(color: colors.white),
+                    ),
                   ),
                 ),
               ],
@@ -253,17 +275,25 @@ class LoanCard extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text('FECHA DE REGISTRO', style: AppTextStyles.mainStyleGrey12(context)),
+                    Text(
+                      'FECHA DE REGISTRO',
+                      style: AppTextStyles.mainStyleGrey12(context),
+                    ),
                     SizedBox(height: small * 0.5),
                     Text(date, style: AppTextStyles.mainStyle12Bold(context)),
                     SizedBox(height: small * 0.5),
-                    Text('Motivo', style: AppTextStyles.mainStyleGrey12(context)),
+                    Text(
+                      'Motivo',
+                      style: AppTextStyles.mainStyleGrey12(context),
+                    ),
                     SizedBox(height: small * 0.25),
                     Text(reason, style: AppTextStyles.mainStyle12Bold(context)),
                     SizedBox(height: small * 0.5),
                     Text(
-                      loanType.toLowerCase() == 'gramos' ? 'Gramos' : 'Monto total', 
-                      style: AppTextStyles.mainStyleGrey12(context)
+                      loanType.toLowerCase() == 'gramos'
+                          ? 'Gramos'
+                          : 'Monto total',
+                      style: AppTextStyles.mainStyleGrey12(context),
                     ),
                     SizedBox(height: small * 0.25),
                     Text(amount, style: AppTextStyles.mainStyle16Bold(context)),
@@ -274,11 +304,21 @@ class LoanCard extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-                    decoration: BoxDecoration(color: bgStatus, borderRadius: BorderRadius.circular(20)),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 4,
+                    ),
+                    decoration: BoxDecoration(
+                      color: bgStatus,
+                      borderRadius: BorderRadius.circular(20),
+                    ),
                     child: Text(
                       status.toUpperCase(),
-                      style: TextStyle(color: colorStatus, fontWeight: FontWeight.bold, fontSize: 10),
+                      style: TextStyle(
+                        color: colorStatus,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 10,
+                      ),
                     ),
                   ),
                   if (isRejected && motivoRechazo != null) ...[
@@ -288,7 +328,12 @@ class LoanCard extends StatelessWidget {
                       children: [
                         Icon(Icons.remove_red_eye, color: colors.red, size: 16),
                         const SizedBox(width: 4),
-                        Text('Ver motivo', style: AppTextStyles.mainStyle10Bold(context).copyWith(color: colors.red)),
+                        Text(
+                          'Ver motivo',
+                          style: AppTextStyles.mainStyle10Bold(
+                            context,
+                          ).copyWith(color: colors.red),
+                        ),
                       ],
                     ),
                   ],
@@ -650,7 +695,15 @@ class ContributionCard extends StatelessWidget {
 class TextLoanScreen extends StatelessWidget {
   final String? hintText;
   final TextEditingController? controller;
-  const TextLoanScreen({super.key, required this.hintText, this.controller});
+  final bool enabled;
+  final TextInputType? keyboardType;
+  const TextLoanScreen({
+    super.key,
+    required this.hintText,
+    this.controller,
+    required this.enabled,
+    this.keyboardType,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -658,7 +711,9 @@ class TextLoanScreen extends StatelessWidget {
       height: 50,
       child: TextFormField(
         controller: controller,
+        keyboardType: keyboardType ?? TextInputType.text,
         decoration: InputDecoration(
+          enabled: enabled,
           hintText: hintText,
           hintStyle: const TextStyle(color: Colors.grey),
           filled: true,
@@ -718,13 +773,19 @@ class CustomForm extends StatelessWidget {
         children: [
           Text(title, style: AppTextStyles.mainStyle14Bold(context)),
           SizedBox(height: smallSpacing * 1),
-          TextLoanScreen(hintText: "Bs. 0.00", controller: amountController),
+          TextLoanScreen(
+            hintText: title =='Monto'? "Bs. 0.00": 'Gr. 0.00',
+            controller: amountController,
+            enabled: true,
+            keyboardType: TextInputType.number,
+          ),
           SizedBox(height: smallSpacing * 1),
           Text("Motivo", style: AppTextStyles.mainStyle14Bold(context)),
           SizedBox(height: smallSpacing * 1),
           TextLoanScreen(
             hintText: "Escribe el motivo del préstamo",
             controller: reasonController,
+            enabled: true,
           ),
           SizedBox(height: smallSpacing * 1),
           Text(
@@ -734,7 +795,8 @@ class CustomForm extends StatelessWidget {
           SizedBox(height: smallSpacing * 1),
           TextLoanScreen(
             hintText: "Los tigresitos",
-            controller: applicantController,
+            controller: TextEditingController(text: UserSession.userName),
+            enabled: false,
           ),
           SizedBox(height: 18),
           Text(
@@ -767,18 +829,37 @@ class CustomForm extends StatelessWidget {
               const SizedBox(width: 10),
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
-                children: const [
+                children:  [
                   Text(
                     "recibo_pago_042.jpg",
                     style: TextStyle(color: Colors.grey),
                   ),
                   SizedBox(height: 4),
-                  Text(
-                    "Ver imagen completa",
-                    style: TextStyle(
-                      color: Colors.amber,
-                      fontWeight: FontWeight.bold,
-                      fontSize: 10,
+                  GestureDetector(
+                    onTap: image == null
+                        ? null
+                        : () {
+                            Navigator.of(context).push(
+                              PageRouteBuilder(
+                                opaque: false,
+                                pageBuilder: (_, _, _) =>
+                                    FullScreenFileImageViewer(file: image!),
+                                transitionsBuilder:
+                                    (_, animation, _, child) =>
+                                        FadeTransition(
+                                          opacity: animation,
+                                          child: child,
+                                        ),
+                              ),
+                            );
+                          },
+                    child: Text(
+                      "Ver imagen completa",
+                      style: TextStyle(
+                        color: image == null ? Colors.grey : Colors.amber,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 10,
+                      ),
                     ),
                   ),
                 ],
@@ -787,6 +868,51 @@ class CustomForm extends StatelessWidget {
           ),
           SizedBox(height: smallSpacing * 1),
         ],
+      ),
+    );
+  }
+}
+
+class NumericTextField extends StatelessWidget {
+  final TextEditingController controller;
+  final String hintText;
+  final bool enabled;
+
+  const NumericTextField({
+    super.key,
+    required this.controller,
+    required this.hintText,
+    this.enabled = true,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      height: 50,
+      child: TextFormField(
+        controller: controller,
+        enabled: enabled,
+        keyboardType: TextInputType.number,
+        inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+        decoration: InputDecoration(
+          hintText: hintText,
+          hintStyle: const TextStyle(color: Colors.grey),
+          filled: true,
+          fillColor: Colors.white,
+          contentPadding: const EdgeInsets.symmetric(horizontal: 14),
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: BorderSide(color: Colors.grey.shade300),
+          ),
+          enabledBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: BorderSide(color: Colors.grey.shade300),
+          ),
+          focusedBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: BorderSide(color: Colors.blue),
+          ),
+        ),
       ),
     );
   }

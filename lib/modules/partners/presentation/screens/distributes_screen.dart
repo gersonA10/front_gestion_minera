@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:front_gestion_minera/config/theme/extension_theme.dart';
 import 'package:front_gestion_minera/core/widgets/custom_date_selector.dart';
+import 'package:front_gestion_minera/core/widgets/excavator_loader.dart';
 import 'package:front_gestion_minera/injector_container.dart';
 import 'package:front_gestion_minera/modules/partners/presentation/bloc/partners_bloc.dart';
 import 'package:front_gestion_minera/modules/partners/presentation/widgets/distributes/custom_card_metric_widget.dart';
@@ -28,7 +29,7 @@ class _DistributesScreenState extends State<DistributesScreen> {
   final List<String> _filters = ["Todo", "Pagados", "Pendientes", "Este mes"];
 
   String? _exactDateToFetch;
-String? _periodToFetch;
+  String? _periodToFetch;
 
   DistributesMetricsEntity? _currentMetrics;
   Map<String, List<DistributesHistoryEntity>>? _currentHistory;
@@ -36,12 +37,14 @@ String? _periodToFetch;
   @override
   void initState() {
     super.initState();
-    _bloc = InjectorContainer.getIt<PartnersBloc>()..add(FetchDistributesDataEvent());
-    
-    _searchController.addListener(() => setState(() {})); 
-    
+    _bloc = InjectorContainer.getIt<PartnersBloc>()
+      ..add(FetchDistributesDataEvent());
+
+    _searchController.addListener(() => setState(() {}));
+
     _scrollController.addListener(() {
-      if (_scrollController.position.pixels >= _scrollController.position.maxScrollExtent - 200) {
+      if (_scrollController.position.pixels >=
+          _scrollController.position.maxScrollExtent - 200) {
         _bloc.add(LoadMoreDistributesEvent());
       }
     });
@@ -55,46 +58,50 @@ String? _periodToFetch;
     super.dispose();
   }
 
-void _fetchData() {
-  String? status;
-  String? period;
+  void _fetchData() {
+    String? status;
+    String? period;
 
-  if (_selectedFilter == "Pagados") status = 'pagado';
-  if (_selectedFilter == "Pendientes") status = 'pendiente';
+    if (_selectedFilter == "Pagados") status = 'pagado';
+    if (_selectedFilter == "Pendientes") status = 'pendiente';
 
-  if (_selectedFilter == "Este mes") {
-    period = 'month';
-    _exactDateToFetch = null; // Borramos fecha exacta para que traiga el mes actual natural
-  } else if (_selectedFilter == "Personalizado") {
-    period = _periodToFetch; // Usamos el periodo devuelto por el modal ('day', 'month' o 'year')
+    if (_selectedFilter == "Este mes") {
+      period = 'month';
+      _exactDateToFetch =
+          null; // Borramos fecha exacta para que traiga el mes actual natural
+    } else if (_selectedFilter == "Personalizado") {
+      period =
+          _periodToFetch; // Usamos el periodo devuelto por el modal ('day', 'month' o 'year')
+    }
+
+    _bloc.add(
+      FetchDistributesDataEvent(
+        status: status,
+        search: _searchController.text.trim(),
+        period: period,
+        exactDate: _exactDateToFetch,
+        isRefresh: true,
+      ),
+    );
   }
 
-  _bloc.add(FetchDistributesDataEvent(
-    status: status,
-    search: _searchController.text.trim(),
-    period: period,
-    exactDate: _exactDateToFetch,
-    isRefresh: true,
-  ));
-}
+  Future<void> _selectCustomDate() async {
+    final result = await CustomDateSelector.show(context);
 
-Future<void> _selectCustomDate() async {
-  final result = await CustomDateSelector.show(context);
-
-  if (result != null) {
-    setState(() {
-      _selectedFilter = "Personalizado"; 
-      _periodToFetch = result.period;
-      _exactDateToFetch = result.exactDate;
-    });
-    _fetchData();
+    if (result != null) {
+      setState(() {
+        _selectedFilter = "Personalizado";
+        _periodToFetch = result.period;
+        _exactDateToFetch = result.exactDate;
+      });
+      _fetchData();
+    }
   }
-}
 
   @override
   Widget build(BuildContext context) {
     final colors = Theme.of(context).colorScheme;
-    
+
     return Scaffold(
       backgroundColor: colors.backgroundColor,
       appBar: AppBar(
@@ -108,7 +115,9 @@ Future<void> _selectCustomDate() async {
         ),
         title: Text(
           'Historial de Ingresos',
-          style: AppTextStyles.mainStyle16Bold(context).copyWith(color: colors.black),
+          style: AppTextStyles.mainStyle16Bold(
+            context,
+          ).copyWith(color: colors.black, fontSize: 18),
         ),
       ),
       body: Column(
@@ -125,24 +134,36 @@ Future<void> _selectCustomDate() async {
               },
               builder: (context, state) {
                 final isLoading = state is DistributesDataLoading;
-                final hasData = _currentMetrics != null && _currentHistory != null;
+                final hasData =
+                    _currentMetrics != null && _currentHistory != null;
 
                 if (isLoading && !hasData) {
-                  return Center(child: CircularProgressIndicator(color: colors.blue));
+                  return Center(
+                    child: ExcavatorLoader(),
+                  );
                 }
 
                 if (state is DistributesDataError && !hasData) {
                   return Center(
                     child: Padding(
                       padding: const EdgeInsets.all(20.0),
-                      child: Text(state.message, style: TextStyle(color: colors.red), textAlign: TextAlign.center),
+                      child: Text(
+                        state.message,
+                        style: TextStyle(color: colors.red),
+                        textAlign: TextAlign.center,
+                      ),
                     ),
                   );
                 }
 
                 if (hasData) {
-                  final isFetchingMore = state is DistributesDataLoaded && !state.hasReachedMax;
-                  return _buildHistoryContent(colors, isLoading, isFetchingMore);
+                  final isFetchingMore =
+                      state is DistributesDataLoaded && !state.hasReachedMax;
+                  return _buildHistoryContent(
+                    colors,
+                    isLoading,
+                    isFetchingMore,
+                  );
                 }
 
                 return const SizedBox.shrink();
@@ -169,7 +190,9 @@ Future<void> _selectCustomDate() async {
                     decoration: BoxDecoration(
                       color: colors.white,
                       borderRadius: BorderRadius.circular(12),
-                      border: Border.all(color: colors.lead.withValues(alpha: 0.3)),
+                      border: Border.all(
+                        color: colors.lead.withValues(alpha: 0.3),
+                      ),
                     ),
                     child: TextField(
                       controller: _searchController,
@@ -191,9 +214,13 @@ Future<void> _selectCustomDate() async {
                               )
                             : null,
                         hintText: "Buscar por detalle",
-                        hintStyle: AppTextStyles.mainStyle12(context).copyWith(color: colors.lead),
+                        hintStyle: AppTextStyles.mainStyle12(
+                          context,
+                        ).copyWith(color: colors.lead),
                         border: InputBorder.none,
-                        contentPadding: const EdgeInsets.symmetric(vertical: 14),
+                        contentPadding: const EdgeInsets.symmetric(
+                          vertical: 14,
+                        ),
                       ),
                     ),
                   ),
@@ -205,7 +232,9 @@ Future<void> _selectCustomDate() async {
                     height: 45,
                     width: 45,
                     decoration: BoxDecoration(
-                      color: _selectedFilter == "Personalizado" ? colors.amber : colors.blue,
+                      color: _selectedFilter == "Personalizado"
+                          ? colors.amber
+                          : colors.blue,
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: Icon(Icons.tune, color: colors.white),
@@ -231,11 +260,18 @@ Future<void> _selectCustomDate() async {
                       _fetchData();
                     },
                     child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 8),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 18,
+                        vertical: 8,
+                      ),
                       decoration: BoxDecoration(
                         color: isActive ? colors.blue : colors.white,
                         borderRadius: BorderRadius.circular(20),
-                        border: Border.all(color: isActive ? colors.blue : colors.lead.withValues(alpha: 0.3)),
+                        border: Border.all(
+                          color: isActive
+                              ? colors.blue
+                              : colors.lead.withValues(alpha: 0.3),
+                        ),
                       ),
                       child: Text(
                         filter,
@@ -257,14 +293,20 @@ Future<void> _selectCustomDate() async {
     );
   }
 
-  Widget _buildHistoryContent(ColorScheme colors, bool isLoading, bool isFetchingMore) {
+  Widget _buildHistoryContent(
+    ColorScheme colors,
+    bool isLoading,
+    bool isFetchingMore,
+  ) {
     return RefreshIndicator(
       onRefresh: () async => _fetchData(),
       child: Container(
         width: double.infinity,
         decoration: BoxDecoration(
           color: colors.bajo,
-          border: Border(top: BorderSide(color: colors.lead.withValues(alpha: 0.2))),
+          border: Border(
+            top: BorderSide(color: colors.lead.withValues(alpha: 0.2)),
+          ),
         ),
         child: Stack(
           children: [
@@ -273,16 +315,48 @@ Future<void> _selectCustomDate() async {
               padding: const EdgeInsets.all(16),
               physics: const AlwaysScrollableScrollPhysics(),
               children: [
-                _buildMetricsHeader(colors),
+                SizedBox(
+                  height: 90,
+                  child: ListView(
+                    scrollDirection: Axis.horizontal,
+                    children: [
+                      CustomCardMetric(
+                        title: 'TOTAL DISTRIBUIDO',
+                        amount:
+                            'Bs ${_currentMetrics!.totalDistribuido.toStringAsFixed(0)}',
+                        bgColor: colors.blue,
+                        titleColor: colors.white.withValues(alpha: 0.8),
+                        amountColor: colors.white,
+                      ),
+                      CustomCardMetric(
+                        title: 'PENDIENTE',
+                        amount:
+                            'Bs ${_currentMetrics!.totalPendiente.toStringAsFixed(0)}',
+                        bgColor: colors.white,
+                        titleColor: colors.lead,
+                        amountColor: colors.amber,
+                      ),
+                      CustomCardMetric(
+                        title: 'COMPLETADO',
+                        amount:
+                            'Bs ${_currentMetrics!.totalPagado.toStringAsFixed(0)}',
+                        bgColor: colors.white,
+                        titleColor: colors.lead,
+                        amountColor: colors.green,
+                      ),
+                    ],
+                  ),
+                ),
                 const SizedBox(height: 14),
-                
                 if (_currentHistory!.isEmpty)
                   Center(
                     child: Padding(
                       padding: const EdgeInsets.all(40.0),
                       child: Text(
                         'No se encontraron ingresos.',
-                        style: AppTextStyles.mainStyle12(context).copyWith(color: colors.lead),
+                        style: AppTextStyles.mainStyle12(
+                          context,
+                        ).copyWith(color: colors.lead),
                       ),
                     ),
                   )
@@ -292,10 +366,15 @@ Future<void> _selectCustomDate() async {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Padding(
-                          padding: const EdgeInsets.only(top: 10.0, bottom: 12.0),
+                          padding: const EdgeInsets.only(
+                            top: 10.0,
+                            bottom: 12.0,
+                          ),
                           child: Text(
                             entry.key,
-                            style: AppTextStyles.mainStyle12Bold(context).copyWith(color: colors.lead),
+                            style: AppTextStyles.mainStyle10Bold(
+                              context,
+                            ).copyWith(color: colors.lead),
                           ),
                         ),
                         ...entry.value.map((item) => DividendCard(item: item)),
@@ -304,55 +383,30 @@ Future<void> _selectCustomDate() async {
                   }),
 
                 if (isFetchingMore && !isLoading)
-                   const Padding(
-                     padding: EdgeInsets.symmetric(vertical: 20),
-                     child: Center(child: CircularProgressIndicator()),
-                   ),
+                  const Padding(
+                    padding: EdgeInsets.symmetric(vertical: 20),
+                    child: Center(child: ExcavatorLoader()),
+                  ),
               ],
             ),
             if (isLoading) ...[
               Positioned(
-                top: 0, left: 0, right: 0,
-                child: LinearProgressIndicator(color: colors.blue, backgroundColor: Colors.transparent),
+                top: 0,
+                left: 0,
+                right: 0,
+                child: LinearProgressIndicator(
+                  color: colors.blue,
+                  backgroundColor: Colors.transparent,
+                ),
               ),
               Positioned.fill(
-                child: Container(color: colors.backgroundColor.withValues(alpha: 0.4)),
+                child: Container(
+                  color: colors.backgroundColor.withValues(alpha: 0.4),
+                ),
               ),
-            ]
+            ],
           ],
         ),
-      ),
-    );
-  }
-
-  Widget _buildMetricsHeader(ColorScheme colors) {
-    return SizedBox(
-      height: 90,
-      child: ListView(
-        scrollDirection: Axis.horizontal,
-        children: [
-          CustomCardMetric(
-            title: 'TOTAL DISTRIBUIDO',
-            amount: 'Bs ${_currentMetrics!.totalDistribuido.toStringAsFixed(0)}',
-            bgColor: colors.blue,
-            titleColor: colors.white.withValues(alpha: 0.8),
-            amountColor: colors.white,
-          ),
-          CustomCardMetric(
-            title: 'PENDIENTE',
-            amount: 'Bs ${_currentMetrics!.totalPendiente.toStringAsFixed(0)}',
-            bgColor: colors.white,
-            titleColor: colors.lead,
-            amountColor: colors.amber,
-          ),
-          CustomCardMetric(
-            title: 'COMPLETADO',
-            amount: 'Bs ${_currentMetrics!.totalPagado.toStringAsFixed(0)}',
-            bgColor: colors.white,
-            titleColor: colors.lead,
-            amountColor: colors.green,
-          ),
-        ],
       ),
     );
   }

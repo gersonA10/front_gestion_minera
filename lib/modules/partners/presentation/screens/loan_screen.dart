@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:front_gestion_minera/config/theme/extension_theme.dart';
 import 'package:front_gestion_minera/core/widgets/custom_alert_widget.dart';
+import 'package:front_gestion_minera/core/widgets/excavator_loader.dart';
 import 'package:front_gestion_minera/injector_container.dart';
 import 'package:front_gestion_minera/modules/partners/presentation/bloc/partners_bloc.dart';
 import 'package:front_gestion_minera/modules/partners/presentation/widgets/custom_card_widget.dart';
@@ -130,159 +131,173 @@ class _LoanScreenState extends State<LoanScreen>
             }
           },
           builder: (context, state) {
-            return SafeArea(
-              child: Column(
-                children: [
-                  Container(
-                    padding: EdgeInsets.symmetric(
-                      horizontal: topPadding * 0.05,
-                      vertical: 14,
-                    ),
-                    color: Colors.white,
-                    child: Row(
-                      children: [
-                        IconButton(
-                          onPressed: () => context.router.back(),
-                          icon: const Icon(Icons.arrow_back_ios_new),
+            final isLoading = state is LoanRegisterLoading;
+            return Stack(
+              children: [
+                SafeArea(
+                  child: Column(
+                    children: [
+                      Container(
+                        padding: EdgeInsets.symmetric(
+                          horizontal: topPadding * 0.05,
+                          vertical: 14,
                         ),
-                        const Expanded(
-                          child: Center(
-                            child: Text(
-                              "Registrar Préstamo",
-                              style: TextStyle(
-                                fontSize: 18,
-                                fontWeight: FontWeight.bold,
+                        color: Colors.white,
+                        child: Row(
+                          children: [
+                            IconButton(
+                              onPressed: () => context.router.back(),
+                              icon: const Icon(Icons.arrow_back_ios_new),
+                            ),
+                            const Expanded(
+                              child: Center(
+                                child: Text(
+                                  "Registrar Préstamo",
+                                  style: TextStyle(
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
                               ),
                             ),
-                          ),
+                            const SizedBox(width: 40),
+                          ],
                         ),
-                        const SizedBox(width: 40),
-                      ],
-                    ),
-                  ),
-                  TabBar(
-                    dividerColor: Colors.transparent,
-                    controller: _tabController,
-                    indicatorColor: colors.blue,
-                    labelColor: colors.blue,
-                    unselectedLabelColor: Colors.grey,
-                    tabs: const [
-                      Tab(text: "Dinero"),
-                      Tab(text: "Gramos"),
-                    ],
-                  ),
-                  Expanded(
-                    child: SingleChildScrollView(
-                      padding: const EdgeInsets.only(
-                        left: 20,
-                        right: 20,
-                        top: 10,
-                        bottom: 20,
                       ),
-                      child: IndexedStack(
-                        index: _tabController.index,
-                        children: [
-                          CustomForm(
-                            smallSpacing: smallSpacing,
-                            colors: colors,
-                            image: _image,
-                            onOpenCamera: _pickImage,
-                            title: 'Monto',
-                            amountController: _amountController,
-                            reasonController: _reasonController,
-                            applicantController: _applicantController,
-                          ),
-                          CustomForm(
-                            smallSpacing: smallSpacing,
-                            colors: colors,
-                            image: _image,
-                            onOpenCamera: _pickImage,
-                            title: 'Gramos',
-                            amountController: _amountController,
-                            reasonController: _reasonController,
-                            applicantController: _applicantController,
-                          ),
+                      TabBar(
+                        dividerColor: Colors.transparent,
+                        controller: _tabController,
+                        indicatorColor: colors.blue,
+                        labelColor: colors.blue,
+                        unselectedLabelColor: Colors.grey,
+                        tabs: const [
+                          Tab(text: "Dinero"),
+                          Tab(text: "Gramos"),
                         ],
                       ),
-                    ),
-                  ),
-                  Padding(
-                    padding: EdgeInsets.all(20),
-                    child: ElevatedButton(
-                      onPressed: () {
-                        final amount =
-                            double.tryParse(_amountController.text) ?? 0.0;
-                        final description = _reasonController.text;
-                        final loanType = _tabController.index == 0
-                            ? 'dinero'
-                            : 'gramos';
-
-                        final comprobanteImg = _image?.path;
-
-                        if (amount <= 0) {
-                          CustomAlert.show(
-                            context,
-                            title: 'Error',
-                            message:
-                                'Ingrese ${_tabController.index == 0 ? 'monto' : 'cantidad'}',
-                            type: AlertType.warning,
-                          );
-                          return;
-                        }
-                        if (description.isEmpty) {
-                          CustomAlert.show(
-                            context,
-                            title: 'Error',
-                            message: 'Ingrese una descripcion valida.',
-                            type: AlertType.warning,
-                          );
-                          return;
-                        }
-
-                        if (comprobanteImg == null) {
-                          CustomAlert.show(
-                            context,
-                            title: 'Error',
-                            message: 'Debe agregar un comprobante',
-                            type: AlertType.warning,
-                          );
-                          return;
-                        }
-
-                        context.read<PartnersBloc>().add(
-                          LoanRegisterEvent(
-                            amount: amount,
-                            description: description,
-                            comprobanteImg: comprobanteImg,
-                            loanType: loanType,
+                      Expanded(
+                        child: SingleChildScrollView(
+                          padding: const EdgeInsets.only(
+                            left: 20,
+                            right: 20,
+                            top: 10,
+                            bottom: 20,
                           ),
-                        );
-                      },
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xffffc400),
-                        minimumSize: const Size(double.infinity, 55),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(16),
+                          child: IndexedStack(
+                            index: _tabController.index,
+                            children: [
+                              CustomForm(
+                                smallSpacing: smallSpacing,
+                                colors: colors,
+                                image: _image,
+                                onOpenCamera: _pickImage,
+                                title: 'Monto',
+                                amountController: _amountController,
+                                reasonController: _reasonController,
+                                applicantController: _applicantController,
+                              ),
+                              CustomForm(
+                                smallSpacing: smallSpacing,
+                                colors: colors,
+                                image: _image,
+                                onOpenCamera: _pickImage,
+                                title: 'Gramos',
+                                amountController: _amountController,
+                                reasonController: _reasonController,
+                                applicantController: _applicantController,
+                              ),
+                            ],
+                          ),
                         ),
                       ),
-                      child: const Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Icon(Icons.save_outlined),
-                          SizedBox(width: 10),
-                          Text(
-                            "Registrar Préstamo",
-                            style: TextStyle(
-                              fontWeight: FontWeight.bold,
-                              fontSize: 16,
+                      Padding(
+                        padding: EdgeInsets.all(20),
+                        child: ElevatedButton(
+                          onPressed: isLoading
+                              ? null
+                              : () {
+                                  final amount =
+                                      double.tryParse(_amountController.text) ??
+                                      0.0;
+                                  final description = _reasonController.text;
+                                  final loanType = _tabController.index == 0
+                                      ? 'dinero'
+                                      : 'gramos';
+
+                                  final comprobanteImg = _image?.path;
+
+                                  if (amount <= 0) {
+                                    CustomAlert.show(
+                                      context,
+                                      title: 'Error',
+                                      message:
+                                          'Ingrese ${_tabController.index == 0 ? 'monto' : 'cantidad'}',
+                                      type: AlertType.warning,
+                                    );
+                                    return;
+                                  }
+                                  if (description.isEmpty) {
+                                    CustomAlert.show(
+                                      context,
+                                      title: 'Error',
+                                      message: 'Ingrese un  motivo valido.',
+                                      type: AlertType.warning,
+                                    );
+                                    return;
+                                  }
+
+                                  if (comprobanteImg == null) {
+                                    CustomAlert.show(
+                                      context,
+                                      title: 'Error',
+                                      message: 'Debe agregar un comprobante',
+                                      type: AlertType.warning,
+                                    );
+                                    return;
+                                  }
+                                  context.read<PartnersBloc>().add(
+                                    LoanRegisterEvent(
+                                      amount: amount,
+                                      description: description,
+                                      comprobanteImg: comprobanteImg,
+                                      loanType: loanType,
+                                    ),
+                                  );
+                                },
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: const Color(0xffffc400),
+                            minimumSize: const Size(double.infinity, 55),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(16),
                             ),
                           ),
-                        ],
+                          child: const Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Icon(Icons.save_outlined),
+                              SizedBox(width: 10),
+                              Text(
+                                "Registrar Préstamo",
+                                style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 16,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
                       ),
+                    ],
+                  ),
+                ),
+                if (isLoading)
+                  const Positioned.fill(
+                    child: ColoredBox(
+                      color: Colors.black26,
+                      child: Center(child: ExcavatorLoader()),
                     ),
                   ),
-                ],
-              ),
+              ],
             );
           },
         ),

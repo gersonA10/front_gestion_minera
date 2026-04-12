@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 
 class ZoomableEvidenceImage extends StatelessWidget {
@@ -201,6 +202,60 @@ class _FullScreenImageViewerState extends State<FullScreenImageViewer> {
               ),
             ),
 
+            Positioned(
+              top: 12,
+              right: 12,
+              child: CircleAvatar(
+                radius: 22,
+                backgroundColor: Colors.black.withValues(alpha: 0.55),
+                child: IconButton(
+                  icon: const Icon(Icons.close, color: Colors.white),
+                  onPressed: () => Navigator.of(context).pop(),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class FullScreenFileImageViewer extends StatefulWidget {
+  final File file;
+
+  const FullScreenFileImageViewer({super.key, required this.file});
+
+  @override
+  State<FullScreenFileImageViewer> createState() =>
+      _FullScreenFileImageViewerState();
+}
+
+class _FullScreenFileImageViewerState extends State<FullScreenFileImageViewer> {
+  final TransformationController _controller = TransformationController();
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: Colors.black.withValues(alpha: 0.95),
+      body: SafeArea(
+        child: Stack(
+          children: [
+            Center(
+              child: InteractiveViewer(
+                transformationController: _controller,
+                minScale: 0.8,
+                maxScale: 5.0,
+                panEnabled: true,
+                child: Image.file(widget.file, fit: BoxFit.contain),
+              ),
+            ),
             Positioned(
               top: 12,
               right: 12,
