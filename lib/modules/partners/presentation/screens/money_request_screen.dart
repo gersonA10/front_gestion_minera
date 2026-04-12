@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:front_gestion_minera/config/theme/extension_theme.dart';
 import 'package:front_gestion_minera/core/widgets/custom_alert_widget.dart';
+import 'package:front_gestion_minera/core/widgets/excavator_loader.dart';
 import 'package:front_gestion_minera/injector_container.dart';
 import 'package:front_gestion_minera/utils/session/user_session.dart';
 import 'package:front_gestion_minera/utils/text_util.dart';
@@ -142,11 +143,16 @@ void _showImageSourceSelector() {
                 type: AlertType.error,
               );
             }
+            if (state is PartnersMoneyRequestLoading) {
+              ExcavatorLoader();
+            }
           },
           builder: (context, state) {
             final isLoading = state is PartnersMoneyRequestLoading;
 
-            return SingleChildScrollView(
+            return Stack(
+              children: [
+                SingleChildScrollView(
               padding: const EdgeInsets.symmetric(
                 horizontal: 20.0,
                 vertical: 10.0,
@@ -200,7 +206,6 @@ void _showImageSourceSelector() {
                   ),
                   SizedBox(height: smallSpacing),
 
-                  // Tarjetas (Cargadas dinámicamente)
                   Row(
                     children: [
                       Expanded(
@@ -324,38 +329,40 @@ void _showImageSourceSelector() {
                                   requestedAmount: monto,
                                   description: _descripcionController.text,
                                   evidenceUrlPath: _selectedImage!.path,
-                                  // area: _area,
-                                  // solicitante: _solicitante,
-                                  // monto: monto,
-                                  // descripcion: _descripcionController.text,
-                                  // comprobantePath: _selectedImage?.path,
                                 ),
                               );
                             },
-                      child: isLoading
-                          ? const CircularProgressIndicator(color: Colors.white)
-                          : Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Text(
-                                  'Solicitar Egreso',
-                                  style: AppTextStyles.mainStyleWhite16Bold(
-                                    context,
-                                  ),
-                                ),
-                                const SizedBox(width: 8),
-                                const Icon(
-                                  Icons.send_outlined,
-                                  color: Colors.white,
-                                  size: 20,
-                                ),
-                              ],
-                            ),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text(
+                            'Solicitar Egreso',
+                            style: AppTextStyles.mainStyleWhite16Bold(context),
+                          ),
+                          const SizedBox(width: 8),
+                          const Icon(
+                            Icons.send_outlined,
+                            color: Colors.white,
+                            size: 20,
+                          ),
+                        ],
+                      ),
                     ),
                   ),
                   SizedBox(height: smallSpacing * 2),
                 ],
               ),
+                ),
+                if (isLoading)
+                  const Positioned.fill(
+                    child: ColoredBox(
+                      color: Colors.black26,
+                      child: Center(
+                        child:ExcavatorLoader()
+                      ),
+                    ),
+                  ),
+              ],
             );
           },
         ),

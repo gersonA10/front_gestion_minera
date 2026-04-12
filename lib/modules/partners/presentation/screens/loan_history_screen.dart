@@ -2,6 +2,7 @@ import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:front_gestion_minera/config/theme/extension_theme.dart';
+import 'package:front_gestion_minera/core/widgets/excavator_loader.dart';
 import 'package:front_gestion_minera/injector_container.dart';
 import 'package:front_gestion_minera/modules/partners/domain/entity/loan_histori_entity.dart';
 import 'package:front_gestion_minera/modules/partners/presentation/bloc/partners_bloc.dart';
@@ -96,7 +97,7 @@ class _LoanHistoryScreenState extends State<LoanHistoryScreen> {
 
             if (_cachedHistory == null) {
               if (isLoading) {
-                return const Center(child: CircularProgressIndicator());
+                return const Center(child: ExcavatorLoader());
               }
               if (state is LoanHistoryError || state is LoanHistoryStatusError) {
                 final errorMessage = state is LoanHistoryError
@@ -224,8 +225,6 @@ class _LoanHistoryScreenState extends State<LoanHistoryScreen> {
                         ),
                       ),
                       SizedBox(height: smallSpacing * 0.5),
-
-                      // Reemplaza el Row de FilterButton por este bloque:
                       SizedBox(
                         height: 40,
                         child: ListView(
@@ -304,21 +303,53 @@ class _LoanHistoryScreenState extends State<LoanHistoryScreen> {
                       ),
                       SizedBox(height: smallSpacing * 0.5),
                       Expanded(
-                        child: ListView.builder(
-                          itemCount: loansHistory.length,
-                          itemBuilder: (context, index) {
-                            final data = loansHistory[index];
-                            return LoanCard(
-                              small: smallSpacing,
-                              date: formatDate((data.createdAt)),
-                              reason: data.description,
-                              amount: data.amountOrQuantity,
-                              status: data.status,
-                              motivoRechazo: data.motivoRechazo,
-                              loanType: data.loanType,
-                            );
-                          },
-                        ),
+                        child: loansHistory.isEmpty
+                            ? Center(
+                                child: Column(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Icon(
+                                      Icons.inbox_outlined,
+                                      size: 64,
+                                      color: Colors.grey.shade300,
+                                    ),
+                                    SizedBox(height: smallSpacing * 0.5),
+                                    Text(
+                                      switch (_activeFilter) {
+                                        'en revisión' || 'pendiente' =>
+                                          'No tienes préstamos pendientes',
+                                        'aprobado' =>
+                                          'No tienes préstamos aprobados',
+                                        'rechazado' =>
+                                          'No tienes préstamos rechazados',
+                                        'pagado' =>
+                                          'No tienes préstamos pagados',
+                                        _ => 'Aún no tienes préstamos',
+                                      },
+                                      style: TextStyle(
+                                        color: Colors.grey.shade500,
+                                        fontSize: 15,
+                                        fontWeight: FontWeight.w500,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              )
+                            : ListView.builder(
+                                itemCount: loansHistory.length,
+                                itemBuilder: (context, index) {
+                                  final data = loansHistory[index];
+                                  return LoanCard(
+                                    small: smallSpacing,
+                                    date: formatDate((data.createdAt)),
+                                    reason: data.description,
+                                    amount: data.amountOrQuantity,
+                                    status: data.status,
+                                    motivoRechazo: data.motivoRechazo,
+                                    loanType: data.loanType,
+                                  );
+                                },
+                              ),
                       ),
                     ],
                   ),

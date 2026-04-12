@@ -37,7 +37,7 @@ class DividendCard extends StatelessWidget {
               color: statusColor.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(10),
             ),
-            child: Icon(iconData, color: statusColor, size: 24),
+            child: Icon(iconData, color: statusColor, size: 20),
           ),
           const SizedBox(width: 14),
           Expanded(
@@ -46,15 +46,15 @@ class DividendCard extends StatelessWidget {
               children: [
                 Text(
                   item.description,
-                  style: AppTextStyles.mainStyle14Bold(context).copyWith(color: colors.black),
+                  style: AppTextStyles.mainStyle12Bold(context).copyWith(color: colors.black),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),
                 const SizedBox(height: 4),
                 Text(
                   dateInfo,
-                  style: AppTextStyles.mainStyle12(context).copyWith(color: colors.lead),
-                ),
+                  style: AppTextStyles.mainStyle10(context).copyWith(color: colors.lead),
+                )
               ],
             ),
           ),
@@ -63,7 +63,7 @@ class DividendCard extends StatelessWidget {
             children: [
               Text(
                 'Bs ${item.amount.toStringAsFixed(2)}',
-                style: AppTextStyles.mainStyle14Bold(context).copyWith(color: colors.black),
+                style: AppTextStyles.mainStyle12Bold(context).copyWith(color: colors.black),
               ),
               const SizedBox(height: 6),
               Container(

@@ -47,7 +47,7 @@ class CustomCardMetric extends StatelessWidget {
           const SizedBox(height: 4),
           Text(
             amount,
-            style: AppTextStyles.mainStyle20Bold(context).copyWith(color: amountColor),
+            style: AppTextStyles.mainStyle14Bold(context).copyWith(color: amountColor),
             overflow: TextOverflow.ellipsis,
           ),
         ],

@@ -2,6 +2,7 @@ import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:front_gestion_minera/config/theme/extension_theme.dart';
+import 'package:front_gestion_minera/core/widgets/excavator_loader.dart';
 import 'package:front_gestion_minera/injector_container.dart';
 import 'package:front_gestion_minera/modules/partners/domain/entity/request_history_entity.dart';
 import 'package:front_gestion_minera/utils/date_util.dart';
@@ -121,7 +122,7 @@ class _RequestHistoryScreenState extends State<RequestHistoryScreen>
                   tabs: _tabs.map((tab) => Tab(text: tab)).toList(),
                   onTap: (_) {
                     _searchController.clear();
-                    _fetchHistory(isRefresh: true); // 🔥 Asegurar que mande isRefresh: true
+                    _fetchHistory(isRefresh: true); 
                   },
                 ),
               ),
@@ -159,7 +160,7 @@ class _RequestHistoryScreenState extends State<RequestHistoryScreen>
                       if (_cachedHistory == null) {
                         if (isLoading) {
                           return Center(
-                            child: CircularProgressIndicator(color: colors.blue),
+                            child: ExcavatorLoader(),
                           );
                         }
                         if (state is RequestHistoryError) {
