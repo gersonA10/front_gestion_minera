@@ -104,7 +104,7 @@ class _NewDistributionScreenState extends State<NewDistributionScreen> {
             onPressed: () => context.router.back(),
           ),
           title: const Text(
-            'Nueva Distribución',
+            'Nuevo Dividendo',
             style: TextStyle(
               color: TColors.textPrimary,
               fontSize: 16,
@@ -121,7 +121,7 @@ class _NewDistributionScreenState extends State<NewDistributionScreen> {
               CustomAlert.show(
                 context,
                 title: 'Éxito',
-                message: 'La distribución se ha creado exitosamente.',
+                message: 'El dividendo se ha creado exitosamente.',
                 type: AlertType.success,
               );
             } else if (state is NewLayoutError) {

@@ -172,7 +172,7 @@ class HomeBody extends StatelessWidget {
                             Expanded(
                               child: PrimaryCard(
                                 title: 'Caja Mayor',
-                                amount: '${data.cajaMayor}',
+                                amount: data.cajaMayor.toStringAsFixed(2),
                                 icon: Icons.account_balance,
                                 colors: colors,
                               ),
@@ -181,7 +181,7 @@ class HomeBody extends StatelessWidget {
                             Expanded(
                               child: SecondaryCard(
                                 title: 'Caja Chica',
-                                amount: '${data.cajaChica}',
+                                amount: data.cajaChica.toStringAsFixed(2),
                                 icon: Icons.account_balance_wallet,
                                 iconColor: Colors.orange,
                                 iconBgColor: Color(0xFFFFF3E0),
@@ -196,7 +196,7 @@ class HomeBody extends StatelessWidget {
                             Expanded(
                               child: SecondaryCard(
                                 title: 'Saldo a Desembolsar',
-                                amount: '${data.aDesembolsar}',
+                                amount: data.aDesembolsar.toStringAsFixed(2),
                                 icon: Icons.lock_outline,
                                 iconColor: Colors.blue,
                                 iconBgColor: Color(0xFFE3F2FD),
@@ -207,7 +207,7 @@ class HomeBody extends StatelessWidget {
                             Expanded(
                               child: SecondaryCard(
                                 title: 'Saldo Disponible Real',
-                                amount: '${data.saldoDisponibleReal}',
+                                amount: data.saldoDisponibleReal.toStringAsFixed(2),
                                 icon: Icons.check_circle_outline,
                                 iconColor: Colors.green,
                                 iconBgColor: Color(0xFFE8F5E9),
