@@ -54,16 +54,18 @@ class MemberCard extends StatelessWidget {
           );
         }
         if (state is PayDividendSuccess) {
-          Navigator.of(context, rootNavigator: true).pop();
+                        context.router.back();
           Future.delayed(const Duration(milliseconds: 300)).then((_) {
             if (context.mounted) {
               context.router.push(
                 PaymentSuccessDistributionRoute(
                   bloc: context.read<TreasuryBloc>(),
                   receiptId: member.detailId,
+                  isFromDetails: true
                 ),
               );
             }
+
           });
         }
         if (state is PayDividendError) {
@@ -209,6 +211,7 @@ class MemberCard extends StatelessWidget {
                                 evidenciaPath: evidenciaPath,
                               ),
                             );
+
                           },
                         );
                       },
@@ -241,6 +244,7 @@ class MemberCard extends StatelessWidget {
                           PaymentSuccessDistributionRoute(
                             bloc: context.read<TreasuryBloc>(),
                             receiptId: member.detailId,
+                            isFromDetails: false
                           ),
                         );
                       },

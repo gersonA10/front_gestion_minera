@@ -179,7 +179,7 @@ class _SellPreviewBody extends StatelessWidget {
                 Align(
                   alignment: Alignment.centerLeft,
                   child: IconButton(
-                    onPressed: () => Navigator.of(context).pop(),
+                    onPressed: () => context.router.back(),
                     icon: const Icon(
                       Icons.arrow_back_ios_new_rounded,
                       size: 18,

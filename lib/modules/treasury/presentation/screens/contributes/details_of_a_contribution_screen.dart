@@ -70,38 +70,6 @@ class _ContributesDetailScreenState extends State<ContributesDetailScreen> {
           ],
           centerTitle: true,
         ),
-        bottomNavigationBar: SafeArea(
-          child: Padding(
-            padding: const EdgeInsets.fromLTRB(16, 8, 16, 12),
-            child: SizedBox(
-              width: double.infinity,
-              height: 52,
-              child: ElevatedButton.icon(
-                onPressed: () {},
-                icon: const Icon(
-                  Icons.credit_card_outlined,
-                  size: 20,
-                  color: TColors.white,
-                ),
-                label: const Text(
-                  'Registrar Pago',
-                  style: TextStyle(
-                    fontSize: 15,
-                    fontWeight: FontWeight.w700,
-                    color: TColors.white,
-                  ),
-                ),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: TColors.appMainColor,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(14),
-                  ),
-                  elevation: 2,
-                ),
-              ),
-            ),
-          ),
-        ),
         body: BlocBuilder<TreasuryBloc, TreasuryState>(
           buildWhen: (_, state) =>
               state is ContributionDetailLoading ||

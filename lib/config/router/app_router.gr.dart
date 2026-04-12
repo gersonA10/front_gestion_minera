@@ -873,6 +873,7 @@ class PaymentSuccessDistributionRoute
     _i47.Key? key,
     required String receiptId,
     required _i50.TreasuryBloc bloc,
+    required bool isFromDetails,
     List<_i46.PageRouteInfo>? children,
   }) : super(
          PaymentSuccessDistributionRoute.name,
@@ -880,6 +881,7 @@ class PaymentSuccessDistributionRoute
            key: key,
            receiptId: receiptId,
            bloc: bloc,
+           isFromDetails: isFromDetails,
          ),
          initialChildren: children,
        );
@@ -894,6 +896,7 @@ class PaymentSuccessDistributionRoute
         key: args.key,
         receiptId: args.receiptId,
         bloc: args.bloc,
+        isFromDetails: args.isFromDetails,
       );
     },
   );
@@ -904,6 +907,7 @@ class PaymentSuccessDistributionRouteArgs {
     this.key,
     required this.receiptId,
     required this.bloc,
+    required this.isFromDetails,
   });
 
   final _i47.Key? key;
@@ -912,9 +916,11 @@ class PaymentSuccessDistributionRouteArgs {
 
   final _i50.TreasuryBloc bloc;
 
+  final bool isFromDetails;
+
   @override
   String toString() {
-    return 'PaymentSuccessDistributionRouteArgs{key: $key, receiptId: $receiptId, bloc: $bloc}';
+    return 'PaymentSuccessDistributionRouteArgs{key: $key, receiptId: $receiptId, bloc: $bloc, isFromDetails: $isFromDetails}';
   }
 }
 

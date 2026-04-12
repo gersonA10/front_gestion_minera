@@ -135,7 +135,7 @@ final VoidCallback? onTap;
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                'Cuota #$number${label != null ? ' $label' : ''}',
+                                'Cuota #$number',
                                 style: const TextStyle(
                                   color: TColors.white,
                                   fontSize: 13,
@@ -192,7 +192,7 @@ final VoidCallback? onTap;
                           crossAxisAlignment: CrossAxisAlignment.end,
                           children: [
                             Text(
-                              '\$${amount.toStringAsFixed(2)}',
+                              amount.toStringAsFixed(2),
                               style: TextStyle(
                                 color: status == 'Atrasado'
                                     ? TColors.danger

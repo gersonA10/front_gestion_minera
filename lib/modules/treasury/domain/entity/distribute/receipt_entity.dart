@@ -2,7 +2,7 @@ class ReceiptResponseEneity {
     final String memberName;
     final String identification;
     final String period;
-    final int paidAmount;
+    final double paidAmount;
     final DateTime paymentDate;
     final String affectedCashbox;
     final String reference;

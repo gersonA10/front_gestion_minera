@@ -110,7 +110,7 @@ class _FinancialReportsScreenState extends State<FinancialReportsScreen> {
         centerTitle: true,
         leading: IconButton(
           icon: Icon(Icons.arrow_back_ios_new, color: colors.black, size: 20),
-          onPressed: () => context.router.maybePop(),
+          onPressed: () => context.router.back(),
         ),
         title: Text(
           'Reportes Financieros',

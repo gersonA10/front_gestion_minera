@@ -16,7 +16,8 @@ import 'package:pdf/widgets.dart' as pw;
 class PaymentSuccessDistributionScreen extends StatefulWidget {
   final TreasuryBloc bloc;
   final String receiptId;
-  const PaymentSuccessDistributionScreen({super.key, required this.receiptId, required this.bloc});
+  final bool isFromDetails;
+  const PaymentSuccessDistributionScreen({super.key, required this.receiptId, required this.bloc, required this.isFromDetails});
 
   @override
   State<PaymentSuccessDistributionScreen> createState() =>
@@ -151,275 +152,282 @@ class _PaymentSuccessDistributionScreenState
             ),
           ),
         ),
-        body: BlocConsumer<TreasuryBloc, TreasuryState>(
-          listenWhen: (_, curr) =>
-              curr is ReceiptSuccess ||
-              curr is ReceiptLoading ||
-              curr is ReceiptError,
-          listener: (context, state) {
-            if (state is ReceiptSuccess) {
-              setState(() => _receipt = state.data);
-            }
-          },
-          buildWhen: (_, curr) =>
-              curr is ReceiptLoading ||
-              curr is ReceiptSuccess ||
-              curr is ReceiptError,
-          builder: (context, state) {
-            if (_receipt != null) {
-              final res = _receipt!;
-              return Column(
-                children: [
-                  Expanded(
-                    child: SingleChildScrollView(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 20,
-                        vertical: 24,
+        body: SafeArea(
+          child: BlocConsumer<TreasuryBloc, TreasuryState>(
+            listenWhen: (_, curr) =>
+                curr is ReceiptSuccess ||
+                curr is ReceiptLoading ||
+                curr is ReceiptError,
+            listener: (context, state) {
+              if (state is ReceiptSuccess) {
+                setState(() => _receipt = state.data);
+              }
+            },
+            buildWhen: (_, curr) =>
+                curr is ReceiptLoading ||
+                curr is ReceiptSuccess ||
+                curr is ReceiptError,
+            builder: (context, state) {
+              if (_receipt != null) {
+                final res = _receipt!;
+                return Column(
+                  children: [
+                    Expanded(
+                      child: SingleChildScrollView(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 20,
+                          vertical: 24,
+                        ),
+                        child: Column(
+                          children: [
+                            Container(
+                              width: 72,
+                              height: 72,
+                              decoration: BoxDecoration(
+                                color: TColors.primary.withValues(alpha: 0.12),
+                                shape: BoxShape.circle,
+                              ),
+                              child: const Icon(
+                                Icons.check_circle_outline_rounded,
+                                color: TColors.primary,
+                                size: 36,
+                              ),
+                            ),
+                            const SizedBox(height: 20),
+                            const Text(
+                              'Pago registrado\nexitosamente',
+                              textAlign: TextAlign.center,
+                              style: TextStyle(
+                                color: TColors.textPrimary,
+                                fontSize: 24,
+                                fontWeight: FontWeight.w800,
+                                height: 1.2,
+                              ),
+                            ),
+                            const SizedBox(height: 10),
+                            const Text(
+                              'La transferencia de dividendos se ha\nprocesado correctamente.',
+                              textAlign: TextAlign.center,
+                              style: TextStyle(
+                                color: TColors.textSecondary,
+                                fontSize: 13,
+                                height: 1.5,
+                              ),
+                            ),
+                            const SizedBox(height: 28),
+                            Container(
+                              width: double.infinity,
+                              decoration: BoxDecoration(
+                                color: TColors.background,
+                                borderRadius: BorderRadius.circular(14),
+                                border: Border.all(color: TColors.border),
+                              ),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Container(
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 16,
+                                      vertical: 12,
+                                    ),
+                                    decoration: const BoxDecoration(
+                                      borderRadius: BorderRadius.vertical(
+                                        top: Radius.circular(14),
+                                      ),
+                                    ),
+                                    child: const Row(
+                                      children: [
+                                        Icon(
+                                          Icons.receipt_long_outlined,
+                                          color: TColors.textSecondary,
+                                          size: 18,
+                                        ),
+                                        SizedBox(width: 8),
+                                        Text(
+                                          'DETALLES DE LA TRANSACCIÓN',
+                                          style: TextStyle(
+                                            color: TColors.textPrimary,
+                                            fontSize: 11,
+                                            fontWeight: FontWeight.w800,
+                                            letterSpacing: 0.5,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                  Divider(height: 1, color: TColors.border),
+                                  _DetailRow(
+                                    label: 'Beneficiario',
+                                    value: res.memberName,
+                                  ),
+                                  Divider(
+                                    height: 1,
+                                    color: TColors.border,
+                                    indent: 16,
+                                    endIndent: 16,
+                                  ),
+                                  _DetailRow(
+                                    label: 'Monto Pagado',
+                                    value: res.paidAmount.toString(),
+                                  ),
+                                  Divider(
+                                    height: 1,
+                                    color: TColors.border,
+                                    indent: 16,
+                                    endIndent: 16,
+                                  ),
+                                  _DetailRow(
+                                    label: 'Periodo',
+                                    value: res.period,
+                                  ),
+                                  Divider(
+                                    height: 1,
+                                    color: TColors.border,
+                                    indent: 16,
+                                    endIndent: 16,
+                                  ),
+                                  _DetailRow(
+                                    label: 'Fecha/Hora',
+                                    value: _formatDate(res.paymentDate),
+                                  ),
+                                  Divider(
+                                    height: 1,
+                                    color: TColors.border,
+                                    indent: 16,
+                                    endIndent: 16,
+                                  ),
+                                  Padding(
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 16,
+                                      vertical: 14,
+                                    ),
+                                    child: Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.spaceBetween,
+                                      children: [
+                                        const Text(
+                                          'Caja Origen',
+                                          style: TextStyle(
+                                            color: TColors.textSecondary,
+                                            fontSize: 13,
+                                          ),
+                                        ),
+                                        Container(
+                                          padding: const EdgeInsets.symmetric(
+                                            horizontal: 10,
+                                            vertical: 4,
+                                          ),
+                                          decoration: BoxDecoration(
+                                            color: TColors.border,
+                                            borderRadius:
+                                                BorderRadius.circular(6),
+                                          ),
+                                          child: Text(
+                                            res.affectedCashbox.toUpperCase(),
+                                            style: const TextStyle(
+                                              color: TColors.textSecondary,
+                                              fontSize: 11,
+                                              fontWeight: FontWeight.w700,
+                                              letterSpacing: 0.3,
+                                            ),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(20, 0, 20, 28),
                       child: Column(
                         children: [
-                          Container(
-                            width: 72,
-                            height: 72,
-                            decoration: BoxDecoration(
-                              color: TColors.primary.withValues(alpha: 0.12),
-                              shape: BoxShape.circle,
-                            ),
-                            child: const Icon(
-                              Icons.check_circle_outline_rounded,
-                              color: TColors.primary,
-                              size: 36,
-                            ),
-                          ),
-                          const SizedBox(height: 20),
-                          const Text(
-                            'Pago registrado\nexitosamente',
-                            textAlign: TextAlign.center,
-                            style: TextStyle(
-                              color: TColors.textPrimary,
-                              fontSize: 24,
-                              fontWeight: FontWeight.w800,
-                              height: 1.2,
+                          SizedBox(
+                            width: double.infinity,
+                            height: 52,
+                            child: ElevatedButton.icon(
+                              onPressed: _isGenerating
+                                  ? null
+                                  : _downloadComprobante,
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: TColors.primary,
+                                foregroundColor: TColors.white,
+                                elevation: 0,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(14),
+                                ),
+                              ),
+                              icon: _isGenerating
+                                  ? const SizedBox(
+                                      width: 18,
+                                      height: 18,
+                                      child: CircularProgressIndicator(
+                                        strokeWidth: 2,
+                                        color: TColors.white,
+                                      ),
+                                    )
+                                  : const Icon(Icons.download_outlined, size: 20),
+                              label: Text(
+                                _isGenerating
+                                    ? 'Generando...'
+                                    : 'Descargar Comprobante',
+                                style: const TextStyle(
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.w700,
+                                ),
+                              ),
                             ),
                           ),
                           const SizedBox(height: 10),
-                          const Text(
-                            'La transferencia de dividendos se ha\nprocesado correctamente.',
-                            textAlign: TextAlign.center,
-                            style: TextStyle(
-                              color: TColors.textSecondary,
-                              fontSize: 13,
-                              height: 1.5,
-                            ),
-                          ),
-                          const SizedBox(height: 28),
-                          Container(
+                          SizedBox(
                             width: double.infinity,
-                            decoration: BoxDecoration(
-                              color: TColors.background,
-                              borderRadius: BorderRadius.circular(14),
-                              border: Border.all(color: TColors.border),
-                            ),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Container(
-                                  padding: const EdgeInsets.symmetric(
-                                    horizontal: 16,
-                                    vertical: 12,
-                                  ),
-                                  decoration: const BoxDecoration(
-                                    borderRadius: BorderRadius.vertical(
-                                      top: Radius.circular(14),
-                                    ),
-                                  ),
-                                  child: const Row(
-                                    children: [
-                                      Icon(
-                                        Icons.receipt_long_outlined,
-                                        color: TColors.textSecondary,
-                                        size: 18,
-                                      ),
-                                      SizedBox(width: 8),
-                                      Text(
-                                        'DETALLES DE LA TRANSACCIÓN',
-                                        style: TextStyle(
-                                          color: TColors.textPrimary,
-                                          fontSize: 11,
-                                          fontWeight: FontWeight.w800,
-                                          letterSpacing: 0.5,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
+                            height: 52,
+                            child: OutlinedButton(
+                              onPressed: () {if (widget.isFromDetails) {
+                                 context.router.back();
+                                  context.router.back();
+                              } else {
+                                context.router.back();
+                              }} ,
+                              style: OutlinedButton.styleFrom(
+                                foregroundColor: TColors.textPrimary,
+                                side: const BorderSide(color: TColors.border),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(14),
                                 ),
-                                Divider(height: 1, color: TColors.border),
-                                _DetailRow(
-                                  label: 'Beneficiario',
-                                  value: res.memberName,
+                              ),
+                              child: const Text(
+                                'Volver',
+                                style: TextStyle(
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.w600,
                                 ),
-                                Divider(
-                                  height: 1,
-                                  color: TColors.border,
-                                  indent: 16,
-                                  endIndent: 16,
-                                ),
-                                _DetailRow(
-                                  label: 'Monto Pagado',
-                                  value: res.paidAmount.toString(),
-                                ),
-                                Divider(
-                                  height: 1,
-                                  color: TColors.border,
-                                  indent: 16,
-                                  endIndent: 16,
-                                ),
-                                _DetailRow(
-                                  label: 'Periodo',
-                                  value: res.period,
-                                ),
-                                Divider(
-                                  height: 1,
-                                  color: TColors.border,
-                                  indent: 16,
-                                  endIndent: 16,
-                                ),
-                                _DetailRow(
-                                  label: 'Fecha/Hora',
-                                  value: _formatDate(res.paymentDate),
-                                ),
-                                Divider(
-                                  height: 1,
-                                  color: TColors.border,
-                                  indent: 16,
-                                  endIndent: 16,
-                                ),
-                                Padding(
-                                  padding: const EdgeInsets.symmetric(
-                                    horizontal: 16,
-                                    vertical: 14,
-                                  ),
-                                  child: Row(
-                                    mainAxisAlignment:
-                                        MainAxisAlignment.spaceBetween,
-                                    children: [
-                                      const Text(
-                                        'Caja Origen',
-                                        style: TextStyle(
-                                          color: TColors.textSecondary,
-                                          fontSize: 13,
-                                        ),
-                                      ),
-                                      Container(
-                                        padding: const EdgeInsets.symmetric(
-                                          horizontal: 10,
-                                          vertical: 4,
-                                        ),
-                                        decoration: BoxDecoration(
-                                          color: TColors.border,
-                                          borderRadius:
-                                              BorderRadius.circular(6),
-                                        ),
-                                        child: Text(
-                                          res.affectedCashbox.toUpperCase(),
-                                          style: const TextStyle(
-                                            color: TColors.textSecondary,
-                                            fontSize: 11,
-                                            fontWeight: FontWeight.w700,
-                                            letterSpacing: 0.3,
-                                          ),
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              ],
+                              ),
                             ),
                           ),
                         ],
                       ),
                     ),
+                  ],
+                );
+              }
+              if (state is ReceiptError) {
+                return Center(
+                  child: Text(
+                    state.message,
+                    style: const TextStyle(color: TColors.textSecondary),
                   ),
-                  Padding(
-                    padding: const EdgeInsets.fromLTRB(20, 0, 20, 28),
-                    child: Column(
-                      children: [
-                        SizedBox(
-                          width: double.infinity,
-                          height: 52,
-                          child: ElevatedButton.icon(
-                            onPressed: _isGenerating
-                                ? null
-                                : _downloadComprobante,
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: TColors.primary,
-                              foregroundColor: TColors.white,
-                              elevation: 0,
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(14),
-                              ),
-                            ),
-                            icon: _isGenerating
-                                ? const SizedBox(
-                                    width: 18,
-                                    height: 18,
-                                    child: CircularProgressIndicator(
-                                      strokeWidth: 2,
-                                      color: TColors.white,
-                                    ),
-                                  )
-                                : const Icon(Icons.download_outlined, size: 20),
-                            label: Text(
-                              _isGenerating
-                                  ? 'Generando...'
-                                  : 'Descargar Comprobante',
-                              style: const TextStyle(
-                                fontSize: 14,
-                                fontWeight: FontWeight.w700,
-                              ),
-                            ),
-                          ),
-                        ),
-                        const SizedBox(height: 10),
-                        SizedBox(
-                          width: double.infinity,
-                          height: 52,
-                          child: OutlinedButton(
-                            onPressed: () {context.router.back();context.router.back();} ,
-                            style: OutlinedButton.styleFrom(
-                              foregroundColor: TColors.textPrimary,
-                              side: const BorderSide(color: TColors.border),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(14),
-                              ),
-                            ),
-                            child: const Text(
-                              'Volver',
-                              style: TextStyle(
-                                fontSize: 14,
-                                fontWeight: FontWeight.w600,
-                              ),
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
+                );
+              }
+              return const Center(
+                child: ExcavatorLoader()
               );
-            }
-            if (state is ReceiptError) {
-              return Center(
-                child: Text(
-                  state.message,
-                  style: const TextStyle(color: TColors.textSecondary),
-                ),
-              );
-            }
-            return const Center(
-              child: ExcavatorLoader()
-            );
-          },
+            },
+          ),
         ),
       ),
     );
