@@ -231,11 +231,11 @@ class _ApplicationDetailsScreenState extends State<ApplicationDetailsScreen> {
                   icon: Icons.badge_outlined,
                 ),
               ),
-              const SizedBox(width: 12),
+               SizedBox(width: 12),
               Expanded(
                 child: _SummaryMetric(
                   label: 'Monto solicitado',
-                  value: '${widget.amount} Bs.',
+                  value: '${double.tryParse(widget.amount)?.toStringAsFixed(2) ?? widget.amount} Bs.',
                   icon: Icons.account_balance_wallet_outlined,
                   highlight: true,
                 ),
@@ -771,7 +771,7 @@ class _SummaryMetric extends StatelessWidget {
                   overflow: TextOverflow.ellipsis,
                   style: AppTextStyles.mainStyleWhite12(context).copyWith(
                     fontWeight: FontWeight.w700,
-                    fontSize: highlight ? 14 : 12,
+                    fontSize: highlight ? 12 : 10,
                     color: highlight ? const Color(0xfff2df1d) : Colors.white,
                   ),
                 ),

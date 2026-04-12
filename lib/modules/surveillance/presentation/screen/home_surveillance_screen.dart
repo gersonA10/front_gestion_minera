@@ -6,7 +6,6 @@ import 'package:front_gestion_minera/config/theme/extension_theme.dart';
 import 'package:front_gestion_minera/core/widgets/logout_button_widget.dart';
 import 'package:front_gestion_minera/injector_container.dart';
 import 'package:front_gestion_minera/modules/surveillance/presentation/bloc/surveillance_bloc.dart';
-import 'package:front_gestion_minera/modules/surveillance/presentation/screen/register_contribution.dart';
 import 'package:front_gestion_minera/modules/surveillance/presentation/widget/request_card_widget.dart';
 import 'package:front_gestion_minera/utils/date_util.dart';
 import 'package:front_gestion_minera/utils/text_util.dart';
@@ -20,7 +19,6 @@ class HomeSurveillanceScreen extends StatefulWidget {
 }
 
 class _HomeSurveillanceScreenState extends State<HomeSurveillanceScreen> {
-  int _selectedIndex = 0;
   late final SurveillanceBloc _surveillanceBloc;
   late final ScrollController _scrollController;
 
@@ -37,14 +35,6 @@ class _HomeSurveillanceScreenState extends State<HomeSurveillanceScreen> {
     if (_scrollController.position.pixels >=
         _scrollController.position.maxScrollExtent - 200) {
       _surveillanceBloc.add(LoadMoreRequestEvent());
-    }
-  }
-
-  void _onItemTapped(int index) {
-    setState(() => _selectedIndex = index);
-
-    if (index == 0) {
-      _surveillanceBloc.add(MonitoringTrayEvent(isRefresh: false));
     }
   }
 
@@ -72,42 +62,9 @@ class _HomeSurveillanceScreenState extends State<HomeSurveillanceScreen> {
       child: Scaffold(
         backgroundColor: colors.backgroundColor,
         body: SafeArea(
-          child: _selectedIndex == 0
-              ? RefreshIndicator(
-                  onRefresh: () => _fetchHistory(isRefresh: true),
-                  child: _buildInboxView(),
-                )
-              : const RegisterContributionsView(),
-        ),
-        bottomNavigationBar: Container(
-          decoration: BoxDecoration(
-            color: colors.white,
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withValues(alpha: .06),
-                blurRadius: 18,
-                offset: const Offset(0, -4),
-              ),
-            ],
-          ),
-          child: NavigationBar(
-            selectedIndex: _selectedIndex,
-            onDestinationSelected: _onItemTapped,
-            backgroundColor: colors.white,
-            indicatorColor: colors.blue.withValues(alpha: .12),
-            labelBehavior: NavigationDestinationLabelBehavior.alwaysShow,
-            destinations: const [
-              NavigationDestination(
-                icon: Icon(Icons.dashboard_outlined),
-                selectedIcon: Icon(Icons.dashboard),
-                label: 'Inicio',
-              ),
-              NavigationDestination(
-                icon: Icon(Icons.account_balance_wallet_outlined),
-                selectedIcon: Icon(Icons.account_balance_wallet),
-                label: 'Aportes',
-              ),
-            ],
+          child: RefreshIndicator(
+            onRefresh: () => _fetchHistory(isRefresh: true),
+            child: _buildInboxView(),
           ),
         ),
       ),
