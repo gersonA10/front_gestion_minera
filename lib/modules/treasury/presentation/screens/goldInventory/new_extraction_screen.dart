@@ -217,72 +217,74 @@ class _NewExtractionBodyState extends State<_NewExtractionBody> {
           child: Container(color: const Color(0xFFE5E7EB), height: 1),
         ),
       ),
-      body: BlocConsumer<TreasuryBloc, TreasuryState>(
-        listener: (context, state) {
-          if (state is NewExtractionLoaded) {
-            showExtractionSuccessDialog(
-              context: context,
-              loteId: state.newExtraction.batchCode,
-              pesoGramos: _pesoTotal.toString(),
-              message: state.newExtraction.message,
-            );
-          } else if (state is NewExtractionError) {
-            CustomAlert.show(
-              context,
-              title: 'Error',
-              message: state.message,
-              type: AlertType.error,
-            );
-          }
-        },
-        builder: (context, state) {
-          final isLoading = state is NewExtractionLoading;
-
-          return Stack(
-            children: [
-              SingleChildScrollView(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    _buildCalendar(),
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 16),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          const SizedBox(height: 20),
-                          Row(
-                            children: [
-                              Expanded(child: _buildPesoField()),
-                              const SizedBox(width: 14),
-                              Expanded(child: _buildPurezaField()),
-                            ],
-                          ),
-                          const SizedBox(height: 14),
-                          _buildOroPuroInfo(),
-                          const SizedBox(height: 24),
-                          _buildEvidenciaSection(),
-                          const SizedBox(height: 24),
-                          _buildObservaciones(),
-                          const SizedBox(height: 28),
-                          _buildSubmitButton(isLoading),
-                          const SizedBox(height: 32),
-                        ],
+      body: SafeArea(
+        child: BlocConsumer<TreasuryBloc, TreasuryState>(
+          listener: (context, state) {
+            if (state is NewExtractionLoaded) {
+              showExtractionSuccessDialog(
+                context: context,
+                loteId: state.newExtraction.batchCode,
+                pesoGramos: _pesoTotal.toString(),
+                message: state.newExtraction.message,
+              );
+            } else if (state is NewExtractionError) {
+              CustomAlert.show(
+                context,
+                title: 'Error',
+                message: state.message,
+                type: AlertType.error,
+              );
+            }
+          },
+          builder: (context, state) {
+            final isLoading = state is NewExtractionLoading;
+        
+            return Stack(
+              children: [
+                SingleChildScrollView(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      _buildCalendar(),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 16),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const SizedBox(height: 20),
+                            Row(
+                              children: [
+                                Expanded(child: _buildPesoField()),
+                                const SizedBox(width: 14),
+                                Expanded(child: _buildPurezaField()),
+                              ],
+                            ),
+                            const SizedBox(height: 14),
+                            _buildOroPuroInfo(),
+                            const SizedBox(height: 24),
+                            _buildEvidenciaSection(),
+                            const SizedBox(height: 24),
+                            _buildObservaciones(),
+                            const SizedBox(height: 28),
+                            _buildSubmitButton(isLoading),
+                            const SizedBox(height: 32),
+                          ],
+                        ),
                       ),
-                    ),
-                  ],
-                ),
-              ),
-              if (isLoading)
-                Container(
-                  color: Colors.black.withValues(alpha: 0.1),
-                  child: const Center(
-                    child: CircularProgressIndicator(color: Color(0xFF3B82F6)),
+                    ],
                   ),
                 ),
-            ],
-          );
-        },
+                if (isLoading)
+                  Container(
+                    color: Colors.black.withValues(alpha: 0.1),
+                    child: const Center(
+                      child: CircularProgressIndicator(color: Color(0xFF3B82F6)),
+                    ),
+                  ),
+              ],
+            );
+          },
+        ),
       ),
     );
   }

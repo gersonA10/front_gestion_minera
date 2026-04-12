@@ -307,7 +307,7 @@ class _LoansHomeScreenState extends State<LoansHomeScreen> {
                                       ),
                                     );
                                   }
-                                  return LoanCard(loan: list[i]);
+                                  return LoanCard(loan: list[i], treasuryBloc: _treasuryBloc,);
                                 },
                               ),
                       ),

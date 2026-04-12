@@ -2,21 +2,28 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:front_gestion_minera/config/router/app_router.gr.dart';
+import 'package:front_gestion_minera/modules/treasury/presentation/bloc/treasury_bloc.dart';
 import 'package:front_gestion_minera/modules/treasury/presentation/screens/loans/loans_home_screen.dart';
 import 'package:intl/intl.dart';
 import '../../../domain/entity/entity.dart';
 
 class LoanCard extends StatelessWidget {
   final InternalLoansEntity loan;
-  const LoanCard({super.key, required this.loan});
+   final TreasuryBloc treasuryBloc;
+  const LoanCard({super.key, required this.loan, required this.treasuryBloc});
 
   @override
   Widget build(BuildContext context) {
     final fmt = NumberFormat('#,##0', 'es_PE');
 
     return GestureDetector(
-      onTap: () {
-        context.router.push(LoanDetailsRoute(idLoan: loan.loanId));
+      onTap: () async{
+        await context.router.push(LoanDetailsRoute(idLoan: loan.loanId));
+         treasuryBloc.add(
+      InternalLoansRequestsEvent(
+        
+      ),
+    );
       },
       child: Container(
         padding: const EdgeInsets.all(16),

@@ -30,9 +30,9 @@ class LotDetailsDataModel extends LotDetailsDataEntity {
       LotDetailsDataModel(
         batchCode: json["batch_code"],
         progresoConsumoPct: json["progreso_consumo_pct"],
-        pesoInicial: json["peso_inicial"],
-        pesoVendido: json["peso_vendido"],
-        pesoDisponible: json["peso_disponible"],
+        pesoInicial: (json["peso_inicial"]  as num).toDouble(),
+        pesoVendido: (json["peso_vendido"]  as num).toDouble(),
+        pesoDisponible: (json["peso_disponible"]  as num).toDouble(),
         detallesExtraccion: DetallesExtraccionModel.fromJson(
           json["detalles_extraccion"],
         ),

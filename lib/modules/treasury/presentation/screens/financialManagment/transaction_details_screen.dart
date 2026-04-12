@@ -227,7 +227,7 @@ class TransactionDetailsScreen extends StatelessWidget {
           surfaceTintColor: Colors.transparent,
           leading: IconButton(
             icon: const Icon(Icons.arrow_back, color: Color(0xFF1F2937)),
-            onPressed: () => context.router.maybePop(),
+            onPressed: () => context.router.back(),
           ),
           centerTitle: true,
           title: const Text(

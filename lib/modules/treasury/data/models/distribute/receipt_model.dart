@@ -18,7 +18,7 @@ class ReceiptResponseModel extends ReceiptResponseEneity {
         memberName: json["member_name"],
         identification: json["identification"],
         period: json["period"],
-        paidAmount: json["paid_amount"],
+        paidAmount: (json["paid_amount"] as num).toDouble(),
         paymentDate: DateTime.parse(json["payment_date"]),
         affectedCashbox: json["affected_cashbox"],
         reference: json["reference"],

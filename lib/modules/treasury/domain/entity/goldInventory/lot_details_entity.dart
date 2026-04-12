@@ -7,9 +7,9 @@ class LotDetailsResponseEntity {
 class LotDetailsDataEntity {
   final String batchCode;
   final int progresoConsumoPct;
-  final int pesoInicial;
-  final int pesoVendido;
-  final int pesoDisponible;
+  final double pesoInicial;
+  final double pesoVendido;
+  final double pesoDisponible;
   final DetallesExtraccionEntity detallesExtraccion;
   final String observaciones;
   final String evidenciaUrl;

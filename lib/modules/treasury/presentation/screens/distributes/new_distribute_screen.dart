@@ -101,7 +101,7 @@ class _NewDistributionScreenState extends State<NewDistributionScreen> {
               color: TColors.textPrimary,
               size: 18,
             ),
-            onPressed: () => Navigator.pop(context),
+            onPressed: () => context.router.back(),
           ),
           title: const Text(
             'Nueva Distribución',
@@ -199,7 +199,7 @@ class _NewDistributionScreenState extends State<NewDistributionScreen> {
                           ),
                           inputFormatters: [
                             FilteringTextInputFormatter.allow(
-                              RegExp(r'[0-9,.]'),
+                              RegExp(r'^\d*\.?\d{0,2}'),
                             ),
                           ],
                           textAlign: TextAlign.right,

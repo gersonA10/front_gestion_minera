@@ -72,7 +72,7 @@ class _ContributesHomeScreenState extends State<ContributesHomeScreen> {
               color: TColors.textPrimary,
               size: 22,
             ),
-            onPressed: () => context.maybePop(),
+            onPressed: () => context.router.back(),
           ),
           title: _showSearch
               ? SizedBox(

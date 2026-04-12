@@ -20,7 +20,7 @@ class TransactionDetailsResponseModel extends  TransactionDetailsResponseEntity{
     factory TransactionDetailsResponseModel.fromJson(Map<String, dynamic> json) => TransactionDetailsResponseModel(
         transactionId: json["transaction_id"],
         referencia: json["referencia"],
-        monto: json["monto"],
+        monto: json["monto"] is int ? json["monto"] : json["monto"].toInt(),
         tipoOperacion: json["tipo_operacion"],
         concepto: json["concepto"]??'',
         fechaHora: DateTime.parse(json["fecha_hora"]),

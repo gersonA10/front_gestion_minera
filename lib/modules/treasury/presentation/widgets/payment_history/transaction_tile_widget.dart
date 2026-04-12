@@ -1,7 +1,6 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:front_gestion_minera/config/router/app_router.gr.dart';
-import 'package:front_gestion_minera/config/theme/extension_theme.dart';
 import 'package:front_gestion_minera/modules/treasury/presentation/screens/financialManagment/payment_history_screen.dart';
 import 'package:intl/intl.dart';
 
@@ -14,9 +13,6 @@ class TransactionTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    DateTime fechaDb = DateTime.parse("2026-03-28T19:32:43.554Z");
-    DateTime fechaLocal = fechaDb.toLocal();
-    final String timeStr = DateFormat('HH:mm').format(fechaLocal);
     final amountStr =  '-${NumberFormat('#,##0.00', 'en_US').format(item.monto)} Bs';
     final iconData = iconForTransaction(item.operationType, item.destinoDinero);
     final iconColor = iconColorForTransaction(
@@ -37,7 +33,6 @@ class TransactionTile extends StatelessWidget {
       ),
       child: Row(
         children: [
-          // Ícono
           Container(
             width: 44,
             height: 44,
@@ -48,7 +43,6 @@ class TransactionTile extends StatelessWidget {
             child: Icon(iconData, size: 22, color: iconColor),
           ),
           const SizedBox(width: 12),
-          // Texto
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -73,7 +67,7 @@ class TransactionTile extends StatelessWidget {
                     ),
                     const SizedBox(width: 3),
                     Text(
-                      timeStr,
+                      DateFormat('HH:mm').format(item.fecha.toLocal()),
                       style: const TextStyle(
                         fontSize: 12,
                         color: Color(0xFF9CA3AF),
@@ -126,9 +120,10 @@ class TransactionTile extends StatelessWidget {
                 Text(
                   'Ver detalle',
                   style: TextStyle(
-                    fontSize: 14,
+                    fontSize: 12,
                     fontWeight: FontWeight.w700,
-                    color: Theme.of(context).colorScheme.blue,
+                    color: Color(0xFF3B82F6),
+                                  
                   ),
                             
                   textAlign: TextAlign.end,

@@ -230,215 +230,217 @@ late TreasuryBloc treasuryBloc;
             ),
           ),
         ),
-        body: SingleChildScrollView(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const Text(
-                'Detalle de la Cuota',
-                style: TextStyle(
-                  color: TColors.white,
-                  fontSize: 16,
-                  fontWeight: FontWeight.w700,
-                ),
-              ),
-              const SizedBox(height: 12),
-              Container(
-                width: double.infinity,
-                padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  color: TColors.cardBgDark,
-                  borderRadius: BorderRadius.circular(14),
-                  border: Border.all(
-                    color: TColors.cardBorderDark.withValues(alpha: 0.5),
+        body: SafeArea(
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text(
+                  'Detalle de la Cuota',
+                  style: TextStyle(
+                    color: TColors.white,
+                    fontSize: 16,
+                    fontWeight: FontWeight.w700,
                   ),
                 ),
-                child: Column(
-                  children: [
-                    _buildDetailRow('Nº Cuota', widget.textoCuota),
-                    _buildDivider(),
-                    _buildDetailRow(
-                      'Capital',
-                      (widget.montoTotalCuota * 0.89).toStringAsFixed(2),
-                    ),
-                    _buildDivider(),
-                    _buildDetailRow(
-                      'Interés',
-                      (widget.montoTotalCuota * 0.11).toStringAsFixed(2),
-                    ),
-                    _buildDivider(),
-                    _buildDetailRow(
-                      'Total a Pagar',
-                      widget.montoTotalCuota.toStringAsFixed(2),
-                      isTotal: true,
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(height: 24),
-              const Text(
-                'Datos del Pago',
-                style: TextStyle(
-                  color: TColors.white,
-                  fontSize: 16,
-                  fontWeight: FontWeight.w700,
-                ),
-              ),
-              const SizedBox(height: 16),
-              _buildLabel('Fecha de Pago'),
-              const SizedBox(height: 8),
-              TextField(
-                controller: _fechaController,
-                readOnly: true,
-                style: const TextStyle(color: TColors.white, fontSize: 14),
-                decoration: _inputDecoration(
-                  hint: 'mm/dd/yyyy',
-                  suffix: const Icon(
-                    Icons.calendar_today_outlined,
-                    color: TColors.textSecondary1,
-                    size: 16,
-                  ),
-                ),
-              ),
-              const SizedBox(height: 16),
-              _buildLabel('Caja de Destino'),
-              const SizedBox(height: 8),
-              GestureDetector(
-                onTap: _showCajaDialog,
-                child: Container(
+                const SizedBox(height: 12),
+                Container(
                   width: double.infinity,
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 14,
-                    vertical: 14,
-                  ),
+                  padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
-                    color: TColors.cardInnerBg,
-                    borderRadius: BorderRadius.circular(10),
+                    color: TColors.cardBgDark,
+                    borderRadius: BorderRadius.circular(14),
                     border: Border.all(
                       color: TColors.cardBorderDark.withValues(alpha: 0.5),
                     ),
                   ),
-                  child: Row(
+                  child: Column(
                     children: [
-                      const Icon(
-                        Icons.account_balance_outlined,
-                        color: TColors.textSecondary1,
-                        size: 16,
+                      _buildDetailRow('Nº Cuota', widget.textoCuota),
+                      _buildDivider(),
+                      _buildDetailRow(
+                        'Capital',
+                        (widget.montoTotalCuota * 0.89).toStringAsFixed(2),
                       ),
-                      const SizedBox(width: 10),
-                      Expanded(
-                        child: Text(
-                          _selectedCaja != null
-                              ? widget.cash.data
-                                    .firstWhere(
-                                      (caja) => caja.id == _selectedCaja,
-                                    )
-                                    .nombre
-                              : 'Seleccionar caja',
-                          style: TextStyle(
-                            color: _selectedCaja != null
-                                ? TColors.white
-                                : TColors.textSecondary1,
-                            fontSize: 14,
-                          ),
-                        ),
+                      _buildDivider(),
+                      _buildDetailRow(
+                        'Interés',
+                        (widget.montoTotalCuota * 0.11).toStringAsFixed(2),
                       ),
-                      const Icon(
-                        Icons.keyboard_arrow_down,
-                        color: TColors.textSecondary1,
-                        size: 20,
+                      _buildDivider(),
+                      _buildDetailRow(
+                        'Total a Pagar',
+                        widget.montoTotalCuota.toStringAsFixed(2),
+                        isTotal: true,
                       ),
                     ],
                   ),
                 ),
-              ),
-              const SizedBox(height: 16),
-              _buildLabel('Método de Pago'),
-              const SizedBox(height: 8),
-              Row(
-                children: [
-                  Expanded(
-                    child: _MetodoPagoCard(
-                      icon: Icons.wallet_outlined,
-                      label: 'Efectivo',
-                      selected: _metodoPago == 'Efectivo',
-                      onTap: () => setState(() => _metodoPago = 'Efectivo'),
-                    ),
+                const SizedBox(height: 24),
+                const Text(
+                  'Datos del Pago',
+                  style: TextStyle(
+                    color: TColors.white,
+                    fontSize: 16,
+                    fontWeight: FontWeight.w700,
                   ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: _MetodoPagoCard(
-                      icon: Icons.account_balance_outlined,
-                      label: 'Transferencia',
-                      selected: _metodoPago == 'Transferencia',
-                      onTap: () =>
-                          setState(() => _metodoPago = 'Transferencia'),
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 16),
-              _buildLabel('Referencia / Observaciones'),
-              const SizedBox(height: 8),
-              TextField(
-                controller: _referenciaController,
-                style: const TextStyle(color: TColors.white, fontSize: 14),
-                maxLines: 3,
-                decoration: _inputDecoration(hint: 'Ej. Depósito Nº 123456...'),
-              ),
-              const SizedBox(height: 32),
-              SizedBox(
-                width: double.infinity,
-                height: 52,
-                child: ElevatedButton.icon(
-                  onPressed: () {
-                    if (_referenciaController.text.isEmpty) {
-                      CustomAlert.show(
-                        context,
-                        title: 'Error',
-                        message:
-                            'Por favor, ingresa una referencia u observación para el pago.',
-                        type: AlertType.error,
-                      );
-                      return;
-                    }
-                    if (_metodoPago.isEmpty) {
-                      CustomAlert.show(
-                        context,
-                        title: 'Error',
-                        message: 'Por favor, selecciona un método de pago.',
-                        type: AlertType.error,
-                      );
-                      return;
-                    }
-                    if (_selectedCaja == null) {
-                      CustomAlert.show(
-                        context,
-                        title: 'Error',
-                        message: 'Por favor, selecciona una caja.',
-                        type: AlertType.error,
-                      );
-                      return;
-                    }
-                    _showConfirmarPagoDialog();
-                  },
-                  icon: const Icon(Icons.check, size: 18),
-                  label: const Text(
-                    'Continuar',
-                    style: TextStyle(fontSize: 15, fontWeight: FontWeight.w700),
-                  ),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF2563EB),
-                    foregroundColor: Colors.white,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(14),
+                ),
+                const SizedBox(height: 16),
+                _buildLabel('Fecha de Pago'),
+                const SizedBox(height: 8),
+                TextField(
+                  controller: _fechaController,
+                  readOnly: true,
+                  style: const TextStyle(color: TColors.white, fontSize: 14),
+                  decoration: _inputDecoration(
+                    hint: 'mm/dd/yyyy',
+                    suffix: const Icon(
+                      Icons.calendar_today_outlined,
+                      color: TColors.textSecondary1,
+                      size: 16,
                     ),
                   ),
                 ),
-              ),
-              const SizedBox(height: 24),
-            ],
+                const SizedBox(height: 16),
+                _buildLabel('Caja de Destino'),
+                const SizedBox(height: 8),
+                GestureDetector(
+                  onTap: _showCajaDialog,
+                  child: Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 14,
+                      vertical: 14,
+                    ),
+                    decoration: BoxDecoration(
+                      color: TColors.cardInnerBg,
+                      borderRadius: BorderRadius.circular(10),
+                      border: Border.all(
+                        color: TColors.cardBorderDark.withValues(alpha: 0.5),
+                      ),
+                    ),
+                    child: Row(
+                      children: [
+                        const Icon(
+                          Icons.account_balance_outlined,
+                          color: TColors.textSecondary1,
+                          size: 16,
+                        ),
+                        const SizedBox(width: 10),
+                        Expanded(
+                          child: Text(
+                            _selectedCaja != null
+                                ? widget.cash.data
+                                      .firstWhere(
+                                        (caja) => caja.id == _selectedCaja,
+                                      )
+                                      .nombre
+                                : 'Seleccionar caja',
+                            style: TextStyle(
+                              color: _selectedCaja != null
+                                  ? TColors.white
+                                  : TColors.textSecondary1,
+                              fontSize: 14,
+                            ),
+                          ),
+                        ),
+                        const Icon(
+                          Icons.keyboard_arrow_down,
+                          color: TColors.textSecondary1,
+                          size: 20,
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 16),
+                _buildLabel('Método de Pago'),
+                const SizedBox(height: 8),
+                Row(
+                  children: [
+                    Expanded(
+                      child: _MetodoPagoCard(
+                        icon: Icons.wallet_outlined,
+                        label: 'Efectivo',
+                        selected: _metodoPago == 'Efectivo',
+                        onTap: () => setState(() => _metodoPago = 'Efectivo'),
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: _MetodoPagoCard(
+                        icon: Icons.account_balance_outlined,
+                        label: 'Transferencia',
+                        selected: _metodoPago == 'Transferencia',
+                        onTap: () =>
+                            setState(() => _metodoPago = 'Transferencia'),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 16),
+                _buildLabel('Referencia / Observaciones'),
+                const SizedBox(height: 8),
+                TextField(
+                  controller: _referenciaController,
+                  style: const TextStyle(color: TColors.white, fontSize: 14),
+                  maxLines: 3,
+                  decoration: _inputDecoration(hint: 'Ej. Depósito Nº 123456...'),
+                ),
+                const SizedBox(height: 32),
+                SizedBox(
+                  width: double.infinity,
+                  height: 52,
+                  child: ElevatedButton.icon(
+                    onPressed: () {
+                      if (_referenciaController.text.isEmpty) {
+                        CustomAlert.show(
+                          context,
+                          title: 'Error',
+                          message:
+                              'Por favor, ingresa una referencia u observación para el pago.',
+                          type: AlertType.error,
+                        );
+                        return;
+                      }
+                      if (_metodoPago.isEmpty) {
+                        CustomAlert.show(
+                          context,
+                          title: 'Error',
+                          message: 'Por favor, selecciona un método de pago.',
+                          type: AlertType.error,
+                        );
+                        return;
+                      }
+                      if (_selectedCaja == null) {
+                        CustomAlert.show(
+                          context,
+                          title: 'Error',
+                          message: 'Por favor, selecciona una caja.',
+                          type: AlertType.error,
+                        );
+                        return;
+                      }
+                      _showConfirmarPagoDialog();
+                    },
+                    icon: const Icon(Icons.check, size: 18),
+                    label: const Text(
+                      'Continuar',
+                      style: TextStyle(fontSize: 15, fontWeight: FontWeight.w700),
+                    ),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xFF2563EB),
+                      foregroundColor: Colors.white,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(14),
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 24),
+              ],
+            ),
           ),
         ),
       ),

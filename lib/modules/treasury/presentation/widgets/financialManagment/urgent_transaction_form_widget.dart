@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:front_gestion_minera/core/widgets/custom_alert_widget.dart';
 import 'package:front_gestion_minera/modules/treasury/domain/entity/income_request_entity.dart';
@@ -24,25 +25,20 @@ class _UrgentTransactionFormWidgetState
 
   String _selectedType = 'Ingreso';
   
-  // Variables para Ingreso/Egreso
   String? _selectedCajaId;
   
-  // Variables para Transferencia
   String? _selectedCajaOrigenId;
   String? _selectedCajaDestinoId;
 
-  // Controladores
   final TextEditingController _montoController = TextEditingController();
   final TextEditingController _conceptoController = TextEditingController();
 
-  // Variables para la imagen
   File? _evidenciaFile;
   final ImagePicker _picker = ImagePicker();
 
   @override
   void initState() {
     super.initState();
-    // Llamamos al servicio para obtener las cajas
     context.read<TreasuryBloc>().add(GetCashRegistersEvent());
   }
 
@@ -53,7 +49,6 @@ class _UrgentTransactionFormWidgetState
     super.dispose();
   }
 
-  // Método para seleccionar la imagen
   Future<void> _pickImage(ImageSource source) async {
     try {
       final XFile? pickedFile = await _picker.pickImage(
@@ -66,9 +61,7 @@ class _UrgentTransactionFormWidgetState
         });
       }
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Error al seleccionar la imagen')),
-      );
+      CustomAlert.show(context, title: 'Error', message: 'No se pudo seleccionar la imagen. Intenta de nuevo.', type: AlertType.error);
     }
   }
 
@@ -108,7 +101,6 @@ class _UrgentTransactionFormWidgetState
   void _submitForm() {
     if (!_formKey.currentState!.validate()) return;
 
-    // 1. SI ES TRANSFERENCIA
     if (_selectedType == 'Transferencia') {
       if (_selectedCajaOrigenId == null || _selectedCajaDestinoId == null) {
         CustomAlert.show(context, title: 'Error', message: 'Debes seleccionar caja origen y destino.', type: AlertType.error);
@@ -118,8 +110,6 @@ class _UrgentTransactionFormWidgetState
         CustomAlert.show(context, title: 'Error', message: 'La caja origen y destino no pueden ser la misma.', type: AlertType.error);
         return;
       }
-
-      // COMPLETAMENTE DESCOMENTADO Y FUNCIONANDO
       final request = TransferRequestEntity(
         monto: double.parse(_montoController.text),
         cajaOrigenId: _selectedCajaOrigenId!,
@@ -130,7 +120,6 @@ class _UrgentTransactionFormWidgetState
       return;
     }
 
-    // 2. SI ES INGRESO O EGRESO
     if (_selectedCajaId == null) {
       CustomAlert.show(
         context, title: 'Error', message: 'Debes seleccionar una caja ${_selectedType == 'Ingreso' ? 'destino' : 'origen'}.', type: AlertType.error);
@@ -166,7 +155,6 @@ class _UrgentTransactionFormWidgetState
   Widget build(BuildContext context) {
     return BlocConsumer<TreasuryBloc, TreasuryState>(
       listener: (context, state) {
-        // AGREGADO EL SUCESO Y ERROR DE TRANSFERENCIA
         if (state is UrgentIncomeSuccess || state is UrgentExpenseSuccess || state is UrgentTransferSuccess) {
           String mensaje = 'Transacción registrada correctamente';
           if (state is UrgentIncomeSuccess) mensaje = 'El ingreso se ha registrado correctamente';
@@ -195,20 +183,16 @@ class _UrgentTransactionFormWidgetState
                   setState(() {
                     _selectedType = value;
                     _evidenciaFile = null;
-                    // Limpiamos las selecciones al cambiar de tipo
                     _selectedCajaId = null; 
                     _selectedCajaOrigenId = null;
                     _selectedCajaDestinoId = null;
 
-                    // CORRECCIÓN ERROR 1: Limpiamos los controladores de texto
                     _montoController.clear();
                     _conceptoController.clear();
                   });
                 },
               ),
               const SizedBox(height: 24),
-                  
-              // SECTOR DE CAJAS ALIMENTADO POR EL BLOC
               BlocBuilder<TreasuryBloc, TreasuryState>(
                 buildWhen: (previous, current) =>
                     current is CashRegistersLoading ||
@@ -221,7 +205,6 @@ class _UrgentTransactionFormWidgetState
                   
                   final cajas = context.read<TreasuryBloc>().cashRegisters;
                   
-                  // Generamos la lista de items para los dropdowns
                   final dropdownItems = cajas.map((caja) {
                     return DropdownMenuItem(
                       value: caja.id,
@@ -229,7 +212,6 @@ class _UrgentTransactionFormWidgetState
                     );
                   }).toList();
 
-                  // SI ES TRANSFERENCIA, MOSTRAMOS DOS DROPDOWNS
                   if (_selectedType == 'Transferencia') {
                     return Column(
                       children: [
@@ -259,7 +241,6 @@ class _UrgentTransactionFormWidgetState
                       ],
                     );
                   } 
-                  // SI ES INGRESO O EGRESO, MOSTRAMOS UN DROPDOWN
                   else {
                     return DropdownButtonFormField<String>(
                       value: _selectedCajaId,
@@ -281,7 +262,16 @@ class _UrgentTransactionFormWidgetState
               TextFormField(
                 controller: _montoController,
                 keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                validator: (value) => value == null || value.isEmpty ? 'Requerido' : null,
+                inputFormatters: [
+                  FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*')),
+                ],
+                validator: (value) {
+                  if (value == null || value.isEmpty) return 'El monto es requerido';
+                  final monto = double.tryParse(value);
+                  if (monto == null) return 'Ingresa un valor numérico válido';
+                  if (monto <= 0) return 'El monto debe ser mayor a 0';
+                  return null;
+                },
                 decoration: InputDecoration(
                   labelText: 'Monto (Bs.)',
                   hintText: '0.00',

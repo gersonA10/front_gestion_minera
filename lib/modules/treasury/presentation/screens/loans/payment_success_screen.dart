@@ -148,17 +148,14 @@ class _PaymentSuccessScreenState extends State<PaymentSuccessScreen> {
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: const Text('Recibo guardado correctamente'),
-            backgroundColor: const Color(0xFF22C55E),
+          const SnackBar(
+            content: Text('Recibo guardado correctamente'),
+            backgroundColor: Color(0xFF22C55E),
             behavior: SnackBarBehavior.floating,
-            action: SnackBarAction(
-              label: 'Abrir',
-              textColor: Colors.black,
-              onPressed: () => OpenFilex.open(file.path),
-            ),
+            duration: Duration(seconds: 3),
           ),
         );
+        await OpenFilex.open(file.path);
       }
     } catch (e) {
       if (mounted) {
