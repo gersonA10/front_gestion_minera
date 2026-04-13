@@ -2,85 +2,13 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_svg/svg.dart';
 import 'package:front_gestion_minera/config/theme/extension_theme.dart';
 import 'package:front_gestion_minera/core/widgets/zoomable_evidence_image.dart';
 import 'package:front_gestion_minera/modules/partners/domain/entity/partners_entity.dart';
 import 'package:front_gestion_minera/utils/session/user_session.dart';
 import 'package:front_gestion_minera/utils/text_util.dart';
+import 'package:path/path.dart' as path;
 
-class CustomCardWidget extends StatelessWidget {
-  const CustomCardWidget({
-    super.key,
-    required this.screenSize,
-    required this.topPadding,
-    required this.smallSpacing,
-    required this.icon,
-    required this.title,
-    required this.subtitle,
-    required this.onTap,
-  });
-
-  final Size screenSize;
-  final double topPadding;
-  final double smallSpacing;
-  final String icon;
-  final String title;
-  final String subtitle;
-  final GestureTapCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    final colors = Theme.of(context).colorScheme;
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        height: screenSize.height * 0.17,
-        width: screenSize.width * 0.43,
-        decoration: BoxDecoration(
-          color: colors.white,
-          borderRadius: BorderRadius.circular(15),
-          boxShadow: [
-            BoxShadow(
-              color: colors.lead,
-              blurRadius: 20,
-              offset: const Offset(0, 10),
-            ),
-          ],
-        ),
-        child: Padding(
-          padding: EdgeInsets.all(topPadding * 0.05),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Container(
-                padding: EdgeInsets.all(topPadding * 0.05),
-                margin: EdgeInsets.only(top: topPadding * 0.05),
-                decoration: BoxDecoration(
-                  color: Theme.of(context).colorScheme.bajo,
-                  borderRadius: BorderRadius.circular(16),
-                ),
-                child: SvgPicture.asset(icon, width: 28, height: 28),
-              ),
-              SizedBox(height: smallSpacing * 0.8),
-              Text(
-                title,
-                style: AppTextStyles.mainStyle12Bold(context),
-                textAlign: TextAlign.start,
-              ),
-              Text(
-                subtitle,
-                style: AppTextStyles.mainStyle10(context),
-                textAlign: TextAlign.start,
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}
 
 class FilterButton extends StatelessWidget {
   final String text;
@@ -737,6 +665,7 @@ class TextLoanScreen extends StatelessWidget {
   }
 }
 
+
 class CustomForm extends StatelessWidget {
   const CustomForm({
     super.key,
@@ -759,120 +688,188 @@ class CustomForm extends StatelessWidget {
   final TextEditingController reasonController;
   final TextEditingController applicantController;
 
+  String get fileName =>
+      image != null ? path.basename(image!.path) : 'Ningún archivo seleccionado';
+
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: EdgeInsets.all(smallSpacing * 1.5),
+      padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
-        color: colors.white,
-        borderRadius: BorderRadius.circular(16),
+        color: colors.surface,
+        borderRadius: BorderRadius.circular(28),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.04),
+            blurRadius: 24,
+            offset: const Offset(0, 10),
+          ),
+        ],
       ),
       child: Column(
-        mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          Text(
+            "Formulario de solicitud",
+            style: AppTextStyles.mainStyle14Bold(context).copyWith(
+              fontSize: 18,
+            ),
+          ),
+          const SizedBox(height: 6),
+          Text(
+            "Completa la información requerida y adjunta un comprobante válido.",
+            style: TextStyle(
+              color: colors.onSurfaceVariant,
+              fontSize: 13,
+            ),
+          ),
+          const SizedBox(height: 20),
+
           Text(title, style: AppTextStyles.mainStyle14Bold(context)),
-          SizedBox(height: smallSpacing * 1),
+          const SizedBox(height: 8),
           TextLoanScreen(
-            hintText: title =='Monto'? "Bs. 0.00": 'Gr. 0.00',
+            hintText: title == 'Monto' ? "Bs. 0.00" : "Gr. 0.00",
             controller: amountController,
             enabled: true,
-            keyboardType: TextInputType.number,
+            keyboardType: const TextInputType.numberWithOptions(decimal: true),
           ),
-          SizedBox(height: smallSpacing * 1),
+
+          const SizedBox(height: 16),
+
           Text("Motivo", style: AppTextStyles.mainStyle14Bold(context)),
-          SizedBox(height: smallSpacing * 1),
+          const SizedBox(height: 8),
           TextLoanScreen(
-            hintText: "Escribe el motivo del préstamo",
+            hintText: "Describe brevemente el motivo",
             controller: reasonController,
             enabled: true,
           ),
-          SizedBox(height: smallSpacing * 1),
+
+          const SizedBox(height: 16),
+
           Text(
             "Nombre del solicitante",
             style: AppTextStyles.mainStyle14Bold(context),
           ),
-          SizedBox(height: smallSpacing * 1),
+          const SizedBox(height: 8),
           TextLoanScreen(
-            hintText: "Los tigresitos",
-            controller: TextEditingController(text: UserSession.userName),
+            hintText: UserSession.userName,
+            controller: applicantController,
             enabled: false,
           ),
-          SizedBox(height: 18),
-          Text(
-            "Comprobante",
-            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
-          ),
-          SizedBox(height: smallSpacing * 1),
-          Row(
-            children: [
-              GestureDetector(
-                onTap: onOpenCamera,
-                child: Container(
-                  width: 70,
-                  height: 70,
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(12),
-                    image: DecorationImage(
-                      image: image != null
-                          ? FileImage(image!)
-                          : const NetworkImage("https://picsum.photos/200")
-                                as ImageProvider,
-                      fit: BoxFit.cover,
+
+          const SizedBox(height: 20),
+
+          Text("Comprobante", style: AppTextStyles.mainStyle14Bold(context)),
+          const SizedBox(height: 10),
+
+          InkWell(
+            borderRadius: BorderRadius.circular(22),
+            onTap: onOpenCamera,
+            child: Ink(
+              padding: const EdgeInsets.all(14),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(22),
+                border: Border.all(
+                  color: image != null
+                      ? colors.primary.withOpacity(0.25)
+                      : colors.outline.withOpacity(0.18),
+                ),
+                color: colors.surfaceContainerHighest.withOpacity(0.28),
+              ),
+              child: Row(
+                children: [
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(16),
+                    child: Container(
+                      width: 84,
+                      height: 84,
+                      color: colors.surfaceContainerHighest,
+                      child: image != null
+                          ? Image.file(image!, fit: BoxFit.cover)
+                          : Icon(
+                              Icons.camera_alt_rounded,
+                              size: 30,
+                              color: colors.primary,
+                            ),
                     ),
                   ),
-                  child: const Center(
-                    child: Icon(Icons.camera_alt, color: Colors.white),
-                  ),
-                ),
-              ),
-              const SizedBox(width: 10),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children:  [
-                  Text(
-                    "recibo_pago_042.jpg",
-                    style: TextStyle(color: Colors.grey),
-                  ),
-                  SizedBox(height: 4),
-                  GestureDetector(
-                    onTap: image == null
-                        ? null
-                        : () {
-                            Navigator.of(context).push(
-                              PageRouteBuilder(
-                                opaque: false,
-                                pageBuilder: (_, _, _) =>
-                                    FullScreenFileImageViewer(file: image!),
-                                transitionsBuilder:
-                                    (_, animation, _, child) =>
-                                        FadeTransition(
+                  const SizedBox(width: 14),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          image != null
+                              ? "Archivo adjunto"
+                              : "Subir comprobante",
+                          style: const TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                        const SizedBox(height: 10),
+                        Row(
+                          children: [
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 10,
+                                vertical: 6,
+                              ),
+                              decoration: BoxDecoration(
+                                color: colors.primary.withOpacity(0.10),
+                                borderRadius: BorderRadius.circular(999),
+                              ),
+                              child: Text(
+                                image != null ? "Cambiar imagen" : "Agregar imagen",
+                                style: TextStyle(
+                                  color: colors.primary,
+                                  fontSize: 11.5,
+                                  fontWeight: FontWeight.w700,
+                                ),
+                              ),
+                            ),
+                            if (image != null) ...[
+                              const SizedBox(width: 8),
+                              GestureDetector(
+                                onTap: () {
+                                  Navigator.of(context).push(
+                                    PageRouteBuilder(
+                                      opaque: false,
+                                      pageBuilder: (_, _, _) =>
+                                          FullScreenFileImageViewer(file: image!),
+                                      transitionsBuilder:
+                                          (_, animation, _, child) {
+                                        return FadeTransition(
                                           opacity: animation,
                                           child: child,
-                                        ),
+                                        );
+                                      },
+                                    ),
+                                  );
+                                },
+                                child: const Text(
+                                  "Ver completa",
+                                  style: TextStyle(
+                                    fontSize: 11.5,
+                                    fontWeight: FontWeight.w700,
+                                  ),
+                                ),
                               ),
-                            );
-                          },
-                    child: Text(
-                      "Ver imagen completa",
-                      style: TextStyle(
-                        color: image == null ? Colors.grey : Colors.amber,
-                        fontWeight: FontWeight.bold,
-                        fontSize: 10,
-                      ),
+                            ]
+                          ],
+                        )
+                      ],
                     ),
                   ),
                 ],
               ),
-            ],
+            ),
           ),
-          SizedBox(height: smallSpacing * 1),
         ],
       ),
     );
   }
 }
-
 class NumericTextField extends StatelessWidget {
   final TextEditingController controller;
   final String hintText;

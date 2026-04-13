@@ -53,14 +53,24 @@ class _MainAppState extends State<MainApp> {
     _startInactivityTimer();
     
     _lifecycleListener = AppLifecycleListener(
-      onPause: () {
-        _pausedTime = DateTime.now();
-        _inactivityTimer?.cancel(); 
+      onHide: () {
+        // En algunos dispositivos el app pasa a 'hidden' antes que 'paused'
+        _pausedTime ??= DateTime.now();
+        _inactivityTimer?.cancel();
       },
-      onResume: () {
+      onPause: () {
+        _pausedTime ??= DateTime.now();
+        _inactivityTimer?.cancel();
+      },
+      onResume: () async {
         if (_pausedTime != null) {
           final diff = DateTime.now().difference(_pausedTime!);
-          _pausedTime = null; // Siempre resetear antes de actuar
+          _pausedTime = null;
+          final hasSession = await UserSession.isSession();
+          if (!hasSession) {
+            _startInactivityTimer();
+            return;
+          }
           if (diff.inMinutes >= _timeoutMinutes) {
             SessionActions.logout(true);
             return;
@@ -74,9 +84,12 @@ class _MainAppState extends State<MainApp> {
   }
 
   void _startInactivityTimer() {
-    _inactivityTimer?.cancel(); 
-    _inactivityTimer = Timer(Duration(minutes: _timeoutMinutes), () {
-      SessionActions.logout(true);
+    _inactivityTimer?.cancel();
+    _inactivityTimer = Timer(Duration(minutes: _timeoutMinutes), () async {
+      final hasSession = await UserSession.isSession();
+      if (hasSession) {
+        SessionActions.logout(true);
+      }
     });
   }
 
