@@ -32,7 +32,6 @@ class _ContributesHomeScreenState extends State<ContributesHomeScreen> {
   void dispose() {
     _scrollController.dispose();
     _searchController.dispose();
-    _bloc.close();
     super.dispose();
   }
 

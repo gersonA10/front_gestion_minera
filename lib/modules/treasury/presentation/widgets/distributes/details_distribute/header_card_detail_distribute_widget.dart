@@ -36,6 +36,13 @@ class HeaderCard extends StatelessWidget {
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+               Text(
+                'Periodo: ',
+                style: TextStyle(
+                  color: Colors.white.withValues(alpha: 0.7),
+                  fontSize: 12,
+                ),
+              ),
               Text(
                 header.period,
                 style: const TextStyle(

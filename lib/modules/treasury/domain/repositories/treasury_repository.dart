@@ -95,6 +95,7 @@ abstract class TreasuryRepository {
   Future<DistributionHistoryResponseEntity> getDistributionHistory({
     int page = 1,
     int limit = 10,
+    int? year,
   });
 
   Future<DistributionDetailResponseEntity> getDistributionDetail(

@@ -82,7 +82,16 @@ class _LoansHomeScreenState extends State<LoansHomeScreen> {
     setState(() => _activeFilter = filter);
     _searchController.clear();
     setState(() => _searchQuery = '');
-    _treasuryBloc.add(InternalLoansRequestsEvent(status: filter));
+    _treasuryBloc.add(InternalLoansRequestsEvent(
+      status: filter == 'todos' ? null : filter,
+    ));
+  }
+
+  void _reloadWithCurrentFilter() {
+    _treasuryBloc.add(InternalLoansRequestsEvent(
+      status: _activeFilter == 'todos' ? null : _activeFilter,
+      search: _searchQuery.isNotEmpty ? _searchQuery : null,
+    ));
   }
 
   @override
@@ -307,7 +316,7 @@ class _LoansHomeScreenState extends State<LoansHomeScreen> {
                                       ),
                                     );
                                   }
-                                  return LoanCard(loan: list[i], treasuryBloc: _treasuryBloc,);
+                                  return LoanCard(loan: list[i], treasuryBloc: _treasuryBloc, onReturn: _reloadWithCurrentFilter,);
                                 },
                               ),
                       ),

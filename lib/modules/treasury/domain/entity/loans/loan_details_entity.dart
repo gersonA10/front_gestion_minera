@@ -21,12 +21,12 @@ class LoanDetailsDataEntity {
 class CabeceraEntity {
     final String loanCode;
     final String estadoEtiqueta;
-    final int montoPrincipal;
+    final double montoPrincipal;
     final String moneda;
-    final int interesTotal;
-    final int totalAPagar;
-    final int saldoPendiente;
-    final int progresoPagoPct;
+    final double interesTotal;
+    final double totalAPagar;
+    final double saldoPendiente;
+    final double progresoPagoPct;
 
     CabeceraEntity({
         required this.loanCode,

@@ -2,6 +2,7 @@ import 'package:auto_route/auto_route.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:front_gestion_minera/core/widgets/custom_date_selector.dart';
 import 'package:front_gestion_minera/config/router/app_router.gr.dart';
+import 'package:front_gestion_minera/core/widgets/excavator_loader.dart';
 import 'package:front_gestion_minera/injector_container.dart';
 import 'package:front_gestion_minera/utils/constants/color.constant.dart';
 
@@ -235,18 +236,10 @@ class _GoldDashboardScreenState extends State<GoldDashboardScreen> {
                     ),
                   ),
                   if (isLoading)
-                    const Positioned(
-                      top: 0,
-                      left: 0,
-                      right: 0,
-                      child: LinearProgressIndicator(color: Color(0xFF2563EB)),
-                    ),
-                  if (isLoading)
                     Positioned.fill(
-                      child: IgnorePointer(
-                        child: Container(
-                          color: const Color(0xFFF5F5F7).withValues(alpha: 0.5),
-                        ),
+                      child: Container(
+                        color: Colors.black.withValues(alpha: 0.1),
+                        child: const Center(child: ExcavatorLoader()),
                       ),
                     ),
                 ],

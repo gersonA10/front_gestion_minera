@@ -143,15 +143,23 @@ void _showImageSourceSelector() {
                 type: AlertType.error,
               );
             }
-            if (state is PartnersMoneyRequestLoading) {
-              ExcavatorLoader();
-            }
+            // if (state is PartnersMoneyRequestLoading) {
+            //   ExcavatorLoader();
+            // }
           },
           builder: (context, state) {
             final isLoading = state is PartnersMoneyRequestLoading;
 
             return Stack(
               children: [
+                isLoading
+                  ? Container(
+                      color: Colors.black26,
+                      child: const Center(
+                        child: ExcavatorLoader()
+                      ),
+                    )
+                  : 
                 SingleChildScrollView(
               padding: const EdgeInsets.symmetric(
                 horizontal: 20.0,
@@ -301,8 +309,7 @@ void _showImageSourceSelector() {
                       onPressed: isLoading
                           ? null
                           : () {
-                              final monto =
-                                  double.tryParse(_montoController.text) ?? 0.0;
+                              final monto =  double.tryParse(_montoController.text) ?? 0.0;
                               if (monto <= 0) {
                                 CustomAlert.show(
                                   context,
@@ -318,6 +325,16 @@ void _showImageSourceSelector() {
                                   context,
                                   title: 'Error',
                                   message: 'Debe agregar un comprobante',
+                                  type: AlertType.warning,
+                                );
+                                return;
+                              }
+
+                               if (_descripcionController.text.isEmpty) {
+                                CustomAlert.show(
+                                  context,
+                                  title: 'Error',
+                                  message: 'Debe agregar una descripcion o motivo',
                                   type: AlertType.warning,
                                 );
                                 return;
@@ -353,15 +370,6 @@ void _showImageSourceSelector() {
                 ],
               ),
                 ),
-                if (isLoading)
-                  const Positioned.fill(
-                    child: ColoredBox(
-                      color: Colors.black26,
-                      child: Center(
-                        child:ExcavatorLoader()
-                      ),
-                    ),
-                  ),
               ],
             );
           },

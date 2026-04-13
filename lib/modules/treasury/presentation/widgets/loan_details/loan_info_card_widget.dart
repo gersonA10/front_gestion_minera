@@ -200,7 +200,7 @@ class LoanInfoCard extends StatelessWidget {
                           ),
                         ),
                         Text(
-                          '${cabecera.progresoPagoPct}%',
+                          '${cabecera.progresoPagoPct.toStringAsFixed(cabecera.progresoPagoPct % 1 == 0 ? 0 : 1)}%',
                           style: const TextStyle(
                             color: TColors.amber,
                             fontSize: 10,

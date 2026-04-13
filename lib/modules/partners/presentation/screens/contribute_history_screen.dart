@@ -241,7 +241,7 @@ Future<void> _selectCustomDate() async {
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
                             Text(
-                              entry.key, // Ej: "OCTUBRE 2023"
+                              entry.key, 
                               style: AppTextStyles.mainStyle12Bold(context).copyWith(color: colors.lead),
                             ),
                             Text(
@@ -294,12 +294,6 @@ Future<void> _selectCustomDate() async {
           "Historial de Aportes",
           style: AppTextStyles.mainStyle16Bold(context).copyWith(color: colors.black),
         ),
-        actions: [
-          IconButton(
-            icon: Icon(Icons.more_horiz, color: colors.blue),
-            onPressed: () {},
-          )
-        ],
       ),
       body: Column(
         children: [
@@ -445,7 +439,9 @@ class ContributionCard extends StatelessWidget {
     final statusColor = isConfirmed ? colors.green : colors.amber;
 
     final months = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
-    final dateStr = '${item.fechaPago.day.toString().padLeft(2, '0')} ${months[item.fechaPago.month - 1]}, ${item.fechaPago.year}';
+    final dateStr = item.fechaPago != null
+        ? '${item.fechaPago!.day.toString().padLeft(2, '0')} ${months[item.fechaPago!.month - 1]}, ${item.fechaPago!.year}'
+        : 'Fecha no disponible';
 
     return Container(
       margin: const EdgeInsets.only(bottom: 14),

@@ -11,7 +11,7 @@ class PayTheFeeResponseModel extends PayTheFeeResponseEntity {
 
   factory PayTheFeeResponseModel.fromJson(Map<String, dynamic> json) =>
       PayTheFeeResponseModel(
-        montoPagado: json["monto_pagado"],
+        montoPagado: (json["monto_pagado"] as num).toDouble(),
         referencia: json["referencia"],
         fechaHora: json["fecha_hora"],
         cajaAfectada: json["caja_afectada"],

@@ -94,15 +94,19 @@ class PartnersBloc extends Bloc<PartnersEvent, PartnersState> {
         'DICIEMBRE',
       ];
 
-      for (var item in history) {
-        final monthName = months[item.fechaPago.month - 1];
-        final groupKey = '$monthName ${item.fechaPago.year}';
+         for (final item in history) {
+          late final String groupKey;
 
-        if (!groupedHistory.containsKey(groupKey)) {
-          groupedHistory[groupKey] = [];
+          if (item.fechaPago != null) {
+            final monthName = months[item.fechaPago!.month - 1];
+            groupKey = '$monthName ${item.fechaPago!.year}';
+          } else {
+            groupKey = 'PENDIENTES';
+          }
+
+          groupedHistory.putIfAbsent(groupKey, () => []);
+          groupedHistory[groupKey]!.add(item);
         }
-        groupedHistory[groupKey]!.add(item);
-      }
 
       emit(
         ContributeDataLoaded(metrics: metrics, groupedHistory: groupedHistory),

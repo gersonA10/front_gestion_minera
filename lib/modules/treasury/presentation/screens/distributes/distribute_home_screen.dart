@@ -1,15 +1,14 @@
 import 'package:auto_route/auto_route.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:front_gestion_minera/config/router/app_router.gr.dart';
-import 'package:front_gestion_minera/core/widgets/excavator_loader.dart';
 import 'package:front_gestion_minera/injector_container.dart';
+import 'package:front_gestion_minera/modules/treasury/domain/entity/distribute/distribution_history_entity.dart';
 import 'package:front_gestion_minera/modules/treasury/presentation/bloc/treasury_bloc.dart';
 import 'package:front_gestion_minera/modules/treasury/presentation/widgets/distributes/distributes_home/distribution_card_home_widget.dart';
 import 'package:front_gestion_minera/utils/constants/color.constant.dart';
 import 'package:intl/intl.dart';
-import '../../../domain/entity/entity.dart';
 import '../../widgets/widgtes.dart';
-
 
 @RoutePage()
 class DistributeHomeScreen extends StatefulWidget {
@@ -24,17 +23,27 @@ class _DistributeHomeScreenState extends State<DistributeHomeScreen> {
   late final TreasuryBloc _bloc;
   final ScrollController _scrollController = ScrollController();
 
+  List<DistributionHistoryItemEntity> _cachedItems = [];
+
+  bool _hasMax = true;
+
+  bool _isInitialLoading = false;
+
   @override
   void initState() {
     super.initState();
     _bloc = InjectorContainer.getIt<TreasuryBloc>()
       ..add(GetDistributionHistoryEvent(isRefresh: true));
-    _scrollController.addListener(() {
-      if (_scrollController.position.pixels >=
-          _scrollController.position.maxScrollExtent - 200) {
-        _bloc.add(LoadMoreDistributionHistoryEvent());
-      }
-    });
+
+    _scrollController.addListener(_onScroll);
+  }
+
+  void _onScroll() {
+    if (_scrollController.position.pixels < _scrollController.position.maxScrollExtent - 200) return;
+
+    if (_hasMax || _isInitialLoading) return;
+
+    _bloc.add(LoadMoreDistributionHistoryEvent());
   }
 
   @override
@@ -43,21 +52,15 @@ class _DistributeHomeScreenState extends State<DistributeHomeScreen> {
     super.dispose();
   }
 
-  String _extractYear(DistributionHistoryItemEntity item) {
-    final parts = item.period.trim().split(' ');
-    return parts.isNotEmpty ? parts.last : '';
+  List<String> _availableYears() {
+    final currentYear = DateTime.now().year;
+    return List.generate(3, (i) => '${currentYear - i}');
   }
 
-  List<DistributionHistoryItemEntity> _applyFilter(
-      List<DistributionHistoryItemEntity> items) {
-    if (_filtroAnio == 'Todos') return items;
-    return items.where((i) => _extractYear(i) == _filtroAnio).toList();
-  }
-
-  List<String> _availableYears(List<DistributionHistoryItemEntity> items) {
-    final years = items.map(_extractYear).where((y) => y.isNotEmpty).toSet().toList();
-    years.sort((a, b) => b.compareTo(a));
-    return years;
+  void _onYearSelected(String anio) {
+    setState(() => _filtroAnio = anio);
+    final year = int.tryParse(anio);
+    _bloc.add(GetDistributionHistoryEvent(isRefresh: true, year: year));
   }
 
   String _formatCurrency(double value) => NumberFormat.currency(
@@ -73,9 +76,9 @@ class _DistributeHomeScreenState extends State<DistributeHomeScreen> {
       child: Scaffold(
         backgroundColor: TColors.background,
         floatingActionButton: FloatingActionButton.extended(
-          onPressed: () async{
+          onPressed: () async {
             await context.router.push(const NewDistributionRoute());
-              _bloc.add(GetDistributionHistoryEvent(isRefresh: true));
+            _bloc.add(GetDistributionHistoryEvent(isRefresh: true));
           },
           backgroundColor: TColors.primary,
           foregroundColor: TColors.white,
@@ -105,165 +108,209 @@ class _DistributeHomeScreenState extends State<DistributeHomeScreen> {
               fontWeight: FontWeight.w700,
             ),
           ),
-          actions: [
-            IconButton(
-              icon: const Icon(Icons.search, color: TColors.textPrimary, size: 22),
-              onPressed: () {},
-            ),
-          ],
+          // actions: [
+          //   IconButton(
+          //     icon: const Icon(Icons.search,
+          //         color: TColors.textPrimary, size: 22),
+          //     onPressed: () {},
+          //   ),
+          // ],
         ),
-        body: BlocBuilder<TreasuryBloc, TreasuryState>(
+        body: BlocConsumer<TreasuryBloc, TreasuryState>(
+          listenWhen: (_, curr) =>
+              curr is DistributionHistoryLoading ||
+              curr is DistributionHistoryLoaded ||
+              curr is DistributionHistoryError,
+          listener: (context, state) {
+            if (state is DistributionHistoryLoading) {
+              // FIX: cuando empieza el refresh bloqueamos el scroll listener
+              setState(() => _isInitialLoading = true);
+            }
+            if (state is DistributionHistoryLoaded ||
+                state is DistributionHistoryError) {
+              // FIX: cuando termina, desbloqueamos
+              setState(() => _isInitialLoading = false);
+            }
+          },
           buildWhen: (_, curr) =>
               curr is DistributionHistoryLoading ||
               curr is DistributionHistoryLoaded ||
               curr is DistributionHistoryError,
           builder: (context, state) {
-            if (state is DistributionHistoryLoading) {
-              return const Center(child: ExcavatorLoader());
-            }
-
-            if (state is DistributionHistoryError) {
-              return Center(
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    const Icon(Icons.error_outline,
-                        color: TColors.danger, size: 48),
-                    const SizedBox(height: 12),
-                    Text(state.message,
-                        style: const TextStyle(
-                            color: TColors.textSecondary, fontSize: 13),
-                        textAlign: TextAlign.center),
-                    const SizedBox(height: 16),
-                    ElevatedButton(
-                      onPressed: () =>
-                          _bloc.add(GetDistributionHistoryEvent(isRefresh: true)),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: TColors.primary,
-                        foregroundColor: TColors.white,
-                        elevation: 0,
-                        shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(10)),
-                      ),
-                      child: const Text('Reintentar'),
-                    ),
-                  ],
-                ),
-              );
-            }
+            final isLoading = state is DistributionHistoryLoading;
 
             if (state is DistributionHistoryLoaded) {
-              final allItems = state.items;
-              final years = _availableYears(allItems);
-              final filtered = _applyFilter(allItems);
+              _cachedItems = state.items;
+              // FIX: solo actualizamos _hasMax cuando llegó la respuesta real
+              _hasMax = state.hasReachedMax;
+            }
 
-              return Column(
-                children: [
-                  Container(
-                    width: double.infinity,
-                    color: TColors.surface,
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 16, vertical: 12),
-                    child: SingleChildScrollView(
-                      scrollDirection: Axis.horizontal,
-                      child: Row(
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: ['Todos', ...years].map((anio) {
-                          final selected = _filtroAnio == anio;
-                          return Padding(
-                            padding: const EdgeInsets.only(right: 8),
-                            child: GestureDetector(
-                              onTap: () =>
-                                  setState(() => _filtroAnio = anio),
-                              child: AnimatedContainer(
-                                duration: const Duration(milliseconds: 200),
-                                padding: const EdgeInsets.symmetric(
-                                    horizontal: 18, vertical: 8),
-                                decoration: BoxDecoration(
-                                  color: selected
-                                      ? TColors.textPrimary
-                                      : TColors.surface,
-                                  borderRadius: BorderRadius.circular(30),
-                                  border: Border.all(
+            final years = _availableYears();
+
+            return Stack(
+              children: [
+                Column(
+                  children: [
+                    // Chips de año
+                    Container(
+                      width: double.infinity,
+                      color: TColors.surface,
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 16, vertical: 12),
+                      child: SingleChildScrollView(
+                        scrollDirection: Axis.horizontal,
+                        child: Row(
+                          children: ['Todos', ...years].map((anio) {
+                            final selected = _filtroAnio == anio;
+                            return Padding(
+                              padding: const EdgeInsets.only(right: 8),
+                              child: GestureDetector(
+                                onTap: () => _onYearSelected(anio),
+                                child: AnimatedContainer(
+                                  duration: const Duration(milliseconds: 200),
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 18, vertical: 8),
+                                  decoration: BoxDecoration(
                                     color: selected
                                         ? TColors.textPrimary
-                                        : TColors.border,
+                                        : TColors.surface,
+                                    borderRadius: BorderRadius.circular(30),
+                                    border: Border.all(
+                                      color: selected
+                                          ? TColors.textPrimary
+                                          : TColors.border,
+                                    ),
                                   ),
-                                ),
-                                child: Text(
-                                  anio,
-                                  style: TextStyle(
-                                    color: selected
-                                        ? TColors.white
-                                        : TColors.textSecondary,
-                                    fontSize: 13,
-                                    fontWeight: FontWeight.w600,
+                                  child: Text(
+                                    anio,
+                                    style: TextStyle(
+                                      color: selected
+                                          ? TColors.white
+                                          : TColors.textSecondary,
+                                      fontSize: 13,
+                                      fontWeight: FontWeight.w600,
+                                    ),
                                   ),
                                 ),
                               ),
-                            ),
-                          );
-                        }).toList(),
+                            );
+                          }).toList(),
+                        ),
+                      ),
+                    ),
+
+                    // Lista
+                    Expanded(
+                      child: RefreshIndicator(
+                        color: TColors.primary,
+                        onRefresh: () async {
+                          _bloc.add(GetDistributionHistoryEvent(
+                            isRefresh: true,
+                            year: int.tryParse(_filtroAnio),
+                          ));
+                          await _bloc.stream.firstWhere((s) =>
+                              s is DistributionHistoryLoaded ||
+                              s is DistributionHistoryError);
+                        },
+                        child: _cachedItems.isEmpty && !isLoading
+                            ? ListView(
+                                physics: const AlwaysScrollableScrollPhysics(),
+                                children: [
+                                  if (state is DistributionHistoryError)
+                                    Padding(
+                                      padding: const EdgeInsets.all(32),
+                                      child: Column(
+                                        children: [
+                                          const Icon(Icons.error_outline,
+                                              color: TColors.danger, size: 48),
+                                          const SizedBox(height: 12),
+                                          Text(state.message,
+                                              style: const TextStyle(
+                                                  color: TColors.textSecondary,
+                                                  fontSize: 13),
+                                              textAlign: TextAlign.center),
+                                          const SizedBox(height: 16),
+                                          ElevatedButton(
+                                            onPressed: () => _bloc.add(
+                                                GetDistributionHistoryEvent(
+                                                    isRefresh: true)),
+                                            style: ElevatedButton.styleFrom(
+                                              backgroundColor: TColors.primary,
+                                              foregroundColor: TColors.white,
+                                              elevation: 0,
+                                              shape: RoundedRectangleBorder(
+                                                  borderRadius:
+                                                      BorderRadius.circular(
+                                                          10)),
+                                            ),
+                                            child: const Text('Reintentar'),
+                                          ),
+                                        ],
+                                      ),
+                                    )
+                                  else
+                                    const Padding(
+                                      padding: EdgeInsets.only(top: 80),
+                                      child: Center(
+                                        child: Text(
+                                          'Sin registros',
+                                          style: TextStyle(
+                                              color: TColors.textSecondary,
+                                              fontSize: 13),
+                                        ),
+                                      ),
+                                    ),
+                                ],
+                              )
+                            : ListView.builder(
+                                controller: _scrollController,
+                                physics: const AlwaysScrollableScrollPhysics(),
+                                padding: const EdgeInsets.fromLTRB(
+                                    16, 14, 16, 100),
+                                // FIX: solo mostrar el loader del final
+                                // cuando hay más páginas Y no estamos en refresh
+                                itemCount: _cachedItems.length +
+                                    (!_hasMax && !_isInitialLoading ? 1 : 0),
+                                itemBuilder: (context, index) {
+                                  if (index == _cachedItems.length) {
+                                    return const Padding(
+                                      padding:
+                                          EdgeInsets.symmetric(vertical: 16),
+                                      child: Center(
+                                        child: CircularProgressIndicator(
+                                            color: TColors.primary),
+                                      ),
+                                    );
+                                  }
+                                  return DistribucionCardHome(
+                                    item: _cachedItems[index],
+                                    formatCurrency: _formatCurrency,
+                                  );
+                                },
+                              ),
+                      ),
+                    ),
+                  ],
+                ),
+
+                // Overlay de carga del refresh (barra superior)
+                if (isLoading)
+                  Positioned(
+                    top: 0,
+                    left: 0,
+                    right: 0,
+                    child: LinearProgressIndicator(color: TColors.primary),
+                  ),
+                if (isLoading)
+                  Positioned.fill(
+                    child: IgnorePointer(
+                      child: Container(
+                        color: TColors.white.withValues(alpha: 0.5),
                       ),
                     ),
                   ),
-                  Expanded(
-                    child: RefreshIndicator(
-                      color: TColors.primary,
-                      onRefresh: () async {
-                        _bloc.add(GetDistributionHistoryEvent(isRefresh: true));
-                        await _bloc.stream.firstWhere((s) =>
-                            s is DistributionHistoryLoaded ||
-                            s is DistributionHistoryError);
-                      },
-                      child: filtered.isEmpty
-                          ? ListView(
-                              physics: const AlwaysScrollableScrollPhysics(),
-                              children: const [
-                                Padding(
-                                  padding: EdgeInsets.only(top: 80),
-                                  child: Center(
-                                    child: Text(
-                                      'Sin registros',
-                                      style: TextStyle(
-                                          color: TColors.textSecondary,
-                                          fontSize: 13),
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            )
-                          : ListView.builder(
-                              controller: _scrollController,
-                              physics: const AlwaysScrollableScrollPhysics(),
-                              padding: const EdgeInsets.fromLTRB(16, 14, 16, 100),
-                              itemCount: filtered.length +
-                                  (state.hasReachedMax ? 0 : 1),
-                              itemBuilder: (context, index) {
-                                if (index == filtered.length) {
-                                  return const Padding(
-                                    padding:
-                                        EdgeInsets.symmetric(vertical: 16),
-                                    child: Center(
-                                      child: CircularProgressIndicator(
-                                          color: TColors.primary),
-                                    ),
-                                  );
-                                }
-                                return DistribucionCardHome(
-                                  item: filtered[index],
-                                  formatCurrency: _formatCurrency,
-                                );
-                              },
-                            ),
-                    ),
-                  ),
-                ],
-              );
-            }
-
-            return const SizedBox.shrink();
+              ],
+            );
           },
         ),
       ),

@@ -37,7 +37,7 @@ class LotDetailsDataModel extends LotDetailsDataEntity {
           json["detalles_extraccion"],
         ),
         observaciones: json["observaciones"],
-        evidenciaUrl: json["evidencia_url"],
+        evidenciaUrl: json["evidencia_url"]??'',
         historialMovimientos: List<HistorialMovimientoModel>.from(
           json["historial_movimientos"].map(
             (x) => HistorialMovimientoModel.fromJson(x),
@@ -83,9 +83,9 @@ class ResumenFinancieroModel extends ResumenFinancieroEntity {
 
   factory ResumenFinancieroModel.fromJson(Map<String, dynamic> json) =>
       ResumenFinancieroModel(
-        totalVendidoBs: json["total_vendido_bs"],
+        totalVendidoBs: (json["total_vendido_bs"] as num).toDouble(),
         ventasTotales: json["ventas_totales"],
-        precioPromedio: json["precio_promedio"].toDouble(),
+        precioPromedio: (json["precio_promedio"] as num).toDouble(),
       );
 }
 

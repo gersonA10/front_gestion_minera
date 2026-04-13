@@ -25,7 +25,7 @@ class InternalLoansResponseModel extends  InternalLoansEntity{
         montoPrestado: json["monto_prestado"] is int ? json["monto_prestado"].toDouble() : json["monto_prestado"],
         totalAPagar: json["total_a_pagar"] is int ? json["total_a_pagar"].toDouble() : json["total_a_pagar"],
         pendiente: json["pendiente"] is int ? json["pendiente"].toDouble() : json["pendiente"],
-        progresoPagoPct: json["progreso_pago_pct"],
+        progresoPagoPct: (json["progreso_pago_pct"] as num).toInt(),
         alertaVencimiento: AlertaVencimientoModel.fromJson(json["alerta_vencimiento"]),
     );
     InternalLoansEntity toEntity() {

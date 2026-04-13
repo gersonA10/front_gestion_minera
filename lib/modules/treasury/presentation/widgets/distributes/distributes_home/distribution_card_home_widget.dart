@@ -61,7 +61,7 @@ class DistribucionCardHome extends StatelessWidget {
                   ),
                   child: CustomPaint(
                     painter: GeometricPainter(
-                      color: Colors.white.withValues(alpha: 0.05),
+                      color: Colors.black.withValues(alpha: 0.01),
                     ),
                   ),
                 ),

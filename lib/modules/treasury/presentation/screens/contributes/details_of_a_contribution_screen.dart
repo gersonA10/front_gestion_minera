@@ -38,7 +38,12 @@ class _ContributesDetailScreenState extends State<ContributesDetailScreen> {
   Widget build(BuildContext context) {
     return BlocProvider.value(
       value: _bloc,
-      child: Scaffold(
+      child: PopScope(
+        canPop: false,
+        onPopInvokedWithResult: (didPop, _) {
+          if (!didPop) context.router.back();
+        },
+        child: Scaffold(
         backgroundColor: TColors.appBackgroundColor,
         appBar: AppBar(
           backgroundColor: TColors.lightContainerAccount,
@@ -221,6 +226,8 @@ class _ContributesDetailScreenState extends State<ContributesDetailScreen> {
           },
         ),
       ),
-    );
-  }
+    ),
+  );
 }
+}
+

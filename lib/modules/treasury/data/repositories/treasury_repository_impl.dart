@@ -269,10 +269,12 @@ class TreasuryRepositoryImpl implements TreasuryRepository {
   Future<DistributionHistoryResponseEntity> getDistributionHistory({
     int page = 1,
     int limit = 10,
+    int? year,
   }) async {
     final result = await datasource.getDistributionHistory(
       page: page,
       limit: limit,
+      year: year,
     );
     final models = result['items'] as List<DistributionHistoryItemModel>;
     return DistributionHistoryResponseEntity(

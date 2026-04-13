@@ -1,12 +1,16 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:front_gestion_minera/config/router/app_router.gr.dart';
 import 'package:front_gestion_minera/core/widgets/excavator_loader.dart';
 import 'package:front_gestion_minera/injector_container.dart';
 import 'package:front_gestion_minera/modules/treasury/domain/entity/contributes/contribution_receipt_entity.dart';
 import 'package:front_gestion_minera/modules/treasury/presentation/bloc/treasury_bloc.dart';
 import 'package:front_gestion_minera/utils/constants/color.constant.dart';
 import 'package:intl/intl.dart';
+import 'package:pdf/pdf.dart';
+import 'package:pdf/widgets.dart' as pw;
+import 'package:printing/printing.dart';
 
 @RoutePage()
 class ReceiptsHistoryScreen extends StatefulWidget {
@@ -51,7 +55,12 @@ class _ReceiptsHistoryScreenState extends State<ReceiptsHistoryScreen> {
   Widget build(BuildContext context) {
     return BlocProvider.value(
       value: _bloc,
-      child: Scaffold(
+      child: PopScope(
+        canPop: false,
+        onPopInvokedWithResult: (didPop, _) {
+          if (!didPop) context.router.back();
+        },
+        child: Scaffold(
         backgroundColor: TColors.appBackgroundColor,
         appBar: AppBar(
           backgroundColor: TColors.lightContainerAccount,
@@ -160,7 +169,8 @@ class _ReceiptsHistoryScreenState extends State<ReceiptsHistoryScreen> {
           },
         ),
       ),
-    );
+    ),
+  );
   }
 }
 
@@ -198,6 +208,99 @@ class ReciboCard extends StatelessWidget {
       return item.payDate;
     }
   }
+
+  Future<void> _generarPdf(BuildContext context) async {
+    final formattedDate = _formattedDate;
+    final doc = pw.Document();
+    doc.addPage(
+      pw.Page(
+        pageFormat: PdfPageFormat.a4,
+        margin: const pw.EdgeInsets.all(40),
+        build: (pw.Context ctx) => pw.Column(
+          crossAxisAlignment: pw.CrossAxisAlignment.start,
+          children: [
+            pw.Center(
+              child: pw.Text(
+                'RECIBO DE PAGO',
+                style: pw.TextStyle(
+                  fontSize: 22,
+                  fontWeight: pw.FontWeight.bold,
+                ),
+              ),
+            ),
+            pw.SizedBox(height: 8),
+            pw.Center(
+              child: pw.Text(
+                'Cooperativa Minera',
+                style: pw.TextStyle(fontSize: 13, color: PdfColors.grey600),
+              ),
+            ),
+            pw.SizedBox(height: 24),
+            pw.Divider(),
+            pw.SizedBox(height: 16),
+            _pdfRow('Socio', item.memberName),
+            _pdfRow('Referencia', item.referenceCode),
+            _pdfRow('Fecha de pago', formattedDate),
+            pw.SizedBox(height: 16),
+            pw.Divider(),
+            pw.SizedBox(height: 16),
+            pw.Row(
+              mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+              children: [
+                pw.Text(
+                  'MONTO PAGADO',
+                  style: pw.TextStyle(
+                    fontSize: 13,
+                    fontWeight: pw.FontWeight.bold,
+                  ),
+                ),
+                pw.Text(
+                  'Bs ${item.amount.toStringAsFixed(2)}',
+                  style: pw.TextStyle(
+                    fontSize: 18,
+                    fontWeight: pw.FontWeight.bold,
+                    color: PdfColors.green700,
+                  ),
+                ),
+              ],
+            ),
+            pw.SizedBox(height: 24),
+            pw.Divider(),
+            pw.SizedBox(height: 12),
+            pw.Center(
+              child: pw.Text(
+                'Estado: PAGADO',
+                style: pw.TextStyle(
+                  fontSize: 12,
+                  color: PdfColors.green700,
+                  fontWeight: pw.FontWeight.bold,
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+
+    await Printing.layoutPdf(
+      onLayout: (_) async => doc.save(),
+      name: 'recibo_${item.referenceCode}.pdf',
+    );
+  }
+
+  pw.Widget _pdfRow(String label, String value) => pw.Padding(
+        padding: const pw.EdgeInsets.only(bottom: 10),
+        child: pw.Row(
+          mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+          children: [
+            pw.Text(label,
+                style: pw.TextStyle(fontSize: 12, color: PdfColors.grey600)),
+            pw.Text(value,
+                style: pw.TextStyle(
+                    fontSize: 12, fontWeight: pw.FontWeight.bold)),
+          ],
+        ),
+      );
 
   @override
   Widget build(BuildContext context) {
@@ -290,13 +393,18 @@ class ReciboCard extends StatelessWidget {
             valueBold: true,
           ),
           Divider(color: TColors.appSurfaceColor),
-            Row(
+          Row(
             children: [
               Expanded(
                 child: ActionBtn(
                   icon: Icons.visibility_outlined,
                   label: 'Ver',
-                  onTap: () {},
+                  onTap: () => context.router.push(
+                    PaymentConfirmationRoute(
+                      transactionId: item.detailId,
+                      screen: false,
+                    ),
+                  ),
                 ),
               ),
               const SizedBox(width: 10),
@@ -304,7 +412,7 @@ class ReciboCard extends StatelessWidget {
                 child: ActionBtn(
                   icon: Icons.download_outlined,
                   label: 'PDF',
-                  onTap: () {},
+                  onTap: () => _generarPdf(context),
                   filled: true,
                 ),
               ),

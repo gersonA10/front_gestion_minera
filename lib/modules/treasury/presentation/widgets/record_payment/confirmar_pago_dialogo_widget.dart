@@ -190,7 +190,7 @@ class _ConfirmarPagoDialogState extends State<ConfirmarPagoDialog> {
                               text: 'Está registrando un pago de ',
                             ),
                             TextSpan(
-                              text: '${widget.montoFormateado} CLP',
+                              text: '${widget.montoFormateado} Bs',
                               style: const TextStyle(
                                 color: Color(0xFF2563EB),
                                 fontWeight: FontWeight.w700,

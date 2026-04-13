@@ -56,6 +56,6 @@ class ContributeHistoryDataModel extends ContributeHistoryDataEntity {
         motivo: json["motivo"] ?? 'Sin motivo',
         monto: double.tryParse(json["monto"]?.toString() ?? '0') ?? 0.0,
         estado: json["estado"] ?? 'Desconocido',
-        fechaPago: DateTime.tryParse(json["fecha_pago"] ?? '') ?? DateTime.now(),
+        fechaPago: DateTime.tryParse(json["fecha_pago"] ?? ''),
       );
 }

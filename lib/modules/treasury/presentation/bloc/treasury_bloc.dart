@@ -77,6 +77,7 @@ class TreasuryBloc extends Bloc<TreasuryEvent, TreasuryState> {
   int _distributionHistoryTotalRecords = 0;
   List<DistributionHistoryItemEntity> _distributionHistoryItems = [];
   bool _isLoadingMoreDistributionHistory = false;
+  int? _distributionHistoryYear;
 
   // detalle de distribución
   int _distributionDetailPage = 1;
@@ -963,12 +964,14 @@ class TreasuryBloc extends Bloc<TreasuryEvent, TreasuryState> {
       _distributionHistoryPage = 1;
       _distributionHistoryReachedMax = false;
       _distributionHistoryItems.clear();
+      _distributionHistoryYear = event.year;
       emit(DistributionHistoryLoading());
     }
 
     try {
       final response = await repository.getDistributionHistory(
         page: _distributionHistoryPage,
+        year: _distributionHistoryYear,
       );
       _distributionHistoryItems = response.items;
       _distributionHistoryReachedMax = !response.hasMore;
@@ -992,13 +995,13 @@ class TreasuryBloc extends Bloc<TreasuryEvent, TreasuryState> {
     LoadMoreDistributionHistoryEvent event,
     Emitter<TreasuryState> emit,
   ) async {
-    if (_distributionHistoryReachedMax || _isLoadingMoreDistributionHistory)
-      return;
+    if (_distributionHistoryReachedMax || _isLoadingMoreDistributionHistory) return;
     _isLoadingMoreDistributionHistory = true;
     _distributionHistoryPage++;
     try {
       final response = await repository.getDistributionHistory(
         page: _distributionHistoryPage,
+        year: _distributionHistoryYear,
       );
       _distributionHistoryItems.addAll(response.items);
       _distributionHistoryReachedMax = !response.hasMore;

@@ -9,21 +9,18 @@ import '../../../domain/entity/entity.dart';
 
 class LoanCard extends StatelessWidget {
   final InternalLoansEntity loan;
-   final TreasuryBloc treasuryBloc;
-  const LoanCard({super.key, required this.loan, required this.treasuryBloc});
+  final TreasuryBloc treasuryBloc;
+  final VoidCallback? onReturn;
+  const LoanCard({super.key, required this.loan, required this.treasuryBloc, this.onReturn});
 
   @override
   Widget build(BuildContext context) {
     final fmt = NumberFormat('#,##0', 'es_PE');
 
     return GestureDetector(
-      onTap: () async{
+      onTap: () async {
         await context.router.push(LoanDetailsRoute(idLoan: loan.loanId));
-         treasuryBloc.add(
-      InternalLoansRequestsEvent(
-        
-      ),
-    );
+        onReturn?.call();
       },
       child: Container(
         padding: const EdgeInsets.all(16),

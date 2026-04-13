@@ -5,13 +5,14 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:front_gestion_minera/config/router/app_router.gr.dart';
 import 'package:front_gestion_minera/core/widgets/custom_alert_widget.dart';
 import 'package:front_gestion_minera/core/widgets/excavator_loader.dart';
+import 'package:front_gestion_minera/core/widgets/upload_file_widget.dart';
 import 'package:front_gestion_minera/utils/constants/color.constant.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
 import '../../../../domain/entity/entity.dart';
 import '../../../bloc/treasury_bloc.dart';
 
-class MemberCard extends StatelessWidget {
+class MemberCard extends StatefulWidget {
   final DistributionDetailMemberEntity member;
   final String Function(double) formatCurrency;
   final String distributionId;
@@ -25,51 +26,66 @@ class MemberCard extends StatelessWidget {
     required this.distributionPeriod,
   });
 
-  bool get _isPendiente => member.status.toLowerCase() == 'pendiente';
+  @override
+  State<MemberCard> createState() => _MemberCardState();
+}
+
+class _MemberCardState extends State<MemberCard> {
+  bool _isThisCardPaying = false;
+
+  bool get _isPendiente => widget.member.status.toLowerCase() == 'pendiente';
+
   Color get _statusColor => _isPendiente ? TColors.warning : TColors.success;
+
   Color get _avatarBg =>
       _isPendiente ? TColors.warningLight : TColors.successLight;
 
   String get _initials {
-    final parts = member.fullName.trim().split(' ');
+    final parts = widget.member.fullName.trim().split(' ');
     if (parts.length >= 2) {
       return '${parts[0][0]}${parts[1][0]}'.toUpperCase();
     }
-    return member.fullName.substring(0, 2).toUpperCase();
+    return widget.member.fullName.substring(0, 2).toUpperCase();
+  }
+
+  void _navigateToSuccess(BuildContext context) {
+    Navigator.of(context, rootNavigator: true).pop();
+
+    context.router.push(
+      PaymentSuccessDistributionRoute(
+        bloc: context.read<TreasuryBloc>(),
+        receiptId: widget.member.detailId,
+        isFromDetails: true,
+      ),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
     return BlocConsumer<TreasuryBloc, TreasuryState>(
+      // Solo escuchar si esta card fue la que disparó el pago
+      listenWhen: (_, state) => _isThisCardPaying,
       listener: (context, state) {
         if (state is PayDividendLoading) {
           showDialog(
             context: context,
             barrierDismissible: false,
-            barrierColor: Colors.black.withValues(alpha: 0.5),
+            barrierColor: Colors.black.withValues(alpha: 0.45),
             builder: (_) => const PopScope(
               canPop: false,
               child: Center(child: ExcavatorLoader()),
             ),
           );
         }
-        if (state is PayDividendSuccess) {
-                        context.router.back();
-          Future.delayed(const Duration(milliseconds: 300)).then((_) {
-            if (context.mounted) {
-              context.router.push(
-                PaymentSuccessDistributionRoute(
-                  bloc: context.read<TreasuryBloc>(),
-                  receiptId: member.detailId,
-                  isFromDetails: true
-                ),
-              );
-            }
 
-          });
+        if (state is PayDividendSuccess) {
+          _isThisCardPaying = false;
+          _navigateToSuccess(context);
         }
+
         if (state is PayDividendError) {
-          context.router.back();
+          _isThisCardPaying = false;
+          Navigator.of(context, rootNavigator: true).pop();
           CustomAlert.show(
             context,
             title: 'Error',
@@ -78,6 +94,10 @@ class MemberCard extends StatelessWidget {
           );
         }
       },
+      buildWhen: (prev, curr) =>
+          curr is! PayDividendLoading &&
+          curr is! PayDividendSuccess &&
+          curr is! PayDividendError,
       builder: (context, state) {
         return Container(
           margin: const EdgeInsets.only(bottom: 10),
@@ -98,23 +118,10 @@ class MemberCard extends StatelessWidget {
             children: [
               Row(
                 children: [
-                  Container(
-                    width: 40,
-                    height: 40,
-                    decoration: BoxDecoration(
-                      color: _avatarBg,
-                      shape: BoxShape.circle,
-                    ),
-                    child: Center(
-                      child: Text(
-                        _initials,
-                        style: TextStyle(
-                          color: _statusColor,
-                          fontSize: 13,
-                          fontWeight: FontWeight.w700,
-                        ),
-                      ),
-                    ),
+                  _Avatar(
+                    initials: _initials,
+                    bg: _avatarBg,
+                    color: _statusColor,
                   ),
                   const SizedBox(width: 10),
                   Expanded(
@@ -122,16 +129,16 @@ class MemberCard extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          member.fullName,
+                          widget.member.fullName,
                           style: const TextStyle(
                             color: TColors.textPrimary,
                             fontSize: 13,
                             fontWeight: FontWeight.w700,
                           ),
                         ),
-                        if (member.paymentDate != null)
+                        if (widget.member.paymentDate != null)
                           Text(
-                            'Pagado: ${member.paymentDate}',
+                            'Pagado: ${widget.member.paymentDate}',
                             style: const TextStyle(
                               color: TColors.textSecondary,
                               fontSize: 11,
@@ -140,127 +147,63 @@ class MemberCard extends StatelessWidget {
                       ],
                     ),
                   ),
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 10,
-                      vertical: 4,
-                    ),
-                    decoration: BoxDecoration(
-                      color: TColors.surface,
-                      borderRadius: BorderRadius.circular(6),
-                      border: Border.all(color: _statusColor),
-                    ),
-                    child: Text(
-                      member.status,
-                      style: TextStyle(
-                        color: _statusColor,
-                        fontSize: 11,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
+                  _StatusBadge(
+                    label: widget.member.status,
+                    color: _statusColor,
                   ),
                 ],
               ),
+
               const SizedBox(height: 10),
               Divider(height: 1, color: TColors.border),
               const SizedBox(height: 10),
+
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const Text(
-                        'MONTO ASIGNADO',
-                        style: TextStyle(
-                          color: TColors.textSecondary,
-                          fontSize: 10,
-                          fontWeight: FontWeight.w600,
-                          letterSpacing: 0.4,
-                        ),
-                      ),
-                      const SizedBox(height: 2),
-                      Text(
-                        formatCurrency(member.assignedAmount),
-                        style: const TextStyle(
-                          color: TColors.textPrimary,
-                          fontSize: 13,
-                          fontWeight: FontWeight.w700,
-                        ),
-                      ),
-                    ],
+                  _AmountColumn(
+                    label: 'MONTO ASIGNADO',
+                    value: widget.formatCurrency(widget.member.assignedAmount),
                   ),
                   if (_isPendiente)
-                    ElevatedButton(
+                    _PayButton(
                       onPressed: () {
                         final bloc = context.read<TreasuryBloc>();
                         showConfirmarPagoDialog(
                           context: context,
-                          nombreSocio: member.fullName,
-                          monto: formatCurrency(member.assignedAmount),
-                          periodo: distributionPeriod,
+                          nombreSocio: widget.member.fullName,
+                          monto: widget.formatCurrency(
+                            widget.member.assignedAmount,
+                          ),
+                          periodo: widget.distributionPeriod,
                           cashRegisters: bloc.cashRegisters,
                           onConfirmar: (cashRegisterId, evidenciaPath) {
+                            setState(() => _isThisCardPaying = true);
                             bloc.add(
                               PayDividendEvent(
-                                distributionId: distributionId,
-                                memberId: member.memberId,
+                                distributionId: widget.distributionId,
+                                memberId: widget.member.memberId,
                                 cashRegisterId: cashRegisterId,
-                                period: distributionPeriod,
+                                period: widget.distributionPeriod,
                                 evidenciaPath: evidenciaPath,
                               ),
                             );
-
                           },
                         );
                       },
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: TColors.primary,
-                        foregroundColor: TColors.white,
-                        elevation: 0,
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 22,
-                          vertical: 10,
-                        ),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                        minimumSize: Size.zero,
-                        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                      ),
-                      child: const Text(
-                        'Pagar',
-                        style: TextStyle(
-                          fontSize: 12,
-                          fontWeight: FontWeight.w700,
-                        ),
-                      ),
                     )
                   else
-                    TextButton.icon(
+                    _ViewReceiptButton(
                       onPressed: () {
                         context.router.push(
                           PaymentSuccessDistributionRoute(
                             bloc: context.read<TreasuryBloc>(),
-                            receiptId: member.detailId,
-                            isFromDetails: false
+                            receiptId: widget.member.detailId,
+                            isFromDetails: false,
                           ),
                         );
                       },
-                      icon: const Icon(
-                        Icons.receipt_long_outlined,
-                        color: TColors.textSecondary,
-                        size: 15,
-                      ),
-                      label: const Text(
-                        'Ver recibo',
-                        style: TextStyle(
-                          color: TColors.textSecondary,
-                          fontWeight: FontWeight.w600,
-                          fontSize: 12,
-                        ),
-                      ),
                     ),
                 ],
               ),
@@ -271,6 +214,146 @@ class MemberCard extends StatelessWidget {
     );
   }
 }
+
+class _Avatar extends StatelessWidget {
+  final String initials;
+  final Color bg;
+  final Color color;
+  const _Avatar({
+    required this.initials,
+    required this.bg,
+    required this.color,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: 40,
+      height: 40,
+      decoration: BoxDecoration(color: bg, shape: BoxShape.circle),
+      child: Center(
+        child: Text(
+          initials,
+          style: TextStyle(
+            color: color,
+            fontSize: 13,
+            fontWeight: FontWeight.w700,
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _StatusBadge extends StatelessWidget {
+  final String label;
+  final Color color;
+  const _StatusBadge({required this.label, required this.color});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+      decoration: BoxDecoration(
+        color: TColors.surface,
+        borderRadius: BorderRadius.circular(6),
+        border: Border.all(color: color),
+      ),
+      child: Text(
+        label,
+        style: TextStyle(
+          color: color,
+          fontSize: 11,
+          fontWeight: FontWeight.w600,
+        ),
+      ),
+    );
+  }
+}
+
+class _AmountColumn extends StatelessWidget {
+  final String label;
+  final String value;
+  const _AmountColumn({required this.label, required this.value});
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          label,
+          style: const TextStyle(
+            color: TColors.textSecondary,
+            fontSize: 10,
+            fontWeight: FontWeight.w600,
+            letterSpacing: 0.4,
+          ),
+        ),
+        const SizedBox(height: 2),
+        Text(
+          value,
+          style: const TextStyle(
+            color: TColors.textPrimary,
+            fontSize: 13,
+            fontWeight: FontWeight.w700,
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _PayButton extends StatelessWidget {
+  final VoidCallback onPressed;
+  const _PayButton({required this.onPressed});
+
+  @override
+  Widget build(BuildContext context) {
+    return ElevatedButton(
+      onPressed: onPressed,
+      style: ElevatedButton.styleFrom(
+        backgroundColor: TColors.primary,
+        foregroundColor: TColors.white,
+        elevation: 0,
+        padding: const EdgeInsets.symmetric(horizontal: 22, vertical: 10),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+        minimumSize: Size.zero,
+        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+      ),
+      child: const Text(
+        'Pagar',
+        style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700),
+      ),
+    );
+  }
+}
+
+class _ViewReceiptButton extends StatelessWidget {
+  final VoidCallback onPressed;
+  const _ViewReceiptButton({required this.onPressed});
+
+  @override
+  Widget build(BuildContext context) {
+    return TextButton.icon(
+      onPressed: onPressed,
+      icon: const Icon(
+        Icons.receipt_long_outlined,
+        color: TColors.textSecondary,
+        size: 15,
+      ),
+      label: const Text(
+        'Ver recibo',
+        style: TextStyle(
+          color: TColors.textSecondary,
+          fontWeight: FontWeight.w600,
+          fontSize: 12,
+        ),
+      ),
+    );
+  }
+}
+
 
 void showConfirmarPagoDialog({
   required BuildContext context,
@@ -321,14 +404,59 @@ class _ConfirmarPagoDistribucionDialogState
   File? _evidenciaFile;
   final ImagePicker _picker = ImagePicker();
 
-  Future<void> _pickImage() async {
-    final XFile? picked = await _picker.pickImage(
-      source: ImageSource.gallery,
-      imageQuality: 80,
-    );
-    if (picked != null) {
-      setState(() => _evidenciaFile = File(picked.path));
+  Future<void> _pickImage(ImageSource source) async {
+    try {
+      final XFile? pickedFile = await _picker.pickImage(
+        source: source,
+        imageQuality: 80,
+      );
+      if (pickedFile != null) {
+        setState(() => _evidenciaFile = File(pickedFile.path));
+      }
+    } catch (e) {
+      debugPrint('Error al seleccionar imagen: $e');
     }
+  }
+
+  void _showPickerOptions() {
+    showModalBottomSheet(
+      context: context,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+      ),
+      builder: (ctx) => SafeArea(
+        child: Wrap(
+          children: [
+            const Padding(
+              padding: EdgeInsets.all(16),
+              child: Text(
+                'Seleccionar evidencia',
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+              ),
+            ),
+            ListTile(
+              leading: const Icon(
+                Icons.photo_library,
+                color: Color(0xFF295AF5),
+              ),
+              title: const Text('Elegir de la Galería'),
+              onTap: () {
+                Navigator.of(ctx).pop();
+                _pickImage(ImageSource.gallery);
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.photo_camera, color: Color(0xFF295AF5)),
+              title: const Text('Tomar Foto'),
+              onTap: () {
+                Navigator.of(ctx).pop();
+                _pickImage(ImageSource.camera);
+              },
+            ),
+          ],
+        ),
+      ),
+    );
   }
 
   String _formatCurrency(double value) => NumberFormat.currency(
@@ -352,6 +480,7 @@ class _ConfirmarPagoDistribucionDialogState
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              // Ícono central
               Center(
                 child: Container(
                   width: 64,
@@ -390,6 +519,8 @@ class _ConfirmarPagoDistribucionDialogState
                 ),
               ),
               const SizedBox(height: 24),
+
+              // Caja origen
               const Text(
                 'CAJA ORIGEN',
                 style: TextStyle(
@@ -468,6 +599,7 @@ class _ConfirmarPagoDistribucionDialogState
               ),
               const SizedBox(height: 16),
 
+              // Evidencia
               const Text(
                 'EVIDENCIA',
                 style: TextStyle(
@@ -478,53 +610,12 @@ class _ConfirmarPagoDistribucionDialogState
                 ),
               ),
               const SizedBox(height: 8),
-              GestureDetector(
-                onTap: _pickImage,
-                child: Container(
-                  width: double.infinity,
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 14,
-                    vertical: 14,
-                  ),
-                  decoration: BoxDecoration(
-                    color: TColors.background,
-                    borderRadius: BorderRadius.circular(12),
-                    border: Border.all(
-                      color: _evidenciaFile != null
-                          ? TColors.success
-                          : TColors.border,
-                    ),
-                  ),
-                  child: Row(
-                    children: [
-                      Icon(
-                        _evidenciaFile != null
-                            ? Icons.check_circle_outline_rounded
-                            : Icons.attach_file_rounded,
-                        color: _evidenciaFile != null
-                            ? TColors.success
-                            : TColors.textSecondary,
-                        size: 18,
-                      ),
-                      const SizedBox(width: 10),
-                      Expanded(
-                        child: Text(
-                          _evidenciaFile != null
-                              ? _evidenciaFile!.path.split('/').last
-                              : 'Seleccionar imagen',
-                          style: TextStyle(
-                            color: _evidenciaFile != null
-                                ? TColors.textPrimary
-                                : TColors.textSecondary,
-                            fontSize: 13,
-                          ),
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
+              UploadFileWidget(
+                onTap: _showPickerOptions,
+                selectedImage: _evidenciaFile,
+                onRemoveImage: () => setState(() => _evidenciaFile = null),
               ),
+
               const SizedBox(height: 28),
               SizedBox(
                 width: double.infinity,
@@ -532,6 +623,7 @@ class _ConfirmarPagoDistribucionDialogState
                 child: ElevatedButton(
                   onPressed: canConfirm
                       ? () {
+                          Navigator.pop(context);
                           widget.onConfirmar(
                             _selectedCajaId!,
                             _evidenciaFile!.path,

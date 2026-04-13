@@ -464,8 +464,10 @@ class TreasuryDatasource {
   Future<Map<String, dynamic>> getDistributionHistory({
     int page = 1,
     int limit = 10,
+    int? year,
   }) async {
     final Map<String, dynamic> queryParameters = {'page': page, 'limit': limit};
+    if (year != null) queryParameters['year'] = year;
     final response = await apiClient.get(
       '/api/treasury/distributions/history',
       operationName: 'getDistributionHistory',

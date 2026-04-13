@@ -182,7 +182,8 @@ class LoanDetailsEvent extends TreasuryEvent {
 
 class GetDistributionHistoryEvent extends TreasuryEvent {
   final bool isRefresh;
-  GetDistributionHistoryEvent({this.isRefresh = true});
+  final int? year;
+  GetDistributionHistoryEvent({this.isRefresh = true, this.year});
 }
 
 class LoadMoreDistributionHistoryEvent extends TreasuryEvent {}

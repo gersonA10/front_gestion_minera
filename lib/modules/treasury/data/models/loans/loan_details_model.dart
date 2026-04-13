@@ -44,12 +44,12 @@ class CabeceraModel extends CabeceraEntity {
     factory CabeceraModel.fromJson(Map<String, dynamic> json) => CabeceraModel(
         loanCode: json["loan_code"],
         estadoEtiqueta: json["estado_etiqueta"],
-        montoPrincipal: json["monto_principal"],
+        montoPrincipal: (json["monto_principal"] as num).toDouble(),
         moneda: json["moneda"],
-        interesTotal: json["interes_total"] is int ? json["interes_total"] : json["interes_total"].toInt(),
-        totalAPagar: json["total_a_pagar"] is int ? json["total_a_pagar"] : json["total_a_pagar"].toInt(),
-        saldoPendiente: json["saldo_pendiente"] is int ? json["saldo_pendiente"] : json["saldo_pendiente"].toInt(),
-        progresoPagoPct: json["progreso_pago_pct"],
+        interesTotal: (json["interes_total"] as num).toDouble(),
+        totalAPagar: (json["total_a_pagar"] as num).toDouble(),
+        saldoPendiente: (json["saldo_pendiente"] as num).toDouble(),
+        progresoPagoPct: (json["progreso_pago_pct"] as num).toDouble(),
     );
 }
 

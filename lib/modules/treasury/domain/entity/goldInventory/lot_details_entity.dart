@@ -50,7 +50,7 @@ class HistorialMovimientoEntity {
 }
 
 class ResumenFinancieroEntity {
-  final int totalVendidoBs;
+  final double totalVendidoBs;
   final int ventasTotales;
   final double precioPromedio;
 

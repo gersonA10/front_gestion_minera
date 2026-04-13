@@ -36,8 +36,9 @@ class InternalLoansEntity {
   });
 
   LoanStatus get status {
-    if (alertaVencimiento.estaEnMora) return LoanStatus.enMora;
-    if (pendiente <= 0) return LoanStatus.finalizado;
+    final label = estadoEtiqueta.toLowerCase().trim();
+    if (label == 'finalizado' || label == 'pagado') return LoanStatus.finalizado;
+    if (alertaVencimiento.estaEnMora || label == 'en mora' || label == 'mora') return LoanStatus.enMora;
     return LoanStatus.activo;
   }
 

@@ -29,7 +29,7 @@ class ContributeHistoryDataEntity {
   final String motivo;
   final double monto;
   final String estado;
-  final DateTime fechaPago;
+  final DateTime? fechaPago;
 
   ContributeHistoryDataEntity({
     required this.detailId,
