@@ -72,7 +72,7 @@ class _MainAppState extends State<MainApp> {
             return;
           }
           if (diff.inMinutes >= _timeoutMinutes) {
-            SessionActions.logout(true);
+            SessionActions.logout(SessionLogoutReason.inactivity);
             return;
           }
         }
@@ -88,7 +88,7 @@ class _MainAppState extends State<MainApp> {
     _inactivityTimer = Timer(Duration(minutes: _timeoutMinutes), () async {
       final hasSession = await UserSession.isSession();
       if (hasSession) {
-        SessionActions.logout(true);
+        SessionActions.logout(SessionLogoutReason.inactivity);
       }
     });
   }

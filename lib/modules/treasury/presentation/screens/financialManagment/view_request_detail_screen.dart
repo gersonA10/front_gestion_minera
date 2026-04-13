@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:front_gestion_minera/config/theme/extension_theme.dart';
 import 'package:front_gestion_minera/core/widgets/custom_alert_widget.dart';
+import 'package:front_gestion_minera/core/widgets/zoomable_evidence_image.dart';
 import 'package:front_gestion_minera/injector_container.dart';
 import 'package:image_picker/image_picker.dart';
 import '../../../domain/entity/entity.dart';
@@ -247,28 +248,33 @@ class _ViewRequestDetailsScreenState extends State<ViewRequestDetailsScreen> {
                                   ),
                             const SizedBox(height: 24),
                             const SectionTitle(title: 'Evidencia Adjunta'),
-                            Container(
-                              width: 80,
-                              height: 80,
-                              decoration: BoxDecoration(
-                                color: Colors.orange.shade100,
-                                borderRadius: BorderRadius.circular(12),
-                              ),
-                              child: ClipRRect(
-                                borderRadius: BorderRadius.circular(12),
-                                child: Image.network(
-                                  data.evidenciaUrl.startsWith('http')
-                                      ? data.evidenciaUrl
-                                      : '$baseUrl${data.evidenciaUrl}',
-                                  fit: BoxFit.cover,
-                                  errorBuilder: (context, error, stackTrace) {
-                                    return const Icon(
-                                      Icons.broken_image,
-                                      color: Colors.orange,
-                                    );
-                                  },
-                                ),
-                              ),
+                            ZoomableEvidenceImage(
+                              imageUrl: data.evidenciaUrl.startsWith('http')
+                                        ? data.evidenciaUrl
+                                        : '$baseUrl${data.evidenciaUrl}',
+                              // child: Container(
+                              //   width: 80,
+                              //   height: 80,
+                              //   decoration: BoxDecoration(
+                              //     color: Colors.orange.shade100,
+                              //     borderRadius: BorderRadius.circular(12),
+                              //   ),
+                              //   child: ClipRRect(
+                              //     borderRadius: BorderRadius.circular(12),
+                              //     child: Image.network(
+                              //       data.evidenciaUrl.startsWith('http')
+                              //           ? data.evidenciaUrl
+                              //           : '$baseUrl${data.evidenciaUrl}',
+                              //       fit: BoxFit.cover,
+                              //       errorBuilder: (context, error, stackTrace) {
+                              //         return const Icon(
+                              //           Icons.broken_image,
+                              //           color: Colors.orange,
+                              //         );
+                              //       },
+                              //     ),
+                              //   ),
+                              // ),
                             ),
                             const SizedBox(height: 24),
                             const SectionTitle(title: 'Gestión de Pago'),

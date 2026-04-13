@@ -1,6 +1,7 @@
 import 'package:dio/dio.dart';
 import 'package:front_gestion_minera/utils/session/user_session.dart';
-import 'package:front_gestion_minera/utils/session/session_actions.dart';
+import 'package:front_gestion_minera/utils/session/session_actions.dart'
+    show SessionActions, SessionLogoutReason;
 
 class InterceptorService extends Interceptor {
   final Dio _dio;
@@ -27,9 +28,16 @@ class InterceptorService extends Interceptor {
       final isLoginRequest = err.requestOptions.path.toLowerCase().contains('login');
 
       if (!isLoginRequest) {
-        await SessionActions.logout(true);
+        final responseData = err.response?.data;
+        final reason = responseData is Map ? responseData['reason'] as String? : null;
+
+        final logoutReason = reason == 'session_replaced'
+            ? SessionLogoutReason.replacedByAnotherDevice
+            : SessionLogoutReason.inactivity;
+
+        await SessionActions.logout(logoutReason);
       }
-    } 
+    }
     return handler.next(err);
   }
 }
