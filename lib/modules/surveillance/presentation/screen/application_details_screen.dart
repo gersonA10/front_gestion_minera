@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:front_gestion_minera/config/theme/extension_theme.dart';
 import 'package:front_gestion_minera/core/widgets/custom_alert_widget.dart';
+import 'package:front_gestion_minera/core/widgets/zoomable_evidence_image.dart';
 import 'package:front_gestion_minera/injector_container.dart';
 import 'package:front_gestion_minera/modules/surveillance/presentation/bloc/surveillance_bloc.dart';
 import 'package:front_gestion_minera/modules/surveillance/presentation/widget/custom_dialog_wigdet.dart';
@@ -293,81 +294,15 @@ class _ApplicationDetailsScreenState extends State<ApplicationDetailsScreen> {
             ),
           ),
           const SizedBox(height: 14),
-          GestureDetector(
-            onTap: _showFullImage,
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(18),
-              child: Stack(
-                children: [
-                  Image.network(
-                    widget.evidencia,
-                    height: 180,
-                    width: double.infinity,
-                    fit: BoxFit.cover,
-                    errorBuilder: (context, error, stackTrace) {
-                      return Container(
-                        height: 180,
-                        width: double.infinity,
-                        decoration: BoxDecoration(
-                          color: const Color(0xff0f213e),
-                          borderRadius: BorderRadius.circular(18),
-                        ),
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Icon(
-                              Icons.image_not_supported_outlined,
-                              color: Colors.white.withValues(alpha: .5),
-                              size: 34,
-                            ),
-                            const SizedBox(height: 10),
-                            Text(
-                              'No se pudo cargar la imagen',
-                              style: AppTextStyles.mainStyleWhite12(context)
-                                  .copyWith(
-                                color: Colors.white.withValues(alpha: .7),
-                              ),
-                            ),
-                          ],
-                        ),
-                      );
-                    },
-                  ),
-                  Positioned(
-                    right: 12,
-                    bottom: 12,
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 12,
-                        vertical: 8,
-                      ),
-                      decoration: BoxDecoration(
-                        color: Colors.black.withValues(alpha: .45),
-                        borderRadius: BorderRadius.circular(999),
-                      ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          const Icon(
-                            Icons.zoom_out_map_rounded,
-                            color: Colors.white,
-                            size: 14,
-                          ),
-                          const SizedBox(width: 6),
-                          Text(
-                            'Ver completa',
-                            style: AppTextStyles.mainStyleWhite12(context)
-                                .copyWith(
-                              fontSize: 11,
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                ],
-              ),
+          ClipRRect(
+            borderRadius: BorderRadius.circular(18),
+            child: Stack(
+              children: [
+                ZoomableEvidenceImage(
+                  imageUrl: widget.evidencia,
+                  height: 180,
+                ),       
+              ],
             ),
           ),
         ],
@@ -483,24 +418,24 @@ class _ApplicationDetailsScreenState extends State<ApplicationDetailsScreen> {
     }
   }
 
-  void _showFullImage() {
-    showDialog(
-      context: context,
-      builder: (context) => Dialog(
-        backgroundColor: Colors.transparent,
-        insetPadding: const EdgeInsets.all(16),
-        child: ClipRRect(
-          borderRadius: BorderRadius.circular(18),
-          child: InteractiveViewer(
-            child: Image.network(
-              widget.evidencia,
-              fit: BoxFit.contain,
-            ),
-          ),
-        ),
-      ),
-    );
-  }
+  // void _showFullImage() {
+  //   showDialog(
+  //     context: context,
+  //     builder: (context) => Dialog(
+  //       backgroundColor: Colors.transparent,
+  //       insetPadding: const EdgeInsets.all(16),
+  //       child: ClipRRect(
+  //         borderRadius: BorderRadius.circular(18),
+  //         child: InteractiveViewer(
+  //           child: Image.network(
+  //             widget.evidencia,
+  //             fit: BoxFit.contain,
+  //           ),
+  //         ),
+  //       ),
+  //     ),
+  //   );
+  // }
 
   void _approveRequest() {
     showDialog(
@@ -529,53 +464,111 @@ class _ApplicationDetailsScreenState extends State<ApplicationDetailsScreen> {
   }
 
   void _rejectRequest() {
-    showDialog(
-      barrierDismissible: false,
-      context: context,
-      builder: (context) {
-        return CustomDialog(
-          title: "Rechazar solicitud",
-          isDanger: true,
-          content: TextFormField(
-            controller: rejectedContoller,
-            style: AppTextStyles.mainStyleWhite12(context),
-            maxLines: 4,
-            decoration: InputDecoration(
-              hintText: "Motivo del rechazo",
-              hintStyle: AppTextStyles.mainStyleGrey10(context),
-              filled: true,
-              fillColor: const Color(0xff0f213e),
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(12),
-                borderSide: BorderSide.none,
-              ),
+  rejectedContoller.clear();
+
+  showDialog(
+    barrierDismissible: false,
+    context: context,
+    builder: (dialogContext) {
+      String? errorText;
+
+      return StatefulBuilder(
+        builder: (context, setModalState) {
+          return CustomDialog(
+            title: "Rechazar solicitud",
+            isDanger: true,
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                TextFormField(
+                  controller: rejectedContoller,
+                  style: AppTextStyles.mainStyleWhite12(context),
+                  maxLines: 4,
+                  onChanged: (_) {
+                    if (errorText != null) {
+                      setModalState(() {
+                        errorText = null;
+                      });
+                    }
+                  },
+                  decoration: InputDecoration(
+                    hintText: "Motivo del rechazo",
+                    hintStyle: AppTextStyles.mainStyleGrey10(context),
+                    filled: true,
+                    fillColor: const Color(0xff0f213e),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: BorderSide.none,
+                    ),
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: BorderSide.none,
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: const BorderSide(
+                        color: Colors.redAccent,
+                        width: 1.2,
+                      ),
+                    ),
+                    errorBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: const BorderSide(
+                        color: Colors.redAccent,
+                        width: 1.2,
+                      ),
+                    ),
+                    focusedErrorBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: const BorderSide(
+                        color: Colors.redAccent,
+                        width: 1.2,
+                      ),
+                    ),
+                  ),
+                ),
+                if (errorText != null) ...[
+                  const SizedBox(height: 8),
+                  Text(
+                    errorText!,
+                    style: const TextStyle(
+                      color: Colors.redAccent,
+                      fontSize: 11,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ],
+              ],
             ),
-          ),
-          onPressed: () {
-            final rejected = rejectedContoller.text.trim();
-            if (rejected.isEmpty) {
-              CustomAlert.show(
-                context,
-                title: 'Error',
-                message: 'Ingrese el motivo de rechazo.',
-                type: AlertType.warning,
+            onPressed: () {
+              final rejected = rejectedContoller.text.trim();
+
+              if (rejected.isEmpty) {
+                setModalState(() {
+                  errorText = 'Ingrese el motivo de rechazo.';
+                });
+                return;
+              }
+
+              Navigator.of(dialogContext).pop();
+
+              _bloc.add(
+                ApproveTheRequestEvent(
+                  action: 'rechazado',
+                  requestId: widget.requestId,
+                  reason: rejected,
+                ),
               );
-              return;
-            }
-            context.router.back();
-            _bloc.add(
-              ApproveTheRequestEvent(
-                action: 'rechazado',
-                requestId: widget.requestId,
-                reason: rejected,
-              ),
-            );
-          },
-          text: rejectedContoller,
-        );
-      },
-    );
-  }
+            },
+            text: rejectedContoller,
+          );
+        },
+      );
+    },
+  );
+}
+
 }
 
 class _SectionCard extends StatelessWidget {
