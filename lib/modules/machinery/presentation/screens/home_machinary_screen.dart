@@ -2,7 +2,6 @@ import 'package:auto_route/auto_route.dart';
 import 'package:front_gestion_minera/core/widgets/logout_button_widget.dart';
 import 'package:front_gestion_minera/modules/treasury/presentation/widgets/widgtes.dart';
 import 'package:front_gestion_minera/utils/constants/color.constant.dart';
-import 'package:front_gestion_minera/utils/session/session_actions.dart';
 import 'package:front_gestion_minera/utils/session/user_session.dart';
 
 @RoutePage()
@@ -32,7 +31,7 @@ class _HomeMachinaryScreenState extends State<HomeMachinaryScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF3F4F6),
+      backgroundColor: TColors.appBackgroundColor,
       body: SafeArea(
         child: SingleChildScrollView(
           physics: const AlwaysScrollableScrollPhysics(),
@@ -45,7 +44,6 @@ class _HomeMachinaryScreenState extends State<HomeMachinaryScreen> {
                     color: TColors.white,
                     borderRadius: BorderRadius.circular(10),
                   ),
-                  // margin: EdgeInsets.symmetric(horizontal: 15),
                   padding: EdgeInsets.all(15),
                   child: Row(
                     children: [
@@ -55,7 +53,7 @@ class _HomeMachinaryScreenState extends State<HomeMachinaryScreen> {
                           color: TColors.appMainColor.withValues(alpha: 0.4),
                           borderRadius: BorderRadius.circular(50),
                         ),
-                        child: Icon(Icons.person),
+                        child: const Icon(Icons.person),
                       ),
                       const SizedBox(width: 20),
                       Column(
@@ -66,8 +64,8 @@ class _HomeMachinaryScreenState extends State<HomeMachinaryScreen> {
                           Text(rol),
                         ],
                       ),
-                      Spacer(),
-                      LogoutButton()
+                      const Spacer(),
+                      LogoutButton(),
                     ],
                   ),
                 ),
@@ -76,7 +74,7 @@ class _HomeMachinaryScreenState extends State<HomeMachinaryScreen> {
                   width: double.infinity,
                   padding: EdgeInsets.all(15),
                   decoration: BoxDecoration(
-                    color: Color(0xFF013467),
+                    color: const Color(0xFF013467),
                     borderRadius: BorderRadius.circular(10),
                   ),
                   child: Column(
@@ -84,9 +82,7 @@ class _HomeMachinaryScreenState extends State<HomeMachinaryScreen> {
                     children: [
                       Text(
                         'Total Maquinaria',
-                        style: TextStyle(
-                          color: TColors.white,
-                        ),
+                        style: TextStyle(color: TColors.white),
                       ),
                       Text(
                         '124',
@@ -102,83 +98,8 @@ class _HomeMachinaryScreenState extends State<HomeMachinaryScreen> {
                 const SizedBox(height: 15),
                 Row(
                   children: [
-                    Expanded(
-                      child: Container(
-                        margin: EdgeInsets.only(right: 10),
-                        padding: EdgeInsets.all(10),
-                        decoration: BoxDecoration(
-                          color: TColors.white,
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Row(
-                              children: [
-                                const Icon(
-                                  Icons.check_circle_outline_outlined,
-                                  color: TColors.green,
-                                ),
-                                Spacer(),
-                                Text(
-                                  'ACTIVO',
-                                  style: TextStyle(
-                                    color: TColors.green,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
-                              ],
-                            ),
-                            const SizedBox(height: 5),
-                            const Text('OPERATIVAS'),
-                            Text(
-                              '98',
-                              style: TextStyle(
-                                fontSize: 25,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                    Expanded(
-                      child: Container(
-                        margin: EdgeInsets.only(left: 10),
-                        padding: EdgeInsets.all(10),
-                        decoration: BoxDecoration(
-                          color: TColors.white,
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Row(
-                              children: [
-                                Icon(Icons.warning_amber, color: TColors.red),
-                                Spacer(),
-                                Text(
-                                  'PARADO',
-                                  style: TextStyle(
-                                    color: TColors.red,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
-                              ],
-                            ),
-                            const SizedBox(height: 5),
-                            const Text('INACTIVAS'),
-                            Text(
-                              '24',
-                              style: TextStyle(
-                                fontSize: 25,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
+                    CardStateMachinaryWidget(state: 'Activo'),
+                    CardStateMachinaryWidget(state: 'Inactivo'),
                   ],
                 ),
                 const SizedBox(height: 10),
@@ -207,7 +128,7 @@ class _HomeMachinaryScreenState extends State<HomeMachinaryScreen> {
                   itemCount: 5,
                   physics: const NeverScrollableScrollPhysics(),
                   itemBuilder: (BuildContext context, int index) {
-                    return _cardMaquinas(index);
+                    return CardMaquinasWidget(index: index);
                   },
                 ),
                 const SizedBox(height: 15),
@@ -238,39 +159,6 @@ class _HomeMachinaryScreenState extends State<HomeMachinaryScreen> {
                   ),
                 ),
                 const SizedBox(height: 15),
-                // SizedBox(
-                //   width: double.infinity,
-                //   height: 52,
-                //   child: OutlinedButton.icon(
-                //     onPressed: () {
-                //       SessionActions.logout();
-                //     },
-                //     icon: const Icon(
-                //       Icons.logout,
-                //       color: TColors.white,
-                //       size: 18,
-                //     ),
-                //     label: const Text(
-                //       'Cerrar Sesión',
-                //       style: TextStyle(
-                //         color: TColors.white,
-                //         fontWeight: FontWeight.w700,
-                //         fontSize: 16,
-                //       ),
-                //     ),
-                //     style: OutlinedButton.styleFrom(
-                //       backgroundColor: Colors.red,
-                //       side: const BorderSide(
-                //         color: Color(0xFFFFC9C9),
-                //         width: 1.2,
-                //       ),
-                //       shape: RoundedRectangleBorder(
-                //         borderRadius: BorderRadius.circular(14),
-                //       ),
-                //       elevation: 0,
-                //     ),
-                //   ),
-                // ),
               ],
             ),
           ),
@@ -278,33 +166,64 @@ class _HomeMachinaryScreenState extends State<HomeMachinaryScreen> {
       ),
     );
   }
+}
 
-  Widget getEstado(String tipo) {
-    if (tipo == 'Excavadora') {
-      return Icon(
-        Icons.handyman,
-        color: TColors.appMainColor.withValues(alpha: 0.9),
-      );
-    }
-    if (tipo == 'Camión') {
-      return Icon(
-        Icons.local_shipping_outlined,
-        color: TColors.appMainColor.withValues(alpha: 0.9),
-      );
-    }
-    if (tipo == 'Perforadora') {
-      return Icon(
-        Icons.precision_manufacturing,
-        color: TColors.appMainColor.withValues(alpha: 0.9),
-      );
-    }
-    return Icon(
-      Icons.handyman,
-      color: TColors.appMainColor.withValues(alpha: 0.9),
+class CardStateMachinaryWidget extends StatelessWidget {
+  final String state;
+  const CardStateMachinaryWidget({super.key, required this.state});
+
+  @override
+  Widget build(BuildContext context) {
+    return Expanded(
+      child: Container(
+        margin: (state == 'Activo')
+            ? EdgeInsets.only(right: 10)
+            : EdgeInsets.only(left: 10),
+        padding: EdgeInsets.all(10),
+        decoration: BoxDecoration(
+          color: TColors.white,
+          borderRadius: BorderRadius.circular(10),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Icon(
+                  (state == 'Activo')
+                      ? Icons.check_circle_outline_outlined
+                      : Icons.warning_amber,
+                  color: (state == 'Activo') ? TColors.green : TColors.red,
+                ),
+                Spacer(),
+                Text(
+                  (state == 'Activo') ? 'ACTIVO' : 'PARADO',
+                  style: TextStyle(
+                    color: (state == 'Activo') ? TColors.green : TColors.red,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 5),
+            Text((state == 'Activo') ? 'OPERATIVAS' : 'INACTIVAS'),
+            Text(
+              '98',
+              style: TextStyle(fontSize: 25, fontWeight: FontWeight.bold),
+            ),
+          ],
+        ),
+      ),
     );
   }
+}
 
-  Container _cardMaquinas(int index) {
+class CardMaquinasWidget extends StatelessWidget {
+  final int index;
+  const CardMaquinasWidget({super.key, required this.index});
+
+  @override
+  Widget build(BuildContext context) {
     return Container(
       width: double.infinity,
       padding: EdgeInsets.all(15),
@@ -321,7 +240,7 @@ class _HomeMachinaryScreenState extends State<HomeMachinaryScreen> {
               color: TColors.appMainColor.withValues(alpha: 0.2),
               borderRadius: BorderRadius.circular(10),
             ),
-            child: getEstado('Camión')
+            child: getEstado('Excavadora'),
           ),
           const SizedBox(width: 15),
           Column(
@@ -359,6 +278,30 @@ class _HomeMachinaryScreenState extends State<HomeMachinaryScreen> {
           ),
         ],
       ),
+    );
+  }
+    Widget getEstado(String tipo) {
+    if (tipo == 'Excavadora') {
+      return Icon(
+        Icons.handyman,
+        color: TColors.appMainColor.withValues(alpha: 0.9),
+      );
+    }
+    if (tipo == 'Camión') {
+      return Icon(
+        Icons.local_shipping_outlined,
+        color: TColors.appMainColor.withValues(alpha: 0.9),
+      );
+    }
+    if (tipo == 'Perforadora') {
+      return Icon(
+        Icons.precision_manufacturing,
+        color: TColors.appMainColor.withValues(alpha: 0.9),
+      );
+    }
+    return Icon(
+      Icons.handyman,
+      color: TColors.appMainColor.withValues(alpha: 0.9),
     );
   }
 }
