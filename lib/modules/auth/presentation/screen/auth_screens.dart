@@ -181,6 +181,29 @@ class _AuthScreenState extends State<AuthScreen> {
     if (mounted) _navigateByRole(role);
   }
 
+  void _showChangePasswordSheet(BuildContext context, String tempToken) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      isDismissible: false,
+      enableDrag: false,
+      backgroundColor: Colors.transparent,
+      builder: (_) => BlocProvider.value(
+        value: _authBloc,
+        child: _ChangePasswordSheet(
+          tempToken: tempToken,
+          email: _userController.text,
+          onPasswordChanged: (email, newPassword) {
+            _loginWithBiometric = true;
+            _authBloc.add(
+              AuthDataEvent(username: email, password: newPassword),
+            );
+          },
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final screenSize = MediaQuery.of(context).size;
@@ -192,7 +215,22 @@ class _AuthScreenState extends State<AuthScreen> {
         backgroundColor: const Color(0xFFF3F5F7),
         body: BlocConsumer<AuthBloc, AuthState>(
           listener: (context, state) {
-            if (state is AuthError) {
+            if (state is AuthRequirePasswordChange) {
+              _showChangePasswordSheet(context, state.tempToken);
+            } else if (state is ChangePasswordSuccess) {
+              _userController.clear();
+              _passwordController.clear();
+              final focusScope = FocusScope.of(context);
+              Future.delayed(const Duration(milliseconds: 400), () {
+                if (mounted) focusScope.unfocus();
+              });
+              CustomAlert.show(
+                context,
+                title: 'Contraseña actualizada',
+                message: 'Tu contraseña fue actualizada correctamente. Por favor, inicia sesión.',
+                type: AlertType.success,
+              );
+            } else if (state is AuthError) {
               // Si falló el login biométrico, limpiamos las credenciales guardadas
               if (_loginWithBiometric) {
                 _loginWithBiometric = false;
@@ -473,6 +511,221 @@ class _BiometricButton extends StatelessWidget {
           ),
         ),
       ),
+    );
+  }
+}
+
+// ── Change Password Bottom Sheet ────────────────────────────────────────────
+
+class _ChangePasswordSheet extends StatefulWidget {
+  final String tempToken;
+  final String email;
+  final void Function(String email, String newPassword) onPasswordChanged;
+
+  const _ChangePasswordSheet({
+    required this.tempToken,
+    required this.email,
+    required this.onPasswordChanged,
+  });
+
+  @override
+  State<_ChangePasswordSheet> createState() => _ChangePasswordSheetState();
+}
+
+class _ChangePasswordSheetState extends State<_ChangePasswordSheet> {
+  final _formKey = GlobalKey<FormState>();
+  final _newPasswordController = TextEditingController();
+  final _confirmPasswordController = TextEditingController();
+
+  bool _obscureNew = true;
+  bool _obscureConfirm = true;
+
+  @override
+  void dispose() {
+    _newPasswordController.dispose();
+    _confirmPasswordController.dispose();
+    super.dispose();
+  }
+
+  void _submit() {
+    if (!_formKey.currentState!.validate()) return;
+    context.read<AuthBloc>().add(
+      ChangePasswordEvent(
+        tempToken: widget.tempToken,
+        newPassword: _newPasswordController.text,
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return BlocConsumer<AuthBloc, AuthState>(
+      listener: (context, state) {
+        if (state is ChangePasswordError) {
+          CustomAlert.show(
+            context,
+            title: 'Error',
+            message: state.message,
+            type: AlertType.error,
+          );
+        } else if (state is ChangePasswordSuccess) {
+          Navigator.of(context).pop();
+        }
+      },
+      builder: (context, state) {
+        final isLoading = state is AuthLoading;
+
+        return SafeArea(
+          top: false,
+          child: Padding(
+            padding: EdgeInsets.only(
+              bottom: MediaQuery.of(context).viewInsets.bottom,
+            ),
+            child: Container(
+              decoration: const BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+              ),
+              padding: const EdgeInsets.fromLTRB(24, 16, 24, 24),
+            child: Form(
+              key: _formKey,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Center(
+                    child: Container(
+                      width: 40,
+                      height: 4,
+                      decoration: BoxDecoration(
+                        color: Colors.grey.shade300,
+                        borderRadius: BorderRadius.circular(2),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 20),
+                  Text(
+                    'Cambiar Contraseña',
+                    style: AppTextStyles.mainStyle25Bold(context),
+                  ),
+                  const SizedBox(height: 6),
+                  Text(
+                    'Es tu primer inicio de sesión. Debes establecer una nueva contraseña para continuar.',
+                    style: AppTextStyles.mainStyleGrey12(context),
+                  ),
+                  const SizedBox(height: 20),
+                  Text(
+                    'Nueva Contraseña',
+                    style: AppTextStyles.mainStyle12Bold(context),
+                  ),
+                  const SizedBox(height: 6),
+                  TextFormField(
+                    controller: _newPasswordController,
+                    obscureText: _obscureNew,
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return 'Ingresa tu nueva contraseña';
+                      }
+                      if (value.length < 6) {
+                        return 'Mínimo 6 caracteres';
+                      }
+                      return null;
+                    },
+                    decoration: InputDecoration(
+                      hintText: 'Nueva contraseña',
+                      hintStyle: AppTextStyles.mainStyle12(context)
+                          .copyWith(color: Theme.of(context).colorScheme.lead),
+                      prefixIcon: const Icon(Icons.lock_outline),
+                      suffixIcon: IconButton(
+                        icon: Icon(
+                          _obscureNew ? Icons.visibility_off : Icons.visibility,
+                        ),
+                        onPressed: () =>
+                            setState(() => _obscureNew = !_obscureNew),
+                      ),
+                      filled: true,
+                      fillColor: Theme.of(context).colorScheme.bajo,
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: BorderSide.none,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  Text(
+                    'Confirmar Contraseña',
+                    style: AppTextStyles.mainStyle12Bold(context),
+                  ),
+                  const SizedBox(height: 6),
+                  TextFormField(
+                    controller: _confirmPasswordController,
+                    obscureText: _obscureConfirm,
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return 'Confirma tu contraseña';
+                      }
+                      if (value != _newPasswordController.text) {
+                        return 'Las contraseñas no coinciden';
+                      }
+                      return null;
+                    },
+                    decoration: InputDecoration(
+                      hintText: 'Repite la contraseña',
+                      hintStyle: AppTextStyles.mainStyle12(context)
+                          .copyWith(color: Theme.of(context).colorScheme.lead),
+                      prefixIcon: const Icon(Icons.lock_outline),
+                      suffixIcon: IconButton(
+                        icon: Icon(
+                          _obscureConfirm
+                              ? Icons.visibility_off
+                              : Icons.visibility,
+                        ),
+                        onPressed: () =>
+                            setState(() => _obscureConfirm = !_obscureConfirm),
+                      ),
+                      filled: true,
+                      fillColor: Theme.of(context).colorScheme.bajo,
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: BorderSide.none,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 20),
+                  SizedBox(
+                    width: double.infinity,
+                    height: 52,
+                    child: ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Theme.of(context).colorScheme.blue,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(14),
+                        ),
+                      ),
+                      onPressed: isLoading ? null : _submit,
+                      child: isLoading
+                          ? const SizedBox(
+                              width: 22,
+                              height: 22,
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2.5,
+                                color: Colors.white,
+                              ),
+                            )
+                          : Text(
+                              'Guardar Contraseña',
+                              style:
+                                  AppTextStyles.mainStyleWhite14Bold(context),
+                            ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      );
+      },
     );
   }
 }

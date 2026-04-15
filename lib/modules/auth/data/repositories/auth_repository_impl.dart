@@ -11,4 +11,9 @@ class AuthRepositoryImpl extends AuthRepository {
   Future<LoginResponseEntity> login(String username, String password) async {
     return await datasource.login(username, password);
   }
+
+  @override
+  Future<void> forcePasswordChange(String tempToken, String newPassword) async {
+    await datasource.forcePasswordChange(tempToken, newPassword);
+  }
 }

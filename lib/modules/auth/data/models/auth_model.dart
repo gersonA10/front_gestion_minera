@@ -8,15 +8,30 @@ class LoginResponseModel extends LoginResponseEntity {
   LoginResponseModel({
     required super.success,
     required super.message,
-    required super.data,
+    super.reason,
+    super.data,
+    super.tempToken,
   });
 
-  factory LoginResponseModel.fromJson(Map<String, dynamic> json) =>
-      LoginResponseModel(
+  factory LoginResponseModel.fromJson(Map<String, dynamic> json) {
+    final reason = json["reason"] as String?;
+
+    if (reason == 'require_password_change') {
+      return LoginResponseModel(
         success: json["success"],
         message: json["message"],
-        data: LoginDataModel.fromJson(json["data"]),
+        reason: reason,
+        data: null,
+        tempToken: json["data"]["temp_token"],
       );
+    }
+
+    return LoginResponseModel(
+      success: json["success"],
+      message: json["message"],
+      data: LoginDataModel.fromJson(json["data"]),
+    );
+  }
 }
 
 class LoginDataModel extends LoginDataEntity {

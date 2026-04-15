@@ -10,7 +10,13 @@ class AppRouter extends RootStackRouter {
 
   @override
   List<AutoRoute> get routes => [
-    AutoRoute(page: AuthRoute.page, initial: true, guards: [authGuard]),
+    CustomRoute(
+      page: AuthRoute.page,
+      initial: true,
+      guards: [authGuard],
+      transitionsBuilder: TransitionsBuilders.fadeIn,
+      durationInMilliseconds: 350,
+    ),
     AutoRoute(page: PartnersRoute.page),
     AutoRoute(page: ContributeHistoryRoute.page),
     AutoRoute(page: LoanHistoryRoute.page),
@@ -18,7 +24,7 @@ class AppRouter extends RootStackRouter {
     AutoRoute(page: MoneyRequestRoute.page),
     AutoRoute(page: RequestHistoryRoute.page),
     AutoRoute(page: LoanRoute.page),
-    AutoRoute(page: HomeSurveillanceRoute.page),
+    AutoRoute(page: HomeSurveillanceRoute.page,),
     AutoRoute(page: HistoryRequestsRoute.page),
     AutoRoute(page: ApplicationDetailsRoute.page),
     AutoRoute(page: TreasuryRoute.page),
@@ -53,9 +59,9 @@ class AppRouter extends RootStackRouter {
     AutoRoute(page: NewDistributionRoute.page),
     AutoRoute(page: ContributesDetailRoute.page),
     AutoRoute(page: PaymentSuccessDistributionRoute.page),
-     AutoRoute(page: ReceiptsHistoryRoute.page),
-     AutoRoute(page: RecordContributionPaymentRoute.page),
-     AutoRoute(page: PaymentConfirmationRoute.page),
-    AutoRoute(page: HomeMachinaryRoute.page)
+    AutoRoute(page: ReceiptsHistoryRoute.page),
+    AutoRoute(page: RecordContributionPaymentRoute.page),
+    AutoRoute(page: PaymentConfirmationRoute.page),
+    AutoRoute(page: HomeMachinaryRoute.page),
   ];
 }
