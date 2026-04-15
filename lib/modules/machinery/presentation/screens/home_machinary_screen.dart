@@ -74,7 +74,7 @@ class _HomeMachinaryScreenState extends State<HomeMachinaryScreen> {
                   width: double.infinity,
                   padding: EdgeInsets.all(15),
                   decoration: BoxDecoration(
-                    color: const Color(0xFF013467),
+                    color: TColors.appBackgroundDarkColor,
                     borderRadius: BorderRadius.circular(10),
                   ),
                   child: Column(
@@ -151,7 +151,7 @@ class _HomeMachinaryScreenState extends State<HomeMachinaryScreen> {
                       ),
                     ),
                     style: OutlinedButton.styleFrom(
-                      backgroundColor: Color(0xFF013467),
+                      backgroundColor: TColors.appBackgroundDarkColor,
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadiusGeometry.circular(14),
                       ),
