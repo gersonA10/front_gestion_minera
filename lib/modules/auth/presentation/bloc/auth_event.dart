@@ -8,3 +8,10 @@ class AuthDataEvent extends AuthEvent {
 
   AuthDataEvent({required this.username, required this.password});
 }
+
+class ChangePasswordEvent extends AuthEvent {
+  final String tempToken;
+  final String newPassword;
+
+  ChangePasswordEvent({required this.tempToken, required this.newPassword});
+}
