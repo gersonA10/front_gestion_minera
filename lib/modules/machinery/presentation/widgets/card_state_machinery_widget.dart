@@ -1,9 +1,15 @@
 import 'package:flutter/material.dart';
+import 'package:front_gestion_minera/modules/machinery/domain/entity/entity.dart';
 import 'package:front_gestion_minera/utils/constants/color.constant.dart';
 
 class CardStateMachineryWidget extends StatelessWidget {
+  final MetricsMachineryEntity metrics;
   final String state;
-  const CardStateMachineryWidget({super.key, required this.state});
+  const CardStateMachineryWidget({
+    super.key,
+    required this.metrics,
+    required this.state,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -41,7 +47,7 @@ class CardStateMachineryWidget extends StatelessWidget {
             const SizedBox(height: 5),
             Text((state == 'Activo') ? 'OPERATIVAS' : 'INACTIVAS'),
             Text(
-              '98',
+              (state == 'Activo') ? metrics.operationalMachines.toString() : metrics.inactiveMachines.toString(),
               style: TextStyle(fontSize: 25, fontWeight: FontWeight.bold),
             ),
           ],

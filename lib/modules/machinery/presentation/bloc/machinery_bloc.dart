@@ -10,10 +10,22 @@ import 'package:meta/meta.dart';
 part 'machinery_event.dart';
 part 'machinery_state.dart';
 
-class MachinaryBloc extends Bloc<MachineryEvent, MachineryState> {
+class MachineryBloc extends Bloc<MachineryEvent, MachineryState> {
   final MachineryRepository repository;
-  MachinaryBloc({required this.repository}) : super(MachineryInitial()) {
+
+  //Para inventario de maquineria
+  int _currentInventoryMachineryPage = 1;
+  bool _hasReachedinventorymachineryMax = false;
+  int _currentInventoryMachineryTotalRecords = 0;
+  List<MachineryEntity> _inventoryMachinery = [];
+  String? _currentInventoryMachineryStatus;
+
+  // evitar bombardeo a la api
+  bool _isLoadingMoreMahinary = false;
+
+  MachineryBloc({required this.repository}) : super(MachineryInitial()) {
     on<FetchMetricsMachineEvent>(_onFetchMetricMachine);
+    on<ListInventoryMachineryEvent>(_listInventoryMachinery);
   }
 
   FutureOr<void> _onFetchMetricMachine(
@@ -24,14 +36,58 @@ class MachinaryBloc extends Bloc<MachineryEvent, MachineryState> {
     try {
       final metrics = await repository.getMetricsMachinery();
       emit(MetricsMachineryLoaded(metrics: metrics));
-    } on BaseApiException catch (error){
-      if (error.key == DioExceptionKey.unauthorised){
+    } on BaseApiException catch (error) {
+      if (error.key == DioExceptionKey.unauthorised) {
         return;
       }
       emit(MetricsMachineryError(mapErrorMessage(error.key)));
+    } catch (e) {
+      emit(MetricsMachineryError('Error inesperado: $e'));
+    }
+  }
+
+  FutureOr<void> _listInventoryMachinery(
+    ListInventoryMachineryEvent event,
+    Emitter<MachineryState> emit,
+  ) async {
+    if (!event.isRefresh && _inventoryMachinery.isNotEmpty) {
+      emit(
+        InventoryMachineryLoaded(
+          machinery: List.from(_inventoryMachinery),
+          hasReachedMax: _hasReachedinventorymachineryMax,
+          totalRecords: _currentInventoryMachineryTotalRecords,
+        ),
+      );
+      return;
+    }
+    if (event.isRefresh) {
+      _currentInventoryMachineryPage = 1;
+      _hasReachedinventorymachineryMax = false;
+      _inventoryMachinery.clear();
+      emit(InventoryMachineryLoading());
+    }
+    try {
+      final response = await repository.getInventoryMachinery(
+        page: _currentInventoryMachineryPage,
+      );
+      _inventoryMachinery = response.machine;
+      _hasReachedinventorymachineryMax = !response.hasMore;
+      _currentInventoryMachineryTotalRecords = response.totalRecords;
+      emit(
+        InventoryMachineryLoaded(
+          machinery: List.from(_inventoryMachinery),
+          hasReachedMax: _hasReachedinventorymachineryMax,
+          totalRecords: _currentInventoryMachineryTotalRecords,
+        ),
+      );
+    }on BaseApiException catch (error){
+      if (error.key == DioExceptionKey.unauthorised) {
+        return;
+      }
+      emit(InventoryMachineryError(mapErrorMessage(error.key)));
     } 
     catch (e) {
-      emit(MetricsMachineryError('Error inesperado: $e'));
+      emit(InventoryMachineryError('Error Inesperado: $e'));
     }
   }
 }

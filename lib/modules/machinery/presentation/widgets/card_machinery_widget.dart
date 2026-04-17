@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:front_gestion_minera/modules/machinery/domain/entity/entity.dart';
 import 'package:front_gestion_minera/utils/constants/color.constant.dart';
 
 class CardMachineryWidget extends StatelessWidget {
-  final int index;
-  const CardMachineryWidget({super.key, required this.index});
+  final MachineryEntity machine;
+  const CardMachineryWidget({super.key, required this.machine});
 
   @override
   Widget build(BuildContext context) {
@@ -23,68 +24,110 @@ class CardMachineryWidget extends StatelessWidget {
               color: TColors.appMainColor.withValues(alpha: 0.2),
               borderRadius: BorderRadius.circular(10),
             ),
-            child: getEstado('Excavadora'),
+            child: getEstado(machine.type.toLowerCase()),
           ),
           const SizedBox(width: 15),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                'Excavadora-camion',
-                style: TextStyle(fontWeight: FontWeight.bold),
-              ),
-              Text(
-                'detalles',
-                style: TextStyle(color: TColors.textFieldDisabledColor),
-              ),
-            ],
-          ),
-          Spacer(),
-          Container(
-            padding: EdgeInsets.symmetric(vertical: 5, horizontal: 10),
-            decoration: BoxDecoration(
-              color: ((index % 2) == 0)
-                  ? TColors.green.withValues(alpha: 0.2)
-                  : TColors.red.withValues(alpha: 0.2),
-              borderRadius: BorderRadius.circular(30),
-            ),
-            child: Text(
-              ((index % 2) == 0) ? 'ACTIVO' : 'INACTIVO',
-              style: TextStyle(
-                fontWeight: FontWeight.bold,
-                color: ((index % 2) == 0)
-                    ? TColors.green.withValues(alpha: 0.9)
-                    : TColors.red.withValues(alpha: 0.9),
-                fontSize: 10,
-              ),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  machine.name,
+                  style: TextStyle(fontWeight: FontWeight.bold),
+                ),
+                Text(
+                  machine.description,
+                  style: TextStyle(color: TColors.textFieldDisabledColor),
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ],
             ),
           ),
+          _viewState(machine.status.toLowerCase())
         ],
       ),
     );
   }
     Widget getEstado(String tipo) {
-    if (tipo == 'Excavadora') {
+    if (tipo == 'excavadora') {
       return Icon(
         Icons.handyman,
         color: TColors.appMainColor.withValues(alpha: 0.9),
       );
     }
-    if (tipo == 'Camión') {
+    if (tipo == 'camion_acarreo') {
       return Icon(
         Icons.local_shipping_outlined,
         color: TColors.appMainColor.withValues(alpha: 0.9),
       );
     }
-    if (tipo == 'Perforadora') {
+    if (tipo == 'perforadora') {
       return Icon(
         Icons.precision_manufacturing,
         color: TColors.appMainColor.withValues(alpha: 0.9),
       );
     }
+    if (tipo == 'tractor') {
+      return Icon(
+        Icons.agriculture,
+        color: TColors.appMainColor.withValues(alpha: 0.9),
+      );
+    }
     return Icon(
-      Icons.handyman,
+      Icons.construction,
       color: TColors.appMainColor.withValues(alpha: 0.9),
     );
+  }
+  Widget _viewState(String tipo) {
+    if (tipo == 'activo') {
+      return Container(
+            padding: EdgeInsets.symmetric(vertical: 5, horizontal: 10),
+            decoration: BoxDecoration(
+              color: TColors.green.withValues(alpha: 0.2),
+              borderRadius: BorderRadius.circular(30),
+            ),
+            child: Text(
+              'ACTIVO',
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
+                color: TColors.green.withValues(alpha: 0.9),
+                fontSize: 10,
+              ),
+            ),
+          );
+    }
+    if (tipo == 'en mantenimiento') {
+      return Container(
+            padding: EdgeInsets.symmetric(vertical: 5, horizontal: 10),
+            decoration: BoxDecoration(
+              color: TColors.amber.withValues(alpha: 0.2),
+              borderRadius: BorderRadius.circular(30),
+            ),
+            child: Text(
+              'MANTENIMIENTO',
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
+                color: TColors.amber.withValues(alpha: 0.9),
+                fontSize: 10,
+              ),
+            ),
+          );
+    }
+    return Container(
+            padding: EdgeInsets.symmetric(vertical: 5, horizontal: 10),
+            decoration: BoxDecoration(
+              color: TColors.red.withValues(alpha: 0.2),
+              borderRadius: BorderRadius.circular(30),
+            ),
+            child: Text(
+              'INACTIVO',
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
+                color: TColors.red.withValues(alpha: 0.9),
+                fontSize: 10,
+              ),
+            ),
+          );
   }
 }

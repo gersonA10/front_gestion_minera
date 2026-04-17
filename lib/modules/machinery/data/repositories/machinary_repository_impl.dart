@@ -15,7 +15,7 @@ class MachineryRepositoryImpl extends MachineryRepository {
   
   @override
   Future<InventoryMachineryEntity> getInventoryMachinery({int page = 1, int limit = 10}) {
-    return datasource.getInvetoryMachinery();
+    return datasource.getInventoryMachinery(page: page, limit: limit);
   }
   
 }

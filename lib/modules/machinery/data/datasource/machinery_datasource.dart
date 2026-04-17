@@ -15,7 +15,7 @@ class MachineryDatasource {
     return MetricsMachineryModel.fromJson(response['data'] ?? []);
   }
 
-  Future<InventoryMachineryResponseModel> getInvetoryMachinery({
+  Future<InventoryMachineryResponseModel> getInventoryMachinery({
     int page = 1,
     int limit = 10,
   }) async {
