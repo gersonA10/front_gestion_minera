@@ -19,12 +19,20 @@ class CardMachineryWidget extends StatelessWidget {
       child: Row(
         children: [
           Container(
-            padding: EdgeInsets.all(10),
+            width: 60,
+            height: 50,
             decoration: BoxDecoration(
               color: TColors.appMainColor.withValues(alpha: 0.2),
               borderRadius: BorderRadius.circular(10),
             ),
-            child: getEstado(machine.type.toLowerCase()),
+            child: FadeInImage.assetNetwork(
+              placeholder: 'assets/img/excavadora.png',
+              image: machine.photoUrl ?? '',
+              fit: BoxFit.cover,
+              imageErrorBuilder: (_, _, _) {
+                return const Icon(Icons.image_not_supported,size: 30,);
+              },
+            ),
           ),
           const SizedBox(width: 15),
           Expanded(
@@ -34,6 +42,8 @@ class CardMachineryWidget extends StatelessWidget {
                 Text(
                   machine.name,
                   style: TextStyle(fontWeight: FontWeight.bold),
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
                 ),
                 Text(
                   machine.description,
@@ -44,90 +54,61 @@ class CardMachineryWidget extends StatelessWidget {
               ],
             ),
           ),
-          _viewState(machine.status.toLowerCase())
+          _viewState(machine.status.toLowerCase()),
         ],
       ),
     );
   }
-    Widget getEstado(String tipo) {
-    if (tipo == 'excavadora') {
-      return Icon(
-        Icons.handyman,
-        color: TColors.appMainColor.withValues(alpha: 0.9),
-      );
-    }
-    if (tipo == 'camion_acarreo') {
-      return Icon(
-        Icons.local_shipping_outlined,
-        color: TColors.appMainColor.withValues(alpha: 0.9),
-      );
-    }
-    if (tipo == 'perforadora') {
-      return Icon(
-        Icons.precision_manufacturing,
-        color: TColors.appMainColor.withValues(alpha: 0.9),
-      );
-    }
-    if (tipo == 'tractor') {
-      return Icon(
-        Icons.agriculture,
-        color: TColors.appMainColor.withValues(alpha: 0.9),
-      );
-    }
-    return Icon(
-      Icons.construction,
-      color: TColors.appMainColor.withValues(alpha: 0.9),
-    );
-  }
+
   Widget _viewState(String tipo) {
     if (tipo == 'activo') {
       return Container(
-            padding: EdgeInsets.symmetric(vertical: 5, horizontal: 10),
-            decoration: BoxDecoration(
-              color: TColors.green.withValues(alpha: 0.2),
-              borderRadius: BorderRadius.circular(30),
-            ),
-            child: Text(
-              'ACTIVO',
-              style: TextStyle(
-                fontWeight: FontWeight.bold,
-                color: TColors.green.withValues(alpha: 0.9),
-                fontSize: 10,
-              ),
-            ),
-          );
+        padding: EdgeInsets.symmetric(vertical: 5, horizontal: 10),
+        decoration: BoxDecoration(
+          color: TColors.green.withValues(alpha: 0.2),
+          borderRadius: BorderRadius.circular(30),
+        ),
+        child: Text(
+          'ACTIVO',
+          style: TextStyle(
+            fontWeight: FontWeight.bold,
+            color: TColors.green.withValues(alpha: 0.9),
+            fontSize: 10,
+          ),
+        ),
+      );
     }
     if (tipo == 'en mantenimiento') {
       return Container(
-            padding: EdgeInsets.symmetric(vertical: 5, horizontal: 10),
-            decoration: BoxDecoration(
-              color: TColors.amber.withValues(alpha: 0.2),
-              borderRadius: BorderRadius.circular(30),
-            ),
-            child: Text(
-              'MANTENIMIENTO',
-              style: TextStyle(
-                fontWeight: FontWeight.bold,
-                color: TColors.amber.withValues(alpha: 0.9),
-                fontSize: 10,
-              ),
-            ),
-          );
+        padding: EdgeInsets.symmetric(vertical: 5, horizontal: 10),
+        decoration: BoxDecoration(
+          color: TColors.amber.withValues(alpha: 0.2),
+          borderRadius: BorderRadius.circular(30),
+        ),
+        child: Text(
+          'MANTENIMIENTO',
+          style: TextStyle(
+            fontWeight: FontWeight.bold,
+            color: TColors.amber.withValues(alpha: 0.9),
+            fontSize: 10,
+          ),
+        ),
+      );
     }
     return Container(
-            padding: EdgeInsets.symmetric(vertical: 5, horizontal: 10),
-            decoration: BoxDecoration(
-              color: TColors.red.withValues(alpha: 0.2),
-              borderRadius: BorderRadius.circular(30),
-            ),
-            child: Text(
-              'INACTIVO',
-              style: TextStyle(
-                fontWeight: FontWeight.bold,
-                color: TColors.red.withValues(alpha: 0.9),
-                fontSize: 10,
-              ),
-            ),
-          );
+      padding: EdgeInsets.symmetric(vertical: 5, horizontal: 10),
+      decoration: BoxDecoration(
+        color: TColors.red.withValues(alpha: 0.2),
+        borderRadius: BorderRadius.circular(30),
+      ),
+      child: Text(
+        'INACTIVO',
+        style: TextStyle(
+          fontWeight: FontWeight.bold,
+          color: TColors.red.withValues(alpha: 0.9),
+          fontSize: 10,
+        ),
+      ),
+    );
   }
 }
