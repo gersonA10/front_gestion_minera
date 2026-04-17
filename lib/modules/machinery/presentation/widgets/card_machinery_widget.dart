@@ -19,19 +19,21 @@ class CardMachineryWidget extends StatelessWidget {
       child: Row(
         children: [
           Container(
-            width: 60,
-            height: 50,
+            width: 70,
+            height: 70,
             decoration: BoxDecoration(
-              color: TColors.appMainColor.withValues(alpha: 0.2),
-              borderRadius: BorderRadius.circular(10),
+              color: TColors.appBackgroundColor,
             ),
-            child: FadeInImage.assetNetwork(
-              placeholder: 'assets/img/excavadora.png',
-              image: machine.photoUrl ?? '',
-              fit: BoxFit.cover,
-              imageErrorBuilder: (_, _, _) {
-                return const Icon(Icons.image_not_supported,size: 30,);
-              },
+            child: ClipRRect(
+              borderRadius: BorderRadiusGeometry.circular(12),
+              child: FadeInImage.assetNetwork(
+                placeholder: 'assets/img/loadingb.gif',
+                image: machine.photoUrl ?? '',
+                fit: BoxFit.cover,
+                imageErrorBuilder: (_, _, _) {
+                  return const Icon(Icons.image_not_supported,size: 30,);
+                },
+              ),
             ),
           ),
           const SizedBox(width: 15),
