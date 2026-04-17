@@ -39,19 +39,6 @@ class _GoldDashboardScreenState extends State<GoldDashboardScreen> {
   double _lastScrollOffset = 0;
   static const double _scrollThreshold = 10.0;
 
-  List<GoldBatchEntity> _getFilteredLotes(List<GoldBatchEntity> lotes) {
-    switch (_selectedFilter) {
-      case 1:
-        return lotes.where((l) => l.status == 'Disponible').toList();
-      case 2:
-        return lotes.where((l) => l.status == 'Parcial').toList();
-      case 3:
-        return lotes.where((l) => l.status == 'Agotado').toList();
-      default:
-        return lotes;
-    }
-  }
-
   String _formatDate(DateTime date) {
     const months = [
       'Ene',
