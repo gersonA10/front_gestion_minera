@@ -1,0 +1,2 @@
+export 'package:front_gestion_minera/modules/machinery/domain/entity/inventory_machinery_entity.dart';
+export 'package:front_gestion_minera/modules/machinery/domain/entity/metrics_machinery_entity.dart';
