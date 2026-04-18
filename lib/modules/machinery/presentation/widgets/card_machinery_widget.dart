@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:front_gestion_minera/modules/machinery/domain/entity/entity.dart';
+import 'package:front_gestion_minera/utils/assets.dart';
 import 'package:front_gestion_minera/utils/constants/color.constant.dart';
 
 class CardMachineryWidget extends StatelessWidget {
@@ -18,20 +19,18 @@ class CardMachineryWidget extends StatelessWidget {
       ),
       child: Row(
         children: [
-          Container(
-            width: 70,
-            height: 70,
-            decoration: BoxDecoration(
+          ClipRRect(
+            borderRadius: BorderRadiusGeometry.circular(12),
+            child: Container(
+              width: 70,
+              height: 70,
               color: TColors.appBackgroundColor,
-            ),
-            child: ClipRRect(
-              borderRadius: BorderRadiusGeometry.circular(12),
               child: FadeInImage.assetNetwork(
-                placeholder: 'assets/img/loadingb.gif',
+                placeholder: AssetImageApp.getIconLoading,
                 image: machine.photoUrl ?? '',
                 fit: BoxFit.cover,
                 imageErrorBuilder: (_, _, _) {
-                  return const Icon(Icons.image_not_supported,size: 30,);
+                  return Center(child: const Icon(Icons.image_not_supported, size: 30));
                 },
               ),
             ),
