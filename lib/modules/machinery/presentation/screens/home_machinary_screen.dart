@@ -21,8 +21,8 @@ class _HomeMachinaryScreenState extends State<HomeMachinaryScreen> {
   String rol = 'cargando...';
 
   late final MachineryBloc _machineryBloc;
-  MetricsMachineryEntity? metrics;
-  List<MachineryEntity> inventory = [];
+  MetricsMachineryEntity? _cacheMetrics;
+  List<MachineryEntity>? _cacheinventory;
 
   Future<void> _loadUserData() async {
     final role = await UserSession.getRole();
@@ -36,15 +36,7 @@ class _HomeMachinaryScreenState extends State<HomeMachinaryScreen> {
     super.initState();
     _loadUserData();
     _machineryBloc = InjectorContainer.getIt<MachineryBloc>()
-      ..add(FetchMetricsMachineEvent())
-      ..add(ListInventoryMachineryEvent());
-    ;
-    metrics = MetricsMachineryEntity(
-      total: 0,
-      operationalMachines: 0,
-      underMaintenance: 0,
-      inactiveMachines: 0,
-    );
+      ..add(FetchMetricsMachineEvent());
   }
 
   @override
@@ -91,12 +83,35 @@ class _HomeMachinaryScreenState extends State<HomeMachinaryScreen> {
                         );
                       }
                       if (state is MetricsMachineryLoaded) {
-                        metrics = state.metrics;
+                        _cacheMetrics = state.metrics;
+                        _machineryBloc.add(ListInventoryMachineryEvent());
                       }
 
                       if (state is InventoryMachineryLoaded) {
-                        inventory = state.machinery;
+                        _cacheinventory = state.machinery;
                       }
+                      
+                      final bool isLoadingM = state is MetricsMachineryLoading;
+                      final bool isLoadingI = state is InventoryMachineryLoading;
+
+                      if (_cacheMetrics == null || _cacheinventory == null) {
+                        if (isLoadingM || isLoadingI) {
+                          return const Center(
+                            child: CircularProgressIndicator(),
+                          );
+                        }
+                        if (state is MetricsMachineryError) {
+                          return Center(child: Text(state.message));
+                        }
+                        if (state is InventoryMachineryError) {
+                          return Center(child: Text(state.message));
+                        }
+                        return const SizedBox();
+                      }
+                      
+                      final metrics = _cacheMetrics!;
+                      final inventory = _cacheinventory!;
+
                       return Column(
                         children: [
                           Container(
@@ -151,7 +166,7 @@ class _HomeMachinaryScreenState extends State<HomeMachinaryScreen> {
                                   style: TextStyle(color: TColors.white),
                                 ),
                                 Text(
-                                  metrics!.total.toString(),
+                                  metrics.total.toString(),
                                   style: TextStyle(
                                     color: TColors.white,
                                     fontSize: 25,
@@ -165,11 +180,11 @@ class _HomeMachinaryScreenState extends State<HomeMachinaryScreen> {
                           Row(
                             children: [
                               CardStateMachineryWidget(
-                                metrics: metrics!,
+                                metrics: metrics,
                                 state: 'Activo',
                               ),
                               CardStateMachineryWidget(
-                                metrics: metrics!,
+                                metrics: metrics,
                                 state: 'inactivo',
                               ),
                             ],
@@ -207,6 +222,20 @@ class _HomeMachinaryScreenState extends State<HomeMachinaryScreen> {
                               );
                             },
                           ),
+                          if (inventory.isEmpty)
+                            const Padding(
+                              padding: EdgeInsets.symmetric(vertical: 40),
+                              child: Center(
+                                child: Text(
+                                  'No hay lotes con este estado',
+                                  style: TextStyle(
+                                    color: Color(0xFF9CA3AF),
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.w500,
+                                  ),
+                                ),
+                              ),
+                            ),
                           const SizedBox(height: 15),
                           SizedBox(
                             width: double.infinity,
