@@ -31,7 +31,7 @@ class DetailsofanapplicationDataModel extends DetailsofanapplicationDataEntity {
   factory DetailsofanapplicationDataModel.fromJson(Map<String, dynamic> json) =>
       DetailsofanapplicationDataModel(
         requestId: json["request_id"],
-        monto: json["monto"],
+        monto: (json["monto"] as num).toDouble(),
         descripcion: json["descripcion"],
         solicitante: json["solicitante"],
         createdAt: DateTime.parse(json["created_at"]),

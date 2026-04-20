@@ -48,14 +48,17 @@ class GeneralSummaryModel extends GeneralSummaryEntity {
 class ChartDataModel extends ChartDataEntity {
   ChartDataModel({
     required super.fecha,
+    required super.etiqueta,
     required super.ingresos,
     required super.egresos,
     required super.margen,
   });
 
   factory ChartDataModel.fromJson(Map<String, dynamic> json) {
+    final fecha = json['fecha']?.toString() ?? '';
     return ChartDataModel(
-      fecha: json['fecha'] ?? '',
+      fecha: fecha,
+      etiqueta: json['etiqueta']?.toString() ?? '', 
       ingresos: (json['ingresos'] ?? 0).toDouble(),
       egresos: (json['egresos'] ?? 0).toDouble(),
       margen: (json['margen'] ?? 0).toDouble(),

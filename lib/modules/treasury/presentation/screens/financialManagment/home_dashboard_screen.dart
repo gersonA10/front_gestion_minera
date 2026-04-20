@@ -262,9 +262,9 @@ class HomeBody extends StatelessWidget {
                             },
                             child: RequestTile(
                               title: data.motivo,
-                              subtitle: 'Solocitante:${data.solicitante}',
+                              subtitle: 'Solocitante: ${data.solicitante}',
                               amount: data.monto.toString(),
-                              icon: Icons.handyman,
+                              icon: Icons.request_page_outlined,
                             ),
                           );
                         },

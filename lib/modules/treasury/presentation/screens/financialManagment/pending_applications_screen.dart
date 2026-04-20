@@ -1,5 +1,4 @@
 import 'package:auto_route/auto_route.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:front_gestion_minera/config/theme/extension_theme.dart';
 import 'package:front_gestion_minera/injector_container.dart';
@@ -112,13 +111,11 @@ class _PendingApplicationsScreenState extends State<PendingApplicationsScreen> {
               });
               return Column(
                 children: [
-                  const SizedBox(height: 10),
                   Container(
                     color: Colors.white,
                     padding: const EdgeInsets.all(20),
                     child: Column(
                       children: [
-                        const SizedBox(height: 20),
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
@@ -126,11 +123,10 @@ class _PendingApplicationsScreenState extends State<PendingApplicationsScreen> {
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 const Text(
-                                  'PENDIENTES DE PAGO',
+                                  'Pendientes de Pago',
                                   style: TextStyle(
                                     color: Colors.grey,
-                                    fontSize: 8,
-                                    letterSpacing: 1.1,
+                                    fontSize: 12,
                                   ),
                                 ),
                                 const SizedBox(height: 4),
@@ -151,7 +147,7 @@ class _PendingApplicationsScreenState extends State<PendingApplicationsScreen> {
                                   'Total acumulado',
                                   style: TextStyle(
                                     color: Colors.grey,
-                                    fontSize: 10,
+                                    fontSize: 12,
                                   ),
                                 ),
                                 const SizedBox(height: 4),
@@ -187,8 +183,8 @@ class _PendingApplicationsScreenState extends State<PendingApplicationsScreen> {
                               controller: _scrollController,
                               physics: const AlwaysScrollableScrollPhysics(),
                               padding: const EdgeInsets.symmetric(
-                                horizontal: 20,
-                                vertical: 10,
+                                horizontal: 10,
+                                vertical: 8,
                               ),
                               itemCount: items.length + 1,
                               itemBuilder: (context, index) {

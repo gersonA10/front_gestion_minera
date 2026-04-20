@@ -124,7 +124,7 @@ class _ViewRequestDetailsScreenState extends State<ViewRequestDetailsScreen> {
           ),
           body: BlocConsumer<TreasuryBloc, TreasuryState>(
             listener: (context, state) {
-              if (state is DashboardDataError) {
+              if (state is DetailsofanapplicationError) {
                 context.router.back();
                 CustomAlert.show(
                   context,

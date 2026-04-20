@@ -296,7 +296,7 @@ class _PaymentHistoryViewState extends State<_PaymentHistoryView> {
                                   icon: Icons.account_balance_wallet_rounded,
                                   iconColor: const Color(0xFF3B82F6),
                                   iconBg: const Color(0xFFDBEAFE),
-                                  label: 'TOTAL HOY',
+                                  label: 'TOTAL HOY EGRESOS',
                                   value: _formatCurrency(
                                       _cachedSummary!.totalMontoHoy),
                                   isHighlighted: true,
@@ -368,20 +368,20 @@ class _PaymentHistoryViewState extends State<_PaymentHistoryView> {
                         ),
                       ),
         
-                      if (_cachedItems!.isNotEmpty)
-                        SliverToBoxAdapter(
-                          child: Padding(
-                            padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
-                            child: Text(
-                              'Total listado: ${_formatCurrency(totalObtained)}',
-                              style: const TextStyle(
-                                fontSize: 13,
-                                fontWeight: FontWeight.w600,
-                                color: Color(0xFF3B82F6),
-                              ),
-                            ),
-                          ),
-                        ),
+                      // if (_cachedItems!.isNotEmpty)
+                      //   SliverToBoxAdapter(
+                      //     child: Padding(
+                      //       padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
+                      //       child: Text(
+                      //         'Total listado: ${_formatCurrency(totalObtained)}',
+                      //         style: const TextStyle(
+                      //           fontSize: 13,
+                      //           fontWeight: FontWeight.w600,
+                      //           color: Color(0xFF3B82F6),
+                      //         ),
+                      //       ),
+                      //     ),
+                      //   ),
         
                       if (sortedKeys.isEmpty)
                         const SliverFillRemaining(

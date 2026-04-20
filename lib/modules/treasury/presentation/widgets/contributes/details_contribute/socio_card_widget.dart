@@ -11,7 +11,14 @@ class SocioCard extends StatelessWidget {
   final bool isPendiente;
   final DateTime dateContibution;
   final String titleContibuton;
-  const SocioCard({super.key, required this.item, required this.cash, required this.isPendiente, required this.dateContibution, required this.titleContibuton});
+  const SocioCard({
+    super.key,
+    required this.item,
+    required this.cash,
+    required this.isPendiente,
+    required this.dateContibution,
+    required this.titleContibuton,
+  });
   @override
   Widget build(BuildContext context) {
     final Color montoColor = isPendiente
@@ -32,9 +39,20 @@ class SocioCard extends StatelessWidget {
     return GestureDetector(
       onTap: () {
         isPendiente
-                        ? context.router.push(RecordContributionPaymentRoute(dateContibution: dateContibution, titleContibuton: titleContibuton, item: item , cash: cash))
-                        : context.router.push(PaymentConfirmationRoute(transactionId: item.detailId, screen: false));
-       
+            ? context.router.push(
+                RecordContributionPaymentRoute(
+                  dateContibution: dateContibution,
+                  titleContibuton: titleContibuton,
+                  item: item,
+                  cash: cash,
+                ),
+              )
+            : context.router.push(
+                PaymentConfirmationRoute(
+                  transactionId: item.detailId,
+                  screen: false,
+                ),
+              );
       },
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),

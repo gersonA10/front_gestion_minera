@@ -28,12 +28,14 @@ class GeneralSummaryEntity {
 
 class ChartDataEntity {
   final String fecha;
+  final String etiqueta;
   final double ingresos;
   final double egresos;
   final double margen;
 
   ChartDataEntity({
     required this.fecha,
+    required this.etiqueta,
     required this.ingresos,
     required this.egresos,
     required this.margen,

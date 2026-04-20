@@ -45,13 +45,13 @@ class RequestDetailCard extends StatelessWidget {
                       item.name,
                       style: TextStyle(
                         fontWeight: FontWeight.bold,
-                        fontSize: 12,
+                        fontSize: 14,
                         color: colors.black,
                       ),
                     ),
                     Text(
                       item.rol,
-                      style: TextStyle(color: Colors.grey, fontSize: 10),
+                      style: TextStyle(color: Colors.grey, fontSize: 12),
                     ),
                   ],
                 ),
@@ -80,7 +80,7 @@ class RequestDetailCard extends StatelessWidget {
           Text(
             item.amount,
             style: TextStyle(
-              fontSize: 15,
+              fontSize: 18,
               fontWeight: FontWeight.bold,
               color: colors.black,
             ),
@@ -88,7 +88,7 @@ class RequestDetailCard extends StatelessWidget {
           const SizedBox(height: 4),
           Text(
             item.description,
-            style: TextStyle(color: Colors.grey.shade600, fontSize: 10),
+            style: TextStyle(color: Colors.grey.shade600, fontSize: 12),
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
           ),

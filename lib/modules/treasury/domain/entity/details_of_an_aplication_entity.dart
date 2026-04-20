@@ -12,7 +12,7 @@ class DetailsofanapplicationResponseEntity {
 
 class DetailsofanapplicationDataEntity {
   final String requestId;
-  final int monto;
+  final double monto;
   final String descripcion;
   final String solicitante;
   final DateTime createdAt;
