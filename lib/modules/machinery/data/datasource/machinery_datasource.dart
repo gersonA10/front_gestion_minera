@@ -18,8 +18,16 @@ class MachineryDatasource {
   Future<InventoryMachineryResponseModel> getInventoryMachinery({
     int page = 1,
     int limit = 10,
+    String? search,
+    String? status,
+    String? type,
   }) async {
     final Map<String, dynamic> queryParameters = {'page': page, 'limit': limit};
+
+    if (search != null && search.isNotEmpty) queryParameters['search'] = search;
+    if (status != null && status != 'TODOS') queryParameters['status'] = status;
+    if (type != null && status != 'TODOS') queryParameters['type'] = type;
+
     final response = await apiClient.get(
       '/api/machinery',
       queryParameters: queryParameters,

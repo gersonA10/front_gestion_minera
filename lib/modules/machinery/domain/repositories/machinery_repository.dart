@@ -6,6 +6,9 @@ abstract class MachineryRepository {
   
   Future<InventoryMachineryEntity> getInventoryMachinery({
     int page = 1,
-    int limit = 10,
+    int limit = 5,
+    String? search,
+    String? status,
+    String? type
   });
 }
