@@ -24,11 +24,16 @@ class InventoryMachineryLoaded extends MachineryState {
   final List<MachineryEntity> machinery;
   final bool hasReachedMax;
   final int totalRecords;
-
+  final String? search;
+  final String? status;
+  final String? type;
   InventoryMachineryLoaded({
     required this.machinery,
     required this.hasReachedMax,
     required this.totalRecords,
+    this.search,
+    this.status,
+    this.type,
   });
 }
 
@@ -36,4 +41,16 @@ class InventoryMachineryError extends MachineryState {
   final String message;
 
   InventoryMachineryError(this.message);
+}
+
+class TypeMachineryLoading extends MachineryState {}
+class TypeMachineryLoaded extends MachineryState {
+  final List<TypeMachineryEntity> types;
+
+  TypeMachineryLoaded({required this.types});
+}
+class TypeMachineryError extends MachineryState {
+  final String message;
+
+  TypeMachineryError(this.message);
 }
