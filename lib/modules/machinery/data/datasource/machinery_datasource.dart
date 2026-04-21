@@ -26,7 +26,7 @@ class MachineryDatasource {
 
     if (search != null && search.isNotEmpty) queryParameters['search'] = search;
     if (status != null && status != 'TODOS') queryParameters['status'] = status;
-    if (type != null && status != 'TODOS') queryParameters['type'] = type;
+    if (type != null && type != 'TODOS') queryParameters['type'] = type;
 
     final response = await apiClient.get(
       '/api/machinery',
