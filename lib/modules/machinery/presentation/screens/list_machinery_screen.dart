@@ -17,18 +17,6 @@ class ListMachineryScreen extends StatefulWidget {
 }
 
 class _ListMachineryScreenState extends State<ListMachineryScreen> {
-  List<Map<String, dynamic>> tipos = [
-    {'nombre': 'Todos', 'tipo': 'TODOS'},
-    {'nombre': 'Excavadora', 'tipo': 'EXCAVADORA'},
-    {'nombre': 'Camión de Acarreo', 'tipo': 'CAMION_ACARREO'},
-    {'nombre': 'Perforadora', 'tipo': 'PERFORADORA'},
-    {'nombre': 'Cargador', 'tipo': 'CARGADOR'},
-    {'nombre': 'Tractor', 'tipo': 'TRACTOR'},
-    {'nombre': 'Motoniveladora', 'tipo': 'MOTONIVELADORA'},
-    {'nombre': 'Compresora', 'tipo': 'COMPRESORA'},
-    {'nombre': 'Grúa', 'tipo': 'GRUA'},
-    {'nombre': 'Otro', 'tipo': 'OTRO'},
-  ];
   List<Map<String, dynamic>> estados = [
     {
       "estado": "Todo",
@@ -78,6 +66,7 @@ class _ListMachineryScreenState extends State<ListMachineryScreen> {
   void dispose() {
     _scrollController.dispose();
     searchController.dispose();
+    _machineryBloc.close();
     super.dispose();
   }
 
