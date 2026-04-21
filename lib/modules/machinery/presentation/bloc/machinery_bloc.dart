@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:front_gestion_minera/core/networking/base_api_exception.dart';
+import 'package:front_gestion_minera/modules/machinery/data/models/model.dart';
 import 'package:front_gestion_minera/modules/machinery/domain/entity/entity.dart';
 import 'package:front_gestion_minera/modules/machinery/domain/repositories/repository.dart';
 import 'package:front_gestion_minera/utils/error.dart';
@@ -28,6 +29,7 @@ class MachineryBloc extends Bloc<MachineryEvent, MachineryState> {
     on<FetchMetricsMachineEvent>(_onFetchMetricMachine);
     on<ListInventoryMachineryEvent>(_listInventoryMachinery);
     on<LoadMoreListInventoryMachineryEvent>(_loadMoreInventoryMachinery);
+    on<ListTypeMachinery>(_litsTypeMachinery);
   }
 
   FutureOr<void> _onFetchMetricMachine(
@@ -72,7 +74,7 @@ class MachineryBloc extends Bloc<MachineryEvent, MachineryState> {
     _currentInventoryMachinerySearch = event.search;
     _currentInventoryMachineryStatus = event.status;
     _currentInventoryMachineryType = event.type;
-    
+
     if (event.isRefresh) {
       _currentInventoryMachineryPage = 1;
       _hasReachedInventoryMachineryMax = false;
@@ -84,7 +86,7 @@ class MachineryBloc extends Bloc<MachineryEvent, MachineryState> {
         page: _currentInventoryMachineryPage,
         search: _currentInventoryMachinerySearch,
         status: _currentInventoryMachineryStatus,
-        type: _currentInventoryMachineryType
+        type: _currentInventoryMachineryType,
       );
       _inventoryMachinery = response.machine;
       _hasReachedInventoryMachineryMax = !response.hasMore;
@@ -119,7 +121,7 @@ class MachineryBloc extends Bloc<MachineryEvent, MachineryState> {
         page: _currentInventoryMachineryPage,
         search: _currentInventoryMachinerySearch,
         status: _currentInventoryMachineryStatus,
-        type: _currentInventoryMachineryType
+        type: _currentInventoryMachineryType,
       );
 
       _inventoryMachinery.addAll(response.machine);
@@ -143,6 +145,33 @@ class MachineryBloc extends Bloc<MachineryEvent, MachineryState> {
       emit(InventoryMachineryError('Error Inesperado: $e'));
     } finally {
       _isLoadingMoreMachinery = false;
+    }
+  }
+
+  FutureOr<void> _litsTypeMachinery(
+    ListTypeMachinery event,
+    Emitter<MachineryState> emit,
+  ) async {
+    emit(TypeMachineryLoading());
+    try {
+      final types = await repository.getTypeMachinery();
+      types.insert(
+        0,
+        TypeMachineryModel(
+          id: 'todos',
+          code: 'TODOS',
+          name: 'Todos',
+          prefix: 'ALL',
+        ),
+      );
+      emit(TypeMachineryLoaded(types: types));
+    } on BaseApiException catch (error) {
+      if (error.key == DioExceptionKey.unauthorised) {
+        return;
+      }
+      emit(TypeMachineryError(mapErrorMessage(error.key)));
+    } catch (e) {
+      emit(TypeMachineryError('Error inesperado: $e'));
     }
   }
 }

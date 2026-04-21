@@ -1,4 +1,5 @@
 import 'package:front_gestion_minera/modules/machinery/domain/entity/entity.dart';
+import 'package:front_gestion_minera/modules/machinery/domain/entity/type_machinery_entity.dart';
 import 'package:front_gestion_minera/modules/machinery/domain/repositories/repository.dart';
 import '../datasource/datasource.dart';
 
@@ -27,5 +28,10 @@ class MachineryRepositoryImpl extends MachineryRepository {
       status: status,
       type: type,
     );
+  }
+
+  @override
+  Future<List<TypeMachineryEntity>> getTypeMachinery() {
+    return datasource.getTypesMachinery();
   }
 }

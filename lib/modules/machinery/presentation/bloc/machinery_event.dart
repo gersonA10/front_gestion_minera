@@ -17,3 +17,8 @@ class LoadMoreListInventoryMachineryEvent extends MachineryEvent {
 
   LoadMoreListInventoryMachineryEvent({this.isRefresh = true});
 }
+class ListTypeMachinery extends MachineryEvent{
+  final bool isRefresh;
+
+  ListTypeMachinery({this.isRefresh = true});
+}

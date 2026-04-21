@@ -42,3 +42,15 @@ class InventoryMachineryError extends MachineryState {
 
   InventoryMachineryError(this.message);
 }
+
+class TypeMachineryLoading extends MachineryState {}
+class TypeMachineryLoaded extends MachineryState {
+  final List<TypeMachineryEntity> types;
+
+  TypeMachineryLoaded({required this.types});
+}
+class TypeMachineryError extends MachineryState {
+  final String message;
+
+  TypeMachineryError(this.message);
+}

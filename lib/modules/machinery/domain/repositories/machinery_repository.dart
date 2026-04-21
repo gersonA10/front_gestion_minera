@@ -1,4 +1,5 @@
 import 'package:front_gestion_minera/modules/machinery/domain/entity/entity.dart';
+import 'package:front_gestion_minera/modules/machinery/domain/entity/type_machinery_entity.dart';
 
 abstract class MachineryRepository {
 
@@ -11,4 +12,5 @@ abstract class MachineryRepository {
     String? status,
     String? type
   });
+  Future<List<TypeMachineryEntity>> getTypeMachinery();
 }
