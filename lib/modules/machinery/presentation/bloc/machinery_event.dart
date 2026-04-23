@@ -22,3 +22,16 @@ class ListTypeMachinery extends MachineryEvent{
 
   ListTypeMachinery({this.isRefresh = true});
 }
+
+class FetchMaintenanceHistoryEvent extends MachineryEvent {
+  final String machineId;
+  final bool isRefresh;
+
+  FetchMaintenanceHistoryEvent({required this.machineId, this.isRefresh = true});
+}
+
+class LoadMoreMaintenanceHistoryEvent extends MachineryEvent {
+  final String machineId;
+
+  LoadMoreMaintenanceHistoryEvent({required this.machineId});
+}

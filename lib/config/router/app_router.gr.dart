@@ -753,18 +753,52 @@ class LoansHomeRoute extends _i50.PageRouteInfo<void> {
 
 /// generated route for
 /// [_i25.MaintenanceRequestHistoryScreen]
-class MaintenanceRequestHistoryRoute extends _i50.PageRouteInfo<void> {
-  const MaintenanceRequestHistoryRoute({List<_i50.PageRouteInfo>? children})
-    : super(MaintenanceRequestHistoryRoute.name, initialChildren: children);
+class MaintenanceRequestHistoryRoute
+    extends _i50.PageRouteInfo<MaintenanceRequestHistoryRouteArgs> {
+  MaintenanceRequestHistoryRoute({
+    _i51.Key? key,
+    required String machineId,
+    List<_i50.PageRouteInfo>? children,
+  }) : super(
+         MaintenanceRequestHistoryRoute.name,
+         args: MaintenanceRequestHistoryRouteArgs(
+           key: key,
+           machineId: machineId,
+         ),
+         rawPathParams: {'machineId': machineId},
+         initialChildren: children,
+       );
 
   static const String name = 'MaintenanceRequestHistoryRoute';
 
   static _i50.PageInfo page = _i50.PageInfo(
     name,
     builder: (data) {
-      return const _i25.MaintenanceRequestHistoryScreen();
+      final pathParams = data.inheritedPathParams;
+      final args = data.argsAs<MaintenanceRequestHistoryRouteArgs>(
+        orElse: () => MaintenanceRequestHistoryRouteArgs(
+          machineId: pathParams.getString('machineId'),
+        ),
+      );
+      return _i25.MaintenanceRequestHistoryScreen(
+        key: args.key,
+        machineId: args.machineId,
+      );
     },
   );
+}
+
+class MaintenanceRequestHistoryRouteArgs {
+  const MaintenanceRequestHistoryRouteArgs({this.key, required this.machineId});
+
+  final _i51.Key? key;
+
+  final String machineId;
+
+  @override
+  String toString() {
+    return 'MaintenanceRequestHistoryRouteArgs{key: $key, machineId: $machineId}';
+  }
 }
 
 /// generated route for

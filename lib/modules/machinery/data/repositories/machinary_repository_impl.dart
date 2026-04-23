@@ -1,5 +1,4 @@
 import 'package:front_gestion_minera/modules/machinery/domain/entity/entity.dart';
-import 'package:front_gestion_minera/modules/machinery/domain/entity/type_machinery_entity.dart';
 import 'package:front_gestion_minera/modules/machinery/domain/repositories/repository.dart';
 import '../datasource/datasource.dart';
 
@@ -33,5 +32,18 @@ class MachineryRepositoryImpl extends MachineryRepository {
   @override
   Future<List<TypeMachineryEntity>> getTypeMachinery() {
     return datasource.getTypesMachinery();
+  }
+
+  @override
+  Future<MaintenanceHistoryResponseEntity> getMaintenanceHistory({
+    required String machineId,
+    int page = 1,
+    int limit = 10,
+  }) {
+    return datasource.getMaintenanceHistory(
+      machineId: machineId,
+      page: page,
+      limit: limit,
+    );
   }
 }
