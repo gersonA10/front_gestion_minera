@@ -202,7 +202,13 @@ class _HomeMachinaryScreenState extends State<HomeMachinaryScreen> {
                               ),
                               Spacer(),
                               GestureDetector(
+<<<<<<< HEAD
                                 onTap: () {context.router.push(MaintenanceRequestHistoryRoute());},
+=======
+                                onTap: () {
+                                  context.router.push(ListMachineryRoute());
+                                },
+>>>>>>> origin/dev
                                 child: Text(
                                   'Ver Todos',
                                   style: TextStyle(color: TColors.appMainColor),
