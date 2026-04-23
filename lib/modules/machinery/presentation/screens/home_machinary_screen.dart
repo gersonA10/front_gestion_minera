@@ -1,6 +1,7 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:front_gestion_minera/config/router/app_router.gr.dart';
 import 'package:front_gestion_minera/core/widgets/logout_button_widget.dart';
 import 'package:front_gestion_minera/injector_container.dart';
 import 'package:front_gestion_minera/modules/machinery/domain/entity/entity.dart';
@@ -201,7 +202,7 @@ class _HomeMachinaryScreenState extends State<HomeMachinaryScreen> {
                               ),
                               Spacer(),
                               GestureDetector(
-                                onTap: () {},
+                                onTap: () {context.router.push(MaintenanceRequestHistoryRoute());},
                                 child: Text(
                                   'Ver Todos',
                                   style: TextStyle(color: TColors.appMainColor),
