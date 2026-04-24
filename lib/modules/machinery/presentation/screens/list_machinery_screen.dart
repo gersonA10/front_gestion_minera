@@ -42,6 +42,7 @@ class _ListMachineryScreenState extends State<ListMachineryScreen> {
   final TextEditingController searchController = TextEditingController();
   String? filterState;
   String? filterType;
+  bool _isLoadingMore = false;
 
   @override
   void initState() {
@@ -53,9 +54,14 @@ class _ListMachineryScreenState extends State<ListMachineryScreen> {
   }
 
   void _onScroll() {
-    final current = _scrollController.position.pixels;
+    if (!_scrollController.hasClients) return;
+    if (_cachedHasReachedMax) return;
+    if (_isLoadingMore) return;
 
-    if (current >= _scrollController.position.maxScrollExtent - 200) {
+    final position = _scrollController.position;
+
+    if (position.pixels >= position.maxScrollExtent - 200) {
+      _isLoadingMore = true;
       _machineryBloc.add(LoadMoreListInventoryMachineryEvent());
     }
   }
@@ -110,7 +116,30 @@ class _ListMachineryScreenState extends State<ListMachineryScreen> {
                     if (state is InventoryMachineryLoaded) {
                       _cacheinventory = state.machinery;
                       _cachedHasReachedMax = state.hasReachedMax;
+
+                      _isLoadingMore = false;
+
                       _machineryBloc.add(ListTypeMachinery());
+
+                      WidgetsBinding.instance.addPostFrameCallback((_) {
+                        if (!mounted) return;
+                        if (!_scrollController.hasClients) return;
+
+                        final position = _scrollController.position;
+
+                        final isNotScrollable =
+                            position.maxScrollExtent <=
+                            position.viewportDimension;
+
+                        if (isNotScrollable &&
+                            !_cachedHasReachedMax &&
+                            !_isLoadingMore) {
+                          _isLoadingMore = true;
+                          _machineryBloc.add(
+                            LoadMoreListInventoryMachineryEvent(),
+                          );
+                        }
+                      });
                     }
                     if (state is TypeMachineryLoaded &&
                         _cacheTypeMachine == null) {
@@ -127,7 +156,7 @@ class _ListMachineryScreenState extends State<ListMachineryScreen> {
                       if (state is InventoryMachineryError) {
                         return Center(child: Text(state.message));
                       }
-                      return const Center(child: CircularProgressIndicator(),);
+                      return const Center(child: CircularProgressIndicator());
                     }
 
                     if (_cacheTypeMachine == null) {
@@ -137,7 +166,7 @@ class _ListMachineryScreenState extends State<ListMachineryScreen> {
                       if (state is TypeMachineryError) {
                         return Center(child: Text(state.message));
                       }
-                      return const Center(child: CircularProgressIndicator(),);
+                      return const Center(child: CircularProgressIndicator());
                     }
                     final inventory = _cacheinventory!;
                     final hasReachedMax = _cachedHasReachedMax;
@@ -223,12 +252,10 @@ class _ListMachineryScreenState extends State<ListMachineryScreen> {
                                         ),
                                       ),
                                     ),
-                                  if (!hasReachedMax && inventory.isNotEmpty)
-                                    const Center(
-                                      child: Padding(
-                                        padding: EdgeInsets.all(8.0),
-                                        child: CircularProgressIndicator(),
-                                      ),
+                                  if (_isLoadingMore && !_cachedHasReachedMax)
+                                    const Padding(
+                                      padding: EdgeInsets.all(8.0),
+                                      child: CircularProgressIndicator(),
                                     ),
                                   const SizedBox(height: 80),
                                 ],
