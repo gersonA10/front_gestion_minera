@@ -700,7 +700,7 @@ class CustomForm extends StatelessWidget {
         borderRadius: BorderRadius.circular(28),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.04),
+            color: Colors.black.withValues(alpha: 0.04),
             blurRadius: 24,
             offset: const Offset(0, 10),
           ),
@@ -771,10 +771,10 @@ class CustomForm extends StatelessWidget {
                 borderRadius: BorderRadius.circular(22),
                 border: Border.all(
                   color: image != null
-                      ? colors.primary.withOpacity(0.25)
-                      : colors.outline.withOpacity(0.18),
+                      ? colors.primary.withValues(alpha: 0.25)
+                      : colors.outline.withValues(alpha: 0.18),
                 ),
-                color: colors.surfaceContainerHighest.withOpacity(0.28),
+                color: colors.surfaceContainerHighest.withValues(alpha: 0.28),
               ),
               child: Row(
                 children: [
@@ -816,7 +816,7 @@ class CustomForm extends StatelessWidget {
                                 vertical: 6,
                               ),
                               decoration: BoxDecoration(
-                                color: colors.primary.withOpacity(0.10),
+                                color: colors.primary.withValues(alpha: 0.10),
                                 borderRadius: BorderRadius.circular(999),
                               ),
                               child: Text(
