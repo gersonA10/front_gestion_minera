@@ -54,3 +54,23 @@ class TypeMachineryError extends MachineryState {
 
   TypeMachineryError(this.message);
 }
+
+class MaintenanceHistoryLoading extends MachineryState {}
+
+class MaintenanceHistoryLoaded extends MachineryState {
+  final List<MaintenanceHistoryItemEntity> items;
+  final bool hasReachedMax;
+  final int totalRecords;
+
+  MaintenanceHistoryLoaded({
+    required this.items,
+    required this.hasReachedMax,
+    required this.totalRecords,
+  });
+}
+
+class MaintenanceHistoryError extends MachineryState {
+  final String message;
+
+  MaintenanceHistoryError(this.message);
+}

@@ -1,6 +1,6 @@
-import 'package:auto_route/annotations.dart';
+import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
-
+import 'package:front_gestion_minera/config/router/app_router.gr.dart';
 import '../../../../utils/assets.dart';
 import '../../../../utils/constants/color.constant.dart';
 
@@ -120,7 +120,7 @@ class _DetailMachineryScreenState extends State<DetailMachineryScreen> {
                   children: [
                     Text('Historial de Solicitudes'),
                     GestureDetector(
-                      onTap: () {},
+                      onTap: () {context.router.push(MaintenanceRequestHistoryRoute(machineId: 'cb155c0d-2ec0-42db-953c-b50ba9bf6081'));},
                       child: Text(
                         'Ver Todos',
                         style: TextStyle(color: TColors.appMainColor),
