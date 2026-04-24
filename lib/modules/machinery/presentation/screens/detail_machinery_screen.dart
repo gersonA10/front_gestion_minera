@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 
 import '../../../../utils/assets.dart';
 import '../../../../utils/constants/color.constant.dart';
+import '../widgets/widgets.dart';
 
 @RoutePage()
 class DetailMachineryScreen extends StatefulWidget {
@@ -49,12 +50,10 @@ class _DetailMachineryScreenState extends State<DetailMachineryScreen> {
                       ),
                     ),
                     const SizedBox(height: 150),
-                    Container(
-                      decoration: BoxDecoration(
-                        color: TColors.green,
-                        borderRadius: BorderRadius.circular(20),
-                      ),
-                      child: Text('Activos'),
+                    Positioned(
+                      bottom: 10,
+                      left: 10,
+                      child: _viewState('activo')
                     ),
                   ],
                 ),
@@ -83,9 +82,9 @@ class _DetailMachineryScreenState extends State<DetailMachineryScreen> {
                       ),
                     ),
                     Container(
-                      padding: EdgeInsets.all(10),
+                      padding: EdgeInsets.all(7),
                       decoration: BoxDecoration(
-                        color: TColors.greyText,
+                        color: TColors.greyText.withValues(alpha: 0.3),
                         borderRadius: BorderRadius.circular(15),
                       ),
                       child: Icon(Icons.precision_manufacturing),
@@ -115,13 +114,14 @@ class _DetailMachineryScreenState extends State<DetailMachineryScreen> {
                     ),
                   ),
                 ),
-                const SizedBox(height: 10),
+                const SizedBox(height: 15),
                 Row(
                   children: [
-                    Text('Historial de Solicitudes'),
+                    const Text('Historial de Solicitudes', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15),),
+                    const Spacer(),
                     GestureDetector(
                       onTap: () {},
-                      child: Text(
+                      child: const Text(
                         'Ver Todos',
                         style: TextStyle(color: TColors.appMainColor),
                       ),
@@ -132,62 +132,65 @@ class _DetailMachineryScreenState extends State<DetailMachineryScreen> {
                 ListView.builder(
                   shrinkWrap: true,
                   physics: const NeverScrollableScrollPhysics(),
-                  itemCount: 3,
+                  itemCount: 5,
                   itemBuilder: (BuildContext context, int index) {
-                    return Container(
-                      padding: EdgeInsets.symmetric(horizontal: 10,vertical: 15),
-                      margin: EdgeInsets.symmetric(vertical: 7),
-                      decoration: BoxDecoration(
-                        color: TColors.white,
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                      child: Row(
-                        children: [
-                          Container(
-                            padding: EdgeInsets.all(10),
-                            decoration: BoxDecoration(
-                              color: TColors.appBackgroundColor,
-                              borderRadius: BorderRadius.circular(20),
-                            ),
-                            child: Icon(Icons.history),
-                          ),
-                          const SizedBox(width: 10),
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  'Cambio HIstoria',
-                                  style: TextStyle(fontWeight: FontWeight.bold),
-                                ),
-                                Text(
-                                  'idfecha',
-                                  style: TextStyle(color: TColors.greyText),
-                                ),
-                              ],
-                            ),
-                          ),
-                          Container(
-                            padding: EdgeInsets.symmetric(horizontal: 5),
-                            decoration: BoxDecoration(
-                              color: TColors.green,
-                              borderRadius: BorderRadius.circular(10),
-                            ),
-                            child: Text(
-                              'Estado',
-                              style: TextStyle(
-                                color: TColors.appBackgroundDarkColor,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    );
+                    return CardMaintenanceWidget();
                   },
                 ),
               ],
             ),
           ),
+        ),
+      ),
+    );
+  }
+  Widget _viewState(String tipo) {
+    if (tipo == 'activo') {
+      return Container(
+        padding: EdgeInsets.symmetric(vertical: 5, horizontal: 10),
+        decoration: BoxDecoration(
+          color: TColors.green,
+          borderRadius: BorderRadius.circular(30),
+        ),
+        child: Text(
+          'ACTIVO',
+          style: TextStyle(
+            fontWeight: FontWeight.bold,
+            color: TColors.white,
+            fontSize: 10,
+          ),
+        ),
+      );
+    }
+    if (tipo == 'en mantenimiento') {
+      return Container(
+        padding: EdgeInsets.symmetric(vertical: 5, horizontal: 10),
+        decoration: BoxDecoration(
+          color: TColors.amber,
+          borderRadius: BorderRadius.circular(30),
+        ),
+        child: Text(
+          'MANTENIMIENTO',
+          style: TextStyle(
+            fontWeight: FontWeight.bold,
+            color: TColors.white,
+            fontSize: 10,
+          ),
+        ),
+      );
+    }
+    return Container(
+      padding: EdgeInsets.symmetric(vertical: 5, horizontal: 10),
+      decoration: BoxDecoration(
+        color: TColors.red,
+        borderRadius: BorderRadius.circular(30),
+      ),
+      child: Text(
+        'INACTIVO',
+        style: TextStyle(
+          fontWeight: FontWeight.bold,
+          color: TColors.white,
+          fontSize: 10,
         ),
       ),
     );
