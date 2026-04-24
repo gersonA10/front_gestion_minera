@@ -1,7 +1,6 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:front_gestion_minera/config/router/app_router.gr.dart';
 import 'package:front_gestion_minera/injector_container.dart';
 import 'package:front_gestion_minera/modules/machinery/domain/entity/entity.dart';
 import 'package:front_gestion_minera/modules/machinery/presentation/bloc/machinery_bloc.dart';
@@ -50,8 +49,7 @@ class _ListMachineryScreenState extends State<ListMachineryScreen> {
     _scrollController.addListener(_onScroll);
 
     _machineryBloc = InjectorContainer.getIt<MachineryBloc>()
-      ..add(ListInventoryMachineryEvent())
-      ..add(ListTypeMachinery());
+      ..add(ListInventoryMachineryEvent());
   }
 
   void _onScroll() {
@@ -106,30 +104,40 @@ class _ListMachineryScreenState extends State<ListMachineryScreen> {
                       current is InventoryMachineryLoaded ||
                       current is InventoryMachineryError ||
                       current is TypeMachineryLoading ||
-                      current is TypeMachineryLoaded || 
+                      current is TypeMachineryLoaded ||
                       current is TypeMachineryError,
                   builder: (context, state) {
                     if (state is InventoryMachineryLoaded) {
                       _cacheinventory = state.machinery;
                       _cachedHasReachedMax = state.hasReachedMax;
+                      _machineryBloc.add(ListTypeMachinery());
                     }
-                    if (state is TypeMachineryLoaded) {
+                    if (state is TypeMachineryLoaded &&
+                        _cacheTypeMachine == null) {
                       _cacheTypeMachine = state.types;
                     }
 
                     final bool isLoading = state is InventoryMachineryLoading;
                     final bool isLoadingType = state is TypeMachineryLoading;
-                    if (_cacheinventory == null || _cacheTypeMachine == null) {
-                      if (isLoading || isLoadingType) {
+
+                    if (_cacheinventory == null) {
+                      if (isLoading) {
                         return const Center(child: CircularProgressIndicator());
                       }
                       if (state is InventoryMachineryError) {
                         return Center(child: Text(state.message));
                       }
+                      return const Center(child: CircularProgressIndicator(),);
+                    }
+
+                    if (_cacheTypeMachine == null) {
+                      if (isLoadingType) {
+                        return const Center(child: CircularProgressIndicator());
+                      }
                       if (state is TypeMachineryError) {
                         return Center(child: Text(state.message));
                       }
-                      return const SizedBox();
+                      return const Center(child: CircularProgressIndicator(),);
                     }
                     final inventory = _cacheinventory!;
                     final hasReachedMax = _cachedHasReachedMax;
@@ -163,7 +171,10 @@ class _ListMachineryScreenState extends State<ListMachineryScreen> {
                                 children: [
                                   const SizedBox(height: 15),
                                   // filtro de tipo
-                                  SizedBox(height: 40, child: _filterTypes(types)),
+                                  SizedBox(
+                                    height: 40,
+                                    child: _filterTypes(types),
+                                  ),
                                   const SizedBox(height: 15),
                                   SizedBox(
                                     height: 30,
@@ -191,15 +202,8 @@ class _ListMachineryScreenState extends State<ListMachineryScreen> {
                                     itemCount: inventory.length,
                                     itemBuilder:
                                         (BuildContext context, int index) {
-                                          return GestureDetector(
-                                            onTap: () {
-                                              context.router.push(
-                                                DetailMachineryRoute(),
-                                              );
-                                            },
-                                            child: CardMachineryWidget(
-                                              machine: inventory[index],
-                                            ),
+                                          return CardMachineryWidget(
+                                            machine: inventory[index],
                                           );
                                         },
                                   ),
@@ -297,7 +301,7 @@ class _ListMachineryScreenState extends State<ListMachineryScreen> {
                 types[index].name,
                 style: TextStyle(
                   color: isSelected ? TColors.white : TColors.bgColor,
-                  fontWeight: FontWeight.bold
+                  fontWeight: FontWeight.bold,
                 ),
               ),
             ),
