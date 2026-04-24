@@ -3,8 +3,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:front_gestion_minera/core/services/connectivity_service.dart';
+import 'package:front_gestion_minera/core/widgets/connectivity_wrapper.dart';
 import 'package:front_gestion_minera/utils/session/session_actions.dart';
-import 'package:in_app_update/in_app_update.dart'; 
+import 'package:in_app_update/in_app_update.dart';
 
 import 'package:front_gestion_minera/config/theme/app_theme.dart';
 import 'package:front_gestion_minera/injector_container.dart';
@@ -28,6 +30,7 @@ void main() async {
   await dotenv.load(fileName: '.env');
   InjectorContainer.setupGetIt();
   await initializeDateFormatting('es');
+  await ConnectivityService.instance.initialize();
   runApp(const MainApp());
 }
 
@@ -144,6 +147,9 @@ class _MainAppState extends State<MainApp> {
         theme: TAppTheme.lightTheme,
         darkTheme: TAppTheme.lightTheme,
         routerConfig: appRouter.config(),
+        builder: (context, child) => ConnectivityWrapper(
+          child: child ?? const SizedBox.shrink(),
+        ),
       ),
     );
   }

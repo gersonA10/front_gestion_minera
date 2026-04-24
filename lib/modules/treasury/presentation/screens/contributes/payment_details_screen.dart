@@ -36,138 +36,143 @@ class _PaymentConfirmationScreenState extends State<PaymentConfirmationScreen> {
   Widget build(BuildContext context) {
     return BlocProvider.value(
       value: _treasuryBloc,
-      child: Scaffold(
-        backgroundColor: TColors.appBackgroundColor,
-        appBar: AppBar(
-          backgroundColor: TColors.lightContainerAccount,
-          elevation: 0,
-          automaticallyImplyLeading: false,
-          title: const Text(
-            'Confirmación',
-            style: TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.w700,
-              color: TColors.appMainTextColor,
+      child: PopScope(
+        canPop: false,
+        onPopInvokedWithResult: (didPop, _) {
+          if (!didPop) context.router.back();
+        },
+        child: Scaffold(
+          backgroundColor: TColors.appBackgroundColor,
+          appBar: AppBar(
+            backgroundColor: TColors.lightContainerAccount,
+            elevation: 0,
+            automaticallyImplyLeading: false,
+            title: const Text(
+              'Confirmación',
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.w700,
+                color: TColors.appMainTextColor,
+              ),
             ),
+            centerTitle: true,
           ),
-          centerTitle: true,
-        ),
-        body: BlocBuilder<TreasuryBloc, TreasuryState>(
-          builder: (context, state) {
-            if (state is ContributionPaymentReceiptLoading) {
-              return const Center(child: CircularProgressIndicator());
-            }
-            if (state is ContributionPaymentReceiptError) {
-              return Center(
-                child: Text(
-                  state.message,
-                  style: const TextStyle(color: Colors.red),
-                ),
-              );
-            }
-            if (state is ContributionPaymentReceiptLoaded) {
-              final receipt = state.receipt;
-              return Column(
-                children: [
-                  Expanded(
-                    child: SingleChildScrollView(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 16,
-                        vertical: 24,
-                      ),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: [
-                          Container(
-                            width: 72,
-                            height: 72,
-                            decoration: BoxDecoration(
-                              color: TColors.green.withValues(alpha: 0.12),
-                              shape: BoxShape.circle,
+          body: BlocBuilder<TreasuryBloc, TreasuryState>(
+            builder: (context, state) {
+              if (state is ContributionPaymentReceiptLoading) {
+                return const Center(child: CircularProgressIndicator());
+              }
+              if (state is ContributionPaymentReceiptError) {
+                return Center(
+                  child: Text(
+                    state.message,
+                    style: const TextStyle(color: Colors.red),
+                  ),
+                );
+              }
+              if (state is ContributionPaymentReceiptLoaded) {
+                final receipt = state.receipt;
+                return Column(
+                  children: [
+                    Expanded(
+                      child: SingleChildScrollView(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 24,
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: [
+                            Container(
+                              width: 72,
+                              height: 72,
+                              decoration: BoxDecoration(
+                                color: TColors.green.withValues(alpha: 0.12),
+                                shape: BoxShape.circle,
+                              ),
+                              child: const Icon(
+                                Icons.check_circle_outline_rounded,
+                                color: TColors.green,
+                                size: 42,
+                              ),
                             ),
-                            child: const Icon(
-                              Icons.check_circle_outline_rounded,
-                              color: TColors.green,
-                              size: 42,
+                            const SizedBox(height: 16),
+                            const Text(
+                              '¡Pago Exitoso!',
+                              style: TextStyle(
+                                fontSize: 22,
+                                fontWeight: FontWeight.w800,
+                                color: TColors.appMainTextColor,
+                              ),
                             ),
-                          ),
-                          const SizedBox(height: 16),
-                          const Text(
-                            '¡Pago Exitoso!',
-                            style: TextStyle(
-                              fontSize: 22,
-                              fontWeight: FontWeight.w800,
-                              color: TColors.appMainTextColor,
+                            const SizedBox(height: 6),
+                            Text(
+                              receipt.receiptStatus,
+                              textAlign: TextAlign.center,
+                              style: const TextStyle(
+                                fontSize: 13,
+                                color: TColors.appSecondaryTextColor,
+                              ),
                             ),
-                          ),
-                          const SizedBox(height: 6),
-                          Text(
-                            receipt.receiptStatus,
-                            textAlign: TextAlign.center,
-                            style: const TextStyle(
-                              fontSize: 13,
-                              color: TColors.appSecondaryTextColor,
+                            const SizedBox(height: 24),
+                            TotalPagadoCard(
+                              amountPaid: receipt.amountPaid,
+                              transactionId: receipt.transactionId,
                             ),
-                          ),
-                          const SizedBox(height: 24),
-                          TotalPagadoCard(
-                            amountPaid: receipt.amountPaid,
-                            transactionId: receipt.transactionId,
-                          ),
-                          const SizedBox(height: 16),
-                          DetalleCard(
-                            paidBy: receipt.paidBy,
-                            reason: receipt.reason,
-                            period: receipt.period,
-                            paymentDate: receipt.paymentDate,
-                            registeredBy: receipt.registeredBy,
-                            observation: receipt.observation,
-                          ),
-                          const SizedBox(height: 32),
-                        ],
+                            const SizedBox(height: 16),
+                            DetalleCard(
+                              paidBy: receipt.paidBy,
+                              reason: receipt.reason,
+                              period: receipt.period,
+                              paymentDate: receipt.paymentDate,
+                              registeredBy: receipt.registeredBy,
+                              observation: receipt.observation,
+                            ),
+                            const SizedBox(height: 32),
+                          ],
+                        ),
                       ),
                     ),
-                  ),
-                  SafeArea(
-                    child: Padding(
-                      padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
-                      child: SizedBox(
-                        width: double.infinity,
-                        height: 52,
-                        child: OutlinedButton(
-                          onPressed: () {
-                            if (widget.screen) {
-                              context.router.back();
-                              context.router.back();
-                            } else {
-                              context.router.back();
-                            }
-                          },
-                          style: OutlinedButton.styleFrom(
-                            side: const BorderSide(
-                              color: TColors.appSurfaceColor,
+                    SafeArea(
+                      child: Padding(
+                        padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
+                        child: SizedBox(
+                          width: double.infinity,
+                          height: 52,
+                          child: OutlinedButton(
+                            onPressed: () {
+                              if (widget.screen) {
+                                context.router.back();
+                              } else {
+                                context.router.back();
+                              }
+                            },
+                            style: OutlinedButton.styleFrom(
+                              side: const BorderSide(
+                                color: TColors.appSurfaceColor,
+                              ),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(14),
+                              ),
                             ),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(14),
-                            ),
-                          ),
-                          child: const Text(
-                            'Volver al Detalle',
-                            style: TextStyle(
-                              fontSize: 14,
-                              fontWeight: FontWeight.w600,
-                              color: TColors.appMainTextColor,
+                            child: const Text(
+                              'Volver al Detalle',
+                              style: TextStyle(
+                                fontSize: 14,
+                                fontWeight: FontWeight.w600,
+                                color: TColors.appMainTextColor,
+                              ),
                             ),
                           ),
                         ),
                       ),
                     ),
-                  ),
-                ],
-              );
-            }
-            return const SizedBox.shrink();
-          },
+                  ],
+                );
+              }
+              return const SizedBox.shrink();
+            },
+          ),
         ),
       ),
     );
