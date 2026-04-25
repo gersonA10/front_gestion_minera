@@ -23,7 +23,7 @@ class SurveillanceHistoryModel extends SurveillanceHistoryEntity {
       requestId: json['request_id'],
       rol: json['rol'],
       amount: json['amount'],
-      evidencia: json['evidencia'],
+      evidencia: json['evidencia'] ?? '',
     );
   }
 

@@ -71,8 +71,8 @@ class SurveillanceBloc extends Bloc<SurveillanceEvent, SurveillanceState> {
       );
     } on BaseApiException catch (e) {
       emit(SurveillanceHistoryError(e.message));
-    } catch (_) {
-      emit(SurveillanceHistoryError('Ocurrió un error inesperado'));
+    } catch (e) {
+      emit(SurveillanceHistoryError('Ocurrió un error inesperado $e'));
     }
   }
 

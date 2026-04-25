@@ -12,6 +12,7 @@ import 'package:front_gestion_minera/modules/auth/presentation/bloc/auth_bloc.da
 import 'package:front_gestion_minera/utils/assets.dart';
 import 'package:front_gestion_minera/utils/text_util.dart';
 import 'package:local_auth/local_auth.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 
 @RoutePage()
 class AuthScreen extends StatefulWidget {
@@ -26,6 +27,7 @@ class _AuthScreenState extends State<AuthScreen> {
   final TextEditingController _passwordController = TextEditingController();
 
   late final AuthBloc _authBloc;
+  String appVersion = "";
 
   bool _obscurePassword = true;
   bool _biometricAvailable = false;
@@ -46,6 +48,15 @@ class _AuthScreenState extends State<AuthScreen> {
     super.initState();
     _authBloc = InjectorContainer.getIt<AuthBloc>();
     _initBiometric();
+    _loadAppVersion();
+  }
+
+  Future<void> _loadAppVersion() async {
+    final info = await PackageInfo.fromPlatform();
+
+    setState(() {
+      appVersion = "v${info.version}";
+    });
   }
 
   @override
@@ -227,7 +238,8 @@ class _AuthScreenState extends State<AuthScreen> {
               CustomAlert.show(
                 context,
                 title: 'Contraseña actualizada',
-                message: 'Tu contraseña fue actualizada correctamente. Por favor, inicia sesión.',
+                message:
+                    'Tu contraseña fue actualizada correctamente. Por favor, inicia sesión.',
                 type: AlertType.success,
               );
             } else if (state is AuthError) {
@@ -424,10 +436,21 @@ class _AuthScreenState extends State<AuthScreen> {
                           ],
 
                           SizedBox(height: smallSpacing * 2),
-                          Text(
-                            'Desarrollado por XploreMore y Gicager Systems',
-                            style: AppTextStyles.mainStyleGrey10(context),
-                            textAlign: TextAlign.center,
+                          Column(
+                            children: [
+                              Text(
+                                'Desarrollado por XploreMore y Gicager Systems',
+                                style: AppTextStyles.mainStyleGrey10(context),
+                                textAlign: TextAlign.center,
+                              ),
+                              const SizedBox(height: 4),
+                              Text(
+                                appVersion.isEmpty ? "" : appVersion,
+                                style: AppTextStyles.mainStyleGrey10(
+                                  context,
+                                ).copyWith(fontSize: 10, letterSpacing: 0.5),
+                              ),
+                            ],
                           ),
                         ],
                       ),
@@ -587,144 +610,150 @@ class _ChangePasswordSheetState extends State<_ChangePasswordSheet> {
                 borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
               ),
               padding: const EdgeInsets.fromLTRB(24, 16, 24, 24),
-            child: Form(
-              key: _formKey,
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Center(
-                    child: Container(
-                      width: 40,
-                      height: 4,
-                      decoration: BoxDecoration(
-                        color: Colors.grey.shade300,
-                        borderRadius: BorderRadius.circular(2),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 20),
-                  Text(
-                    'Cambiar Contraseña',
-                    style: AppTextStyles.mainStyle25Bold(context),
-                  ),
-                  const SizedBox(height: 6),
-                  Text(
-                    'Es tu primer inicio de sesión. Debes establecer una nueva contraseña para continuar.',
-                    style: AppTextStyles.mainStyleGrey12(context),
-                  ),
-                  const SizedBox(height: 20),
-                  Text(
-                    'Nueva Contraseña',
-                    style: AppTextStyles.mainStyle12Bold(context),
-                  ),
-                  const SizedBox(height: 6),
-                  TextFormField(
-                    controller: _newPasswordController,
-                    obscureText: _obscureNew,
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return 'Ingresa tu nueva contraseña';
-                      }
-                      if (value.length < 6) {
-                        return 'Mínimo 6 caracteres';
-                      }
-                      return null;
-                    },
-                    decoration: InputDecoration(
-                      hintText: 'Nueva contraseña',
-                      hintStyle: AppTextStyles.mainStyle12(context)
-                          .copyWith(color: Theme.of(context).colorScheme.lead),
-                      prefixIcon: const Icon(Icons.lock_outline),
-                      suffixIcon: IconButton(
-                        icon: Icon(
-                          _obscureNew ? Icons.visibility_off : Icons.visibility,
-                        ),
-                        onPressed: () =>
-                            setState(() => _obscureNew = !_obscureNew),
-                      ),
-                      filled: true,
-                      fillColor: Theme.of(context).colorScheme.bajo,
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12),
-                        borderSide: BorderSide.none,
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 12),
-                  Text(
-                    'Confirmar Contraseña',
-                    style: AppTextStyles.mainStyle12Bold(context),
-                  ),
-                  const SizedBox(height: 6),
-                  TextFormField(
-                    controller: _confirmPasswordController,
-                    obscureText: _obscureConfirm,
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return 'Confirma tu contraseña';
-                      }
-                      if (value != _newPasswordController.text) {
-                        return 'Las contraseñas no coinciden';
-                      }
-                      return null;
-                    },
-                    decoration: InputDecoration(
-                      hintText: 'Repite la contraseña',
-                      hintStyle: AppTextStyles.mainStyle12(context)
-                          .copyWith(color: Theme.of(context).colorScheme.lead),
-                      prefixIcon: const Icon(Icons.lock_outline),
-                      suffixIcon: IconButton(
-                        icon: Icon(
-                          _obscureConfirm
-                              ? Icons.visibility_off
-                              : Icons.visibility,
-                        ),
-                        onPressed: () =>
-                            setState(() => _obscureConfirm = !_obscureConfirm),
-                      ),
-                      filled: true,
-                      fillColor: Theme.of(context).colorScheme.bajo,
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12),
-                        borderSide: BorderSide.none,
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 20),
-                  SizedBox(
-                    width: double.infinity,
-                    height: 52,
-                    child: ElevatedButton(
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Theme.of(context).colorScheme.blue,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(14),
+              child: Form(
+                key: _formKey,
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Center(
+                      child: Container(
+                        width: 40,
+                        height: 4,
+                        decoration: BoxDecoration(
+                          color: Colors.grey.shade300,
+                          borderRadius: BorderRadius.circular(2),
                         ),
                       ),
-                      onPressed: isLoading ? null : _submit,
-                      child: isLoading
-                          ? const SizedBox(
-                              width: 22,
-                              height: 22,
-                              child: CircularProgressIndicator(
-                                strokeWidth: 2.5,
-                                color: Colors.white,
+                    ),
+                    const SizedBox(height: 20),
+                    Text(
+                      'Cambiar Contraseña',
+                      style: AppTextStyles.mainStyle25Bold(context),
+                    ),
+                    const SizedBox(height: 6),
+                    Text(
+                      'Es tu primer inicio de sesión. Debes establecer una nueva contraseña para continuar.',
+                      style: AppTextStyles.mainStyleGrey12(context),
+                    ),
+                    const SizedBox(height: 20),
+                    Text(
+                      'Nueva Contraseña',
+                      style: AppTextStyles.mainStyle12Bold(context),
+                    ),
+                    const SizedBox(height: 6),
+                    TextFormField(
+                      controller: _newPasswordController,
+                      obscureText: _obscureNew,
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return 'Ingresa tu nueva contraseña';
+                        }
+                        if (value.length < 6) {
+                          return 'Mínimo 6 caracteres';
+                        }
+                        return null;
+                      },
+                      decoration: InputDecoration(
+                        hintText: 'Nueva contraseña',
+                        hintStyle: AppTextStyles.mainStyle12(
+                          context,
+                        ).copyWith(color: Theme.of(context).colorScheme.lead),
+                        prefixIcon: const Icon(Icons.lock_outline),
+                        suffixIcon: IconButton(
+                          icon: Icon(
+                            _obscureNew
+                                ? Icons.visibility_off
+                                : Icons.visibility,
+                          ),
+                          onPressed: () =>
+                              setState(() => _obscureNew = !_obscureNew),
+                        ),
+                        filled: true,
+                        fillColor: Theme.of(context).colorScheme.bajo,
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          borderSide: BorderSide.none,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    Text(
+                      'Confirmar Contraseña',
+                      style: AppTextStyles.mainStyle12Bold(context),
+                    ),
+                    const SizedBox(height: 6),
+                    TextFormField(
+                      controller: _confirmPasswordController,
+                      obscureText: _obscureConfirm,
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return 'Confirma tu contraseña';
+                        }
+                        if (value != _newPasswordController.text) {
+                          return 'Las contraseñas no coinciden';
+                        }
+                        return null;
+                      },
+                      decoration: InputDecoration(
+                        hintText: 'Repite la contraseña',
+                        hintStyle: AppTextStyles.mainStyle12(
+                          context,
+                        ).copyWith(color: Theme.of(context).colorScheme.lead),
+                        prefixIcon: const Icon(Icons.lock_outline),
+                        suffixIcon: IconButton(
+                          icon: Icon(
+                            _obscureConfirm
+                                ? Icons.visibility_off
+                                : Icons.visibility,
+                          ),
+                          onPressed: () => setState(
+                            () => _obscureConfirm = !_obscureConfirm,
+                          ),
+                        ),
+                        filled: true,
+                        fillColor: Theme.of(context).colorScheme.bajo,
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          borderSide: BorderSide.none,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 20),
+                    SizedBox(
+                      width: double.infinity,
+                      height: 52,
+                      child: ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Theme.of(context).colorScheme.blue,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(14),
+                          ),
+                        ),
+                        onPressed: isLoading ? null : _submit,
+                        child: isLoading
+                            ? const SizedBox(
+                                width: 22,
+                                height: 22,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2.5,
+                                  color: Colors.white,
+                                ),
+                              )
+                            : Text(
+                                'Guardar Contraseña',
+                                style: AppTextStyles.mainStyleWhite14Bold(
+                                  context,
+                                ),
                               ),
-                            )
-                          : Text(
-                              'Guardar Contraseña',
-                              style:
-                                  AppTextStyles.mainStyleWhite14Bold(context),
-                            ),
+                      ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             ),
           ),
-        ),
-      );
+        );
       },
     );
   }

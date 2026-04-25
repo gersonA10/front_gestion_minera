@@ -175,38 +175,44 @@ class _LoanScreenState extends State<LoanScreen>
                           Tab(text: "Gramos"),
                         ],
                       ),
+                     
                       Expanded(
-                        child: SingleChildScrollView(
-                          padding: const EdgeInsets.only(
-                            left: 20,
-                            right: 20,
-                            top: 10,
-                            bottom: 20,
+                        child: ScrollConfiguration(
+                          behavior: const ScrollBehavior().copyWith(
+                            overscroll: false,
                           ),
-                          child: IndexedStack(
-                            index: _tabController.index,
-                            children: [
-                              CustomForm(
-                                smallSpacing: smallSpacing,
-                                colors: colors,
-                                image: _image,
-                                onOpenCamera: _pickImage,
-                                title: 'Monto',
-                                amountController: _amountController,
-                                reasonController: _reasonController,
-                                applicantController: _applicantController,
-                              ),
-                              CustomForm(
-                                smallSpacing: smallSpacing,
-                                colors: colors,
-                                image: _image,
-                                onOpenCamera: _pickImage,
-                                title: 'Gramos',
-                                amountController: _amountController,
-                                reasonController: _reasonController,
-                                applicantController: _applicantController,
-                              ),
-                            ],
+                          child: SingleChildScrollView(
+                            padding: const EdgeInsets.only(
+                              left: 20,
+                              right: 20,
+                              top: 10,
+                              bottom: 20,
+                            ),
+                            child: IndexedStack(
+                              index: _tabController.index,
+                              children: [
+                                CustomForm(
+                                  smallSpacing: smallSpacing,
+                                  colors: colors,
+                                  image: _image,
+                                  onOpenCamera: _pickImage,
+                                  title: 'Monto',
+                                  amountController: _amountController,
+                                  reasonController: _reasonController,
+                                  applicantController: _applicantController,
+                                ),
+                                CustomForm(
+                                  smallSpacing: smallSpacing,
+                                  colors: colors,
+                                  image: _image,
+                                  onOpenCamera: _pickImage,
+                                  title: 'Gramos',
+                                  amountController: _amountController,
+                                  reasonController: _reasonController,
+                                  applicantController: _applicantController,
+                                ),
+                              ],
+                            ),
                           ),
                         ),
                       ),

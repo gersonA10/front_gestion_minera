@@ -5,6 +5,7 @@ import 'package:front_gestion_minera/config/router/app_router.dart';
 import 'package:front_gestion_minera/config/router/app_router.gr.dart';
 import 'package:front_gestion_minera/core/widgets/logout_button_widget.dart';
 import 'package:front_gestion_minera/injector_container.dart';
+import 'package:front_gestion_minera/utils/constants/color.constant.dart';
 import 'package:front_gestion_minera/utils/greeting_util.dart';
 import 'package:front_gestion_minera/utils/session/user_session.dart';
 
@@ -74,66 +75,154 @@ class _PartnersScreenState extends State<PartnersScreen>
   }
 
   List<_MenuItem> _buildMenuItems(BuildContext context) => [
-        _MenuItem(
-          title: 'Registrar Préstamo',
-          subtitle: 'Nueva solicitud',
-          icon: Icons.add_card_rounded,
-          accent: _AppColors.primary,
-          onTap: () => InjectorContainer.getIt<AppRouter>().push(LoanRoute()),
-        ),
-        _MenuItem(
-          title: 'Historial de Préstamos',
-          subtitle: 'Seguimiento de cuotas',
-          icon: Icons.receipt_long_rounded,
-          accent: _AppColors.accentTeal,
-          onTap: () => context.router.push(LoanHistoryRoute()),
-        ),
-        _MenuItem(
-          title: 'Ingresos',
-          subtitle: 'Entradas de capital',
-          icon: Icons.trending_up_rounded,
-          accent: _AppColors.accentGreen,
-          onTap: () => context.router.push(DistributesRoute()),
-        ),
-        _MenuItem(
-          title: 'Solicitar Dinero',
-          subtitle: 'Solicitud de egreso',
-          icon: Icons.payments_rounded,
-          accent: _AppColors.accentOrange,
-          onTap: () => context.router.push(MoneyRequestRoute()),
-        ),
-        _MenuItem(
-          title: 'Historial de Aportes',
-          subtitle: 'Contribuciones totales',
-          icon: Icons.savings_rounded,
-          accent: _AppColors.accentPurple,
-          onTap: () => InjectorContainer.getIt<AppRouter>()
-              .push(const ContributeHistoryRoute()),
-        ),
-        _MenuItem(
-          title: 'Historial de Solicitudes',
-          subtitle: 'Seguimiento de solicitud',
-          icon: Icons.history_rounded,
-          accent: _AppColors.accentRose,
-          onTap: () => context.router.push(const RequestHistoryRoute()),
-        ),
-        _MenuItem(
-          title: 'Bandeja de Socios',
-          subtitle: 'Asistencia y actividades',
-          icon: Icons.groups_2_rounded,
-          accent: _AppColors.accentTeal,
-          onTap: () {},
-        ),
-      ];
+    _MenuItem(
+      title: 'Registrar Préstamo',
+      subtitle: 'Nueva solicitud',
+      icon: Icons.add_card_rounded,
+      accent: _AppColors.primary,
+      onTap: () => InjectorContainer.getIt<AppRouter>().push(LoanRoute()),
+    ),
+    _MenuItem(
+      title: 'Historial de Préstamos',
+      subtitle: 'Seguimiento de cuotas',
+      icon: Icons.receipt_long_rounded,
+      accent: _AppColors.accentTeal,
+      onTap: () => context.router.push(LoanHistoryRoute()),
+    ),
+    _MenuItem(
+      title: 'Ingresos',
+      subtitle: 'Entradas de capital',
+      icon: Icons.trending_up_rounded,
+      accent: _AppColors.accentGreen,
+      onTap: () => context.router.push(DistributesRoute()),
+    ),
+    _MenuItem(
+      title: 'Solicitar Dinero',
+      subtitle: 'Solicitud de egreso',
+      icon: Icons.payments_rounded,
+      accent: _AppColors.accentOrange,
+      onTap: () => context.router.push(MoneyRequestRoute()),
+    ),
+    _MenuItem(
+      title: 'Historial de Aportes',
+      subtitle: 'Contribuciones totales',
+      icon: Icons.savings_rounded,
+      accent: _AppColors.accentPurple,
+      onTap: () => InjectorContainer.getIt<AppRouter>().push(
+        const ContributeHistoryRoute(),
+      ),
+    ),
+    _MenuItem(
+      title: 'Historial de Solicitudes',
+      subtitle: 'Seguimiento de solicitud',
+      icon: Icons.history_rounded,
+      accent: _AppColors.accentRose,
+      onTap: () => context.router.push(const RequestHistoryRoute()),
+    ),
+    _MenuItem(
+      title: 'Bandeja de Socios',
+      subtitle: 'Asistencia y actividades',
+      icon: Icons.groups_2_rounded,
+      accent: _AppColors.accentTeal,
+      onTap: () {
+        _showComingSoonDialog(context);
+      },
+    ),
+  ];
+
+  void _showComingSoonDialog(BuildContext context) {
+    final colors = Theme.of(context).colorScheme;
+
+    showDialog(
+      context: context,
+      barrierDismissible: true,
+      builder: (context) {
+        return Dialog(
+          backgroundColor: Colors.transparent,
+          insetPadding: const EdgeInsets.symmetric(horizontal: 24),
+          child: Container(
+            padding: const EdgeInsets.all(24),
+            decoration: BoxDecoration(
+              color: colors.surface,
+              borderRadius: BorderRadius.circular(24),
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Container(
+                  width: 64,
+                  height: 64,
+                  decoration: BoxDecoration(
+                    color: colors.primary.withValues(alpha: 0.1),
+                    borderRadius: BorderRadius.circular(18),
+                  ),
+                  child: Icon(
+                    Icons.auto_awesome_rounded,
+                    color: colors.primary,
+                    size: 30,
+                  ),
+                ),
+
+                const SizedBox(height: 20),
+
+                Text(
+                  "Próximamente",
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    color: colors.onSurface,
+                  ),
+                ),
+
+                const SizedBox(height: 10),
+
+                Text(
+                  "Muy pronto podrás visualizar las actividades y asistencias de los socios desde este módulo.",
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontSize: 14,
+                    color: colors.onSurfaceVariant,
+                    height: 1.4,
+                  ),
+                ),
+
+                const SizedBox(height: 24),
+
+                SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton(
+                    onPressed: () => Navigator.pop(context),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: colors.primary,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(14),
+                      ),
+                      padding: const EdgeInsets.symmetric(vertical: 14),
+                    ),
+                    child: const Text(
+                      "Entendido",
+                      style: TextStyle(fontWeight: FontWeight.w600, color: TColors.appBackgroundColor),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
     final items = _buildMenuItems(context);
 
-    SystemChrome.setSystemUIOverlayStyle(const SystemUiOverlayStyle(
-      statusBarColor: Colors.transparent,
-      statusBarIconBrightness: Brightness.dark,
-    ));
+    SystemChrome.setSystemUIOverlayStyle(
+      const SystemUiOverlayStyle(
+        statusBarColor: Colors.transparent,
+        statusBarIconBrightness: Brightness.dark,
+      ),
+    );
 
     return Scaffold(
       backgroundColor: _AppColors.background,
@@ -146,17 +235,14 @@ class _PartnersScreenState extends State<PartnersScreen>
             SliverPadding(
               padding: const EdgeInsets.fromLTRB(20, 8, 20, 32),
               sliver: SliverGrid(
-                delegate: SliverChildBuilderDelegate(
-                  (context, index) {
-                    final item = items[index];
-                    // Last item full width if odd count
-                    return _MenuCard(
-                      item: item,
-                      delay: Duration(milliseconds: 60 * index),
-                    );
-                  },
-                  childCount: items.length,
-                ),
+                delegate: SliverChildBuilderDelegate((context, index) {
+                  final item = items[index];
+                  // Last item full width if odd count
+                  return _MenuCard(
+                    item: item,
+                    delay: Duration(milliseconds: 60 * index),
+                  );
+                }, childCount: items.length),
                 gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                   crossAxisCount: 2,
                   mainAxisSpacing: 14,

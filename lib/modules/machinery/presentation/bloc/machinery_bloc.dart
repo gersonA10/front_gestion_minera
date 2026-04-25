@@ -25,11 +25,20 @@ class MachineryBloc extends Bloc<MachineryEvent, MachineryState> {
   // evitar bombardeo a la api
   bool _isLoadingMoreMachinery = false;
 
+  // Para historial de mantenimiento
+  int _currentHistoryPage = 1;
+  bool _hasReachedHistoryMax = false;
+  int _currentHistoryTotalRecords = 0;
+  List<MaintenanceHistoryItemEntity> _historyItems = [];
+  bool _isLoadingMoreHistory = false;
+
   MachineryBloc({required this.repository}) : super(MachineryInitial()) {
     on<FetchMetricsMachineEvent>(_onFetchMetricMachine);
     on<ListInventoryMachineryEvent>(_listInventoryMachinery);
     on<LoadMoreListInventoryMachineryEvent>(_loadMoreInventoryMachinery);
     on<ListTypeMachinery>(_litsTypeMachinery);
+    on<FetchMaintenanceHistoryEvent>(_onFetchMaintenanceHistory);
+    on<LoadMoreMaintenanceHistoryEvent>(_onLoadMoreMaintenanceHistory);
   }
 
   FutureOr<void> _onFetchMetricMachine(
@@ -145,6 +154,68 @@ class MachineryBloc extends Bloc<MachineryEvent, MachineryState> {
       emit(InventoryMachineryError('Error Inesperado: $e'));
     } finally {
       _isLoadingMoreMachinery = false;
+    }
+  }
+
+  FutureOr<void> _onFetchMaintenanceHistory(
+    FetchMaintenanceHistoryEvent event,
+    Emitter<MachineryState> emit,
+  ) async {
+    if (event.isRefresh) {
+      _currentHistoryPage = 1;
+      _hasReachedHistoryMax = false;
+      _historyItems.clear();
+      emit(MaintenanceHistoryLoading());
+    }
+    try {
+      final response = await repository.getMaintenanceHistory(
+        machineId: event.machineId,
+        page: _currentHistoryPage,
+      );
+      _historyItems = response.items;
+      _hasReachedHistoryMax = !response.hasMore;
+      _currentHistoryTotalRecords = response.totalRecords;
+      emit(MaintenanceHistoryLoaded(
+        items: List.from(_historyItems),
+        hasReachedMax: _hasReachedHistoryMax,
+        totalRecords: _currentHistoryTotalRecords,
+      ));
+    } on BaseApiException catch (error) {
+      if (error.key == DioExceptionKey.unauthorised) return;
+      emit(MaintenanceHistoryError(mapErrorMessage(error.key)));
+    } catch (e) {
+      emit(MaintenanceHistoryError('Error inesperado: $e'));
+    }
+  }
+
+  FutureOr<void> _onLoadMoreMaintenanceHistory(
+    LoadMoreMaintenanceHistoryEvent event,
+    Emitter<MachineryState> emit,
+  ) async {
+    if (_hasReachedHistoryMax || _isLoadingMoreHistory) return;
+    _isLoadingMoreHistory = true;
+    _currentHistoryPage++;
+    try {
+      final response = await repository.getMaintenanceHistory(
+        machineId: event.machineId,
+        page: _currentHistoryPage,
+      );
+      _historyItems.addAll(response.items);
+      _hasReachedHistoryMax = !response.hasMore;
+      emit(MaintenanceHistoryLoaded(
+        items: List.from(_historyItems),
+        hasReachedMax: _hasReachedHistoryMax,
+        totalRecords: _currentHistoryTotalRecords,
+      ));
+    } on BaseApiException catch (error) {
+      if (error.key == DioExceptionKey.unauthorised) return;
+      _currentHistoryPage--;
+      emit(MaintenanceHistoryError(mapErrorMessage(error.key)));
+    } catch (e) {
+      _currentHistoryPage--;
+      emit(MaintenanceHistoryError('Error inesperado: $e'));
+    } finally {
+      _isLoadingMoreHistory = false;
     }
   }
 

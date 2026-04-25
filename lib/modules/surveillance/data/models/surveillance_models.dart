@@ -12,18 +12,21 @@ class MonitoringTrayDataModel extends MonitoringTrayDataEntity {
     required super.requestId,
   });
 
-  factory MonitoringTrayDataModel.fromJson(Map<String, dynamic> json) =>
-      MonitoringTrayDataModel(
-        createdAt:
-            DateTime.tryParse(json["created_at"] ?? '') ?? DateTime.now(),
+  factory MonitoringTrayDataModel.fromJson(Map<String, dynamic> json) {
+
+    return MonitoringTrayDataModel(
+        createdAt:  DateTime.tryParse(json["created_at"] ?? '') ?? DateTime.now(),
         name: json["name"],
         rol: json["rol"],
         description: json["description"],
-        status: json["status"],
-        amount: json["amount"],
-        evidencia: json["evidencia"],
-        requestId: json["request_id"],
+        status: json["status"] ?? '',
+        amount: json["amount"] ?? '0',
+        evidencia: json["evidencia"] ?? '',
+        requestId: json["request_id"] ?? '',
       );
+  }
+    
+
   MonitoringTrayDataEntity toEntity() {
     return MonitoringTrayDataEntity(
       description: description,

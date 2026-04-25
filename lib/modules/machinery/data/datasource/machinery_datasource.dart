@@ -1,4 +1,3 @@
-import 'package:front_gestion_minera/modules/machinery/data/models/type_machinery_model.dart';
 
 import '../../../../core/networking/http_services.dart';
 import '../../domain/entity/entity.dart';
@@ -36,6 +35,19 @@ class MachineryDatasource {
       operationName: 'InventoryMachinery',
     );
     return InventoryMachineryResponseModel.fromJson(response);
+  }
+
+  Future<MaintenanceHistoryResponseEntity> getMaintenanceHistory({
+    required String machineId,
+    int page = 1,
+    int limit = 10,
+  }) async {
+    final response = await apiClient.get(
+      '/api/machinery/machine/$machineId',
+      queryParameters: {'page': page, 'limit': limit},
+      operationName: 'maintenanceHistory',
+    );
+    return MaintenanceHistoryResponseModel.fromJson(response);
   }
 
   Future<List<TypeMachineryModel>> getTypesMachinery() async {
