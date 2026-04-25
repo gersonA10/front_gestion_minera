@@ -35,3 +35,9 @@ class LoadMoreMaintenanceHistoryEvent extends MachineryEvent {
 
   LoadMoreMaintenanceHistoryEvent({required this.machineId});
 }
+
+class RegisterMachineryEvent extends MachineryEvent {
+  final RegisterMachineryRequestEntity request;
+
+  RegisterMachineryEvent({required this.request});
+}

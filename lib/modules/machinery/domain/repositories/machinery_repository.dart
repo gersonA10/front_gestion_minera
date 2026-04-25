@@ -19,4 +19,8 @@ abstract class MachineryRepository {
     int page = 1,
     int limit = 10,
   });
+
+  Future<RegisterMachineryResponseEntity> registerMachinery(
+    RegisterMachineryRequestEntity request,
+  );
 }

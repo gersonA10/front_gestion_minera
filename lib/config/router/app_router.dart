@@ -24,7 +24,7 @@ class AppRouter extends RootStackRouter {
     AutoRoute(page: MoneyRequestRoute.page),
     AutoRoute(page: RequestHistoryRoute.page),
     AutoRoute(page: LoanRoute.page),
-    AutoRoute(page: HomeSurveillanceRoute.page,),
+    AutoRoute(page: HomeSurveillanceRoute.page),
     AutoRoute(page: HistoryRequestsRoute.page),
     AutoRoute(page: ApplicationDetailsRoute.page),
     AutoRoute(page: TreasuryRoute.page),
@@ -65,6 +65,7 @@ class AppRouter extends RootStackRouter {
     AutoRoute(page: HomeMachinaryRoute.page),
     AutoRoute(page: ListMachineryRoute.page),
     AutoRoute(page: DetailMachineryRoute.page),
-      AutoRoute(page: MaintenanceRequestHistoryRoute.page,)
+    AutoRoute(page: MaintenanceRequestHistoryRoute.page),
+    AutoRoute(page: RegistrationOfNewMachineryRoute.page),
   ];
 }

@@ -244,7 +244,7 @@ class _HomeMachinaryScreenState extends State<HomeMachinaryScreen> {
                             width: double.infinity,
                             height: 52,
                             child: OutlinedButton.icon(
-                              onPressed: () {},
+                              onPressed: () {context.router.push(RegistrationOfNewMachineryRoute());},
                               icon: Icon(
                                 Icons.add_circle_outline,
                                 color: TColors.white,
