@@ -74,3 +74,15 @@ class MaintenanceHistoryError extends MachineryState {
 
   MaintenanceHistoryError(this.message);
 }
+
+class CreateMaintenanceRequestLoading extends MachineryState {}
+
+class CreateMaintenanceRequestSuccess extends MachineryState {
+  final CreateMaintenanceResponseEntity response;
+  CreateMaintenanceRequestSuccess({required this.response});
+}
+
+class CreateMaintenanceRequestError extends MachineryState {
+  final String message;
+  CreateMaintenanceRequestError(this.message);
+}

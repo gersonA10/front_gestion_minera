@@ -1,5 +1,4 @@
 import 'package:front_gestion_minera/modules/machinery/domain/entity/entity.dart';
-import 'package:front_gestion_minera/modules/machinery/domain/entity/type_machinery_entity.dart';
 
 abstract class MachineryRepository {
 
@@ -19,4 +18,8 @@ abstract class MachineryRepository {
     int page = 1,
     int limit = 10,
   });
+
+  Future<CreateMaintenanceResponseEntity> createMaintenanceRequest(
+    CreateMaintenanceRequestEntity requestModel,
+  );
 }

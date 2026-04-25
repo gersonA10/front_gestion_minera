@@ -1,4 +1,3 @@
-
 import '../../../../core/networking/http_services.dart';
 import '../../domain/entity/entity.dart';
 import '../models/model.dart';
@@ -7,6 +6,24 @@ class MachineryDatasource {
   final ApiClient apiClient;
 
   MachineryDatasource({required this.apiClient});
+
+  Future<CreateMaintenanceResponseModel> createMaintenanceRequest(
+    CreateMaintenanceRequestModel requestModel,
+  ) async {
+    final response = await apiClient.postFormData(
+      '/api/machinery/maintenances',
+      operationName: 'createMaintenanceRequest',
+      data: requestModel.toFormDataMap(),
+      files: [
+        {
+          'name': 'evidence_url',
+          'path': requestModel.evidenceUrlPath!,
+          'filename': requestModel.evidenceUrlPath!.split('/').last,
+        },
+      ],
+    );
+    return CreateMaintenanceResponseModel.fromJson(response['data']);
+  }
 
   Future<MetricsMachineryModel> getMetricsMachine() async {
     final response = await apiClient.get(

@@ -1,6 +1,7 @@
 import 'package:front_gestion_minera/modules/machinery/domain/entity/entity.dart';
 import 'package:front_gestion_minera/modules/machinery/domain/repositories/repository.dart';
 import '../datasource/datasource.dart';
+import '../models/model.dart';
 
 class MachineryRepositoryImpl extends MachineryRepository {
   final MachineryDatasource datasource;
@@ -45,5 +46,14 @@ class MachineryRepositoryImpl extends MachineryRepository {
       page: page,
       limit: limit,
     );
+  }
+
+  @override
+  Future<CreateMaintenanceResponseEntity> createMaintenanceRequest(
+    CreateMaintenanceRequestEntity requestModel,
+  ) async{
+    final request = CreateMaintenanceRequestModel.fromEntity(requestModel);
+    final response = await datasource.createMaintenanceRequest(request);
+    return response;
   }
 }
