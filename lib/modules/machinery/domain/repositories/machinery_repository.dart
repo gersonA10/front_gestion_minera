@@ -6,7 +6,7 @@ abstract class MachineryRepository {
 
   Future<InventoryMachineryEntity> getInventoryMachinery({
     int page = 1,
-    int limit = 5,
+    int limit = 10,
     String? search,
     String? status,
     String? type
@@ -19,4 +19,8 @@ abstract class MachineryRepository {
     int page = 1,
     int limit = 10,
   });
+
+  Future<RegisterMachineryResponseEntity> registerMachinery(
+    RegisterMachineryRequestEntity request,
+  );
 }

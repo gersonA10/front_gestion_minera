@@ -15,7 +15,7 @@ class MachineryRepositoryImpl extends MachineryRepository {
   @override
   Future<InventoryMachineryEntity> getInventoryMachinery({
     int page = 1,
-    int limit = 5,
+    int limit = 10,
     String? search,
     String? status,
     String? type,
@@ -32,6 +32,13 @@ class MachineryRepositoryImpl extends MachineryRepository {
   @override
   Future<List<TypeMachineryEntity>> getTypeMachinery() {
     return datasource.getTypesMachinery();
+  }
+
+  @override
+  Future<RegisterMachineryResponseEntity> registerMachinery(
+    RegisterMachineryRequestEntity request,
+  ) {
+    return datasource.registerMachinery(request);
   }
 
   @override

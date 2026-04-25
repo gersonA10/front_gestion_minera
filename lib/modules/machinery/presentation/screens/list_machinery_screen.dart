@@ -1,7 +1,6 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:front_gestion_minera/config/router/app_router.gr.dart';
 import 'package:front_gestion_minera/injector_container.dart';
 import 'package:front_gestion_minera/modules/machinery/domain/entity/entity.dart';
 import 'package:front_gestion_minera/modules/machinery/presentation/bloc/machinery_bloc.dart';
@@ -43,6 +42,7 @@ class _ListMachineryScreenState extends State<ListMachineryScreen> {
   final TextEditingController searchController = TextEditingController();
   String? filterState;
   String? filterType;
+  bool _isLoadingMore = false;
 
   @override
   void initState() {
@@ -50,14 +50,18 @@ class _ListMachineryScreenState extends State<ListMachineryScreen> {
     _scrollController.addListener(_onScroll);
 
     _machineryBloc = InjectorContainer.getIt<MachineryBloc>()
-      ..add(ListInventoryMachineryEvent())
-      ..add(ListTypeMachinery());
+      ..add(ListInventoryMachineryEvent());
   }
 
   void _onScroll() {
-    final current = _scrollController.position.pixels;
+    if (!_scrollController.hasClients) return;
+    if (_cachedHasReachedMax) return;
+    if (_isLoadingMore) return;
 
-    if (current >= _scrollController.position.maxScrollExtent - 200) {
+    final position = _scrollController.position;
+
+    if (position.pixels >= position.maxScrollExtent - 200) {
+      _isLoadingMore = true;
       _machineryBloc.add(LoadMoreListInventoryMachineryEvent());
     }
   }
@@ -106,30 +110,63 @@ class _ListMachineryScreenState extends State<ListMachineryScreen> {
                       current is InventoryMachineryLoaded ||
                       current is InventoryMachineryError ||
                       current is TypeMachineryLoading ||
-                      current is TypeMachineryLoaded || 
+                      current is TypeMachineryLoaded ||
                       current is TypeMachineryError,
                   builder: (context, state) {
                     if (state is InventoryMachineryLoaded) {
                       _cacheinventory = state.machinery;
                       _cachedHasReachedMax = state.hasReachedMax;
+
+                      _isLoadingMore = false;
+
+                      _machineryBloc.add(ListTypeMachinery());
+
+                      WidgetsBinding.instance.addPostFrameCallback((_) {
+                        if (!mounted) return;
+                        if (!_scrollController.hasClients) return;
+
+                        final position = _scrollController.position;
+
+                        final isNotScrollable =
+                            position.maxScrollExtent <=
+                            position.viewportDimension;
+
+                        if (isNotScrollable &&
+                            !_cachedHasReachedMax &&
+                            !_isLoadingMore) {
+                          _isLoadingMore = true;
+                          _machineryBloc.add(
+                            LoadMoreListInventoryMachineryEvent(),
+                          );
+                        }
+                      });
                     }
-                    if (state is TypeMachineryLoaded) {
+                    if (state is TypeMachineryLoaded &&
+                        _cacheTypeMachine == null) {
                       _cacheTypeMachine = state.types;
                     }
 
                     final bool isLoading = state is InventoryMachineryLoading;
                     final bool isLoadingType = state is TypeMachineryLoading;
-                    if (_cacheinventory == null || _cacheTypeMachine == null) {
-                      if (isLoading || isLoadingType) {
+
+                    if (_cacheinventory == null) {
+                      if (isLoading) {
                         return const Center(child: CircularProgressIndicator());
                       }
                       if (state is InventoryMachineryError) {
                         return Center(child: Text(state.message));
                       }
+                      return const Center(child: CircularProgressIndicator());
+                    }
+
+                    if (_cacheTypeMachine == null) {
+                      if (isLoadingType) {
+                        return const Center(child: CircularProgressIndicator());
+                      }
                       if (state is TypeMachineryError) {
                         return Center(child: Text(state.message));
                       }
-                      return const SizedBox();
+                      return const Center(child: CircularProgressIndicator());
                     }
                     final inventory = _cacheinventory!;
                     final hasReachedMax = _cachedHasReachedMax;
@@ -163,7 +200,10 @@ class _ListMachineryScreenState extends State<ListMachineryScreen> {
                                 children: [
                                   const SizedBox(height: 15),
                                   // filtro de tipo
-                                  SizedBox(height: 40, child: _filterTypes(types)),
+                                  SizedBox(
+                                    height: 40,
+                                    child: _filterTypes(types),
+                                  ),
                                   const SizedBox(height: 15),
                                   SizedBox(
                                     height: 30,
@@ -191,15 +231,8 @@ class _ListMachineryScreenState extends State<ListMachineryScreen> {
                                     itemCount: inventory.length,
                                     itemBuilder:
                                         (BuildContext context, int index) {
-                                          return GestureDetector(
-                                            onTap: () {
-                                              context.router.push(
-                                                DetailMachineryRoute(),
-                                              );
-                                            },
-                                            child: CardMachineryWidget(
-                                              machine: inventory[index],
-                                            ),
+                                          return CardMachineryWidget(
+                                            machine: inventory[index],
                                           );
                                         },
                                   ),
@@ -219,12 +252,10 @@ class _ListMachineryScreenState extends State<ListMachineryScreen> {
                                         ),
                                       ),
                                     ),
-                                  if (!hasReachedMax && inventory.isNotEmpty)
-                                    const Center(
-                                      child: Padding(
-                                        padding: EdgeInsets.all(8.0),
-                                        child: CircularProgressIndicator(),
-                                      ),
+                                  if (_isLoadingMore && !_cachedHasReachedMax)
+                                    const Padding(
+                                      padding: EdgeInsets.all(8.0),
+                                      child: CircularProgressIndicator(),
                                     ),
                                   const SizedBox(height: 80),
                                 ],
@@ -297,7 +328,7 @@ class _ListMachineryScreenState extends State<ListMachineryScreen> {
                 types[index].name,
                 style: TextStyle(
                   color: isSelected ? TColors.white : TColors.bgColor,
-                  fontWeight: FontWeight.bold
+                  fontWeight: FontWeight.bold,
                 ),
               ),
             ),

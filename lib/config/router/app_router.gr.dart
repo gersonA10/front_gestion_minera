@@ -32,7 +32,13 @@ import 'package:front_gestion_minera/modules/machinery/presentation/screens/home
 import 'package:front_gestion_minera/modules/machinery/presentation/screens/list_machinery_screen.dart'
     as _i20;
 import 'package:front_gestion_minera/modules/machinery/presentation/screens/maintenance_request_history_screen.dart'
+<<<<<<< HEAD
     as _i26;
+=======
+    as _i25;
+import 'package:front_gestion_minera/modules/machinery/presentation/screens/registration_of_new_machinery_screen.dart'
+    as _i40;
+>>>>>>> origin/dev
 import 'package:front_gestion_minera/modules/partners/presentation/screens/contribute_history_screen.dart'
     as _i5;
 import 'package:front_gestion_minera/modules/partners/presentation/screens/distributes_screen.dart'
@@ -94,6 +100,23 @@ import 'package:front_gestion_minera/modules/treasury/presentation/screens/goldI
 import 'package:front_gestion_minera/modules/treasury/presentation/screens/goldInventory/gold_dashboard_screen.dart'
     as _i15;
 import 'package:front_gestion_minera/modules/treasury/presentation/screens/goldInventory/new_extraction_screen.dart'
+<<<<<<< HEAD
+=======
+    as _i28;
+import 'package:front_gestion_minera/modules/treasury/presentation/screens/goldInventory/register_sell_screen.dart'
+    as _i39;
+import 'package:front_gestion_minera/modules/treasury/presentation/screens/goldInventory/sell_preview_screen.dart'
+    as _i43;
+import 'package:front_gestion_minera/modules/treasury/presentation/screens/goldInventory/sell_summary_screen.dart'
+    as _i44;
+import 'package:front_gestion_minera/modules/treasury/presentation/screens/loans/loan_details_screen.dart'
+    as _i20;
+import 'package:front_gestion_minera/modules/treasury/presentation/screens/loans/loan_simulation_screen.dart'
+    as _i23;
+import 'package:front_gestion_minera/modules/treasury/presentation/screens/loans/loans_home_screen.dart'
+    as _i24;
+import 'package:front_gestion_minera/modules/treasury/presentation/screens/loans/new_loans_screen.dart'
+>>>>>>> origin/dev
     as _i29;
 import 'package:front_gestion_minera/modules/treasury/presentation/screens/goldInventory/register_sell_screen.dart'
     as _i40;
@@ -408,6 +431,7 @@ class DetailMachineryRoute extends _i51.PageRouteInfo<void> {
 }
 
 /// generated route for
+<<<<<<< HEAD
 /// [_i10.DetailMaintenanceScreen]
 class DetailMaintenanceRoute
     extends _i51.PageRouteInfo<DetailMaintenanceRouteArgs> {
@@ -453,6 +477,9 @@ class DetailMaintenanceRouteArgs {
 
 /// generated route for
 /// [_i11.DistributeHomeScreen]
+=======
+/// [_i10.DistributeHomeScreen]
+>>>>>>> origin/dev
 class DistributeHomeRoute extends _i51.PageRouteInfo<void> {
   const DistributeHomeRoute({List<_i51.PageRouteInfo>? children})
     : super(DistributeHomeRoute.name, initialChildren: children);
@@ -468,7 +495,11 @@ class DistributeHomeRoute extends _i51.PageRouteInfo<void> {
 }
 
 /// generated route for
+<<<<<<< HEAD
 /// [_i12.DistributesScreen]
+=======
+/// [_i11.DistributesScreen]
+>>>>>>> origin/dev
 class DistributesRoute extends _i51.PageRouteInfo<void> {
   const DistributesRoute({List<_i51.PageRouteInfo>? children})
     : super(DistributesRoute.name, initialChildren: children);
@@ -531,7 +562,11 @@ class DividendDistributionDetailsRouteArgs {
 }
 
 /// generated route for
+<<<<<<< HEAD
 /// [_i14.FinancialReportsScreen]
+=======
+/// [_i13.FinancialReportsScreen]
+>>>>>>> origin/dev
 class FinancialReportsRoute extends _i51.PageRouteInfo<void> {
   const FinancialReportsRoute({List<_i51.PageRouteInfo>? children})
     : super(FinancialReportsRoute.name, initialChildren: children);
@@ -547,7 +582,11 @@ class FinancialReportsRoute extends _i51.PageRouteInfo<void> {
 }
 
 /// generated route for
+<<<<<<< HEAD
 /// [_i15.GoldDashboardScreen]
+=======
+/// [_i14.GoldDashboardScreen]
+>>>>>>> origin/dev
 class GoldDashboardRoute extends _i51.PageRouteInfo<void> {
   const GoldDashboardRoute({List<_i51.PageRouteInfo>? children})
     : super(GoldDashboardRoute.name, initialChildren: children);
@@ -563,7 +602,11 @@ class GoldDashboardRoute extends _i51.PageRouteInfo<void> {
 }
 
 /// generated route for
+<<<<<<< HEAD
 /// [_i16.HistoryRequestsScreen]
+=======
+/// [_i15.HistoryRequestsScreen]
+>>>>>>> origin/dev
 class HistoryRequestsRoute extends _i51.PageRouteInfo<void> {
   const HistoryRequestsRoute({List<_i51.PageRouteInfo>? children})
     : super(HistoryRequestsRoute.name, initialChildren: children);
@@ -579,7 +622,11 @@ class HistoryRequestsRoute extends _i51.PageRouteInfo<void> {
 }
 
 /// generated route for
+<<<<<<< HEAD
 /// [_i17.HomeDashboardScreen]
+=======
+/// [_i16.HomeDashboardScreen]
+>>>>>>> origin/dev
 class HomeDashboardRoute extends _i51.PageRouteInfo<void> {
   const HomeDashboardRoute({List<_i51.PageRouteInfo>? children})
     : super(HomeDashboardRoute.name, initialChildren: children);
@@ -595,7 +642,11 @@ class HomeDashboardRoute extends _i51.PageRouteInfo<void> {
 }
 
 /// generated route for
+<<<<<<< HEAD
 /// [_i18.HomeMachinaryScreen]
+=======
+/// [_i17.HomeMachinaryScreen]
+>>>>>>> origin/dev
 class HomeMachinaryRoute extends _i51.PageRouteInfo<void> {
   const HomeMachinaryRoute({List<_i51.PageRouteInfo>? children})
     : super(HomeMachinaryRoute.name, initialChildren: children);
@@ -611,7 +662,11 @@ class HomeMachinaryRoute extends _i51.PageRouteInfo<void> {
 }
 
 /// generated route for
+<<<<<<< HEAD
 /// [_i19.HomeSurveillanceScreen]
+=======
+/// [_i18.HomeSurveillanceScreen]
+>>>>>>> origin/dev
 class HomeSurveillanceRoute extends _i51.PageRouteInfo<void> {
   const HomeSurveillanceRoute({List<_i51.PageRouteInfo>? children})
     : super(HomeSurveillanceRoute.name, initialChildren: children);
@@ -627,7 +682,11 @@ class HomeSurveillanceRoute extends _i51.PageRouteInfo<void> {
 }
 
 /// generated route for
+<<<<<<< HEAD
 /// [_i20.ListMachineryScreen]
+=======
+/// [_i19.ListMachineryScreen]
+>>>>>>> origin/dev
 class ListMachineryRoute extends _i51.PageRouteInfo<void> {
   const ListMachineryRoute({List<_i51.PageRouteInfo>? children})
     : super(ListMachineryRoute.name, initialChildren: children);
@@ -643,7 +702,11 @@ class ListMachineryRoute extends _i51.PageRouteInfo<void> {
 }
 
 /// generated route for
+<<<<<<< HEAD
 /// [_i21.LoanDetailsScreen]
+=======
+/// [_i20.LoanDetailsScreen]
+>>>>>>> origin/dev
 class LoanDetailsRoute extends _i51.PageRouteInfo<LoanDetailsRouteArgs> {
   LoanDetailsRoute({
     _i53.Key? key,
@@ -680,7 +743,11 @@ class LoanDetailsRouteArgs {
 }
 
 /// generated route for
+<<<<<<< HEAD
 /// [_i22.LoanHistoryScreen]
+=======
+/// [_i21.LoanHistoryScreen]
+>>>>>>> origin/dev
 class LoanHistoryRoute extends _i51.PageRouteInfo<void> {
   const LoanHistoryRoute({List<_i51.PageRouteInfo>? children})
     : super(LoanHistoryRoute.name, initialChildren: children);
@@ -696,7 +763,11 @@ class LoanHistoryRoute extends _i51.PageRouteInfo<void> {
 }
 
 /// generated route for
+<<<<<<< HEAD
 /// [_i23.LoanScreen]
+=======
+/// [_i22.LoanScreen]
+>>>>>>> origin/dev
 class LoanRoute extends _i51.PageRouteInfo<void> {
   const LoanRoute({List<_i51.PageRouteInfo>? children})
     : super(LoanRoute.name, initialChildren: children);
@@ -712,7 +783,11 @@ class LoanRoute extends _i51.PageRouteInfo<void> {
 }
 
 /// generated route for
+<<<<<<< HEAD
 /// [_i24.LoanSimulationScreen]
+=======
+/// [_i23.LoanSimulationScreen]
+>>>>>>> origin/dev
 class LoanSimulationRoute extends _i51.PageRouteInfo<LoanSimulationRouteArgs> {
   LoanSimulationRoute({
     _i53.Key? key,
@@ -782,7 +857,11 @@ class LoanSimulationRouteArgs {
 }
 
 /// generated route for
+<<<<<<< HEAD
 /// [_i25.LoansHomeScreen]
+=======
+/// [_i24.LoansHomeScreen]
+>>>>>>> origin/dev
 class LoansHomeRoute extends _i51.PageRouteInfo<void> {
   const LoansHomeRoute({List<_i51.PageRouteInfo>? children})
     : super(LoansHomeRoute.name, initialChildren: children);
@@ -820,7 +899,11 @@ class MaintenanceRequestHistoryRoute
     name,
     builder: (data) {
       final args = data.argsAs<MaintenanceRequestHistoryRouteArgs>();
+<<<<<<< HEAD
       return _i26.MaintenanceRequestHistoryScreen(
+=======
+      return _i25.MaintenanceRequestHistoryScreen(
+>>>>>>> origin/dev
         key: args.key,
         machineId: args.machineId,
       );
@@ -842,7 +925,11 @@ class MaintenanceRequestHistoryRouteArgs {
 }
 
 /// generated route for
+<<<<<<< HEAD
 /// [_i27.MoneyRequestScreen]
+=======
+/// [_i26.MoneyRequestScreen]
+>>>>>>> origin/dev
 class MoneyRequestRoute extends _i51.PageRouteInfo<void> {
   const MoneyRequestRoute({List<_i51.PageRouteInfo>? children})
     : super(MoneyRequestRoute.name, initialChildren: children);
@@ -858,7 +945,11 @@ class MoneyRequestRoute extends _i51.PageRouteInfo<void> {
 }
 
 /// generated route for
+<<<<<<< HEAD
 /// [_i28.NewDistributionScreen]
+=======
+/// [_i27.NewDistributionScreen]
+>>>>>>> origin/dev
 class NewDistributionRoute extends _i51.PageRouteInfo<void> {
   const NewDistributionRoute({List<_i51.PageRouteInfo>? children})
     : super(NewDistributionRoute.name, initialChildren: children);
@@ -874,7 +965,11 @@ class NewDistributionRoute extends _i51.PageRouteInfo<void> {
 }
 
 /// generated route for
+<<<<<<< HEAD
 /// [_i29.NewExtractionScreen]
+=======
+/// [_i28.NewExtractionScreen]
+>>>>>>> origin/dev
 class NewExtractionRoute extends _i51.PageRouteInfo<void> {
   const NewExtractionRoute({List<_i51.PageRouteInfo>? children})
     : super(NewExtractionRoute.name, initialChildren: children);
@@ -890,7 +985,11 @@ class NewExtractionRoute extends _i51.PageRouteInfo<void> {
 }
 
 /// generated route for
+<<<<<<< HEAD
 /// [_i30.NewLoansScreen]
+=======
+/// [_i29.NewLoansScreen]
+>>>>>>> origin/dev
 class NewLoansRoute extends _i51.PageRouteInfo<void> {
   const NewLoansRoute({List<_i51.PageRouteInfo>? children})
     : super(NewLoansRoute.name, initialChildren: children);
@@ -906,7 +1005,11 @@ class NewLoansRoute extends _i51.PageRouteInfo<void> {
 }
 
 /// generated route for
+<<<<<<< HEAD
 /// [_i31.PartnersScreen]
+=======
+/// [_i30.PartnersScreen]
+>>>>>>> origin/dev
 class PartnersRoute extends _i51.PageRouteInfo<PartnersRouteArgs> {
   PartnersRoute({
     _i52.Key? key,
@@ -996,7 +1099,11 @@ class PaymentConfirmationRouteArgs {
 }
 
 /// generated route for
+<<<<<<< HEAD
 /// [_i33.PaymentHistoryScreen]
+=======
+/// [_i32.PaymentHistoryScreen]
+>>>>>>> origin/dev
 class PaymentHistoryRoute extends _i51.PageRouteInfo<void> {
   const PaymentHistoryRoute({List<_i51.PageRouteInfo>? children})
     : super(PaymentHistoryRoute.name, initialChildren: children);
@@ -1071,7 +1178,11 @@ class PaymentSuccessDistributionRouteArgs {
 }
 
 /// generated route for
+<<<<<<< HEAD
 /// [_i35.PaymentSuccessScreen]
+=======
+/// [_i34.PaymentSuccessScreen]
+>>>>>>> origin/dev
 class PaymentSuccessRoute extends _i51.PageRouteInfo<PaymentSuccessRouteArgs> {
   PaymentSuccessRoute({
     _i52.Key? key,
@@ -1111,7 +1222,11 @@ class PaymentSuccessRouteArgs {
 }
 
 /// generated route for
+<<<<<<< HEAD
 /// [_i36.PendingApplicationsScreen]
+=======
+/// [_i35.PendingApplicationsScreen]
+>>>>>>> origin/dev
 class PendingApplicationsRoute extends _i51.PageRouteInfo<void> {
   const PendingApplicationsRoute({List<_i51.PageRouteInfo>? children})
     : super(PendingApplicationsRoute.name, initialChildren: children);
@@ -1236,7 +1351,11 @@ class RecordContributionPaymentRouteArgs {
 }
 
 /// generated route for
+<<<<<<< HEAD
 /// [_i39.RecordPaymentScreen]
+=======
+/// [_i38.RecordPaymentScreen]
+>>>>>>> origin/dev
 class RecordPaymentRoute extends _i51.PageRouteInfo<RecordPaymentRouteArgs> {
   RecordPaymentRoute({
     _i52.Key? key,
@@ -1306,7 +1425,11 @@ class RecordPaymentRouteArgs {
 }
 
 /// generated route for
+<<<<<<< HEAD
 /// [_i40.RegisterSellScreen]
+=======
+/// [_i39.RegisterSellScreen]
+>>>>>>> origin/dev
 class RegisterSellRoute extends _i51.PageRouteInfo<void> {
   const RegisterSellRoute({List<_i51.PageRouteInfo>? children})
     : super(RegisterSellRoute.name, initialChildren: children);
@@ -1322,6 +1445,25 @@ class RegisterSellRoute extends _i51.PageRouteInfo<void> {
 }
 
 /// generated route for
+<<<<<<< HEAD
+=======
+/// [_i40.RegistrationOfNewMachineryScreen]
+class RegistrationOfNewMachineryRoute extends _i51.PageRouteInfo<void> {
+  const RegistrationOfNewMachineryRoute({List<_i51.PageRouteInfo>? children})
+    : super(RegistrationOfNewMachineryRoute.name, initialChildren: children);
+
+  static const String name = 'RegistrationOfNewMachineryRoute';
+
+  static _i51.PageInfo page = _i51.PageInfo(
+    name,
+    builder: (data) {
+      return const _i40.RegistrationOfNewMachineryScreen();
+    },
+  );
+}
+
+/// generated route for
+>>>>>>> origin/dev
 /// [_i41.RequestDetailScreen]
 class RequestDetailRoute extends _i51.PageRouteInfo<RequestDetailRouteArgs> {
   RequestDetailRoute({
