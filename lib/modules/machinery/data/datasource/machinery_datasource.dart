@@ -17,8 +17,8 @@ class MachineryDatasource {
       files: [
         {
           'name': 'evidence_url',
-          'path': requestModel.evidenceUrlPath!,
-          'filename': requestModel.evidenceUrlPath!.split('/').last,
+          'path': requestModel.evidenceUrlPath,
+          'filename': requestModel.evidenceUrlPath.split('/').last,
         },
       ],
     );

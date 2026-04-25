@@ -5,7 +5,6 @@ class CreateMaintenanceRequestModel extends CreateMaintenanceRequestEntity {
     required super.machineId,
     required super.failureType,
     required super.estimatedAmount,
-    required super.priority,
     required super.description,
     required super.evidenceUrlPath,
   });
@@ -16,7 +15,6 @@ class CreateMaintenanceRequestModel extends CreateMaintenanceRequestEntity {
       machineId: entity.machineId,
       failureType: entity.failureType,
       estimatedAmount: entity.estimatedAmount,
-      priority: entity.priority,
       description: entity.description,
       evidenceUrlPath: entity.evidenceUrlPath,
     );
@@ -26,7 +24,6 @@ class CreateMaintenanceRequestModel extends CreateMaintenanceRequestEntity {
       'machine_id': machineId,
       'failure_type': failureType,
       'estimated_amount': estimatedAmount,
-      'priority': priority,
       'description': description,
     };
   }

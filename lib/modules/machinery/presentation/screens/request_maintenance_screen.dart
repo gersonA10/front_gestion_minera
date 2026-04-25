@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:front_gestion_minera/core/widgets/custom_alert_widget.dart';
 import 'package:front_gestion_minera/core/widgets/excavator_loader.dart';
+import 'package:front_gestion_minera/utils/text_util.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:front_gestion_minera/injector_container.dart';
 import 'package:front_gestion_minera/modules/machinery/presentation/bloc/machinery_bloc.dart';
@@ -32,16 +33,8 @@ class _RequestMaintenanceScreenState extends State<RequestMaintenanceScreen> {
     'preventivo': 'Mantenimiento preventivo',
   };
 
-  static const _priorityOptions = {
-    'baja': 'Baja',
-    'normal': 'Normal',
-    'alta': 'Alta',
-    'urgente': 'Urgente',
-  };
-
   late MachineryBloc _machineryBloc;
   String _selectedFaultType = 'mecanica';
-  String _selectedPriority = 'normal';
   final _descriptionController = TextEditingController();
   final _costController = TextEditingController();
   final List<XFile> _pickedImages = [];
@@ -59,8 +52,6 @@ class _RequestMaintenanceScreenState extends State<RequestMaintenanceScreen> {
     _costController.dispose();
     super.dispose();
   }
-
-  // ── Image picker ────────────────────────────────────────────────────────────
 
   Future<void> _showImageSourceSheet() async {
     await showModalBottomSheet(
@@ -95,11 +86,15 @@ class _RequestMaintenanceScreenState extends State<RequestMaintenanceScreen> {
                     color: TColors.appSecondaryColor.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(10),
                   ),
-                  child: const Icon(Icons.camera_alt_outlined,
-                      color: TColors.appSecondaryColor),
+                  child: const Icon(
+                    Icons.camera_alt_outlined,
+                    color: TColors.appSecondaryColor,
+                  ),
                 ),
-                title: const Text('Tomar foto',
-                    style: TextStyle(fontWeight: FontWeight.w600)),
+                title: const Text(
+                  'Tomar foto',
+                  style: TextStyle(fontWeight: FontWeight.w600),
+                ),
                 subtitle: const Text('Usar la cámara del dispositivo'),
                 onTap: () {
                   Navigator.pop(context);
@@ -113,11 +108,15 @@ class _RequestMaintenanceScreenState extends State<RequestMaintenanceScreen> {
                     color: TColors.appSecondaryColor.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(10),
                   ),
-                  child: const Icon(Icons.photo_library_outlined,
-                      color: TColors.appSecondaryColor),
+                  child: const Icon(
+                    Icons.photo_library_outlined,
+                    color: TColors.appSecondaryColor,
+                  ),
                 ),
-                title: const Text('Elegir de galería',
-                    style: TextStyle(fontWeight: FontWeight.w600)),
+                title: const Text(
+                  'Elegir de galería',
+                  style: TextStyle(fontWeight: FontWeight.w600),
+                ),
                 subtitle: const Text('Seleccionar una imagen existente'),
                 onTap: () {
                   Navigator.pop(context);
@@ -133,9 +132,11 @@ class _RequestMaintenanceScreenState extends State<RequestMaintenanceScreen> {
   }
 
   Future<void> _pickImage(ImageSource source) async {
-    final image = await _picker.pickImage(source: source, imageQuality: 80);
-    if (image != null) {
-      setState(() => _pickedImages.add(image));
+    final XFile? photo = await _picker.pickImage(source: source);
+    if (photo != null) {
+      setState(() {
+        _pickedImages.add(photo);
+      });
     }
   }
 
@@ -157,22 +158,27 @@ class _RequestMaintenanceScreenState extends State<RequestMaintenanceScreen> {
       return;
     }
 
-    final XFile? evidence = _pickedImages.isNotEmpty ? _pickedImages.first : null;
-// final request = CreateMaintenanceRequestEntity(
-//       machineId: widget.machineId,
-//       failureType: _selectedFaultType,
-//       priority: _selectedPriority,
-//       description: description,
-//       estimatedAmount: double.tryParse(cost) ?? 0.0,
-//       evidenceFilePath: evidence?.path,
-//       evidenceFileName: evidence != null ? evidence.name : null,
-//     );
-//     _machineryBloc.add(
-//      CreateMaintenanceRequestEvent(request: request)
-//     );
-  }
+    if (_pickedImages.isEmpty) {
+      CustomAlert.show(
+        context,
+        title: 'Falta evidencia',
+        message: 'Por favor, agrega al menos una imagen de evidencia.',
+        type: AlertType.warning,
+      );
+      return;
+    }
 
-  // ── Build ────────────────────────────────────────────────────────────────────
+    final evidence = _pickedImages.first;
+
+    final request = CreateMaintenanceRequestEntity(
+      machineId: widget.machineId,
+      failureType: _selectedFaultType,
+      description: description,
+      estimatedAmount: cost,
+      evidenceUrlPath: evidence.path,
+    );
+    _machineryBloc.add(CreateMaintenanceRequestEvent(request: request));
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -187,7 +193,7 @@ class _RequestMaintenanceScreenState extends State<RequestMaintenanceScreen> {
               message: 'Solicitud de mantenimiento creada correctamente.',
               type: AlertType.success,
             );
-            Navigator.of(context).pop();
+            context.router.maybePop(true);
           } else if (state is CreateMaintenanceRequestError) {
             CustomAlert.show(
               context,
@@ -203,19 +209,46 @@ class _RequestMaintenanceScreenState extends State<RequestMaintenanceScreen> {
             children: [
               Scaffold(
                 backgroundColor: TColors.appBackgroundColor,
-                appBar: _buildAppBar(),
+                appBar: AppBar(
+                  backgroundColor: TColors.appSecondaryColor,
+                  elevation: 0,
+                  leadingWidth: 40,
+                  leading: Padding(
+                    padding: const EdgeInsets.only(left: 12),
+                    child: IconButton(
+                      icon: const Icon(
+                        Icons.arrow_back,
+                        color: Colors.white,
+                        size: 22,
+                      ),
+                      onPressed: () => context.router.back(),
+                    ),
+                  ),
+                  title: const Text(
+                    'SOLICITAR MANTENIMIENTO',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
                 body: SafeArea(
                   child: Column(
                     children: [
                       Expanded(
                         child: SingleChildScrollView(
                           padding: const EdgeInsets.symmetric(
-                              horizontal: 20, vertical: 24),
+                            horizontal: 20,
+                            vertical: 24,
+                          ),
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               _buildSectionTitle(
-                                  Icons.warning_amber_outlined, 'Tipo de Falla'),
+                                Icons.warning_amber_outlined,
+                                'Tipo de Falla',
+                              ),
                               const SizedBox(height: 10),
                               _buildDropdown(
                                 value: _selectedFaultType,
@@ -225,28 +258,22 @@ class _RequestMaintenanceScreenState extends State<RequestMaintenanceScreen> {
                               ),
                               const SizedBox(height: 20),
                               _buildSectionTitle(
-                                  Icons.flag_outlined, 'Prioridad'),
-                              const SizedBox(height: 10),
-                              _buildDropdown(
-                                value: _selectedPriority,
-                                items: _priorityOptions,
-                                onChanged: (val) =>
-                                    setState(() => _selectedPriority = val!),
+                                Icons.description_outlined,
+                                'Detalles',
                               ),
-                              const SizedBox(height: 28),
-                              _buildSectionTitle(
-                                  Icons.description_outlined, 'Detalles'),
                               const SizedBox(height: 16),
-                              _buildLabel('Descripción'),
+                              Text('Descripción', style: AppTextStyles.mainStyle12(context),),
                               const SizedBox(height: 6),
                               _buildTextArea(),
                               const SizedBox(height: 20),
-                              _buildLabel('Costo Estimado'),
+                              Text('Costo Estimado', style: AppTextStyles.mainStyle12(context),),
                               const SizedBox(height: 6),
                               _buildCostField(),
                               const SizedBox(height: 28),
                               _buildSectionTitle(
-                                  Icons.add_a_photo_outlined, 'Evidencia'),
+                                Icons.add_a_photo_outlined,
+                                'Evidencia',
+                              ),
                               const SizedBox(height: 16),
                               _buildUploadArea(),
                               if (_pickedImages.isNotEmpty) ...[
@@ -258,7 +285,39 @@ class _RequestMaintenanceScreenState extends State<RequestMaintenanceScreen> {
                           ),
                         ),
                       ),
-                      _buildBottomButton(isLoading),
+                      Container(
+                        color: TColors.appBackgroundColor,
+                        padding: const EdgeInsets.fromLTRB(20, 12, 20, 28),
+                        child: SizedBox(
+                          width: double.infinity,
+                          height: 52,
+                          child: ElevatedButton.icon(
+                            onPressed: () {
+                              _submit();
+                            },
+                            icon: const Icon(
+                              Icons.send,
+                              color: Colors.white,
+                              size: 18,
+                            ),
+                            label: const Text(
+                              'Enviar Solicitud',
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 15,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: TColors.appSecondaryColor,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              elevation: 0,
+                            ),
+                          ),
+                        ),
+                      ),
                     ],
                   ),
                 ),
@@ -277,43 +336,8 @@ class _RequestMaintenanceScreenState extends State<RequestMaintenanceScreen> {
     );
   }
 
-  // ── App bar ──────────────────────────────────────────────────────────────────
 
-  PreferredSizeWidget _buildAppBar() {
-    return AppBar(
-      backgroundColor: TColors.appSecondaryColor,
-      elevation: 0,
-      leadingWidth: 40,
-      leading: Padding(
-        padding: const EdgeInsets.only(left: 12),
-        child: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.white, size: 22),
-          onPressed: () => context.router.back(),
-        ),
-      ),
-      title: const Text(
-        'SOLICITAR MANTENIMIENTO',
-        style: TextStyle(
-          color: Colors.white,
-          fontSize: 16,
-          fontWeight: FontWeight.bold,
-        ),
-      ),
-    );
-  }
 
-  // ── Form widgets ─────────────────────────────────────────────────────────────
-
-  Widget _buildLabel(String text) {
-    return Text(
-      text,
-      style: const TextStyle(
-        fontSize: 13,
-        color: TColors.appSecondaryTextColor,
-        fontWeight: FontWeight.w400,
-      ),
-    );
-  }
 
   Widget _buildSectionTitle(IconData icon, String title) {
     return Row(
@@ -349,8 +373,11 @@ class _RequestMaintenanceScreenState extends State<RequestMaintenanceScreen> {
           value: value,
           isExpanded: true,
           dropdownColor: Colors.white,
-          icon: const Icon(Icons.keyboard_arrow_down,
-              color: TColors.appSecondaryColor, size: 22),
+          icon: const Icon(
+            Icons.keyboard_arrow_down,
+            color: TColors.appSecondaryColor,
+            size: 22,
+          ),
           style: const TextStyle(
             fontSize: 15,
             fontWeight: FontWeight.w600,
@@ -383,7 +410,9 @@ class _RequestMaintenanceScreenState extends State<RequestMaintenanceScreen> {
           border: InputBorder.none,
           hintText: 'Describe el problema de la maquinaria...',
           hintStyle: TextStyle(
-              color: TColors.appSecondaryTextColor, fontSize: 13),
+            color: TColors.appSecondaryTextColor,
+            fontSize: 13,
+          ),
         ),
       ),
     );
@@ -411,13 +440,13 @@ class _RequestMaintenanceScreenState extends State<RequestMaintenanceScreen> {
           ),
           hintText: '0.00',
           hintStyle: TextStyle(
-              color: TColors.appSecondaryTextColor, fontSize: 15),
+            color: TColors.appSecondaryTextColor,
+            fontSize: 15,
+          ),
         ),
       ),
     );
   }
-
-  // ── Evidence section ─────────────────────────────────────────────────────────
 
   Widget _buildUploadArea() {
     return GestureDetector(
@@ -442,8 +471,11 @@ class _RequestMaintenanceScreenState extends State<RequestMaintenanceScreen> {
                 color: TColors.appSecondaryColor.withValues(alpha: 0.08),
                 shape: BoxShape.circle,
               ),
-              child: const Icon(Icons.add_a_photo_outlined,
-                  color: TColors.appSecondaryColor, size: 28),
+              child: const Icon(
+                Icons.add_a_photo_outlined,
+                color: TColors.appSecondaryColor,
+                size: 28,
+              ),
             ),
             const SizedBox(height: 12),
             const Text(
@@ -458,19 +490,33 @@ class _RequestMaintenanceScreenState extends State<RequestMaintenanceScreen> {
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                const Icon(Icons.camera_alt_outlined,
-                    size: 14, color: TColors.appSecondaryTextColor),
+                const Icon(
+                  Icons.camera_alt_outlined,
+                  size: 14,
+                  color: TColors.appSecondaryTextColor,
+                ),
                 const SizedBox(width: 4),
-                const Text('Cámara',
-                    style: TextStyle(
-                        fontSize: 12, color: TColors.appSecondaryTextColor)),
+                const Text(
+                  'Cámara',
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: TColors.appSecondaryTextColor,
+                  ),
+                ),
                 const SizedBox(width: 12),
-                const Icon(Icons.photo_library_outlined,
-                    size: 14, color: TColors.appSecondaryTextColor),
+                const Icon(
+                  Icons.photo_library_outlined,
+                  size: 14,
+                  color: TColors.appSecondaryTextColor,
+                ),
                 const SizedBox(width: 4),
-                const Text('Galería',
-                    style: TextStyle(
-                        fontSize: 12, color: TColors.appSecondaryTextColor)),
+                const Text(
+                  'Galería',
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: TColors.appSecondaryTextColor,
+                  ),
+                ),
               ],
             ),
           ],
@@ -484,7 +530,7 @@ class _RequestMaintenanceScreenState extends State<RequestMaintenanceScreen> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          '${_pickedImages.length} foto(s) seleccionada(s)',
+          '${_pickedImages.length} foto seleccionada(s)',
           style: const TextStyle(
             fontSize: 12,
             color: TColors.appSecondaryTextColor,
@@ -522,8 +568,11 @@ class _RequestMaintenanceScreenState extends State<RequestMaintenanceScreen> {
                         color: Colors.red,
                         shape: BoxShape.circle,
                       ),
-                      child: const Icon(Icons.close,
-                          color: Colors.white, size: 14),
+                      child: const Icon(
+                        Icons.close,
+                        color: Colors.white,
+                        size: 14,
+                      ),
                     ),
                   ),
                 ),
@@ -533,42 +582,5 @@ class _RequestMaintenanceScreenState extends State<RequestMaintenanceScreen> {
         ),
       ],
     );
-  }
-
-  // ── Bottom button ────────────────────────────────────────────────────────────
-
-  Widget _buildBottomButton(bool isLoading) {
-    return Container(
-      color: TColors.appBackgroundColor,
-      padding: const EdgeInsets.fromLTRB(20, 12, 20, 28),
-      child: SizedBox(
-        width: double.infinity,
-        height: 52,
-        child: ElevatedButton.icon(
-          onPressed: () {
-            _submit();
-          },
-          icon: const Icon(Icons.send, color: Colors.white, size: 18),
-          label: const Text(
-            'Enviar Solicitud',
-            style: TextStyle(
-              color: Colors.white,
-              fontSize: 15,
-              fontWeight: FontWeight.w600,
-            ),
-          ),
-          style: ElevatedButton.styleFrom(
-            backgroundColor: TColors.appSecondaryColor,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(12),
-            ),
-            elevation: 0,
-          ),
-        ),
-      ),
-    );
-    
-    
-     
   }
 }

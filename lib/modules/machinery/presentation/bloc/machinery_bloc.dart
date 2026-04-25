@@ -231,12 +231,9 @@ class MachineryBloc extends Bloc<MachineryEvent, MachineryState> {
       );
       emit(CreateMaintenanceRequestSuccess(response: response));
     } on BaseApiException catch (error) {
-       if (error.key == DioExceptionKey.unauthorised) {
-        return;
-      }
-      emit(TypeMachineryError(mapErrorMessage(error.key)));
+      emit(CreateMaintenanceRequestError(mapErrorMessage(error.key)));
     } catch (e) {
-      emit(TypeMachineryError('Error inesperado: $e'));
+      emit(CreateMaintenanceRequestError('Error inesperado: $e'));
     }
   }
 
