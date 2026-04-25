@@ -231,8 +231,7 @@ class MachineryBloc extends Bloc<MachineryEvent, MachineryState> {
         response: response,
       ));
     } on BaseApiException catch (error) {
-      if (error.key == DioExceptionKey.unauthorised) return;
-      emit(RegisterMachineryError(error.message));
+      emit(RegisterMachineryError(mapErrorMessage(error.key)));
     } catch (e) {
       emit(RegisterMachineryError('Error inesperado: $e'));
     }

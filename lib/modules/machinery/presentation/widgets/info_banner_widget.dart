@@ -43,53 +43,6 @@ class InfoBanner extends StatelessWidget {
 }
 
 
-
-class CustomTextField extends StatelessWidget {
-  final TextEditingController controller;
-  final String hintText;
-  final int maxLines;
-  final bool enabled;
-
-  const CustomTextField({super.key, 
-    required this.controller,
-    required this.hintText,
-    this.maxLines = 1,
-    this.enabled = true,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return TextField(
-      controller: controller,
-      maxLines: maxLines,
-      enabled: enabled,
-      style: const TextStyle(fontSize: 14, color: TColors.textPrimary),
-      decoration: InputDecoration(
-        hintText: hintText,
-        hintStyle: const TextStyle(color: TColors.hintColor, fontSize: 14),
-        contentPadding: const EdgeInsets.symmetric(
-          horizontal: 14,
-          vertical: 14,
-        ),
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(8),
-          borderSide: const BorderSide(color: TColors.inputBorder),
-        ),
-        enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(8),
-          borderSide: const BorderSide(color: TColors.inputBorder),
-        ),
-        focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(8),
-          borderSide: const BorderSide(color: TColors.textPrimary, width: 1.5),
-        ),
-        filled: true,
-        fillColor: TColors.surface,
-      ),
-    );
-  }
-}
-
 class TypeDropdown extends StatelessWidget {
   final TypeMachineryEntity? value;
   final List<TypeMachineryEntity> types;
