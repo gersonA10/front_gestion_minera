@@ -67,5 +67,6 @@ class AppRouter extends RootStackRouter {
     AutoRoute(page: DetailMachineryRoute.page),
     AutoRoute(page: MaintenanceRequestHistoryRoute.page),
     AutoRoute(page: RegistrationOfNewMachineryRoute.page),
+    AutoRoute(page: DetailMaintenanceRoute.page)
   ];
 }

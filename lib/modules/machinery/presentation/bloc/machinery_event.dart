@@ -41,3 +41,9 @@ class RegisterMachineryEvent extends MachineryEvent {
 
   RegisterMachineryEvent({required this.request});
 }
+
+class FetchDetailMaintenanceEvent extends MachineryEvent {
+  final String machineId;
+
+  FetchDetailMaintenanceEvent({required this.machineId});
+}
