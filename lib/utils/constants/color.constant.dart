@@ -95,4 +95,11 @@ class TColors {
   static const cardInnerBg = Color(0xFF1E1B14); // Fondo cajas internas
   static const green = Color(0xFF4CAF50); // Estado activo/pagado
   static const pendingYellow = Color(0xFFFFB300); // Estado pendiente
+
+  static const infoBannerBg = Color(0xFFEFF3FA);
+  static const photoUploadBg = Color(0xFFF4F7FB);
+  static const iconMuted = Color(0xFF8A9BB0);
+  static const hintColor = Color(0xFFADB5BD);
+  static const inputBorder = Color(0xFFCED4DA);
+  static const dottedBorder = Color(0xFFB0BEC5);
 }

@@ -91,9 +91,10 @@ class _HomeMachinaryScreenState extends State<HomeMachinaryScreen> {
                       if (state is InventoryMachineryLoaded) {
                         _cacheinventory = state.machinery;
                       }
-                      
+
                       final bool isLoadingM = state is MetricsMachineryLoading;
-                      final bool isLoadingI = state is InventoryMachineryLoading;
+                      final bool isLoadingI =
+                          state is InventoryMachineryLoading;
 
                       if (_cacheMetrics == null || _cacheinventory == null) {
                         if (isLoadingM || isLoadingI) {
@@ -109,7 +110,7 @@ class _HomeMachinaryScreenState extends State<HomeMachinaryScreen> {
                         }
                         return const SizedBox();
                       }
-                      
+
                       final metrics = _cacheMetrics!;
                       final inventory = _cacheinventory!;
 
@@ -244,7 +245,14 @@ class _HomeMachinaryScreenState extends State<HomeMachinaryScreen> {
                             width: double.infinity,
                             height: 52,
                             child: OutlinedButton.icon(
-                              onPressed: () {},
+                              onPressed: () async {
+                              final response =  await context.router.push(
+                                  RegistrationOfNewMachineryRoute(),
+                                );
+                                if (response == true) {
+                                  _machineryBloc.add(FetchMetricsMachineEvent());
+                                }
+                              },
                               icon: Icon(
                                 Icons.add_circle_outline,
                                 color: TColors.white,

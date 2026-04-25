@@ -2,4 +2,6 @@
 export 'package:front_gestion_minera/modules/machinery/presentation/widgets/card_maintenance_widget.dart';
 export 'package:front_gestion_minera/modules/machinery/presentation/widgets/card_state_machinery_widget.dart';
 export 'package:front_gestion_minera/modules/machinery/presentation/widgets/maintenance_card_widget.dart';
+export 'package:front_gestion_minera/modules/machinery/presentation/widgets/info_banner_widget.dart';
+export 'package:front_gestion_minera/modules/machinery/presentation/widgets/registration_from_body_widget.dart';
 export 'package:front_gestion_minera/modules/machinery/presentation/widgets/card_machinery_widget.dart';

@@ -39,6 +39,7 @@ class MachineryBloc extends Bloc<MachineryEvent, MachineryState> {
     on<ListTypeMachinery>(_litsTypeMachinery);
     on<FetchMaintenanceHistoryEvent>(_onFetchMaintenanceHistory);
     on<LoadMoreMaintenanceHistoryEvent>(_onLoadMoreMaintenanceHistory);
+    on<RegisterMachineryEvent>(_onRegisterMachinery);
   }
 
   FutureOr<void> _onFetchMetricMachine(
@@ -216,6 +217,23 @@ class MachineryBloc extends Bloc<MachineryEvent, MachineryState> {
       emit(MaintenanceHistoryError('Error inesperado: $e'));
     } finally {
       _isLoadingMoreHistory = false;
+    }
+  }
+
+  FutureOr<void> _onRegisterMachinery(
+    RegisterMachineryEvent event,
+    Emitter<MachineryState> emit,
+  ) async {
+    emit(RegisterMachineryLoading());
+    try {
+      final response = await repository.registerMachinery(event.request);
+      emit(RegisterMachinerySuccess(
+        response: response,
+      ));
+    } on BaseApiException catch (error) {
+      emit(RegisterMachineryError(mapErrorMessage(error.key)));
+    } catch (e) {
+      emit(RegisterMachineryError('Error inesperado: $e'));
     }
   }
 

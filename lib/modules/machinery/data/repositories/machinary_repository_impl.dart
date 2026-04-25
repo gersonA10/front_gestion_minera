@@ -35,6 +35,13 @@ class MachineryRepositoryImpl extends MachineryRepository {
   }
 
   @override
+  Future<RegisterMachineryResponseEntity> registerMachinery(
+    RegisterMachineryRequestEntity request,
+  ) {
+    return datasource.registerMachinery(request);
+  }
+
+  @override
   Future<MaintenanceHistoryResponseEntity> getMaintenanceHistory({
     required String machineId,
     int page = 1,
