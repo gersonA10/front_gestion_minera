@@ -35,3 +35,10 @@ class LoadMoreMaintenanceHistoryEvent extends MachineryEvent {
 
   LoadMoreMaintenanceHistoryEvent({required this.machineId});
 }
+
+//Evento para detalle de mantenimiento
+class FetchDetailMaintenanceEvent extends MachineryEvent {
+  final String machineId;
+
+  FetchDetailMaintenanceEvent({required this.machineId});
+}

@@ -74,3 +74,18 @@ class MaintenanceHistoryError extends MachineryState {
 
   MaintenanceHistoryError(this.message);
 }
+
+//estados para detalle de mantenimiento
+class DetailMaintenanceLoading extends MachineryState {}
+
+class DetailMaintenanceLoaded extends MachineryState {
+  final DetailMaintenanceResponseEntity detail;
+
+  DetailMaintenanceLoaded({required this.detail});
+}
+
+class DetailMaintenanceError extends MachineryState {
+  final String message;
+
+  DetailMaintenanceError(this.message);
+}

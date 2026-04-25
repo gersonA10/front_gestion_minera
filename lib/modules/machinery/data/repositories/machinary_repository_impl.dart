@@ -46,4 +46,9 @@ class MachineryRepositoryImpl extends MachineryRepository {
       limit: limit,
     );
   }
+  
+  @override
+  Future<DetailMaintenanceResponseEntity> getDetailMachinery({required String machineId}) {
+    return datasource.getDetailMachinery(machineId: machineId);
+  }
 }

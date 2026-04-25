@@ -1,4 +1,3 @@
-
 import '../../../../core/networking/http_services.dart';
 import '../../domain/entity/entity.dart';
 import '../models/model.dart';
@@ -59,5 +58,15 @@ class MachineryDatasource {
     final List data = response['data'];
 
     return data.map((e) => TypeMachineryModel.fromJson(e)).toList();
+  }
+
+  Future<DetailMaintenanceResponseEntity> getDetailMachinery({
+    required String machineId,
+  }) async {
+    final response = await apiClient.get(
+      '/api/machinery/maintenance/$machineId',
+      operationName: 'detailMachinery',
+    );
+    return DetailMaintenanceResponseModel.fromJson(response['data']);
   }
 }
