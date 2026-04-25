@@ -42,3 +42,5 @@ class CreateMaintenanceRequestEvent extends MachineryEvent {
     required this.request
   });
 }
+
+class FetchFailureTypesEvent extends MachineryEvent {}

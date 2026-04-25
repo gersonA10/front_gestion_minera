@@ -56,4 +56,9 @@ class MachineryRepositoryImpl extends MachineryRepository {
     final response = await datasource.createMaintenanceRequest(request);
     return response;
   }
+
+  @override
+  Future<List<FailureTypeEntity>> getFailureTypes() {
+    return datasource.getFailureTypes();
+  }
 }

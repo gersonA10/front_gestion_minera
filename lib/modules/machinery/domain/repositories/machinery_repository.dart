@@ -22,4 +22,6 @@ abstract class MachineryRepository {
   Future<CreateMaintenanceResponseEntity> createMaintenanceRequest(
     CreateMaintenanceRequestEntity requestModel,
   );
+
+  Future<List<FailureTypeEntity>> getFailureTypes();
 }

@@ -25,16 +25,9 @@ class RequestMaintenanceScreen extends StatefulWidget {
 }
 
 class _RequestMaintenanceScreenState extends State<RequestMaintenanceScreen> {
-  static const _faultTypeOptions = {
-    'mecanica': 'Falla mecánica',
-    'electrica': 'Falla eléctrica',
-    'rodado': 'Rodado',
-    'hidraulica': 'Falla hidráulica',
-    'preventivo': 'Mantenimiento preventivo',
-  };
-
   late MachineryBloc _machineryBloc;
-  String _selectedFaultType = 'mecanica';
+  List<FailureTypeEntity> _failureTypes = [];
+  String? _selectedFaultType;
   final _descriptionController = TextEditingController();
   final _costController = TextEditingController();
   final List<XFile> _pickedImages = [];
@@ -44,6 +37,7 @@ class _RequestMaintenanceScreenState extends State<RequestMaintenanceScreen> {
   void initState() {
     super.initState();
     _machineryBloc = InjectorContainer.getIt<MachineryBloc>();
+    _machineryBloc.add(FetchFailureTypesEvent());
   }
 
   @override
@@ -148,6 +142,16 @@ class _RequestMaintenanceScreenState extends State<RequestMaintenanceScreen> {
     final description = _descriptionController.text.trim();
     final cost = _costController.text.trim();
 
+    if (_selectedFaultType == null) {
+      CustomAlert.show(
+        context,
+        title: 'Campos incompletos',
+        message: 'Por favor, selecciona un tipo de falla.',
+        type: AlertType.warning,
+      );
+      return;
+    }
+
     if (description.isEmpty || cost.isEmpty) {
       CustomAlert.show(
         context,
@@ -172,7 +176,7 @@ class _RequestMaintenanceScreenState extends State<RequestMaintenanceScreen> {
 
     final request = CreateMaintenanceRequestEntity(
       machineId: widget.machineId,
-      failureType: _selectedFaultType,
+      failureType: _selectedFaultType!,
       description: description,
       estimatedAmount: cost,
       evidenceUrlPath: evidence.path,
@@ -186,7 +190,21 @@ class _RequestMaintenanceScreenState extends State<RequestMaintenanceScreen> {
       value: _machineryBloc,
       child: BlocConsumer<MachineryBloc, MachineryState>(
         listener: (context, state) {
-          if (state is CreateMaintenanceRequestSuccess) {
+          if (state is FailureTypesLoaded) {
+            setState(() {
+              _failureTypes = state.failureTypes;
+              _selectedFaultType = state.failureTypes.isNotEmpty
+                  ? state.failureTypes.first.value
+                  : null;
+            });
+          } else if (state is FailureTypesError) {
+            CustomAlert.show(
+              context,
+              title: 'Error',
+              message: state.message,
+              type: AlertType.error,
+            );
+          } else if (state is CreateMaintenanceRequestSuccess) {
             CustomAlert.show(
               context,
               title: 'Éxito',
@@ -250,12 +268,7 @@ class _RequestMaintenanceScreenState extends State<RequestMaintenanceScreen> {
                                 'Tipo de Falla',
                               ),
                               const SizedBox(height: 10),
-                              _buildDropdown(
-                                value: _selectedFaultType,
-                                items: _faultTypeOptions,
-                                onChanged: (val) =>
-                                    setState(() => _selectedFaultType = val!),
-                              ),
+                              _buildFailureTypeDropdown(),
                               const SizedBox(height: 20),
                               _buildSectionTitle(
                                 Icons.description_outlined,
@@ -356,11 +369,8 @@ class _RequestMaintenanceScreenState extends State<RequestMaintenanceScreen> {
     );
   }
 
-  Widget _buildDropdown({
-    required String value,
-    required Map<String, String> items,
-    required ValueChanged<String?> onChanged,
-  }) {
+  Widget _buildFailureTypeDropdown() {
+    final isLoading = _failureTypes.isEmpty;
     return Container(
       decoration: BoxDecoration(
         color: Colors.white,
@@ -368,27 +378,41 @@ class _RequestMaintenanceScreenState extends State<RequestMaintenanceScreen> {
         borderRadius: BorderRadius.circular(8),
       ),
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 4),
-      child: DropdownButtonHideUnderline(
-        child: DropdownButton<String>(
-          value: value,
-          isExpanded: true,
-          dropdownColor: Colors.white,
-          icon: const Icon(
-            Icons.keyboard_arrow_down,
-            color: TColors.appSecondaryColor,
-            size: 22,
-          ),
-          style: const TextStyle(
-            fontSize: 15,
-            fontWeight: FontWeight.w600,
-            color: TColors.appMainTextColor,
-          ),
-          items: items.entries
-              .map((e) => DropdownMenuItem(value: e.key, child: Text(e.value)))
-              .toList(),
-          onChanged: onChanged,
-        ),
-      ),
+      child: isLoading
+          ? const SizedBox(
+              height: 48,
+              child: Center(
+                child: SizedBox(
+                  width: 20,
+                  height: 20,
+                  child: CircularProgressIndicator(
+                    strokeWidth: 2,
+                    color: TColors.appSecondaryColor,
+                  ),
+                ),
+              ),
+            )
+          : DropdownButtonHideUnderline(
+              child: DropdownButton<String>(
+                value: _selectedFaultType,
+                isExpanded: true,
+                dropdownColor: Colors.white,
+                icon: const Icon(
+                  Icons.keyboard_arrow_down,
+                  color: TColors.appSecondaryColor,
+                  size: 22,
+                ),
+                style: const TextStyle(
+                  fontSize: 15,
+                  fontWeight: FontWeight.w600,
+                  color: TColors.appMainTextColor,
+                ),
+                items: _failureTypes
+                    .map((e) => DropdownMenuItem(value: e.value, child: Text(e.label)))
+                    .toList(),
+                onChanged: (val) => setState(() => _selectedFaultType = val),
+              ),
+            ),
     );
   }
 

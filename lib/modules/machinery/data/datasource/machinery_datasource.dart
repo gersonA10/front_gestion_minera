@@ -77,4 +77,13 @@ class MachineryDatasource {
 
     return data.map((e) => TypeMachineryModel.fromJson(e)).toList();
   }
+
+  Future<List<FailureTypeModel>> getFailureTypes() async {
+    final response = await apiClient.get(
+      '/api/maintenance/failure-types',
+      operationName: 'failureTypes',
+    );
+    final List data = response['data'];
+    return data.map((e) => FailureTypeModel.fromJson(e)).toList();
+  }
 }

@@ -40,6 +40,7 @@ class MachineryBloc extends Bloc<MachineryEvent, MachineryState> {
     on<FetchMaintenanceHistoryEvent>(_onFetchMaintenanceHistory);
     on<LoadMoreMaintenanceHistoryEvent>(_onLoadMoreMaintenanceHistory);
     on<CreateMaintenanceRequestEvent>(_onCreateMaintenanceRequest);
+    on<FetchFailureTypesEvent>(_onFetchFailureTypes);
   }
 
   FutureOr<void> _onFetchMetricMachine(
@@ -234,6 +235,22 @@ class MachineryBloc extends Bloc<MachineryEvent, MachineryState> {
       emit(CreateMaintenanceRequestError(mapErrorMessage(error.key)));
     } catch (e) {
       emit(CreateMaintenanceRequestError('Error inesperado: $e'));
+    }
+  }
+
+  FutureOr<void> _onFetchFailureTypes(
+    FetchFailureTypesEvent event,
+    Emitter<MachineryState> emit,
+  ) async {
+    emit(FailureTypesLoading());
+    try {
+      final types = await repository.getFailureTypes();
+      emit(FailureTypesLoaded(failureTypes: types));
+    } on BaseApiException catch (error) {
+      if (error.key == DioExceptionKey.unauthorised) return;
+      emit(FailureTypesError(mapErrorMessage(error.key)));
+    } catch (e) {
+      emit(FailureTypesError('Error inesperado: $e'));
     }
   }
 

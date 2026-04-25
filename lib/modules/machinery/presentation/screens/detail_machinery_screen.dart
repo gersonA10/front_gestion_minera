@@ -97,8 +97,9 @@ class _DetailMachineryScreenState extends State<DetailMachineryScreen> {
                   width: double.infinity,
                   height: 52,
                   child: OutlinedButton.icon(
-                    onPressed: () {
-                      context.router.push(RequestMaintenanceRoute(machineId: 'cb155c0d-2ec0-42db-953c-b50ba9bf6081'));
+                    onPressed: () async{
+                     final response = await  context.router.push(RequestMaintenanceRoute(machineId: 'cb155c0d-2ec0-42db-953c-b50ba9bf6081'));
+                     
                     },
                     icon: Icon(Icons.build, color: TColors.white, size: 23),
                     label: Text(

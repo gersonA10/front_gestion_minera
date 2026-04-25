@@ -86,3 +86,15 @@ class CreateMaintenanceRequestError extends MachineryState {
   final String message;
   CreateMaintenanceRequestError(this.message);
 }
+
+class FailureTypesLoading extends MachineryState {}
+
+class FailureTypesLoaded extends MachineryState {
+  final List<FailureTypeEntity> failureTypes;
+  FailureTypesLoaded({required this.failureTypes});
+}
+
+class FailureTypesError extends MachineryState {
+  final String message;
+  FailureTypesError(this.message);
+}
