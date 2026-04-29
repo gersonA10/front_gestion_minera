@@ -122,7 +122,10 @@ class _AuthScreenState extends State<AuthScreen> {
       context.router.replaceAll([const AdminHomeRoute()]);
     } else if (role == 'jefe_maquinas') {
       context.router.replaceAll([const HomeMachinaryRoute()]);
+    }else if (role == 'jefe_campamento') {
+      context.router.replaceAll([const NewRequestRoute()]);
     }
+
   }
 
   /// Muestra el dialog para activar la huella tras un login exitoso con formulario.
