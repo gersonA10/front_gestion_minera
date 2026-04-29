@@ -7,6 +7,24 @@ class MachineryDatasource {
 
   MachineryDatasource({required this.apiClient});
 
+  Future<CreateMaintenanceResponseModel> createMaintenanceRequest(
+    CreateMaintenanceRequestModel requestModel,
+  ) async {
+    final response = await apiClient.postFormData(
+      '/api/machinery/maintenances',
+      operationName: 'createMaintenanceRequest',
+      data: requestModel.toFormDataMap(),
+      files: [
+        {
+          'name': 'evidence_url',
+          'path': requestModel.evidenceUrlPath,
+          'filename': requestModel.evidenceUrlPath.split('/').last,
+        },
+      ],
+    );
+    return CreateMaintenanceResponseModel.fromJson(response['data']);
+  }
+
   Future<MetricsMachineryModel> getMetricsMachine() async {
     final response = await apiClient.get(
       '/api/machinery/stats',
@@ -87,5 +105,26 @@ class MachineryDatasource {
       operationName: 'detailMachinery',
     );
     return DetailMaintenanceResponseModel.fromJson(response['data']);
+  }
+  Future<List<FailureTypeModel>> getFailureTypes() async {
+    final response = await apiClient.get(
+      '/api/maintenance/failure-types',
+      operationName: 'failureTypes',
+    );
+    final List data = response['data'];
+    return data.map((e) => FailureTypeModel.fromJson(e)).toList();
+  }
+
+  Future<CloseUpOfAMachineResponseEntity> getCloseUpOfAMachine({
+    required String machineId,
+    int page = 1,
+    int limit = 10,
+  }) async {
+    final response = await apiClient.get(
+      '/api/machinery/$machineId',
+      queryParameters: {'page': page, 'limit': limit},
+      operationName: 'closeUpOfAMachine',
+    );
+    return CloseUpOfAMachineResponseModel.fromJson(response);
   }
 }

@@ -1,6 +1,7 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:front_gestion_minera/config/router/app_router.gr.dart';
 import 'package:front_gestion_minera/injector_container.dart';
 import 'package:front_gestion_minera/modules/machinery/domain/entity/entity.dart';
 import 'package:front_gestion_minera/modules/machinery/presentation/bloc/machinery_bloc.dart';
@@ -231,8 +232,17 @@ class _ListMachineryScreenState extends State<ListMachineryScreen> {
                                     itemCount: inventory.length,
                                     itemBuilder:
                                         (BuildContext context, int index) {
-                                          return CardMachineryWidget(
-                                            machine: inventory[index],
+                                          return GestureDetector(
+                                            onTap: () {
+                                              context.router.push(
+                                                DetailMachineryRoute(
+                                                  machineId: inventory[index].machineId,
+                                                ),
+                                              );
+                                            },
+                                            child: CardMachineryWidget(
+                                              machine: inventory[index],
+                                            ),
                                           );
                                         },
                                   ),

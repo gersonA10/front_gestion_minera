@@ -13,7 +13,7 @@ class CardMachineryWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: () {
-        context.router.push(DetailMachineryRoute());
+        context.router.push(DetailMachineryRoute(machineId: machine.machineId));
       },
       child: Container(
         width: double.infinity,

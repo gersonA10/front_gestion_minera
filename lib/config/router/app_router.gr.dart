@@ -9,8 +9,8 @@
 // coverage:ignore-file
 
 // ignore_for_file: no_leading_underscores_for_library_prefixes
-import 'package:auto_route/auto_route.dart' as _i53;
-import 'package:flutter/material.dart' as _i54;
+import 'package:auto_route/auto_route.dart' as _i54;
+import 'package:flutter/material.dart' as _i55;
 import 'package:front_gestion_minera/modules/admin/home/presentation/screens/admin_home_screen.dart'
     as _i1;
 import 'package:front_gestion_minera/modules/admin/home/presentation/screens/create_contribution_screen.dart'
@@ -18,9 +18,9 @@ import 'package:front_gestion_minera/modules/admin/home/presentation/screens/cre
 import 'package:front_gestion_minera/modules/admin/home/presentation/screens/request_detail_screen.dart'
     as _i43;
 import 'package:front_gestion_minera/modules/admin/users/presentation/screens/user_form_screen.dart'
-    as _i50;
-import 'package:front_gestion_minera/modules/admin/users/presentation/screens/users_management_screen.dart'
     as _i51;
+import 'package:front_gestion_minera/modules/admin/users/presentation/screens/users_management_screen.dart'
+    as _i52;
 import 'package:front_gestion_minera/modules/auth/presentation/screen/auth_screens.dart'
     as _i3;
 import 'package:front_gestion_minera/modules/camp/presentation/screens/home_dashboard__camp_screen.dart'
@@ -37,6 +37,8 @@ import 'package:front_gestion_minera/modules/machinery/presentation/screens/main
     as _i27;
 import 'package:front_gestion_minera/modules/machinery/presentation/screens/registration_of_new_machinery_screen.dart'
     as _i42;
+import 'package:front_gestion_minera/modules/machinery/presentation/screens/request_maintenance_screen.dart'
+    as _i45;
 import 'package:front_gestion_minera/modules/partners/presentation/screens/contribute_history_screen.dart'
     as _i5;
 import 'package:front_gestion_minera/modules/partners/presentation/screens/distributes_screen.dart'
@@ -58,11 +60,11 @@ import 'package:front_gestion_minera/modules/surveillance/presentation/screen/hi
 import 'package:front_gestion_minera/modules/surveillance/presentation/screen/home_surveillance_screen.dart'
     as _i20;
 import 'package:front_gestion_minera/modules/treasury/domain/entity/entity.dart'
-    as _i56;
-import 'package:front_gestion_minera/modules/treasury/domain/entity/loans/payment_process_entity.dart'
-    as _i58;
-import 'package:front_gestion_minera/modules/treasury/presentation/bloc/treasury_bloc.dart'
     as _i57;
+import 'package:front_gestion_minera/modules/treasury/domain/entity/loans/payment_process_entity.dart'
+    as _i59;
+import 'package:front_gestion_minera/modules/treasury/presentation/bloc/treasury_bloc.dart'
+    as _i58;
 import 'package:front_gestion_minera/modules/treasury/presentation/screens/contributes/contributes_home_screen.dart'
     as _i7;
 import 'package:front_gestion_minera/modules/treasury/presentation/screens/contributes/contribution_history_screen.dart'
@@ -88,11 +90,11 @@ import 'package:front_gestion_minera/modules/treasury/presentation/screens/finan
 import 'package:front_gestion_minera/modules/treasury/presentation/screens/financialManagment/pending_applications_screen.dart'
     as _i37;
 import 'package:front_gestion_minera/modules/treasury/presentation/screens/financialManagment/transaction_details_screen.dart'
-    as _i47;
+    as _i48;
 import 'package:front_gestion_minera/modules/treasury/presentation/screens/financialManagment/urgent_transaction_screen.dart'
-    as _i49;
+    as _i50;
 import 'package:front_gestion_minera/modules/treasury/presentation/screens/financialManagment/view_request_detail_screen.dart'
-    as _i52;
+    as _i53;
 import 'package:front_gestion_minera/modules/treasury/presentation/screens/goldInventory/batch_detail_screen.dart'
     as _i4;
 import 'package:front_gestion_minera/modules/treasury/presentation/screens/goldInventory/gold_dashboard_screen.dart'
@@ -102,9 +104,9 @@ import 'package:front_gestion_minera/modules/treasury/presentation/screens/goldI
 import 'package:front_gestion_minera/modules/treasury/presentation/screens/goldInventory/register_sell_screen.dart'
     as _i41;
 import 'package:front_gestion_minera/modules/treasury/presentation/screens/goldInventory/sell_preview_screen.dart'
-    as _i45;
-import 'package:front_gestion_minera/modules/treasury/presentation/screens/goldInventory/sell_summary_screen.dart'
     as _i46;
+import 'package:front_gestion_minera/modules/treasury/presentation/screens/goldInventory/sell_summary_screen.dart'
+    as _i47;
 import 'package:front_gestion_minera/modules/treasury/presentation/screens/loans/loan_details_screen.dart'
     as _i22;
 import 'package:front_gestion_minera/modules/treasury/presentation/screens/loans/loan_simulation_screen.dart'
@@ -120,19 +122,19 @@ import 'package:front_gestion_minera/modules/treasury/presentation/screens/loans
 import 'package:front_gestion_minera/modules/treasury/presentation/screens/reports/financial_reports_screen.dart'
     as _i14;
 import 'package:front_gestion_minera/modules/treasury/presentation/screens/treasury_screen.dart'
-    as _i48;
+    as _i49;
 import 'package:front_gestion_minera/modules/treasury/presentation/widgets/widgtes.dart'
-    as _i55;
+    as _i56;
 
 /// generated route for
 /// [_i1.AdminHomeScreen]
-class AdminHomeRoute extends _i53.PageRouteInfo<void> {
-  const AdminHomeRoute({List<_i53.PageRouteInfo>? children})
+class AdminHomeRoute extends _i54.PageRouteInfo<void> {
+  const AdminHomeRoute({List<_i54.PageRouteInfo>? children})
     : super(AdminHomeRoute.name, initialChildren: children);
 
   static const String name = 'AdminHomeRoute';
 
-  static _i53.PageInfo page = _i53.PageInfo(
+  static _i54.PageInfo page = _i54.PageInfo(
     name,
     builder: (data) {
       return const _i1.AdminHomeScreen();
@@ -143,9 +145,9 @@ class AdminHomeRoute extends _i53.PageRouteInfo<void> {
 /// generated route for
 /// [_i2.ApplicationDetailsScreen]
 class ApplicationDetailsRoute
-    extends _i53.PageRouteInfo<ApplicationDetailsRouteArgs> {
+    extends _i54.PageRouteInfo<ApplicationDetailsRouteArgs> {
   ApplicationDetailsRoute({
-    _i54.Key? key,
+    _i55.Key? key,
     required String requestId,
     required DateTime createdAt,
     required String name,
@@ -155,7 +157,7 @@ class ApplicationDetailsRoute
     required String evidencia,
     required String status,
     String? motivoRechazo,
-    List<_i53.PageRouteInfo>? children,
+    List<_i54.PageRouteInfo>? children,
   }) : super(
          ApplicationDetailsRoute.name,
          args: ApplicationDetailsRouteArgs(
@@ -175,7 +177,7 @@ class ApplicationDetailsRoute
 
   static const String name = 'ApplicationDetailsRoute';
 
-  static _i53.PageInfo page = _i53.PageInfo(
+  static _i54.PageInfo page = _i54.PageInfo(
     name,
     builder: (data) {
       final args = data.argsAs<ApplicationDetailsRouteArgs>();
@@ -209,7 +211,7 @@ class ApplicationDetailsRouteArgs {
     this.motivoRechazo,
   });
 
-  final _i54.Key? key;
+  final _i55.Key? key;
 
   final String requestId;
 
@@ -237,13 +239,13 @@ class ApplicationDetailsRouteArgs {
 
 /// generated route for
 /// [_i3.AuthScreen]
-class AuthRoute extends _i53.PageRouteInfo<void> {
-  const AuthRoute({List<_i53.PageRouteInfo>? children})
+class AuthRoute extends _i54.PageRouteInfo<void> {
+  const AuthRoute({List<_i54.PageRouteInfo>? children})
     : super(AuthRoute.name, initialChildren: children);
 
   static const String name = 'AuthRoute';
 
-  static _i53.PageInfo page = _i53.PageInfo(
+  static _i54.PageInfo page = _i54.PageInfo(
     name,
     builder: (data) {
       return const _i3.AuthScreen();
@@ -253,11 +255,11 @@ class AuthRoute extends _i53.PageRouteInfo<void> {
 
 /// generated route for
 /// [_i4.BatchDetailScreen]
-class BatchDetailRoute extends _i53.PageRouteInfo<BatchDetailRouteArgs> {
+class BatchDetailRoute extends _i54.PageRouteInfo<BatchDetailRouteArgs> {
   BatchDetailRoute({
-    _i54.Key? key,
+    _i55.Key? key,
     required String batchId,
-    List<_i53.PageRouteInfo>? children,
+    List<_i54.PageRouteInfo>? children,
   }) : super(
          BatchDetailRoute.name,
          args: BatchDetailRouteArgs(key: key, batchId: batchId),
@@ -266,7 +268,7 @@ class BatchDetailRoute extends _i53.PageRouteInfo<BatchDetailRouteArgs> {
 
   static const String name = 'BatchDetailRoute';
 
-  static _i53.PageInfo page = _i53.PageInfo(
+  static _i54.PageInfo page = _i54.PageInfo(
     name,
     builder: (data) {
       final args = data.argsAs<BatchDetailRouteArgs>();
@@ -278,7 +280,7 @@ class BatchDetailRoute extends _i53.PageRouteInfo<BatchDetailRouteArgs> {
 class BatchDetailRouteArgs {
   const BatchDetailRouteArgs({this.key, required this.batchId});
 
-  final _i54.Key? key;
+  final _i55.Key? key;
 
   final String batchId;
 
@@ -290,13 +292,13 @@ class BatchDetailRouteArgs {
 
 /// generated route for
 /// [_i5.ContributeHistoryScreen]
-class ContributeHistoryRoute extends _i53.PageRouteInfo<void> {
-  const ContributeHistoryRoute({List<_i53.PageRouteInfo>? children})
+class ContributeHistoryRoute extends _i54.PageRouteInfo<void> {
+  const ContributeHistoryRoute({List<_i54.PageRouteInfo>? children})
     : super(ContributeHistoryRoute.name, initialChildren: children);
 
   static const String name = 'ContributeHistoryRoute';
 
-  static _i53.PageInfo page = _i53.PageInfo(
+  static _i54.PageInfo page = _i54.PageInfo(
     name,
     builder: (data) {
       return const _i5.ContributeHistoryScreen();
@@ -307,13 +309,13 @@ class ContributeHistoryRoute extends _i53.PageRouteInfo<void> {
 /// generated route for
 /// [_i6.ContributesDetailScreen]
 class ContributesDetailRoute
-    extends _i53.PageRouteInfo<ContributesDetailRouteArgs> {
+    extends _i54.PageRouteInfo<ContributesDetailRouteArgs> {
   ContributesDetailRoute({
-    _i55.Key? key,
+    _i56.Key? key,
     required String contributionId,
     required DateTime dateContibution,
     required String titleContibuton,
-    List<_i53.PageRouteInfo>? children,
+    List<_i54.PageRouteInfo>? children,
   }) : super(
          ContributesDetailRoute.name,
          args: ContributesDetailRouteArgs(
@@ -327,7 +329,7 @@ class ContributesDetailRoute
 
   static const String name = 'ContributesDetailRoute';
 
-  static _i53.PageInfo page = _i53.PageInfo(
+  static _i54.PageInfo page = _i54.PageInfo(
     name,
     builder: (data) {
       final args = data.argsAs<ContributesDetailRouteArgs>();
@@ -349,7 +351,7 @@ class ContributesDetailRouteArgs {
     required this.titleContibuton,
   });
 
-  final _i55.Key? key;
+  final _i56.Key? key;
 
   final String contributionId;
 
@@ -365,13 +367,13 @@ class ContributesDetailRouteArgs {
 
 /// generated route for
 /// [_i7.ContributesHomeScreen]
-class ContributesHomeRoute extends _i53.PageRouteInfo<void> {
-  const ContributesHomeRoute({List<_i53.PageRouteInfo>? children})
+class ContributesHomeRoute extends _i54.PageRouteInfo<void> {
+  const ContributesHomeRoute({List<_i54.PageRouteInfo>? children})
     : super(ContributesHomeRoute.name, initialChildren: children);
 
   static const String name = 'ContributesHomeRoute';
 
-  static _i53.PageInfo page = _i53.PageInfo(
+  static _i54.PageInfo page = _i54.PageInfo(
     name,
     builder: (data) {
       return const _i7.ContributesHomeScreen();
@@ -381,13 +383,13 @@ class ContributesHomeRoute extends _i53.PageRouteInfo<void> {
 
 /// generated route for
 /// [_i8.CreateContributionScreen]
-class CreateContributionRoute extends _i53.PageRouteInfo<void> {
-  const CreateContributionRoute({List<_i53.PageRouteInfo>? children})
+class CreateContributionRoute extends _i54.PageRouteInfo<void> {
+  const CreateContributionRoute({List<_i54.PageRouteInfo>? children})
     : super(CreateContributionRoute.name, initialChildren: children);
 
   static const String name = 'CreateContributionRoute';
 
-  static _i53.PageInfo page = _i53.PageInfo(
+  static _i54.PageInfo page = _i54.PageInfo(
     name,
     builder: (data) {
       return const _i8.CreateContributionScreen();
@@ -397,28 +399,53 @@ class CreateContributionRoute extends _i53.PageRouteInfo<void> {
 
 /// generated route for
 /// [_i9.DetailMachineryScreen]
-class DetailMachineryRoute extends _i53.PageRouteInfo<void> {
-  const DetailMachineryRoute({List<_i53.PageRouteInfo>? children})
-    : super(DetailMachineryRoute.name, initialChildren: children);
+class DetailMachineryRoute
+    extends _i54.PageRouteInfo<DetailMachineryRouteArgs> {
+  DetailMachineryRoute({
+    _i55.Key? key,
+    required String machineId,
+    List<_i54.PageRouteInfo>? children,
+  }) : super(
+         DetailMachineryRoute.name,
+         args: DetailMachineryRouteArgs(key: key, machineId: machineId),
+         initialChildren: children,
+       );
 
   static const String name = 'DetailMachineryRoute';
 
-  static _i53.PageInfo page = _i53.PageInfo(
+  static _i54.PageInfo page = _i54.PageInfo(
     name,
     builder: (data) {
-      return const _i9.DetailMachineryScreen();
+      final args = data.argsAs<DetailMachineryRouteArgs>();
+      return _i9.DetailMachineryScreen(
+        key: args.key,
+        machineId: args.machineId,
+      );
     },
   );
+}
+
+class DetailMachineryRouteArgs {
+  const DetailMachineryRouteArgs({this.key, required this.machineId});
+
+  final _i55.Key? key;
+
+  final String machineId;
+
+  @override
+  String toString() {
+    return 'DetailMachineryRouteArgs{key: $key, machineId: $machineId}';
+  }
 }
 
 /// generated route for
 /// [_i10.DetailMaintenanceScreen]
 class DetailMaintenanceRoute
-    extends _i53.PageRouteInfo<DetailMaintenanceRouteArgs> {
+    extends _i54.PageRouteInfo<DetailMaintenanceRouteArgs> {
   DetailMaintenanceRoute({
-    _i54.Key? key,
+    _i55.Key? key,
     required String maintenanceId,
-    List<_i53.PageRouteInfo>? children,
+    List<_i54.PageRouteInfo>? children,
   }) : super(
          DetailMaintenanceRoute.name,
          args: DetailMaintenanceRouteArgs(
@@ -430,7 +457,7 @@ class DetailMaintenanceRoute
 
   static const String name = 'DetailMaintenanceRoute';
 
-  static _i53.PageInfo page = _i53.PageInfo(
+  static _i54.PageInfo page = _i54.PageInfo(
     name,
     builder: (data) {
       final args = data.argsAs<DetailMaintenanceRouteArgs>();
@@ -445,7 +472,7 @@ class DetailMaintenanceRoute
 class DetailMaintenanceRouteArgs {
   const DetailMaintenanceRouteArgs({this.key, required this.maintenanceId});
 
-  final _i54.Key? key;
+  final _i55.Key? key;
 
   final String maintenanceId;
 
@@ -457,13 +484,13 @@ class DetailMaintenanceRouteArgs {
 
 /// generated route for
 /// [_i11.DistributeHomeScreen]
-class DistributeHomeRoute extends _i53.PageRouteInfo<void> {
-  const DistributeHomeRoute({List<_i53.PageRouteInfo>? children})
+class DistributeHomeRoute extends _i54.PageRouteInfo<void> {
+  const DistributeHomeRoute({List<_i54.PageRouteInfo>? children})
     : super(DistributeHomeRoute.name, initialChildren: children);
 
   static const String name = 'DistributeHomeRoute';
 
-  static _i53.PageInfo page = _i53.PageInfo(
+  static _i54.PageInfo page = _i54.PageInfo(
     name,
     builder: (data) {
       return const _i11.DistributeHomeScreen();
@@ -473,13 +500,13 @@ class DistributeHomeRoute extends _i53.PageRouteInfo<void> {
 
 /// generated route for
 /// [_i12.DistributesScreen]
-class DistributesRoute extends _i53.PageRouteInfo<void> {
-  const DistributesRoute({List<_i53.PageRouteInfo>? children})
+class DistributesRoute extends _i54.PageRouteInfo<void> {
+  const DistributesRoute({List<_i54.PageRouteInfo>? children})
     : super(DistributesRoute.name, initialChildren: children);
 
   static const String name = 'DistributesRoute';
 
-  static _i53.PageInfo page = _i53.PageInfo(
+  static _i54.PageInfo page = _i54.PageInfo(
     name,
     builder: (data) {
       return const _i12.DistributesScreen();
@@ -490,11 +517,11 @@ class DistributesRoute extends _i53.PageRouteInfo<void> {
 /// generated route for
 /// [_i13.DividendDistributionDetailsScreen]
 class DividendDistributionDetailsRoute
-    extends _i53.PageRouteInfo<DividendDistributionDetailsRouteArgs> {
+    extends _i54.PageRouteInfo<DividendDistributionDetailsRouteArgs> {
   DividendDistributionDetailsRoute({
-    _i55.Key? key,
+    _i56.Key? key,
     required String distributionId,
-    List<_i53.PageRouteInfo>? children,
+    List<_i54.PageRouteInfo>? children,
   }) : super(
          DividendDistributionDetailsRoute.name,
          args: DividendDistributionDetailsRouteArgs(
@@ -506,7 +533,7 @@ class DividendDistributionDetailsRoute
 
   static const String name = 'DividendDistributionDetailsRoute';
 
-  static _i53.PageInfo page = _i53.PageInfo(
+  static _i54.PageInfo page = _i54.PageInfo(
     name,
     builder: (data) {
       final args = data.argsAs<DividendDistributionDetailsRouteArgs>();
@@ -524,7 +551,7 @@ class DividendDistributionDetailsRouteArgs {
     required this.distributionId,
   });
 
-  final _i55.Key? key;
+  final _i56.Key? key;
 
   final String distributionId;
 
@@ -536,13 +563,13 @@ class DividendDistributionDetailsRouteArgs {
 
 /// generated route for
 /// [_i14.FinancialReportsScreen]
-class FinancialReportsRoute extends _i53.PageRouteInfo<void> {
-  const FinancialReportsRoute({List<_i53.PageRouteInfo>? children})
+class FinancialReportsRoute extends _i54.PageRouteInfo<void> {
+  const FinancialReportsRoute({List<_i54.PageRouteInfo>? children})
     : super(FinancialReportsRoute.name, initialChildren: children);
 
   static const String name = 'FinancialReportsRoute';
 
-  static _i53.PageInfo page = _i53.PageInfo(
+  static _i54.PageInfo page = _i54.PageInfo(
     name,
     builder: (data) {
       return const _i14.FinancialReportsScreen();
@@ -552,13 +579,13 @@ class FinancialReportsRoute extends _i53.PageRouteInfo<void> {
 
 /// generated route for
 /// [_i15.GoldDashboardScreen]
-class GoldDashboardRoute extends _i53.PageRouteInfo<void> {
-  const GoldDashboardRoute({List<_i53.PageRouteInfo>? children})
+class GoldDashboardRoute extends _i54.PageRouteInfo<void> {
+  const GoldDashboardRoute({List<_i54.PageRouteInfo>? children})
     : super(GoldDashboardRoute.name, initialChildren: children);
 
   static const String name = 'GoldDashboardRoute';
 
-  static _i53.PageInfo page = _i53.PageInfo(
+  static _i54.PageInfo page = _i54.PageInfo(
     name,
     builder: (data) {
       return const _i15.GoldDashboardScreen();
@@ -568,13 +595,13 @@ class GoldDashboardRoute extends _i53.PageRouteInfo<void> {
 
 /// generated route for
 /// [_i16.HistoryRequestsScreen]
-class HistoryRequestsRoute extends _i53.PageRouteInfo<void> {
-  const HistoryRequestsRoute({List<_i53.PageRouteInfo>? children})
+class HistoryRequestsRoute extends _i54.PageRouteInfo<void> {
+  const HistoryRequestsRoute({List<_i54.PageRouteInfo>? children})
     : super(HistoryRequestsRoute.name, initialChildren: children);
 
   static const String name = 'HistoryRequestsRoute';
 
-  static _i53.PageInfo page = _i53.PageInfo(
+  static _i54.PageInfo page = _i54.PageInfo(
     name,
     builder: (data) {
       return const _i16.HistoryRequestsScreen();
@@ -584,13 +611,13 @@ class HistoryRequestsRoute extends _i53.PageRouteInfo<void> {
 
 /// generated route for
 /// [_i17.HomeDashboardCampScreen]
-class HomeDashboardCampRoute extends _i53.PageRouteInfo<void> {
-  const HomeDashboardCampRoute({List<_i53.PageRouteInfo>? children})
+class HomeDashboardCampRoute extends _i54.PageRouteInfo<void> {
+  const HomeDashboardCampRoute({List<_i54.PageRouteInfo>? children})
     : super(HomeDashboardCampRoute.name, initialChildren: children);
 
   static const String name = 'HomeDashboardCampRoute';
 
-  static _i53.PageInfo page = _i53.PageInfo(
+  static _i54.PageInfo page = _i54.PageInfo(
     name,
     builder: (data) {
       return const _i17.HomeDashboardCampScreen();
@@ -600,13 +627,13 @@ class HomeDashboardCampRoute extends _i53.PageRouteInfo<void> {
 
 /// generated route for
 /// [_i18.HomeDashboardScreen]
-class HomeDashboardRoute extends _i53.PageRouteInfo<void> {
-  const HomeDashboardRoute({List<_i53.PageRouteInfo>? children})
+class HomeDashboardRoute extends _i54.PageRouteInfo<void> {
+  const HomeDashboardRoute({List<_i54.PageRouteInfo>? children})
     : super(HomeDashboardRoute.name, initialChildren: children);
 
   static const String name = 'HomeDashboardRoute';
 
-  static _i53.PageInfo page = _i53.PageInfo(
+  static _i54.PageInfo page = _i54.PageInfo(
     name,
     builder: (data) {
       return const _i18.HomeDashboardScreen();
@@ -616,13 +643,13 @@ class HomeDashboardRoute extends _i53.PageRouteInfo<void> {
 
 /// generated route for
 /// [_i19.HomeMachinaryScreen]
-class HomeMachinaryRoute extends _i53.PageRouteInfo<void> {
-  const HomeMachinaryRoute({List<_i53.PageRouteInfo>? children})
+class HomeMachinaryRoute extends _i54.PageRouteInfo<void> {
+  const HomeMachinaryRoute({List<_i54.PageRouteInfo>? children})
     : super(HomeMachinaryRoute.name, initialChildren: children);
 
   static const String name = 'HomeMachinaryRoute';
 
-  static _i53.PageInfo page = _i53.PageInfo(
+  static _i54.PageInfo page = _i54.PageInfo(
     name,
     builder: (data) {
       return const _i19.HomeMachinaryScreen();
@@ -632,13 +659,13 @@ class HomeMachinaryRoute extends _i53.PageRouteInfo<void> {
 
 /// generated route for
 /// [_i20.HomeSurveillanceScreen]
-class HomeSurveillanceRoute extends _i53.PageRouteInfo<void> {
-  const HomeSurveillanceRoute({List<_i53.PageRouteInfo>? children})
+class HomeSurveillanceRoute extends _i54.PageRouteInfo<void> {
+  const HomeSurveillanceRoute({List<_i54.PageRouteInfo>? children})
     : super(HomeSurveillanceRoute.name, initialChildren: children);
 
   static const String name = 'HomeSurveillanceRoute';
 
-  static _i53.PageInfo page = _i53.PageInfo(
+  static _i54.PageInfo page = _i54.PageInfo(
     name,
     builder: (data) {
       return const _i20.HomeSurveillanceScreen();
@@ -648,13 +675,13 @@ class HomeSurveillanceRoute extends _i53.PageRouteInfo<void> {
 
 /// generated route for
 /// [_i21.ListMachineryScreen]
-class ListMachineryRoute extends _i53.PageRouteInfo<void> {
-  const ListMachineryRoute({List<_i53.PageRouteInfo>? children})
+class ListMachineryRoute extends _i54.PageRouteInfo<void> {
+  const ListMachineryRoute({List<_i54.PageRouteInfo>? children})
     : super(ListMachineryRoute.name, initialChildren: children);
 
   static const String name = 'ListMachineryRoute';
 
-  static _i53.PageInfo page = _i53.PageInfo(
+  static _i54.PageInfo page = _i54.PageInfo(
     name,
     builder: (data) {
       return const _i21.ListMachineryScreen();
@@ -664,11 +691,11 @@ class ListMachineryRoute extends _i53.PageRouteInfo<void> {
 
 /// generated route for
 /// [_i22.LoanDetailsScreen]
-class LoanDetailsRoute extends _i53.PageRouteInfo<LoanDetailsRouteArgs> {
+class LoanDetailsRoute extends _i54.PageRouteInfo<LoanDetailsRouteArgs> {
   LoanDetailsRoute({
-    _i55.Key? key,
+    _i56.Key? key,
     required String idLoan,
-    List<_i53.PageRouteInfo>? children,
+    List<_i54.PageRouteInfo>? children,
   }) : super(
          LoanDetailsRoute.name,
          args: LoanDetailsRouteArgs(key: key, idLoan: idLoan),
@@ -677,7 +704,7 @@ class LoanDetailsRoute extends _i53.PageRouteInfo<LoanDetailsRouteArgs> {
 
   static const String name = 'LoanDetailsRoute';
 
-  static _i53.PageInfo page = _i53.PageInfo(
+  static _i54.PageInfo page = _i54.PageInfo(
     name,
     builder: (data) {
       final args = data.argsAs<LoanDetailsRouteArgs>();
@@ -689,7 +716,7 @@ class LoanDetailsRoute extends _i53.PageRouteInfo<LoanDetailsRouteArgs> {
 class LoanDetailsRouteArgs {
   const LoanDetailsRouteArgs({this.key, required this.idLoan});
 
-  final _i55.Key? key;
+  final _i56.Key? key;
 
   final String idLoan;
 
@@ -701,13 +728,13 @@ class LoanDetailsRouteArgs {
 
 /// generated route for
 /// [_i23.LoanHistoryScreen]
-class LoanHistoryRoute extends _i53.PageRouteInfo<void> {
-  const LoanHistoryRoute({List<_i53.PageRouteInfo>? children})
+class LoanHistoryRoute extends _i54.PageRouteInfo<void> {
+  const LoanHistoryRoute({List<_i54.PageRouteInfo>? children})
     : super(LoanHistoryRoute.name, initialChildren: children);
 
   static const String name = 'LoanHistoryRoute';
 
-  static _i53.PageInfo page = _i53.PageInfo(
+  static _i54.PageInfo page = _i54.PageInfo(
     name,
     builder: (data) {
       return const _i23.LoanHistoryScreen();
@@ -717,13 +744,13 @@ class LoanHistoryRoute extends _i53.PageRouteInfo<void> {
 
 /// generated route for
 /// [_i24.LoanScreen]
-class LoanRoute extends _i53.PageRouteInfo<void> {
-  const LoanRoute({List<_i53.PageRouteInfo>? children})
+class LoanRoute extends _i54.PageRouteInfo<void> {
+  const LoanRoute({List<_i54.PageRouteInfo>? children})
     : super(LoanRoute.name, initialChildren: children);
 
   static const String name = 'LoanRoute';
 
-  static _i53.PageInfo page = _i53.PageInfo(
+  static _i54.PageInfo page = _i54.PageInfo(
     name,
     builder: (data) {
       return const _i24.LoanScreen();
@@ -733,15 +760,15 @@ class LoanRoute extends _i53.PageRouteInfo<void> {
 
 /// generated route for
 /// [_i25.LoanSimulationScreen]
-class LoanSimulationRoute extends _i53.PageRouteInfo<LoanSimulationRouteArgs> {
+class LoanSimulationRoute extends _i54.PageRouteInfo<LoanSimulationRouteArgs> {
   LoanSimulationRoute({
-    _i55.Key? key,
-    required _i56.NewLoansResponseEntity loan,
-    required _i56.CashResponseEntity cash,
+    _i56.Key? key,
+    required _i57.NewLoansResponseEntity loan,
+    required _i57.CashResponseEntity cash,
     required String name,
     required String date,
     required double annualInterestRate,
-    List<_i53.PageRouteInfo>? children,
+    List<_i54.PageRouteInfo>? children,
   }) : super(
          LoanSimulationRoute.name,
          args: LoanSimulationRouteArgs(
@@ -757,7 +784,7 @@ class LoanSimulationRoute extends _i53.PageRouteInfo<LoanSimulationRouteArgs> {
 
   static const String name = 'LoanSimulationRoute';
 
-  static _i53.PageInfo page = _i53.PageInfo(
+  static _i54.PageInfo page = _i54.PageInfo(
     name,
     builder: (data) {
       final args = data.argsAs<LoanSimulationRouteArgs>();
@@ -783,11 +810,11 @@ class LoanSimulationRouteArgs {
     required this.annualInterestRate,
   });
 
-  final _i55.Key? key;
+  final _i56.Key? key;
 
-  final _i56.NewLoansResponseEntity loan;
+  final _i57.NewLoansResponseEntity loan;
 
-  final _i56.CashResponseEntity cash;
+  final _i57.CashResponseEntity cash;
 
   final String name;
 
@@ -803,13 +830,13 @@ class LoanSimulationRouteArgs {
 
 /// generated route for
 /// [_i26.LoansHomeScreen]
-class LoansHomeRoute extends _i53.PageRouteInfo<void> {
-  const LoansHomeRoute({List<_i53.PageRouteInfo>? children})
+class LoansHomeRoute extends _i54.PageRouteInfo<void> {
+  const LoansHomeRoute({List<_i54.PageRouteInfo>? children})
     : super(LoansHomeRoute.name, initialChildren: children);
 
   static const String name = 'LoansHomeRoute';
 
-  static _i53.PageInfo page = _i53.PageInfo(
+  static _i54.PageInfo page = _i54.PageInfo(
     name,
     builder: (data) {
       return const _i26.LoansHomeScreen();
@@ -820,11 +847,11 @@ class LoansHomeRoute extends _i53.PageRouteInfo<void> {
 /// generated route for
 /// [_i27.MaintenanceRequestHistoryScreen]
 class MaintenanceRequestHistoryRoute
-    extends _i53.PageRouteInfo<MaintenanceRequestHistoryRouteArgs> {
+    extends _i54.PageRouteInfo<MaintenanceRequestHistoryRouteArgs> {
   MaintenanceRequestHistoryRoute({
-    _i54.Key? key,
+    _i55.Key? key,
     required String machineId,
-    List<_i53.PageRouteInfo>? children,
+    List<_i54.PageRouteInfo>? children,
   }) : super(
          MaintenanceRequestHistoryRoute.name,
          args: MaintenanceRequestHistoryRouteArgs(
@@ -836,7 +863,7 @@ class MaintenanceRequestHistoryRoute
 
   static const String name = 'MaintenanceRequestHistoryRoute';
 
-  static _i53.PageInfo page = _i53.PageInfo(
+  static _i54.PageInfo page = _i54.PageInfo(
     name,
     builder: (data) {
       final args = data.argsAs<MaintenanceRequestHistoryRouteArgs>();
@@ -851,7 +878,7 @@ class MaintenanceRequestHistoryRoute
 class MaintenanceRequestHistoryRouteArgs {
   const MaintenanceRequestHistoryRouteArgs({this.key, required this.machineId});
 
-  final _i54.Key? key;
+  final _i55.Key? key;
 
   final String machineId;
 
@@ -863,13 +890,13 @@ class MaintenanceRequestHistoryRouteArgs {
 
 /// generated route for
 /// [_i28.MoneyRequestScreen]
-class MoneyRequestRoute extends _i53.PageRouteInfo<void> {
-  const MoneyRequestRoute({List<_i53.PageRouteInfo>? children})
+class MoneyRequestRoute extends _i54.PageRouteInfo<void> {
+  const MoneyRequestRoute({List<_i54.PageRouteInfo>? children})
     : super(MoneyRequestRoute.name, initialChildren: children);
 
   static const String name = 'MoneyRequestRoute';
 
-  static _i53.PageInfo page = _i53.PageInfo(
+  static _i54.PageInfo page = _i54.PageInfo(
     name,
     builder: (data) {
       return const _i28.MoneyRequestScreen();
@@ -879,13 +906,13 @@ class MoneyRequestRoute extends _i53.PageRouteInfo<void> {
 
 /// generated route for
 /// [_i29.NewDistributionScreen]
-class NewDistributionRoute extends _i53.PageRouteInfo<void> {
-  const NewDistributionRoute({List<_i53.PageRouteInfo>? children})
+class NewDistributionRoute extends _i54.PageRouteInfo<void> {
+  const NewDistributionRoute({List<_i54.PageRouteInfo>? children})
     : super(NewDistributionRoute.name, initialChildren: children);
 
   static const String name = 'NewDistributionRoute';
 
-  static _i53.PageInfo page = _i53.PageInfo(
+  static _i54.PageInfo page = _i54.PageInfo(
     name,
     builder: (data) {
       return const _i29.NewDistributionScreen();
@@ -895,13 +922,13 @@ class NewDistributionRoute extends _i53.PageRouteInfo<void> {
 
 /// generated route for
 /// [_i30.NewExtractionScreen]
-class NewExtractionRoute extends _i53.PageRouteInfo<void> {
-  const NewExtractionRoute({List<_i53.PageRouteInfo>? children})
+class NewExtractionRoute extends _i54.PageRouteInfo<void> {
+  const NewExtractionRoute({List<_i54.PageRouteInfo>? children})
     : super(NewExtractionRoute.name, initialChildren: children);
 
   static const String name = 'NewExtractionRoute';
 
-  static _i53.PageInfo page = _i53.PageInfo(
+  static _i54.PageInfo page = _i54.PageInfo(
     name,
     builder: (data) {
       return const _i30.NewExtractionScreen();
@@ -911,13 +938,13 @@ class NewExtractionRoute extends _i53.PageRouteInfo<void> {
 
 /// generated route for
 /// [_i31.NewLoansScreen]
-class NewLoansRoute extends _i53.PageRouteInfo<void> {
-  const NewLoansRoute({List<_i53.PageRouteInfo>? children})
+class NewLoansRoute extends _i54.PageRouteInfo<void> {
+  const NewLoansRoute({List<_i54.PageRouteInfo>? children})
     : super(NewLoansRoute.name, initialChildren: children);
 
   static const String name = 'NewLoansRoute';
 
-  static _i53.PageInfo page = _i53.PageInfo(
+  static _i54.PageInfo page = _i54.PageInfo(
     name,
     builder: (data) {
       return const _i31.NewLoansScreen();
@@ -927,11 +954,11 @@ class NewLoansRoute extends _i53.PageRouteInfo<void> {
 
 /// generated route for
 /// [_i32.PartnersScreen]
-class PartnersRoute extends _i53.PageRouteInfo<PartnersRouteArgs> {
+class PartnersRoute extends _i54.PageRouteInfo<PartnersRouteArgs> {
   PartnersRoute({
-    _i54.Key? key,
+    _i55.Key? key,
     required String nombre,
-    List<_i53.PageRouteInfo>? children,
+    List<_i54.PageRouteInfo>? children,
   }) : super(
          PartnersRoute.name,
          args: PartnersRouteArgs(key: key, nombre: nombre),
@@ -940,7 +967,7 @@ class PartnersRoute extends _i53.PageRouteInfo<PartnersRouteArgs> {
 
   static const String name = 'PartnersRoute';
 
-  static _i53.PageInfo page = _i53.PageInfo(
+  static _i54.PageInfo page = _i54.PageInfo(
     name,
     builder: (data) {
       final args = data.argsAs<PartnersRouteArgs>();
@@ -952,7 +979,7 @@ class PartnersRoute extends _i53.PageRouteInfo<PartnersRouteArgs> {
 class PartnersRouteArgs {
   const PartnersRouteArgs({this.key, required this.nombre});
 
-  final _i54.Key? key;
+  final _i55.Key? key;
 
   final String nombre;
 
@@ -965,12 +992,12 @@ class PartnersRouteArgs {
 /// generated route for
 /// [_i33.PaymentConfirmationScreen]
 class PaymentConfirmationRoute
-    extends _i53.PageRouteInfo<PaymentConfirmationRouteArgs> {
+    extends _i54.PageRouteInfo<PaymentConfirmationRouteArgs> {
   PaymentConfirmationRoute({
-    _i54.Key? key,
+    _i55.Key? key,
     required String transactionId,
     required bool screen,
-    List<_i53.PageRouteInfo>? children,
+    List<_i54.PageRouteInfo>? children,
   }) : super(
          PaymentConfirmationRoute.name,
          args: PaymentConfirmationRouteArgs(
@@ -983,7 +1010,7 @@ class PaymentConfirmationRoute
 
   static const String name = 'PaymentConfirmationRoute';
 
-  static _i53.PageInfo page = _i53.PageInfo(
+  static _i54.PageInfo page = _i54.PageInfo(
     name,
     builder: (data) {
       final args = data.argsAs<PaymentConfirmationRouteArgs>();
@@ -1003,7 +1030,7 @@ class PaymentConfirmationRouteArgs {
     required this.screen,
   });
 
-  final _i54.Key? key;
+  final _i55.Key? key;
 
   final String transactionId;
 
@@ -1017,13 +1044,13 @@ class PaymentConfirmationRouteArgs {
 
 /// generated route for
 /// [_i34.PaymentHistoryScreen]
-class PaymentHistoryRoute extends _i53.PageRouteInfo<void> {
-  const PaymentHistoryRoute({List<_i53.PageRouteInfo>? children})
+class PaymentHistoryRoute extends _i54.PageRouteInfo<void> {
+  const PaymentHistoryRoute({List<_i54.PageRouteInfo>? children})
     : super(PaymentHistoryRoute.name, initialChildren: children);
 
   static const String name = 'PaymentHistoryRoute';
 
-  static _i53.PageInfo page = _i53.PageInfo(
+  static _i54.PageInfo page = _i54.PageInfo(
     name,
     builder: (data) {
       return const _i34.PaymentHistoryScreen();
@@ -1034,13 +1061,13 @@ class PaymentHistoryRoute extends _i53.PageRouteInfo<void> {
 /// generated route for
 /// [_i35.PaymentSuccessDistributionScreen]
 class PaymentSuccessDistributionRoute
-    extends _i53.PageRouteInfo<PaymentSuccessDistributionRouteArgs> {
+    extends _i54.PageRouteInfo<PaymentSuccessDistributionRouteArgs> {
   PaymentSuccessDistributionRoute({
-    _i54.Key? key,
+    _i55.Key? key,
     required String receiptId,
-    required _i57.TreasuryBloc bloc,
+    required _i58.TreasuryBloc bloc,
     required bool isFromDetails,
-    List<_i53.PageRouteInfo>? children,
+    List<_i54.PageRouteInfo>? children,
   }) : super(
          PaymentSuccessDistributionRoute.name,
          args: PaymentSuccessDistributionRouteArgs(
@@ -1054,7 +1081,7 @@ class PaymentSuccessDistributionRoute
 
   static const String name = 'PaymentSuccessDistributionRoute';
 
-  static _i53.PageInfo page = _i53.PageInfo(
+  static _i54.PageInfo page = _i54.PageInfo(
     name,
     builder: (data) {
       final args = data.argsAs<PaymentSuccessDistributionRouteArgs>();
@@ -1076,11 +1103,11 @@ class PaymentSuccessDistributionRouteArgs {
     required this.isFromDetails,
   });
 
-  final _i54.Key? key;
+  final _i55.Key? key;
 
   final String receiptId;
 
-  final _i57.TreasuryBloc bloc;
+  final _i58.TreasuryBloc bloc;
 
   final bool isFromDetails;
 
@@ -1092,11 +1119,11 @@ class PaymentSuccessDistributionRouteArgs {
 
 /// generated route for
 /// [_i36.PaymentSuccessScreen]
-class PaymentSuccessRoute extends _i53.PageRouteInfo<PaymentSuccessRouteArgs> {
+class PaymentSuccessRoute extends _i54.PageRouteInfo<PaymentSuccessRouteArgs> {
   PaymentSuccessRoute({
-    _i54.Key? key,
-    required _i58.PayTheFeeResponseEntity paymentData,
-    List<_i53.PageRouteInfo>? children,
+    _i55.Key? key,
+    required _i59.PayTheFeeResponseEntity paymentData,
+    List<_i54.PageRouteInfo>? children,
   }) : super(
          PaymentSuccessRoute.name,
          args: PaymentSuccessRouteArgs(key: key, paymentData: paymentData),
@@ -1105,7 +1132,7 @@ class PaymentSuccessRoute extends _i53.PageRouteInfo<PaymentSuccessRouteArgs> {
 
   static const String name = 'PaymentSuccessRoute';
 
-  static _i53.PageInfo page = _i53.PageInfo(
+  static _i54.PageInfo page = _i54.PageInfo(
     name,
     builder: (data) {
       final args = data.argsAs<PaymentSuccessRouteArgs>();
@@ -1120,9 +1147,9 @@ class PaymentSuccessRoute extends _i53.PageRouteInfo<PaymentSuccessRouteArgs> {
 class PaymentSuccessRouteArgs {
   const PaymentSuccessRouteArgs({this.key, required this.paymentData});
 
-  final _i54.Key? key;
+  final _i55.Key? key;
 
-  final _i58.PayTheFeeResponseEntity paymentData;
+  final _i59.PayTheFeeResponseEntity paymentData;
 
   @override
   String toString() {
@@ -1132,13 +1159,13 @@ class PaymentSuccessRouteArgs {
 
 /// generated route for
 /// [_i37.PendingApplicationsScreen]
-class PendingApplicationsRoute extends _i53.PageRouteInfo<void> {
-  const PendingApplicationsRoute({List<_i53.PageRouteInfo>? children})
+class PendingApplicationsRoute extends _i54.PageRouteInfo<void> {
+  const PendingApplicationsRoute({List<_i54.PageRouteInfo>? children})
     : super(PendingApplicationsRoute.name, initialChildren: children);
 
   static const String name = 'PendingApplicationsRoute';
 
-  static _i53.PageInfo page = _i53.PageInfo(
+  static _i54.PageInfo page = _i54.PageInfo(
     name,
     builder: (data) {
       return const _i37.PendingApplicationsScreen();
@@ -1149,11 +1176,11 @@ class PendingApplicationsRoute extends _i53.PageRouteInfo<void> {
 /// generated route for
 /// [_i38.ReceiptsHistoryScreen]
 class ReceiptsHistoryRoute
-    extends _i53.PageRouteInfo<ReceiptsHistoryRouteArgs> {
+    extends _i54.PageRouteInfo<ReceiptsHistoryRouteArgs> {
   ReceiptsHistoryRoute({
-    _i54.Key? key,
+    _i55.Key? key,
     required String contributionId,
-    List<_i53.PageRouteInfo>? children,
+    List<_i54.PageRouteInfo>? children,
   }) : super(
          ReceiptsHistoryRoute.name,
          args: ReceiptsHistoryRouteArgs(
@@ -1165,7 +1192,7 @@ class ReceiptsHistoryRoute
 
   static const String name = 'ReceiptsHistoryRoute';
 
-  static _i53.PageInfo page = _i53.PageInfo(
+  static _i54.PageInfo page = _i54.PageInfo(
     name,
     builder: (data) {
       final args = data.argsAs<ReceiptsHistoryRouteArgs>();
@@ -1180,7 +1207,7 @@ class ReceiptsHistoryRoute
 class ReceiptsHistoryRouteArgs {
   const ReceiptsHistoryRouteArgs({this.key, required this.contributionId});
 
-  final _i54.Key? key;
+  final _i55.Key? key;
 
   final String contributionId;
 
@@ -1193,14 +1220,14 @@ class ReceiptsHistoryRouteArgs {
 /// generated route for
 /// [_i39.RecordContributionPaymentScreen]
 class RecordContributionPaymentRoute
-    extends _i53.PageRouteInfo<RecordContributionPaymentRouteArgs> {
+    extends _i54.PageRouteInfo<RecordContributionPaymentRouteArgs> {
   RecordContributionPaymentRoute({
-    _i54.Key? key,
+    _i55.Key? key,
     required DateTime dateContibution,
     required String titleContibuton,
-    required _i56.ContributionDetailMemberEntity item,
-    required _i56.CashResponseEntity cash,
-    List<_i53.PageRouteInfo>? children,
+    required _i57.ContributionDetailMemberEntity item,
+    required _i57.CashResponseEntity cash,
+    List<_i54.PageRouteInfo>? children,
   }) : super(
          RecordContributionPaymentRoute.name,
          args: RecordContributionPaymentRouteArgs(
@@ -1215,7 +1242,7 @@ class RecordContributionPaymentRoute
 
   static const String name = 'RecordContributionPaymentRoute';
 
-  static _i53.PageInfo page = _i53.PageInfo(
+  static _i54.PageInfo page = _i54.PageInfo(
     name,
     builder: (data) {
       final args = data.argsAs<RecordContributionPaymentRouteArgs>();
@@ -1239,15 +1266,15 @@ class RecordContributionPaymentRouteArgs {
     required this.cash,
   });
 
-  final _i54.Key? key;
+  final _i55.Key? key;
 
   final DateTime dateContibution;
 
   final String titleContibuton;
 
-  final _i56.ContributionDetailMemberEntity item;
+  final _i57.ContributionDetailMemberEntity item;
 
-  final _i56.CashResponseEntity cash;
+  final _i57.CashResponseEntity cash;
 
   @override
   String toString() {
@@ -1257,15 +1284,15 @@ class RecordContributionPaymentRouteArgs {
 
 /// generated route for
 /// [_i40.RecordPaymentScreen]
-class RecordPaymentRoute extends _i53.PageRouteInfo<RecordPaymentRouteArgs> {
+class RecordPaymentRoute extends _i54.PageRouteInfo<RecordPaymentRouteArgs> {
   RecordPaymentRoute({
-    _i54.Key? key,
+    _i55.Key? key,
     required String quotaId,
     required String textoCuota,
     required int montoTotalCuota,
-    required _i56.CashResponseEntity cash,
+    required _i57.CashResponseEntity cash,
     required String idLoan,
-    List<_i53.PageRouteInfo>? children,
+    List<_i54.PageRouteInfo>? children,
   }) : super(
          RecordPaymentRoute.name,
          args: RecordPaymentRouteArgs(
@@ -1281,7 +1308,7 @@ class RecordPaymentRoute extends _i53.PageRouteInfo<RecordPaymentRouteArgs> {
 
   static const String name = 'RecordPaymentRoute';
 
-  static _i53.PageInfo page = _i53.PageInfo(
+  static _i54.PageInfo page = _i54.PageInfo(
     name,
     builder: (data) {
       final args = data.argsAs<RecordPaymentRouteArgs>();
@@ -1307,7 +1334,7 @@ class RecordPaymentRouteArgs {
     required this.idLoan,
   });
 
-  final _i54.Key? key;
+  final _i55.Key? key;
 
   final String quotaId;
 
@@ -1315,7 +1342,7 @@ class RecordPaymentRouteArgs {
 
   final int montoTotalCuota;
 
-  final _i56.CashResponseEntity cash;
+  final _i57.CashResponseEntity cash;
 
   final String idLoan;
 
@@ -1327,13 +1354,13 @@ class RecordPaymentRouteArgs {
 
 /// generated route for
 /// [_i41.RegisterSellScreen]
-class RegisterSellRoute extends _i53.PageRouteInfo<void> {
-  const RegisterSellRoute({List<_i53.PageRouteInfo>? children})
+class RegisterSellRoute extends _i54.PageRouteInfo<void> {
+  const RegisterSellRoute({List<_i54.PageRouteInfo>? children})
     : super(RegisterSellRoute.name, initialChildren: children);
 
   static const String name = 'RegisterSellRoute';
 
-  static _i53.PageInfo page = _i53.PageInfo(
+  static _i54.PageInfo page = _i54.PageInfo(
     name,
     builder: (data) {
       return const _i41.RegisterSellScreen();
@@ -1343,13 +1370,13 @@ class RegisterSellRoute extends _i53.PageRouteInfo<void> {
 
 /// generated route for
 /// [_i42.RegistrationOfNewMachineryScreen]
-class RegistrationOfNewMachineryRoute extends _i53.PageRouteInfo<void> {
-  const RegistrationOfNewMachineryRoute({List<_i53.PageRouteInfo>? children})
+class RegistrationOfNewMachineryRoute extends _i54.PageRouteInfo<void> {
+  const RegistrationOfNewMachineryRoute({List<_i54.PageRouteInfo>? children})
     : super(RegistrationOfNewMachineryRoute.name, initialChildren: children);
 
   static const String name = 'RegistrationOfNewMachineryRoute';
 
-  static _i53.PageInfo page = _i53.PageInfo(
+  static _i54.PageInfo page = _i54.PageInfo(
     name,
     builder: (data) {
       return const _i42.RegistrationOfNewMachineryScreen();
@@ -1359,11 +1386,11 @@ class RegistrationOfNewMachineryRoute extends _i53.PageRouteInfo<void> {
 
 /// generated route for
 /// [_i43.RequestDetailScreen]
-class RequestDetailRoute extends _i53.PageRouteInfo<RequestDetailRouteArgs> {
+class RequestDetailRoute extends _i54.PageRouteInfo<RequestDetailRouteArgs> {
   RequestDetailRoute({
-    _i54.Key? key,
+    _i55.Key? key,
     required String requestId,
-    List<_i53.PageRouteInfo>? children,
+    List<_i54.PageRouteInfo>? children,
   }) : super(
          RequestDetailRoute.name,
          args: RequestDetailRouteArgs(key: key, requestId: requestId),
@@ -1372,7 +1399,7 @@ class RequestDetailRoute extends _i53.PageRouteInfo<RequestDetailRouteArgs> {
 
   static const String name = 'RequestDetailRoute';
 
-  static _i53.PageInfo page = _i53.PageInfo(
+  static _i54.PageInfo page = _i54.PageInfo(
     name,
     builder: (data) {
       final args = data.argsAs<RequestDetailRouteArgs>();
@@ -1384,7 +1411,7 @@ class RequestDetailRoute extends _i53.PageRouteInfo<RequestDetailRouteArgs> {
 class RequestDetailRouteArgs {
   const RequestDetailRouteArgs({this.key, required this.requestId});
 
-  final _i54.Key? key;
+  final _i55.Key? key;
 
   final String requestId;
 
@@ -1396,13 +1423,13 @@ class RequestDetailRouteArgs {
 
 /// generated route for
 /// [_i44.RequestHistoryScreen]
-class RequestHistoryRoute extends _i53.PageRouteInfo<void> {
-  const RequestHistoryRoute({List<_i53.PageRouteInfo>? children})
+class RequestHistoryRoute extends _i54.PageRouteInfo<void> {
+  const RequestHistoryRoute({List<_i54.PageRouteInfo>? children})
     : super(RequestHistoryRoute.name, initialChildren: children);
 
   static const String name = 'RequestHistoryRoute';
 
-  static _i53.PageInfo page = _i53.PageInfo(
+  static _i54.PageInfo page = _i54.PageInfo(
     name,
     builder: (data) {
       return const _i44.RequestHistoryScreen();
@@ -1411,17 +1438,58 @@ class RequestHistoryRoute extends _i53.PageRouteInfo<void> {
 }
 
 /// generated route for
-/// [_i45.SellPreviewScreen]
-class SellPreviewRoute extends _i53.PageRouteInfo<SellPreviewRouteArgs> {
+/// [_i45.RequestMaintenanceScreen]
+class RequestMaintenanceRoute
+    extends _i54.PageRouteInfo<RequestMaintenanceRouteArgs> {
+  RequestMaintenanceRoute({
+    _i55.Key? key,
+    required String machineId,
+    List<_i54.PageRouteInfo>? children,
+  }) : super(
+         RequestMaintenanceRoute.name,
+         args: RequestMaintenanceRouteArgs(key: key, machineId: machineId),
+         initialChildren: children,
+       );
+
+  static const String name = 'RequestMaintenanceRoute';
+
+  static _i54.PageInfo page = _i54.PageInfo(
+    name,
+    builder: (data) {
+      final args = data.argsAs<RequestMaintenanceRouteArgs>();
+      return _i45.RequestMaintenanceScreen(
+        key: args.key,
+        machineId: args.machineId,
+      );
+    },
+  );
+}
+
+class RequestMaintenanceRouteArgs {
+  const RequestMaintenanceRouteArgs({this.key, required this.machineId});
+
+  final _i55.Key? key;
+
+  final String machineId;
+
+  @override
+  String toString() {
+    return 'RequestMaintenanceRouteArgs{key: $key, machineId: $machineId}';
+  }
+}
+
+/// generated route for
+/// [_i46.SellPreviewScreen]
+class SellPreviewRoute extends _i54.PageRouteInfo<SellPreviewRouteArgs> {
   SellPreviewRoute({
-    _i54.Key? key,
-    required _i56.SalePreviewResponseEntity previewData,
+    _i55.Key? key,
+    required _i57.SalePreviewResponseEntity previewData,
     required String salesDate,
     required String buyer,
     required double totalGramsSold,
     required double priceBsPerGram,
     required String comprobanteFilePath,
-    List<_i53.PageRouteInfo>? children,
+    List<_i54.PageRouteInfo>? children,
   }) : super(
          SellPreviewRoute.name,
          args: SellPreviewRouteArgs(
@@ -1438,11 +1506,11 @@ class SellPreviewRoute extends _i53.PageRouteInfo<SellPreviewRouteArgs> {
 
   static const String name = 'SellPreviewRoute';
 
-  static _i53.PageInfo page = _i53.PageInfo(
+  static _i54.PageInfo page = _i54.PageInfo(
     name,
     builder: (data) {
       final args = data.argsAs<SellPreviewRouteArgs>();
-      return _i45.SellPreviewScreen(
+      return _i46.SellPreviewScreen(
         key: args.key,
         previewData: args.previewData,
         salesDate: args.salesDate,
@@ -1466,9 +1534,9 @@ class SellPreviewRouteArgs {
     required this.comprobanteFilePath,
   });
 
-  final _i54.Key? key;
+  final _i55.Key? key;
 
-  final _i56.SalePreviewResponseEntity previewData;
+  final _i57.SalePreviewResponseEntity previewData;
 
   final String salesDate;
 
@@ -1487,13 +1555,13 @@ class SellPreviewRouteArgs {
 }
 
 /// generated route for
-/// [_i46.SellSummaryScreen]
-class SellSummaryRoute extends _i53.PageRouteInfo<SellSummaryRouteArgs> {
+/// [_i47.SellSummaryScreen]
+class SellSummaryRoute extends _i54.PageRouteInfo<SellSummaryRouteArgs> {
   SellSummaryRoute({
-    _i54.Key? key,
-    required _i56.RegisterSaleResponseEntity saleData,
+    _i55.Key? key,
+    required _i57.RegisterSaleResponseEntity saleData,
     bool isFromHistory = false,
-    List<_i53.PageRouteInfo>? children,
+    List<_i54.PageRouteInfo>? children,
   }) : super(
          SellSummaryRoute.name,
          args: SellSummaryRouteArgs(
@@ -1506,11 +1574,11 @@ class SellSummaryRoute extends _i53.PageRouteInfo<SellSummaryRouteArgs> {
 
   static const String name = 'SellSummaryRoute';
 
-  static _i53.PageInfo page = _i53.PageInfo(
+  static _i54.PageInfo page = _i54.PageInfo(
     name,
     builder: (data) {
       final args = data.argsAs<SellSummaryRouteArgs>();
-      return _i46.SellSummaryScreen(
+      return _i47.SellSummaryScreen(
         key: args.key,
         saleData: args.saleData,
         isFromHistory: args.isFromHistory,
@@ -1526,9 +1594,9 @@ class SellSummaryRouteArgs {
     this.isFromHistory = false,
   });
 
-  final _i54.Key? key;
+  final _i55.Key? key;
 
-  final _i56.RegisterSaleResponseEntity saleData;
+  final _i57.RegisterSaleResponseEntity saleData;
 
   final bool isFromHistory;
 
@@ -1539,13 +1607,13 @@ class SellSummaryRouteArgs {
 }
 
 /// generated route for
-/// [_i47.TransactionDetailsScreen]
+/// [_i48.TransactionDetailsScreen]
 class TransactionDetailsRoute
-    extends _i53.PageRouteInfo<TransactionDetailsRouteArgs> {
+    extends _i54.PageRouteInfo<TransactionDetailsRouteArgs> {
   TransactionDetailsRoute({
-    _i55.Key? key,
+    _i56.Key? key,
     required String idTransaction,
-    List<_i53.PageRouteInfo>? children,
+    List<_i54.PageRouteInfo>? children,
   }) : super(
          TransactionDetailsRoute.name,
          args: TransactionDetailsRouteArgs(
@@ -1557,11 +1625,11 @@ class TransactionDetailsRoute
 
   static const String name = 'TransactionDetailsRoute';
 
-  static _i53.PageInfo page = _i53.PageInfo(
+  static _i54.PageInfo page = _i54.PageInfo(
     name,
     builder: (data) {
       final args = data.argsAs<TransactionDetailsRouteArgs>();
-      return _i47.TransactionDetailsScreen(
+      return _i48.TransactionDetailsScreen(
         key: args.key,
         idTransaction: args.idTransaction,
       );
@@ -1572,7 +1640,7 @@ class TransactionDetailsRoute
 class TransactionDetailsRouteArgs {
   const TransactionDetailsRouteArgs({this.key, required this.idTransaction});
 
-  final _i55.Key? key;
+  final _i56.Key? key;
 
   final String idTransaction;
 
@@ -1583,44 +1651,44 @@ class TransactionDetailsRouteArgs {
 }
 
 /// generated route for
-/// [_i48.TreasuryScreen]
-class TreasuryRoute extends _i53.PageRouteInfo<void> {
-  const TreasuryRoute({List<_i53.PageRouteInfo>? children})
+/// [_i49.TreasuryScreen]
+class TreasuryRoute extends _i54.PageRouteInfo<void> {
+  const TreasuryRoute({List<_i54.PageRouteInfo>? children})
     : super(TreasuryRoute.name, initialChildren: children);
 
   static const String name = 'TreasuryRoute';
 
-  static _i53.PageInfo page = _i53.PageInfo(
+  static _i54.PageInfo page = _i54.PageInfo(
     name,
     builder: (data) {
-      return const _i48.TreasuryScreen();
+      return const _i49.TreasuryScreen();
     },
   );
 }
 
 /// generated route for
-/// [_i49.UrgentTransactionScreen]
-class UrgentTransactionRoute extends _i53.PageRouteInfo<void> {
-  const UrgentTransactionRoute({List<_i53.PageRouteInfo>? children})
+/// [_i50.UrgentTransactionScreen]
+class UrgentTransactionRoute extends _i54.PageRouteInfo<void> {
+  const UrgentTransactionRoute({List<_i54.PageRouteInfo>? children})
     : super(UrgentTransactionRoute.name, initialChildren: children);
 
   static const String name = 'UrgentTransactionRoute';
 
-  static _i53.PageInfo page = _i53.PageInfo(
+  static _i54.PageInfo page = _i54.PageInfo(
     name,
     builder: (data) {
-      return const _i49.UrgentTransactionScreen();
+      return const _i50.UrgentTransactionScreen();
     },
   );
 }
 
 /// generated route for
-/// [_i50.UserFormScreen]
-class UserFormRoute extends _i53.PageRouteInfo<UserFormRouteArgs> {
+/// [_i51.UserFormScreen]
+class UserFormRoute extends _i54.PageRouteInfo<UserFormRouteArgs> {
   UserFormRoute({
-    _i54.Key? key,
+    _i55.Key? key,
     String? userId,
-    List<_i53.PageRouteInfo>? children,
+    List<_i54.PageRouteInfo>? children,
   }) : super(
          UserFormRoute.name,
          args: UserFormRouteArgs(key: key, userId: userId),
@@ -1629,13 +1697,13 @@ class UserFormRoute extends _i53.PageRouteInfo<UserFormRouteArgs> {
 
   static const String name = 'UserFormRoute';
 
-  static _i53.PageInfo page = _i53.PageInfo(
+  static _i54.PageInfo page = _i54.PageInfo(
     name,
     builder: (data) {
       final args = data.argsAs<UserFormRouteArgs>(
         orElse: () => const UserFormRouteArgs(),
       );
-      return _i50.UserFormScreen(key: args.key, userId: args.userId);
+      return _i51.UserFormScreen(key: args.key, userId: args.userId);
     },
   );
 }
@@ -1643,7 +1711,7 @@ class UserFormRoute extends _i53.PageRouteInfo<UserFormRouteArgs> {
 class UserFormRouteArgs {
   const UserFormRouteArgs({this.key, this.userId});
 
-  final _i54.Key? key;
+  final _i55.Key? key;
 
   final String? userId;
 
@@ -1654,29 +1722,29 @@ class UserFormRouteArgs {
 }
 
 /// generated route for
-/// [_i51.UsersManagementScreen]
-class UsersManagementRoute extends _i53.PageRouteInfo<void> {
-  const UsersManagementRoute({List<_i53.PageRouteInfo>? children})
+/// [_i52.UsersManagementScreen]
+class UsersManagementRoute extends _i54.PageRouteInfo<void> {
+  const UsersManagementRoute({List<_i54.PageRouteInfo>? children})
     : super(UsersManagementRoute.name, initialChildren: children);
 
   static const String name = 'UsersManagementRoute';
 
-  static _i53.PageInfo page = _i53.PageInfo(
+  static _i54.PageInfo page = _i54.PageInfo(
     name,
     builder: (data) {
-      return const _i51.UsersManagementScreen();
+      return const _i52.UsersManagementScreen();
     },
   );
 }
 
 /// generated route for
-/// [_i52.ViewRequestDetailsScreen]
+/// [_i53.ViewRequestDetailsScreen]
 class ViewRequestDetailsRoute
-    extends _i53.PageRouteInfo<ViewRequestDetailsRouteArgs> {
+    extends _i54.PageRouteInfo<ViewRequestDetailsRouteArgs> {
   ViewRequestDetailsRoute({
-    _i54.Key? key,
+    _i55.Key? key,
     required String id,
-    List<_i53.PageRouteInfo>? children,
+    List<_i54.PageRouteInfo>? children,
   }) : super(
          ViewRequestDetailsRoute.name,
          args: ViewRequestDetailsRouteArgs(key: key, id: id),
@@ -1685,11 +1753,11 @@ class ViewRequestDetailsRoute
 
   static const String name = 'ViewRequestDetailsRoute';
 
-  static _i53.PageInfo page = _i53.PageInfo(
+  static _i54.PageInfo page = _i54.PageInfo(
     name,
     builder: (data) {
       final args = data.argsAs<ViewRequestDetailsRouteArgs>();
-      return _i52.ViewRequestDetailsScreen(key: args.key, id: args.id);
+      return _i53.ViewRequestDetailsScreen(key: args.key, id: args.id);
     },
   );
 }
@@ -1697,7 +1765,7 @@ class ViewRequestDetailsRoute
 class ViewRequestDetailsRouteArgs {
   const ViewRequestDetailsRouteArgs({this.key, required this.id});
 
-  final _i54.Key? key;
+  final _i55.Key? key;
 
   final String id;
 
