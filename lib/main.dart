@@ -16,9 +16,7 @@ import 'package:intl/date_symbol_data_local.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await SystemChrome.setPreferredOrientations([
-    DeviceOrientation.portraitUp,
-  ]);
+  await SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
 
   SystemChrome.setSystemUIOverlayStyle(
     const SystemUiOverlayStyle(
@@ -42,19 +40,18 @@ class MainApp extends StatefulWidget {
 }
 
 class _MainAppState extends State<MainApp> {
-  
   late final AppLifecycleListener _lifecycleListener;
   DateTime? _pausedTime;
-  
+
   Timer? _inactivityTimer;
   final int _timeoutMinutes = 5;
 
   @override
   void initState() {
     super.initState();
-    
+
     _startInactivityTimer();
-    
+
     _lifecycleListener = AppLifecycleListener(
       onHide: () {
         // En algunos dispositivos el app pasa a 'hidden' antes que 'paused'
@@ -83,7 +80,7 @@ class _MainAppState extends State<MainApp> {
       },
     );
 
-    _checkForUpdate(); 
+    _checkForUpdate();
   }
 
   void _startInactivityTimer() {
@@ -103,21 +100,20 @@ class _MainAppState extends State<MainApp> {
   @override
   void dispose() {
     _lifecycleListener.dispose();
-    _inactivityTimer?.cancel(); 
+    _inactivityTimer?.cancel();
     super.dispose();
   }
 
   Future<void> _checkForUpdate() async {
     try {
       final info = await InAppUpdate.checkForUpdate();
-      
+
       if (info.updateAvailability == UpdateAvailability.updateAvailable) {
         if (info.immediateUpdateAllowed) {
           await InAppUpdate.performImmediateUpdate();
-        } 
-        else if (info.flexibleUpdateAllowed) {
+        } else if (info.flexibleUpdateAllowed) {
           await InAppUpdate.startFlexibleUpdate();
-          await InAppUpdate.completeFlexibleUpdate(); 
+          await InAppUpdate.completeFlexibleUpdate();
         }
       }
     } catch (e) {
@@ -128,11 +124,11 @@ class _MainAppState extends State<MainApp> {
   @override
   Widget build(BuildContext context) {
     final appRouter = InjectorContainer.getIt<AppRouter>();
-    
+
     return Listener(
       behavior: HitTestBehavior.translucent,
       onPointerDown: _handleUserInteraction,
-      onPointerMove: _handleUserInteraction, 
+      onPointerMove: _handleUserInteraction,
       child: MaterialApp.router(
         title: 'Tigres Dorados',
         debugShowCheckedModeBanner: false,
@@ -148,7 +144,13 @@ class _MainAppState extends State<MainApp> {
         darkTheme: TAppTheme.lightTheme,
         routerConfig: appRouter.config(),
         builder: (context, child) => ConnectivityWrapper(
-          child: child ?? const SizedBox.shrink(),
+          child: SafeArea(
+            bottom: true,
+            top: false,
+            left: false,
+            right: false,
+            child: child ?? const SizedBox.shrink(),
+          ),
         ),
       ),
     );
