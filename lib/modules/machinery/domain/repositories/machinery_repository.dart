@@ -5,12 +5,13 @@ abstract class MachineryRepository {
 
   Future<InventoryMachineryEntity> getInventoryMachinery({
     int page = 1,
-    int limit = 5,
+    int limit = 10,
     String? search,
     String? status,
     String? type,
   });
   Future<List<TypeMachineryEntity>> getTypeMachinery();
+  Future<DetailMaintenanceResponseEntity> getDetailMachinery({required String machineId});
 
   Future<MaintenanceHistoryResponseEntity> getMaintenanceHistory({
     required String machineId,
@@ -18,7 +19,10 @@ abstract class MachineryRepository {
     int limit = 10,
   });
 
-  Future<CreateMaintenanceResponseEntity> createMaintenanceRequest(
+  Future<RegisterMachineryResponseEntity> registerMachinery(
+    RegisterMachineryRequestEntity request,
+  );
+   Future<CreateMaintenanceResponseEntity> createMaintenanceRequest(
     CreateMaintenanceRequestEntity requestModel,
   );
 

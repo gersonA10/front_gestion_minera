@@ -1,4 +1,6 @@
+import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
+import 'package:front_gestion_minera/config/router/app_router.gr.dart';
 import 'package:front_gestion_minera/modules/machinery/domain/entity/entity.dart';
 import 'package:front_gestion_minera/utils/assets.dart';
 import 'package:front_gestion_minera/utils/constants/color.constant.dart';
@@ -9,54 +11,59 @@ class CardMachineryWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      width: double.infinity,
-      padding: EdgeInsets.all(15),
-      margin: EdgeInsets.symmetric(vertical: 5),
-      decoration: BoxDecoration(
-        color: TColors.white,
-        borderRadius: BorderRadius.circular(10),
-      ),
-      child: Row(
-        children: [
-          ClipRRect(
-            borderRadius: BorderRadiusGeometry.circular(12),
-            child: Container(
-              width: 70,
-              height: 70,
-              color: TColors.appBackgroundColor,
-              child: FadeInImage.assetNetwork(
-                placeholder: AssetImageApp.getIconLoading,
-                image: machine.photoUrl ?? '',
-                fit: BoxFit.cover,
-                imageErrorBuilder: (_, _, _) {
-                  return Center(child: const Icon(Icons.image_not_supported, size: 30));
-                },
+    return GestureDetector(
+      onTap: () {
+        context.router.push(DetailMachineryRoute());
+      },
+      child: Container(
+        width: double.infinity,
+        padding: EdgeInsets.all(15),
+        margin: EdgeInsets.symmetric(vertical: 5),
+        decoration: BoxDecoration(
+          color: TColors.white,
+          borderRadius: BorderRadius.circular(10),
+        ),
+        child: Row(
+          children: [
+            ClipRRect(
+              borderRadius: BorderRadiusGeometry.circular(12),
+              child: Container(
+                width: 70,
+                height: 70,
+                color: TColors.appBackgroundColor,
+                child: FadeInImage.assetNetwork(
+                  placeholder: AssetImageApp.getIconLoading,
+                  image: machine.photoUrl ?? '',
+                  fit: BoxFit.cover,
+                  imageErrorBuilder: (_, _, _) {
+                    return Center(child: const Icon(Icons.image_not_supported, size: 30));
+                  },
+                ),
               ),
             ),
-          ),
-          const SizedBox(width: 15),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  machine.name,
-                  style: TextStyle(fontWeight: FontWeight.bold),
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                ),
-                Text(
-                  machine.description,
-                  style: TextStyle(color: TColors.textFieldDisabledColor),
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                ),
-              ],
+            const SizedBox(width: 15),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    machine.name,
+                    style: TextStyle(fontWeight: FontWeight.bold),
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  Text(
+                    machine.description,
+                    style: TextStyle(color: TColors.textFieldDisabledColor),
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ],
+              ),
             ),
-          ),
-          _viewState(machine.status.toLowerCase()),
-        ],
+            _viewState(machine.status.toLowerCase()),
+          ],
+        ),
       ),
     );
   }

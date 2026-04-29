@@ -16,7 +16,7 @@ class MachineryRepositoryImpl extends MachineryRepository {
   @override
   Future<InventoryMachineryEntity> getInventoryMachinery({
     int page = 1,
-    int limit = 5,
+    int limit = 10,
     String? search,
     String? status,
     String? type,
@@ -36,6 +36,13 @@ class MachineryRepositoryImpl extends MachineryRepository {
   }
 
   @override
+  Future<RegisterMachineryResponseEntity> registerMachinery(
+    RegisterMachineryRequestEntity request,
+  ) {
+    return datasource.registerMachinery(request);
+  }
+
+  @override
   Future<MaintenanceHistoryResponseEntity> getMaintenanceHistory({
     required String machineId,
     int page = 1,
@@ -47,7 +54,11 @@ class MachineryRepositoryImpl extends MachineryRepository {
       limit: limit,
     );
   }
-
+  
+  @override
+  Future<DetailMaintenanceResponseEntity> getDetailMachinery({required String machineId}) {
+    return datasource.getDetailMachinery(machineId: machineId);
+  }
   @override
   Future<CreateMaintenanceResponseEntity> createMaintenanceRequest(
     CreateMaintenanceRequestEntity requestModel,

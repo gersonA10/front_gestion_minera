@@ -8,6 +8,7 @@ import 'package:front_gestion_minera/modules/machinery/presentation/bloc/machine
 import 'package:intl/intl.dart';
 import '../../../../utils/assets.dart';
 import '../../../../utils/constants/color.constant.dart';
+import '../widgets/widgets.dart';
 
 @RoutePage()
 class DetailMachineryScreen extends StatefulWidget {

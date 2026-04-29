@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:front_gestion_minera/config/theme/extension_theme.dart';
+import 'package:front_gestion_minera/utils/constants/color.constant.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 class AppTextStyles {
@@ -100,14 +101,10 @@ class AppTextStyles {
         fontSize: 16,
         fontWeight: FontWeight.bold,
       );
-  static TextStyle mainStyle16Bold(BuildContext context) => GoogleFonts.inter(
-    fontSize: 16,
-    fontWeight: FontWeight.bold,
-  );
-    static TextStyle mainStyle17Bold(BuildContext context) => GoogleFonts.inter(
-    fontSize: 17,
-    fontWeight: FontWeight.bold,
-  );
+  static TextStyle mainStyle16Bold(BuildContext context) =>
+      GoogleFonts.inter(fontSize: 16, fontWeight: FontWeight.bold);
+  static TextStyle mainStyle17Bold(BuildContext context) =>
+      GoogleFonts.inter(fontSize: 17, fontWeight: FontWeight.bold);
   static TextStyle mainStyleWhite14Bold(BuildContext context) =>
       GoogleFonts.inter(
         color: Theme.of(context).colorScheme.white,
@@ -263,5 +260,11 @@ class AppTextStyles {
     fontSize: 14,
     fontStyle: FontStyle.normal,
     fontWeight: FontWeight.bold,
+  );
+  static TextStyle? mainStyleBluePrimary12(BuildContext context) => GoogleFonts.inter(
+    color: TColors.textPrimary,
+    fontWeight: FontWeight.bold,
+    fontSize: 12,
+    letterSpacing: 0.8,
   );
 }

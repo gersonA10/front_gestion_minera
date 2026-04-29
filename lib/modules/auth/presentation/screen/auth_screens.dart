@@ -122,6 +122,8 @@ class _AuthScreenState extends State<AuthScreen> {
       context.router.replaceAll([const AdminHomeRoute()]);
     } else if (role == 'jefe_maquinas') {
       context.router.replaceAll([const HomeMachinaryRoute()]);
+    } else if (role == 'jefe_campamento') {
+      context.router.replaceAll([ const HomeDashboardCampRoute()]);
     }
   }
 

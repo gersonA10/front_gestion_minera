@@ -47,7 +47,9 @@ class MachineryBloc extends Bloc<MachineryEvent, MachineryState> {
     on<ListTypeMachinery>(_litsTypeMachinery);
     on<FetchMaintenanceHistoryEvent>(_onFetchMaintenanceHistory);
     on<LoadMoreMaintenanceHistoryEvent>(_onLoadMoreMaintenanceHistory);
-    on<CreateMaintenanceRequestEvent>(_onCreateMaintenanceRequest);
+    on<FetchDetailMaintenanceEvent>(_fetchDetailMaintenance);
+    on<RegisterMachineryEvent>(_onRegisterMachinery);
+      on<CreateMaintenanceRequestEvent>(_onCreateMaintenanceRequest);
     on<FetchFailureTypesEvent>(_onFetchFailureTypes);
     on<GetCloseUpOfAMachineEvent>(_onGetCloseUpOfAMachine);
     on<LoadMoreCloseUpOfAMachineEvent>(_onLoadMoreCloseUpOfAMachine);
@@ -231,36 +233,20 @@ class MachineryBloc extends Bloc<MachineryEvent, MachineryState> {
     }
   }
 
-  FutureOr<void> _onCreateMaintenanceRequest(
-    CreateMaintenanceRequestEvent event,
+  FutureOr<void> _onRegisterMachinery(
+    RegisterMachineryEvent event,
     Emitter<MachineryState> emit,
   ) async {
-    emit(CreateMaintenanceRequestLoading());
+    emit(RegisterMachineryLoading());
     try {
-      final response = await repository.createMaintenanceRequest(
-       event.request
-      );
-      emit(CreateMaintenanceRequestSuccess(response: response));
+      final response = await repository.registerMachinery(event.request);
+      emit(RegisterMachinerySuccess(
+        response: response,
+      ));
     } on BaseApiException catch (error) {
-      emit(CreateMaintenanceRequestError(mapErrorMessage(error.key)));
+      emit(RegisterMachineryError(mapErrorMessage(error.key)));
     } catch (e) {
-      emit(CreateMaintenanceRequestError('Error inesperado: $e'));
-    }
-  }
-
-  FutureOr<void> _onFetchFailureTypes(
-    FetchFailureTypesEvent event,
-    Emitter<MachineryState> emit,
-  ) async {
-    emit(FailureTypesLoading());
-    try {
-      final types = await repository.getFailureTypes();
-      emit(FailureTypesLoaded(failureTypes: types));
-    } on BaseApiException catch (error) {
-      if (error.key == DioExceptionKey.unauthorised) return;
-      emit(FailureTypesError(mapErrorMessage(error.key)));
-    } catch (e) {
-      emit(FailureTypesError('Error inesperado: $e'));
+      emit(RegisterMachineryError('Error inesperado: $e'));
     }
   }
 
@@ -290,6 +276,21 @@ class MachineryBloc extends Bloc<MachineryEvent, MachineryState> {
       emit(TypeMachineryError('Error inesperado: $e'));
     }
   }
+
+   Future<void> _fetchDetailMaintenance(
+    FetchDetailMaintenanceEvent event,
+    Emitter<MachineryState> emit,
+   ) async {
+    emit(DetailMaintenanceLoading());
+    try {
+      final detail = await repository.getDetailMachinery(machineId: event.machineId);
+      emit(DetailMaintenanceLoaded(detail: detail));
+    } on BaseApiException catch (error) {
+      emit(DetailMaintenanceError(mapErrorMessage(error.key)));
+    } catch (e) {
+      emit(DetailMaintenanceError('Error inesperado al obtener el detalle'));
+    }
+   }
 
   FutureOr<void> _onGetCloseUpOfAMachine(
     GetCloseUpOfAMachineEvent event,
@@ -356,5 +357,38 @@ class MachineryBloc extends Bloc<MachineryEvent, MachineryState> {
     }
   }
 
- 
-}
+  FutureOr<void> _onCreateMaintenanceRequest(
+    CreateMaintenanceRequestEvent event,
+    Emitter<MachineryState> emit,
+  ) async {
+    emit(CreateMaintenanceRequestLoading());
+    try {
+      final response = await repository.createMaintenanceRequest(
+       event.request
+      );
+      emit(CreateMaintenanceRequestSuccess(response: response));
+    } on BaseApiException catch (error) {
+      emit(CreateMaintenanceRequestError(mapErrorMessage(error.key)));
+    } catch (e) {
+      emit(CreateMaintenanceRequestError('Error inesperado: $e'));
+    }
+  }
+
+  FutureOr<void> _onFetchFailureTypes(
+    FetchFailureTypesEvent event,
+    Emitter<MachineryState> emit,
+  ) async {
+    emit(FailureTypesLoading());
+    try {
+      final types = await repository.getFailureTypes();
+      emit(FailureTypesLoaded(failureTypes: types));
+    } on BaseApiException catch (error) {
+      if (error.key == DioExceptionKey.unauthorised) return;
+      emit(FailureTypesError(mapErrorMessage(error.key)));
+    } catch (e) {
+      emit(FailureTypesError('Error inesperado: $e'));
+    }
+  }
+    
+
+    }
