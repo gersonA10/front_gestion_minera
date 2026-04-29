@@ -2,6 +2,7 @@ import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:front_gestion_minera/modules/camp/presentation/widgets/widgets.dart';
 import 'package:front_gestion_minera/utils/constants/color.constant.dart';
+import '../../../../core/widgets/logout_button_widget.dart';
 
 @RoutePage()
 class HomeDashboardCampScreen extends StatefulWidget {
@@ -17,7 +18,12 @@ class _HomeDashboardCampScreenState extends State<HomeDashboardCampScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: TColors.appBackgroundColor,
-      appBar: AppBar(backgroundColor: TColors.white, title: Text('Campamento')),
+      appBar: AppBar(
+        backgroundColor: TColors.white,
+        title: const Row(
+          children: [SizedBox(width: 10),Text('Campamento'), Spacer(), LogoutButton()],
+        ),
+      ),
       body: SafeArea(
         child: SingleChildScrollView(
           physics: const AlwaysScrollableScrollPhysics(),
@@ -71,8 +77,13 @@ class _HomeDashboardCampScreenState extends State<HomeDashboardCampScreen> {
           onPressed: () {},
           backgroundColor: TColors.appMainColor,
           icon: Icon(Icons.add),
-          label: Text('Nueva Solicitud',style: TextStyle(fontSize: 15,fontWeight: FontWeight.bold),),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadiusGeometry.circular(50)),
+          label: Text(
+            'Nueva Solicitud',
+            style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
+          ),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadiusGeometry.circular(50),
+          ),
         ),
       ),
     );
