@@ -28,7 +28,7 @@ class _MaintenanceRequestHistoryScreenState
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 3, vsync: this);
+    _tabController = TabController(length: 5, vsync: this);
     _machineryBloc = InjectorContainer.getIt<MachineryBloc>()
       ..add(FetchMaintenanceHistoryEvent(machineId: widget.machineId));
   }
@@ -48,10 +48,6 @@ class _MaintenanceRequestHistoryScreenState
         appBar: AppBar(
           backgroundColor: Colors.white,
           elevation: 0,
-          leading: IconButton(
-            icon: const Icon(Icons.arrow_back, color: Color(0xFF1A1A2E)),
-            onPressed: () => context.router.back(),
-          ),
           title: const Text(
             'Solicitudes de Mantenimiento',
             style: TextStyle(
@@ -63,10 +59,13 @@ class _MaintenanceRequestHistoryScreenState
           centerTitle: true,
           bottom: TabBar(
             controller: _tabController,
+            isScrollable: true,
+            tabAlignment: TabAlignment.start,
             labelColor: TColors.textPrimary,
             unselectedLabelColor: const Color(0xFF9CA3AF),
             indicatorColor: TColors.textPrimary,
             indicatorWeight: 2.5,
+            labelPadding: const EdgeInsets.symmetric(horizontal: 20),
             labelStyle: const TextStyle(
               fontSize: 14,
               fontWeight: FontWeight.w600,
@@ -77,9 +76,11 @@ class _MaintenanceRequestHistoryScreenState
               fontWeight: FontWeight.w400,
             ),
             tabs: const [
-              Tab(text: 'Historial'),
-              Tab(text: 'Pendientes'),
-              Tab(text: 'Completadas'),
+              Tab(height: 48, text: 'Historial'),
+              Tab(height: 48, text: 'Pendientes'),
+              Tab(height: 48, text: 'Completadas'),
+              Tab(height: 48, text: 'Rechazadas'),
+              Tab(height: 48, text: 'Pagadas'),
             ],
           ),
         ),
@@ -126,6 +127,12 @@ class _MaintenanceRequestHistoryScreenState
                     e.globalStatus == MaintenanceGlobalStatus.completed ||
                     e.globalStatus == MaintenanceGlobalStatus.approved)
                 .toList();
+            final rejected = items
+                .where((e) => e.globalStatus == MaintenanceGlobalStatus.rejected)
+                .toList();
+            final paid = items
+                .where((e) => e.globalStatus == 'PAID')
+                .toList();
 
             return TabBarView(
               controller: _tabController,
@@ -133,6 +140,8 @@ class _MaintenanceRequestHistoryScreenState
                 _buildList(items, hasReachedMax),
                 _buildList(pending, true),
                 _buildList(completed, true),
+                _buildList(rejected, true),
+                _buildList(paid, true),
               ],
             );
           },
