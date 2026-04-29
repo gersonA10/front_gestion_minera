@@ -264,7 +264,7 @@ class MachineryBloc extends Bloc<MachineryEvent, MachineryState> {
       emit(TypeMachineryError('Error inesperado: $e'));
     }
   }
-   
+
    Future<void> _fetchDetailMaintenance(
     FetchDetailMaintenanceEvent event,
     Emitter<MachineryState> emit,
@@ -272,7 +272,7 @@ class MachineryBloc extends Bloc<MachineryEvent, MachineryState> {
     emit(DetailMaintenanceLoading());
     try {
       final detail = await repository.getDetailMachinery(machineId: event.machineId);
-      emit(DetailMaintenanceLoaded(detail: detail)); 
+      emit(DetailMaintenanceLoaded(detail: detail));
     } on BaseApiException catch (error) {
       emit(DetailMaintenanceError(mapErrorMessage(error.key)));
     } catch (e) {
