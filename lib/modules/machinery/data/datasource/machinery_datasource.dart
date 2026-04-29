@@ -86,4 +86,17 @@ class MachineryDatasource {
     final List data = response['data'];
     return data.map((e) => FailureTypeModel.fromJson(e)).toList();
   }
+
+  Future<CloseUpOfAMachineResponseEntity> getCloseUpOfAMachine({
+    required String machineId,
+    int page = 1,
+    int limit = 10,
+  }) async {
+    final response = await apiClient.get(
+      '/api/machinery/$machineId',
+      queryParameters: {'page': page, 'limit': limit},
+      operationName: 'closeUpOfAMachine',
+    );
+    return CloseUpOfAMachineResponseModel.fromJson(response);
+  }
 }

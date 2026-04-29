@@ -393,18 +393,38 @@ class CreateContributionRoute extends _i51.PageRouteInfo<void> {
 
 /// generated route for
 /// [_i9.DetailMachineryScreen]
-class DetailMachineryRoute extends _i51.PageRouteInfo<void> {
-  const DetailMachineryRoute({List<_i51.PageRouteInfo>? children})
-    : super(DetailMachineryRoute.name, initialChildren: children);
+class DetailMachineryRoute extends _i51.PageRouteInfo<DetailMachineryRouteArgs> {
+  DetailMachineryRoute({
+    _i52.Key? key,
+    required String machineId,
+    List<_i51.PageRouteInfo>? children,
+  }) : super(
+         DetailMachineryRoute.name,
+         args: DetailMachineryRouteArgs(key: key, machineId: machineId),
+         initialChildren: children,
+       );
 
   static const String name = 'DetailMachineryRoute';
 
   static _i51.PageInfo page = _i51.PageInfo(
     name,
     builder: (data) {
-      return const _i9.DetailMachineryScreen();
+      final args = data.argsAs<DetailMachineryRouteArgs>();
+      return _i9.DetailMachineryScreen(key: args.key, machineId: args.machineId);
     },
   );
+}
+
+class DetailMachineryRouteArgs {
+  const DetailMachineryRouteArgs({this.key, required this.machineId});
+
+  final _i52.Key? key;
+  final String machineId;
+
+  @override
+  String toString() {
+    return 'DetailMachineryRouteArgs{key: $key, machineId: $machineId}';
+  }
 }
 
 /// generated route for

@@ -194,7 +194,9 @@ class _ListMachineryScreenState extends State<ListMachineryScreen> {
                                           return GestureDetector(
                                             onTap: () {
                                               context.router.push(
-                                                DetailMachineryRoute(),
+                                                DetailMachineryRoute(
+                                                  machineId: inventory[index].machineId,
+                                                ),
                                               );
                                             },
                                             child: CardMachineryWidget(

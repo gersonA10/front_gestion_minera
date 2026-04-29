@@ -98,3 +98,24 @@ class FailureTypesError extends MachineryState {
   final String message;
   FailureTypesError(this.message);
 }
+///
+class GetCloseUpOfAMachineLoading extends MachineryState {}
+
+class GetCloseUpOfAMachineLoaded extends MachineryState {
+  final HeaderMetricsEntity headerMetrics;
+  final List<MaintenancesListEntity> items;
+  final bool hasReachedMax;
+  final int totalRecords;
+
+  GetCloseUpOfAMachineLoaded({
+    required this.headerMetrics,
+    required this.items,
+    required this.hasReachedMax,
+    required this.totalRecords,
+  });
+}
+
+class GetCloseUpOfAMachineError extends MachineryState {
+  final String message;
+  GetCloseUpOfAMachineError(this.message);
+}

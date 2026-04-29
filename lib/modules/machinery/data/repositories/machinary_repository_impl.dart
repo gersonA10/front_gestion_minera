@@ -51,7 +51,7 @@ class MachineryRepositoryImpl extends MachineryRepository {
   @override
   Future<CreateMaintenanceResponseEntity> createMaintenanceRequest(
     CreateMaintenanceRequestEntity requestModel,
-  ) async{
+  ) async {
     final request = CreateMaintenanceRequestModel.fromEntity(requestModel);
     final response = await datasource.createMaintenanceRequest(request);
     return response;
@@ -60,5 +60,18 @@ class MachineryRepositoryImpl extends MachineryRepository {
   @override
   Future<List<FailureTypeEntity>> getFailureTypes() {
     return datasource.getFailureTypes();
+  }
+
+  @override
+  Future<CloseUpOfAMachineResponseEntity> getCloseUpOfAMachine({
+    required String machineId,
+    int page = 1,
+    int limit = 10,
+  }) {
+    return datasource.getCloseUpOfAMachine(
+      machineId: machineId,
+      page: page,
+      limit: limit,
+    );
   }
 }
