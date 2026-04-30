@@ -170,7 +170,6 @@ class _ListMachineryScreenState extends State<ListMachineryScreen> {
                       return const Center(child: CircularProgressIndicator());
                     }
                     final inventory = _cacheinventory!;
-                    final hasReachedMax = _cachedHasReachedMax;
 
                     final types = _cacheTypeMachine!;
 
