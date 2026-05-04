@@ -91,7 +91,7 @@ class _UploadReceiptEvidenceScreenState
                           fontWeight: FontWeight.w500,
                         ),
                       ),
-                      
+
                       const Spacer(),
 
                       ElevatedButton.icon(
@@ -128,14 +128,42 @@ class _UploadReceiptEvidenceScreenState
             const SizedBox(height: 10),
 
             Container(
-              padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 15),
               decoration: BoxDecoration(
+                color: TColors.white, 
                 border: Border.all(color: const Color(0xFFE9EBF0)),
                 borderRadius: BorderRadius.circular(12),
               ),
-              child: Row(children: [
-                  
-                ],
+              child: TextFormField(
+                keyboardType: const TextInputType.numberWithOptions(
+                  decimal: true,
+                ),
+                decoration: const InputDecoration(
+                  hintText: '0.00',
+                  hintStyle: TextStyle(
+                    color: Color(
+                      0xFFD1D5DB,
+                    ), 
+                    fontSize: 16,
+                  ),
+                  prefixIcon: Padding(
+                    padding: EdgeInsets.all(15),
+                    child: Text(
+                      'Bs',
+                      style: TextStyle(
+                        color: Color(0xFF6B7280),
+                        fontWeight: FontWeight.bold,
+                        fontSize: 16,
+                      ),
+                    ),
+                  ),
+                  prefixIconConstraints: BoxConstraints(
+                    minWidth: 0,
+                    minHeight: 0,
+                  ),
+                  border: InputBorder
+                      .none, 
+                  contentPadding: EdgeInsets.symmetric(vertical: 15),
+                ),
               ),
             ),
 
@@ -143,12 +171,19 @@ class _UploadReceiptEvidenceScreenState
             Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: const [
-                Icon(Icons.info_outline, size: 18, color: TColors.appDisabledColor),
+                Icon(
+                  Icons.info_outline,
+                  size: 18,
+                  color: TColors.appDisabledColor,
+                ),
                 SizedBox(width: 8),
                 Expanded(
                   child: Text(
                     'Asegúrese de que el monto coincida exactamente con el total del recibo adjunto.',
-                    style: TextStyle(fontSize: 12, color: TColors.appDisabledColor),
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: TColors.appDisabledColor,
+                    ),
                   ),
                 ),
               ],
