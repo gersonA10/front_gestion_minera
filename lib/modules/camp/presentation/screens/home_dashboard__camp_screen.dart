@@ -1,5 +1,6 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
+import 'package:front_gestion_minera/config/router/app_router.gr.dart';
 import 'package:front_gestion_minera/modules/camp/presentation/widgets/widgets.dart';
 import 'package:front_gestion_minera/utils/constants/color.constant.dart';
 import '../../../../core/widgets/logout_button_widget.dart';
@@ -74,7 +75,9 @@ class _HomeDashboardCampScreenState extends State<HomeDashboardCampScreen> {
       floatingActionButton: Padding(
         padding: const EdgeInsets.symmetric(vertical: 25.0),
         child: FloatingActionButton.extended(
-          onPressed: () {},
+          onPressed: () {
+            context.router.push(UploadReceiptEvidenceRoute());
+          },
           backgroundColor: TColors.appMainColor,
           icon: Icon(Icons.add),
           label: Text(
