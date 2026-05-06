@@ -1,6 +1,7 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:front_gestion_minera/config/router/app_router.gr.dart';
 import 'package:front_gestion_minera/config/router/guards/auth_guard.dart';
+import 'package:front_gestion_minera/modules/camp/presentation/screens/upload_receipt_evidence_screen.dart';
 
 @AutoRouterConfig()
 class AppRouter extends RootStackRouter {
@@ -69,6 +70,9 @@ class AppRouter extends RootStackRouter {
     AutoRoute(page: RegistrationOfNewMachineryRoute.page),
     AutoRoute(page: DetailMaintenanceRoute.page),
     AutoRoute(page: HomeDashboardCampRoute.page),
+    AutoRoute(page: RequestMaintenanceRoute.page),
+    AutoRoute(page: UploadReceiptEvidenceRoute.page),
     AutoRoute(page: TransactionHistoryRoute.page),
+
   ];
 }

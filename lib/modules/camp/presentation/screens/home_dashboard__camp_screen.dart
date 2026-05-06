@@ -77,7 +77,9 @@ class _HomeDashboardCampScreenState extends State<HomeDashboardCampScreen> {
       floatingActionButton: Padding(
         padding: const EdgeInsets.symmetric(vertical: 25.0),
         child: FloatingActionButton.extended(
-          onPressed: () {},
+          onPressed: () {
+            context.router.push(UploadReceiptEvidenceRoute());
+          },
           backgroundColor: TColors.appMainColor,
           icon: Icon(Icons.add),
           label: Text(

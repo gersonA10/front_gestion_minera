@@ -32,6 +32,14 @@ class MachineryBloc extends Bloc<MachineryEvent, MachineryState> {
   List<MaintenanceHistoryItemEntity> _historyItems = [];
   bool _isLoadingMoreHistory = false;
 
+  // Para close up de maquinaria
+  int _currentCloseUpPage = 1;
+  bool _hasReachedCloseUpMax = false;
+  int _currentCloseUpTotalRecords = 0;
+  List<MaintenancesListEntity> _closeUpItems = [];
+  HeaderMetricsEntity? _closeUpHeaderMetrics;
+  bool _isLoadingMoreCloseUp = false;
+
   MachineryBloc({required this.repository}) : super(MachineryInitial()) {
     on<FetchMetricsMachineEvent>(_onFetchMetricMachine);
     on<ListInventoryMachineryEvent>(_listInventoryMachinery);
@@ -41,6 +49,10 @@ class MachineryBloc extends Bloc<MachineryEvent, MachineryState> {
     on<LoadMoreMaintenanceHistoryEvent>(_onLoadMoreMaintenanceHistory);
     on<FetchDetailMaintenanceEvent>(_fetchDetailMaintenance);
     on<RegisterMachineryEvent>(_onRegisterMachinery);
+      on<CreateMaintenanceRequestEvent>(_onCreateMaintenanceRequest);
+    on<FetchFailureTypesEvent>(_onFetchFailureTypes);
+    on<GetCloseUpOfAMachineEvent>(_onGetCloseUpOfAMachine);
+    on<LoadMoreCloseUpOfAMachineEvent>(_onLoadMoreCloseUpOfAMachine);
   }
 
   FutureOr<void> _onFetchMetricMachine(
@@ -280,4 +292,103 @@ class MachineryBloc extends Bloc<MachineryEvent, MachineryState> {
     }
    }
 
-}
+  FutureOr<void> _onGetCloseUpOfAMachine(
+    GetCloseUpOfAMachineEvent event,
+    Emitter<MachineryState> emit,
+  ) async {
+    if (event.isRefresh) {
+      _currentCloseUpPage = 1;
+      _hasReachedCloseUpMax = false;
+      _closeUpItems.clear();
+      emit(GetCloseUpOfAMachineLoading());
+    }
+    try {
+      final response = await repository.getCloseUpOfAMachine(
+        machineId: event.machineId,
+        page: _currentCloseUpPage,
+      );
+      _closeUpHeaderMetrics = response.headerMetrics;
+      _closeUpItems = response.maintenancesList;
+      _hasReachedCloseUpMax = !response.hasMore;
+      _currentCloseUpTotalRecords = response.totalRecords;
+      emit(GetCloseUpOfAMachineLoaded(
+        headerMetrics: _closeUpHeaderMetrics!,
+        items: List.from(_closeUpItems),
+        hasReachedMax: _hasReachedCloseUpMax,
+        totalRecords: _currentCloseUpTotalRecords,
+      ));
+    } on BaseApiException catch (error) {
+      if (error.key == DioExceptionKey.unauthorised) return;
+      emit(GetCloseUpOfAMachineError(mapErrorMessage(error.key)));
+    } catch (e) {
+      emit(GetCloseUpOfAMachineError('Error inesperado: $e'));
+    }
+  }
+
+  FutureOr<void> _onLoadMoreCloseUpOfAMachine(
+    LoadMoreCloseUpOfAMachineEvent event,
+    Emitter<MachineryState> emit,
+  ) async {
+    if (_hasReachedCloseUpMax || _isLoadingMoreCloseUp) return;
+    _isLoadingMoreCloseUp = true;
+    _currentCloseUpPage++;
+    try {
+      final response = await repository.getCloseUpOfAMachine(
+        machineId: event.machineId,
+        page: _currentCloseUpPage,
+      );
+      _closeUpItems.addAll(response.maintenancesList);
+      _hasReachedCloseUpMax = !response.hasMore;
+      emit(GetCloseUpOfAMachineLoaded(
+        headerMetrics: _closeUpHeaderMetrics!,
+        items: List.from(_closeUpItems),
+        hasReachedMax: _hasReachedCloseUpMax,
+        totalRecords: _currentCloseUpTotalRecords,
+      ));
+    } on BaseApiException catch (error) {
+      if (error.key == DioExceptionKey.unauthorised) return;
+      _currentCloseUpPage--;
+      emit(GetCloseUpOfAMachineError(mapErrorMessage(error.key)));
+    } catch (e) {
+      _currentCloseUpPage--;
+      emit(GetCloseUpOfAMachineError('Error inesperado: $e'));
+    } finally {
+      _isLoadingMoreCloseUp = false;
+    }
+  }
+
+  FutureOr<void> _onCreateMaintenanceRequest(
+    CreateMaintenanceRequestEvent event,
+    Emitter<MachineryState> emit,
+  ) async {
+    emit(CreateMaintenanceRequestLoading());
+    try {
+      final response = await repository.createMaintenanceRequest(
+       event.request
+      );
+      emit(CreateMaintenanceRequestSuccess(response: response));
+    } on BaseApiException catch (error) {
+      emit(CreateMaintenanceRequestError(mapErrorMessage(error.key)));
+    } catch (e) {
+      emit(CreateMaintenanceRequestError('Error inesperado: $e'));
+    }
+  }
+
+  FutureOr<void> _onFetchFailureTypes(
+    FetchFailureTypesEvent event,
+    Emitter<MachineryState> emit,
+  ) async {
+    emit(FailureTypesLoading());
+    try {
+      final types = await repository.getFailureTypes();
+      emit(FailureTypesLoaded(failureTypes: types));
+    } on BaseApiException catch (error) {
+      if (error.key == DioExceptionKey.unauthorised) return;
+      emit(FailureTypesError(mapErrorMessage(error.key)));
+    } catch (e) {
+      emit(FailureTypesError('Error inesperado: $e'));
+    }
+  }
+    
+
+    }

@@ -47,3 +47,23 @@ class FetchDetailMaintenanceEvent extends MachineryEvent {
 
   FetchDetailMaintenanceEvent({required this.machineId});
 }
+
+class CreateMaintenanceRequestEvent extends MachineryEvent {
+  final CreateMaintenanceRequestEntity request;
+  CreateMaintenanceRequestEvent({
+    required this.request
+  });
+}
+
+class FetchFailureTypesEvent extends MachineryEvent {}
+
+class GetCloseUpOfAMachineEvent extends MachineryEvent {
+  final String machineId;
+  final bool isRefresh;
+  GetCloseUpOfAMachineEvent({required this.machineId, this.isRefresh = true});
+}
+
+class LoadMoreCloseUpOfAMachineEvent extends MachineryEvent {
+  final String machineId;
+  LoadMoreCloseUpOfAMachineEvent({required this.machineId});
+}
