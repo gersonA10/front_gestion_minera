@@ -50,7 +50,9 @@ class _HomeDashboardCampScreenState extends State<HomeDashboardCampScreen> {
                     ),
                     const Spacer(),
                     GestureDetector(
-                      onTap: () {},
+                      onTap: () {
+                        context.router.push(TransactionHistoryRoute());
+                      },
                       child: Text(
                         'Ver Todos',
                         style: TextStyle(color: TColors.appMainColor),
