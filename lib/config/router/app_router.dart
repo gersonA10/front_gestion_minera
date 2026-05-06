@@ -1,7 +1,6 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:front_gestion_minera/config/router/app_router.gr.dart';
 import 'package:front_gestion_minera/config/router/guards/auth_guard.dart';
-import 'package:front_gestion_minera/modules/camp/presentation/screens/upload_receipt_evidence_screen.dart';
 
 @AutoRouterConfig()
 class AppRouter extends RootStackRouter {
