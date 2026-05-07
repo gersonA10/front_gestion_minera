@@ -1,7 +1,6 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:front_gestion_minera/config/router/app_router.gr.dart';
 import 'package:front_gestion_minera/config/router/guards/auth_guard.dart';
-import 'package:front_gestion_minera/modules/minutes_memos/presentation/screens/minutes_memos_main_screen.dart';
 
 @AutoRouterConfig()
 class AppRouter extends RootStackRouter {
