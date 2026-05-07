@@ -271,8 +271,8 @@ class _PaymentHistoryViewState extends State<_PaymentHistoryView> {
             final sortedKeys = grouped.keys.toList()
               ..sort((a, b) => b.compareTo(a));
         
-            final totalObtained =
-                _cachedItems!.fold<double>(0, (sum, t) => sum + t.monto);
+            // final totalObtained =
+            //     _cachedItems!.fold<double>(0, (sum, t) => sum + t.monto);
         
             return Stack(
               children: [

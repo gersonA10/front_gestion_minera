@@ -350,31 +350,4 @@ class _ChartCardWidgetState extends State<ChartCardWidget> {
     );
   }
 
-  Widget _lineLegend(
-    BuildContext context,
-    Color color,
-    String label,
-    ColorScheme colors,
-  ) {
-    return Row(
-      children: [
-        Container(
-          width: 16,
-          height: 2.5,
-          decoration: BoxDecoration(
-            color: color,
-            borderRadius: BorderRadius.circular(2),
-          ),
-        ),
-        const SizedBox(width: 5),
-        Text(
-          label,
-          style: AppTextStyles.mainStyle10(context).copyWith(
-            color: colors.lead.withValues(alpha: 0.75),
-            fontWeight: FontWeight.w500,
-          ),
-        ),
-      ],
-    );
-  }
 }

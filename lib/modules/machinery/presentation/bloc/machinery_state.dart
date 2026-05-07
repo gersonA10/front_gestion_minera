@@ -102,3 +102,48 @@ class DetailMaintenanceError extends MachineryState {
   DetailMaintenanceError(this.message);
 }
 
+
+class CreateMaintenanceRequestLoading extends MachineryState {}
+
+class CreateMaintenanceRequestSuccess extends MachineryState {
+  final CreateMaintenanceResponseEntity response;
+  CreateMaintenanceRequestSuccess({required this.response});
+}
+
+class CreateMaintenanceRequestError extends MachineryState {
+  final String message;
+  CreateMaintenanceRequestError(this.message);
+}
+
+class FailureTypesLoading extends MachineryState {}
+
+class FailureTypesLoaded extends MachineryState {
+  final List<FailureTypeEntity> failureTypes;
+  FailureTypesLoaded({required this.failureTypes});
+}
+
+class FailureTypesError extends MachineryState {
+  final String message;
+  FailureTypesError(this.message);
+}
+///
+class GetCloseUpOfAMachineLoading extends MachineryState {}
+
+class GetCloseUpOfAMachineLoaded extends MachineryState {
+  final HeaderMetricsEntity headerMetrics;
+  final List<MaintenancesListEntity> items;
+  final bool hasReachedMax;
+  final int totalRecords;
+
+  GetCloseUpOfAMachineLoaded({
+    required this.headerMetrics,
+    required this.items,
+    required this.hasReachedMax,
+    required this.totalRecords,
+  });
+}
+
+class GetCloseUpOfAMachineError extends MachineryState {
+  final String message;
+  GetCloseUpOfAMachineError(this.message);
+}
