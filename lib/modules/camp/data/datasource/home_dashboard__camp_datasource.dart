@@ -22,12 +22,11 @@ class CampDatasource {
     int limit = 10,
     String? status,
   }) async {
-    final queryParams = <String, dynamic>{'page': page, 'limit': limit};
-    if (status != null && status != 'TODOS') {
-      queryParams['status'] = status;
-    } else {
-      queryParams['status'] = 'TODOS';
-    }
+    final queryParams = <String, dynamic>{
+      'page': page,
+      'limit': limit,
+      'status': (status == null || status.isEmpty) ? 'TODOS' : status,
+    };
 
     final response = await apiClient.get(
       '/api/camp/requests/history',
@@ -49,18 +48,39 @@ class CampDatasource {
     CreateCampRequestEntity request,
   ) async {
     final model = CreateCampRequestModel.fromEntity(request);
-    final response = await apiClient.postFormData(
+    final response = await apiClient.post(
       '/api/camp/requests',
       operationName: 'createCampRequest',
+      data: model.toJson(),
+    );
+    return CampRecentRequestModel.fromJson(response['data']);
+  }
+
+  Future<RequestDetailModel> getRequestDetail(String requestId) async {
+    final response = await apiClient.get(
+      '/api/camp/requests/$requestId',
+      operationName: 'getCampRequestDetail',
+    );
+    return RequestDetailModel.fromJson(response['data']);
+  }
+
+  Future<CloseRequestResultModel> closeRequest(
+    String requestId,
+    CloseRequestEntity request,
+  ) async {
+    final model = CloseRequestModel.fromEntity(request);
+    final response = await apiClient.postFormData(
+      '/api/camp/requests/$requestId/close',
+      operationName: 'closeCampRequest',
       data: model.toFormDataMap(),
       files: [
         {
-          'name': 'receipt_evidence',
+          'name': 'evidence_url',
           'path': model.evidencePath,
           'filename': model.evidencePath.split('/').last,
         },
       ],
     );
-    return CampRecentRequestModel.fromJson(response['data']);
+    return CloseRequestResultModel.fromJson(response['data']);
   }
 }

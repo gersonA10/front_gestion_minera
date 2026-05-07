@@ -76,5 +76,6 @@ class AppRouter extends RootStackRouter {
     AutoRoute(page: NewRequestRoute.page),
     AutoRoute(page: MinutesMemosMainRoute.page),
     AutoRoute(page: RegisterMinutesMemosRoute.page),
+    AutoRoute(page: RequestProgressDetailsRoute.page),
   ];
 }

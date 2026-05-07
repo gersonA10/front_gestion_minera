@@ -1,4 +1,6 @@
+import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
+import 'package:front_gestion_minera/config/router/app_router.gr.dart';
 import 'package:intl/intl.dart';
 
 import '../../../../utils/constants/color.constant.dart';
@@ -11,150 +13,144 @@ class CardRequestDetailWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final color = _colorFor(transaction.statusKey);
-    final formattedAmount = NumberFormat('#,##0.00', 'es_BO').format(transaction.amount);
-    final date = DateFormat('dd/MM/yyyy').format(transaction.transactionDate);
-    final time = DateFormat('hh:mm a').format(transaction.transactionDate);
+    final color = _statusColor(transaction.globalStatus);
+    final amount = transaction.finalAmount ?? transaction.requestedAmount;
+    final formattedAmount = NumberFormat('#,##0.00', 'es_BO').format(amount);
+    final date = DateFormat('dd/MM/yyyy').format(transaction.createdAt);
 
-    return Container(
-      width: double.infinity,
-      margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
-      padding: const EdgeInsets.all(15),
-      decoration: BoxDecoration(
-        color: TColors.white,
-        borderRadius: BorderRadius.circular(20),
-      ),
-      child: Column(
-        children: [
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Container(
-                padding: const EdgeInsets.all(10),
-                decoration: BoxDecoration(
-                  color: color.withValues(alpha: 0.2),
-                  borderRadius: BorderRadius.circular(15),
+    return GestureDetector(
+      onTap: () {
+        context.router.push(
+          RequestProgressDetailsRoute(requestId: transaction.requestId),
+        );
+      },
+      child: Container(
+        width: double.infinity,
+        margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
+        padding: const EdgeInsets.all(15),
+        decoration: BoxDecoration(
+          color: TColors.white,
+          borderRadius: BorderRadius.circular(20),
+        ),
+        child: Column(
+          children: [
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(10),
+                  decoration: BoxDecoration(
+                    color: color.withValues(alpha: 0.2),
+                    borderRadius: BorderRadius.circular(15),
+                  ),
+                  child: Icon(Icons.receipt_long_outlined, color: color),
                 ),
-                child: Icon(
-                  transaction.operationType == 'EXPENSE'
-                      ? Icons.shopping_cart_outlined
-                      : Icons.arrow_downward_rounded,
-                  color: color,
+                const SizedBox(width: 10),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        transaction.description,
+                        style: const TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 15,
+                        ),
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        date,
+                        style: TextStyle(
+                          color: TColors.textFieldDisabledColor,
+                          fontSize: 12,
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
-              ),
-              const SizedBox(width: 10),
-              Expanded(
-                child: Column(
+                const SizedBox(width: 8),
+                _StatusBadge(
+                  globalStatus: transaction.globalStatus,
+                  label: transaction.statusLabel,
+                ),
+              ],
+            ),
+            const SizedBox(height: 12),
+            Row(
+              children: [
+                Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      transaction.description,
-                      style: const TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 15,
+                      'Monto Solicitado',
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: TColors.appDisabledColor,
                       ),
                     ),
-                    const SizedBox(height: 2),
-                    Row(
-                      children: [
-                        Text(
-                          date,
-                          style: TextStyle(color: TColors.textFieldDisabledColor, fontSize: 12),
-                        ),
-                        const SizedBox(width: 5),
-                        Icon(Icons.circle, size: 5, color: TColors.textFieldDisabledColor),
-                        const SizedBox(width: 5),
-                        Text(
-                          time,
-                          style: TextStyle(color: TColors.textFieldDisabledColor, fontSize: 12),
-                        ),
-                      ],
+                    Text(
+                      '$formattedAmount Bs',
+                      style: const TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                   ],
                 ),
-              ),
-              const SizedBox(width: 8),
-              _StatusBadge(statusKey: transaction.statusKey, label: transaction.statusLabel),
-            ],
-          ),
-          const SizedBox(height: 12),
-          Row(
-            children: [
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'Monto Total',
-                    style: TextStyle(fontSize: 12, color: TColors.appDisabledColor),
-                  ),
-                  Text(
-                    '$formattedAmount Bs',
-                    style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                  ),
-                ],
-              ),
-              const Spacer(),
-              Text(
-                transaction.requestCode,
-                style: TextStyle(fontSize: 12, color: TColors.appDisabledColor),
-              ),
-            ],
-          ),
-        ],
+                const Spacer(),
+                Text(
+                  transaction.requestCode,
+                  style: TextStyle(fontSize: 12, color: TColors.appDisabledColor),
+                ),
+              ],
+            ),
+          ],
+        ),
       ),
     );
   }
+}
 
-  Color _colorFor(String statusKey) {
-    switch (statusKey) {
-      case 'IN_REVIEW':
-        return TColors.appMainColor;
-      case 'PAID':
-      case 'COMPLETED':
-        return TColors.green;
-      case 'PENDING_RECEIPT':
-        return TColors.amber;
-      default:
-        return TColors.red;
-    }
+Color _statusColor(String globalStatus) {
+  switch (globalStatus) {
+    case 'IN_REVIEW':
+      return TColors.appMainColor;
+    case 'APPROVED':
+      return TColors.amber;
+    case 'PAID':
+      return TColors.green;
+    case 'REJECTED':
+      return TColors.danger;
+    default:
+      return TColors.appDisabledColor;
   }
 }
 
 class _StatusBadge extends StatelessWidget {
-  final String statusKey;
+  final String globalStatus;
   final String label;
 
-  const _StatusBadge({required this.statusKey, required this.label});
+  const _StatusBadge({required this.globalStatus, required this.label});
 
   @override
   Widget build(BuildContext context) {
-    final color = _colorFor(statusKey);
+    final color = _statusColor(globalStatus);
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 3),
       decoration: BoxDecoration(
         color: color.withValues(alpha: 0.2),
         borderRadius: BorderRadius.circular(10),
       ),
-      constraints: const BoxConstraints(maxWidth: 120),
+      constraints: const BoxConstraints(maxWidth: 130),
       child: Text(
         label,
         textAlign: TextAlign.center,
-        style: TextStyle(fontSize: 10, color: color, fontWeight: FontWeight.bold),
+        style: TextStyle(
+          fontSize: 10,
+          color: color,
+          fontWeight: FontWeight.bold,
+        ),
       ),
     );
-  }
-
-  Color _colorFor(String statusKey) {
-    switch (statusKey) {
-      case 'IN_REVIEW':
-        return TColors.appMainColor;
-      case 'PAID':
-      case 'COMPLETED':
-        return TColors.green;
-      case 'PENDING_RECEIPT':
-        return TColors.amber;
-      default:
-        return TColors.red;
-    }
   }
 }

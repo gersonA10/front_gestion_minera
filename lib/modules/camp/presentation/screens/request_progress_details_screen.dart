@@ -1,32 +1,151 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:front_gestion_minera/config/router/app_router.gr.dart';
+import 'package:front_gestion_minera/injector_container.dart';
+import 'package:intl/intl.dart';
+
+import '../../../../utils/constants/color.constant.dart';
+import '../../domain/entity/entity.dart';
+import '../bloc/camp_bloc.dart';
 
 @RoutePage()
-class RequestProgressDetailsScreen extends StatelessWidget {
-  const RequestProgressDetailsScreen({super.key});
+class RequestProgressDetailsScreen extends StatefulWidget {
+  final String requestId;
+
+  const RequestProgressDetailsScreen({super.key, required this.requestId});
+
+  @override
+  State<RequestProgressDetailsScreen> createState() =>
+      _RequestProgressDetailsScreenState();
+}
+
+class _RequestProgressDetailsScreenState
+    extends State<RequestProgressDetailsScreen> {
+  late final CampBloc _bloc;
+
+  @override
+  void initState() {
+    super.initState();
+    _bloc = InjectorContainer.getIt<CampBloc>();
+    _bloc.add(GetRequestDetailEvent(widget.requestId));
+  }
 
   @override
   Widget build(BuildContext context) {
+    return BlocProvider.value(
+      value: _bloc,
+      child: BlocBuilder<CampBloc, CampState>(
+        buildWhen: (_, state) =>
+            state is RequestDetailLoading ||
+            state is RequestDetailLoaded ||
+            state is RequestDetailError,
+        builder: (context, state) {
+          if (state is RequestDetailLoading) {
+            return Scaffold(
+              backgroundColor: const Color(0xFFF2F3F7),
+              body: Column(
+                children: [
+                  _AppBar(displayCode: '...', onBack: () => context.router.back()),
+                  const Expanded(
+                    child: Center(child: CircularProgressIndicator()),
+                  ),
+                ],
+              ),
+            );
+          }
+
+          if (state is RequestDetailError) {
+            return Scaffold(
+              backgroundColor: const Color(0xFFF2F3F7),
+              body: Column(
+                children: [
+                  _AppBar(displayCode: '', onBack: () => context.router.back()),
+                  Expanded(
+                    child: Center(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text(state.message, textAlign: TextAlign.center),
+                          const SizedBox(height: 16),
+                          ElevatedButton(
+                            onPressed: () => _bloc.add(GetRequestDetailEvent(widget.requestId)),
+                            child: const Text('Reintentar'),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            );
+          }
+
+          if (state is RequestDetailLoaded) {
+            return _DetailView(detail: state.detail);
+          }
+
+          return const Scaffold(
+            backgroundColor: Color(0xFFF2F3F7),
+            body: SizedBox.shrink(),
+          );
+        },
+      ),
+    );
+  }
+}
+
+class _DetailView extends StatelessWidget {
+  final RequestDetailEntity detail;
+
+  const _DetailView({required this.detail});
+
+  @override
+  Widget build(BuildContext context) {
+    final amountFmt = NumberFormat('#,##0.00', 'es_BO');
+
     return Scaffold(
       backgroundColor: const Color(0xFFF2F3F7),
       body: Column(
         children: [
-          _buildAppBar(context),
+          _AppBar(
+            displayCode: detail.displayCode,
+            onBack: () => context.router.back(),
+          ),
           Expanded(
             child: SingleChildScrollView(
               padding: const EdgeInsets.all(16),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  _buildSummaryCard(),
-                  const SizedBox(height: 12),
-                  _buildAccionRequeridaCard(),
+                  _SummaryCard(detail: detail, amountFmt: amountFmt),
+                  if (detail.requiredAction != null) ...[
+                    const SizedBox(height: 12),
+                    _AccionRequeridaCard(requestId: detail.requestId),
+                  ],
+                  if (detail.rejectReason != null) ...[
+                    const SizedBox(height: 12),
+                    _RejectionCard(reason: detail.rejectReason!),
+                  ],
                   const SizedBox(height: 20),
-                  _buildProgresoSection(),
+                  _TimelineSection(
+                    timeline: detail.timeline,
+                    globalStatus: detail.globalStatus,
+                  ),
                   const SizedBox(height: 20),
-                  _buildMetadataRow('Solicitante', 'Jefe de Campamento'),
+                  _MetadataRow('Solicitante', detail.requesterName),
                   const Divider(height: 1),
-                  _buildMetadataRow('Ubicación', 'Mina El Tesoro - Sector C'),
+                  _MetadataRow(
+                    'Creado el',
+                    DateFormat('dd/MM/yyyy HH:mm').format(detail.createdAt),
+                  ),
+                  if (detail.closedAt != null) ...[
+                    const Divider(height: 1),
+                    _MetadataRow(
+                      'Cerrado el',
+                      DateFormat('dd/MM/yyyy HH:mm').format(detail.closedAt!),
+                    ),
+                  ],
                   const SizedBox(height: 24),
                 ],
               ),
@@ -36,8 +155,16 @@ class RequestProgressDetailsScreen extends StatelessWidget {
       ),
     );
   }
+}
 
-  Widget _buildAppBar(BuildContext context) {
+class _AppBar extends StatelessWidget {
+  final String displayCode;
+  final VoidCallback onBack;
+
+  const _AppBar({required this.displayCode, required this.onBack});
+
+  @override
+  Widget build(BuildContext context) {
     return Container(
       color: const Color(0xFF1A1F2E),
       padding: EdgeInsets.only(
@@ -50,12 +177,12 @@ class RequestProgressDetailsScreen extends StatelessWidget {
         children: [
           IconButton(
             icon: const Icon(Icons.arrow_back_ios, color: Colors.white, size: 20),
-            onPressed: () => Navigator.of(context).maybePop(),
+            onPressed: onBack,
           ),
-          const Column(
+          Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(
+              const Text(
                 'SOLICITUD',
                 style: TextStyle(
                   color: Colors.white54,
@@ -65,8 +192,8 @@ class RequestProgressDetailsScreen extends StatelessWidget {
                 ),
               ),
               Text(
-                '#12944',
-                style: TextStyle(
+                displayCode,
+                style: const TextStyle(
                   color: Colors.white,
                   fontSize: 22,
                   fontWeight: FontWeight.bold,
@@ -75,14 +202,21 @@ class RequestProgressDetailsScreen extends StatelessWidget {
               ),
             ],
           ),
-          const Spacer(),
-          const Icon(Icons.more_vert, color: Colors.white),
         ],
       ),
     );
   }
+}
 
-  Widget _buildSummaryCard() {
+class _SummaryCard extends StatelessWidget {
+  final RequestDetailEntity detail;
+  final NumberFormat amountFmt;
+
+  const _SummaryCard({required this.detail, required this.amountFmt});
+
+  @override
+  Widget build(BuildContext context) {
+    final color = _statusColor(detail.globalStatus);
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(18),
@@ -96,41 +230,29 @@ class RequestProgressDetailsScreen extends StatelessWidget {
           Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Suministros de EPP',
-                      style: TextStyle(
-                        fontSize: 17,
-                        fontWeight: FontWeight.bold,
-                        color: Color(0xFF1A1F2E),
-                      ),
-                    ),
-                    SizedBox(height: 2),
-                    Text(
-                      'Categoría: Operaciones Mineras',
-                      style: TextStyle(
-                        fontSize: 13,
-                        color: Colors.grey,
-                      ),
-                    ),
-                  ],
+              Expanded(
+                child: Text(
+                  detail.description,
+                  style: const TextStyle(
+                    fontSize: 17,
+                    fontWeight: FontWeight.bold,
+                    color: Color(0xFF1A1F2E),
+                  ),
                 ),
               ),
+              const SizedBox(width: 8),
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
                 decoration: BoxDecoration(
-                  color: const Color(0xFFE8F4FD),
+                  color: color.withValues(alpha: 0.15),
                   borderRadius: BorderRadius.circular(20),
                 ),
-                child: const Text(
-                  'APROBADA',
+                child: Text(
+                  detail.statusLabel.toUpperCase(),
                   style: TextStyle(
                     fontSize: 11,
                     fontWeight: FontWeight.bold,
-                    color: Color(0xFF2196F3),
+                    color: color,
                     letterSpacing: 0.5,
                   ),
                 ),
@@ -139,7 +261,7 @@ class RequestProgressDetailsScreen extends StatelessWidget {
           ),
           const SizedBox(height: 16),
           const Text(
-            'MONTO TOTAL',
+            'MONTO SOLICITADO',
             style: TextStyle(
               fontSize: 11,
               color: Colors.grey,
@@ -149,18 +271,18 @@ class RequestProgressDetailsScreen extends StatelessWidget {
           ),
           const SizedBox(height: 2),
           RichText(
-            text: const TextSpan(
+            text: TextSpan(
               children: [
                 TextSpan(
-                  text: '\$4,500.00',
-                  style: TextStyle(
+                  text: amountFmt.format(detail.requestedAmount),
+                  style: const TextStyle(
                     fontSize: 30,
                     fontWeight: FontWeight.bold,
                     color: Color(0xFF1A1F2E),
                   ),
                 ),
-                TextSpan(
-                  text: ' USD',
+                const TextSpan(
+                  text: ' Bs',
                   style: TextStyle(
                     fontSize: 14,
                     fontWeight: FontWeight.w500,
@@ -174,8 +296,15 @@ class RequestProgressDetailsScreen extends StatelessWidget {
       ),
     );
   }
+}
 
-  Widget _buildAccionRequeridaCard() {
+class _AccionRequeridaCard extends StatelessWidget {
+  final String requestId;
+
+  const _AccionRequeridaCard({required this.requestId});
+
+  @override
+  Widget build(BuildContext context) {
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(16),
@@ -215,10 +344,7 @@ class RequestProgressDetailsScreen extends StatelessWidget {
                   ),
                   Text(
                     'Pendiente de recibo para cierre',
-                    style: TextStyle(
-                      fontSize: 13,
-                      color: Colors.grey,
-                    ),
+                    style: TextStyle(fontSize: 13, color: Colors.grey),
                   ),
                 ],
               ),
@@ -228,7 +354,9 @@ class RequestProgressDetailsScreen extends StatelessWidget {
           SizedBox(
             width: double.infinity,
             child: ElevatedButton.icon(
-              onPressed: () {},
+              onPressed: () => context.router.push(
+                UploadReceiptEvidenceRoute(requestId: requestId),
+              ),
               icon: const Icon(Icons.cloud_upload_outlined, size: 18),
               label: const Text(
                 'Subir Recibo',
@@ -249,8 +377,59 @@ class RequestProgressDetailsScreen extends StatelessWidget {
       ),
     );
   }
+}
 
-  Widget _buildProgresoSection() {
+class _RejectionCard extends StatelessWidget {
+  final String reason;
+
+  const _RejectionCard({required this.reason});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: TColors.danger.withValues(alpha: 0.08),
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: TColors.danger.withValues(alpha: 0.3)),
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Icon(Icons.cancel_outlined, color: TColors.danger, size: 20),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Solicitud Rechazada',
+                  style: TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.bold,
+                    color: TColors.danger,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(reason, style: const TextStyle(fontSize: 13, color: Colors.black87)),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _TimelineSection extends StatelessWidget {
+  final List<RequestTimelineStepEntity> timeline;
+  final String globalStatus;
+
+  const _TimelineSection({required this.timeline, required this.globalStatus});
+
+  @override
+  Widget build(BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -263,36 +442,61 @@ class RequestProgressDetailsScreen extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 16),
-        _buildStepCompleted(
-          label: 'Creado',
-          date: '10 Oct 2023, 08:30 AM',
-          isFirst: true,
-        ),
-        _buildStepCompleted(
-          label: 'En Revisión',
-          date: '11 Oct 2023, 02:15 PM',
-        ),
-        _buildStepAprobada(),
-        _buildStepDesembolsado(),
-        _buildStepPendiente(
-          label: 'Completada',
-          subtitle: 'Pendiente de documentación',
-          isLast: true,
-        ),
+        ...timeline.asMap().entries.map((entry) {
+          final step = entry.value;
+          final isLast = entry.key == timeline.length - 1;
+          final isCompleted = step.status == 'COMPLETED';
+          final isActive = !isCompleted && step.key == globalStatus;
+          return _TimelineStep(
+            step: step,
+            isLast: isLast,
+            isCompleted: isCompleted,
+            isActive: isActive,
+          );
+        }),
       ],
     );
   }
+}
 
-  Widget _buildStepCompleted({
-    required String label,
-    required String date,
-    bool isFirst = false,
-  }) {
+class _TimelineStep extends StatelessWidget {
+  final RequestTimelineStepEntity step;
+  final bool isLast;
+  final bool isCompleted;
+  final bool isActive;
+
+  const _TimelineStep({
+    required this.step,
+    required this.isLast,
+    required this.isCompleted,
+    required this.isActive,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    const blue = Color(0xFF2196F3);
+
+    final titleColor = (isCompleted || isActive) ? blue : Colors.grey;
+
     return IntrinsicHeight(
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          _buildStepIndicatorCompleted(isLast: false),
+          SizedBox(
+            width: 36,
+            child: Column(
+              children: [
+                _indicator(isCompleted, isActive),
+                if (!isLast)
+                  Expanded(
+                    child: Container(
+                      width: 2,
+                      color: isCompleted ? blue : const Color(0xFFDDDDDD),
+                    ),
+                  ),
+              ],
+            ),
+          ),
           const SizedBox(width: 14),
           Expanded(
             child: Padding(
@@ -300,263 +504,44 @@ class RequestProgressDetailsScreen extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    label,
-                    style: const TextStyle(
-                      fontSize: 15,
-                      fontWeight: FontWeight.w600,
-                      color: Color(0xFF1A1F2E),
-                    ),
-                  ),
-                  Text(
-                    date,
-                    style: const TextStyle(fontSize: 12, color: Colors.grey),
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildStepAprobada() {
-    return IntrinsicHeight(
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          _buildStepIndicatorCompleted(isLast: false),
-          const SizedBox(width: 14),
-          Expanded(
-            child: Padding(
-              padding: const EdgeInsets.only(bottom: 16),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Text(
-                    'Aprobada',
-                    style: TextStyle(
-                      fontSize: 15,
-                      fontWeight: FontWeight.w600,
-                      color: Color(0xFF2196F3),
-                    ),
-                  ),
-                  const Text(
-                    '11 Oct 2023, 02:15 PM',
-                    style: TextStyle(fontSize: 12, color: Colors.grey),
-                  ),
-                  const SizedBox(height: 8),
-                  Container(
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                    child: Column(
-                      children: [
-                        _buildApprovalRow('Aprobado por\nAdministracion:', 'Ing. Roberto Méndez'),
-                        const Divider(height: 1, indent: 12, endIndent: 12),
-                        _buildApprovalRow('Aprobado por\nVigilancia:', 'Ing. Roberto Méndez'),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildApprovalRow(String label, String value) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Text(
-            label,
-            style: const TextStyle(fontSize: 12, color: Colors.grey, height: 1.4),
-          ),
-          Text(
-            value,
-            style: const TextStyle(
-              fontSize: 13,
-              fontWeight: FontWeight.w600,
-              color: Color(0xFF1A1F2E),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildStepDesembolsado() {
-    return IntrinsicHeight(
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          _buildStepIndicatorActive(isLast: false),
-          const SizedBox(width: 14),
-          Expanded(
-            child: Padding(
-              padding: const EdgeInsets.only(bottom: 16),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Text(
-                    'Desembolsado',
-                    style: TextStyle(
-                      fontSize: 15,
-                      fontWeight: FontWeight.w600,
-                      color: Color(0xFF2196F3),
-                    ),
-                  ),
-                  RichText(
-                    text: const TextSpan(
-                      children: [
-                        TextSpan(
-                          text: 'Estado Actual',
-                          style: TextStyle(
-                            fontSize: 12,
-                            color: Color(0xFF2196F3),
-                            fontWeight: FontWeight.w500,
-                          ),
+                  Row(
+                    children: [
+                      Text(
+                        step.title,
+                        style: TextStyle(
+                          fontSize: 15,
+                          fontWeight: FontWeight.w600,
+                          color: titleColor,
                         ),
-                        TextSpan(
-                          text: ' • 12 Oct 2023',
-                          style: TextStyle(fontSize: 12, color: Colors.grey),
-                        ),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  Container(
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          const Text(
-                            'Desembolsado\npor:',
-                            style: TextStyle(fontSize: 12, color: Colors.grey, height: 1.4),
-                          ),
-                          const Text(
-                            'Ing. Roberto Méndez',
-                            style: TextStyle(
-                              fontSize: 13,
-                              fontWeight: FontWeight.w600,
-                              color: Color(0xFF1A1F2E),
-                            ),
-                          ),
-                        ],
                       ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildStepPendiente({
-    required String label,
-    required String subtitle,
-    bool isLast = false,
-  }) {
-    return IntrinsicHeight(
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          _buildStepIndicatorPending(isLast: isLast),
-          const SizedBox(width: 14),
-          Expanded(
-            child: Padding(
-              padding: const EdgeInsets.only(bottom: 16),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    label,
-                    style: const TextStyle(
-                      fontSize: 15,
-                      fontWeight: FontWeight.w500,
-                      color: Colors.grey,
-                    ),
-                  ),
-                  Text(
-                    subtitle,
-                    style: const TextStyle(fontSize: 12, color: Colors.grey),
-                  ),
-                  const SizedBox(height: 10),
-                  Container(
-                    padding: const EdgeInsets.all(14),
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(10),
-                      border: Border.all(
-                        color: const Color(0xFFDDDDDD),
-                        style: BorderStyle.solid,
-                        width: 1.5,
-                      ),
-                    ),
-                    child: Row(
-                      children: [
+                      if (isActive) ...[
+                        const SizedBox(width: 8),
                         Container(
-                          width: 60,
-                          height: 60,
+                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                           decoration: BoxDecoration(
-                            color: const Color(0xFFF0F0F0),
-                            borderRadius: BorderRadius.circular(8),
-                            border: Border.all(
-                              color: const Color(0xFFCCCCCC),
-                              style: BorderStyle.solid,
-                            ),
+                            color: blue.withValues(alpha: 0.12),
+                            borderRadius: BorderRadius.circular(10),
                           ),
-                          child: const Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Icon(Icons.image_outlined, color: Colors.grey, size: 20),
-                              SizedBox(height: 2),
-                              Text(
-                                'VISTA PREVIA',
-                                style: TextStyle(fontSize: 7, color: Colors.grey, letterSpacing: 0.3),
-                              ),
-                            ],
-                          ),
-                        ),
-                        const SizedBox(width: 14),
-                        const Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                'Sin archivos aún',
-                                style: TextStyle(
-                                  fontSize: 14,
-                                  fontWeight: FontWeight.bold,
-                                  color: Color(0xFF1A1F2E),
-                                ),
-                              ),
-                              SizedBox(height: 3),
-                              Text(
-                                'Sube el comprobante de pago para finalizar el proceso administrativo.',
-                                style: TextStyle(fontSize: 12, color: Colors.grey, height: 1.4),
-                              ),
-                            ],
+                          child: const Text(
+                            'Estado Actual',
+                            style: TextStyle(fontSize: 10, color: blue, fontWeight: FontWeight.w600),
                           ),
                         ),
                       ],
-                    ),
+                    ],
                   ),
+                  const SizedBox(height: 2),
+                  Text(
+                    step.description,
+                    style: const TextStyle(fontSize: 12, color: Colors.grey),
+                  ),
+                  if (step.date != null) ...[
+                    const SizedBox(height: 2),
+                    Text(
+                      DateFormat('dd/MM/yyyy HH:mm').format(step.date!),
+                      style: const TextStyle(fontSize: 11, color: Colors.grey),
+                    ),
+                  ],
                 ],
               ),
             ),
@@ -566,104 +551,57 @@ class RequestProgressDetailsScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildStepIndicatorCompleted({required bool isLast}) {
-    return SizedBox(
-      width: 36,
-      child: Column(
-        children: [
-          Container(
-            width: 32,
-            height: 32,
-            decoration: const BoxDecoration(
-              color: Color(0xFF2196F3),
-              shape: BoxShape.circle,
-            ),
-            child: const Icon(Icons.check, color: Colors.white, size: 18),
+  Widget _indicator(bool isCompleted, bool isActive) {
+    const blue = Color(0xFF2196F3);
+    if (isCompleted) {
+      return Container(
+        width: 32,
+        height: 32,
+        decoration: const BoxDecoration(color: blue, shape: BoxShape.circle),
+        child: const Icon(Icons.check, color: Colors.white, size: 18),
+      );
+    }
+    if (isActive) {
+      return Container(
+        width: 32,
+        height: 32,
+        decoration: BoxDecoration(
+          color: blue.withValues(alpha: 0.15),
+          shape: BoxShape.circle,
+          border: Border.all(color: blue, width: 2.5),
+        ),
+        child: Center(
+          child: Container(
+            width: 12,
+            height: 12,
+            decoration: const BoxDecoration(color: blue, shape: BoxShape.circle),
           ),
-          if (!isLast)
-            Expanded(
-              child: Container(
-                width: 2,
-                color: const Color(0xFF2196F3),
-              ),
-            ),
-        ],
-      ),
+        ),
+      );
+    }
+    return Container(
+      width: 32,
+      height: 32,
+      decoration: BoxDecoration(color: Colors.grey.shade200, shape: BoxShape.circle),
+      child: Icon(Icons.lock_outline, color: Colors.grey.shade400, size: 16),
     );
   }
+}
 
-  Widget _buildStepIndicatorActive({required bool isLast}) {
-    return SizedBox(
-      width: 36,
-      child: Column(
-        children: [
-          Container(
-            width: 32,
-            height: 32,
-            decoration: BoxDecoration(
-              color: const Color(0xFF2196F3).withOpacity(0.15),
-              shape: BoxShape.circle,
-              border: Border.all(color: const Color(0xFF2196F3), width: 2.5),
-            ),
-            child: Center(
-              child: Container(
-                width: 12,
-                height: 12,
-                decoration: const BoxDecoration(
-                  color: Color(0xFF2196F3),
-                  shape: BoxShape.circle,
-                ),
-              ),
-            ),
-          ),
-          if (!isLast)
-            Expanded(
-              child: Container(
-                width: 2,
-                color: const Color(0xFFDDDDDD),
-              ),
-            ),
-        ],
-      ),
-    );
-  }
+class _MetadataRow extends StatelessWidget {
+  final String label;
+  final String value;
 
-  Widget _buildStepIndicatorPending({required bool isLast}) {
-    return SizedBox(
-      width: 36,
-      child: Column(
-        children: [
-          Container(
-            width: 32,
-            height: 32,
-            decoration: BoxDecoration(
-              color: Colors.grey.shade200,
-              shape: BoxShape.circle,
-            ),
-            child: Icon(Icons.lock_outline, color: Colors.grey.shade400, size: 16),
-          ),
-          if (!isLast)
-            Expanded(
-              child: Container(
-                width: 2,
-                color: const Color(0xFFDDDDDD),
-              ),
-            ),
-        ],
-      ),
-    );
-  }
+  const _MetadataRow(this.label, this.value);
 
-  Widget _buildMetadataRow(String label, String value) {
+  @override
+  Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 4),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Text(
-            label,
-            style: const TextStyle(fontSize: 14, color: Colors.grey),
-          ),
+          Text(label, style: const TextStyle(fontSize: 14, color: Colors.grey)),
           Text(
             value,
             style: const TextStyle(
@@ -675,5 +613,22 @@ class RequestProgressDetailsScreen extends StatelessWidget {
         ],
       ),
     );
+  }
+}
+
+Color _statusColor(String status) {
+  switch (status) {
+    case 'IN_REVIEW':
+      return TColors.appMainColor;
+    case 'APPROVED':
+    case 'PENDING_RECEIPT':
+      return TColors.amber;
+    case 'PAID':
+    case 'COMPLETED':
+      return TColors.green;
+    case 'REJECTED':
+      return TColors.danger;
+    default:
+      return TColors.appMainColor;
   }
 }

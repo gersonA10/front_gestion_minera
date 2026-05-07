@@ -36,4 +36,17 @@ class CampRepositoryImpl implements CampRepository {
   ) async {
     return await datasource.createRequest(request);
   }
+
+  @override
+  Future<RequestDetailEntity> getRequestDetail(String requestId) async {
+    return await datasource.getRequestDetail(requestId);
+  }
+
+  @override
+  Future<CloseRequestResultEntity> closeRequest(
+    String requestId,
+    CloseRequestEntity request,
+  ) async {
+    return await datasource.closeRequest(requestId, request);
+  }
 }

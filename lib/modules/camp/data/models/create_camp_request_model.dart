@@ -5,7 +5,6 @@ class CreateCampRequestModel extends CreateCampRequestEntity {
     required super.concept,
     required super.detail,
     required super.requestedAmount,
-    required super.evidencePath,
   });
 
   factory CreateCampRequestModel.fromEntity(CreateCampRequestEntity entity) {
@@ -13,11 +12,10 @@ class CreateCampRequestModel extends CreateCampRequestEntity {
       concept: entity.concept,
       detail: entity.detail,
       requestedAmount: entity.requestedAmount,
-      evidencePath: entity.evidencePath,
     );
   }
 
-  Map<String, dynamic> toFormDataMap() {
+  Map<String, dynamic> toJson() {
     return {
       'concept': concept,
       'detail': detail,

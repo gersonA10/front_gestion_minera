@@ -10,4 +10,11 @@ abstract class CampRepository {
   });
 
   Future<CampRecentRequestEntity> createRequest(CreateCampRequestEntity request);
+
+  Future<RequestDetailEntity> getRequestDetail(String requestId);
+
+  Future<CloseRequestResultEntity> closeRequest(
+    String requestId,
+    CloseRequestEntity request,
+  );
 }

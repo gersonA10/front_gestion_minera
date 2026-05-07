@@ -29,6 +29,8 @@ import 'package:front_gestion_minera/modules/camp/presentation/screens/new_reque
     as _i33;
 import 'package:front_gestion_minera/modules/camp/presentation/screens/transaction_history_screen.dart'
     as _i52;
+import 'package:front_gestion_minera/modules/camp/presentation/screens/request_progress_details_screen.dart'
+    as _i65;
 import 'package:front_gestion_minera/modules/camp/presentation/screens/upload_receipt_evidence_screen.dart'
     as _i54;
 import 'package:front_gestion_minera/modules/machinery/presentation/screens/detail_machinery_screen.dart'
@@ -1558,6 +1560,47 @@ class RequestMaintenanceRouteArgs {
   @override
   String toString() {
     return 'RequestMaintenanceRouteArgs{key: $key, machineId: $machineId}';
+  }
+}
+
+/// generated route for
+/// [_i65.RequestProgressDetailsScreen]
+class RequestProgressDetailsRoute
+    extends _i59.PageRouteInfo<RequestProgressDetailsRouteArgs> {
+  RequestProgressDetailsRoute({
+    _i60.Key? key,
+    required String requestId,
+    List<_i59.PageRouteInfo>? children,
+  }) : super(
+         RequestProgressDetailsRoute.name,
+         args: RequestProgressDetailsRouteArgs(key: key, requestId: requestId),
+         initialChildren: children,
+       );
+
+  static const String name = 'RequestProgressDetailsRoute';
+
+  static _i59.PageInfo page = _i59.PageInfo(
+    name,
+    builder: (data) {
+      final args = data.argsAs<RequestProgressDetailsRouteArgs>();
+      return _i65.RequestProgressDetailsScreen(
+        key: args.key,
+        requestId: args.requestId,
+      );
+    },
+  );
+}
+
+class RequestProgressDetailsRouteArgs {
+  const RequestProgressDetailsRouteArgs({this.key, required this.requestId});
+
+  final _i60.Key? key;
+
+  final String requestId;
+
+  @override
+  String toString() {
+    return 'RequestProgressDetailsRouteArgs{key: $key, requestId: $requestId}';
   }
 }
 

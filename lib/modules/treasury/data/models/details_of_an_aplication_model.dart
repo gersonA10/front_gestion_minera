@@ -25,7 +25,7 @@ class DetailsofanapplicationDataModel extends DetailsofanapplicationDataEntity {
     required super.solicitante,
     required super.createdAt,
     required super.flujoAprobacion,
-    required super.evidenciaUrl,
+    super.evidenciaUrl,
   });
 
   factory DetailsofanapplicationDataModel.fromJson(Map<String, dynamic> json) =>
