@@ -34,7 +34,9 @@ class CampBloc extends Bloc<CampEvent, CampState> {
     on<LoadMoreCampRequestsEvent>(_onLoadMoreDashboard);
     on<GetCampHistoryEvent>(_onGetHistory);
     on<LoadMoreCampHistoryEvent>(_onLoadMoreHistory);
+    on<GetRequestDetailEvent>(_onGetRequestDetail);
     on<CreateCampRequestEvent>(_onCreateRequest);
+    on<CloseRequestEvent>(_onCloseRequest);
   }
 
   Future<void> _onGetDashboard(
@@ -177,6 +179,21 @@ class CampBloc extends Bloc<CampEvent, CampState> {
     }
   }
 
+  Future<void> _onGetRequestDetail(
+    GetRequestDetailEvent event,
+    Emitter<CampState> emit,
+  ) async {
+    emit(RequestDetailLoading());
+    try {
+      final detail = await repository.getRequestDetail(event.requestId);
+      emit(RequestDetailLoaded(detail));
+    } on BaseApiException catch (e) {
+      emit(RequestDetailError(mapErrorMessage(e.key)));
+    } catch (_) {
+      emit(RequestDetailError('Ocurrió un error inesperado'));
+    }
+  }
+
   Future<void> _onCreateRequest(
     CreateCampRequestEvent event,
     Emitter<CampState> emit,
@@ -189,6 +206,21 @@ class CampBloc extends Bloc<CampEvent, CampState> {
       emit(CampRequestCreateError(mapErrorMessage(e.key)));
     } catch (_) {
       emit(CampRequestCreateError('Ocurrió un error inesperado'));
+    }
+  }
+
+  Future<void> _onCloseRequest(
+    CloseRequestEvent event,
+    Emitter<CampState> emit,
+  ) async {
+    emit(RequestClosing());
+    try {
+      final result = await repository.closeRequest(event.requestId, event.request);
+      emit(RequestClosed(result));
+    } on BaseApiException catch (e) {
+      emit(RequestCloseError(mapErrorMessage(e.key)));
+    } catch (_) {
+      emit(RequestCloseError('Ocurrió un error inesperado'));
     }
   }
 }

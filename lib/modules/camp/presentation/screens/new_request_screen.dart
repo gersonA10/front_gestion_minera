@@ -1,7 +1,13 @@
 import 'package:auto_route/auto_route.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:front_gestion_minera/injector_container.dart';
 import 'package:front_gestion_minera/modules/camp/presentation/widgets/widgets.dart';
 import 'package:front_gestion_minera/modules/treasury/presentation/widgets/widgtes.dart';
 import 'package:front_gestion_minera/utils/constants/color.constant.dart';
+
+import '../../domain/entity/entity.dart';
+import '../bloc/camp_bloc.dart';
 
 @RoutePage()
 class NewRequestScreen extends StatefulWidget {
@@ -12,22 +18,34 @@ class NewRequestScreen extends StatefulWidget {
 }
 
 class _NewRequestScreenState extends State<NewRequestScreen> {
+  late final CampBloc _campBloc;
   final _formKey = GlobalKey<FormState>();
 
   final tituloController = TextEditingController();
   final montoController = TextEditingController();
   final fechaController = TextEditingController();
+  final detailController = TextEditingController();
 
   @override
   void initState() {
     super.initState();
-    DateTime hoy = DateTime.now();
+    _campBloc = InjectorContainer.getIt<CampBloc>();
+    final hoy = DateTime.now();
     fechaController.text = "${hoy.month}/${hoy.day}/${hoy.year}";
   }
 
+  @override
+  void dispose() {
+    tituloController.dispose();
+    montoController.dispose();
+    fechaController.dispose();
+    detailController.dispose();
+    super.dispose();
+  }
+
   Future<void> _seleccionarFecha() async {
-    DateTime hoy = DateTime.now();
-    DateTime maxFecha = DateTime(hoy.year, hoy.month + 1, hoy.day);
+    final hoy = DateTime.now();
+    final maxFecha = DateTime(hoy.year, hoy.month + 1, hoy.day);
 
     final fecha = await showDatePicker(
       context: context,
@@ -41,135 +59,213 @@ class _NewRequestScreenState extends State<NewRequestScreen> {
     }
   }
 
+  void _onSubmit() {
+    if (!_formKey.currentState!.validate()) return;
+
+    final monto = double.parse(
+      montoController.text.trim().replaceAll(',', '.'),
+    );
+
+    _campBloc.add(CreateCampRequestEvent(
+      request: CreateCampRequestEntity(
+        concept: tituloController.text.trim(),
+        detail: detailController.text.trim(),
+        requestedAmount: monto,
+      ),
+    ));
+  }
+
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: TColors.appBackgroundColor,
-      appBar: AppBar(
-        title: Text("Nueva Solicitud", style: TextStyle(color: TColors.white)),
-        backgroundColor: const Color(0xFF0A1D37),
-        leading: Icon(Icons.arrow_back_ios, color: Colors.white),
-      ),
-      body: SingleChildScrollView(
-        padding: EdgeInsets.all(20),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              "Detalles",
-              style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
-            ),
-            Text(
-              "Complete la información.",
-              style: TextStyle(color: TColors.greyText),
-            ),
-            SizedBox(height: 20),
-
-            Container(
-              padding: EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(15),
+    return BlocProvider.value(
+      value: _campBloc,
+      child: BlocConsumer<CampBloc, CampState>(
+        listenWhen: (_, state) =>
+            state is CampRequestCreated || state is CampRequestCreateError,
+        listener: (context, state) {
+          if (state is CampRequestCreated) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                content: Text('Solicitud creada exitosamente'),
+                backgroundColor: Colors.green,
               ),
-              child: Form(
-                key: _formKey,
-                child: Column(
-                  children: [
-                     CustomTextFormFieldWidget(
-                      label: "Título",
-                      icon: Icons.campaign_rounded,
-                      hint: "Compra de Viveres",
-                      controller: tituloController,
-                      validator: (value) {
-                        if (value == null || value.isEmpty) {
-                          return "Ingrese un título";
-                        }
-                        return null;
-                      },
-                    ),
-                     CustomTextFormFieldWidget(
-                      label: "Monto solicitado (Bs)",
-                      icon: Icons.money,
-                      hint: "0.00",
-                      suffixText: "Bs",
-                      keyboardType: TextInputType.numberWithOptions(decimal: true),
-                      controller: montoController,
-                      validator: (value) {
-                        if (value == null || value.isEmpty) {
-                          return "Ingrese un monto";
-                        }
-                        final monto = double.tryParse(value.replaceAll(',', '.'));
-                        if (monto == null || monto <= 0) {
-                          return "El monto debe ser mayor a 0";
-                        }
-                        return null;
-                      },
-                    ),
-                     CustomTextFormFieldWidget(
-                      label: "Fecha estimada de compra",
-                      icon: Icons.calendar_today_rounded,
-                      hint: "mm/dd/yyyy",
-                      controller: fechaController,
-                      readOnly: true,
-                      onTap: _seleccionarFecha,
-                      validator: (value) {
-                        if (value == null || value.isEmpty) {
-                          return "Seleccione una fecha";
-                        }
-                        return null;
-                      },
-                    ),
-                     CustomTextFormFieldWidget(
-                      label: "Descripción o detalle de compra",
-                      icon: Icons.description_rounded,
-                      hint: "Describa los insumos, herramientas o servicios requeridos para la operación...",
-                      maxLines: 4,
-                    ),
-                  ],
-                ),
+            );
+            context.router.back();
+          }
+          if (state is CampRequestCreateError) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(state.message),
+                backgroundColor: Colors.red,
+              ),
+            );
+          }
+        },
+        buildWhen: (_, state) =>
+            state is CampRequestCreating ||
+            state is CampRequestCreated ||
+            state is CampRequestCreateError ||
+            state is CampInitial,
+        builder: (context, state) {
+          final isLoading = state is CampRequestCreating;
+          return Scaffold(
+            backgroundColor: TColors.appBackgroundColor,
+            appBar: AppBar(
+              title: const Text(
+                "Nueva Solicitud",
+                style: TextStyle(color: TColors.white),
+              ),
+              backgroundColor: const Color(0xFF0A1D37),
+              leading: IconButton(
+                icon: const Icon(Icons.arrow_back_ios, color: Colors.white),
+                onPressed: () => context.router.back(),
               ),
             ),
-
-            SizedBox(height: 20),
-
-            Container(
-              padding: EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: Color(0xFFE3F2FD),
-                borderRadius: BorderRadius.circular(10),
-              ),
-              child: Row(
+            body: SingleChildScrollView(
+              padding: const EdgeInsets.all(20),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Icon(Icons.info, color: Colors.blue),
-                  SizedBox(width: 10),
-                  Text(
-                    "Esta solicitud será revisada por vigilancia.",
-                    style: TextStyle(color: TColors.appMainColor, fontWeight: FontWeight.w600),
+                  const Text(
+                    "Detalles",
+                    style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+                  ),
+                  const Text(
+                    "Complete la información.",
+                    style: TextStyle(color: TColors.greyText),
+                  ),
+                  const SizedBox(height: 20),
+                  Container(
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(15),
+                    ),
+                    child: Form(
+                      key: _formKey,
+                      child: Column(
+                        children: [
+                          CustomTextFormFieldWidget(
+                            label: "Título",
+                            icon: Icons.campaign_rounded,
+                            hint: "Compra de Viveres",
+                            controller: tituloController,
+                            validator: (value) {
+                              if (value == null || value.isEmpty) {
+                                return "Ingrese un título";
+                              }
+                              return null;
+                            },
+                          ),
+                          CustomTextFormFieldWidget(
+                            label: "Monto solicitado (Bs)",
+                            icon: Icons.money,
+                            hint: "0.00",
+                            suffixText: "Bs",
+                            keyboardType: const TextInputType.numberWithOptions(
+                              decimal: true,
+                            ),
+                            controller: montoController,
+                            validator: (value) {
+                              if (value == null || value.isEmpty) {
+                                return "Ingrese un monto";
+                              }
+                              final monto = double.tryParse(
+                                value.replaceAll(',', '.'),
+                              );
+                              if (monto == null || monto <= 0) {
+                                return "El monto debe ser mayor a 0";
+                              }
+                              return null;
+                            },
+                          ),
+                          CustomTextFormFieldWidget(
+                            label: "Fecha estimada de compra",
+                            icon: Icons.calendar_today_rounded,
+                            hint: "mm/dd/yyyy",
+                            controller: fechaController,
+                            readOnly: true,
+                            onTap: _seleccionarFecha,
+                            validator: (value) {
+                              if (value == null || value.isEmpty) {
+                                return "Seleccione una fecha";
+                              }
+                              return null;
+                            },
+                          ),
+                          CustomTextFormFieldWidget(
+                            label: "Descripción o detalle de compra",
+                            icon: Icons.description_rounded,
+                            hint:
+                                "Describa los insumos, herramientas o servicios requeridos...",
+                            maxLines: 4,
+                            controller: detailController,
+                            validator: (value) {
+                              if (value == null || value.isEmpty) {
+                                return "Ingrese un detalle";
+                              }
+                              return null;
+                            },
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 20),
+                  Container(
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFE3F2FD),
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: const Row(
+                      children: [
+                        Icon(Icons.info, color: Colors.blue),
+                        SizedBox(width: 10),
+                        Expanded(
+                          child: Text(
+                            "Esta solicitud será revisada por vigilancia.",
+                            style: TextStyle(
+                              color: TColors.appMainColor,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 30),
+                  ElevatedButton.icon(
+                    onPressed: isLoading ? null : _onSubmit,
+                    icon: isLoading
+                        ? const SizedBox(
+                            width: 20,
+                            height: 20,
+                            child: CircularProgressIndicator(
+                              color: Colors.white,
+                              strokeWidth: 2,
+                            ),
+                          )
+                        : const Icon(Icons.send, color: TColors.white),
+                    label: Text(
+                      isLoading ? "Enviando..." : "Enviar Solicitud",
+                      style: const TextStyle(color: TColors.white),
+                    ),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xFF1E88E5),
+                      disabledBackgroundColor:
+                          const Color(0xFF1E88E5).withValues(alpha: 0.6),
+                      minimumSize: const Size(double.infinity, 50),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
                   ),
                 ],
               ),
             ),
-
-            SizedBox(height: 30),
-
-            ElevatedButton.icon(
-              onPressed: () {
-                if (_formKey.currentState!.validate()) {
-                  print("Formulario enviado");
-                }
-              },
-              icon: Icon(Icons.send, color: TColors.white,),
-              label: Text("Enviar Solicitud", style: TextStyle(color: TColors.white),),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Color(0xFF1E88E5),
-                minimumSize: Size(double.infinity, 50),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
-              ),
-            ),
-          ],
-        ),
+          );
+        },
       ),
     );
   }

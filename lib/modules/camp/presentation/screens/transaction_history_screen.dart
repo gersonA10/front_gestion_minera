@@ -22,10 +22,10 @@ class _TransactionHistoryScreenState extends State<TransactionHistoryScreen> {
 
   static const _filters = [
     ('Todos', 'TODOS'),
-    ('En Revisión', 'IN_REVIEW'),
-    ('Pend. Recibo', 'PENDING_RECEIPT'),
-    ('Completados', 'COMPLETED'),
-    ('Rechazados', 'REJECTED'),
+    ('En Revisión', 'EN_REVISION'),
+    ('Pend. Recibo', 'PENDIENTE_RECIBO'),
+    ('Completados', 'COMPLETADO'),
+    ('Rechazados', 'RECHAZADO'),
   ];
 
   int _selectedIndex = 0;
@@ -75,7 +75,7 @@ class _TransactionHistoryScreenState extends State<TransactionHistoryScreen> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                'Historial de Transacciones',
+                'Historial de Solicitudes',
                 style: TextStyle(color: Colors.white, fontSize: 22),
               ),
               Text(
@@ -88,19 +88,58 @@ class _TransactionHistoryScreenState extends State<TransactionHistoryScreen> {
         body: SafeArea(
           child: Column(
             children: [
-              Container(
-                height: 60,
-                color: TColors.white,
-                margin: const EdgeInsets.only(top: 10),
-                child: _FilterBar(
-                  filters: _filters,
-                  selectedIndex: _selectedIndex,
-                  onTap: _onFilterTap,
+              const SizedBox(height: 14),
+              SizedBox(
+                height: 40,
+                child: ListView(
+                  scrollDirection: Axis.horizontal,
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  children: List.generate(_filters.length, (index) {
+                    final selected = _selectedIndex == index;
+                    return Padding(
+                      padding: const EdgeInsets.only(right: 8),
+                      child: GestureDetector(
+                        onTap: () => _onFilterTap(index),
+                        child: AnimatedContainer(
+                          duration: const Duration(milliseconds: 200),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 16,
+                            vertical: 9,
+                          ),
+                          decoration: BoxDecoration(
+                            color: selected
+                                ? TColors.appMainColor
+                                : TColors.white,
+                            borderRadius: BorderRadius.circular(30),
+                            border: Border.all(
+                              color: selected
+                                  ? TColors.appMainColor
+                                  : TColors.appDisabledColor,
+                            ),
+                          ),
+                          child: Text(
+                            _filters[index].$1,
+                            style: TextStyle(
+                              color: selected
+                                  ? TColors.white
+                                  : TColors.appDisabledColor,
+                              fontSize: 12,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ),
+                      ),
+                    );
+                  }),
                 ),
               ),
               const SizedBox(height: 8),
               Expanded(
                 child: BlocBuilder<CampBloc, CampState>(
+                  buildWhen: (_, curr) =>
+                      curr is CampHistoryLoading ||
+                      curr is CampHistoryLoaded ||
+                      curr is CampHistoryError,
                   builder: (context, state) {
                     if (state is CampHistoryLoading) {
                       return const Center(child: CircularProgressIndicator());
@@ -115,7 +154,10 @@ class _TransactionHistoryScreenState extends State<TransactionHistoryScreen> {
                             const SizedBox(height: 16),
                             ElevatedButton(
                               onPressed: () => _historyBloc.add(
-                                GetCampHistoryEvent(status: _filters[_selectedIndex].$2),
+                                GetCampHistoryEvent(
+                                  status: _filters[_selectedIndex].$2,
+                                  isRefresh: true,
+                                ),
                               ),
                               child: const Text('Reintentar'),
                             ),
@@ -127,7 +169,13 @@ class _TransactionHistoryScreenState extends State<TransactionHistoryScreen> {
                     if (state is CampHistoryLoaded) {
                       if (state.items.isEmpty) {
                         return const Center(
-                          child: Text('No hay transacciones registradas'),
+                          child: Text(
+                            'No hay solicitudes registradas',
+                            style: TextStyle(
+                              color: TColors.appDisabledColor,
+                              fontSize: 13,
+                            ),
+                          ),
                         );
                       }
 
@@ -141,12 +189,16 @@ class _TransactionHistoryScreenState extends State<TransactionHistoryScreen> {
                         child: ListView.builder(
                           controller: _scrollController,
                           physics: const AlwaysScrollableScrollPhysics(),
-                          itemCount: state.items.length + (state.hasMore ? 1 : 0),
+                          padding: const EdgeInsets.only(top: 6, bottom: 16),
+                          itemCount:
+                              state.items.length + (state.hasMore ? 1 : 0),
                           itemBuilder: (context, index) {
                             if (index == state.items.length) {
                               return const Padding(
                                 padding: EdgeInsets.symmetric(vertical: 16),
-                                child: Center(child: CircularProgressIndicator()),
+                                child: Center(
+                                  child: CircularProgressIndicator(),
+                                ),
                               );
                             }
                             return CardRequestDetailWidget(
@@ -156,7 +208,6 @@ class _TransactionHistoryScreenState extends State<TransactionHistoryScreen> {
                         ),
                       );
                     }
-
                     return const SizedBox.shrink();
                   },
                 ),
@@ -165,51 +216,6 @@ class _TransactionHistoryScreenState extends State<TransactionHistoryScreen> {
           ),
         ),
       ),
-    );
-  }
-}
-
-class _FilterBar extends StatelessWidget {
-  final List<(String, String)> filters;
-  final int selectedIndex;
-  final void Function(int) onTap;
-
-  const _FilterBar({
-    required this.filters,
-    required this.selectedIndex,
-    required this.onTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return ListView.builder(
-      scrollDirection: Axis.horizontal,
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 10),
-      itemCount: filters.length,
-      itemBuilder: (context, index) {
-        final isSelected = selectedIndex == index;
-        return GestureDetector(
-          onTap: () => onTap(index),
-          child: AnimatedContainer(
-            duration: const Duration(milliseconds: 250),
-            margin: const EdgeInsets.symmetric(horizontal: 4),
-            padding: const EdgeInsets.symmetric(horizontal: 14),
-            decoration: BoxDecoration(
-              color: isSelected ? TColors.appMainColor : TColors.appBackgroundColor,
-              borderRadius: BorderRadius.circular(15),
-            ),
-            child: Center(
-              child: Text(
-                filters[index].$1,
-                style: TextStyle(
-                  color: isSelected ? TColors.white : TColors.textFieldIconColor,
-                  fontSize: 13,
-                ),
-              ),
-            ),
-          ),
-        );
-      },
     );
   }
 }

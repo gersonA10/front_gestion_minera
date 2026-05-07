@@ -17,7 +17,7 @@ class DetailsofanapplicationDataEntity {
   final String solicitante;
   final DateTime createdAt;
   final List<FlujoAprobacionEntity> flujoAprobacion;
-  final String evidenciaUrl;
+  final String? evidenciaUrl;
 
   DetailsofanapplicationDataEntity({
     required this.requestId,
@@ -26,7 +26,7 @@ class DetailsofanapplicationDataEntity {
     required this.solicitante,
     required this.createdAt,
     required this.flujoAprobacion,
-    required this.evidenciaUrl,
+    this.evidenciaUrl,
   });
 }
 

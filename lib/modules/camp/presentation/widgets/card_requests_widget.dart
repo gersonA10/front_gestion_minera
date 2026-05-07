@@ -1,4 +1,6 @@
+import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
+import 'package:front_gestion_minera/config/router/app_router.gr.dart';
 import 'package:intl/intl.dart';
 
 import '../../../../utils/constants/color.constant.dart';
@@ -11,32 +13,37 @@ class CardRequestsWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(15),
-      margin: const EdgeInsets.symmetric(vertical: 5),
-      decoration: BoxDecoration(
-        color: TColors.white,
-        borderRadius: BorderRadius.circular(10),
-      ),
-      child: Row(
-        children: [
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(request.description, style: const TextStyle(fontSize: 15)),
-                const SizedBox(height: 5),
-                Text(
-                  '${request.displayCode} · ${DateFormat('dd/MM/yyyy').format(request.createdAt)}',
-                  style: TextStyle(fontSize: 13, color: TColors.appDisabledColor),
-                ),
-              ],
+    return GestureDetector(
+      onTap: () {
+         context.router.push(RequestProgressDetailsRoute(requestId: request.requestId));
+      },
+      child: Container(
+        width: double.infinity,
+        padding: const EdgeInsets.all(15),
+        margin: const EdgeInsets.symmetric(vertical: 5),
+        decoration: BoxDecoration(
+          color: TColors.white,
+          borderRadius: BorderRadius.circular(10),
+        ),
+        child: Row(
+          children: [
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(request.description, style: const TextStyle(fontSize: 15)),
+                  const SizedBox(height: 5),
+                  Text(
+                    '${request.displayCode} · ${DateFormat('dd/MM/yyyy').format(request.createdAt)}',
+                    style: TextStyle(fontSize: 13, color: TColors.appDisabledColor),
+                  ),
+                ],
+              ),
             ),
-          ),
-          const SizedBox(width: 8),
-          _StatusBadge(globalStatus: request.globalStatus, label: request.statusLabel),
-        ],
+            const SizedBox(width: 8),
+            _StatusBadge(globalStatus: request.globalStatus, label: request.statusLabel),
+          ],
+        ),
       ),
     );
   }
@@ -70,12 +77,14 @@ class _StatusBadge extends StatelessWidget {
     switch (status) {
       case 'IN_REVIEW':
         return TColors.appMainColor;
-      case 'COMPLETED':
-        return TColors.green;
-      case 'PENDING_RECEIPT':
+      case 'APPROVED':
         return TColors.amber;
+      case 'PAID':
+        return TColors.green;
+      case 'REJECTED':
+        return TColors.danger;
       default:
-        return TColors.red;
+        return TColors.danger;
     }
   }
 }

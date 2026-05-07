@@ -64,3 +64,29 @@ final class CampRequestCreateError extends CampState {
   final String message;
   CampRequestCreateError(this.message);
 }
+
+// Request detail states
+final class RequestDetailLoading extends CampState {}
+
+final class RequestDetailLoaded extends CampState {
+  final RequestDetailEntity detail;
+  RequestDetailLoaded(this.detail);
+}
+
+final class RequestDetailError extends CampState {
+  final String message;
+  RequestDetailError(this.message);
+}
+
+// Close request states
+final class RequestClosing extends CampState {}
+
+final class RequestClosed extends CampState {
+  final CloseRequestResultEntity result;
+  RequestClosed(this.result);
+}
+
+final class RequestCloseError extends CampState {
+  final String message;
+  RequestCloseError(this.message);
+}

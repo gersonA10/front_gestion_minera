@@ -20,3 +20,15 @@ class CreateCampRequestEvent extends CampEvent {
 
   CreateCampRequestEvent({required this.request});
 }
+
+class GetRequestDetailEvent extends CampEvent {
+  final String requestId;
+  GetRequestDetailEvent(this.requestId);
+}
+
+class CloseRequestEvent extends CampEvent {
+  final String requestId;
+  final CloseRequestEntity request;
+
+  CloseRequestEvent({required this.requestId, required this.request});
+}

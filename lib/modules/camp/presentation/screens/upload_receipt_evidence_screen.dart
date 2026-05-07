@@ -12,7 +12,9 @@ import '../bloc/camp_bloc.dart';
 
 @RoutePage()
 class UploadReceiptEvidenceScreen extends StatefulWidget {
-  const UploadReceiptEvidenceScreen({super.key});
+  final String requestId;
+
+  const UploadReceiptEvidenceScreen({super.key, required this.requestId});
 
   @override
   State<UploadReceiptEvidenceScreen> createState() =>
@@ -23,10 +25,7 @@ class _UploadReceiptEvidenceScreenState
     extends State<UploadReceiptEvidenceScreen> {
   late final CampBloc _campBloc;
   final _formKey = GlobalKey<FormState>();
-  final _conceptController = TextEditingController();
-  final _detailController = TextEditingController();
   final _amountController = TextEditingController();
-  final _picker = ImagePicker();
   XFile? _pickedImage;
 
   @override
@@ -37,83 +36,44 @@ class _UploadReceiptEvidenceScreenState
 
   @override
   void dispose() {
-    _conceptController.dispose();
-    _detailController.dispose();
     _amountController.dispose();
     super.dispose();
   }
 
-  Future<void> _showImageSourceSheet() async {
-    await showModalBottomSheet(
+  Future<void> _pickImage(ImageSource source) async {
+    final picker = ImagePicker();
+    final image = await picker.pickImage(source: source, imageQuality: 85);
+    if (image != null) setState(() => _pickedImage = image);
+  }
+
+  void _showImageSourceSheet() {
+    showModalBottomSheet(
       context: context,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
       builder: (_) => SafeArea(
         child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 16),
+          padding: const EdgeInsets.symmetric(vertical: 12),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Container(
-                width: 40,
-                height: 4,
-                decoration: BoxDecoration(
-                  color: Colors.grey[300],
-                  borderRadius: BorderRadius.circular(2),
-                ),
-              ),
-              const SizedBox(height: 16),
-              const Text(
-                'Agregar comprobante',
-                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-              ),
-              const SizedBox(height: 16),
               ListTile(
-                leading: Container(
-                  padding: const EdgeInsets.all(10),
-                  decoration: BoxDecoration(
-                    color: TColors.appMainColor.withValues(alpha: 0.1),
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                  child: const Icon(
-                    Icons.camera_alt_outlined,
-                    color: TColors.appMainColor,
-                  ),
-                ),
-                title: const Text(
-                  'Tomar foto',
-                  style: TextStyle(fontWeight: FontWeight.w600),
-                ),
-                subtitle: const Text('Usar la cámara del dispositivo'),
+                leading: const Icon(Icons.camera_alt_outlined),
+                title: const Text('Tomar foto'),
                 onTap: () {
                   Navigator.pop(context);
                   _pickImage(ImageSource.camera);
                 },
               ),
               ListTile(
-                leading: Container(
-                  padding: const EdgeInsets.all(10),
-                  decoration: BoxDecoration(
-                    color: TColors.appMainColor.withValues(alpha: 0.1),
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                  child: const Icon(
-                    Icons.photo_library_outlined,
-                    color: TColors.appMainColor,
-                  ),
-                ),
-                title: const Text(
-                  'Elegir de galería',
-                  style: TextStyle(fontWeight: FontWeight.w600),
-                ),
-                subtitle: const Text('Seleccionar una imagen existente'),
+                leading: const Icon(Icons.photo_library_outlined),
+                title: const Text('Seleccionar de galería'),
                 onTap: () {
                   Navigator.pop(context);
                   _pickImage(ImageSource.gallery);
                 },
               ),
-              const SizedBox(height: 8),
             ],
           ),
         ),
@@ -121,31 +81,26 @@ class _UploadReceiptEvidenceScreenState
     );
   }
 
-  Future<void> _pickImage(ImageSource source) async {
-    final XFile? photo = await _picker.pickImage(source: source);
-    if (photo != null) {
-      setState(() => _pickedImage = photo);
-    }
-  }
-
   void _onSubmit() {
-    if (!_formKey.currentState!.validate()) return;
-
     if (_pickedImage == null) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('Por favor, agrega un comprobante de evidencia'),
-          backgroundColor: TColors.red,
+          content: Text('Debe capturar una foto del recibo'),
+          backgroundColor: Colors.red,
         ),
       );
       return;
     }
+    if (!_formKey.currentState!.validate()) return;
 
-    _campBloc.add(CreateCampRequestEvent(
-      request: CreateCampRequestEntity(
-        concept: _conceptController.text.trim(),
-        detail: _detailController.text.trim(),
-        requestedAmount: double.parse(_amountController.text.trim()),
+    final amount = double.parse(
+      _amountController.text.trim().replaceAll(',', '.'),
+    );
+
+    _campBloc.add(CloseRequestEvent(
+      requestId: widget.requestId,
+      request: CloseRequestEntity(
+        finalAmount: amount,
         evidencePath: _pickedImage!.path,
       ),
     ));
@@ -157,33 +112,33 @@ class _UploadReceiptEvidenceScreenState
       value: _campBloc,
       child: BlocConsumer<CampBloc, CampState>(
         listenWhen: (_, state) =>
-            state is CampRequestCreated || state is CampRequestCreateError,
+            state is RequestClosed || state is RequestCloseError,
         listener: (context, state) {
-          if (state is CampRequestCreated) {
+          if (state is RequestClosed) {
             ScaffoldMessenger.of(context).showSnackBar(
               const SnackBar(
-                content: Text('Solicitud creada exitosamente'),
-                backgroundColor: TColors.green,
+                content: Text('Solicitud cerrada correctamente'),
+                backgroundColor: Colors.green,
               ),
             );
             context.router.back();
           }
-          if (state is CampRequestCreateError) {
+          if (state is RequestCloseError) {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
                 content: Text(state.message),
-                backgroundColor: TColors.red,
+                backgroundColor: Colors.red,
               ),
             );
           }
         },
         buildWhen: (_, state) =>
-            state is CampRequestCreating ||
-            state is CampRequestCreated ||
-            state is CampRequestCreateError ||
+            state is RequestClosing ||
+            state is RequestClosed ||
+            state is RequestCloseError ||
             state is CampInitial,
         builder: (context, state) {
-          final isLoading = state is CampRequestCreating;
+          final isLoading = state is RequestClosing;
           return Scaffold(
             backgroundColor: TColors.appBackgroundColor,
             appBar: AppBar(
@@ -194,7 +149,7 @@ class _UploadReceiptEvidenceScreenState
                 onPressed: () => context.router.back(),
               ),
               title: const Text(
-                'Nueva Solicitud',
+                'Subir Recibo',
                 style: TextStyle(
                   color: Colors.black,
                   fontWeight: FontWeight.bold,
@@ -203,15 +158,15 @@ class _UploadReceiptEvidenceScreenState
               ),
               centerTitle: true,
             ),
-            body: Form(
-              key: _formKey,
-              child: SingleChildScrollView(
-                padding: const EdgeInsets.all(20.0),
+            body: SingleChildScrollView(
+              padding: const EdgeInsets.all(20.0),
+              child: Form(
+                key: _formKey,
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     const Text(
-                      'Solicitud de Egreso',
+                      'Evidencia de Gasto',
                       style: TextStyle(
                         fontSize: 22,
                         fontWeight: FontWeight.bold,
@@ -220,93 +175,166 @@ class _UploadReceiptEvidenceScreenState
                     ),
                     const SizedBox(height: 8),
                     const Text(
-                      'Complete los datos para registrar una nueva solicitud de fondo fijo.',
+                      'Capture una imagen clara del recibo para finalizar la solicitud de fondo fijo.',
                       style: TextStyle(
-                        fontSize: 14,
-                        color: TColors.appDisabledColor,
+                          fontSize: 14, color: TColors.appDisabledColor),
+                    ),
+                    const SizedBox(height: 25),
+                    Container(
+                      width: double.infinity,
+                      height: 350,
+                      decoration: BoxDecoration(
+                        color: TColors.disabled.withValues(alpha: 0.2),
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                      child: Center(
+                        child: Container(
+                          width: 250,
+                          height: 300,
+                          decoration: BoxDecoration(
+                            color: const Color(0xFFF5F6F8),
+                            borderRadius: BorderRadius.circular(10),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black.withValues(alpha: 0.05),
+                                blurRadius: 10,
+                                spreadRadius: 2,
+                              ),
+                            ],
+                          ),
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              const SizedBox(height: 20),
+                              if (_pickedImage != null)
+                                Expanded(
+                                  child: ClipRRect(
+                                    borderRadius: BorderRadius.circular(10),
+                                    child: Image.file(
+                                      File(_pickedImage!.path),
+                                      fit: BoxFit.cover,
+                                      width: double.infinity,
+                                    ),
+                                  ),
+                                )
+                              else ...[
+                                const Icon(
+                                  Icons.receipt_long_outlined,
+                                  size: 80,
+                                  color: Color(0xFF9DA4B0),
+                                ),
+                                const SizedBox(height: 10),
+                                const Text(
+                                  'Sin imagen seleccionada',
+                                  style: TextStyle(
+                                    color: Color(0xFF1E88E5),
+                                    decoration: TextDecoration.underline,
+                                    fontWeight: FontWeight.w500,
+                                  ),
+                                ),
+                              ],
+                              const Spacer(),
+                              Padding(
+                                padding: const EdgeInsets.only(bottom: 12),
+                                child: ElevatedButton.icon(
+                                  onPressed: isLoading ? null : _showImageSourceSheet,
+                                  icon: const Icon(Icons.camera_alt_outlined,
+                                      size: 20),
+                                  label: Text(_pickedImage != null
+                                      ? 'CAMBIAR IMAGEN'
+                                      : 'AGREGAR IMAGEN'),
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: const Color(0xFF1A1F26),
+                                    foregroundColor: Colors.white,
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(25),
+                                    ),
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 20,
+                                      vertical: 12,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
                       ),
                     ),
                     const SizedBox(height: 30),
-                    _FieldLabel('Concepto'),
-                    const SizedBox(height: 8),
-                    _InputField(
-                      controller: _conceptController,
-                      hintText: 'Ej. Compra de Víveres Quincena 1',
-                      validator: (v) {
-                        if (v == null || v.trim().isEmpty) {
-                          return 'El concepto es requerido';
-                        }
-                        if (v.trim().length < 5) {
-                          return 'El concepto debe tener al menos 5 caracteres';
-                        }
-                        return null;
-                      },
+                    const Text(
+                      'MONTO FINAL EJECUTADO (BS)',
+                      style: TextStyle(
+                        fontSize: 13,
+                        fontWeight: FontWeight.bold,
+                        color: Color(0xFF1A1F26),
+                      ),
                     ),
-                    const SizedBox(height: 20),
-                    _FieldLabel('Detalle'),
-                    const SizedBox(height: 8),
-                    _InputField(
-                      controller: _detailController,
-                      hintText: 'Ej. Insumos para el comedor del campamento norte',
-                      maxLines: 3,
-                      validator: (v) {
-                        if (v == null || v.trim().isEmpty) {
-                          return 'El detalle es requerido';
-                        }
-                        return null;
-                      },
-                    ),
-                    const SizedBox(height: 20),
-                    _FieldLabel('Monto Solicitado (Bs)'),
-                    const SizedBox(height: 8),
-                    _InputField(
-                      controller: _amountController,
-                      hintText: '0.00',
-                      keyboardType:
-                          const TextInputType.numberWithOptions(decimal: true),
-                      prefixText: 'Bs  ',
-                      validator: (v) {
-                        if (v == null || v.trim().isEmpty) {
-                          return 'El monto es requerido';
-                        }
-                        final amount = double.tryParse(v.trim());
-                        if (amount == null || amount <= 0) {
-                          return 'Ingrese un monto válido mayor a 0';
-                        }
-                        return null;
-                      },
+                    const SizedBox(height: 10),
+                    Container(
+                      decoration: BoxDecoration(
+                        color: TColors.white,
+                        border: Border.all(color: const Color(0xFFE9EBF0)),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: TextFormField(
+                        controller: _amountController,
+                        keyboardType: const TextInputType.numberWithOptions(
+                          decimal: true,
+                        ),
+                        decoration: const InputDecoration(
+                          hintText: '0.00',
+                          hintStyle: TextStyle(
+                            color: Color(0xFFD1D5DB),
+                            fontSize: 16,
+                          ),
+                          prefixIcon: Padding(
+                            padding: EdgeInsets.all(15),
+                            child: Text(
+                              'Bs',
+                              style: TextStyle(
+                                color: Color(0xFF6B7280),
+                                fontWeight: FontWeight.bold,
+                                fontSize: 16,
+                              ),
+                            ),
+                          ),
+                          prefixIconConstraints: BoxConstraints(
+                            minWidth: 0,
+                            minHeight: 0,
+                          ),
+                          border: InputBorder.none,
+                          contentPadding: EdgeInsets.symmetric(vertical: 15),
+                        ),
+                        validator: (value) {
+                          if (value == null || value.isEmpty) {
+                            return 'Ingrese el monto final';
+                          }
+                          final amount =
+                              double.tryParse(value.replaceAll(',', '.'));
+                          if (amount == null || amount <= 0) {
+                            return 'El monto debe ser mayor a 0';
+                          }
+                          return null;
+                        },
+                      ),
                     ),
                     const SizedBox(height: 12),
                     Row(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: const [
-                        Icon(
-                          Icons.info_outline,
-                          size: 18,
-                          color: TColors.appDisabledColor,
-                        ),
+                        Icon(Icons.info_outline,
+                            size: 18, color: TColors.appDisabledColor),
                         SizedBox(width: 8),
                         Expanded(
                           child: Text(
-                            'El monto solicitado debe coincidir con el gasto estimado a ejecutar.',
+                            'Asegúrese de que el monto coincida exactamente con el total del recibo adjunto.',
                             style: TextStyle(
-                              fontSize: 12,
-                              color: TColors.appDisabledColor,
-                            ),
+                                fontSize: 12, color: TColors.appDisabledColor),
                           ),
                         ),
                       ],
                     ),
-                    const SizedBox(height: 28),
-                    _FieldLabel('Comprobante de Evidencia'),
-                    const SizedBox(height: 12),
-                    _pickedImage == null
-                        ? _UploadArea(onTap: _showImageSourceSheet)
-                        : _ImagePreview(
-                            file: File(_pickedImage!.path),
-                            onRemove: () =>
-                                setState(() => _pickedImage = null),
-                          ),
                     const SizedBox(height: 40),
                     SizedBox(
                       width: double.infinity,
@@ -324,17 +352,15 @@ class _UploadReceiptEvidenceScreenState
                               )
                             : const Icon(Icons.check_circle_outline),
                         label: Text(
-                          isLoading ? 'CREANDO...' : 'CREAR SOLICITUD',
+                          isLoading ? 'Cerrando...' : 'CERRAR SOLICITUD',
                           style: const TextStyle(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 16,
-                          ),
+                              fontWeight: FontWeight.bold, fontSize: 16),
                         ),
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: TColors.appMainColor,
+                          backgroundColor: TColors.primary,
                           foregroundColor: Colors.white,
                           disabledBackgroundColor:
-                              TColors.appMainColor.withValues(alpha: 0.6),
+                              TColors.primary.withValues(alpha: 0.6),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(12),
                           ),
@@ -348,183 +374,6 @@ class _UploadReceiptEvidenceScreenState
           );
         },
       ),
-    );
-  }
-}
-
-class _FieldLabel extends StatelessWidget {
-  final String text;
-  const _FieldLabel(this.text);
-
-  @override
-  Widget build(BuildContext context) {
-    return Text(
-      text.toUpperCase(),
-      style: const TextStyle(
-        fontSize: 13,
-        fontWeight: FontWeight.bold,
-        color: Color(0xFF1A1F26),
-      ),
-    );
-  }
-}
-
-class _InputField extends StatelessWidget {
-  final TextEditingController controller;
-  final String hintText;
-  final int maxLines;
-  final TextInputType? keyboardType;
-  final String? prefixText;
-  final String? Function(String?)? validator;
-
-  const _InputField({
-    required this.controller,
-    required this.hintText,
-    this.maxLines = 1,
-    this.keyboardType,
-    this.prefixText,
-    this.validator,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      decoration: BoxDecoration(
-        color: TColors.white,
-        border: Border.all(color: const Color(0xFFE9EBF0)),
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: TextFormField(
-        controller: controller,
-        maxLines: maxLines,
-        keyboardType: keyboardType,
-        validator: validator,
-        decoration: InputDecoration(
-          hintText: hintText,
-          hintStyle: const TextStyle(color: Color(0xFFD1D5DB), fontSize: 15),
-          prefixText: prefixText,
-          prefixStyle: const TextStyle(
-            color: Color(0xFF6B7280),
-            fontWeight: FontWeight.bold,
-            fontSize: 16,
-          ),
-          border: InputBorder.none,
-          contentPadding: const EdgeInsets.symmetric(
-            horizontal: 16,
-            vertical: 14,
-          ),
-          errorStyle: const TextStyle(fontSize: 12),
-        ),
-      ),
-    );
-  }
-}
-
-class _UploadArea extends StatelessWidget {
-  final VoidCallback onTap;
-  const _UploadArea({required this.onTap});
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        width: double.infinity,
-        padding: const EdgeInsets.symmetric(vertical: 28),
-        decoration: BoxDecoration(
-          color: TColors.white,
-          border: Border.all(
-            color: TColors.appMainColor.withValues(alpha: 0.4),
-            width: 1.5,
-          ),
-          borderRadius: BorderRadius.circular(12),
-        ),
-        child: Column(
-          children: [
-            Container(
-              width: 60,
-              height: 60,
-              decoration: BoxDecoration(
-                color: TColors.appMainColor.withValues(alpha: 0.08),
-                shape: BoxShape.circle,
-              ),
-              child: const Icon(
-                Icons.add_a_photo_outlined,
-                color: TColors.appMainColor,
-                size: 28,
-              ),
-            ),
-            const SizedBox(height: 12),
-            const Text(
-              'Agregar foto del comprobante',
-              style: TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.w600,
-                color: TColors.appMainColor,
-              ),
-            ),
-            const SizedBox(height: 4),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: const [
-                Icon(Icons.camera_alt_outlined,
-                    size: 14, color: TColors.appDisabledColor),
-                SizedBox(width: 4),
-                Text('Cámara',
-                    style: TextStyle(
-                        fontSize: 12, color: TColors.appDisabledColor)),
-                SizedBox(width: 12),
-                Icon(Icons.photo_library_outlined,
-                    size: 14, color: TColors.appDisabledColor),
-                SizedBox(width: 4),
-                Text('Galería',
-                    style: TextStyle(
-                        fontSize: 12, color: TColors.appDisabledColor)),
-              ],
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _ImagePreview extends StatelessWidget {
-  final File file;
-  final VoidCallback onRemove;
-  const _ImagePreview({required this.file, required this.onRemove});
-
-  @override
-  Widget build(BuildContext context) {
-    return Stack(
-      clipBehavior: Clip.none,
-      children: [
-        ClipRRect(
-          borderRadius: BorderRadius.circular(12),
-          child: Image.file(
-            file,
-            width: double.infinity,
-            height: 180,
-            fit: BoxFit.cover,
-          ),
-        ),
-        Positioned(
-          top: -10,
-          right: -10,
-          child: GestureDetector(
-            onTap: onRemove,
-            child: Container(
-              width: 28,
-              height: 28,
-              decoration: const BoxDecoration(
-                color: Colors.red,
-                shape: BoxShape.circle,
-              ),
-              child: const Icon(Icons.close, color: Colors.white, size: 16),
-            ),
-          ),
-        ),
-      ],
     );
   }
 }
