@@ -72,6 +72,7 @@ class AppRouter extends RootStackRouter {
     AutoRoute(page: RequestMaintenanceRoute.page),
     AutoRoute(page: UploadReceiptEvidenceRoute.page),
     AutoRoute(page: TransactionHistoryRoute.page),
+    AutoRoute(page: NewRequestRoute.page)
 
   ];
 }

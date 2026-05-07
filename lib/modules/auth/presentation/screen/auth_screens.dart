@@ -125,6 +125,7 @@ class _AuthScreenState extends State<AuthScreen> {
     } else if (role == 'jefe_campamento') {
       context.router.replaceAll([ const HomeDashboardCampRoute()]);
     }
+
   }
 
   /// Muestra el dialog para activar la huella tras un login exitoso con formulario.
