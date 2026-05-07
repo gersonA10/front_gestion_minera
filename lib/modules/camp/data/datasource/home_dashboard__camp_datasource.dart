@@ -1,0 +1,66 @@
+import 'package:front_gestion_minera/core/networking/http_services.dart';
+
+import '../../domain/entity/entity.dart';
+import '../models/model.dart';
+
+class CampDatasource {
+  final ApiClient apiClient;
+
+  CampDatasource({required this.apiClient});
+
+  Future<CampDashboardModel> getDashboard({int page = 1, int limit = 10}) async {
+    final response = await apiClient.get(
+      '/api/camp/dashboard',
+      operationName: 'getCampDashboard',
+      queryParameters: {'page': page, 'limit': limit},
+    );
+    return CampDashboardModel.fromJson(response);
+  }
+
+  Future<Map<String, dynamic>> getTransactionHistory({
+    int page = 1,
+    int limit = 10,
+    String? status,
+  }) async {
+    final queryParams = <String, dynamic>{'page': page, 'limit': limit};
+    if (status != null && status != 'TODOS') {
+      queryParams['status'] = status;
+    } else {
+      queryParams['status'] = 'TODOS';
+    }
+
+    final response = await apiClient.get(
+      '/api/camp/requests/history',
+      operationName: 'getCampTransactionHistory',
+      queryParameters: queryParams,
+    );
+
+    final List<dynamic> data = response['data'] ?? [];
+    final Map<String, dynamic> meta = response['meta'] ?? {};
+
+    return {
+      'items': data.map((item) => TransactionHistoryModel.fromJson(item)).toList(),
+      'has_more': meta['has_more'] ?? false,
+      'total_records': meta['total_records'] ?? 0,
+    };
+  }
+
+  Future<CampRecentRequestModel> createRequest(
+    CreateCampRequestEntity request,
+  ) async {
+    final model = CreateCampRequestModel.fromEntity(request);
+    final response = await apiClient.postFormData(
+      '/api/camp/requests',
+      operationName: 'createCampRequest',
+      data: model.toFormDataMap(),
+      files: [
+        {
+          'name': 'receipt_evidence',
+          'path': model.evidencePath,
+          'filename': model.evidencePath.split('/').last,
+        },
+      ],
+    );
+    return CampRecentRequestModel.fromJson(response['data']);
+  }
+}

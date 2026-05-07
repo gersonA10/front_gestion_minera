@@ -1,16 +1,20 @@
-import 'package:flutter/widgets.dart';
+import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
+
 import '../../../../utils/constants/color.constant.dart';
+import '../../domain/entity/entity.dart';
 
 class CardRequestsWidget extends StatelessWidget {
-  final int state;
-  const CardRequestsWidget({super.key, required this.state});
+  final CampRecentRequestEntity request;
+
+  const CardRequestsWidget({super.key, required this.request});
 
   @override
   Widget build(BuildContext context) {
     return Container(
       width: double.infinity,
-      padding: EdgeInsets.all(15),
-      margin: EdgeInsets.symmetric(vertical: 5),
+      padding: const EdgeInsets.all(15),
+      margin: const EdgeInsets.symmetric(vertical: 5),
       decoration: BoxDecoration(
         color: TColors.white,
         borderRadius: BorderRadius.circular(10),
@@ -19,54 +23,59 @@ class CardRequestsWidget extends StatelessWidget {
         children: [
           Expanded(
             child: Column(
-              crossAxisAlignment: .start,
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text('Descripcion solicitud', style: TextStyle(fontSize: 15)),
+                Text(request.description, style: const TextStyle(fontSize: 15)),
                 const SizedBox(height: 5),
                 Text(
-                  'id: datoaref - fecha',
-                  style: TextStyle(
-                    fontSize: 13,
-                    color: TColors.appDisabledColor,
-                  ),
+                  '${request.displayCode} · ${DateFormat('dd/MM/yyyy').format(request.createdAt)}',
+                  style: TextStyle(fontSize: 13, color: TColors.appDisabledColor),
                 ),
               ],
             ),
           ),
-          _tipodato(state.toString()),
+          const SizedBox(width: 8),
+          _StatusBadge(globalStatus: request.globalStatus, label: request.statusLabel),
         ],
       ),
     );
   }
+}
 
-  Widget _tipodato(String state) {
-    if (state == '1') {
-      return Container(
-            padding: EdgeInsets.symmetric(horizontal: 10, vertical: 1),
-            decoration: BoxDecoration(
-              color: TColors.appMainColor.withValues(alpha: 0.2),
-              borderRadius: BorderRadius.circular(10),
-            ),
-            child: Text('En Revision', style: TextStyle(fontSize: 10,color: TColors.appMainColor,fontWeight: FontWeight.bold)),
-          );
-    }
-    if (state == '2') {
-      return Container(
-            padding: EdgeInsets.symmetric(horizontal: 10, vertical: 1),
-            decoration: BoxDecoration(
-              color: TColors.green.withValues(alpha: 0.2),
-              borderRadius: BorderRadius.circular(10),
-            ),
-            child: Text('Completada', style: TextStyle(fontSize: 10,color: TColors.green,fontWeight: FontWeight.bold)),
-          );
-    }
+class _StatusBadge extends StatelessWidget {
+  final String globalStatus;
+  final String label;
+
+  const _StatusBadge({required this.globalStatus, required this.label});
+
+  @override
+  Widget build(BuildContext context) {
+    final color = _colorFor(globalStatus);
     return Container(
-      padding: EdgeInsets.symmetric(horizontal: 10, vertical: 1),
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 3),
       decoration: BoxDecoration(
-        color: TColors.red.withValues(alpha: 0.2),
+        color: color.withValues(alpha: 0.2),
         borderRadius: BorderRadius.circular(10),
       ),
-      child: Text('Rechazada', style: TextStyle(fontSize: 10,color: TColors.red,fontWeight: FontWeight.bold)),
+      constraints: const BoxConstraints(maxWidth: 110),
+      child: Text(
+        label,
+        textAlign: TextAlign.center,
+        style: TextStyle(fontSize: 10, color: color, fontWeight: FontWeight.bold),
+      ),
     );
+  }
+
+  Color _colorFor(String status) {
+    switch (status) {
+      case 'IN_REVIEW':
+        return TColors.appMainColor;
+      case 'COMPLETED':
+        return TColors.green;
+      case 'PENDING_RECEIPT':
+        return TColors.amber;
+      default:
+        return TColors.red;
+    }
   }
 }
