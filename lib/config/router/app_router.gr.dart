@@ -1382,11 +1382,11 @@ class RegisterMinutesMemosRoute
     extends _i58.PageRouteInfo<RegisterMinutesMemosRouteArgs> {
   RegisterMinutesMemosRoute({
     _i59.Key? key,
-    required bool isMemo,
+    required int isOption,
     List<_i58.PageRouteInfo>? children,
   }) : super(
          RegisterMinutesMemosRoute.name,
-         args: RegisterMinutesMemosRouteArgs(key: key, isMemo: isMemo),
+         args: RegisterMinutesMemosRouteArgs(key: key, isOption: isOption),
          initialChildren: children,
        );
 
@@ -1398,22 +1398,22 @@ class RegisterMinutesMemosRoute
       final args = data.argsAs<RegisterMinutesMemosRouteArgs>();
       return _i42.RegisterMinutesMemosScreen(
         key: args.key,
-        isMemo: args.isMemo,
+        isOption: args.isOption,
       );
     },
   );
 }
 
 class RegisterMinutesMemosRouteArgs {
-  const RegisterMinutesMemosRouteArgs({this.key, required this.isMemo});
+  const RegisterMinutesMemosRouteArgs({this.key, required this.isOption});
 
   final _i59.Key? key;
 
-  final bool isMemo;
+  final int isOption;
 
   @override
   String toString() {
-    return 'RegisterMinutesMemosRouteArgs{key: $key, isMemo: $isMemo}';
+    return 'RegisterMinutesMemosRouteArgs{key: $key, isOption: $isOption}';
   }
 }
 
