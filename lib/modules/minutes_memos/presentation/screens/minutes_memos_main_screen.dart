@@ -1,5 +1,6 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
+import 'package:front_gestion_minera/modules/minutes_memos/presentation/widgets/widgets.dart';
 import 'package:front_gestion_minera/utils/constants/color.constant.dart';
 
 @RoutePage()
@@ -56,7 +57,18 @@ class _MinutesMemosMainScreenState extends State<MinutesMemosMainScreen> {
               ),
             ),
             const SizedBox(height: 20),
-          ],
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20),
+              child: Row(
+                children: const [
+                  SummaryCardMinutesMemosWidget(type: 'minute', value: '128'),
+                  SizedBox(width: 12),
+                  SummaryCardMinutesMemosWidget(type: 'memo', value: '84'),
+                ],
+              ),
+            ),
+            const SizedBox(height: 20),            
+          ], ///////////////////////////////
         ),
       ),
     );
