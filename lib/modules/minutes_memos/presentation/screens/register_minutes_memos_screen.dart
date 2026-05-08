@@ -1,9 +1,13 @@
 import 'dart:io';
 import 'package:auto_route/auto_route.dart';
+import 'package:dotted_border/dotted_border.dart';
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:front_gestion_minera/utils/constants/color.constant.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
+
+import '../widgets/widgets.dart';
 
 @RoutePage()
 class RegisterMinutesMemosScreen extends StatefulWidget {
@@ -26,7 +30,9 @@ class _RegisterMinutesMemosScreenState
   late int _isOptionSelected;
   List<String> typeRegister = ['Acta', 'Memorando'];
 
-  File? _selectedImage;
+  List<File> _selectedFiles = [];
+  final int _maxFiles = 5;
+  final int _maxFileSize = 10 * 1024 * 1024;
   final ImagePicker _picker = ImagePicker();
   @override
   void initState() {
@@ -64,19 +70,15 @@ class _RegisterMinutesMemosScreenState
     setState(() => _displayedMonth = next);
   }
 
+  List<String> _listParticipants = ['hola', 'hola2'];
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: TColors.appBackgroundColor,
       appBar: AppBar(
         backgroundColor: TColors.white,
-        title: Text(
-          'Registrar Documento',
-          style: TextStyle(
-            color: TColors.textPrimary,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
+        title: TextTitleCardWidget(title: 'Registrar Documento'),
       ),
       body: Padding(
         padding: EdgeInsetsGeometry.all(15),
@@ -104,32 +106,20 @@ class _RegisterMinutesMemosScreenState
                   child: _selectOptionRegister(),
                 ),
                 const SizedBox(height: 10),
-                const Text(
-                  'Titulo Del Documento',
-                  style: TextStyle(
-                    color: TColors.textPrimary,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
+
+                const TextTitleCardWidget(title: 'Título del Documento'),
                 const SizedBox(height: 10),
-                TextFormField(
-                  decoration: InputDecoration(
-                    hintText: isSelected
-                        ? 'Ej. Acta de asamblea'
-                        : 'Ej. Memorando Interno',
-                    hintStyle: TextStyle(color: TColors.textFieldDisabledColor),
-                    filled: true,
-                    fillColor: TColors.white,
-                  ),
-                ),
+                !isSelected
+                    ? FormEditMinutesMemosWidget(
+                        hintTextform: 'Ej. Acta de asamblea',
+                        maxLength: 200,
+                      )
+                    : FormEditMinutesMemosWidget(
+                        hintTextform: 'Ej. Memorando Interno',
+                        maxLength: 200,
+                      ),
                 const SizedBox(height: 10),
-                const Text(
-                  'Fecha de Emisión',
-                  style: TextStyle(
-                    color: TColors.textPrimary,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
+                const TextTitleCardWidget(title: 'Fecha del Documento'),
                 _buildCalendar(),
                 const SizedBox(height: 10),
                 Container(
@@ -137,25 +127,13 @@ class _RegisterMinutesMemosScreenState
                       ? Column(
                           crossAxisAlignment: .start,
                           children: [
-                            const Text(
-                              'Destinatario',
-                              style: TextStyle(
-                                color: TColors.textPrimary,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
+                            const TextTitleCardWidget(title: 'Destinatario'),
                             Row(
                               children: [
                                 Expanded(
-                                  child: TextFormField(
-                                    decoration: InputDecoration(
-                                      filled: true,
-                                      fillColor: TColors.white,
-                                      hintText: 'Persona a quien se dirige',
-                                      hintStyle: TextStyle(
-                                        color: TColors.textFieldDisabledColor,
-                                      ),
-                                    ),
+                                  child: FormEditMinutesMemosWidget(
+                                    hintTextform: 'Persona a quien se dirige',
+                                    maxLength: 150,
                                   ),
                                 ),
                               ],
@@ -165,51 +143,27 @@ class _RegisterMinutesMemosScreenState
                       : Column(
                           crossAxisAlignment: .start,
                           children: [
-                            const Text(
-                              'Ubicación',
-                              style: TextStyle(
-                                color: TColors.textPrimary,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
+                            const TextTitleCardWidget(title: 'Ubicación'),
                             Row(
                               children: [
                                 Expanded(
-                                  child: TextFormField(
-                                    decoration: InputDecoration(
-                                      filled: true,
-                                      fillColor: TColors.white,
-                                      hintText: 'Lugar de la reunión',
-                                      hintStyle: TextStyle(
-                                        color: TColors.textFieldDisabledColor,
-                                      ),
-                                    ),
+                                  child: FormEditMinutesMemosWidget(
+                                    hintTextform: 'Lugar la reunión',
+                                    maxLength: 150,
                                   ),
                                 ),
                               ],
                             ),
                             const SizedBox(height: 10),
-                            const Text(
-                              'Participantes',
-                              style: TextStyle(
-                                color: TColors.textPrimary,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
+                            const TextTitleCardWidget(title: 'Participantes'),
                             Row(
                               children: [
                                 Expanded(
-                                  child: TextFormField(
-                                    decoration: InputDecoration(
-                                      filled: true,
-                                      fillColor: TColors.white,
-                                      hintText: 'Nombre del Participante',
-                                      hintStyle: TextStyle(
-                                        color: TColors.textFieldDisabledColor,
-                                      ),
-                                    ),
+                                  child: FormEditMinutesMemosWidget(
+                                    hintTextform: 'Nombre del participante',
                                   ),
                                 ),
+                                const SizedBox(width: 10),
                                 GestureDetector(
                                   child: Container(
                                     padding: EdgeInsets.all(5),
@@ -220,12 +174,66 @@ class _RegisterMinutesMemosScreenState
                                     child: Icon(
                                       Icons.add,
                                       color: TColors.white,
-                                      size: 20,
+                                      size: 35,
                                     ),
                                   ),
                                 ),
                               ],
                             ),
+                            const SizedBox(height: 10),
+                            _listParticipants.isNotEmpty
+                                ? Wrap(
+                                    spacing: 10,
+                                    runSpacing: 10,
+                                    children: _listParticipants.map((
+                                      participant,
+                                    ) {
+                                      return Container(
+                                        padding: EdgeInsets.symmetric(
+                                          horizontal: 10,
+                                        ),
+                                        decoration: BoxDecoration(
+                                          color: TColors.appMainColor,
+                                          borderRadius: BorderRadius.circular(
+                                            20,
+                                          ),
+                                        ),
+                                        child: Center(
+                                          child: Row(
+                                            children: [
+                                              Text(
+                                                participant,
+                                                style: TextStyle(
+                                                  color: TColors.white,
+                                                ),
+                                              ),
+                                              const SizedBox(width: 5),
+                                              GestureDetector(
+                                                child: Container(
+                                                  padding: EdgeInsets.all(2),
+                                                  decoration: BoxDecoration(
+                                                    color: TColors.red,
+                                                    borderRadius:
+                                                        BorderRadius.circular(
+                                                          20,
+                                                        ),
+                                                  ),
+                                                  
+                                                  child: Icon(
+                                                    Icons
+                                                        .delete_forever_outlined,
+                                                    color: TColors.white,
+                                                    size: 15,
+                                                  ),
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                      );
+                                    }).toList(),
+                                  )
+                                : SizedBox(),
                           ],
                         ),
                 ),
@@ -233,20 +241,14 @@ class _RegisterMinutesMemosScreenState
                 Column(
                   crossAxisAlignment: .start,
                   children: [
-                    const Text(
-                      'Contenido / Descripción',
-                      style: TextStyle(
-                        color: TColors.textPrimary,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
+                    const TextTitleCardWidget(title: 'Contenido / Descripción'),
                     const SizedBox(height: 10),
                     Row(
                       children: [
                         Expanded(
                           child: TextFormField(
-                            minLines: 4, // Altura mínima inicial
-                            maxLines: 6, // Permite que crezca un poco más
+                            minLines: 4,
+                            maxLines: 6,
                             decoration: InputDecoration(
                               hintText:
                                   'Redacte el contenido del documento aquí...',
@@ -275,33 +277,65 @@ class _RegisterMinutesMemosScreenState
               ],
             ),
             const SizedBox(height: 20),
-            GestureDetector(
-              onTap: () {
-                _showPickerOptions();
-              },
-              child: Container(
-                width: double.infinity,
-                height: 60,
-                decoration: BoxDecoration(
-                  border: Border.fromBorderSide(
-                    BorderSide(color: TColors.appMainDarkColor),
+            DottedBorder(
+              options: RoundedRectDottedBorderOptions(
+                radius: Radius.circular(15),
+                color: TColors.appDisabledColor,
+                dashPattern: [6, 3],
+                strokeWidth: 1,
+                padding: EdgeInsets.zero,
+              ),
+              child: GestureDetector(
+                onTap: () {
+                  _showPickerOptions();
+                },
+                child: Container(
+                  width: double.infinity,
+                  height: 60,
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(15),
                   ),
-                  borderRadius: BorderRadius.circular(15),
-                ),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Icon(
-                      Icons.add_a_photo_outlined,
-                      color: TColors.appMainDarkColor,
-                    ),
-                    const SizedBox(width: 10),
-                    Text(
-                      'Subir Foto / PDF',
-                      style: TextStyle(
+                  child: Row(
+                    children: [
+                      Icon(
+                        Icons.add_a_photo_outlined,
                         color: TColors.appMainDarkColor,
+                      ),
+                      const SizedBox(width: 10),
+                      Text(
+                        'Subir Foto / PDF',
+                        style: TextStyle(
+                          color: TColors.appMainDarkColor,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 16,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+            const SizedBox(height: 10),
+            GestureDetector(
+              onTap: () {},
+              child: Container(
+                height: 60,
+                width: .infinity,
+                decoration: BoxDecoration(
+                  color: TColors.appMainDarkColor,
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                child: const Row(
+                  mainAxisAlignment: .center,
+                  children: [
+                    Icon(Icons.send_outlined, color: TColors.white, size: 20),
+                    SizedBox(width: 10),
+                    Text(
+                      'Guardar y Enviar',
+                      style: TextStyle(
+                        color: TColors.white,
+                        fontSize: 20,
                         fontWeight: FontWeight.bold,
-                        fontSize: 16,
                       ),
                     ),
                   ],
@@ -315,6 +349,31 @@ class _RegisterMinutesMemosScreenState
     );
   }
 
+  void _handleFilesSelection(List<File> newFiles) async {
+    List<File> validFiles = [];
+    for (File file in newFiles) {
+      if (_selectedFiles.length + validFiles.length >= _maxFiles) {
+        _showError("Límite máximo de $_maxFiles archivos alcanzado.");
+        break;
+      }
+
+      int size = await file.length();
+      if (size <= _maxFileSize) {
+        validFiles.add(file);
+      } else {
+        _showError("El archivo ${file.path.split('/').last} supera los 10MB.");
+      }
+    }
+
+    setState(() {
+      _selectedFiles.addAll(validFiles);
+    });
+  }
+
+  void _showError(String msg) {
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(msg)));
+  }
+
   Future<void> _pickImage(ImageSource source) async {
     try {
       final XFile? pickedFile = await _picker.pickImage(
@@ -323,12 +382,31 @@ class _RegisterMinutesMemosScreenState
       );
 
       if (pickedFile != null) {
-        setState(() {
-          _selectedImage = File(pickedFile.path);
-        });
+        _handleFilesSelection([File(pickedFile.path)]);
       }
     } catch (e) {
       debugPrint("Error al seleccionar imagen: $e");
+    }
+  }
+
+  Future<void> _pickPDF() async {
+    try {
+      final FilePickerResult? result = await FilePicker.pickFiles(
+        allowMultiple: true,
+        type: FileType.custom,
+        allowedExtensions: ['jpg', 'jpeg', 'png', 'pdf'],
+      );
+
+      if (result != null) {
+        List<File> files = result.paths
+            .where((path) => path != null)
+            .map((path) => File(path!))
+            .toList();
+
+        _handleFilesSelection(files);
+      }
+    } catch (e) {
+      debugPrint("Error al seleccionar archivos: $e");
     }
   }
 
@@ -379,7 +457,7 @@ class _RegisterMinutesMemosScreenState
                 title: const Text('Subir Archivo PDF'),
                 onTap: () {
                   Navigator.of(context).pop();
-                  _pickImage(ImageSource.camera);
+                  _pickPDF();
                 },
               ),
             ],
