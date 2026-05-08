@@ -125,8 +125,9 @@ class _AuthScreenState extends State<AuthScreen> {
     } else if (role == 'jefe_campamento') {
       context.router.replaceAll([ const HomeDashboardCampRoute()]);
     } else if (role == 'actas') {
-      context.router.replaceAll([RegisterMinutesMemosRoute(isOption: 0)]);
+      context.router.replaceAll([ const MinutesMemosMainRoute()]);
     }
+
 
   }
 
