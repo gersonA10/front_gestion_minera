@@ -7,7 +7,6 @@ import 'package:front_gestion_minera/injector_container.dart';
 import 'package:front_gestion_minera/modules/camp/presentation/widgets/widgets.dart';
 import 'package:front_gestion_minera/modules/treasury/presentation/widgets/widgtes.dart';
 import 'package:front_gestion_minera/utils/constants/color.constant.dart';
-
 import '../../domain/entity/entity.dart';
 import '../bloc/camp_bloc.dart';
 

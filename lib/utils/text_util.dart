@@ -282,4 +282,21 @@ class AppTextStyles {
 
   static TextStyle mainStyle22Bold(BuildContext context) =>
       GoogleFonts.inter(fontSize: 22, fontWeight: FontWeight.bold);
+
+  static TextStyle mainStyleWhite22(BuildContext context) => GoogleFonts.inter(
+    color: Theme.of(context).colorScheme.white,
+    fontSize: 22,
+  );
+
+  static TextStyle mainStyle30Bold(BuildContext context) =>
+      GoogleFonts.inter(fontSize: 30, fontWeight: FontWeight.bold);
+
+  static TextStyle mainStyle15Bold(BuildContext context) =>
+      GoogleFonts.inter(fontSize: 15, fontWeight: FontWeight.bold);
+
+  static TextStyle mainStyle15(BuildContext context) =>
+      GoogleFonts.inter(fontSize: 15);
+
+  static TextStyle mainStyle11(BuildContext context) =>
+      GoogleFonts.inter(fontSize: 11);
 }
