@@ -21,6 +21,15 @@ class RegisterMinutesMemosScreen extends StatefulWidget {
 
 class _RegisterMinutesMemosScreenState
     extends State<RegisterMinutesMemosScreen> {
+  TextEditingController participantController = TextEditingController();
+  TextEditingController titleController = TextEditingController();
+  TextEditingController placecontroller = TextEditingController();
+  TextEditingController destinataryController = TextEditingController();
+  TextEditingController descriptionController = TextEditingController();
+  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+
+  late int type = widget.isOption;
+  bool _isUploading = false;
   late DateTime _displayedMonth;
   late DateTime _selectedDate;
   final DateTime _today = DateTime.now();
@@ -70,7 +79,7 @@ class _RegisterMinutesMemosScreenState
     setState(() => _displayedMonth = next);
   }
 
-  List<String> _listParticipants = ['hola', 'hola2'];
+  List<String> _listParticipants = [];
 
   @override
   Widget build(BuildContext context) {
@@ -111,10 +120,12 @@ class _RegisterMinutesMemosScreenState
                 const SizedBox(height: 10),
                 !isSelected
                     ? FormEditMinutesMemosWidget(
+                        controller: titleController,
                         hintTextform: 'Ej. Acta de asamblea',
                         maxLength: 200,
                       )
                     : FormEditMinutesMemosWidget(
+                        controller: titleController,
                         hintTextform: 'Ej. Memorando Interno',
                         maxLength: 200,
                       ),
@@ -132,6 +143,7 @@ class _RegisterMinutesMemosScreenState
                               children: [
                                 Expanded(
                                   child: FormEditMinutesMemosWidget(
+                                    controller: destinataryController,
                                     hintTextform: 'Persona a quien se dirige',
                                     maxLength: 150,
                                   ),
@@ -148,6 +160,7 @@ class _RegisterMinutesMemosScreenState
                               children: [
                                 Expanded(
                                   child: FormEditMinutesMemosWidget(
+                                    controller: placecontroller,
                                     hintTextform: 'Lugar la reunión',
                                     maxLength: 150,
                                   ),
@@ -160,11 +173,22 @@ class _RegisterMinutesMemosScreenState
                               children: [
                                 Expanded(
                                   child: FormEditMinutesMemosWidget(
+                                    controller: participantController,
                                     hintTextform: 'Nombre del participante',
                                   ),
                                 ),
                                 const SizedBox(width: 10),
                                 GestureDetector(
+                                  onTap: () {
+                                    final value = participantController.text
+                                        .trim();
+
+                                    if (value.isEmpty) return;
+                                    setState(() {
+                                      _listParticipants.add(value);
+                                      participantController.clear();
+                                    });
+                                  },
                                   child: Container(
                                     padding: EdgeInsets.all(5),
                                     decoration: BoxDecoration(
@@ -182,57 +206,7 @@ class _RegisterMinutesMemosScreenState
                             ),
                             const SizedBox(height: 10),
                             _listParticipants.isNotEmpty
-                                ? Wrap(
-                                    spacing: 10,
-                                    runSpacing: 10,
-                                    children: _listParticipants.map((
-                                      participant,
-                                    ) {
-                                      return Container(
-                                        padding: EdgeInsets.symmetric(
-                                          horizontal: 10,
-                                        ),
-                                        decoration: BoxDecoration(
-                                          color: TColors.appMainColor,
-                                          borderRadius: BorderRadius.circular(
-                                            20,
-                                          ),
-                                        ),
-                                        child: Center(
-                                          child: Row(
-                                            children: [
-                                              Text(
-                                                participant,
-                                                style: TextStyle(
-                                                  color: TColors.white,
-                                                ),
-                                              ),
-                                              const SizedBox(width: 5),
-                                              GestureDetector(
-                                                child: Container(
-                                                  padding: EdgeInsets.all(2),
-                                                  decoration: BoxDecoration(
-                                                    color: TColors.red,
-                                                    borderRadius:
-                                                        BorderRadius.circular(
-                                                          20,
-                                                        ),
-                                                  ),
-                                                  
-                                                  child: Icon(
-                                                    Icons
-                                                        .delete_forever_outlined,
-                                                    color: TColors.white,
-                                                    size: 15,
-                                                  ),
-                                                ),
-                                              ),
-                                            ],
-                                          ),
-                                        ),
-                                      );
-                                    }).toList(),
-                                  )
+                                ? _listOfParticipantMinutes()
                                 : SizedBox(),
                           ],
                         ),
@@ -247,6 +221,7 @@ class _RegisterMinutesMemosScreenState
                       children: [
                         Expanded(
                           child: TextFormField(
+                            controller: descriptionController,
                             minLines: 4,
                             maxLines: 6,
                             decoration: InputDecoration(
@@ -296,6 +271,7 @@ class _RegisterMinutesMemosScreenState
                     borderRadius: BorderRadius.circular(15),
                   ),
                   child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       Icon(
                         Icons.add_a_photo_outlined,
@@ -316,29 +292,46 @@ class _RegisterMinutesMemosScreenState
               ),
             ),
             const SizedBox(height: 10),
+            _selectedFiles.isNotEmpty ? _buildFilePreview() : SizedBox(),
             GestureDetector(
-              onTap: () {},
-              child: Container(
+              onTap: _isUploading ? null : _onSaveAndSend,
+              child: AnimatedContainer(
+                duration: const Duration(milliseconds: 300),
                 height: 60,
-                width: .infinity,
+                width: double.infinity,
                 decoration: BoxDecoration(
-                  color: TColors.appMainDarkColor,
+                  color: _isUploading ? Colors.grey : TColors.appMainDarkColor,
                   borderRadius: BorderRadius.circular(20),
                 ),
-                child: const Row(
-                  mainAxisAlignment: .center,
-                  children: [
-                    Icon(Icons.send_outlined, color: TColors.white, size: 20),
-                    SizedBox(width: 10),
-                    Text(
-                      'Guardar y Enviar',
-                      style: TextStyle(
-                        color: TColors.white,
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ],
+                child: Center(
+                  child: _isUploading
+                      ? const SizedBox(
+                          height: 25,
+                          width: 25,
+                          child: CircularProgressIndicator(
+                            color: Colors.white,
+                            strokeWidth: 3,
+                          ),
+                        )
+                      : const Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(
+                              Icons.send_outlined,
+                              color: TColors.white,
+                              size: 20,
+                            ),
+                            SizedBox(width: 10),
+                            Text(
+                              'Guardar y Enviar',
+                              style: TextStyle(
+                                color: TColors.white,
+                                fontSize: 20,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ],
+                        ),
                 ),
               ),
             ),
@@ -347,6 +340,78 @@ class _RegisterMinutesMemosScreenState
       ),
       //bottomNavigationBar: Container(),
     );
+  }
+
+  Wrap _listOfParticipantMinutes() {
+    return Wrap(
+                                  spacing: 10,
+                                  runSpacing: 10,
+
+                                  children: _listParticipants.map((
+                                    participant,
+                                  ) {
+                                    return Container(
+                                      padding: const EdgeInsets.symmetric(
+                                        horizontal: 10,
+                                        vertical: 8,
+                                      ),
+
+                                      decoration: BoxDecoration(
+                                        color: Colors.blue,
+
+                                        borderRadius: BorderRadius.circular(
+                                          20,
+                                        ),
+                                      ),
+
+                                      child: Row(
+                                        mainAxisSize: MainAxisSize.min,
+
+                                        children: [
+                                          Text(
+                                            participant,
+
+                                            style: const TextStyle(
+                                              color: Colors.white,
+                                            ),
+                                          ),
+
+                                          const SizedBox(width: 5),
+
+                                          GestureDetector(
+                                            onTap: () {
+                                              setState(() {
+                                                _listParticipants.remove(
+                                                  participant,
+                                                );
+                                              });
+                                            },
+
+                                            child: Container(
+                                              padding: const EdgeInsets.all(
+                                                2,
+                                              ),
+
+                                              decoration: BoxDecoration(
+                                                color: Colors.red,
+
+                                                borderRadius:
+                                                    BorderRadius.circular(20),
+                                              ),
+
+                                              child: const Icon(
+                                                Icons.delete_forever_outlined,
+
+                                                color: Colors.white,
+                                                size: 15,
+                                              ),
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    );
+                                  }).toList(),
+                                );
   }
 
   void _handleFilesSelection(List<File> newFiles) async {
@@ -374,24 +439,80 @@ class _RegisterMinutesMemosScreenState
     ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(msg)));
   }
 
+  Widget _buildFilePreview() {
+    return Column(
+      children: _selectedFiles.map((file) {
+        final fileName = file.path.split('/').last;
+        final isImage = [
+          '.jpg',
+          '.jpeg',
+          '.png',
+        ].any((ext) => fileName.toLowerCase().endsWith(ext));
+
+        return Container(
+          margin: const EdgeInsets.only(bottom: 10),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(10),
+            border: Border.all(
+              color: TColors.appDisabledColor.withValues(alpha: 0.5),
+            ),
+          ),
+          child: ListTile(
+            leading: isImage
+                ? Image.file(file, width: 40, height: 40, fit: BoxFit.cover)
+                : const Icon(Icons.picture_as_pdf, color: Colors.red),
+            title: Text(
+              fileName,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: const TextStyle(fontSize: 14),
+            ),
+            trailing: IconButton(
+              icon: const Icon(Icons.cancel, color: Colors.grey),
+              onPressed: () {
+                setState(() {
+                  _selectedFiles.remove(file);
+                });
+              },
+            ),
+          ),
+        );
+      }).toList(),
+    );
+  }
+
   Future<void> _pickImage(ImageSource source) async {
     try {
-      final XFile? pickedFile = await _picker.pickImage(
-        source: source,
-        imageQuality: 80,
-      );
+      if (source == ImageSource.camera) {
+        final XFile? singleFile = await _picker.pickImage(
+          source: source,
+          imageQuality: 80,
+        );
+        if (singleFile != null) {
+          _handleFilesSelection([File(singleFile.path)]);
+        }
+      } else {
+        final List<XFile> pickedFiles = await _picker.pickMultiImage(
+          limit: 5,
+          imageQuality: 80,
+        );
 
-      if (pickedFile != null) {
-        _handleFilesSelection([File(pickedFile.path)]);
+        if (pickedFiles.isNotEmpty) {
+          _handleFilesSelection(
+            pickedFiles.map((xfile) => File(xfile.path)).toList(),
+          );
+        }
       }
     } catch (e) {
       debugPrint("Error al seleccionar imagen: $e");
+      _showError('No se Pudo Accede a la Camara o Galeria');
     }
   }
 
   Future<void> _pickPDF() async {
     try {
-      final FilePickerResult? result = await FilePicker.pickFiles(
+      final result = await FilePicker.pickFiles(
         allowMultiple: true,
         type: FileType.custom,
         allowedExtensions: ['jpg', 'jpeg', 'png', 'pdf'],
@@ -465,6 +586,66 @@ class _RegisterMinutesMemosScreenState
         );
       },
     );
+  }
+
+  Future<void> _onSaveAndSend() async {
+    if (type == 1) {
+      if (destinataryController.text.trim().isEmpty) {
+        _showError("El destinatario es obligatorio para memorandos.");
+        return;
+      }
+    }
+    if (type == 0) {
+      if (placecontroller.text.trim().isEmpty) {
+        _showError("El lugar es obligatorio para actas.");
+        return;
+      }
+      if (_listParticipants.isEmpty) {
+        _showError("Agrega al menos un participante para actas.");
+        return;
+      }
+    }
+    if (titleController.text.trim().isEmpty) {
+      _showError("El titulo es obligatorio.");
+      return;
+    }
+
+    if (descriptionController.text.trim().isEmpty) {
+      _showError("Debes agregar la descripcion.");
+      return;
+    }
+
+    if (_selectedFiles.isEmpty) {
+      _showError("Por favor, selecciona al menos un archivo.");
+      return;
+    }
+
+    setState(() => _isUploading = true);
+
+    try {
+      debugPrint("Simulando validación de datos...");
+      await Future.delayed(const Duration(seconds: 2));
+
+      setState(() {
+        if (type == 0) {
+          placecontroller.clear();
+          participantController.clear();
+          _listParticipants.clear();
+        }
+        else{
+          destinataryController.clear();
+        }
+        titleController.clear();
+        descriptionController.clear();
+        _selectedFiles.clear();
+      });
+    } catch (e) {
+      _showError("Ocurrió un error: $e");
+    } finally {
+      if (mounted) {
+        setState(() => _isUploading = false);
+      }
+    }
   }
 
   Widget _buildCalendar() {
@@ -646,6 +827,7 @@ class _RegisterMinutesMemosScreenState
           onTap: () {
             setState(() {
               _isOptionSelected = index;
+              type = index;
               if (!isSelectedbutton) {
                 isSelected = !isSelected;
               }
