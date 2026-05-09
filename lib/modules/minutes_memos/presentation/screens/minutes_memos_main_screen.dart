@@ -1,7 +1,14 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:front_gestion_minera/core/widgets/logout_button_widget.dart';
+import 'package:front_gestion_minera/injector_container.dart';
+import 'package:front_gestion_minera/modules/minutes_memos/domain/entity/acta_entity.dart';
+import 'package:front_gestion_minera/modules/minutes_memos/domain/entity/memorandum_entity.dart';
+import 'package:front_gestion_minera/modules/minutes_memos/presentation/bloc/minutes_memos_bloc.dart';
 import 'package:front_gestion_minera/modules/minutes_memos/presentation/widgets/widgets.dart';
 import 'package:front_gestion_minera/utils/constants/color.constant.dart';
+import 'package:intl/intl.dart';
 
 @RoutePage()
 class MinutesMemosMainScreen extends StatefulWidget {
@@ -12,207 +19,507 @@ class MinutesMemosMainScreen extends StatefulWidget {
 }
 
 class _MinutesMemosMainScreenState extends State<MinutesMemosMainScreen> {
+  late final MinutesMemosBloc _bloc;
   int selectedTab = 0;
   int selectedFilter = 0;
+  DateTimeRange? _customRange;
+  final ScrollController _actasScrollController = ScrollController();
+  final ScrollController _memosScrollController = ScrollController();
+
+  static const _filters = [
+    ('Recientes', 'recientes'),
+    ('Semana', 'semana'),
+    ('Mes', 'mes'),
+    ('Personalizado', 'personalizado'),
+  ];
+
+  @override
+  void initState() {
+    super.initState();
+    _bloc = InjectorContainer.getIt<MinutesMemosBloc>();
+    _actasScrollController.addListener(_onScrollActas);
+    _memosScrollController.addListener(_onScrollMemos);
+    _bloc.add(GetActasCountEvent(filter: _filters[0].$2));
+    _bloc.add(GetActasEvent(filter: _filters[0].$2));
+  }
+
+  @override
+  void dispose() {
+    _actasScrollController.dispose();
+    _memosScrollController.dispose();
+    super.dispose();
+  }
+
+  void _onScrollActas() {
+    if (_actasScrollController.position.pixels >=
+        _actasScrollController.position.maxScrollExtent - 300) {
+      _bloc.add(LoadMoreActasEvent());
+    }
+  }
+
+  void _onScrollMemos() {
+    if (_memosScrollController.position.pixels >=
+        _memosScrollController.position.maxScrollExtent - 300) {
+      _bloc.add(LoadMoreMemorandosEvent());
+    }
+  }
+
+  void _loadActas({String? filter, String? from, String? to}) {
+    _bloc.add(GetActasEvent(filter: filter, from: from, to: to));
+  }
+
+  void _loadMemorandos({String? filter, String? from, String? to}) {
+    _bloc.add(GetMemorandosEvent(filter: filter, from: from, to: to));
+  }
+
+  Future<void> _onFilterTap(int index) async {
+    if (index == 3) {
+      final range = await showDateRangePicker(
+        context: context,
+        firstDate: DateTime(2020),
+        lastDate: DateTime.now(),
+        initialDateRange: _customRange,
+        locale: const Locale('es'),
+      );
+      if (range == null) return;
+      _customRange = range;
+      final fmt = DateFormat('yyyy-MM-dd');
+      final from = fmt.format(range.start);
+      final to = fmt.format(range.end);
+      setState(() => selectedFilter = index);
+      if (selectedTab == 0) {
+        _bloc.add(GetActasCountEvent(filter: 'personalizado', from: from, to: to));
+        _loadActas(filter: 'personalizado', from: from, to: to);
+      } else {
+        _bloc.add(GetMemosCountEvent(filter: 'personalizado', from: from, to: to));
+        _loadMemorandos(filter: 'personalizado', from: from, to: to);
+      }
+    } else {
+      if (selectedFilter == index) return;
+      setState(() => selectedFilter = index);
+      if (selectedTab == 0) {
+        _bloc.add(GetActasCountEvent(filter: _filters[index].$2));
+      } else {
+        _bloc.add(GetMemosCountEvent(filter: _filters[index].$2));
+      }
+      if (selectedTab == 0) {
+        _loadActas(filter: _filters[index].$2);
+      } else {
+        _loadMemorandos(filter: _filters[index].$2);
+      }
+    }
+  }
+
+  void _onTabTap(int index) {
+    if (selectedTab == index) return;
+    setState(() => selectedTab = index);
+
+    final String? from;
+    final String? to;
+    final String filter;
+
+    if (selectedFilter == 3 && _customRange != null) {
+      final fmt = DateFormat('yyyy-MM-dd');
+      from = fmt.format(_customRange!.start);
+      to = fmt.format(_customRange!.end);
+      filter = 'personalizado';
+    } else {
+      from = null;
+      to = null;
+      filter = _filters[selectedFilter].$2;
+    }
+
+    if (index == 0) {
+      _bloc.add(GetActasCountEvent(filter: filter, from: from, to: to));
+      _loadActas(filter: filter, from: from, to: to);
+    } else {
+      _bloc.add(GetMemosCountEvent(filter: filter, from: from, to: to));
+      _loadMemorandos(filter: filter, from: from, to: to);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: TColors.textFieldBackgroundColor,
-      body: SafeArea(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Container(
-              width: double.infinity,
-              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-              decoration: const BoxDecoration(
-                color: TColors.white,
-                border: Border(
-                  bottom: BorderSide(color: Color(0xFFEEEEEE), width: 1),
+    return BlocProvider.value(
+      value: _bloc,
+      child: Scaffold(
+        backgroundColor: TColors.textFieldBackgroundColor,
+        appBar: AppBar(
+          backgroundColor: TColors.white,
+          actions: [
+             Padding(
+               padding: const EdgeInsets.all(8.0),
+               child: LogoutButton(),
+             ),
+          ],
+          title: Container(
+            width: double.infinity,
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                decoration: const BoxDecoration(
+                  color: TColors.white,
+                  border: Border(
+                    bottom: BorderSide(color: Color(0xFFEEEEEE), width: 1),
+                  ),
                 ),
-              ),
-              child: Row(
-                children: [
-                  Container(
-                    padding: const EdgeInsets.all(8),
-                    decoration: BoxDecoration(
-                      color: TColors.appMainDarkColor,
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    child: const Icon(
-                      Icons.precision_manufacturing_outlined,
-                      color: Colors.white,
-                      size: 22,
-                    ),
-                  ),
-                  const SizedBox(width: 16),
-                  const Text(
-                    'Actas',
-                    style: TextStyle(
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
-                      color: TColors.appMainDarkColor,
-                      letterSpacing: -0.5,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(height: 20),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20),
-              child: Row(
-                children: const [
-                  SummaryCardMinutesMemosWidget(type: 'minute', value: '128'),
-                  SizedBox(width: 12),
-                  SummaryCardMinutesMemosWidget(type: 'memo', value: '84'),
-                ],
-              ),
-            ),
-            const SizedBox(height: 20),
-
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20),
-              child: Row(
-                children: [
-                  Expanded(
-                    child: Container(
-                      height: 48,
+                child: Row(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(8),
                       decoration: BoxDecoration(
                         color: TColors.appMainDarkColor,
-                        borderRadius: BorderRadius.circular(10),
+                        borderRadius: BorderRadius.circular(8),
                       ),
-                      child: TextButton(
-                        onPressed: () {},
-                        style: TextButton.styleFrom(
-                          foregroundColor: Colors.white,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(10),
-                          ),
-                        ),
-                        child: const Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Icon(Icons.add, size: 18, color: Colors.white),
-                            SizedBox(width: 8),
-                            Text(
-                              'Registrar Acta',
-                              style: TextStyle(fontWeight: FontWeight.w600),
-                            ),
-                          ],
-                        ),
+                      child: const Icon(
+                        Icons.precision_manufacturing_outlined,
+                        color: Colors.white,
+                        size: 22,
                       ),
                     ),
-                  ),
-
-                  const SizedBox(width: 12),
-
-                  Expanded(
-                    child: Container(
-                      height: 48,
-                      decoration: BoxDecoration(
-                        color: Colors.transparent,
-                        borderRadius: BorderRadius.circular(10),
-                        border: Border.all(
-                          color: TColors.appMainDarkColor,
-                          width: 1.5,
-                        ),
-                      ),
-                      child: TextButton(
-                        onPressed: () {},
-                        style: TextButton.styleFrom(
-                          foregroundColor: TColors.appMainDarkColor,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(10),
-                          ),
-                        ),
-                        child: const Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Icon(Icons.edit_outlined, size: 18),
-                            SizedBox(width: 8),
-                            Text(
-                              'Nuevo Memorando',
-                              style: TextStyle(fontWeight: FontWeight.w600),
-                            ),
-                          ],
-                        ),
+                    const SizedBox(width: 16),
+                    const Text(
+                      'Actas',
+                      style: TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                        color: TColors.appMainDarkColor,
+                        letterSpacing: -0.5,
                       ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
-            ),
+        ),
+        body: SafeArea(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              
+              const SizedBox(height: 20),
+              BlocBuilder<MinutesMemosBloc, MinutesMemosState>(
+                buildWhen: (_, s) =>
+                    s is ActasCountLoading ||
+                    s is ActasCountLoaded ||
+                    s is ActasCountError ||
+                    s is MemosCountLoading ||
+                    s is MemosCountLoaded ||
+                    s is MemosCountError,
+                builder: (context, state) {
+                  final count = state is ActasCountLoaded
+                      ? state.count
+                      : state is MemosCountLoaded
+                          ? state.count
+                          : null;
+                  final isLoading =
+                      state is ActasCountLoading || state is MemosCountLoading;
+                  final String? totalVal =
+                      isLoading ? null : count?.total.toString() ?? '-';
+                  final String? pendVal =
+                      isLoading ? null : count?.pendientes.toString() ?? '-';
 
-            const SizedBox(height: 20),
-
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Expanded(child: _buildTab('Actas Recientes', 0)),
-                  Expanded(child: _buildTab('Memorandos', 1)),
-                ],
+                  return Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 20),
+                    child: Row(
+                      children: [
+                        SummaryCardMinutesMemosWidget(
+                          label: 'Total',
+                          icon: Icons.description_outlined,
+                          iconColor: TColors.appMainColor,
+                          value: totalVal,
+                        ),
+                        const SizedBox(width: 12),
+                        SummaryCardMinutesMemosWidget(
+                          label: 'Pendientes',
+                          icon: Icons.pending_outlined,
+                          iconColor: TColors.danger,
+                          value: pendVal,
+                        ),
+                      ],
+                    ),
+                  );
+                },
               ),
-            ),
-            const SizedBox(height: 16),
+              const SizedBox(height: 20),
 
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  _buildFilterChip('Recientes', 0),
-                  const SizedBox(width: 10),
-                  _buildFilterChip('Semana', 1),
-                  const SizedBox(width: 10),
-                  _buildFilterChip('Mes', 2),
-                  const SizedBox(width: 10),
-                  _buildFilterChip('Personalizado', 3, icon: Icons.tune),
-                ],
-              ),
-            ),
-            const SizedBox(height: 20),
-
-            Expanded(
-              child: ListView(
+              Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 20),
-                children: const [
-                  MinutesMemosCardPanelWidget(
-                    tipo: 'minute',
-                    numero: '452',
-                    titulo: 'Reunión de Seguridad Mina Norte',
-                    descripcion:
-                        'Revisión de protocolos de emergencia y actualización de equipos...',
-                    fecha: '15 OCT, 2023',
-                    estado: 'Pendiente',
-                    actualizado: 'Actualizado hace 2h',
-                  ),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: Container(
+                        height: 48,
+                        decoration: BoxDecoration(
+                          color: TColors.appMainDarkColor,
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        child: TextButton(
+                          onPressed: () {},
+                          style: TextButton.styleFrom(
+                            foregroundColor: Colors.white,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                          ),
+                          child: const Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Icon(Icons.add, size: 18, color: Colors.white),
+                              SizedBox(width: 8),
+                              Text(
+                                'Registrar Acta',
+                                style: TextStyle(fontWeight: FontWeight.w600),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
 
-                  MinutesMemosCardPanelWidget(
-                    tipo: 'memo',
-                    numero: '102',
-                    titulo: 'Nuevos Turnos de Perforación',
-                    destinatario: 'Juan Pérez (Operaciones)',
-                    fecha: '12 OCT, 2023',
-                    estado: 'Pendiente',
-                  ),
-                  MinutesMemosCardPanelWidget(
-                    tipo: 'minute',
-                    numero: '451',
-                    titulo: 'Mantenimiento de Maquinaria Pesada',
-                    descripcion:
-                        'Planificación de paradas técnicas para camiones CAT-797F...',
-                    fecha: '10 OCT, 2023',
-                    estado: 'Finalizado',
-                  ),
-                ],
+                    const SizedBox(width: 12),
+
+                    Expanded(
+                      child: Container(
+                        height: 48,
+                        decoration: BoxDecoration(
+                          color: Colors.transparent,
+                          borderRadius: BorderRadius.circular(10),
+                          border: Border.all(
+                            color: TColors.appMainDarkColor,
+                            width: 1.5,
+                          ),
+                        ),
+                        child: TextButton(
+                          onPressed: () {},
+                          style: TextButton.styleFrom(
+                            foregroundColor: TColors.appMainDarkColor,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                          ),
+                          child: const Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Icon(Icons.edit_outlined, size: 18),
+                              SizedBox(width: 8),
+                              Text(
+                                'Nuevo Memorando',
+                                style: TextStyle(fontWeight: FontWeight.w600),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
               ),
-            ),
-          ], ///////////////////////////////
+
+              const SizedBox(height: 20),
+
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 20),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Expanded(child: _buildTab('Actas Recientes', 0)),
+                    Expanded(child: _buildTab('Memorandos', 1)),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 16),
+
+              SizedBox(
+                height: 36,
+                child: ListView(
+                  scrollDirection: Axis.horizontal,
+                  padding: const EdgeInsets.symmetric(horizontal: 20),
+                  children: [
+                    _buildFilterChip('Recientes', 0),
+                    const SizedBox(width: 10),
+                    _buildFilterChip('Semana', 1),
+                    const SizedBox(width: 10),
+                    _buildFilterChip('Mes', 2),
+                    const SizedBox(width: 10),
+                    _buildFilterChip('Personalizado', 3, icon: Icons.tune),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 20),
+
+              Expanded(
+                child: selectedTab == 1
+                    ? _buildMemorandosList()
+                    : _buildActasList(),
+              ),
+            ],
+          ),
         ),
       ),
+    );
+  }
+
+  Widget _buildActasList() {
+    return BlocBuilder<MinutesMemosBloc, MinutesMemosState>(
+      buildWhen: (_, s) =>
+          s is ActasLoading || s is ActasLoaded || s is ActasError,
+      builder: (context, state) {
+        if (state is ActasLoading) {
+          return const Center(child: CircularProgressIndicator());
+        }
+
+        if (state is ActasError) {
+          return Center(
+            child: Text(
+              state.message,
+              style: const TextStyle(color: TColors.appDisabledColor),
+            ),
+          );
+        }
+
+        if (state is ActasLoaded) {
+          if (state.items.isEmpty) {
+            return const Center(
+              child: Text(
+                'No hay actas registradas',
+                style: TextStyle(color: TColors.appDisabledColor),
+              ),
+            );
+          }
+          return RefreshIndicator(
+            onRefresh: () async => _loadActas(
+              filter: selectedFilter == 3
+                  ? 'personalizado'
+                  : _filters[selectedFilter].$2,
+              from: selectedFilter == 3 && _customRange != null
+                  ? DateFormat('yyyy-MM-dd').format(_customRange!.start)
+                  : null,
+              to: selectedFilter == 3 && _customRange != null
+                  ? DateFormat('yyyy-MM-dd').format(_customRange!.end)
+                  : null,
+            ),
+            child: ListView.builder(
+              controller: _actasScrollController,
+              physics: const AlwaysScrollableScrollPhysics(),
+              padding: const EdgeInsets.only(left: 20, right: 20, bottom: 16),
+              itemCount: state.items.length + (state.hasMore ? 1 : 0),
+              itemBuilder: (_, i) {
+                if (i == state.items.length) {
+                  return const Padding(
+                    padding: EdgeInsets.symmetric(vertical: 16),
+                    child: Center(child: CircularProgressIndicator()),
+                  );
+                }
+                return _buildActaCard(state.items[i]);
+              },
+            ),
+          );
+        }
+
+        return const SizedBox.shrink();
+      },
+    );
+  }
+
+  Widget _buildActaCard(ActaEntity acta) {
+    final fmt = DateFormat('dd MMM, yyyy', 'es');
+    final fecha = fmt.format(acta.createdAt).toUpperCase();
+
+    String? actualizado;
+    if (acta.updatedAt != null) {
+      final diff = DateTime.now().difference(acta.updatedAt!);
+      if (diff.inHours < 24) {
+        actualizado = 'Actualizado hace ${diff.inHours}h';
+      } else {
+        actualizado = 'Actualizado hace ${diff.inDays}d';
+      }
+    }
+
+    return MinutesMemosCardPanelWidget(
+      tipo: 'minute',
+      numero: acta.numero,
+      titulo: acta.titulo,
+      descripcion: acta.descripcion,
+      fecha: fecha,
+      estado: acta.estado,
+      actualizado: actualizado,
+    );
+  }
+
+  Widget _buildMemorandosList() {
+    return BlocBuilder<MinutesMemosBloc, MinutesMemosState>(
+      buildWhen: (_, s) =>
+          s is MemorandosLoading ||
+          s is MemorandosLoaded ||
+          s is MemorandosError,
+      builder: (context, state) {
+        if (state is MemorandosLoading) {
+          return const Center(child: CircularProgressIndicator());
+        }
+
+        if (state is MemorandosError) {
+          return Center(
+            child: Text(
+              state.message,
+              style: const TextStyle(color: TColors.appDisabledColor),
+            ),
+          );
+        }
+
+        if (state is MemorandosLoaded) {
+          if (state.items.isEmpty) {
+            return const Center(
+              child: Text(
+                'No hay memorandos registrados',
+                style: TextStyle(color: TColors.appDisabledColor),
+              ),
+            );
+          }
+          return RefreshIndicator(
+            onRefresh: () async => _loadMemorandos(
+              filter: selectedFilter == 3
+                  ? 'personalizado'
+                  : _filters[selectedFilter].$2,
+              from: selectedFilter == 3 && _customRange != null
+                  ? DateFormat('yyyy-MM-dd').format(_customRange!.start)
+                  : null,
+              to: selectedFilter == 3 && _customRange != null
+                  ? DateFormat('yyyy-MM-dd').format(_customRange!.end)
+                  : null,
+            ),
+            child: ListView.builder(
+              controller: _memosScrollController,
+              physics: const AlwaysScrollableScrollPhysics(),
+              padding: const EdgeInsets.only(left: 20, right: 20, bottom: 16),
+              itemCount: state.items.length + (state.hasMore ? 1 : 0),
+              itemBuilder: (_, i) {
+                if (i == state.items.length) {
+                  return const Padding(
+                    padding: EdgeInsets.symmetric(vertical: 16),
+                    child: Center(child: CircularProgressIndicator()),
+                  );
+                }
+                return _buildMemorandoCard(state.items[i]);
+              },
+            ),
+          );
+        }
+
+        return const SizedBox.shrink();
+      },
+    );
+  }
+
+  Widget _buildMemorandoCard(MemorandumEntity memo) {
+    final fmt = DateFormat('dd MMM, yyyy', 'es');
+    final fecha = fmt.format(memo.createdAt).toUpperCase();
+
+    return MinutesMemosCardPanelWidget(
+      tipo: 'memo',
+      numero: memo.numero,
+      titulo: memo.asunto,
+      destinatario: memo.destinatario,
+      fecha: fecha,
+      estado: memo.estado,
     );
   }
 
@@ -221,11 +528,7 @@ class _MinutesMemosMainScreenState extends State<MinutesMemosMainScreen> {
 
     return GestureDetector(
       behavior: HitTestBehavior.opaque,
-      onTap: () {
-        setState(() {
-          selectedTab = index;
-        });
-      },
+      onTap: () => _onTabTap(index),
       child: Column(
         children: [
           Text(
@@ -255,11 +558,7 @@ class _MinutesMemosMainScreenState extends State<MinutesMemosMainScreen> {
     final bool isActive = selectedFilter == index;
 
     return GestureDetector(
-      onTap: () {
-        setState(() {
-          selectedFilter = index;
-        });
-      },
+      onTap: () => _onFilterTap(index),
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
         decoration: BoxDecoration(
