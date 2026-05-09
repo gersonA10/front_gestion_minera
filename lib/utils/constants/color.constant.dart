@@ -110,4 +110,13 @@ class TColors {
   static const subtleHint = Color(0xFF9DA4B0);
   static const grayText = Color(0xFF6B7280);
   static const fieldBorder = Color(0xFFE9EBF0);
+
+  // Request Progress / Timeline
+  static const headerDark = Color(0xFF1A1F2E);
+  static const timelineBlue = Color(0xFF2196F3);
+  static const accionIconBg = Color(0xFFE8F4FD);
+  static const timelineInactiveLine = Color(0xFFDDDDDD);
+  static const greyShade200 = Color(0xFFEEEEEE);
+  static const greyShade400 = Color(0xFFBDBDBD);
+  static const textGrey = Color(0xFF9E9E9E);
 }

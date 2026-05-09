@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:front_gestion_minera/injector_container.dart';
 import 'package:front_gestion_minera/utils/constants/color.constant.dart';
+import 'package:front_gestion_minera/utils/text_util.dart';
 
 import '../bloc/camp_bloc.dart';
 import '../widgets/widgets.dart';
@@ -72,16 +73,18 @@ class _TransactionHistoryScreenState extends State<TransactionHistoryScreen> {
             icon: Icon(Icons.arrow_back, color: TColors.white),
             onPressed: () => context.router.back(),
           ),
-          title: const Column(
+          title: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
                 'Historial de Solicitudes',
-                style: TextStyle(color: Colors.white, fontSize: 22),
+                style: AppTextStyles.mainStyleWhite22(context),
               ),
               Text(
                 'Jefe de Campamento',
-                style: TextStyle(fontSize: 15, color: Colors.white70),
+                style: AppTextStyles.mainStyle15(context).copyWith(
+                  color: TColors.white.withValues(alpha: 0.7),
+                ),
               ),
             ],
           ),
@@ -120,12 +123,10 @@ class _TransactionHistoryScreenState extends State<TransactionHistoryScreen> {
                           ),
                           child: Text(
                             _filters[index].$1,
-                            style: TextStyle(
+                            style: AppTextStyles.mainStyle12Bold(context).copyWith(
                               color: selected
                                   ? TColors.white
                                   : TColors.appDisabledColor,
-                              fontSize: 12,
-                              fontWeight: FontWeight.w600,
                             ),
                           ),
                         ),
@@ -169,12 +170,11 @@ class _TransactionHistoryScreenState extends State<TransactionHistoryScreen> {
 
                     if (state is CampHistoryLoaded) {
                       if (state.items.isEmpty) {
-                        return const Center(
+                        return Center(
                           child: Text(
                             'No hay solicitudes registradas',
-                            style: TextStyle(
+                            style: AppTextStyles.mainStyle13(context).copyWith(
                               color: TColors.appDisabledColor,
-                              fontSize: 13,
                             ),
                           ),
                         );

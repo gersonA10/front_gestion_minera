@@ -4,6 +4,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:front_gestion_minera/config/router/app_router.gr.dart';
 import 'package:front_gestion_minera/core/widgets/excavator_loader.dart';
 import 'package:front_gestion_minera/injector_container.dart';
+import 'package:front_gestion_minera/utils/text_util.dart';
 import 'package:intl/intl.dart';
 
 import '../../../../utils/constants/color.constant.dart';
@@ -37,22 +38,19 @@ class _RequestProgressDetailsScreenState
     return BlocProvider.value(
       value: _bloc,
       child: Scaffold(
-         backgroundColor: TColors.appBackgroundColor,
+        backgroundColor: TColors.appBackgroundColor,
         appBar: AppBar(
-          foregroundColor: Colors.white,
-          backgroundColor: const Color(0xFF1A1F2E),
-            leading: IconButton(
-            icon: Icon(Icons.arrow_back, color: TColors.white),
+          foregroundColor: TColors.white,
+          backgroundColor: TColors.headerDark,
+          leading: IconButton(
+            icon: const Icon(Icons.arrow_back, color: TColors.white),
             onPressed: () => context.router.back(),
           ),
-          title: const Text(
+          title: Text(
             'SOLICITUD',
-            style: TextStyle(
-              color: Colors.white,
-              fontSize: 22,
-              fontWeight: FontWeight.bold,
-              height: 1.1,
-            ),
+            style: AppTextStyles.mainStyle22Bold(
+              context,
+            ).copyWith(color: TColors.white, height: 1.1),
           ),
         ),
         body: BlocBuilder<CampBloc, CampState>(
@@ -95,7 +93,7 @@ class _RequestProgressDetailsScreenState
               );
             }
 
-            return SizedBox.shrink();
+            return const SizedBox.shrink();
           },
         ),
       ),
@@ -113,41 +111,62 @@ class _DetailView extends StatelessWidget {
     final amountFmt = NumberFormat('#,##0.00', 'es_BO');
 
     return SingleChildScrollView(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            _SummaryCard(detail: detail, amountFmt: amountFmt),
-            if (detail.requiredAction != null) ...[
-              const SizedBox(height: 12),
-              _AccionRequeridaCard(requestId: detail.requestId),
+      padding: const EdgeInsets.all(16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _SummaryCard(detail: detail, amountFmt: amountFmt),
+          if (detail.requiredAction != null) ...[
+            const SizedBox(height: 12),
+            _AccionRequeridaCard(requestId: detail.requestId),
+          ],
+          if (detail.rejectReason != null) ...[
+            const SizedBox(height: 12),
+            _RejectionCard(reason: detail.rejectReason!),
+          ],
+          const SizedBox(height: 20),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Progreso de Solicitud',
+                style: AppTextStyles.mainStyle17Bold(
+                  context,
+                ).copyWith(color: TColors.headerDark),
+              ),
+              const SizedBox(height: 16),
+              ...detail.timeline.asMap().entries.map((entry) {
+                final step = entry.value;
+                final isLast = entry.key == detail.timeline.length - 1;
+                final isCompleted = step.status == 'COMPLETED';
+                final isActive =
+                    !isCompleted && step.key == detail.globalStatus;
+                return _TimelineStep(
+                  step: step,
+                  isLast: isLast,
+                  isCompleted: isCompleted,
+                  isActive: isActive,
+                );
+              }),
             ],
-            if (detail.rejectReason != null) ...[
-              const SizedBox(height: 12),
-              _RejectionCard(reason: detail.rejectReason!),
-            ],
-            const SizedBox(height: 20),
-            _TimelineSection(
-              timeline: detail.timeline,
-              globalStatus: detail.globalStatus,
-            ),
-            const SizedBox(height: 20),
-            _MetadataRow('Solicitante', detail.requesterName),
+          ),
+          const SizedBox(height: 20),
+          _MetadataRow('Solicitante', detail.requesterName),
+          const Divider(height: 1),
+          _MetadataRow(
+            'Creado el',
+            DateFormat('dd/MM/yyyy HH:mm').format(detail.createdAt),
+          ),
+          if (detail.closedAt != null) ...[
             const Divider(height: 1),
             _MetadataRow(
-              'Creado el',
-              DateFormat('dd/MM/yyyy HH:mm').format(detail.createdAt),
+              'Cerrado el',
+              DateFormat('dd/MM/yyyy HH:mm').format(detail.closedAt!),
             ),
-            if (detail.closedAt != null) ...[
-              const Divider(height: 1),
-              _MetadataRow(
-                'Cerrado el',
-                DateFormat('dd/MM/yyyy HH:mm').format(detail.closedAt!),
-              ),
-            ],
-            const SizedBox(height: 24),
           ],
-        ),
+          const SizedBox(height: 24),
+        ],
+      ),
     );
   }
 }
@@ -165,7 +184,7 @@ class _SummaryCard extends StatelessWidget {
       width: double.infinity,
       padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: TColors.white,
         borderRadius: BorderRadius.circular(14),
       ),
       child: Column(
@@ -177,11 +196,9 @@ class _SummaryCard extends StatelessWidget {
               Expanded(
                 child: Text(
                   detail.description,
-                  style: const TextStyle(
-                    fontSize: 17,
-                    fontWeight: FontWeight.bold,
-                    color: Color(0xFF1A1F2E),
-                  ),
+                  style: AppTextStyles.mainStyle17Bold(
+                    context,
+                  ).copyWith(color: TColors.headerDark),
                 ),
               ),
               const SizedBox(width: 8),
@@ -196,25 +213,19 @@ class _SummaryCard extends StatelessWidget {
                 ),
                 child: Text(
                   detail.statusLabel.toUpperCase(),
-                  style: TextStyle(
-                    fontSize: 11,
-                    fontWeight: FontWeight.bold,
-                    color: color,
-                    letterSpacing: 0.5,
-                  ),
+                  style: AppTextStyles.mainStyle11Bold(
+                    context,
+                  ).copyWith(color: color, letterSpacing: 0.5),
                 ),
               ),
             ],
           ),
           const SizedBox(height: 16),
-          const Text(
+          Text(
             'MONTO SOLICITADO',
-            style: TextStyle(
-              fontSize: 11,
-              color: Colors.grey,
-              letterSpacing: 1.0,
-              fontWeight: FontWeight.w500,
-            ),
+            style: AppTextStyles.mainStyle11(
+              context,
+            ).copyWith(color: TColors.textGrey, letterSpacing: 1.0),
           ),
           const SizedBox(height: 2),
           RichText(
@@ -222,19 +233,15 @@ class _SummaryCard extends StatelessWidget {
               children: [
                 TextSpan(
                   text: amountFmt.format(detail.requestedAmount),
-                  style: const TextStyle(
-                    fontSize: 30,
-                    fontWeight: FontWeight.bold,
-                    color: Color(0xFF1A1F2E),
-                  ),
+                  style: AppTextStyles.mainStyle30Bold(
+                    context,
+                  ).copyWith(color: TColors.headerDark),
                 ),
-                const TextSpan(
+                TextSpan(
                   text: ' Bs',
-                  style: TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w500,
-                    color: Colors.grey,
-                  ),
+                  style: AppTextStyles.mainStyle14(
+                    context,
+                  ).copyWith(color: TColors.textGrey),
                 ),
               ],
             ),
@@ -256,7 +263,7 @@ class _AccionRequeridaCard extends StatelessWidget {
       width: double.infinity,
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: TColors.white,
         borderRadius: BorderRadius.circular(14),
       ),
       child: Column(
@@ -268,30 +275,30 @@ class _AccionRequeridaCard extends StatelessWidget {
                 width: 42,
                 height: 42,
                 decoration: BoxDecoration(
-                  color: const Color(0xFFE8F4FD),
+                  color: TColors.accionIconBg,
                   borderRadius: BorderRadius.circular(10),
                 ),
                 child: const Icon(
                   Icons.upload_file_outlined,
-                  color: Color(0xFF2196F3),
+                  color: TColors.timelineBlue,
                   size: 22,
                 ),
               ),
               const SizedBox(width: 12),
-              const Column(
+              Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
                     'Acción Requerida',
-                    style: TextStyle(
-                      fontSize: 15,
-                      fontWeight: FontWeight.bold,
-                      color: Color(0xFF1A1F2E),
-                    ),
+                    style: AppTextStyles.mainStyle15Bold(
+                      context,
+                    ).copyWith(color: TColors.headerDark),
                   ),
                   Text(
                     'Pendiente de recibo para cierre',
-                    style: TextStyle(fontSize: 13, color: Colors.grey),
+                    style: AppTextStyles.mainStyle13(
+                      context,
+                    ).copyWith(color: TColors.textGrey),
                   ),
                 ],
               ),
@@ -312,13 +319,13 @@ class _AccionRequeridaCard extends StatelessWidget {
                 }
               },
               icon: const Icon(Icons.cloud_upload_outlined, size: 18),
-              label: const Text(
+              label: Text(
                 'Subir Recibo',
-                style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600),
+                style: AppTextStyles.mainStyle15Bold(context),
               ),
               style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFF2196F3),
-                foregroundColor: Colors.white,
+                backgroundColor: TColors.timelineBlue,
+                foregroundColor: TColors.white,
                 padding: const EdgeInsets.symmetric(vertical: 14),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(10),
@@ -351,7 +358,7 @@ class _RejectionCard extends StatelessWidget {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Icon(Icons.cancel_outlined, color: TColors.danger, size: 20),
+          const Icon(Icons.cancel_outlined, color: TColors.danger, size: 20),
           const SizedBox(width: 10),
           Expanded(
             child: Column(
@@ -359,59 +366,22 @@ class _RejectionCard extends StatelessWidget {
               children: [
                 Text(
                   'Solicitud Rechazada',
-                  style: TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.bold,
-                    color: TColors.danger,
-                  ),
+                  style: AppTextStyles.mainStyle14Bold(
+                    context,
+                  ).copyWith(color: TColors.danger),
                 ),
                 const SizedBox(height: 4),
                 Text(
                   reason,
-                  style: const TextStyle(fontSize: 13, color: Colors.black87),
+                  style: AppTextStyles.mainStyle13(
+                    context,
+                  ).copyWith(color: Colors.black87),
                 ),
               ],
             ),
           ),
         ],
       ),
-    );
-  }
-}
-
-class _TimelineSection extends StatelessWidget {
-  final List<RequestTimelineStepEntity> timeline;
-  final String globalStatus;
-
-  const _TimelineSection({required this.timeline, required this.globalStatus});
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        const Text(
-          'Progreso de Solicitud',
-          style: TextStyle(
-            fontSize: 17,
-            fontWeight: FontWeight.bold,
-            color: Color(0xFF1A1F2E),
-          ),
-        ),
-        const SizedBox(height: 16),
-        ...timeline.asMap().entries.map((entry) {
-          final step = entry.value;
-          final isLast = entry.key == timeline.length - 1;
-          final isCompleted = step.status == 'COMPLETED';
-          final isActive = !isCompleted && step.key == globalStatus;
-          return _TimelineStep(
-            step: step,
-            isLast: isLast,
-            isCompleted: isCompleted,
-            isActive: isActive,
-          );
-        }),
-      ],
     );
   }
 }
@@ -431,9 +401,9 @@ class _TimelineStep extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    const blue = Color(0xFF2196F3);
-
-    final titleColor = (isCompleted || isActive) ? blue : Colors.grey;
+    final titleColor = (isCompleted || isActive)
+        ? TColors.timelineBlue
+        : TColors.textGrey;
 
     return IntrinsicHeight(
       child: Row(
@@ -443,12 +413,65 @@ class _TimelineStep extends StatelessWidget {
             width: 36,
             child: Column(
               children: [
-                _indicator(isCompleted, isActive),
+                if (isCompleted)
+                  Container(
+                    width: 32,
+                    height: 32,
+                    decoration: const BoxDecoration(
+                      color: TColors.timelineBlue,
+                      shape: BoxShape.circle,
+                    ),
+                    child: const Icon(
+                      Icons.check,
+                      color: TColors.white,
+                      size: 18,
+                    ),
+                  ),
+
+                if (isActive)
+                  Container(
+                    width: 32,
+                    height: 32,
+                    decoration: BoxDecoration(
+                      color: TColors.timelineBlue.withValues(alpha: 0.15),
+                      shape: BoxShape.circle,
+                      border: Border.all(
+                        color: TColors.timelineBlue,
+                        width: 2.5,
+                      ),
+                    ),
+                    child: Center(
+                      child: Container(
+                        width: 12,
+                        height: 12,
+                        decoration: const BoxDecoration(
+                          color: TColors.timelineBlue,
+                          shape: BoxShape.circle,
+                        ),
+                      ),
+                    ),
+                  ),
+
+                Container(
+                  width: 32,
+                  height: 32,
+                  decoration: const BoxDecoration(
+                    color: TColors.greyShade200,
+                    shape: BoxShape.circle,
+                  ),
+                  child: const Icon(
+                    Icons.lock_outline,
+                    color: TColors.greyShade400,
+                    size: 16,
+                  ),
+                ),
                 if (!isLast)
                   Expanded(
                     child: Container(
                       width: 2,
-                      color: isCompleted ? blue : const Color(0xFFDDDDDD),
+                      color: isCompleted
+                          ? TColors.timelineBlue
+                          : TColors.timelineInactiveLine,
                     ),
                   ),
               ],
@@ -465,11 +488,9 @@ class _TimelineStep extends StatelessWidget {
                     children: [
                       Text(
                         step.title,
-                        style: TextStyle(
-                          fontSize: 15,
-                          fontWeight: FontWeight.w600,
-                          color: titleColor,
-                        ),
+                        style: AppTextStyles.mainStyle15Bold(
+                          context,
+                        ).copyWith(color: titleColor),
                       ),
                       if (isActive) ...[
                         const SizedBox(width: 8),
@@ -479,16 +500,14 @@ class _TimelineStep extends StatelessWidget {
                             vertical: 2,
                           ),
                           decoration: BoxDecoration(
-                            color: blue.withValues(alpha: 0.12),
+                            color: TColors.timelineBlue.withValues(alpha: 0.12),
                             borderRadius: BorderRadius.circular(10),
                           ),
-                          child: const Text(
+                          child: Text(
                             'Estado Actual',
-                            style: TextStyle(
-                              fontSize: 10,
-                              color: blue,
-                              fontWeight: FontWeight.w600,
-                            ),
+                            style: AppTextStyles.mainStyle10Bold(
+                              context,
+                            ).copyWith(color: TColors.timelineBlue),
                           ),
                         ),
                       ],
@@ -497,13 +516,17 @@ class _TimelineStep extends StatelessWidget {
                   const SizedBox(height: 2),
                   Text(
                     step.description,
-                    style: const TextStyle(fontSize: 12, color: Colors.grey),
+                    style: AppTextStyles.mainStyle12(
+                      context,
+                    ).copyWith(color: TColors.textGrey),
                   ),
                   if (step.date != null) ...[
                     const SizedBox(height: 2),
                     Text(
                       DateFormat('dd/MM/yyyy HH:mm').format(step.date!),
-                      style: const TextStyle(fontSize: 11, color: Colors.grey),
+                      style: AppTextStyles.mainStyle11(
+                        context,
+                      ).copyWith(color: TColors.textGrey),
                     ),
                   ],
                 ],
@@ -512,48 +535,6 @@ class _TimelineStep extends StatelessWidget {
           ),
         ],
       ),
-    );
-  }
-
-  Widget _indicator(bool isCompleted, bool isActive) {
-    const blue = Color(0xFF2196F3);
-    if (isCompleted) {
-      return Container(
-        width: 32,
-        height: 32,
-        decoration: const BoxDecoration(color: blue, shape: BoxShape.circle),
-        child: const Icon(Icons.check, color: Colors.white, size: 18),
-      );
-    }
-    if (isActive) {
-      return Container(
-        width: 32,
-        height: 32,
-        decoration: BoxDecoration(
-          color: blue.withValues(alpha: 0.15),
-          shape: BoxShape.circle,
-          border: Border.all(color: blue, width: 2.5),
-        ),
-        child: Center(
-          child: Container(
-            width: 12,
-            height: 12,
-            decoration: const BoxDecoration(
-              color: blue,
-              shape: BoxShape.circle,
-            ),
-          ),
-        ),
-      );
-    }
-    return Container(
-      width: 32,
-      height: 32,
-      decoration: BoxDecoration(
-        color: Colors.grey.shade200,
-        shape: BoxShape.circle,
-      ),
-      child: Icon(Icons.lock_outline, color: Colors.grey.shade400, size: 16),
     );
   }
 }
@@ -571,14 +552,17 @@ class _MetadataRow extends StatelessWidget {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Text(label, style: const TextStyle(fontSize: 14, color: Colors.grey)),
+          Text(
+            label,
+            style: AppTextStyles.mainStyle14(
+              context,
+            ).copyWith(color: TColors.textGrey),
+          ),
           Text(
             value,
-            style: const TextStyle(
-              fontSize: 14,
-              fontWeight: FontWeight.bold,
-              color: Color(0xFF1A1F2E),
-            ),
+            style: AppTextStyles.mainStyle14Bold(
+              context,
+            ).copyWith(color: TColors.headerDark),
           ),
         ],
       ),
