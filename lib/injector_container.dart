@@ -5,6 +5,7 @@ import 'package:front_gestion_minera/core/networking/http_services.dart';
 import 'package:front_gestion_minera/modules/admin/admin_container.dart';
 import 'package:front_gestion_minera/modules/camp/camp_container.dart';
 import 'package:front_gestion_minera/modules/machinery/machinery_container.dart';
+import 'package:front_gestion_minera/modules/minutes_memos/minutes_memos_container.dart';
 import 'package:front_gestion_minera/modules/partners/partners_container.dart';
 import 'package:front_gestion_minera/modules/surveillance/surveillance_container.dart';
 import 'package:front_gestion_minera/modules/treasury/treasury_container.dart';
@@ -29,5 +30,6 @@ class InjectorContainer {
     initTreasuryContainer(getIt);
     initAdminContainer(getIt);
     initMachineryContainer(getIt);
+    initMinutesMemosContainer(getIt);
   }
 }
