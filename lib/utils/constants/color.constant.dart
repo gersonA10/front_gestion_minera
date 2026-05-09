@@ -97,9 +97,17 @@ class TColors {
   static const pendingYellow = Color(0xFFFFB300); // Estado pendiente
 
   static const infoBannerBg = Color(0xFFEFF3FA);
-  static const photoUploadBg = Color(0xFFF4F7FB);
+  static const photoUploadBg = Color(0xFFF5F6F8);
   static const iconMuted = Color(0xFF8A9BB0);
   static const hintColor = Color(0xFFADB5BD);
   static const inputBorder = Color(0xFFCED4DA);
   static const dottedBorder = Color(0xFFB0BEC5);
+
+  // Upload / Receipt
+  static const darkNavy = Color(0xFF1A1F26);
+  static const borderLight = Color(0xFFD1D5DB);
+  static const uploadBlue = Color(0xFF1E88E5);
+  static const subtleHint = Color(0xFF9DA4B0);
+  static const grayText = Color(0xFF6B7280);
+  static const fieldBorder = Color(0xFFE9EBF0);
 }

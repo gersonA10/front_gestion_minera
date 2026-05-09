@@ -130,8 +130,7 @@ class _HomeDashboardCampScreenState extends State<HomeDashboardCampScreen> {
                           ListView.builder(
                             shrinkWrap: true,
                             physics: const NeverScrollableScrollPhysics(),
-                            itemCount: state.requests.length +
-                                (state.hasReachedMax ? 0 : 1),
+                            itemCount: 5,
                             itemBuilder: (context, index) {
                               if (index == state.requests.length) {
                                 return const Padding(
@@ -160,8 +159,11 @@ class _HomeDashboardCampScreenState extends State<HomeDashboardCampScreen> {
         floatingActionButton: Padding(
           padding: const EdgeInsets.symmetric(vertical: 25.0),
           child: FloatingActionButton.extended(
-            onPressed: () {
-              context.router.push(const NewRequestRoute());
+            onPressed: ()async {
+             final res = await context.router.push(const NewRequestRoute());
+             if(res == true) {
+              _campBloc.add(GetCampDashboardEvent());
+             }
             },
             backgroundColor: TColors.appMainColor,
             icon: const Icon(Icons.add),

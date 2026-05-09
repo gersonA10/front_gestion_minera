@@ -8,8 +8,9 @@ import '../../domain/entity/entity.dart';
 
 class CardRequestDetailWidget extends StatelessWidget {
   final TransactionHistoryEntity transaction;
+  final VoidCallback? onReturn;
 
-  const CardRequestDetailWidget({super.key, required this.transaction});
+  const CardRequestDetailWidget({super.key, required this.transaction, this.onReturn});
 
   @override
   Widget build(BuildContext context) {
@@ -19,10 +20,11 @@ class CardRequestDetailWidget extends StatelessWidget {
     final date = DateFormat('dd/MM/yyyy').format(transaction.createdAt);
 
     return GestureDetector(
-      onTap: () {
-        context.router.push(
+      onTap: () async {
+        await context.router.push(
           RequestProgressDetailsRoute(requestId: transaction.requestId),
         );
+        onReturn?.call();
       },
       child: Container(
         width: double.infinity,
@@ -51,7 +53,7 @@ class CardRequestDetailWidget extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        transaction.description,
+                        transaction.description.split(' - ').first,
                         style: const TextStyle(
                           fontWeight: FontWeight.bold,
                           fontSize: 15,

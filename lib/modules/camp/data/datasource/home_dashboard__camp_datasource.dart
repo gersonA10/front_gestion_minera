@@ -64,22 +64,32 @@ class CampDatasource {
     return RequestDetailModel.fromJson(response['data']);
   }
 
+  Future<String> _uploadReceipt(String filePath) async {
+    final response = await apiClient.postFormData(
+      '/api/upload/camp-receipt',
+      operationName: 'uploadCampReceipt',
+      data: {},
+      files: [
+        {
+          'name': 'file',
+          'path': filePath,
+          'filename': filePath.split('/').last,
+        },
+      ],
+    );
+    return response['data']['url'] as String;
+  }
+
   Future<CloseRequestResultModel> closeRequest(
     String requestId,
     CloseRequestEntity request,
   ) async {
     final model = CloseRequestModel.fromEntity(request);
-    final response = await apiClient.postFormData(
+    final evidenceUrl = await _uploadReceipt(model.evidencePath);
+    final response = await apiClient.post(
       '/api/camp/requests/$requestId/close',
       operationName: 'closeCampRequest',
-      data: model.toFormDataMap(),
-      files: [
-        {
-          'name': 'evidence_url',
-          'path': model.evidencePath,
-          'filename': model.evidencePath.split('/').last,
-        },
-      ],
+      data: model.toJson(evidenceUrl),
     );
     return CloseRequestResultModel.fromJson(response['data']);
   }
