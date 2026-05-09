@@ -411,6 +411,7 @@ class _AuthScreenState extends State<AuthScreen> {
                               onPressed: state is AuthLoading
                                   ? null
                                   : () {
+                                    FocusScope.of(context).unfocus();
                                       _loginWithBiometric = false;
                                       context.read<AuthBloc>().add(
                                         AuthDataEvent(

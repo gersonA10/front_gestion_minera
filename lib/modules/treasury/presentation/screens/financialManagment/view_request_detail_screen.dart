@@ -1,6 +1,5 @@
 import 'dart:io';
 import 'package:auto_route/auto_route.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:front_gestion_minera/config/theme/extension_theme.dart';
 import 'package:front_gestion_minera/core/widgets/custom_alert_widget.dart';
@@ -249,32 +248,11 @@ class _ViewRequestDetailsScreenState extends State<ViewRequestDetailsScreen> {
                             const SizedBox(height: 24),
                             const SectionTitle(title: 'Evidencia Adjunta'),
                             ZoomableEvidenceImage(
-                              imageUrl: data.evidenciaUrl.startsWith('http')
-                                        ? data.evidenciaUrl
-                                        : '$baseUrl${data.evidenciaUrl}',
-                              // child: Container(
-                              //   width: 80,
-                              //   height: 80,
-                              //   decoration: BoxDecoration(
-                              //     color: Colors.orange.shade100,
-                              //     borderRadius: BorderRadius.circular(12),
-                              //   ),
-                              //   child: ClipRRect(
-                              //     borderRadius: BorderRadius.circular(12),
-                              //     child: Image.network(
-                              //       data.evidenciaUrl.startsWith('http')
-                              //           ? data.evidenciaUrl
-                              //           : '$baseUrl${data.evidenciaUrl}',
-                              //       fit: BoxFit.cover,
-                              //       errorBuilder: (context, error, stackTrace) {
-                              //         return const Icon(
-                              //           Icons.broken_image,
-                              //           color: Colors.orange,
-                              //         );
-                              //       },
-                              //     ),
-                              //   ),
-                              // ),
+                              imageUrl: data.evidenciaUrl == null
+                                  ? ''
+                                  : data.evidenciaUrl!.startsWith('http')
+                                      ? data.evidenciaUrl!
+                                      : '$baseUrl${data.evidenciaUrl!}',
                             ),
                             const SizedBox(height: 24),
                             const SectionTitle(title: 'Gestión de Pago'),
