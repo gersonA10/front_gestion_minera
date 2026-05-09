@@ -31,7 +31,7 @@ class CardRequestsWidget extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(request.description, style: const TextStyle(fontSize: 15)),
+                  Text(request.description.split(' - ').first, style: const TextStyle(fontSize: 15)),
                   const SizedBox(height: 5),
                   Text(
                     '${request.displayCode} · ${DateFormat('dd/MM/yyyy').format(request.createdAt)}',

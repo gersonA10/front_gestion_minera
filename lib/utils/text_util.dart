@@ -267,4 +267,19 @@ class AppTextStyles {
     fontSize: 12,
     letterSpacing: 0.8,
   );
+
+  static TextStyle mainStyle13(BuildContext context) =>
+      GoogleFonts.inter(fontSize: 13);
+
+  static TextStyle mainStyle13Bold(BuildContext context) =>
+      GoogleFonts.inter(fontSize: 13, fontWeight: FontWeight.bold);
+
+  static TextStyle mainStyle16(BuildContext context) =>
+      GoogleFonts.inter(fontSize: 16);
+
+  static TextStyle mainStyle18Bold(BuildContext context) =>
+      GoogleFonts.inter(fontSize: 18, fontWeight: FontWeight.bold);
+
+  static TextStyle mainStyle22Bold(BuildContext context) =>
+      GoogleFonts.inter(fontSize: 22, fontWeight: FontWeight.bold);
 }

@@ -23,6 +23,7 @@ class _TransactionHistoryScreenState extends State<TransactionHistoryScreen> {
   static const _filters = [
     ('Todos', 'TODOS'),
     ('En Revisión', 'EN_REVISION'),
+    ('Aprobadas', 'APROBADA'),
     ('Pend. Recibo', 'PENDIENTE_RECIBO'),
     ('Completados', 'COMPLETADO'),
     ('Rechazados', 'RECHAZADO'),
@@ -203,6 +204,12 @@ class _TransactionHistoryScreenState extends State<TransactionHistoryScreen> {
                             }
                             return CardRequestDetailWidget(
                               transaction: state.items[index],
+                              onReturn: () => _historyBloc.add(
+                                GetCampHistoryEvent(
+                                  status: _filters[_selectedIndex].$2,
+                                  isRefresh: true,
+                                ),
+                              ),
                             );
                           },
                         ),

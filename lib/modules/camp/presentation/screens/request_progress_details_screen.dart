@@ -2,6 +2,7 @@ import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:front_gestion_minera/config/router/app_router.gr.dart';
+import 'package:front_gestion_minera/core/widgets/excavator_loader.dart';
 import 'package:front_gestion_minera/injector_container.dart';
 import 'package:intl/intl.dart';
 
@@ -35,32 +36,31 @@ class _RequestProgressDetailsScreenState
   Widget build(BuildContext context) {
     return BlocProvider.value(
       value: _bloc,
-      child: BlocBuilder<CampBloc, CampState>(
-        buildWhen: (_, state) =>
-            state is RequestDetailLoading ||
-            state is RequestDetailLoaded ||
-            state is RequestDetailError,
-        builder: (context, state) {
-          if (state is RequestDetailLoading) {
-            return Scaffold(
-              backgroundColor: const Color(0xFFF2F3F7),
-              body: Column(
+      child: Scaffold(
+         backgroundColor: TColors.appBackgroundColor,
+        appBar: AppBar(
+          foregroundColor: Colors.white,
+          backgroundColor: const Color(0xFF1A1F2E),
+            leading: IconButton(
+            icon: Icon(Icons.arrow_back, color: TColors.white),
+            onPressed: () => context.router.back(),
+          ),
+          title: const Text(
+            'SOLICITUD',
+            style: TextStyle(
+              color: Colors.white,
+              fontSize: 22,
+              fontWeight: FontWeight.bold,
+              height: 1.1,
+            ),
+          ),
+        ),
+        body: BlocBuilder<CampBloc, CampState>(
+          builder: (context, state) {
+            final isLoading = state is RequestDetailLoading;
+            if (state is RequestDetailError) {
+              return Column(
                 children: [
-                  _AppBar(displayCode: '...', onBack: () => context.router.back()),
-                  const Expanded(
-                    child: Center(child: CircularProgressIndicator()),
-                  ),
-                ],
-              ),
-            );
-          }
-
-          if (state is RequestDetailError) {
-            return Scaffold(
-              backgroundColor: const Color(0xFFF2F3F7),
-              body: Column(
-                children: [
-                  _AppBar(displayCode: '', onBack: () => context.router.back()),
                   Expanded(
                     child: Center(
                       child: Column(
@@ -69,7 +69,9 @@ class _RequestProgressDetailsScreenState
                           Text(state.message, textAlign: TextAlign.center),
                           const SizedBox(height: 16),
                           ElevatedButton(
-                            onPressed: () => _bloc.add(GetRequestDetailEvent(widget.requestId)),
+                            onPressed: () => _bloc.add(
+                              GetRequestDetailEvent(widget.requestId),
+                            ),
                             child: const Text('Reintentar'),
                           ),
                         ],
@@ -77,19 +79,25 @@ class _RequestProgressDetailsScreenState
                     ),
                   ),
                 ],
-              ),
-            );
-          }
+              );
+            }
 
-          if (state is RequestDetailLoaded) {
-            return _DetailView(detail: state.detail);
-          }
+            if (state is RequestDetailLoaded) {
+              return Stack(
+                children: [
+                  _DetailView(detail: state.detail),
+                  if (isLoading)
+                    Container(
+                      color: Colors.black.withValues(alpha: 0.3),
+                      child: const Center(child: ExcavatorLoader()),
+                    ),
+                ],
+              );
+            }
 
-          return const Scaffold(
-            backgroundColor: Color(0xFFF2F3F7),
-            body: SizedBox.shrink(),
-          );
-        },
+            return SizedBox.shrink();
+          },
+        ),
       ),
     );
   }
@@ -104,106 +112,42 @@ class _DetailView extends StatelessWidget {
   Widget build(BuildContext context) {
     final amountFmt = NumberFormat('#,##0.00', 'es_BO');
 
-    return Scaffold(
-      backgroundColor: const Color(0xFFF2F3F7),
-      body: Column(
-        children: [
-          _AppBar(
-            displayCode: detail.displayCode,
-            onBack: () => context.router.back(),
-          ),
-          Expanded(
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.all(16),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  _SummaryCard(detail: detail, amountFmt: amountFmt),
-                  if (detail.requiredAction != null) ...[
-                    const SizedBox(height: 12),
-                    _AccionRequeridaCard(requestId: detail.requestId),
-                  ],
-                  if (detail.rejectReason != null) ...[
-                    const SizedBox(height: 12),
-                    _RejectionCard(reason: detail.rejectReason!),
-                  ],
-                  const SizedBox(height: 20),
-                  _TimelineSection(
-                    timeline: detail.timeline,
-                    globalStatus: detail.globalStatus,
-                  ),
-                  const SizedBox(height: 20),
-                  _MetadataRow('Solicitante', detail.requesterName),
-                  const Divider(height: 1),
-                  _MetadataRow(
-                    'Creado el',
-                    DateFormat('dd/MM/yyyy HH:mm').format(detail.createdAt),
-                  ),
-                  if (detail.closedAt != null) ...[
-                    const Divider(height: 1),
-                    _MetadataRow(
-                      'Cerrado el',
-                      DateFormat('dd/MM/yyyy HH:mm').format(detail.closedAt!),
-                    ),
-                  ],
-                  const SizedBox(height: 24),
-                ],
-              ),
+    return SingleChildScrollView(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            _SummaryCard(detail: detail, amountFmt: amountFmt),
+            if (detail.requiredAction != null) ...[
+              const SizedBox(height: 12),
+              _AccionRequeridaCard(requestId: detail.requestId),
+            ],
+            if (detail.rejectReason != null) ...[
+              const SizedBox(height: 12),
+              _RejectionCard(reason: detail.rejectReason!),
+            ],
+            const SizedBox(height: 20),
+            _TimelineSection(
+              timeline: detail.timeline,
+              globalStatus: detail.globalStatus,
             ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _AppBar extends StatelessWidget {
-  final String displayCode;
-  final VoidCallback onBack;
-
-  const _AppBar({required this.displayCode, required this.onBack});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      color: const Color(0xFF1A1F2E),
-      padding: EdgeInsets.only(
-        top: MediaQuery.of(context).padding.top,
-        left: 8,
-        right: 16,
-        bottom: 12,
-      ),
-      child: Row(
-        children: [
-          IconButton(
-            icon: const Icon(Icons.arrow_back_ios, color: Colors.white, size: 20),
-            onPressed: onBack,
-          ),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const Text(
-                'SOLICITUD',
-                style: TextStyle(
-                  color: Colors.white54,
-                  fontSize: 11,
-                  letterSpacing: 1.2,
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
-              Text(
-                displayCode,
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontSize: 22,
-                  fontWeight: FontWeight.bold,
-                  height: 1.1,
-                ),
+            const SizedBox(height: 20),
+            _MetadataRow('Solicitante', detail.requesterName),
+            const Divider(height: 1),
+            _MetadataRow(
+              'Creado el',
+              DateFormat('dd/MM/yyyy HH:mm').format(detail.createdAt),
+            ),
+            if (detail.closedAt != null) ...[
+              const Divider(height: 1),
+              _MetadataRow(
+                'Cerrado el',
+                DateFormat('dd/MM/yyyy HH:mm').format(detail.closedAt!),
               ),
             ],
-          ),
-        ],
-      ),
+            const SizedBox(height: 24),
+          ],
+        ),
     );
   }
 }
@@ -242,7 +186,10 @@ class _SummaryCard extends StatelessWidget {
               ),
               const SizedBox(width: 8),
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 5,
+                ),
                 decoration: BoxDecoration(
                   color: color.withValues(alpha: 0.15),
                   borderRadius: BorderRadius.circular(20),
@@ -354,9 +301,16 @@ class _AccionRequeridaCard extends StatelessWidget {
           SizedBox(
             width: double.infinity,
             child: ElevatedButton.icon(
-              onPressed: () => context.router.push(
-                UploadReceiptEvidenceRoute(requestId: requestId),
-              ),
+              onPressed: () async {
+                await context.router.push(
+                  UploadReceiptEvidenceRoute(requestId: requestId),
+                );
+                if (context.mounted) {
+                  context.read<CampBloc>().add(
+                    GetRequestDetailEvent(requestId),
+                  );
+                }
+              },
               icon: const Icon(Icons.cloud_upload_outlined, size: 18),
               label: const Text(
                 'Subir Recibo',
@@ -412,7 +366,10 @@ class _RejectionCard extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(height: 4),
-                Text(reason, style: const TextStyle(fontSize: 13, color: Colors.black87)),
+                Text(
+                  reason,
+                  style: const TextStyle(fontSize: 13, color: Colors.black87),
+                ),
               ],
             ),
           ),
@@ -517,14 +474,21 @@ class _TimelineStep extends StatelessWidget {
                       if (isActive) ...[
                         const SizedBox(width: 8),
                         Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 8,
+                            vertical: 2,
+                          ),
                           decoration: BoxDecoration(
                             color: blue.withValues(alpha: 0.12),
                             borderRadius: BorderRadius.circular(10),
                           ),
                           child: const Text(
                             'Estado Actual',
-                            style: TextStyle(fontSize: 10, color: blue, fontWeight: FontWeight.w600),
+                            style: TextStyle(
+                              fontSize: 10,
+                              color: blue,
+                              fontWeight: FontWeight.w600,
+                            ),
                           ),
                         ),
                       ],
@@ -574,7 +538,10 @@ class _TimelineStep extends StatelessWidget {
           child: Container(
             width: 12,
             height: 12,
-            decoration: const BoxDecoration(color: blue, shape: BoxShape.circle),
+            decoration: const BoxDecoration(
+              color: blue,
+              shape: BoxShape.circle,
+            ),
           ),
         ),
       );
@@ -582,7 +549,10 @@ class _TimelineStep extends StatelessWidget {
     return Container(
       width: 32,
       height: 32,
-      decoration: BoxDecoration(color: Colors.grey.shade200, shape: BoxShape.circle),
+      decoration: BoxDecoration(
+        color: Colors.grey.shade200,
+        shape: BoxShape.circle,
+      ),
       child: Icon(Icons.lock_outline, color: Colors.grey.shade400, size: 16),
     );
   }

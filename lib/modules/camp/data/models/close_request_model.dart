@@ -13,7 +13,10 @@ class CloseRequestModel extends CloseRequestEntity {
     );
   }
 
-  Map<String, dynamic> toFormDataMap() {
-    return {'final_amount': finalAmount};
+  Map<String, dynamic> toJson(String evidenceUrl) {
+    return {
+      'evidence_url': evidenceUrl,
+      'final_amount': finalAmount,
+    };
   }
 }
