@@ -14,7 +14,6 @@ import '../bloc/camp_bloc.dart';
 @RoutePage()
 class UploadReceiptEvidenceScreen extends StatefulWidget {
   final String requestId;
-
   const UploadReceiptEvidenceScreen({super.key, required this.requestId});
 
   @override
