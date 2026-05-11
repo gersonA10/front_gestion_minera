@@ -131,7 +131,7 @@ class _AuthScreenState extends State<AuthScreen> {
 
   }
 
-  }
+  
 //cambiado 
   /// Muestra el dialog para activar la huella tras un login exitoso con formulario.
   Future<void> _offerBiometricSetup(String role) async {
