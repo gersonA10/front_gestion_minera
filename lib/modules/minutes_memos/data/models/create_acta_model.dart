@@ -10,6 +10,16 @@ class CreateActaModel extends CreateActaEntity {
     required super.attachmentIds,
   });
 
+  factory CreateActaModel.fromEntity(CreateActaEntity entity) {
+    return CreateActaModel(
+      title: entity.title,
+      description: entity.description,
+      date: entity.date,
+      place: entity.place,
+      participants: entity.participants,
+      attachmentIds: entity.attachmentIds,
+    );
+  }
   Map<String, dynamic> toJson() {
     return {
       'title': title,

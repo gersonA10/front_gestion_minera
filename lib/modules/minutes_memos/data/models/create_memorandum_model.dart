@@ -10,7 +10,17 @@ class CreateMemorandumModel extends CreateMemorandumEntity {
     required super.attachmentIds,
   });
 
-  Map<String, dynamic> toJson(){
+  factory CreateMemorandumModel.fromEntity(CreateMemorandumEntity entity) {
+    return CreateMemorandumModel(
+      title: entity.title,
+      contenido: entity.contenido,
+      date: entity.date,
+      destinatary: entity.destinatary,
+      destinataryId: entity.destinataryId,
+      attachmentIds: entity.attachmentIds,
+    );
+  }
+  Map<String, dynamic> toJson() {
     return {
       'title': title,
       'contenido': contenido,
