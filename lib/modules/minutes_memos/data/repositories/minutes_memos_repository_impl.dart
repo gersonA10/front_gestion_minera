@@ -65,11 +65,10 @@ class MinutesMemosRepositoryImpl implements MinutesMemosRepository {
   }
 
   @override
-  Future<void> createActa(CreateActaEntity acta) {
-    throw UnimplementedError();
-  }
+  Future<void> createActa(CreateActaEntity acta) => 
+    datasource.createActa(acta);
+
   @override
-  Future<void> createMemorandum(CreateMemorandumEntity memorandum){
-    throw UnimplementedError();
-  }
+  Future<void> createMemorandum(CreateMemorandumEntity memorandum) =>
+      datasource.createdMemorandum(memorandum);
 }

@@ -32,8 +32,7 @@ class CreateActaModel extends CreateActaEntity {
           'position': participant.rol,
           'attendance': participant.attendanceStatus,
         },
-      ),
-      'attachment_ids': attachmentIds,
+      ).toList(),
     };
   }
 }

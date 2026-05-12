@@ -84,19 +84,25 @@ class MinutesMemosDatasource {
 
   Future<void> createActa(CreateActaEntity acta) async {
     final model = CreateActaModel.fromEntity(acta);
-    await apiClient.post(
+    await apiClient.postFormData(
       '/api/actas',
       operationName: 'createActa',
       data: model.toJson(),
+      files: [
+        {'name': 'archivo_acta_url', 'path': model.attachmentIds},
+      ],
     );
   }
 
   Future<void> createdMemorandum(CreateMemorandumEntity memorandum) async {
     final model = CreateMemorandumModel.fromEntity(memorandum);
-    await apiClient.post(
+    await apiClient.postFormData(
       'api/memorandos',
       operationName: 'createMemorando',
       data: model.toJson(),
+      files: [
+        {'name': 'file_url', 'path': model.attachmentIds},
+      ],
     );
   }
 }

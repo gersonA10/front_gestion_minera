@@ -27,7 +27,6 @@ class CreateMemorandumModel extends CreateMemorandumEntity {
       'emission_date': date.toIso8601String(),
       'destinatario_nombre': destinatary,
       'destinatario_member_id': destinataryId,
-      'attachment_ids': attachmentIds,
     };
   }
 }

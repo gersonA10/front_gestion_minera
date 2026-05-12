@@ -1,10 +1,8 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:front_gestion_minera/core/networking/base_api_exception.dart';
+import 'package:front_gestion_minera/modules/minutes_memos/domain/entity/entity.dart';
 import 'package:front_gestion_minera/utils/error.dart';
 
-import '../../domain/entity/acta_entity.dart';
-import '../../domain/entity/memos_count_entity.dart';
-import '../../domain/entity/memorandum_entity.dart';
 import '../../domain/repositories/minutes_memos_repository.dart';
 
 part 'minutes_memos_event.dart';

@@ -3,7 +3,7 @@ class CreateMemorandumEntity {
   final String contenido;
   final DateTime date;
   final String destinatary;
-  final String destinataryId;
+  final String? destinataryId;
   final List<String> attachmentIds;
 
   CreateMemorandumEntity({

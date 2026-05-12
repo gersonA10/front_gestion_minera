@@ -53,3 +53,27 @@ class ActasError extends MinutesMemosState {
   final String message;
   ActasError(this.message);
 }
+
+class CreateActasLoading extends MinutesMemosState {}
+
+class CreateActasSucces extends MinutesMemosState {
+  final CreateActaEntity response;
+  CreateActasSucces({required this.response});
+}
+
+class CreateActasError extends MinutesMemosState {
+  final String message;
+  CreateActasError({required this.message});
+}
+
+class CreateMemorandumLoading extends MinutesMemosState {}
+
+class CreateMemorandumSucces extends MinutesMemosState {
+  final CreateActaEntity response;
+  CreateMemorandumSucces({required this.response});
+}
+
+class CreateMemorandumError extends MinutesMemosState {
+  final String message;
+  CreateMemorandumError({required this.message});
+}
