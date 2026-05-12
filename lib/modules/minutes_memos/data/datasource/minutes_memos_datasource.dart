@@ -1,5 +1,4 @@
 import 'package:front_gestion_minera/core/networking/http_services.dart';
-import 'package:front_gestion_minera/modules/minutes_memos/data/models/create_acta_model.dart';
 import 'package:front_gestion_minera/modules/minutes_memos/domain/entity/entity.dart';
 import '../models/models.dart';
 
@@ -85,10 +84,19 @@ class MinutesMemosDatasource {
 
   Future<void> createActa(CreateActaEntity acta) async {
     final model = CreateActaModel.fromEntity(acta);
-    final response = await apiClient.postFormData(
+    await apiClient.post(
       '/api/actas',
       operationName: 'createActa',
-      data: model.toJson()
+      data: model.toJson(),
+    );
+  }
+
+  Future<void> createdMemorandum(CreateMemorandumEntity memorandum) async {
+    final model = CreateMemorandumModel.fromEntity(memorandum);
+    await apiClient.post(
+      'api/memorandos',
+      operationName: 'createMemorando',
+      data: model.toJson(),
     );
   }
 }

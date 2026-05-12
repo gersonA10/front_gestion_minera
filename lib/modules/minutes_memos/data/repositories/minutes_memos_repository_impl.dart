@@ -1,4 +1,5 @@
 import 'package:front_gestion_minera/modules/minutes_memos/domain/entity/create_acta_entity.dart';
+import 'package:front_gestion_minera/modules/minutes_memos/domain/entity/create_memorandum_entity.dart';
 
 import '../../domain/entity/acta_entity.dart';
 import '../../domain/entity/memos_count_entity.dart';
@@ -64,7 +65,11 @@ class MinutesMemosRepositoryImpl implements MinutesMemosRepository {
   }
 
   @override
-  Future<CreateActaEntity> createActa(CreateActaEntity acta) {
+  Future<void> createActa(CreateActaEntity acta) {
+    throw UnimplementedError();
+  }
+  @override
+  Future<void> createMemorandum(CreateMemorandumEntity memorandum){
     throw UnimplementedError();
   }
 }
