@@ -54,6 +54,78 @@ class InternalMemorandumDetailsScreen extends StatelessWidget {
                   height: 1.2,
                 ),
               ),
+              const SizedBox(height: 20),
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFF4F6F8),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      'FECHA DE EMISIÓN',
+                      style: TextStyle(
+                        fontSize: 11,
+                        fontWeight: FontWeight.w600,
+                        color: TColors.appDisabledColor,
+                        letterSpacing: 0.5,
+                      ),
+                    ),
+                    const SizedBox(height: 6),
+
+                    Row(
+                      children: const [
+                        Icon(
+                          Icons.calendar_today,
+                          size: 14,
+                          color: TColors.appMainDarkColor,
+                        ),
+                        SizedBox(width: 6),
+                        Text(
+                          '24 de Octubre, 2023',
+                          style: TextStyle(
+                            fontSize: 13,
+                            color: TColors.appMainTextColor,
+                          ),
+                        ),
+                      ],
+                    ),
+
+                    const SizedBox(height: 14),
+                    const Text(
+                      'RESPONSABLE / DESTINATARIO',
+                      style: TextStyle(
+                        fontSize: 11,
+                        fontWeight: FontWeight.w600,
+                        color: TColors.appDisabledColor,
+                        letterSpacing: 0.5,
+                      ),
+                    ),
+                    const SizedBox(height: 6),
+
+                    Row(
+                      children: const [
+                        Icon(
+                          Icons.person_outline,
+                          size: 14,
+                          color: TColors.appMainDarkColor,
+                        ),
+                        SizedBox(width: 6),
+                        Text(
+                          'Ing. Roberto Gómez',
+                          style: TextStyle(
+                            fontSize: 13,
+                            color: TColors.appMainTextColor,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
             ],
           ),
         ),
