@@ -60,8 +60,8 @@ class SubmitCreateActaEvent extends MinutesMemosEvent {
   SubmitCreateActaEvent({required this.actaResponse});
 }
 
-class SubmitCreateMemorandum extends MinutesMemosEvent {
+class SubmitCreateMemorandumEvent extends MinutesMemosEvent {
   final CreateMemorandumEntity memorandumResponse;
 
-  SubmitCreateMemorandum({required this.memorandumResponse});
+  SubmitCreateMemorandumEvent({required this.memorandumResponse});
 }

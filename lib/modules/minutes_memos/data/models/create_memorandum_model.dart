@@ -1,4 +1,5 @@
 import 'package:front_gestion_minera/modules/minutes_memos/domain/entity/entity.dart';
+import 'package:intl/intl.dart';
 
 class CreateMemorandumModel extends CreateMemorandumEntity {
   CreateMemorandumModel({
@@ -24,7 +25,7 @@ class CreateMemorandumModel extends CreateMemorandumEntity {
     return {
       'title': title,
       'contenido': contenido,
-      'emission_date': date.toIso8601String(),
+      'emission_date': DateFormat('yyyy-MM-dd').format(date),
       'destinatario_nombre': destinatary,
       'destinatario_member_id': destinataryId,
     };

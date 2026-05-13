@@ -1,4 +1,5 @@
 import 'package:front_gestion_minera/modules/minutes_memos/domain/entity/entity.dart';
+import 'package:intl/intl.dart';
 
 class CreateActaModel extends CreateActaEntity {
   CreateActaModel({
@@ -25,7 +26,7 @@ class CreateActaModel extends CreateActaEntity {
       'title': title,
       'description': description,
       'location': place,
-      'emision_date': date.toIso8601String(),
+      'emision_date': DateFormat('yyyy-MM-dd').format(date),
       'participants': participants.map(
         (participant) => {
           'full_name': participant.fullName,

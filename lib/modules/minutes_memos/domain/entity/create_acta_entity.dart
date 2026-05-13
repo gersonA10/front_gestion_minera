@@ -18,7 +18,7 @@ class CreateActaEntity {
 
 class ParticipantEntity {
   final String fullName;
-  final String rol;
+  final String? rol;
   final String attendanceStatus;
 
   ParticipantEntity({

@@ -89,7 +89,11 @@ class MinutesMemosDatasource {
       operationName: 'createActa',
       data: model.toJson(),
       files: [
-        {'name': 'archivo_acta_url', 'path': model.attachmentIds},
+        {
+          'name': 'archivo_acta_url',
+          'path': model.attachmentIds,
+          'namefile': model.attachmentIds[0].split('/').last,
+        },
       ],
     );
   }
@@ -97,11 +101,15 @@ class MinutesMemosDatasource {
   Future<void> createdMemorandum(CreateMemorandumEntity memorandum) async {
     final model = CreateMemorandumModel.fromEntity(memorandum);
     await apiClient.postFormData(
-      'api/memorandos',
+      '/api/memorandos',
       operationName: 'createMemorando',
       data: model.toJson(),
       files: [
-        {'name': 'file_url', 'path': model.attachmentIds},
+        {
+          'name': 'archivo_memo',
+          'path': model.attachmentIds.first,
+          'namefile': model.attachmentIds.first.split('/').last,
+        },
       ],
     );
   }
