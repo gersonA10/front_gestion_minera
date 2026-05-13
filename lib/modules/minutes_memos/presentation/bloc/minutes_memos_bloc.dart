@@ -216,5 +216,15 @@ class MinutesMemosBloc extends Bloc<MinutesMemosEvent, MinutesMemosState> {
   FutureOr<void> _onSubmitCreateActa(
     SubmitCreateActaEvent event,
     Emitter<MinutesMemosState> emit,
-  ) {}
+  ) async{
+    emit (MemorandosLoading());
+    try {
+      await repository.createActa(event.actaResponse);
+      emit(CreateActasSucces());
+    } on BaseApiException catch (error) {
+      emit(CreateActasError(mapErrorMessage(error.key)));
+    } catch (e) {
+      emit(CreateActasError('Error inesperado: $e'));
+    }
+  }
 }

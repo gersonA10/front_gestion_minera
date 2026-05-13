@@ -91,8 +91,8 @@ class MinutesMemosDatasource {
       files: [
         {
           'name': 'archivo_acta_url',
-          'path': model.attachmentIds,
-          'namefile': model.attachmentIds[0].split('/').last,
+          'path': model.attachmentIds.first,
+          'namefile': model.attachmentIds.first.split('/').last,
         },
       ],
     );

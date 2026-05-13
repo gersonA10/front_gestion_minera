@@ -114,6 +114,16 @@ class _RegisterMinutesMemosScreenState
                 context,
               ).showSnackBar(SnackBar(content: Text(state.message)));
             }
+            if (state is CreateActasSucces) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(content: Text("Creado correctamente")),
+              );
+            }
+            if (state is CreateActasError) {
+              ScaffoldMessenger.of(
+                context,
+              ).showSnackBar(SnackBar(content: Text(state.message)));
+            }
           },
           builder: (context, state) {
             return Padding(
@@ -707,40 +717,26 @@ class _RegisterMinutesMemosScreenState
       _showError("Por favor, selecciona al menos un archivo.");
       return;
     }
-
     setState(() => _isUploading = true);
-    try {
-      debugPrint("Simulando validación de datos...");
-      await Future.delayed(const Duration(seconds: 2));
-      Map<String, dynamic> datos = {
-        'tipo': type == 0 ? 'Acta' : 'Memorando',
-        'titulo': titleController.text.trim(),
-        'fecha': DateFormat('yyyy-MM-dd').format(_selectedDate),
-        'lugar': type == 0 ? placecontroller.text.trim() : null,
-        'destinatario': type == 1 ? destinataryController.text.trim() : null,
-        'participantes': type == 0 ? _listParticipants : null,
-        'files': _selectedFiles.map((f) => f.path.split('/').last).toList(),
-      };
-      print(datos);
-      setState(() {
-        if (type == 0) {
-          placecontroller.clear();
-          participantController.clear();
-          _listParticipants.clear();
-        } else {
-          destinataryController.clear();
-        }
-        titleController.clear();
-        descriptionController.clear();
-        _selectedFiles.clear();
-      });
-    } catch (e) {
-      _showError("Ocurrió un error: $e");
-    } finally {
-      if (mounted) {
-        setState(() => _isUploading = false);
-      }
-    }
+
+    final acta = CreateActaEntity(
+      title: titleController.text,
+      description: descriptionController.text,
+      date: _selectedDate,
+      place: placecontroller.text,
+      participants: _listParticipants
+          .map(
+            (participante) => ParticipantEntity(
+              fullName: participante,
+              rol: 'rol',
+              attendanceStatus: 'PRESENTE',
+            ),
+          )
+          .toList(),
+      attachmentIds: _selectedFiles.map((file) => file.path).toList(),
+    );
+
+    _blocRegister.add(SubmitCreateActaEvent(actaResponse: acta));
   }
 
   Widget _buildCalendar() {

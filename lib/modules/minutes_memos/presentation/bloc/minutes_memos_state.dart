@@ -56,10 +56,7 @@ class ActasError extends MinutesMemosState {
 
 class CreateActasLoading extends MinutesMemosState {}
 
-class CreateActasSucces extends MinutesMemosState {
-  final CreateActaEntity response;
-  CreateActasSucces({required this.response});
-}
+class CreateActasSucces extends MinutesMemosState {}
 
 class CreateActasError extends MinutesMemosState {
   final String message;
