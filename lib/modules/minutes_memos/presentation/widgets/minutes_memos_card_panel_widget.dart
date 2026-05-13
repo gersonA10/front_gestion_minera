@@ -1,4 +1,6 @@
+import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
+import 'package:front_gestion_minera/config/router/app_router.gr.dart';
 import 'package:front_gestion_minera/utils/constants/color.constant.dart';
 
 class MinutesMemosCardPanelWidget extends StatelessWidget {
@@ -128,7 +130,6 @@ class MinutesMemosCardPanelWidget extends StatelessWidget {
                       ),
                     ],
                   ),
-                  
                 ],
               ],
             ),
@@ -178,7 +179,13 @@ class MinutesMemosCardPanelWidget extends StatelessWidget {
                 ),
 
                 TextButton(
-                  onPressed: () {},
+                  onPressed: () {
+                    context.router.push(
+                      InternalMemorandumDetailsRoute(
+                        ///////////
+                      ),
+                    );
+                  },
                   style: TextButton.styleFrom(
                     foregroundColor: TColors.appMainColor,
                     padding: EdgeInsets.zero,
