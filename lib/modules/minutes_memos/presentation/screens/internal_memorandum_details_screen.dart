@@ -2,6 +2,8 @@ import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:front_gestion_minera/utils/constants/color.constant.dart';
 
+import '../widgets/widgets.dart';
+
 @RoutePage()
 class InternalMemorandumDetailsScreen extends StatelessWidget {
   const InternalMemorandumDetailsScreen({super.key});
@@ -17,17 +19,23 @@ class InternalMemorandumDetailsScreen extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Row(
+                mainAxisAlignment: MainAxisAlignment.start,
                 children: [
                   IconButton(
                     onPressed: () {
                       Navigator.of(context).pop();
                     },
+                    padding: EdgeInsets.zero,
+                    constraints: const BoxConstraints(),
+                    alignment: Alignment.centerLeft,
+                    style: IconButton.styleFrom(
+                      tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                    ),
                     icon: const Icon(
                       Icons.arrow_back,
                       color: TColors.appMainDarkColor,
+                      size: 22,
                     ),
-                    padding: EdgeInsets.zero,
-                    constraints: const BoxConstraints(),
                   ),
 
                   const Spacer(),
@@ -42,7 +50,7 @@ class InternalMemorandumDetailsScreen extends StatelessWidget {
                   ),
                 ],
               ),
-
+              const Divider(color: Color(0xFFEEEEEE), thickness: 1),
               const SizedBox(height: 28),
 
               const Text(
@@ -156,10 +164,25 @@ class InternalMemorandumDetailsScreen extends StatelessWidget {
                         style: TextStyle(
                           fontSize: 13,
                           height: 1.5,
-                          color: TColors.appMainTextColor,
+                          color: TColors.appDisabledColor,
                         ),
                       ),
                     ),
+                  ),
+                ],
+              ),
+              const Divider(color: Color(0xFFEEEEEE), thickness: 1),
+              AttachmentsSectionWidget(
+                items: [
+                  AttachmentItem(
+                    tipo: 'pdf',
+                    nombre: 'Cronograma_Oct_Nov.pdf',
+                    peso: '1.2 MB',
+                  ),
+                  AttachmentItem(
+                    tipo: 'image',
+                    nombre: 'evidencia_1.png',
+                    peso: '850 KB',
                   ),
                 ],
               ),
