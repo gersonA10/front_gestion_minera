@@ -132,7 +132,7 @@ class MinutesMemosDatasource {
 
   Future<String> deleteFileRecord(String attachmentId) async {
     final response = await apiClient.delete(
-      'api/upload/$attachmentId',
+      'api/uploads/$attachmentId',
       operationName: 'deleteFileRecords',
     );
     return response['message'];

@@ -235,9 +235,13 @@ class MinutesMemosBloc extends Bloc<MinutesMemosEvent, MinutesMemosState> {
     Emitter<MinutesMemosState> emit,
   ) async {
     emit(UploadFileRecordsLoading());
+
     try {
-      final response = await repository.uploadFileRecords(event.fileRecord);
-      emit(UploadFileRecordsSuccess(attachmentId: response));
+      for (final entity in event.fileRecord) {
+        final response = await repository.uploadFileRecords(entity);
+
+        emit(UploadFileRecordsSuccess(attachmentId: response));
+      }
     } on BaseApiException catch (error) {
       emit(UploadFileRecordError(mapErrorMessage(error.key)));
     } catch (e) {
@@ -248,7 +252,7 @@ class MinutesMemosBloc extends Bloc<MinutesMemosEvent, MinutesMemosState> {
   FutureOr<void> _onDeleteFileRecord(
     DeleteFileRecordEvent event,
     Emitter<MinutesMemosState> emit,
-  ) async{
+  ) async {
     emit(DeleteFileRecordsLoading());
     try {
       final response = await repository.deleteFileRecord(event.attachmentId);

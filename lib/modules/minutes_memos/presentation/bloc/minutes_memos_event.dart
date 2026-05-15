@@ -67,7 +67,7 @@ class SubmitCreateMemorandumEvent extends MinutesMemosEvent {
 }
 
 class UploadFileRecordEvent extends MinutesMemosEvent {
-  final FileUploadEntity fileRecord;
+  final List<FileUploadEntity> fileRecord;
 
   UploadFileRecordEvent({required this.fileRecord});
 }

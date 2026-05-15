@@ -52,7 +52,7 @@ class _RegisterMinutesMemosScreenState
   final int _maxFiles = 5;
   final int _maxFileSize = 10 * 1024 * 1024;
   final ImagePicker _picker = ImagePicker();
-  final List<Map<String, String>> _attachmentId = [];
+  final List<Map<String,String>> _attachmentId = [];
 
   @override
   void initState() {
@@ -118,7 +118,9 @@ class _RegisterMinutesMemosScreenState
               _showError(state.message);
             }
             if (state is UploadFileRecordsSuccess) {
-              _attachmentId.add(state.attachmentId);
+              setState(() {
+                _attachmentId.add(state.attachmentId);
+              });
             }
           },
           builder: (context, state) {
@@ -570,16 +572,14 @@ class _RegisterMinutesMemosScreenState
       _selectedFiles.addAll(validFiles);
     });
     final typeDocument = isSelected ? 'MEMORANDO' : 'ACTA';
-    for (final file in validFiles) {
-      _blocRegister.add(
-        UploadFileRecordEvent(
-          fileRecord: FileUploadEntity(
-            documentType: typeDocument,
-            file: file.path,
-          ),
-        ),
-      );
-    }
+    final List<FileUploadEntity> entitiesToUpload = validFiles
+        .map(
+          (file) =>
+              FileUploadEntity(documentType: typeDocument, file: file.path),
+        )
+        .toList();
+
+    _blocRegister.add(UploadFileRecordEvent(fileRecord: entitiesToUpload));
   }
 
   void _showError(String msg) {
@@ -624,7 +624,6 @@ class _RegisterMinutesMemosScreenState
           '.jpeg',
           '.png',
         ].any((ext) => fileName.toLowerCase().endsWith(ext));
-        print(_attachmentId);
         return Container(
           margin: const EdgeInsets.only(bottom: 10),
           decoration: BoxDecoration(
@@ -636,7 +635,7 @@ class _RegisterMinutesMemosScreenState
           ),
           child: ListTile(
             leading: isImage
-                ? Image.file(file, width: 40, height: 40, fit: BoxFit.cover)
+                ? Image.file(file, width: 60, height: 60, fit: BoxFit.cover)
                 : const Icon(Icons.picture_as_pdf, color: Colors.red),
 
             title: Column(
@@ -648,15 +647,15 @@ class _RegisterMinutesMemosScreenState
                   overflow: TextOverflow.ellipsis,
                   style: const TextStyle(fontSize: 14),
                 ),
-
-                if (index < _attachmentId.length)
+                
+                if (index < _attachmentId.length && _attachmentId[index].isNotEmpty)
                   Text(
-                    _attachmentId[index]['nombre'] ?? '',
+                    'Subido Exitosamente!',
                     style: const TextStyle(fontSize: 12, color: Colors.green),
                   )
                 else
                   const Text(
-                    "pending...",
+                    "Subiendo Archivo...",
                     style: TextStyle(fontSize: 12, color: Colors.grey),
                   ),
               ],
@@ -667,10 +666,10 @@ class _RegisterMinutesMemosScreenState
               onPressed: () {
                 setState(() {
                   _selectedFiles.remove(file);
-
-                  // opcional: mantener sync simple
+                  final id = _attachmentId[index]['attachment'].toString();
                   if (index < _attachmentId.length) {
                     _attachmentId.removeAt(index);
+                    _blocRegister.add(DeleteFileRecordEvent(attachmentId: id));
                   }
                 });
               },
