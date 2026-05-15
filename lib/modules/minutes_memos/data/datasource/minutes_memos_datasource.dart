@@ -90,7 +90,7 @@ class MinutesMemosDatasource {
       data: model.toJson(),
       files: [
         {
-          'name': 'archivo_acta_url',
+          'name': 'archivo_acta',
           'path': model.attachmentIds.first,
           'namefile': model.attachmentIds.first.split('/').last,
         },

@@ -24,7 +24,9 @@ class FormEditMinutesMemosWidget extends StatelessWidget {
         if (value == null || value.trim().isEmpty) {
           return 'Campo requerido';
         }
-
+        if (value.trim().length < 5) {
+          return 'Debe tener al menos 5 caracteres';
+        }
         return null;
       },
 

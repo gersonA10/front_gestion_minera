@@ -90,7 +90,7 @@ class _RegisterMinutesMemosScreenState
     setState(() => _displayedMonth = next);
   }
 
-  List<String> _listParticipants = [];
+  final List<String> _listParticipants = [];
 
   @override
   Widget build(BuildContext context) {
@@ -105,24 +105,16 @@ class _RegisterMinutesMemosScreenState
         body: BlocConsumer<MinutesMemosBloc, MinutesMemosState>(
           listener: (context, state) {
             if (state is CreateMemorandumSucces) {
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text("Creado correctamente")),
-              );
+              _showUploadedSuccessfully(context);
             }
             if (state is CreateMemorandumError) {
-              ScaffoldMessenger.of(
-                context,
-              ).showSnackBar(SnackBar(content: Text(state.message)));
+              _showError(state.message);
             }
             if (state is CreateActasSucces) {
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text("Creado correctamente")),
-              );
+              _showUploadedSuccessfully(context);
             }
             if (state is CreateActasError) {
-              ScaffoldMessenger.of(
-                context,
-              ).showSnackBar(SnackBar(content: Text(state.message)));
+              _showError(state.message);
             }
           },
           builder: (context, state) {
@@ -293,6 +285,9 @@ class _RegisterMinutesMemosScreenState
                                           value.trim().isEmpty) {
                                         return 'Campo requerido';
                                       }
+                                      if (value.trim().length < 20) {
+                                        return 'Debe tener al menos 20 caracteres';
+                                      }
 
                                       return null;
                                     },
@@ -426,6 +421,77 @@ class _RegisterMinutesMemosScreenState
     );
   }
 
+  Future<dynamic> _showUploadedSuccessfully(BuildContext context) {
+    return showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(24),
+          ),
+          contentPadding: const EdgeInsets.symmetric(
+            horizontal: 24,
+            vertical: 28,
+          ),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Icon(
+                Icons.check_circle_rounded,
+                color: TColors.appMainDarkColor,
+                size: 90,
+              ),
+              const SizedBox(height: 20),
+              const Text(
+                '¡Éxito!',
+                textAlign: TextAlign.center,
+                style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 12),
+              const Text(
+                'Se subió correctamente',
+                textAlign: TextAlign.center,
+                style: TextStyle(fontSize: 16, color: TColors.appMainTextColor),
+              ),
+              const SizedBox(height: 28),
+              SizedBox(
+                width: double.infinity,
+                height: 50,
+                child: ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: TColors.appMainDarkColor,
+                    foregroundColor: TColors.white,
+                    elevation: 4,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(14),
+                    ),
+                  ),
+                  onPressed: () {
+                    context.router.popUntil((route) => route.isFirst);
+                    setState(() {
+                      _isUploading = false;
+
+                      titleController.clear();
+                      placecontroller.clear();
+                      descriptionController.clear();
+                      destinataryController.clear();
+                      _listParticipants.clear();
+                      _selectedFiles.clear();
+                    });
+                  },
+                  child: const Text(
+                    'Aceptar',
+                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
   Wrap _listOfParticipantMinutes() {
     return Wrap(
       spacing: 10,
@@ -502,10 +568,38 @@ class _RegisterMinutesMemosScreenState
   }
 
   void _showError(String msg) {
-    ScaffoldMessenger.of(
-      context,
-    ).showSnackBar(SnackBar(backgroundColor: TColors.red, content: Text(msg)));
-  }
+  ScaffoldMessenger.of(context).showSnackBar(
+    SnackBar(
+      behavior: SnackBarBehavior.floating,
+      margin: const EdgeInsets.all(16),
+      backgroundColor: Colors.red.shade600,
+      elevation: 6,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(14),
+      ),
+      content: Row(
+        children: [
+          const Icon(
+            Icons.error_outline_rounded,
+            color: Colors.white,
+          ),
+
+          const SizedBox(width: 12),
+
+          Expanded(
+            child: Text(
+              msg,
+              style: const TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          ),
+        ],
+      ),
+    ),
+  );
+}
 
   Widget _buildFilePreview() {
     return Column(
@@ -689,10 +783,6 @@ class _RegisterMinutesMemosScreenState
     _blocRegister.add(
       SubmitCreateMemorandumEvent(memorandumResponse: memorandum),
     );
-
-    setState(() {
-      _isUploading = !_isUploading;
-    });
   }
 
   Future<void> _onSaveAndSendActa() async {
