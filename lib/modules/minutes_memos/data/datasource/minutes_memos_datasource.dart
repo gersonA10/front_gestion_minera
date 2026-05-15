@@ -1,6 +1,6 @@
 import 'package:front_gestion_minera/core/networking/http_services.dart';
+import 'package:front_gestion_minera/modules/minutes_memos/domain/entity/entity.dart';
 import '../models/models.dart';
-
 
 class MinutesMemosDatasource {
   final ApiClient apiClient;
@@ -80,5 +80,37 @@ class MinutesMemosDatasource {
       queryParameters: params,
     );
     return ActasListModel.fromJson(response);
+  }
+
+  Future<void> createActa(CreateActaEntity acta) async {
+    final model = CreateActaModel.fromEntity(acta);
+    await apiClient.postFormData(
+      '/api/actas',
+      operationName: 'createActa',
+      data: model.toJson(),
+      files: [
+        {
+          'name': 'archivo_acta',
+          'path': model.attachmentIds.first,
+          'namefile': model.attachmentIds.first.split('/').last,
+        },
+      ],
+    );
+  }
+
+  Future<void> createdMemorandum(CreateMemorandumEntity memorandum) async {
+    final model = CreateMemorandumModel.fromEntity(memorandum);
+    await apiClient.postFormData(
+      '/api/memorandos',
+      operationName: 'createMemorando',
+      data: model.toJson(),
+      files: [
+        {
+          'name': 'archivo_memo',
+          'path': model.attachmentIds.first,
+          'namefile': model.attachmentIds.first.split('/').last,
+        },
+      ],
+    );
   }
 }
