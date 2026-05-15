@@ -1,10 +1,10 @@
+import 'dart:async';
+
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:front_gestion_minera/core/networking/base_api_exception.dart';
+import 'package:front_gestion_minera/modules/minutes_memos/domain/entity/entity.dart';
 import 'package:front_gestion_minera/utils/error.dart';
 
-import '../../domain/entity/acta_entity.dart';
-import '../../domain/entity/memos_count_entity.dart';
-import '../../domain/entity/memorandum_entity.dart';
 import '../../domain/repositories/minutes_memos_repository.dart';
 
 part 'minutes_memos_event.dart';
@@ -36,6 +36,8 @@ class MinutesMemosBloc extends Bloc<MinutesMemosEvent, MinutesMemosState> {
     on<LoadMoreMemorandosEvent>(_onLoadMoreMemorandos);
     on<GetActasEvent>(_onGetActas);
     on<LoadMoreActasEvent>(_onLoadMoreActas);
+    on<SubmitCreateMemorandumEvent>(_onSubmitCreateMemorandum);
+    on<SubmitCreateActaEvent>(_onSubmitCreateActa);
   }
 
   Future<void> _onGetActasCount(
@@ -97,7 +99,9 @@ class MinutesMemosBloc extends Bloc<MinutesMemosEvent, MinutesMemosState> {
       );
       _memosItems = List.from(list.items);
       _memosHasMore = list.hasMoreData;
-      emit(MemorandosLoaded(items: List.from(_memosItems), hasMore: _memosHasMore));
+      emit(
+        MemorandosLoaded(items: List.from(_memosItems), hasMore: _memosHasMore),
+      );
     } on BaseApiException catch (e) {
       emit(MemorandosError(mapErrorMessage(e.key)));
     } catch (e) {
@@ -122,7 +126,9 @@ class MinutesMemosBloc extends Bloc<MinutesMemosEvent, MinutesMemosState> {
       );
       _memosItems.addAll(list.items);
       _memosHasMore = list.hasMoreData;
-      emit(MemorandosLoaded(items: List.from(_memosItems), hasMore: _memosHasMore));
+      emit(
+        MemorandosLoaded(items: List.from(_memosItems), hasMore: _memosHasMore),
+      );
     } on BaseApiException catch (e) {
       _memosPage--;
       emit(MemorandosError(mapErrorMessage(e.key)));
@@ -189,6 +195,36 @@ class MinutesMemosBloc extends Bloc<MinutesMemosEvent, MinutesMemosState> {
       emit(ActasError('Ocurrió un error inesperado'));
     } finally {
       _isActasLoadingMore = false;
+    }
+  }
+
+  FutureOr<void> _onSubmitCreateMemorandum(
+    SubmitCreateMemorandumEvent event,
+    Emitter<MinutesMemosState> emit,
+  ) async {
+    emit(MemorandosLoading());
+    try {
+      await repository.createMemorandum(event.memorandumResponse);
+      emit(CreateMemorandumSucces());
+    } on BaseApiException catch (error) {
+      emit(CreateMemorandumError(mapErrorMessage(error.key)));
+    } catch (e) {
+      emit(CreateMemorandumError('Error inesperado: $e'));
+    }
+  }
+
+  FutureOr<void> _onSubmitCreateActa(
+    SubmitCreateActaEvent event,
+    Emitter<MinutesMemosState> emit,
+  ) async{
+    emit (MemorandosLoading());
+    try {
+      await repository.createActa(event.actaResponse);
+      emit(CreateActasSucces());
+    } on BaseApiException catch (error) {
+      emit(CreateActasError(mapErrorMessage(error.key)));
+    } catch (e) {
+      emit(CreateActasError('Error inesperado: $e'));
     }
   }
 }

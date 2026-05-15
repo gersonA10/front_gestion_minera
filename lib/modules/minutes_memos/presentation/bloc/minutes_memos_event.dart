@@ -53,3 +53,15 @@ class GetActasEvent extends MinutesMemosEvent {
     this.limit = 10,
   });
 }
+
+class SubmitCreateActaEvent extends MinutesMemosEvent {
+  final CreateActaEntity actaResponse;
+  
+  SubmitCreateActaEvent({required this.actaResponse});
+}
+
+class SubmitCreateMemorandumEvent extends MinutesMemosEvent {
+  final CreateMemorandumEntity memorandumResponse;
+
+  SubmitCreateMemorandumEvent({required this.memorandumResponse});
+}

@@ -1,4 +1,3 @@
-
 import '../../domain/entity/entity.dart';
 
 class MemorandumModel extends MemorandumEntity {
@@ -12,26 +11,29 @@ class MemorandumModel extends MemorandumEntity {
   });
 
   factory MemorandumModel.fromJson(Map<String, dynamic> json) {
-    final dynamic destinatarioRaw = json['destinatario'];
+    final dynamic destinatarioRaw = json['destinatario_nombre'];
     String? destinatario;
     if (destinatarioRaw is Map<String, dynamic>) {
       final nombre = destinatarioRaw['nombre'] as String? ?? '';
       final cargo = destinatarioRaw['cargo'] as String?;
-      destinatario = cargo != null && cargo.isNotEmpty ? '$nombre ($cargo)' : nombre;
+      destinatario = cargo != null && cargo.isNotEmpty
+          ? '$nombre ($cargo)'
+          : nombre;
     } else if (destinatarioRaw is String) {
       destinatario = destinatarioRaw;
     }
 
-    final dateRaw = json['created_at'] as String? ?? json['fecha'] as String? ?? '';
+    final dateRaw =
+        json['created_at'] as String? ?? json['fecha'] as String? ?? '';
     final createdAt = DateTime.tryParse(dateRaw) ?? DateTime.now();
 
     return MemorandumModel(
-      id: json['id']?.toString() ?? '',
-      numero: json['numero']?.toString() ?? '',
-      asunto: json['asunto'] as String? ?? json['titulo'] as String? ?? '',
+      id: json['memo_id']?.toString() ?? '',
+      numero: json['memo_number']?.toString() ?? '',
+      asunto: json['title'] as String? ?? json['titulo'] as String? ?? '',
       destinatario: destinatario,
       createdAt: createdAt,
-      estado: json['estado'] as String? ?? '',
+      estado: json['status'] as String? ?? '',
     );
   }
 }
@@ -45,16 +47,15 @@ class MemorandosListModel extends MemorandosListEntity {
   });
 
   factory MemorandosListModel.fromJson(Map<String, dynamic> json) {
-    final meta = json['meta'] as Map<String, dynamic>? ?? {};
-    final dataList = json['data'] as List<dynamic>? ?? [];
+    final itemsList = json['items'] as List<dynamic>? ?? [];
 
     return MemorandosListModel(
-      items: dataList
+      items: itemsList
           .map((e) => MemorandumModel.fromJson(e as Map<String, dynamic>))
           .toList(),
-      currentPage: meta['current_page'] as int? ?? 1,
-      totalRecords: meta['total_records'] as int? ?? 0,
-      hasMoreData: meta['has_more_data'] as bool? ?? false,
+      currentPage: json['page'] as int? ?? 1,
+      totalRecords: json['total'] as int? ?? 0,
+      hasMoreData: json['hasMore'] as bool? ?? false,
     );
   }
 }

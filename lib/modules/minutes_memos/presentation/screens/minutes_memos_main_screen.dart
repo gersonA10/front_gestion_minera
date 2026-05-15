@@ -1,6 +1,7 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:front_gestion_minera/config/router/app_router.gr.dart';
 import 'package:front_gestion_minera/core/widgets/logout_button_widget.dart';
 import 'package:front_gestion_minera/injector_container.dart';
 import 'package:front_gestion_minera/modules/minutes_memos/domain/entity/acta_entity.dart';
@@ -88,10 +89,14 @@ class _MinutesMemosMainScreenState extends State<MinutesMemosMainScreen> {
       final to = fmt.format(range.end);
       setState(() => selectedFilter = index);
       if (selectedTab == 0) {
-        _bloc.add(GetActasCountEvent(filter: 'personalizado', from: from, to: to));
+        _bloc.add(
+          GetActasCountEvent(filter: 'personalizado', from: from, to: to),
+        );
         _loadActas(filter: 'personalizado', from: from, to: to);
       } else {
-        _bloc.add(GetMemosCountEvent(filter: 'personalizado', from: from, to: to));
+        _bloc.add(
+          GetMemosCountEvent(filter: 'personalizado', from: from, to: to),
+        );
         _loadMemorandos(filter: 'personalizado', from: from, to: to);
       }
     } else {
@@ -147,54 +152,49 @@ class _MinutesMemosMainScreenState extends State<MinutesMemosMainScreen> {
         appBar: AppBar(
           backgroundColor: TColors.white,
           actions: [
-             Padding(
-               padding: const EdgeInsets.all(8.0),
-               child: LogoutButton(),
-             ),
+            Padding(padding: const EdgeInsets.all(8.0), child: LogoutButton()),
           ],
           title: Container(
             width: double.infinity,
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-                decoration: const BoxDecoration(
-                  color: TColors.white,
-                  border: Border(
-                    bottom: BorderSide(color: Color(0xFFEEEEEE), width: 1),
+            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+            decoration: const BoxDecoration(
+              color: TColors.white,
+              border: Border(
+                bottom: BorderSide(color: Color(0xFFEEEEEE), width: 1),
+              ),
+            ),
+            child: Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: TColors.appMainDarkColor,
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: const Icon(
+                    Icons.precision_manufacturing_outlined,
+                    color: Colors.white,
+                    size: 22,
                   ),
                 ),
-                child: Row(
-                  children: [
-                    Container(
-                      padding: const EdgeInsets.all(8),
-                      decoration: BoxDecoration(
-                        color: TColors.appMainDarkColor,
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: const Icon(
-                        Icons.precision_manufacturing_outlined,
-                        color: Colors.white,
-                        size: 22,
-                      ),
-                    ),
-                    const SizedBox(width: 16),
-                    const Text(
-                      'Actas',
-                      style: TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold,
-                        color: TColors.appMainDarkColor,
-                        letterSpacing: -0.5,
-                      ),
-                    ),
-                  ],
+                const SizedBox(width: 16),
+                const Text(
+                  'Actas',
+                  style: TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                    color: TColors.appMainDarkColor,
+                    letterSpacing: -0.5,
+                  ),
                 ),
-              ),
+              ],
+            ),
+          ),
         ),
         body: SafeArea(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              
               const SizedBox(height: 20),
               BlocBuilder<MinutesMemosBloc, MinutesMemosState>(
                 buildWhen: (_, s) =>
@@ -208,14 +208,16 @@ class _MinutesMemosMainScreenState extends State<MinutesMemosMainScreen> {
                   final count = state is ActasCountLoaded
                       ? state.count
                       : state is MemosCountLoaded
-                          ? state.count
-                          : null;
+                      ? state.count
+                      : null;
                   final isLoading =
                       state is ActasCountLoading || state is MemosCountLoading;
-                  final String? totalVal =
-                      isLoading ? null : count?.total.toString() ?? '-';
-                  final String? pendVal =
-                      isLoading ? null : count?.pendientes.toString() ?? '-';
+                  final String? totalVal = isLoading
+                      ? null
+                      : count?.total.toString() ?? '-';
+                  final String? pendVal = isLoading
+                      ? null
+                      : count?.pendientes.toString() ?? '-';
 
                   return Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 20),
@@ -253,7 +255,11 @@ class _MinutesMemosMainScreenState extends State<MinutesMemosMainScreen> {
                           borderRadius: BorderRadius.circular(10),
                         ),
                         child: TextButton(
-                          onPressed: () {},
+                          onPressed: () {
+                            context.router.push(
+                              RegisterMinutesMemosRoute(isOption: 0),
+                            );
+                          },
                           style: TextButton.styleFrom(
                             foregroundColor: Colors.white,
                             shape: RoundedRectangleBorder(
@@ -289,7 +295,11 @@ class _MinutesMemosMainScreenState extends State<MinutesMemosMainScreen> {
                           ),
                         ),
                         child: TextButton(
-                          onPressed: () {},
+                          onPressed: () {
+                            context.router.push(
+                              RegisterMinutesMemosRoute(isOption: 1),
+                            );
+                          },
                           style: TextButton.styleFrom(
                             foregroundColor: TColors.appMainDarkColor,
                             shape: RoundedRectangleBorder(
