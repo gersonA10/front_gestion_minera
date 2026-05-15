@@ -38,6 +38,7 @@ class MinutesMemosBloc extends Bloc<MinutesMemosEvent, MinutesMemosState> {
     on<LoadMoreActasEvent>(_onLoadMoreActas);
     on<SubmitCreateMemorandumEvent>(_onSubmitCreateMemorandum);
     on<SubmitCreateActaEvent>(_onSubmitCreateActa);
+    on<GetMemorandumDetailEvent>(_onGetMemorandumDetail);
   }
 
   Future<void> _onGetActasCount(
@@ -216,8 +217,8 @@ class MinutesMemosBloc extends Bloc<MinutesMemosEvent, MinutesMemosState> {
   FutureOr<void> _onSubmitCreateActa(
     SubmitCreateActaEvent event,
     Emitter<MinutesMemosState> emit,
-  ) async{
-    emit (MemorandosLoading());
+  ) async {
+    emit(MemorandosLoading());
     try {
       await repository.createActa(event.actaResponse);
       emit(CreateActasSucces());
@@ -225,6 +226,25 @@ class MinutesMemosBloc extends Bloc<MinutesMemosEvent, MinutesMemosState> {
       emit(CreateActasError(mapErrorMessage(error.key)));
     } catch (e) {
       emit(CreateActasError('Error inesperado: $e'));
+    }
+  }
+
+  Future<void> _onGetMemorandumDetail(
+    GetMemorandumDetailEvent event,
+    Emitter<MinutesMemosState> emit,
+  ) async {
+    emit(MemorandumDetailLoading());
+
+    try {
+      final memorandum = await repository.getMemorandumDetail(event.memoId);
+      print(memorandum.titulo);
+      emit(MemorandumDetailLoaded(memorandum));
+    } on BaseApiException catch (e) {
+      emit(MemorandumDetailError(mapErrorMessage(e.key)));
+    } catch (e) {
+      print(e);
+
+      emit(MemorandumDetailError('Ocurrió un error inesperado'));
     }
   }
 }

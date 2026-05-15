@@ -689,18 +689,43 @@ class HomeSurveillanceRoute extends _i61.PageRouteInfo<void> {
 
 /// generated route for
 /// [_i21.InternalMemorandumDetailsScreen]
-class InternalMemorandumDetailsRoute extends _i61.PageRouteInfo<void> {
-  const InternalMemorandumDetailsRoute({List<_i61.PageRouteInfo>? children})
-    : super(InternalMemorandumDetailsRoute.name, initialChildren: children);
+class InternalMemorandumDetailsRoute
+    extends _i61.PageRouteInfo<InternalMemorandumDetailsRouteArgs> {
+  InternalMemorandumDetailsRoute({
+    _i62.Key? key,
+    required String memoId,
+    List<_i61.PageRouteInfo>? children,
+  }) : super(
+         InternalMemorandumDetailsRoute.name,
+         args: InternalMemorandumDetailsRouteArgs(key: key, memoId: memoId),
+         initialChildren: children,
+       );
 
   static const String name = 'InternalMemorandumDetailsRoute';
 
   static _i61.PageInfo page = _i61.PageInfo(
     name,
     builder: (data) {
-      return const _i21.InternalMemorandumDetailsScreen();
+      final args = data.argsAs<InternalMemorandumDetailsRouteArgs>();
+      return _i21.InternalMemorandumDetailsScreen(
+        key: args.key,
+        memoId: args.memoId,
+      );
     },
   );
+}
+
+class InternalMemorandumDetailsRouteArgs {
+  const InternalMemorandumDetailsRouteArgs({this.key, required this.memoId});
+
+  final _i62.Key? key;
+
+  final String memoId;
+
+  @override
+  String toString() {
+    return 'InternalMemorandumDetailsRouteArgs{key: $key, memoId: $memoId}';
+  }
 }
 
 /// generated route for
