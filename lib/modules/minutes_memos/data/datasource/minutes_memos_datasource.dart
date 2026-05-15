@@ -21,7 +21,7 @@ class MinutesMemosDatasource {
       operationName: 'getMemosCount',
       queryParameters: params.isEmpty ? null : params,
     );
-    return MemosCountModel.fromJson(response['data']);
+    return MemosCountModel.fromJson(response);
   }
 
   Future<MemorandosListModel> getMemorandos({
@@ -59,7 +59,7 @@ class MinutesMemosDatasource {
       operationName: 'getActasCount',
       queryParameters: params.isEmpty ? null : params,
     );
-    return MemosCountModel.fromJson(response['data']);
+    return MemosCountModel.fromJson(response);
   }
 
   Future<ActasListModel> getActas({

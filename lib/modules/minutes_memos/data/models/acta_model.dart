@@ -19,15 +19,15 @@ class ActaModel extends ActaEntity {
     final updatedRaw = json['updated_at'] as String?;
 
     return ActaModel(
-      id: json['id']?.toString() ?? '',
-      numero: json['numero']?.toString() ?? '',
-      titulo: json['titulo'] as String? ?? json['asunto'] as String? ?? '',
-      descripcion: json['descripcion'] as String?,
-      ubicacion: json['ubicacion'] as String?,
-      totalParticipantes: json['total_participantes'] as int?,
+      id: json['record_id']?.toString() ?? '',
+      numero: json['record_number']?.toString() ?? '',
+      titulo: json['title'] as String? ?? json['asunto'] as String? ?? '',
+      descripcion: json['description'] as String?,
+      ubicacion: json['location'] as String?,
+      totalParticipantes: json['participants_count'] as int?,
       createdAt: DateTime.tryParse(dateRaw) ?? DateTime.now(),
       updatedAt: updatedRaw != null ? DateTime.tryParse(updatedRaw) : null,
-      estado: json['estado'] as String? ?? '',
+      estado: json['status'] as String? ?? '',
     );
   }
 }
