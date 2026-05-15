@@ -1,3 +1,4 @@
+import 'package:dio/dio.dart';
 import 'package:front_gestion_minera/core/networking/http_services.dart';
 import 'package:front_gestion_minera/modules/minutes_memos/domain/entity/entity.dart';
 import '../models/models.dart';
@@ -112,5 +113,29 @@ class MinutesMemosDatasource {
         },
       ],
     );
+  }
+
+  Future<String> uploadFileRecords(FileUploadModel document) async {
+    final response = await apiClient.postFormData(
+      '/api/uploads',
+      operationName: 'uploadFileRecords',
+      data: document.toJson(),
+      files: [
+        {
+          'name': 'file',
+          'path': document.file,
+          'namefile': document.file.split('/').last,
+        },
+      ],
+    );
+    return response['data']['attachment_id'] as String;
+  }
+
+  Future<String> deleteFileRecord(String attachmentId) async {
+    final response = await apiClient.delete(
+      'api/upload/$attachmentId',
+      operationName: 'deleteFileRecords',
+    );
+    return response['message'] as String;
   }
 }

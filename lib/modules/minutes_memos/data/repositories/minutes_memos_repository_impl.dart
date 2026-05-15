@@ -1,5 +1,7 @@
+import 'package:front_gestion_minera/modules/minutes_memos/data/models/models.dart';
 import 'package:front_gestion_minera/modules/minutes_memos/domain/entity/create_acta_entity.dart';
 import 'package:front_gestion_minera/modules/minutes_memos/domain/entity/create_memorandum_entity.dart';
+import 'package:front_gestion_minera/modules/minutes_memos/domain/entity/entity.dart';
 
 import '../../domain/entity/acta_entity.dart';
 import '../../domain/entity/memos_count_entity.dart';
@@ -71,4 +73,15 @@ class MinutesMemosRepositoryImpl implements MinutesMemosRepository {
   @override
   Future<void> createMemorandum(CreateMemorandumEntity memorandum) =>
       datasource.createdMemorandum(memorandum);
+
+  @override
+  Future<String> uploadFileRecords(FileUploadEntity files){
+    final model = FileUploadModel.fromEntity(files);
+    return datasource.uploadFileRecords(model);
+  }
+
+  @override
+  Future<String> deleteFileRecord(String attachmentId){
+    return datasource.deleteFileRecord(attachmentId);
+  }
 }
