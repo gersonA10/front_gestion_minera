@@ -75,7 +75,7 @@ class CreateMemorandumError extends MinutesMemosState {
 class UploadFileRecordsLoading extends MinutesMemosState {}
 
 class UploadFileRecordsSuccess extends MinutesMemosState {
-  final String attachmentId;
+  final Map<String,String> attachmentId;
 
   UploadFileRecordsSuccess({required this.attachmentId});
 }

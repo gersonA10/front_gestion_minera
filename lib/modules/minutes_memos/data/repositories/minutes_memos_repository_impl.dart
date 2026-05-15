@@ -75,7 +75,7 @@ class MinutesMemosRepositoryImpl implements MinutesMemosRepository {
       datasource.createdMemorandum(memorandum);
 
   @override
-  Future<String> uploadFileRecords(FileUploadEntity files){
+  Future<Map<String,String>> uploadFileRecords(FileUploadEntity files){
     final model = FileUploadModel.fromEntity(files);
     return datasource.uploadFileRecords(model);
   }

@@ -37,6 +37,6 @@ abstract class MinutesMemosRepository {
   Future<void> createActa(CreateActaEntity acta);
   Future<void> createMemorandum(CreateMemorandumEntity memorandum);
 
-  Future<String> uploadFileRecords(FileUploadEntity files);
+  Future<Map<String,String>> uploadFileRecords(FileUploadEntity files);
   Future<String> deleteFileRecord(String attachmentId);
 }

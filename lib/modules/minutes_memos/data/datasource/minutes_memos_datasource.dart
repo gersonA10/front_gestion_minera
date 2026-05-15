@@ -114,7 +114,7 @@ class MinutesMemosDatasource {
     );
   }
 
-  Future<String> uploadFileRecords(FileUploadModel document) async {
+  Future<Map<String,String>> uploadFileRecords(FileUploadModel document) async {
     final response = await apiClient.postFormData(
       '/api/uploads',
       operationName: 'uploadFileRecords',
@@ -127,7 +127,7 @@ class MinutesMemosDatasource {
         },
       ],
     );
-    return response['data']['attachment_id'] as String;
+    return {'attachment': response['attachment_id'],'nombre':response['file_name']};
   }
 
   Future<String> deleteFileRecord(String attachmentId) async {
@@ -135,6 +135,6 @@ class MinutesMemosDatasource {
       'api/upload/$attachmentId',
       operationName: 'deleteFileRecords',
     );
-    return response['message'] as String;
+    return response['message'];
   }
 }

@@ -52,6 +52,7 @@ class _RegisterMinutesMemosScreenState
   final int _maxFiles = 5;
   final int _maxFileSize = 10 * 1024 * 1024;
   final ImagePicker _picker = ImagePicker();
+  final List<Map<String, String>> _attachmentId = [];
 
   @override
   void initState() {
@@ -115,6 +116,9 @@ class _RegisterMinutesMemosScreenState
             }
             if (state is CreateActasError) {
               _showError(state.message);
+            }
+            if (state is UploadFileRecordsSuccess) {
+              _attachmentId.add(state.attachmentId);
             }
           },
           builder: (context, state) {
@@ -565,52 +569,62 @@ class _RegisterMinutesMemosScreenState
     setState(() {
       _selectedFiles.addAll(validFiles);
     });
+    final typeDocument = isSelected ? 'MEMORANDO' : 'ACTA';
+    for (final file in validFiles) {
+      _blocRegister.add(
+        UploadFileRecordEvent(
+          fileRecord: FileUploadEntity(
+            documentType: typeDocument,
+            file: file.path,
+          ),
+        ),
+      );
+    }
   }
 
   void _showError(String msg) {
-  ScaffoldMessenger.of(context).showSnackBar(
-    SnackBar(
-      behavior: SnackBarBehavior.floating,
-      margin: const EdgeInsets.all(16),
-      backgroundColor: Colors.red.shade600,
-      elevation: 6,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(14),
-      ),
-      content: Row(
-        children: [
-          const Icon(
-            Icons.error_outline_rounded,
-            color: Colors.white,
-          ),
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        behavior: SnackBarBehavior.floating,
+        margin: const EdgeInsets.all(16),
+        backgroundColor: Colors.red.shade600,
+        elevation: 6,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+        content: Row(
+          children: [
+            const Icon(Icons.error_outline_rounded, color: Colors.white),
 
-          const SizedBox(width: 12),
+            const SizedBox(width: 12),
 
-          Expanded(
-            child: Text(
-              msg,
-              style: const TextStyle(
-                color: Colors.white,
-                fontWeight: FontWeight.w500,
+            Expanded(
+              child: Text(
+                msg,
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.w500,
+                ),
               ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
-    ),
-  );
-}
+    );
+  }
 
   Widget _buildFilePreview() {
     return Column(
-      children: _selectedFiles.map((file) {
+      children: _selectedFiles.asMap().entries.map((entry) {
+        final index = entry.key;
+        final file = entry.value;
+
         final fileName = file.path.split('/').last;
+
         final isImage = [
           '.jpg',
           '.jpeg',
           '.png',
         ].any((ext) => fileName.toLowerCase().endsWith(ext));
-
+        print(_attachmentId);
         return Container(
           margin: const EdgeInsets.only(bottom: 10),
           decoration: BoxDecoration(
@@ -624,17 +638,40 @@ class _RegisterMinutesMemosScreenState
             leading: isImage
                 ? Image.file(file, width: 40, height: 40, fit: BoxFit.cover)
                 : const Icon(Icons.picture_as_pdf, color: Colors.red),
-            title: Text(
-              fileName,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: const TextStyle(fontSize: 14),
+
+            title: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  fileName,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(fontSize: 14),
+                ),
+
+                if (index < _attachmentId.length)
+                  Text(
+                    _attachmentId[index]['nombre'] ?? '',
+                    style: const TextStyle(fontSize: 12, color: Colors.green),
+                  )
+                else
+                  const Text(
+                    "pending...",
+                    style: TextStyle(fontSize: 12, color: Colors.grey),
+                  ),
+              ],
             ),
+
             trailing: IconButton(
               icon: const Icon(Icons.cancel, color: Colors.grey),
               onPressed: () {
                 setState(() {
                   _selectedFiles.remove(file);
+
+                  // opcional: mantener sync simple
+                  if (index < _attachmentId.length) {
+                    _attachmentId.removeAt(index);
+                  }
                 });
               },
             ),

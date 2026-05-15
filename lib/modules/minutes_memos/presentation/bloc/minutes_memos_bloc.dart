@@ -38,6 +38,8 @@ class MinutesMemosBloc extends Bloc<MinutesMemosEvent, MinutesMemosState> {
     on<LoadMoreActasEvent>(_onLoadMoreActas);
     on<SubmitCreateMemorandumEvent>(_onSubmitCreateMemorandum);
     on<SubmitCreateActaEvent>(_onSubmitCreateActa);
+    on<UploadFileRecordEvent>(_onUploadFileRecord);
+    on<DeleteFileRecordEvent>(_onDeleteFileRecord);
   }
 
   Future<void> _onGetActasCount(
@@ -216,8 +218,8 @@ class MinutesMemosBloc extends Bloc<MinutesMemosEvent, MinutesMemosState> {
   FutureOr<void> _onSubmitCreateActa(
     SubmitCreateActaEvent event,
     Emitter<MinutesMemosState> emit,
-  ) async{
-    emit (MemorandosLoading());
+  ) async {
+    emit(MemorandosLoading());
     try {
       await repository.createActa(event.actaResponse);
       emit(CreateActasSucces());
@@ -225,6 +227,36 @@ class MinutesMemosBloc extends Bloc<MinutesMemosEvent, MinutesMemosState> {
       emit(CreateActasError(mapErrorMessage(error.key)));
     } catch (e) {
       emit(CreateActasError('Error inesperado: $e'));
+    }
+  }
+
+  FutureOr<void> _onUploadFileRecord(
+    UploadFileRecordEvent event,
+    Emitter<MinutesMemosState> emit,
+  ) async {
+    emit(UploadFileRecordsLoading());
+    try {
+      final response = await repository.uploadFileRecords(event.fileRecord);
+      emit(UploadFileRecordsSuccess(attachmentId: response));
+    } on BaseApiException catch (error) {
+      emit(UploadFileRecordError(mapErrorMessage(error.key)));
+    } catch (e) {
+      emit(UploadFileRecordError('Error inesperado: $e'));
+    }
+  }
+
+  FutureOr<void> _onDeleteFileRecord(
+    DeleteFileRecordEvent event,
+    Emitter<MinutesMemosState> emit,
+  ) async{
+    emit(DeleteFileRecordsLoading());
+    try {
+      final response = await repository.deleteFileRecord(event.attachmentId);
+      emit(DeleteFileRecordsSuccess(message: response));
+    } on BaseApiException catch (error) {
+      emit(DeleteFileRecordError(mapErrorMessage(error.key)));
+    } catch (e) {
+      emit(DeleteFileRecordError('Error inesperado: $e'));
     }
   }
 }
