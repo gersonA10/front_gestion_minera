@@ -71,3 +71,29 @@ class CreateMemorandumError extends MinutesMemosState {
   final String message;
   CreateMemorandumError(this.message);
 }
+
+class UploadFileRecordsLoading extends MinutesMemosState {}
+
+class UploadFileRecordsSuccess extends MinutesMemosState {
+  final String attachmentId;
+
+  UploadFileRecordsSuccess({required this.attachmentId});
+}
+
+class UploadFileRecordError extends MinutesMemosState {
+  final String message;
+  UploadFileRecordError(this.message);
+}
+
+class DeleteFileRecordsLoading extends MinutesMemosState {}
+
+class DeleteFileRecordsSuccess extends MinutesMemosState {
+  final String message;
+
+  DeleteFileRecordsSuccess({required this.message});
+}
+
+class DeleteFileRecordError extends MinutesMemosState {
+  final String message;
+  DeleteFileRecordError(this.message);
+}

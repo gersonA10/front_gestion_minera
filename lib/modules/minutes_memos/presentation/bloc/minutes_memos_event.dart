@@ -65,3 +65,15 @@ class SubmitCreateMemorandumEvent extends MinutesMemosEvent {
 
   SubmitCreateMemorandumEvent({required this.memorandumResponse});
 }
+
+class UploadFileRecordEvent extends MinutesMemosEvent {
+  final FileUploadEntity fileRecord;
+
+  UploadFileRecordEvent({required this.fileRecord});
+}
+
+class DeleteFileRecordEvent extends MinutesMemosEvent {
+  final String attachmentId;
+
+  DeleteFileRecordEvent({required this.attachmentId});
+}
