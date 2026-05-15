@@ -1,4 +1,5 @@
 
+export '../models/file_upload_model.dart';
 export '../models/create_memorandum_model.dart';
 export '../models/create_acta_model.dart';
 export  '../models/acta_model.dart';
