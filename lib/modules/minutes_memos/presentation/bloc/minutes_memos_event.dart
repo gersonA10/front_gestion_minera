@@ -65,3 +65,11 @@ class SubmitCreateMemorandumEvent extends MinutesMemosEvent {
 
   SubmitCreateMemorandumEvent({required this.memorandumResponse});
 }
+
+class GetMemorandumDetailEvent extends MinutesMemosEvent {
+  final String memoId;
+
+  GetMemorandumDetailEvent({
+    required this.memoId,
+  });
+}

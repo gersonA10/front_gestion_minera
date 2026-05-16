@@ -1,195 +1,343 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:front_gestion_minera/injector_container.dart';
+import 'package:front_gestion_minera/modules/minutes_memos/domain/entity/entity.dart';
 import 'package:front_gestion_minera/utils/constants/color.constant.dart';
+import 'package:intl/intl.dart';
 
+import '../bloc/minutes_memos_bloc.dart';
 import '../widgets/widgets.dart';
 
 @RoutePage()
-class InternalMemorandumDetailsScreen extends StatelessWidget {
-  const InternalMemorandumDetailsScreen({super.key});
+class InternalMemorandumDetailsScreen extends StatefulWidget {
+  const InternalMemorandumDetailsScreen({
+    super.key,
+    required this.memoId,
+  });
+
+  final String memoId;
+
+  @override
+  State<InternalMemorandumDetailsScreen> createState() =>
+      _InternalMemorandumDetailsScreenState();
+}
+
+class _InternalMemorandumDetailsScreenState
+    extends State<InternalMemorandumDetailsScreen> {
+  late MinutesMemosBloc _minutesMemosBloc;
+
+  @override
+  void initState() {
+    super.initState();
+
+    _minutesMemosBloc = InjectorContainer.getIt<MinutesMemosBloc>()
+      ..add(
+        GetMemorandumDetailEvent(
+          memoId: widget.memoId,
+        ),
+      );
+  }
+
+  @override
+  void dispose() {
+    _minutesMemosBloc.close();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: TColors.white,
-      body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 16.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.start,
-                children: [
-                  IconButton(
-                    onPressed: () {
-                      Navigator.of(context).pop();
-                    },
-                    padding: EdgeInsets.zero,
-                    constraints: const BoxConstraints(),
-                    alignment: Alignment.centerLeft,
-                    style: IconButton.styleFrom(
-                      tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                    ),
-                    icon: const Icon(
-                      Icons.arrow_back,
-                      color: TColors.appMainDarkColor,
-                      size: 22,
-                    ),
-                  ),
+    return BlocProvider.value(
+      value: _minutesMemosBloc,
+      child: Scaffold(
+        backgroundColor: TColors.white,
+        body: BlocBuilder<MinutesMemosBloc, MinutesMemosState>(
+          builder: (context, state) {
+            if (state is MemorandumDetailLoading) {
+              return const Center(
+                child: CircularProgressIndicator(),
+              );
+            }
 
-                  const Spacer(),
-
-                  const Text(
-                    'Memorando Interno',
-                    style: TextStyle(
-                      color: TColors.appMainDarkColor,
-                      fontWeight: FontWeight.w600,
-                      fontSize: 15,
-                    ),
-                  ),
-                ],
-              ),
-              const Divider(color: Color(0xFFEEEEEE), thickness: 1),
-              const SizedBox(height: 28),
-
-              const Text(
-                'Violacion de ley',
-                style: TextStyle(
-                  fontSize: 26,
-                  fontWeight: FontWeight.w700,
-                  color: TColors.appMainTextColor,
-                  height: 1.2,
-                ),
-              ),
-              const SizedBox(height: 20),
-              Container(
-                width: double.infinity,
-                padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  color: const Color(0xFFF4F6F8),
-                  borderRadius: BorderRadius.circular(12),
-                ),
+            if (state is MemorandumDetailError) {
+              return Center(
                 child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
                   children: [
-                    const Text(
-                      'FECHA DE EMISIÓN',
-                      style: TextStyle(
-                        fontSize: 11,
-                        fontWeight: FontWeight.w600,
+                    Text(
+                      state.message,
+                      style: const TextStyle(
                         color: TColors.appDisabledColor,
-                        letterSpacing: 0.5,
                       ),
                     ),
-                    const SizedBox(height: 6),
-
-                    Row(
-                      children: const [
-                        Icon(
-                          Icons.calendar_today,
-                          size: 14,
-                          color: TColors.appMainDarkColor,
-                        ),
-                        SizedBox(width: 6),
-                        Text(
-                          '24 de Octubre, 2023',
-                          style: TextStyle(
-                            fontSize: 13,
-                            color: TColors.appMainTextColor,
-                          ),
-                        ),
-                      ],
-                    ),
-
-                    const SizedBox(height: 14),
-                    const Text(
-                      'RESPONSABLE / DESTINATARIO',
-                      style: TextStyle(
-                        fontSize: 11,
-                        fontWeight: FontWeight.w600,
-                        color: TColors.appDisabledColor,
-                        letterSpacing: 0.5,
-                      ),
-                    ),
-                    const SizedBox(height: 6),
-
-                    Row(
-                      children: const [
-                        Icon(
-                          Icons.person_outline,
-                          size: 14,
-                          color: TColors.appMainDarkColor,
-                        ),
-                        SizedBox(width: 6),
-                        Text(
-                          'Ing. Roberto Gómez',
-                          style: TextStyle(
-                            fontSize: 13,
-                            color: TColors.appMainTextColor,
-                          ),
-                        ),
-                      ],
+                    const SizedBox(height: 12),
+                    TextButton(
+                      onPressed: () {
+                        context.read<MinutesMemosBloc>().add(
+                              GetMemorandumDetailEvent(
+                                memoId: widget.memoId,
+                              ),
+                            );
+                      },
+                      child: const Text('Reintentar'),
                     ),
                   ],
                 ),
-              ),
-              const SizedBox(height: 24),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
+              );
+            }
+
+            if (state is MemorandumDetailLoaded) {
+              final memorandum = state.memorandum;
+
+              return SafeArea(
+                child: SingleChildScrollView(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 20.0,
+                    vertical: 16.0,
+                  ),
+                  child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Container(width: 3, height: 21, color: Colors.red),
-                      const SizedBox(width: 8),
-                      const Text(
-                        'Descripción del Cambio',
-                        style: TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.w600,
-                          color: TColors.appMainDarkColor,
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        children: [
+                          IconButton(
+                            onPressed: () {
+                              Navigator.of(context).pop();
+                            },
+                            padding: EdgeInsets.zero,
+                            constraints: const BoxConstraints(),
+                            alignment: Alignment.centerLeft,
+                            style: IconButton.styleFrom(
+                              tapTargetSize:
+                                  MaterialTapTargetSize.shrinkWrap,
+                            ),
+                            icon: const Icon(
+                              Icons.arrow_back,
+                              color: TColors.appMainDarkColor,
+                              size: 22,
+                            ),
+                          ),
+                          const Spacer(),
+                          const Text(
+                            'Memorando Interno',
+                            style: TextStyle(
+                              color: TColors.appMainDarkColor,
+                              fontWeight: FontWeight.w600,
+                              fontSize: 15,
+                            ),
+                          ),
+                        ],
+                      ),
+
+                      const Divider(
+                        color: Color(0xFFEEEEEE),
+                        thickness: 1,
+                      ),
+
+                      const SizedBox(height: 28),
+
+                      Text(
+                        memorandum.titulo,
+                        style: const TextStyle(
+                          fontSize: 28,
+                          fontWeight: FontWeight.bold,
+                          color: TColors.appMainTextColor,
+                          height: 1.2,
                         ),
                       ),
+
+                      const SizedBox(height: 20),
+
+                      Container(
+                        width: double.infinity,
+                        padding: const EdgeInsets.all(16),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFF4F6F8),
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: Column(
+                          crossAxisAlignment:
+                              CrossAxisAlignment.start,
+                          children: [
+                            const Text(
+                              'FECHA DE EMISIÓN',
+                              style: TextStyle(
+                                fontSize: 11,
+                                fontWeight: FontWeight.w600,
+                                color: TColors.appDisabledColor,
+                                letterSpacing: 0.5,
+                              ),
+                            ),
+
+                            const SizedBox(height: 6),
+
+                            Row(
+                              children: [
+                                const Icon(
+                                  Icons.calendar_today,
+                                  size: 14,
+                                  color:
+                                      TColors.appMainDarkColor,
+                                ),
+
+                                const SizedBox(width: 6),
+
+                                Text(
+                                  DateFormat(
+                                    'dd \'de\' MMMM, yyyy',
+                                    'es',
+                                  ).format(
+                                    memorandum.fechaEmision,
+                                  ),
+                                  style: const TextStyle(
+                                    fontSize: 13,
+                                    color:
+                                        TColors.appMainTextColor,
+                                  ),
+                                ),
+                              ],
+                            ),
+
+                            const SizedBox(height: 14),
+
+                            const Text(
+                              'RESPONSABLE / DESTINATARIO',
+                              style: TextStyle(
+                                fontSize: 11,
+                                fontWeight: FontWeight.w600,
+                                color: TColors.appDisabledColor,
+                                letterSpacing: 0.5,
+                              ),
+                            ),
+
+                            const SizedBox(height: 6),
+
+                            Row(
+                              children: [
+                                const Icon(
+                                  Icons.person_outline,
+                                  size: 14,
+                                  color:
+                                      TColors.appMainDarkColor,
+                                ),
+
+                                const SizedBox(width: 6),
+
+                                Expanded(
+                                  child: Text(
+                                    memorandum
+                                            .destinatarioNombre
+                                            ?.isNotEmpty ==
+                                        true
+                                        ? memorandum
+                                            .destinatarioNombre!
+                                        : 'Sin destinatario',
+                                    style: const TextStyle(
+                                      fontSize: 13,
+                                      color: TColors
+                                          .appMainTextColor,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
+                      ),
+
+                      const SizedBox(height: 24),
+
+                      Column(
+                        crossAxisAlignment:
+                            CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            crossAxisAlignment:
+                                CrossAxisAlignment.start,
+                            children: [
+                              Container(
+                                width: 3,
+                                height: 21,
+                                color: Colors.red,
+                              ),
+
+                              const SizedBox(width: 8),
+
+                              const Text(
+                                'Descripción del Cambio',
+                                style: TextStyle(
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.w600,
+                                  color:
+                                      TColors.appMainDarkColor,
+                                ),
+                              ),
+                            ],
+                          ),
+
+                          const SizedBox(height: 12),
+
+                          Container(
+                            width: double.infinity,
+                            constraints: const BoxConstraints(
+                              maxHeight: 280,
+                            ),
+                            child: SingleChildScrollView(
+                              child: Text(
+                                memorandum.contenido,
+                                style: const TextStyle(
+                                  fontSize: 13,
+                                  height: 1.5,
+                                  color:
+                                      TColors.appDisabledColor,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+
+                      const Divider(
+                        color: Color(0xFFEEEEEE),
+                        thickness: 1,
+                      ),
+
+                      if (memorandum.attachments.isNotEmpty)
+                        AttachmentsSectionWidget(
+                          items: memorandum.attachments
+                              .map(
+                                (
+                                  MemorandumAttachmentEntity
+                                      attachment,
+                                ) {
+                                  final tipo =
+                                      attachment.tipoArchivo
+                                              .contains(
+                                    'image',
+                                  )
+                                          ? 'image'
+                                          : 'pdf';
+
+                                  return AttachmentItem(
+                                    tipo: tipo,
+                                    nombre:
+                                        attachment.nombreArchivo,
+                                    peso:
+                                        attachment.pesoArchivo,
+                                  );
+                                },
+                              )
+                              .toList(),
+                        ),
                     ],
                   ),
+                ),
+              );
+            }
 
-                  const SizedBox(height: 12),
-                  Container(
-                    width: double.infinity,
-                    constraints: const BoxConstraints(maxHeight: 280),
-                    child: SingleChildScrollView(
-                      child: const Text(
-                        "Lorem ipsum dolor sit amet consectetur adipiscing elit. Quisque faucibus ex sapien vitae pellentesque sem placerat. In id cursus mi pretium tellus duis convallis. Tempus leo eu aenean sed diam urna tempor. Pulvinar vivamus fringilla lacus nec metus bibendum egestas. Iaculis massa nisl malesuada lacinia integer nunc posuere. Ut hendrerit semper vel class aptent taciti sociosqu. Ad litora torquent per conubia nostra inceptos himenaeos.Lorem ipsum dolor sit amet consectetur adipiscing elit. Quisque faucibus ex sapien vitae pellentesque sem placerat. In id cursus mi pretium tellus duis convallis. Tempus leo eu aenean sed diam urna tempor. Pulvinar vivamus fringilla lacus nec metus bibendum egestas. Iaculis massa nisl malesuada lacinia integer nunc posuere. Ut hendrerit semper vel class aptent taciti sociosqu. Ad litora torquent per conubia nostra inceptos himenaeos.Lorem ipsum dolor sit amet consectetur adipiscing elit. Quisque faucibus ex sapien vitae pellentesque sem placerat. In id cursus mi pretium tellus duis convallis. Tempus leo eu aenean sed diam urna tempor. Pulvinar vivamus fringilla lacus nec metus bibendum egestas. Iaculis massa nisl malesuada lacinia integer nunc posuere. Ut hendrerit semper vel class aptent taciti sociosqu. Ad litora torquent per conubia nostra inceptos himenaeos.",
-                        style: TextStyle(
-                          fontSize: 13,
-                          height: 1.5,
-                          color: TColors.appDisabledColor,
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-              const Divider(color: Color(0xFFEEEEEE), thickness: 1),
-              AttachmentsSectionWidget(
-                items: [
-                  AttachmentItem(
-                    tipo: 'pdf',
-                    nombre: 'Cronograma_Oct_Nov.pdf',
-                    peso: '1.2 MB',
-                  ),
-                  AttachmentItem(
-                    tipo: 'image',
-                    nombre: 'evidencia_1.png',
-                    peso: '850 KB',
-                  ),
-                ],
-              ),
-            ],
-
-            ///
-          ),
+            return const SizedBox.shrink();
+          },
         ),
       ),
     );

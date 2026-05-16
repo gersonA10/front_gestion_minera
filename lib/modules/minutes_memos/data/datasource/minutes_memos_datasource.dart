@@ -112,4 +112,21 @@ Future<ActasCountEntity> getActasCount({
       ],
     );
   }
+
+  Future<MemorandumDetailModel> getMemorandumDetail(
+  String memoId,
+) async {
+
+  final response = await apiClient.get(
+    '/api/memorandos/$memoId',
+    operationName: 'getMemorandumDetail',
+  );
+
+  print(response);
+  print(response.runtimeType);
+
+  return MemorandumDetailModel.fromJson(
+    Map<String, dynamic>.from(response as Map),
+  );
+}
 }

@@ -73,3 +73,17 @@ class CreateMemorandumError extends MinutesMemosState {
   final String message;
   CreateMemorandumError(this.message);
 }
+
+class MemorandumDetailLoading extends MinutesMemosState {}
+
+class MemorandumDetailLoaded extends MinutesMemosState {
+  final MemorandumDetailEntity memorandum;
+
+  MemorandumDetailLoaded(this.memorandum);
+}
+
+class MemorandumDetailError extends MinutesMemosState {
+  final String message;
+
+  MemorandumDetailError(this.message);
+}

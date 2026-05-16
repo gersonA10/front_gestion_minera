@@ -2,6 +2,7 @@
 
 import '../entity/entity.dart';
 
+
 abstract class MinutesMemosRepository {
   Future<ActasCountEntity> getActasCount({
     String? filter,
@@ -32,4 +33,7 @@ abstract class MinutesMemosRepository {
   });
   Future<void> createActa(CreateActaEntity acta);
   Future<void> createMemorandum(CreateMemorandumEntity memorandum);
+  Future<MemorandumDetailEntity> getMemorandumDetail(
+  String memoId,
+);
 }

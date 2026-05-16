@@ -455,6 +455,7 @@ class _MinutesMemosMainScreenState extends State<MinutesMemosMainScreen> {
       fecha: fecha,
       estado: acta.estado,
       actualizado: actualizado,
+      itemId: acta.id,
     );
   }
 
@@ -527,6 +528,7 @@ class _MinutesMemosMainScreenState extends State<MinutesMemosMainScreen> {
     final fecha = fmt.format(memo.createdAt).toUpperCase();
 
     return MinutesMemosCardPanelWidget(
+      itemId: memo.id,
       tipo: 'memo',
       numero: memo.numero,
       titulo: memo.asunto,

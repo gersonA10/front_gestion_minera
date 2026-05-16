@@ -30,7 +30,7 @@ class AttachmentsSectionWidget extends StatelessWidget {
         const SizedBox(height: 24),
         Row(
           children: [
-            const Icon(Icons.attach_file, size: 18, color: Colors.blueGrey), 
+            const Icon(Icons.attach_file, size: 18, color: Colors.blueGrey, fontWeight: .bold,), 
             const SizedBox(width: 6),
             Text(
               'Archivos Adjuntos (${items.length})',
