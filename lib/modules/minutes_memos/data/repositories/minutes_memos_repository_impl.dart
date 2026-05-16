@@ -1,9 +1,5 @@
-import 'package:front_gestion_minera/modules/minutes_memos/domain/entity/create_acta_entity.dart';
-import 'package:front_gestion_minera/modules/minutes_memos/domain/entity/create_memorandum_entity.dart';
 
-import '../../domain/entity/acta_entity.dart';
-import '../../domain/entity/memos_count_entity.dart';
-import '../../domain/entity/memorandum_entity.dart';
+import '../../domain/entity/entity.dart';
 import '../../domain/repositories/minutes_memos_repository.dart';
 import '../datasource/minutes_memos_datasource.dart';
 
@@ -13,7 +9,7 @@ class MinutesMemosRepositoryImpl implements MinutesMemosRepository {
   MinutesMemosRepositoryImpl({required this.datasource});
 
   @override
-  Future<MemosCountEntity> getActasCount({
+  Future<ActasCountEntity> getActasCount({
     String? filter,
     String? from,
     String? to,

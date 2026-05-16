@@ -4,24 +4,26 @@ sealed class MinutesMemosState {}
 
 class MinutesMemosInitial extends MinutesMemosState {}
 
-class ActasCountLoading extends MinutesMemosState {}
+class ActasMemoCountLoading extends MinutesMemosState {}
 
-class ActasCountLoaded extends MinutesMemosState {
-  final MemosCountEntity count;
-  ActasCountLoaded(this.count);
+class ActasMemoCountLoaded extends MinutesMemosState {
+  final MemosCountEntity memoscount;
+  final ActasCountEntity actasCount;
+  ActasMemoCountLoaded(this.memoscount, this.actasCount);
 }
 
-class ActasCountError extends MinutesMemosState {
+class ActasMemoCountError extends MinutesMemosState {
   final String message;
-  ActasCountError(this.message);
+  ActasMemoCountError(this.message);
 }
 
 class MemosCountLoading extends MinutesMemosState {}
 
-class MemosCountLoaded extends MinutesMemosState {
-  final MemosCountEntity count;
-  MemosCountLoaded(this.count);
-}
+// class MemosCountLoaded extends MinutesMemosState {
+//   final MemosCountEntity MemoAcount; 
+//   final ActasCountEntity Actascount;
+//   MemosCountLoaded(this.MemoAcount, this.Actascount);
+// }
 
 class MemosCountError extends MinutesMemosState {
   final String message;

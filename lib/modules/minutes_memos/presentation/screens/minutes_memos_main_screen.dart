@@ -40,7 +40,7 @@ class _MinutesMemosMainScreenState extends State<MinutesMemosMainScreen> {
     _bloc = InjectorContainer.getIt<MinutesMemosBloc>();
     _actasScrollController.addListener(_onScrollActas);
     _memosScrollController.addListener(_onScrollMemos);
-    _bloc.add(GetActasCountEvent(filter: _filters[0].$2));
+    _bloc.add(GetActasMoemoCountEvent(filter: _filters[0].$2));
     _bloc.add(GetActasEvent(filter: _filters[0].$2));
   }
 
@@ -90,7 +90,7 @@ class _MinutesMemosMainScreenState extends State<MinutesMemosMainScreen> {
       setState(() => selectedFilter = index);
       if (selectedTab == 0) {
         _bloc.add(
-          GetActasCountEvent(filter: 'personalizado', from: from, to: to),
+          GetActasMoemoCountEvent(filter: 'personalizado', from: from, to: to),
         );
         _loadActas(filter: 'personalizado', from: from, to: to);
       } else {
@@ -103,7 +103,7 @@ class _MinutesMemosMainScreenState extends State<MinutesMemosMainScreen> {
       if (selectedFilter == index) return;
       setState(() => selectedFilter = index);
       if (selectedTab == 0) {
-        _bloc.add(GetActasCountEvent(filter: _filters[index].$2));
+        _bloc.add(GetActasMoemoCountEvent(filter: _filters[index].$2));
       } else {
         _bloc.add(GetMemosCountEvent(filter: _filters[index].$2));
       }
@@ -135,7 +135,7 @@ class _MinutesMemosMainScreenState extends State<MinutesMemosMainScreen> {
     }
 
     if (index == 0) {
-      _bloc.add(GetActasCountEvent(filter: filter, from: from, to: to));
+      _bloc.add(GetActasMoemoCountEvent(filter: filter, from: from, to: to));
       _loadActas(filter: filter, from: from, to: to);
     } else {
       _bloc.add(GetMemosCountEvent(filter: filter, from: from, to: to));
@@ -198,43 +198,46 @@ class _MinutesMemosMainScreenState extends State<MinutesMemosMainScreen> {
               const SizedBox(height: 20),
               BlocBuilder<MinutesMemosBloc, MinutesMemosState>(
                 buildWhen: (_, s) =>
-                    s is ActasCountLoading ||
-                    s is ActasCountLoaded ||
-                    s is ActasCountError ||
+                    s is ActasMemoCountLoaded ||
                     s is MemosCountLoading ||
-                    s is MemosCountLoaded ||
+                    s is ActasMemoCountLoaded ||
                     s is MemosCountError,
                 builder: (context, state) {
-                  final count = state is ActasCountLoaded
-                      ? state.count
-                      : state is MemosCountLoaded
-                      ? state.count
+                  final actascount1 = state is ActasMemoCountLoaded
+                      ? state.actasCount
+                      : state is ActasMemoCountLoaded
+                      ? state.actasCount
+                      : null;
+                       final memoAcount2 = state is ActasMemoCountLoaded
+                      ? state.memoscount
+                      : state is ActasMemoCountLoaded
+                      ? state.memoscount
                       : null;
                   final isLoading =
-                      state is ActasCountLoading || state is MemosCountLoading;
-                  final String? totalVal = isLoading
+                      state is ActasMemoCountLoading || state is MemosCountLoading;
+                  final String? totalValActas = isLoading
                       ? null
-                      : count?.total.toString() ?? '-';
-                  final String? pendVal = isLoading
+                      : actascount1?.total.toString() ?? '-';
+                  final String? pendValMemo = isLoading
                       ? null
-                      : count?.pendientes.toString() ?? '-';
+                      : memoAcount2?.total.toString() ?? '-';
 
                   return Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 20),
                     child: Row(
                       children: [
                         SummaryCardMinutesMemosWidget(
-                          label: 'Total',
+                          label: 'Actas',
                           icon: Icons.description_outlined,
                           iconColor: TColors.appMainColor,
-                          value: totalVal,
+                          value: totalValActas,
                         ),
                         const SizedBox(width: 12),
                         SummaryCardMinutesMemosWidget(
-                          label: 'Pendientes',
-                          icon: Icons.pending_outlined,
+                          label: 'Memorandos',
+                          icon: Icons.email,
                           iconColor: TColors.danger,
-                          value: pendVal,
+                          value: pendValMemo,
                         ),
                       ],
                     ),

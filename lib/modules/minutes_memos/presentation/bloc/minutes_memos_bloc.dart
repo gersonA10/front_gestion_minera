@@ -30,8 +30,8 @@ class MinutesMemosBloc extends Bloc<MinutesMemosEvent, MinutesMemosState> {
   String? _memosTo;
 
   MinutesMemosBloc({required this.repository}) : super(MinutesMemosInitial()) {
-    on<GetActasCountEvent>(_onGetActasCount);
-    on<GetMemosCountEvent>(_onGetMemosCount);
+    on<GetActasMoemoCountEvent>(_onGetActasMemoCount);
+    // on<GetMemosCountEvent>(_onGetMemosCount);
     on<GetMemorandosEvent>(_onGetMemorandos);
     on<LoadMoreMemorandosEvent>(_onLoadMoreMemorandos);
     on<GetActasEvent>(_onGetActas);
@@ -40,43 +40,44 @@ class MinutesMemosBloc extends Bloc<MinutesMemosEvent, MinutesMemosState> {
     on<SubmitCreateActaEvent>(_onSubmitCreateActa);
   }
 
-  Future<void> _onGetActasCount(
-    GetActasCountEvent event,
+  Future<void> _onGetActasMemoCount(
+    GetActasMoemoCountEvent event,
     Emitter<MinutesMemosState> emit,
   ) async {
-    emit(ActasCountLoading());
+    emit(ActasMemoCountLoading());
     try {
-      final count = await repository.getActasCount(
+      final countActas = await repository.getActasCount(
         filter: event.filter,
         from: event.from,
         to: event.to,
       );
-      emit(ActasCountLoaded(count));
+      final countMemos = await repository.getMemosCount(
+        filter: event.filter,
+        from: event.from,
+        to: event.to,
+      );
+      emit(ActasMemoCountLoaded(countMemos, countActas));
     } on BaseApiException catch (e) {
-      emit(ActasCountError(mapErrorMessage(e.key)));
+      emit(ActasMemoCountError(mapErrorMessage(e.key)));
     } catch (_) {
-      emit(ActasCountError('Ocurrió un error inesperado'));
+      emit(ActasMemoCountError('Ocurrió un error inesperado'));
     }
   }
 
-  Future<void> _onGetMemosCount(
-    GetMemosCountEvent event,
-    Emitter<MinutesMemosState> emit,
-  ) async {
-    emit(MemosCountLoading());
-    try {
-      final count = await repository.getMemosCount(
-        filter: event.filter,
-        from: event.from,
-        to: event.to,
-      );
-      emit(MemosCountLoaded(count));
-    } on BaseApiException catch (e) {
-      emit(MemosCountError(mapErrorMessage(e.key)));
-    } catch (_) {
-      emit(MemosCountError('Ocurrió un error inesperado'));
-    }
-  }
+  // Future<void> _onGetMemosCount(
+  //   GetMemosCountEvent event,
+  //   Emitter<MinutesMemosState> emit,
+  // ) async {
+  //   emit(MemosCountLoading());
+  //   try {
+
+  //     emit(MemosCountLoaded(count));
+  //   } on BaseApiException catch (e) {
+  //     emit(MemosCountError(mapErrorMessage(e.key)));
+  //   } catch (_) {
+  //     emit(MemosCountError('Ocurrió un error inesperado'));
+  //   }
+  // }
 
   Future<void> _onGetMemorandos(
     GetMemorandosEvent event,
@@ -216,8 +217,8 @@ class MinutesMemosBloc extends Bloc<MinutesMemosEvent, MinutesMemosState> {
   FutureOr<void> _onSubmitCreateActa(
     SubmitCreateActaEvent event,
     Emitter<MinutesMemosState> emit,
-  ) async{
-    emit (MemorandosLoading());
+  ) async {
+    emit(MemorandosLoading());
     try {
       await repository.createActa(event.actaResponse);
       emit(CreateActasSucces());

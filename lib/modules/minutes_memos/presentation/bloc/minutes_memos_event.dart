@@ -2,12 +2,12 @@ part of 'minutes_memos_bloc.dart';
 
 sealed class MinutesMemosEvent {}
 
-class GetActasCountEvent extends MinutesMemosEvent {
+class GetActasMoemoCountEvent extends MinutesMemosEvent {
   final String? filter;
   final String? from;
   final String? to;
 
-  GetActasCountEvent({this.filter, this.from, this.to});
+  GetActasMoemoCountEvent({this.filter, this.from, this.to});
 }
 
 class GetMemosCountEvent extends MinutesMemosEvent {
