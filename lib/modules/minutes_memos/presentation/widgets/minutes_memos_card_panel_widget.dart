@@ -12,9 +12,11 @@ class MinutesMemosCardPanelWidget extends StatelessWidget {
   final String fecha;
   final String estado;
   final String? actualizado;
+  final String itemId;
 
   const MinutesMemosCardPanelWidget({
     super.key,
+    required this.itemId,
     required this.tipo,
     required this.numero,
     required this.titulo,
@@ -180,11 +182,11 @@ class MinutesMemosCardPanelWidget extends StatelessWidget {
 
                 TextButton(
                   onPressed: () {
-                    context.router.push(
-                      InternalMemorandumDetailsRoute(
-                        ///////////
-                      ),
-                    );
+                    if (!isMinute) {
+                      context.router.push(
+                        InternalMemorandumDetailsRoute(memoId: itemId),
+                      );
+                    }
                   },
                   style: TextButton.styleFrom(
                     foregroundColor: TColors.appMainColor,

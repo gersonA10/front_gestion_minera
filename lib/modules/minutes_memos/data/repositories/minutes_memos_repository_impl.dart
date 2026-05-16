@@ -1,9 +1,4 @@
-import 'package:front_gestion_minera/modules/minutes_memos/domain/entity/create_acta_entity.dart';
-import 'package:front_gestion_minera/modules/minutes_memos/domain/entity/create_memorandum_entity.dart';
-
-import '../../domain/entity/acta_entity.dart';
-import '../../domain/entity/memos_count_entity.dart';
-import '../../domain/entity/memorandum_entity.dart';
+import '../../domain/entity/entity.dart';
 import '../../domain/repositories/minutes_memos_repository.dart';
 import '../datasource/minutes_memos_datasource.dart';
 
@@ -65,10 +60,14 @@ class MinutesMemosRepositoryImpl implements MinutesMemosRepository {
   }
 
   @override
-  Future<void> createActa(CreateActaEntity acta) => 
-    datasource.createActa(acta);
+  Future<void> createActa(CreateActaEntity acta) => datasource.createActa(acta);
 
   @override
   Future<void> createMemorandum(CreateMemorandumEntity memorandum) =>
       datasource.createdMemorandum(memorandum);
+      
+  @override
+  Future<MemorandumDetailEntity> getMemorandumDetail(String memoId) {
+    return datasource.getMemorandumDetail(memoId);
+  }
 }
