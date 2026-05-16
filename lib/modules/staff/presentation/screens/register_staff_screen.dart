@@ -2,6 +2,7 @@ import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 
 import '../../../../utils/constants/color.constant.dart';
+import '../widgets/widgets.dart';
 
 @RoutePage()
 class RegisterStaffScreen extends StatefulWidget {
@@ -14,6 +15,11 @@ class RegisterStaffScreen extends StatefulWidget {
 class _RegisterStaffScreenState extends State<RegisterStaffScreen> {
   String? _opcionseleccionada;
   final _roles = ['usuario', 'jefe campamento', 'jefe maquinaria'];
+  final _fullNameController = TextEditingController();
+  final _ciController = TextEditingController();
+  final _dateController = TextEditingController();
+  final _cargoController = TextEditingController();
+  final _paymentController = TextEditingController();
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -113,53 +119,31 @@ class _RegisterStaffScreenState extends State<RegisterStaffScreen> {
                     padding: EdgeInsetsGeometry.all(20),
                     child: Column(
                       children: [
-                        CustomFormStaffWidget(),
+                        CustomFormStaffWidget(
+                          icon: Icons.badge_outlined,
+                          titleform: 'Nombre Completo',
+                          hint: 'Ej: Juan Alberto Perez Garcia',
+                          controller: _fullNameController,
+                        ),
 
+                        const SizedBox(height: 15),
+                        CustomFormStaffWidget(
+                          icon: Icons.contact_emergency_outlined,
+                          titleform: 'Ci / Carnet Identidad',
+                          hint: 'Ingrese el Carnet',
+                          controller: _ciController,
+                        ),
+                        const SizedBox(height: 15),
+                        CustomFormStaffWidget(
+                          icon: Icons.date_range_outlined,
+                          titleform: 'Fecha Ingreso',
+                          hint: 'mm/dd/yyyy',
+                          controller: _dateController,
+                        ),
                         const SizedBox(height: 15),
                         const Row(
                           children: [
-                            Icon(Icons.abc),
-                            Text(
-                              'CI / Carnet Identidad',
-                              style: TextStyle(
-                                color: TColors.appMainDarkColor,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                          ],
-                        ),
-                        const TextField(
-                          decoration: InputDecoration(
-                            hintText: 'Ingrese el carnet',
-                            hintStyle: TextStyle(
-                              color: TColors.textFieldDisabledBorderDarkColor,
-                            ),
-                          ),
-                        ),
-                        const Row(
-                          children: [
-                            Icon(Icons.abc),
-                            Text(
-                              'Fecha de ingreso',
-                              style: TextStyle(
-                                color: TColors.appMainDarkColor,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                          ],
-                        ),
-                        const TextField(
-                          keyboardType: TextInputType.number,
-                          decoration: InputDecoration(
-                            hintText: 'mm/dd/yyyy',
-                            hintStyle: TextStyle(
-                              color: TColors.textFieldDisabledBorderDarkColor,
-                            ),
-                          ),
-                        ),
-                        const Row(
-                          children: [
-                            Icon(Icons.abc),
+                            Icon(Icons.person_4_outlined),
                             Text(
                               'Cargo / Puesto',
                               style: TextStyle(
@@ -197,35 +181,13 @@ class _RegisterStaffScreenState extends State<RegisterStaffScreen> {
                             );
                           }).toList(),
                         ),
-                        const Row(
-                          children: [
-                            Icon(Icons.abc),
-                            Text(
-                              'Cargo / Puesto',
-                              style: TextStyle(
-                                color: TColors.appMainDarkColor,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                          ],
-                        ),
-                        TextField(
-                          decoration: InputDecoration(
-                            hintText: '0.00',
-                            suffixIcon: const Align(
-                              alignment: Alignment.centerRight,
-                              widthFactor: 1,
-                              child: Padding(
-                                padding: EdgeInsetsGeometry.symmetric(
-                                  horizontal: 20,
-                                ),
-                                child: Text(
-                                  'Bs',
-                                  style: TextStyle(fontWeight: FontWeight.bold),
-                                ),
-                              ),
-                            ),
-                          ),
+                        const SizedBox(height: 15),
+                        CustomFormStaffWidget(
+                          icon: Icons.payments_outlined,
+                          titleform: 'Salario base (Mensual)',
+                          hint: '0.00 Bs',
+                          extraText: 'Bs',
+                          controller: _paymentController,
                         ),
                       ],
                     ),
@@ -266,7 +228,9 @@ class _RegisterStaffScreenState extends State<RegisterStaffScreen> {
                         ),
                         const SizedBox(height: 15),
                         GestureDetector(
-                          onTap: () {},
+                          onTap: () {
+                            // context.router.popUntil((route) => route.isFirst);
+                          },
                           child: Container(
                             width: double.infinity,
                             height: 50,
@@ -299,42 +263,6 @@ class _RegisterStaffScreenState extends State<RegisterStaffScreen> {
           ],
         ),
       ),
-    );
-  }
-}
-
-class CustomFormStaffWidget extends StatelessWidget {
-  
-  const CustomFormStaffWidget({
-    super.key,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      children: [
-        Row(
-          children: [
-            Icon(Icons.abc),
-            Text(
-              'Nombre Completo',
-              style: TextStyle(
-                color: TColors.appMainDarkColor,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-          ],
-        ),
-        TextField(
-          decoration: InputDecoration(
-            hintText: 'Ej. Juan Alberto Perez garcia',
-            hintStyle: TextStyle(
-              color:
-                  TColors.textFieldDisabledBorderDarkColor,
-            ),
-          ),
-        ),
-      ],
     );
   }
 }
