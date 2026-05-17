@@ -2,12 +2,12 @@ part of 'minutes_memos_bloc.dart';
 
 sealed class MinutesMemosEvent {}
 
-class GetActasCountEvent extends MinutesMemosEvent {
+class GetActasMoemoCountEvent extends MinutesMemosEvent {
   final String? filter;
   final String? from;
   final String? to;
 
-  GetActasCountEvent({this.filter, this.from, this.to});
+  GetActasMoemoCountEvent({this.filter, this.from, this.to});
 }
 
 class GetMemosCountEvent extends MinutesMemosEvent {
@@ -73,3 +73,15 @@ class GetMemorandumDetailEvent extends MinutesMemosEvent {
     required this.memoId,
   });
 }
+
+class GetActaDetailEvent extends MinutesMemosEvent {
+  final String actaId;
+  GetActaDetailEvent({required this.actaId});
+}
+
+class GetSociosEvent extends MinutesMemosEvent {
+  final String? search;
+  GetSociosEvent({this.search});
+}
+
+class LoadMoreSociosEvent extends MinutesMemosEvent {}

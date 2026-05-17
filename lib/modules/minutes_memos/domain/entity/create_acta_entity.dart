@@ -17,11 +17,13 @@ class CreateActaEntity {
 }
 
 class ParticipantEntity {
+  final String? memberId;
   final String fullName;
   final String? rol;
   final String attendanceStatus;
 
   ParticipantEntity({
+    this.memberId,
     required this.fullName,
     required this.rol,
     required this.attendanceStatus,

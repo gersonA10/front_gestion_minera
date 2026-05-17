@@ -1,3 +1,4 @@
+
 import '../../domain/entity/entity.dart';
 import '../../domain/repositories/minutes_memos_repository.dart';
 import '../datasource/minutes_memos_datasource.dart';
@@ -8,7 +9,7 @@ class MinutesMemosRepositoryImpl implements MinutesMemosRepository {
   MinutesMemosRepositoryImpl({required this.datasource});
 
   @override
-  Future<MemosCountEntity> getActasCount({
+  Future<ActasCountEntity> getActasCount({
     String? filter,
     String? from,
     String? to,
@@ -69,5 +70,19 @@ class MinutesMemosRepositoryImpl implements MinutesMemosRepository {
   @override
   Future<MemorandumDetailEntity> getMemorandumDetail(String memoId) {
     return datasource.getMemorandumDetail(memoId);
+  }
+
+  @override
+  Future<ActaDetailEntity> getActaDetail(String actaId) {
+    return datasource.getActaDetail(actaId);
+  }
+
+  @override
+  Future<SociosListEntity> getSocios({
+    String? search,
+    int page = 1,
+    int limit = 100,
+  }) {
+    return datasource.getSocios(search: search, page: page, limit: limit);
   }
 }

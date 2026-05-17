@@ -29,6 +29,7 @@ class CreateActaModel extends CreateActaEntity {
       'emission_date': DateFormat('yyyy-MM-dd').format(date),
       'participants': participants.map(
         (participant) => {
+          'member_id': participant.memberId,
           'full_name': participant.fullName,
           'position': participant.rol,
           'attendance': participant.attendanceStatus,

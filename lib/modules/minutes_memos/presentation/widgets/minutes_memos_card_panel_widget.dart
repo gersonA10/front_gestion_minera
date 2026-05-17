@@ -56,7 +56,7 @@ class MinutesMemosCardPanelWidget extends StatelessWidget {
                         vertical: 4,
                       ),
                       decoration: BoxDecoration(
-                        color: tagColor.withOpacity(0.1),
+                        color: tagColor.withValues(alpha:  0.1),
                         borderRadius: BorderRadius.circular(6),
                       ),
                       child: Text(
@@ -180,34 +180,39 @@ class MinutesMemosCardPanelWidget extends StatelessWidget {
                   ],
                 ),
 
-                TextButton(
-                  onPressed: () {
-                    if (!isMinute) {
-                      context.router.push(
-                        InternalMemorandumDetailsRoute(memoId: itemId),
-                      );
-                    }
-                  },
-                  style: TextButton.styleFrom(
-                    foregroundColor: TColors.appMainColor,
-                    padding: EdgeInsets.zero,
-                    minimumSize: const Size(0, 0),
-                    tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                  ),
-                  child: const Row(
-                    children: [
-                      Text(
-                        'Ver Detalles',
-                        style: TextStyle(
-                          fontSize: 12,
-                          fontWeight: FontWeight.w600,
+           
+                  TextButton(
+                    onPressed: () {
+                      if (isMinute) {
+                        context.router.push(
+                          ActaDetailsRoute(actaId: itemId),
+                        );
+                      } else {
+                        context.router.push(
+                          InternalMemorandumDetailsRoute(memoId: itemId),
+                        );
+                      }
+                    },
+                    style: TextButton.styleFrom(
+                      foregroundColor: TColors.appMainColor,
+                      padding: EdgeInsets.zero,
+                      minimumSize: const Size(0, 0),
+                      tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                    ),
+                    child: const Row(
+                      children: [
+                        Text(
+                          'Ver Detalles',
+                          style: TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w600,
+                          ),
                         ),
-                      ),
-                      SizedBox(width: 4),
-                      Icon(Icons.arrow_forward_ios, size: 12),
-                    ],
+                        SizedBox(width: 4),
+                        Icon(Icons.arrow_forward_ios, size: 12),
+                      ],
+                    ),
                   ),
-                ),
               ],
             ),
           ),

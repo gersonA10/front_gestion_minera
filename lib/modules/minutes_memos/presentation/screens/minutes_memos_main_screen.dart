@@ -1,12 +1,12 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:front_gestion_minera/config/router/app_router.gr.dart';
 import 'package:front_gestion_minera/core/widgets/logout_button_widget.dart';
 import 'package:front_gestion_minera/injector_container.dart';
 import 'package:front_gestion_minera/modules/minutes_memos/domain/entity/acta_entity.dart';
 import 'package:front_gestion_minera/modules/minutes_memos/domain/entity/memorandum_entity.dart';
 import 'package:front_gestion_minera/modules/minutes_memos/presentation/bloc/minutes_memos_bloc.dart';
+import 'package:front_gestion_minera/modules/minutes_memos/presentation/widgets/register_widget.dart';
 import 'package:front_gestion_minera/modules/minutes_memos/presentation/widgets/widgets.dart';
 import 'package:front_gestion_minera/utils/constants/color.constant.dart';
 import 'package:intl/intl.dart';
@@ -40,7 +40,7 @@ class _MinutesMemosMainScreenState extends State<MinutesMemosMainScreen> {
     _bloc = InjectorContainer.getIt<MinutesMemosBloc>();
     _actasScrollController.addListener(_onScrollActas);
     _memosScrollController.addListener(_onScrollMemos);
-    _bloc.add(GetActasCountEvent(filter: _filters[0].$2));
+    _bloc.add(GetActasMoemoCountEvent(filter: _filters[0].$2));
     _bloc.add(GetActasEvent(filter: _filters[0].$2));
   }
 
@@ -90,12 +90,12 @@ class _MinutesMemosMainScreenState extends State<MinutesMemosMainScreen> {
       setState(() => selectedFilter = index);
       if (selectedTab == 0) {
         _bloc.add(
-          GetActasCountEvent(filter: 'personalizado', from: from, to: to),
+          GetActasEvent(filter: 'personalizado', from: from, to: to),
         );
         _loadActas(filter: 'personalizado', from: from, to: to);
       } else {
         _bloc.add(
-          GetMemosCountEvent(filter: 'personalizado', from: from, to: to),
+          GetMemorandosEvent(filter: 'personalizado', from: from, to: to),
         );
         _loadMemorandos(filter: 'personalizado', from: from, to: to);
       }
@@ -103,9 +103,9 @@ class _MinutesMemosMainScreenState extends State<MinutesMemosMainScreen> {
       if (selectedFilter == index) return;
       setState(() => selectedFilter = index);
       if (selectedTab == 0) {
-        _bloc.add(GetActasCountEvent(filter: _filters[index].$2));
+        _bloc.add(GetActasEvent(filter: _filters[index].$2));
       } else {
-        _bloc.add(GetMemosCountEvent(filter: _filters[index].$2));
+        _bloc.add(GetMemorandosEvent(filter: _filters[index].$2));
       }
       if (selectedTab == 0) {
         _loadActas(filter: _filters[index].$2);
@@ -135,10 +135,10 @@ class _MinutesMemosMainScreenState extends State<MinutesMemosMainScreen> {
     }
 
     if (index == 0) {
-      _bloc.add(GetActasCountEvent(filter: filter, from: from, to: to));
+      _bloc.add(GetActasEvent(filter: filter, from: from, to: to));
       _loadActas(filter: filter, from: from, to: to);
     } else {
-      _bloc.add(GetMemosCountEvent(filter: filter, from: from, to: to));
+      _bloc.add(GetMemorandosEvent(filter: filter, from: from, to: to));
       _loadMemorandos(filter: filter, from: from, to: to);
     }
   }
@@ -198,43 +198,46 @@ class _MinutesMemosMainScreenState extends State<MinutesMemosMainScreen> {
               const SizedBox(height: 20),
               BlocBuilder<MinutesMemosBloc, MinutesMemosState>(
                 buildWhen: (_, s) =>
-                    s is ActasCountLoading ||
-                    s is ActasCountLoaded ||
-                    s is ActasCountError ||
+                    s is ActasMemoCountLoaded ||
                     s is MemosCountLoading ||
-                    s is MemosCountLoaded ||
+                    s is ActasMemoCountLoaded ||
                     s is MemosCountError,
                 builder: (context, state) {
-                  final count = state is ActasCountLoaded
-                      ? state.count
-                      : state is MemosCountLoaded
-                      ? state.count
+                  final actascount1 = state is ActasMemoCountLoaded
+                      ? state.actasCount
+                      : state is ActasMemoCountLoaded
+                      ? state.actasCount
+                      : null;
+                       final memoAcount2 = state is ActasMemoCountLoaded
+                      ? state.memoscount
+                      : state is ActasMemoCountLoaded
+                      ? state.memoscount
                       : null;
                   final isLoading =
-                      state is ActasCountLoading || state is MemosCountLoading;
-                  final String? totalVal = isLoading
+                      state is ActasMemoCountLoading || state is MemosCountLoading;
+                  final String? totalValActas = isLoading
                       ? null
-                      : count?.total.toString() ?? '-';
-                  final String? pendVal = isLoading
+                      : actascount1?.total.toString() ?? '-';
+                  final String? pendValMemo = isLoading
                       ? null
-                      : count?.pendientes.toString() ?? '-';
+                      : memoAcount2?.total.toString() ?? '-';
 
                   return Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 20),
                     child: Row(
                       children: [
                         SummaryCardMinutesMemosWidget(
-                          label: 'Total',
+                          label: 'Actas',
                           icon: Icons.description_outlined,
                           iconColor: TColors.appMainColor,
-                          value: totalVal,
+                          value: totalValActas,
                         ),
                         const SizedBox(width: 12),
                         SummaryCardMinutesMemosWidget(
-                          label: 'Pendientes',
-                          icon: Icons.pending_outlined,
+                          label: 'Memorandos',
+                          icon: Icons.email,
                           iconColor: TColors.danger,
-                          value: pendVal,
+                          value: pendValMemo,
                         ),
                       ],
                     ),
@@ -242,90 +245,8 @@ class _MinutesMemosMainScreenState extends State<MinutesMemosMainScreen> {
                 },
               ),
               const SizedBox(height: 20),
-
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 20),
-                child: Row(
-                  children: [
-                    Expanded(
-                      child: Container(
-                        height: 48,
-                        decoration: BoxDecoration(
-                          color: TColors.appMainDarkColor,
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                        child: TextButton(
-                          onPressed: () {
-                            context.router.push(
-                              RegisterMinutesMemosRoute(isOption: 0),
-                            );
-                          },
-                          style: TextButton.styleFrom(
-                            foregroundColor: Colors.white,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(10),
-                            ),
-                          ),
-                          child: const Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Icon(Icons.add, size: 18, color: Colors.white),
-                              SizedBox(width: 8),
-                              Text(
-                                'Registrar Acta',
-                                style: TextStyle(fontWeight: FontWeight.w600),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                    ),
-
-                    const SizedBox(width: 12),
-
-                    Expanded(
-                      child: Container(
-                        height: 48,
-                        decoration: BoxDecoration(
-                          color: Colors.transparent,
-                          borderRadius: BorderRadius.circular(10),
-                          border: Border.all(
-                            color: TColors.appMainDarkColor,
-                            width: 1.5,
-                          ),
-                        ),
-                        child: TextButton(
-                          onPressed: () {
-                            context.router.push(
-                              RegisterMinutesMemosRoute(isOption: 1),
-                            );
-                          },
-                          style: TextButton.styleFrom(
-                            foregroundColor: TColors.appMainDarkColor,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(10),
-                            ),
-                          ),
-                          child: const Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Icon(Icons.edit_outlined, size: 18),
-                              SizedBox(width: 8),
-                              Text(
-                                'Nuevo Memorando',
-                                style: TextStyle(fontWeight: FontWeight.w600),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-
+              RegisterWidget(bloc: _bloc,),
               const SizedBox(height: 20),
-
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 20),
                 child: Row(
