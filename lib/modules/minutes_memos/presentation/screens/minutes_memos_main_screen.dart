@@ -1,12 +1,12 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:front_gestion_minera/config/router/app_router.gr.dart';
 import 'package:front_gestion_minera/core/widgets/logout_button_widget.dart';
 import 'package:front_gestion_minera/injector_container.dart';
 import 'package:front_gestion_minera/modules/minutes_memos/domain/entity/acta_entity.dart';
 import 'package:front_gestion_minera/modules/minutes_memos/domain/entity/memorandum_entity.dart';
 import 'package:front_gestion_minera/modules/minutes_memos/presentation/bloc/minutes_memos_bloc.dart';
+import 'package:front_gestion_minera/modules/minutes_memos/presentation/widgets/register_widget.dart';
 import 'package:front_gestion_minera/modules/minutes_memos/presentation/widgets/widgets.dart';
 import 'package:front_gestion_minera/utils/constants/color.constant.dart';
 import 'package:intl/intl.dart';
@@ -90,12 +90,12 @@ class _MinutesMemosMainScreenState extends State<MinutesMemosMainScreen> {
       setState(() => selectedFilter = index);
       if (selectedTab == 0) {
         _bloc.add(
-          GetActasMoemoCountEvent(filter: 'personalizado', from: from, to: to),
+          GetActasEvent(filter: 'personalizado', from: from, to: to),
         );
         _loadActas(filter: 'personalizado', from: from, to: to);
       } else {
         _bloc.add(
-          GetMemosCountEvent(filter: 'personalizado', from: from, to: to),
+          GetMemorandosEvent(filter: 'personalizado', from: from, to: to),
         );
         _loadMemorandos(filter: 'personalizado', from: from, to: to);
       }
@@ -103,9 +103,9 @@ class _MinutesMemosMainScreenState extends State<MinutesMemosMainScreen> {
       if (selectedFilter == index) return;
       setState(() => selectedFilter = index);
       if (selectedTab == 0) {
-        _bloc.add(GetActasMoemoCountEvent(filter: _filters[index].$2));
+        _bloc.add(GetActasEvent(filter: _filters[index].$2));
       } else {
-        _bloc.add(GetMemosCountEvent(filter: _filters[index].$2));
+        _bloc.add(GetMemorandosEvent(filter: _filters[index].$2));
       }
       if (selectedTab == 0) {
         _loadActas(filter: _filters[index].$2);
@@ -135,10 +135,10 @@ class _MinutesMemosMainScreenState extends State<MinutesMemosMainScreen> {
     }
 
     if (index == 0) {
-      _bloc.add(GetActasMoemoCountEvent(filter: filter, from: from, to: to));
+      _bloc.add(GetActasEvent(filter: filter, from: from, to: to));
       _loadActas(filter: filter, from: from, to: to);
     } else {
-      _bloc.add(GetMemosCountEvent(filter: filter, from: from, to: to));
+      _bloc.add(GetMemorandosEvent(filter: filter, from: from, to: to));
       _loadMemorandos(filter: filter, from: from, to: to);
     }
   }
@@ -245,90 +245,8 @@ class _MinutesMemosMainScreenState extends State<MinutesMemosMainScreen> {
                 },
               ),
               const SizedBox(height: 20),
-
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 20),
-                child: Row(
-                  children: [
-                    Expanded(
-                      child: Container(
-                        height: 48,
-                        decoration: BoxDecoration(
-                          color: TColors.appMainDarkColor,
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                        child: TextButton(
-                          onPressed: () {
-                            context.router.push(
-                              RegisterMinutesMemosRoute(isOption: 0),
-                            );
-                          },
-                          style: TextButton.styleFrom(
-                            foregroundColor: Colors.white,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(10),
-                            ),
-                          ),
-                          child: const Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Icon(Icons.add, size: 18, color: Colors.white),
-                              SizedBox(width: 8),
-                              Text(
-                                'Registrar Acta',
-                                style: TextStyle(fontWeight: FontWeight.w600),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                    ),
-
-                    const SizedBox(width: 12),
-
-                    Expanded(
-                      child: Container(
-                        height: 48,
-                        decoration: BoxDecoration(
-                          color: Colors.transparent,
-                          borderRadius: BorderRadius.circular(10),
-                          border: Border.all(
-                            color: TColors.appMainDarkColor,
-                            width: 1.5,
-                          ),
-                        ),
-                        child: TextButton(
-                          onPressed: () {
-                            context.router.push(
-                              RegisterMinutesMemosRoute(isOption: 1),
-                            );
-                          },
-                          style: TextButton.styleFrom(
-                            foregroundColor: TColors.appMainDarkColor,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(10),
-                            ),
-                          ),
-                          child: const Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Icon(Icons.edit_outlined, size: 18),
-                              SizedBox(width: 8),
-                              Text(
-                                'Nuevo Memorando',
-                                style: TextStyle(fontWeight: FontWeight.w600),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-
+              RegisterWidget(bloc: _bloc,),
               const SizedBox(height: 20),
-
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 20),
                 child: Row(

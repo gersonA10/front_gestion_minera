@@ -1,12 +1,9 @@
 import 'dart:async';
-
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:front_gestion_minera/core/networking/base_api_exception.dart';
-import 'package:front_gestion_minera/modules/minutes_memos/domain/entity/entity.dart';
 import 'package:front_gestion_minera/utils/error.dart';
-
+import '../../domain/entity/entity.dart';
 import '../../domain/repositories/minutes_memos_repository.dart';
-
 part 'minutes_memos_event.dart';
 part 'minutes_memos_state.dart';
 
@@ -29,9 +26,14 @@ class MinutesMemosBloc extends Bloc<MinutesMemosEvent, MinutesMemosState> {
   String? _memosFrom;
   String? _memosTo;
 
+  int _sociosPage = 1;
+  bool _sociosHasMore = false;
+  List<SocioEntity> _sociosItems = [];
+  bool _isSociosLoadingMore = false;
+  String? _sociosSearch;
+
   MinutesMemosBloc({required this.repository}) : super(MinutesMemosInitial()) {
     on<GetActasMoemoCountEvent>(_onGetActasMemoCount);
-    // on<GetMemosCountEvent>(_onGetMemosCount);
     on<GetMemorandosEvent>(_onGetMemorandos);
     on<LoadMoreMemorandosEvent>(_onLoadMoreMemorandos);
     on<GetActasEvent>(_onGetActas);
@@ -39,6 +41,9 @@ class MinutesMemosBloc extends Bloc<MinutesMemosEvent, MinutesMemosState> {
     on<SubmitCreateMemorandumEvent>(_onSubmitCreateMemorandum);
     on<SubmitCreateActaEvent>(_onSubmitCreateActa);
     on<GetMemorandumDetailEvent>(_onGetMemorandumDetail);
+    on<GetActaDetailEvent>(_onGetActaDetail);
+    on<GetSociosEvent>(_onGetSocios);
+    on<LoadMoreSociosEvent>(_onLoadMoreSocios);
   }
 
   Future<void> _onGetActasMemoCount(
@@ -64,21 +69,6 @@ class MinutesMemosBloc extends Bloc<MinutesMemosEvent, MinutesMemosState> {
       emit(ActasMemoCountError('Ocurrió un error inesperado'));
     }
   }
-
-  // Future<void> _onGetMemosCount(
-  //   GetMemosCountEvent event,
-  //   Emitter<MinutesMemosState> emit,
-  // ) async {
-  //   emit(MemosCountLoading());
-  //   try {
-
-  //     emit(MemosCountLoaded(count));
-  //   } on BaseApiException catch (e) {
-  //     emit(MemosCountError(mapErrorMessage(e.key)));
-  //   } catch (_) {
-  //     emit(MemosCountError('Ocurrió un error inesperado'));
-  //   }
-  // }
 
   Future<void> _onGetMemorandos(
     GetMemorandosEvent event,
@@ -204,7 +194,7 @@ class MinutesMemosBloc extends Bloc<MinutesMemosEvent, MinutesMemosState> {
     SubmitCreateMemorandumEvent event,
     Emitter<MinutesMemosState> emit,
   ) async {
-    emit(MemorandosLoading());
+    emit(CreateMemorandumLoading());
     try {
       await repository.createMemorandum(event.memorandumResponse);
       emit(CreateMemorandumSucces());
@@ -215,13 +205,13 @@ class MinutesMemosBloc extends Bloc<MinutesMemosEvent, MinutesMemosState> {
     }
   }
 
-  FutureOr<void> _onSubmitCreateActa(
+  Future<void> _onSubmitCreateActa(
     SubmitCreateActaEvent event,
     Emitter<MinutesMemosState> emit,
   ) async {
-    emit(MemorandosLoading());
+    emit(CreateActasLoading());
     try {
-      await repository.createActa(event.actaResponse);
+     await repository.createActa(event.actaResponse);
       emit(CreateActasSucces());
     } on BaseApiException catch (error) {
       emit(CreateActasError(mapErrorMessage(error.key)));
@@ -238,14 +228,79 @@ class MinutesMemosBloc extends Bloc<MinutesMemosEvent, MinutesMemosState> {
 
     try {
       final memorandum = await repository.getMemorandumDetail(event.memoId);
-      print(memorandum.titulo);
       emit(MemorandumDetailLoaded(memorandum));
     } on BaseApiException catch (e) {
       emit(MemorandumDetailError(mapErrorMessage(e.key)));
     } catch (e) {
-      print(e);
-
       emit(MemorandumDetailError('Ocurrió un error inesperado'));
+    }
+  }
+
+  Future<void> _onGetActaDetail(
+    GetActaDetailEvent event,
+    Emitter<MinutesMemosState> emit,
+  ) async {
+    emit(ActaDetailLoading());
+
+    try {
+      final acta = await repository.getActaDetail(event.actaId);
+      emit(ActaDetailLoaded(acta));
+    } on BaseApiException catch (e) {
+      emit(ActaDetailError(mapErrorMessage(e.key)));
+    } catch (e) {
+      emit(ActaDetailError('Ocurrió un error inesperado'));
+    }
+  }
+
+  Future<void> _onGetSocios(
+    GetSociosEvent event,
+    Emitter<MinutesMemosState> emit,
+  ) async {
+    _sociosPage = 1;
+    _sociosHasMore = false;
+    _sociosItems = [];
+    _sociosSearch = event.search;
+    emit(SociosLoading());
+    try {
+      final result = await repository.getSocios(
+        search: event.search,
+        page: 1,
+        limit: 10,
+      );
+      _sociosItems = List.from(result.items);
+      _sociosHasMore = result.hasMoreData;
+      emit(SociosLoaded(List.from(_sociosItems), hasMore: _sociosHasMore));
+    } on BaseApiException catch (e) {
+      emit(SociosError(mapErrorMessage(e.key)));
+    } catch (_) {
+      emit(SociosError('Ocurrió un error inesperado'));
+    }
+  }
+
+  Future<void> _onLoadMoreSocios(
+    LoadMoreSociosEvent event,
+    Emitter<MinutesMemosState> emit,
+  ) async {
+    if (!_sociosHasMore || _isSociosLoadingMore) return;
+    _isSociosLoadingMore = true;
+    _sociosPage++;
+    try {
+      final result = await repository.getSocios(
+        search: _sociosSearch,
+        page: _sociosPage,
+        limit: 10,
+      );
+      _sociosItems.addAll(result.items);
+      _sociosHasMore = result.hasMoreData;
+      emit(SociosLoaded(List.from(_sociosItems), hasMore: _sociosHasMore));
+    } on BaseApiException catch (e) {
+      _sociosPage--;
+      emit(SociosError(mapErrorMessage(e.key)));
+    } catch (_) {
+      _sociosPage--;
+      emit(SociosError('Ocurrió un error inesperado'));
+    } finally {
+      _isSociosLoadingMore = false;
     }
   }
 }

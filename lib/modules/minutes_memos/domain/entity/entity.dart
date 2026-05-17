@@ -6,3 +6,5 @@ export 'package:front_gestion_minera/modules/minutes_memos/domain/entity/entity.
 export 'package:front_gestion_minera/modules/minutes_memos/domain/entity/actas_count_entiry.dart';
 export 'package:front_gestion_minera/modules/minutes_memos/domain/entity/create_memorandum_entity.dart';
 export 'memorandum_detail_entity.dart';
+export 'acta_detail_entity.dart';
+export 'socio_entity.dart';

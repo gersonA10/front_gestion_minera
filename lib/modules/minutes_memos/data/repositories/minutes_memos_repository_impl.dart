@@ -71,4 +71,18 @@ class MinutesMemosRepositoryImpl implements MinutesMemosRepository {
   Future<MemorandumDetailEntity> getMemorandumDetail(String memoId) {
     return datasource.getMemorandumDetail(memoId);
   }
+
+  @override
+  Future<ActaDetailEntity> getActaDetail(String actaId) {
+    return datasource.getActaDetail(actaId);
+  }
+
+  @override
+  Future<SociosListEntity> getSocios({
+    String? search,
+    int page = 1,
+    int limit = 100,
+  }) {
+    return datasource.getSocios(search: search, page: page, limit: limit);
+  }
 }

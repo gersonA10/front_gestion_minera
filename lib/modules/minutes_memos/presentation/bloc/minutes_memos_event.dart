@@ -73,3 +73,15 @@ class GetMemorandumDetailEvent extends MinutesMemosEvent {
     required this.memoId,
   });
 }
+
+class GetActaDetailEvent extends MinutesMemosEvent {
+  final String actaId;
+  GetActaDetailEvent({required this.actaId});
+}
+
+class GetSociosEvent extends MinutesMemosEvent {
+  final String? search;
+  GetSociosEvent({this.search});
+}
+
+class LoadMoreSociosEvent extends MinutesMemosEvent {}

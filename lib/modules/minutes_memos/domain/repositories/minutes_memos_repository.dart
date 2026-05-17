@@ -1,8 +1,4 @@
-
-
 import '../entity/entity.dart';
-
-
 abstract class MinutesMemosRepository {
   Future<ActasCountEntity> getActasCount({
     String? filter,
@@ -33,7 +29,13 @@ abstract class MinutesMemosRepository {
   });
   Future<void> createActa(CreateActaEntity acta);
   Future<void> createMemorandum(CreateMemorandumEntity memorandum);
-  Future<MemorandumDetailEntity> getMemorandumDetail(
-  String memoId,
-);
+  Future<MemorandumDetailEntity> getMemorandumDetail(String memoId);
+
+  Future<ActaDetailEntity> getActaDetail(String actaId);
+
+  Future<SociosListEntity> getSocios({
+    String? search,
+    int page,
+    int limit,
+  });
 }

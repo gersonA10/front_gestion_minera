@@ -113,20 +113,39 @@ Future<ActasCountEntity> getActasCount({
     );
   }
 
-  Future<MemorandumDetailModel> getMemorandumDetail(
-  String memoId,
-) async {
+  Future<SociosListModel> getSocios({
+    String? search,
+    int page = 1,
+    int limit = 10,
+  }) async {
+    final params = <String, dynamic>{'page': page, 'limit': limit};
+    if (search != null && search.isNotEmpty) params['search'] = search;
 
-  final response = await apiClient.get(
-    '/api/memorandos/$memoId',
-    operationName: 'getMemorandumDetail',
-  );
+    final response = await apiClient.get(
+      '/api/socios',
+      operationName: 'getSocios',
+      queryParameters: params,
+    );
+    return SociosListModel.fromJson(Map<String, dynamic>.from(response as Map));
+  }
 
-  print(response);
-  print(response.runtimeType);
+  Future<MemorandumDetailModel> getMemorandumDetail(String memoId) async {
+    final response = await apiClient.get(
+      '/api/memorandos/$memoId',
+      operationName: 'getMemorandumDetail',
+    );
+    return MemorandumDetailModel.fromJson(
+      Map<String, dynamic>.from(response as Map),
+    );
+  }
 
-  return MemorandumDetailModel.fromJson(
-    Map<String, dynamic>.from(response as Map),
-  );
-}
+  Future<ActaDetailModel> getActaDetail(String actaId) async {
+    final response = await apiClient.get(
+      '/api/actas/$actaId',
+      operationName: 'getActaDetail',
+    );
+    return ActaDetailModel.fromJson(
+      Map<String, dynamic>.from(response as Map),
+    );
+  }
 }
