@@ -4,13 +4,15 @@ import 'package:dotted_border/dotted_border.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:front_gestion_minera/core/widgets/custom_alert_widget.dart';
+import 'package:front_gestion_minera/core/widgets/excavator_loader.dart';
 import 'package:front_gestion_minera/injector_container.dart';
 import 'package:front_gestion_minera/modules/minutes_memos/domain/entity/entity.dart';
 import 'package:front_gestion_minera/modules/minutes_memos/presentation/bloc/minutes_memos_bloc.dart';
+import 'package:front_gestion_minera/modules/minutes_memos/presentation/widgets/participants_dialogo_wisget.dart';
 import 'package:front_gestion_minera/utils/constants/color.constant.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
-
 import '../widgets/widgets.dart';
 
 @RoutePage()
@@ -27,7 +29,6 @@ class _RegisterMinutesMemosScreenState
     extends State<RegisterMinutesMemosScreen> {
   late final MinutesMemosBloc _blocRegister;
 
-  TextEditingController participantController = TextEditingController();
   TextEditingController titleController = TextEditingController();
   TextEditingController placecontroller = TextEditingController();
   TextEditingController destinataryController = TextEditingController();
@@ -90,7 +91,7 @@ class _RegisterMinutesMemosScreenState
     setState(() => _displayedMonth = next);
   }
 
-  final List<String> _listParticipants = [];
+  List<SocioEntity> _listParticipants = [];
 
   @override
   Widget build(BuildContext context) {
@@ -105,315 +106,364 @@ class _RegisterMinutesMemosScreenState
         body: BlocConsumer<MinutesMemosBloc, MinutesMemosState>(
           listener: (context, state) {
             if (state is CreateMemorandumSucces) {
-              _showUploadedSuccessfully(context);
+              CustomAlert.show(
+                context,
+                title: 'Exito',
+                message: 'El memorando ha sido creado exitosamente.',
+                type: AlertType.success,
+              );
+              context.router.maybePop(true);
             }
             if (state is CreateMemorandumError) {
               _showError(state.message);
             }
             if (state is CreateActasSucces) {
-              _showUploadedSuccessfully(context);
+              CustomAlert.show(
+                context,
+                title: 'Exito',
+                message: 'La acta ha sido creada exitosamente.',
+                type: AlertType.success,
+              );
+              context.router.maybePop(true);
             }
             if (state is CreateActasError) {
               _showError(state.message);
             }
           },
           builder: (context, state) {
-            return Padding(
-              padding: EdgeInsetsGeometry.all(15),
-              child: ListView(
-                children: [
-                  Column(
-                    crossAxisAlignment: .start,
+            final isLoading =
+                state is CreateMemorandumLoading || state is CreateActasLoading;
+            return Stack(
+              children: [
+                Padding(
+                  padding: EdgeInsetsGeometry.all(15),
+                  child: ListView(
                     children: [
-                      Text(
-                        'TIPO DE DOCUMENTO',
-                        style: TextStyle(
-                          color: TColors.textPrimary,
-                          fontWeight: FontWeight.bold,
-                          fontSize: 16,
-                        ),
-                      ),
-                      const SizedBox(height: 10),
-                      Container(
-                        height: 60,
-                        padding: EdgeInsets.symmetric(
-                          horizontal: 30,
-                          vertical: 5,
-                        ),
-                        decoration: BoxDecoration(
-                          color: TColors.appMainDarkColor.withValues(
-                            alpha: 0.2,
-                          ),
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                        child: _selectOptionRegister(),
-                      ),
-                      const SizedBox(height: 10),
-
-                      const TextTitleCardWidget(title: 'Título del Documento'),
-                      const SizedBox(height: 10),
-                      !isSelected
-                          ? Form(
-                              key: _formTitleKey,
-                              child: FormEditMinutesMemosWidget(
-                                controller: titleController,
-                                hintTextform: 'Ej. Acta de asamblea',
-                                maxLength: 200,
-                              ),
-                            )
-                          : Form(
-                              key: _formTitleKey,
-                              child: FormEditMinutesMemosWidget(
-                                controller: titleController,
-                                hintTextform: 'Ej. Memorando Interno',
-                                maxLength: 200,
-                              ),
+                      Column(
+                        crossAxisAlignment: .start,
+                        children: [
+                          Text(
+                            'TIPO DE DOCUMENTO',
+                            style: TextStyle(
+                              color: TColors.textPrimary,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 16,
                             ),
-                      const SizedBox(height: 10),
-                      const TextTitleCardWidget(title: 'Fecha del Documento'),
-                      _buildCalendar(),
-                      const SizedBox(height: 10),
-                      Container(
-                        child: isSelected
-                            ? Form(
-                                key: _formDestinataryKey,
-                                child: Column(
-                                  crossAxisAlignment: .start,
-                                  children: [
-                                    const TextTitleCardWidget(
-                                      title: 'Destinatario',
-                                    ),
-                                    Row(
-                                      children: [
-                                        Expanded(
-                                          child: FormEditMinutesMemosWidget(
-                                            controller: destinataryController,
-                                            hintTextform:
-                                                'Persona a quien se dirige',
-                                            maxLength: 150,
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ],
+                          ),
+                          const SizedBox(height: 10),
+                          _selectOptionRegister(),
+                          const SizedBox(height: 10),
+                          const TextTitleCardWidget(
+                            title: 'Título del Documento',
+                          ),
+                          const SizedBox(height: 10),
+                          !isSelected
+                              ? Form(
+                                  key: _formTitleKey,
+                                  child: FormEditMinutesMemosWidget(
+                                    controller: titleController,
+                                    hintTextform: 'Ej. Acta de asamblea',
+                                    maxLength: 200,
+                                  ),
+                                )
+                              : Form(
+                                  key: _formTitleKey,
+                                  child: FormEditMinutesMemosWidget(
+                                    controller: titleController,
+                                    hintTextform: 'Ej. Memorando Interno',
+                                    maxLength: 200,
+                                  ),
                                 ),
-                              )
-                            : Column(
-                                crossAxisAlignment: .start,
-                                children: [
-                                  const TextTitleCardWidget(title: 'Ubicación'),
-                                  Form(
-                                    key: _formPlaceKey,
-                                    child: Row(
+                          const SizedBox(height: 10),
+                          const TextTitleCardWidget(
+                            title: 'Fecha del Documento',
+                          ),
+                          _buildCalendar(),
+                          const SizedBox(height: 10),
+                          Container(
+                            child: isSelected
+                                ? Form(
+                                    key: _formDestinataryKey,
+                                    child: Column(
+                                      crossAxisAlignment: .start,
                                       children: [
-                                        Expanded(
-                                          child: FormEditMinutesMemosWidget(
-                                            controller: placecontroller,
-                                            hintTextform: 'Lugar la reunión',
-                                            maxLength: 150,
+                                        const TextTitleCardWidget(
+                                          title: 'Destinatario',
+                                        ),
+                                        GestureDetector(
+                                          onTap: _showParticipantsDialog,
+                                          child: Container(
+                                            width: double.infinity,
+                                            padding: const EdgeInsets.symmetric(
+                                              horizontal: 16,
+                                              vertical: 14,
+                                            ),
+                                            decoration: BoxDecoration(
+                                              border: Border.all(
+                                                color: TColors.appMainDarkColor,
+                                              ),
+                                              borderRadius:
+                                                  BorderRadius.circular(10),
+                                            ),
+                                            child: Row(
+                                              mainAxisAlignment:
+                                                  MainAxisAlignment
+                                                      .spaceBetween,
+                                              children: [
+                                                Expanded(
+                                                  child: Text(
+                                                    _listParticipants.isEmpty
+                                                        ? 'Seleccionar Destinatario'
+                                                        : _listParticipants
+                                                              .first
+                                                              .fullName,
+                                                    maxLines: 1,
+                                                    overflow:
+                                                        TextOverflow.ellipsis,
+                                                    style: TextStyle(
+                                                      color: TColors
+                                                          .appMainDarkColor,
+                                                    ),
+                                                  ),
+                                                ),
+                                                const SizedBox(width: 8),
+                                                Icon(
+                                                  Icons.people_alt_outlined,
+                                                  color:
+                                                      TColors.appMainDarkColor,
+                                                ),
+                                              ],
+                                            ),
                                           ),
                                         ),
+                                        const SizedBox(height: 10),
+                                        _listParticipants.isNotEmpty
+                                            ? _listOfParticipantMinutes()
+                                            : SizedBox(),
                                       ],
                                     ),
-                                  ),
-                                  const SizedBox(height: 10),
-                                  const TextTitleCardWidget(
-                                    title: 'Participantes',
-                                  ),
-                                  Row(
+                                  )
+                                : Column(
+                                    crossAxisAlignment: .start,
                                     children: [
-                                      Expanded(
-                                        child: FormEditMinutesMemosWidget(
-                                          controller: participantController,
-                                          hintTextform:
-                                              'Nombre del participante',
+                                      const TextTitleCardWidget(
+                                        title: 'Ubicación',
+                                      ),
+                                      Form(
+                                        key: _formPlaceKey,
+                                        child: Row(
+                                          children: [
+                                            Expanded(
+                                              child: FormEditMinutesMemosWidget(
+                                                controller: placecontroller,
+                                                hintTextform:
+                                                    'Lugar la reunión',
+                                                maxLength: 150,
+                                              ),
+                                            ),
+                                          ],
                                         ),
                                       ),
-                                      const SizedBox(width: 10),
+                                      const SizedBox(height: 10),
+                                      const TextTitleCardWidget(
+                                        title: 'Participantes',
+                                      ),
                                       GestureDetector(
-                                        onTap: () {
-                                          final value = participantController
-                                              .text
-                                              .trim();
-
-                                          if (value.isEmpty) return;
-                                          setState(() {
-                                            _listParticipants.add(value);
-                                            participantController.clear();
-                                          });
-                                        },
+                                        onTap: _showParticipantsDialog,
                                         child: Container(
-                                          padding: EdgeInsets.all(5),
+                                          width: double.infinity,
+                                          padding: const EdgeInsets.symmetric(
+                                            horizontal: 16,
+                                            vertical: 14,
+                                          ),
                                           decoration: BoxDecoration(
-                                            color: TColors.appMainDarkColor,
+                                            border: Border.all(
+                                              color: TColors.appMainDarkColor,
+                                            ),
                                             borderRadius: BorderRadius.circular(
                                               10,
                                             ),
                                           ),
-                                          child: Icon(
-                                            Icons.add,
-                                            color: TColors.white,
-                                            size: 35,
+                                          child: Row(
+                                            mainAxisAlignment:
+                                                MainAxisAlignment.spaceBetween,
+                                            children: [
+                                              Text(
+                                                _listParticipants.isEmpty
+                                                    ? 'Seleccionar participantes'
+                                                    : '${_listParticipants.length} participante(s) seleccionado(s)',
+                                                style: TextStyle(
+                                                  color:
+                                                      TColors.appMainDarkColor,
+                                                ),
+                                              ),
+                                              Icon(
+                                                Icons.people_alt_outlined,
+                                                color: TColors.appMainDarkColor,
+                                              ),
+                                            ],
                                           ),
                                         ),
                                       ),
+                                      const SizedBox(height: 10),
+                                      _listParticipants.isNotEmpty
+                                          ? _listOfParticipantMinutes()
+                                          : SizedBox(),
                                     ],
                                   ),
-                                  const SizedBox(height: 10),
-                                  _listParticipants.isNotEmpty
-                                      ? _listOfParticipantMinutes()
-                                      : SizedBox(),
-                                ],
-                              ),
-                      ),
-                      const SizedBox(height: 10),
-                      Column(
-                        crossAxisAlignment: .start,
-                        children: [
-                          const TextTitleCardWidget(
-                            title: 'Contenido / Descripción',
                           ),
                           const SizedBox(height: 10),
-                          Form(
-                            key: _formDescriptionKey,
-                            child: Row(
-                              children: [
-                                Expanded(
-                                  child: TextFormField(
-                                    validator: (value) {
-                                      if (value == null ||
-                                          value.trim().isEmpty) {
-                                        return 'Campo requerido';
-                                      }
-                                      if (value.trim().length < 20) {
-                                        return 'Debe tener al menos 20 caracteres';
-                                      }
+                          Column(
+                            crossAxisAlignment: .start,
+                            children: [
+                              const TextTitleCardWidget(
+                                title: 'Contenido / Descripción',
+                              ),
+                              const SizedBox(height: 10),
+                              Form(
+                                key: _formDescriptionKey,
+                                child: Row(
+                                  children: [
+                                    Expanded(
+                                      child: TextFormField(
+                                        validator: (value) {
+                                          if (value == null ||
+                                              value.trim().isEmpty) {
+                                            return 'Campo requerido';
+                                          }
+                                          if (value.trim().length < 20) {
+                                            return 'Debe tener al menos 20 caracteres';
+                                          }
 
-                                      return null;
-                                    },
-                                    controller: descriptionController,
-                                    minLines: 4,
-                                    maxLines: 6,
-                                    decoration: InputDecoration(
-                                      hintText:
-                                          'Redacte el contenido del documento aquí...',
-                                      hintStyle: TextStyle(
-                                        color: TColors.textFieldDisabledColor,
-                                      ),
-                                      filled: true,
-                                      fillColor: Colors.white,
-                                      contentPadding: const EdgeInsets.all(15),
-                                      border: OutlineInputBorder(
-                                        borderRadius: BorderRadius.circular(15),
-                                      ),
-                                      enabledBorder: OutlineInputBorder(
-                                        borderRadius: BorderRadius.circular(15),
-                                        borderSide: BorderSide(
-                                          color: TColors.textFieldDisabledColor,
+                                          return null;
+                                        },
+                                        controller: descriptionController,
+                                        minLines: 4,
+                                        maxLines: 6,
+                                        decoration: InputDecoration(
+                                          hintText:
+                                              'Redacte el contenido del documento aquí...',
+                                          hintStyle: TextStyle(
+                                            color:
+                                                TColors.textFieldDisabledColor,
+                                          ),
+                                          filled: true,
+                                          fillColor: Colors.white,
+                                          contentPadding: const EdgeInsets.all(
+                                            15,
+                                          ),
+                                          border: OutlineInputBorder(
+                                            borderRadius: BorderRadius.circular(
+                                              15,
+                                            ),
+                                          ),
+                                          enabledBorder: OutlineInputBorder(
+                                            borderRadius: BorderRadius.circular(
+                                              15,
+                                            ),
+                                            borderSide: BorderSide(
+                                              color: TColors
+                                                  .textFieldDisabledColor,
+                                            ),
+                                          ),
                                         ),
                                       ),
                                     ),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 20),
+                      DottedBorder(
+                        options: RoundedRectDottedBorderOptions(
+                          radius: Radius.circular(15),
+                          color: TColors.appDisabledColor,
+                          dashPattern: [6, 3],
+                          strokeWidth: 1,
+                          padding: EdgeInsets.zero,
+                        ),
+                        child: GestureDetector(
+                          onTap: () {
+                            _showPickerOptions();
+                          },
+                          child: Container(
+                            width: double.infinity,
+                            height: 60,
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(15),
+                            ),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Icon(
+                                  Icons.add_a_photo_outlined,
+                                  color: TColors.appMainDarkColor,
+                                ),
+                                const SizedBox(width: 10),
+                                Text(
+                                  'Subir Foto / PDF',
+                                  style: TextStyle(
+                                    color: TColors.appMainDarkColor,
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 16,
                                   ),
                                 ),
                               ],
                             ),
                           ),
-                        ],
+                        ),
+                      ),
+                      const SizedBox(height: 10),
+                      _selectedFiles.isNotEmpty
+                          ? _buildFilePreview()
+                          : SizedBox(),
+                      GestureDetector(
+                        onTap: isSelected
+                            ? (_isUploading ? null : _onSaveAndSendMemorandum)
+                            : (_isUploading ? null : _onSaveAndSendActa),
+                        child: AnimatedContainer(
+                          duration: const Duration(milliseconds: 300),
+                          height: 60,
+                          width: double.infinity,
+                          decoration: BoxDecoration(
+                            color: TColors.appMainDarkColor,
+                            borderRadius: BorderRadius.circular(20),
+                          ),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              const Icon(
+                                Icons.send_outlined,
+                                color: TColors.white,
+                                size: 20,
+                              ),
+                              const SizedBox(width: 10),
+                              Text(
+                                isSelected
+                                    ? 'Guardar y Enviar Memorandum'
+                                    : 'Guardar y Enviar Acta',
+                                style: TextStyle(
+                                  color: TColors.white,
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
                       ),
                     ],
                   ),
-                  const SizedBox(height: 20),
-                  DottedBorder(
-                    options: RoundedRectDottedBorderOptions(
-                      radius: Radius.circular(15),
-                      color: TColors.appDisabledColor,
-                      dashPattern: [6, 3],
-                      strokeWidth: 1,
-                      padding: EdgeInsets.zero,
-                    ),
-                    child: GestureDetector(
-                      onTap: () {
-                        _showPickerOptions();
-                      },
-                      child: Container(
-                        width: double.infinity,
-                        height: 60,
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(15),
-                        ),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Icon(
-                              Icons.add_a_photo_outlined,
-                              color: TColors.appMainDarkColor,
-                            ),
-                            const SizedBox(width: 10),
-                            Text(
-                              'Subir Foto / PDF',
-                              style: TextStyle(
-                                color: TColors.appMainDarkColor,
-                                fontWeight: FontWeight.bold,
-                                fontSize: 16,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
+                ),
+                if (isLoading)
+                  Container(
+                    color: Colors.black.withValues(alpha: 0.3),
+                    child: const Center(child: ExcavatorLoader()),
                   ),
-                  const SizedBox(height: 10),
-                  _selectedFiles.isNotEmpty ? _buildFilePreview() : SizedBox(),
-                  GestureDetector(
-                    onTap: isSelected
-                        ? (_isUploading ? null : _onSaveAndSendMemorandum)
-                        : (_isUploading ? null : _onSaveAndSendActa),
-                    child: AnimatedContainer(
-                      duration: const Duration(milliseconds: 300),
-                      height: 60,
-                      width: double.infinity,
-                      decoration: BoxDecoration(
-                        color: _isUploading
-                            ? Colors.grey
-                            : TColors.appMainDarkColor,
-                        borderRadius: BorderRadius.circular(20),
-                      ),
-                      child: Center(
-                        child: _isUploading
-                            ? const SizedBox(
-                                height: 25,
-                                width: 25,
-                                child: CircularProgressIndicator(
-                                  color: Colors.white,
-                                  strokeWidth: 3,
-                                ),
-                              )
-                            : Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  const Icon(
-                                    Icons.send_outlined,
-                                    color: TColors.white,
-                                    size: 20,
-                                  ),
-                                  const SizedBox(width: 10),
-                                  Text(
-                                    isSelected
-                                        ? 'Guardar y Enviar Memorandum'
-                                        : 'Guardar y Enviar Acta',
-                                    style: TextStyle(
-                                      color: TColors.white,
-                                      fontSize: 20,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
+              ],
             );
           },
         ),
@@ -421,75 +471,21 @@ class _RegisterMinutesMemosScreenState
     );
   }
 
-  Future<dynamic> _showUploadedSuccessfully(BuildContext context) {
-    return showDialog(
+  Future<void> _showParticipantsDialog() async {
+    FocusScope.of(context).unfocus();
+    final result = await showDialog<List<SocioEntity>>(
       context: context,
-      builder: (context) {
-        return AlertDialog(
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(24),
-          ),
-          contentPadding: const EdgeInsets.symmetric(
-            horizontal: 24,
-            vertical: 28,
-          ),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              const Icon(
-                Icons.check_circle_rounded,
-                color: TColors.appMainDarkColor,
-                size: 90,
-              ),
-              const SizedBox(height: 20),
-              const Text(
-                '¡Éxito!',
-                textAlign: TextAlign.center,
-                style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-              ),
-              const SizedBox(height: 12),
-              const Text(
-                'Se subió correctamente',
-                textAlign: TextAlign.center,
-                style: TextStyle(fontSize: 16, color: TColors.appMainTextColor),
-              ),
-              const SizedBox(height: 28),
-              SizedBox(
-                width: double.infinity,
-                height: 50,
-                child: ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: TColors.appMainDarkColor,
-                    foregroundColor: TColors.white,
-                    elevation: 4,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(14),
-                    ),
-                  ),
-                  onPressed: () {
-                    context.router.popUntil((route) => route.isFirst);
-                    setState(() {
-                      _isUploading = false;
-
-                      titleController.clear();
-                      placecontroller.clear();
-                      descriptionController.clear();
-                      destinataryController.clear();
-                      _listParticipants.clear();
-                      _selectedFiles.clear();
-                    });
-                  },
-                  child: const Text(
-                    'Aceptar',
-                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                  ),
-                ),
-              ),
-            ],
-          ),
-        );
-      },
+      builder: (_) => BlocProvider.value(
+        value: _blocRegister,
+        child: ParticipantsDialog(
+          initialSelected: _listParticipants,
+          singleSelect: isSelected,
+        ),
+      ),
     );
+    if (result != null) {
+      setState(() => _listParticipants = result);
+    }
   }
 
   Wrap _listOfParticipantMinutes() {
@@ -500,40 +496,36 @@ class _RegisterMinutesMemosScreenState
       children: _listParticipants.map((participant) {
         return Container(
           padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
-
           decoration: BoxDecoration(
             color: Colors.blue,
 
             borderRadius: BorderRadius.circular(20),
           ),
-
           child: Row(
             mainAxisSize: MainAxisSize.min,
 
             children: [
-              Text(participant, style: const TextStyle(color: Colors.white)),
-
+              Text(
+                participant.fullName,
+                style: const TextStyle(color: Colors.white),
+              ),
               const SizedBox(width: 5),
-
               GestureDetector(
                 onTap: () {
                   setState(() {
-                    _listParticipants.remove(participant);
+                    _listParticipants.removeWhere(
+                      (s) => s.memberId == participant.memberId,
+                    );
                   });
                 },
-
                 child: Container(
                   padding: const EdgeInsets.all(2),
-
                   decoration: BoxDecoration(
                     color: Colors.red,
-
                     borderRadius: BorderRadius.circular(20),
                   ),
-
                   child: const Icon(
                     Icons.delete_forever_outlined,
-
                     color: Colors.white,
                     size: 15,
                   ),
@@ -568,38 +560,23 @@ class _RegisterMinutesMemosScreenState
   }
 
   void _showError(String msg) {
-  ScaffoldMessenger.of(context).showSnackBar(
-    SnackBar(
-      behavior: SnackBarBehavior.floating,
-      margin: const EdgeInsets.all(16),
-      backgroundColor: Colors.red.shade600,
-      elevation: 6,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(14),
-      ),
-      content: Row(
-        children: [
-          const Icon(
-            Icons.error_outline_rounded,
-            color: Colors.white,
-          ),
-
-          const SizedBox(width: 12),
-
-          Expanded(
-            child: Text(
-              msg,
-              style: const TextStyle(
-                color: Colors.white,
-                fontWeight: FontWeight.w500,
-              ),
-            ),
-          ),
-        ],
-      ),
-    ),
-  );
-}
+    CustomAlert.show(
+      context,
+      title: 'Error',
+      message: msg,
+      type: AlertType.error,
+    );
+    context.router.back();
+  }
+   void _showError1(String msg) {
+    CustomAlert.show(
+      context,
+      title: 'Error',
+      message: msg,
+      type: AlertType.error,
+    );
+    context.router.back();
+  }
 
   Widget _buildFilePreview() {
     return Column(
@@ -668,7 +645,12 @@ class _RegisterMinutesMemosScreenState
       }
     } catch (e) {
       debugPrint("Error al seleccionar imagen: $e");
-      _showError('No se Pudo Accede a la Camara o Galeria');
+       CustomAlert.show(
+      context,
+      title: 'Error',
+      message: 'No se Pudo Accede a la Camara o Galeria',
+      type: AlertType.error,
+    );
     }
   }
 
@@ -753,20 +735,21 @@ class _RegisterMinutesMemosScreenState
 
   Future<void> _onSaveAndSendMemorandum() async {
     if (!_formTitleKey.currentState!.validate()) {
-      _showError("El titulo es obligatorio.");
+      
+      _showError1("El titulo es obligatorio.");
       return;
     }
-    if (!_formDestinataryKey.currentState!.validate()) {
-      _showError("El destinatario es obligatorio para memorandos.");
+    if (_listParticipants.isEmpty) {
+      _showError1("El destinatario es obligatorio para memorandos.");
       return;
     }
     if (!_formDescriptionKey.currentState!.validate()) {
-      _showError("Debes agregar la descripcion.");
+      _showError1("Debes agregar la descripcion.");
       return;
     }
 
     if (_selectedFiles.isEmpty) {
-      _showError("Por favor, selecciona al menos un archivo.");
+      _showError1("Por favor, selecciona al menos un archivo.");
       return;
     }
 
@@ -776,8 +759,8 @@ class _RegisterMinutesMemosScreenState
       title: titleController.text,
       contenido: descriptionController.text,
       date: _selectedDate,
-      destinatary: destinataryController.text,
-      destinataryId: 'a83c6910-154d-4d2b-b58f-97c4b448259b',
+      destinatary: _listParticipants.first.fullName,
+      destinataryId: _listParticipants.first.memberId,
       attachmentIds: _selectedFiles.map((file) => file.path).toList(),
     );
     _blocRegister.add(
@@ -787,24 +770,24 @@ class _RegisterMinutesMemosScreenState
 
   Future<void> _onSaveAndSendActa() async {
     if (!_formTitleKey.currentState!.validate()) {
-      _showError("El titulo es obligatorio.");
+      _showError1("El titulo es obligatorio.");
       return;
     }
     if (!_formPlaceKey.currentState!.validate()) {
-      _showError("El lugar es obligatorio para actas.");
+      _showError1("El lugar es obligatorio para actas.");
       return;
     }
     if (_listParticipants.isEmpty) {
-      _showError("Agrega al menos un participante para actas.");
+      _showError1("Agrega al menos un participante para actas.");
       return;
     }
     if (!_formDescriptionKey.currentState!.validate()) {
-      _showError("Debes agregar la descripcion.");
+      _showError1("Debes agregar la descripcion.");
       return;
     }
 
     if (_selectedFiles.isEmpty) {
-      _showError("Por favor, selecciona al menos un archivo.");
+      _showError1("Por favor, selecciona al menos un archivo.");
       return;
     }
     setState(() => _isUploading = true);
@@ -816,9 +799,10 @@ class _RegisterMinutesMemosScreenState
       place: placecontroller.text,
       participants: _listParticipants
           .map(
-            (participante) => ParticipantEntity(
-              fullName: participante,
-              rol: 'rol',
+            (socio) => ParticipantEntity(
+              memberId: socio.memberId,
+              fullName: socio.fullName,
+              rol: null,
               attendanceStatus: 'PRESENTE',
             ),
           )
@@ -998,45 +982,68 @@ class _RegisterMinutesMemosScreenState
     );
   }
 
-  ListView _selectOptionRegister() {
-    return ListView.builder(
-      scrollDirection: Axis.horizontal,
-      itemCount: typeRegister.length,
-      itemBuilder: (BuildContext context, int index) {
-        final isSelectedbutton = _isOptionSelected == index;
-        return GestureDetector(
-          onTap: () {
-            setState(() {
-              _isOptionSelected = index;
-              type = index;
-              if (!isSelectedbutton) {
-                isSelected = !isSelected;
-              }
-            });
-          },
-          child: AnimatedContainer(
-            width: 140,
-            margin: EdgeInsets.only(left: 5),
-            padding: EdgeInsets.symmetric(horizontal: 30),
-            duration: Duration(milliseconds: 300),
-            decoration: BoxDecoration(
-              color: isSelectedbutton
-                  ? TColors.appMainDarkColor
-                  : Colors.transparent,
-              borderRadius: BorderRadius.circular(10),
-            ),
-            child: Center(
-              child: Text(
-                typeRegister[index],
-                style: TextStyle(
-                  color: isSelectedbutton ? TColors.white : TColors.textPrimary,
-                  fontWeight: FontWeight.bold,
+  Widget _selectOptionRegister() {
+    final icons = [Icons.article_outlined, Icons.email_outlined];
+    return Container(
+      height: 52,
+      padding: const EdgeInsets.all(4),
+      decoration: BoxDecoration(
+        color: const Color(0xFFF0F2F5),
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Row(
+        children: List.generate(typeRegister.length, (index) {
+          final isActive = _isOptionSelected == index;
+          return Expanded(
+            child: GestureDetector(
+              onTap: () {
+                setState(() {
+                  _isOptionSelected = index;
+                  type = index;
+                  isSelected = index == 1;
+                });
+              },
+              child: AnimatedContainer(
+                duration: const Duration(milliseconds: 200),
+                decoration: BoxDecoration(
+                  color: isActive ? TColors.appMainDarkColor : Colors.transparent,
+                  borderRadius: BorderRadius.circular(9),
+                  boxShadow: isActive
+                      ? [
+                          BoxShadow(
+                            color: TColors.appMainDarkColor.withValues(alpha: 0.25),
+                            blurRadius: 6,
+                            offset: const Offset(0, 2),
+                          ),
+                        ]
+                      : null,
+                ),
+                child: Center(
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(
+                        icons[index],
+                        size: 16,
+                        color: isActive ? Colors.white : const Color(0xFF9CA3AF),
+                      ),
+                      const SizedBox(width: 6),
+                      Text(
+                        typeRegister[index],
+                        style: TextStyle(
+                          color: isActive ? Colors.white : const Color(0xFF9CA3AF),
+                          fontWeight: isActive ? FontWeight.w600 : FontWeight.w500,
+                          fontSize: 14,
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ),
-          ),
-        );
-      },
+          );
+        }),
+      ),
     );
   }
 }
