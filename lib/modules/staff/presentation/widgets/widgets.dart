@@ -1,0 +1,1 @@
+export 'package:front_gestion_minera/modules/staff/presentation/widgets/worker_card_widget.dart';
