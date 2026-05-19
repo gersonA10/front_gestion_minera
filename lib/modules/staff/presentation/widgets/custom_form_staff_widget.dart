@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 import '../../../../utils/constants/color.constant.dart';
 
@@ -8,6 +9,10 @@ class CustomFormStaffWidget extends StatelessWidget {
   final String hint;
   final String extraText;
   final TextEditingController controller;
+  final bool isOnlyRead;
+  final VoidCallback? onTap;
+  final TextInputType keyboradtype;
+  final List<TextInputFormatter>? inputFormatters;
   const CustomFormStaffWidget({
     super.key,
     required this.icon,
@@ -15,6 +20,10 @@ class CustomFormStaffWidget extends StatelessWidget {
     required this.hint,
     this.extraText = '',
     required this.controller,
+    this.isOnlyRead = false,
+    this.onTap,
+    this.keyboradtype = TextInputType.text, 
+    this.inputFormatters,
   });
 
   @override
@@ -24,6 +33,7 @@ class CustomFormStaffWidget extends StatelessWidget {
         Row(
           children: [
             Icon(icon),
+            const SizedBox(width: 7),
             Text(
               titleform,
               style: TextStyle(
@@ -33,8 +43,17 @@ class CustomFormStaffWidget extends StatelessWidget {
             ),
           ],
         ),
-        TextField(
+        TextFormField(
           controller: controller,
+          validator: (value) {
+            if (value == null || value.isEmpty) {
+              return 'Campo requerido';
+            }
+            return null;
+          },
+          readOnly: isOnlyRead,
+          keyboardType: keyboradtype,
+          inputFormatters: inputFormatters,
           decoration: InputDecoration(
             hintText: hint,
             hintStyle: TextStyle(
@@ -52,6 +71,7 @@ class CustomFormStaffWidget extends StatelessWidget {
               ),
             ),
           ),
+          onTap: onTap,
         ),
       ],
     );
