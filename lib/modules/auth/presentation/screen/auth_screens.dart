@@ -123,16 +123,15 @@ class _AuthScreenState extends State<AuthScreen> {
     } else if (role == 'jefe_maquinas') {
       context.router.replaceAll([const HomeMachinaryRoute()]);
     } else if (role == 'jefe_campamento') {
-      context.router.replaceAll([ const HomeDashboardCampRoute()]);
+      context.router.replaceAll([const HomeDashboardCampRoute()]);
     } else if (role == 'actas') {
-      context.router.replaceAll([ const MinutesMemosMainRoute()]);
+      context.router.replaceAll([const MinutesMemosMainRoute()]);
     } else if (role == 'jefe_personal') {
-      context.router.replaceAll([ const RegisterStaffRoute()]);
+      context.router.replaceAll([const StaffMainRoute()]);
     }
   }
 
-  
-//cambiado 
+  //cambiado
   /// Muestra el dialog para activar la huella tras un login exitoso con formulario.
   Future<void> _offerBiometricSetup(String role) async {
     final label = _isFaceId ? 'Face ID' : 'huella dactilar';
@@ -413,7 +412,7 @@ class _AuthScreenState extends State<AuthScreen> {
                               onPressed: state is AuthLoading
                                   ? null
                                   : () {
-                                    FocusScope.of(context).unfocus();
+                                      FocusScope.of(context).unfocus();
                                       _loginWithBiometric = false;
                                       context.read<AuthBloc>().add(
                                         AuthDataEvent(

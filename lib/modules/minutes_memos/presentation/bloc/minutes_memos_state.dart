@@ -4,24 +4,26 @@ sealed class MinutesMemosState {}
 
 class MinutesMemosInitial extends MinutesMemosState {}
 
-class ActasCountLoading extends MinutesMemosState {}
+class ActasMemoCountLoading extends MinutesMemosState {}
 
-class ActasCountLoaded extends MinutesMemosState {
-  final MemosCountEntity count;
-  ActasCountLoaded(this.count);
+class ActasMemoCountLoaded extends MinutesMemosState {
+  final MemosCountEntity memoscount;
+  final ActasCountEntity actasCount;
+  ActasMemoCountLoaded(this.memoscount, this.actasCount);
 }
 
-class ActasCountError extends MinutesMemosState {
+class ActasMemoCountError extends MinutesMemosState {
   final String message;
-  ActasCountError(this.message);
+  ActasMemoCountError(this.message);
 }
 
 class MemosCountLoading extends MinutesMemosState {}
 
-class MemosCountLoaded extends MinutesMemosState {
-  final MemosCountEntity count;
-  MemosCountLoaded(this.count);
-}
+// class MemosCountLoaded extends MinutesMemosState {
+//   final MemosCountEntity MemoAcount; 
+//   final ActasCountEntity Actascount;
+//   MemosCountLoaded(this.MemoAcount, this.Actascount);
+// }
 
 class MemosCountError extends MinutesMemosState {
   final String message;
@@ -56,7 +58,9 @@ class ActasError extends MinutesMemosState {
 
 class CreateActasLoading extends MinutesMemosState {}
 
-class CreateActasSucces extends MinutesMemosState {}
+class CreateActasSucces extends MinutesMemosState {
+  
+}
 
 class CreateActasError extends MinutesMemosState {
   final String message;
@@ -84,4 +88,29 @@ class MemorandumDetailError extends MinutesMemosState {
   final String message;
 
   MemorandumDetailError(this.message);
+}
+
+class ActaDetailLoading extends MinutesMemosState {}
+
+class ActaDetailLoaded extends MinutesMemosState {
+  final ActaDetailEntity acta;
+  ActaDetailLoaded(this.acta);
+}
+
+class ActaDetailError extends MinutesMemosState {
+  final String message;
+  ActaDetailError(this.message);
+}
+
+class SociosLoading extends MinutesMemosState {}
+
+class SociosLoaded extends MinutesMemosState {
+  final List<SocioEntity> socios;
+  final bool hasMore;
+  SociosLoaded(this.socios, {this.hasMore = false});
+}
+
+class SociosError extends MinutesMemosState {
+  final String message;
+  SociosError(this.message);
 }

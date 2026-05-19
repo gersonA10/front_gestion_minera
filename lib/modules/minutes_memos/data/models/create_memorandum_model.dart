@@ -1,4 +1,4 @@
-import 'package:front_gestion_minera/modules/minutes_memos/domain/entity/entity.dart';
+import 'package:front_gestion_minera/modules/minutes_memos/domain/entity/create_memorandum_entity.dart';
 import 'package:intl/intl.dart';
 
 class CreateMemorandumModel extends CreateMemorandumEntity {
