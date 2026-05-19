@@ -21,6 +21,8 @@ class _RegisterStaffScreenState extends State<RegisterStaffScreen> {
   final _ciController = TextEditingController();
   final _dateController = TextEditingController();
   final _paymentController = TextEditingController();
+  final _departamentController = TextEditingController();
+  final _shiftController = TextEditingController();
   final _keyRegisterUser = GlobalKey<FormState>();
 
   Future<void> _selectDate(BuildContext context) async {
@@ -151,13 +153,9 @@ class _RegisterStaffScreenState extends State<RegisterStaffScreen> {
                           const SizedBox(height: 15),
                           CustomFormStaffWidget(
                             icon: Icons.contact_emergency_outlined,
-                            titleform: 'Ci / Carnet Identidad',
-                            hint: 'Ingrese el Carnet',
+                            titleform: 'DNI / Documento de Identidad',
+                            hint: 'Ingrese su documento',
                             controller: _ciController,
-                            keyboradtype: TextInputType.number,
-                            inputFormatters: [
-                              FilteringTextInputFormatter.digitsOnly,
-                            ],
                           ),
                           const SizedBox(height: 15),
                           CustomFormStaffWidget(
@@ -167,6 +165,20 @@ class _RegisterStaffScreenState extends State<RegisterStaffScreen> {
                             controller: _dateController,
                             isOnlyRead: true,
                             onTap: () => _selectDate(context),
+                          ),
+                          const SizedBox(height: 15),                          
+                          CustomFormStaffWidget(
+                            icon: Icons.settings,
+                            titleform: 'Departamento',
+                            hint: 'Ingrese Departamento',
+                            controller: _departamentController,
+                          ),
+                          const SizedBox(height: 15),                                                    
+                          CustomFormStaffWidget(
+                            icon: Icons.access_time,
+                            titleform: 'Turno',
+                            hint: 'Ingrese turno - Ej: "7x7 Rotativo"',
+                            controller: _shiftController,
                           ),
                           const SizedBox(height: 15),
                           const Row(
