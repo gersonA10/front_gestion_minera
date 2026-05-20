@@ -1,6 +1,14 @@
 part of 'staff_bloc.dart';
 
-@immutable
 sealed class StaffState {}
 
-final class StaffInitial extends StaffState {}
+class StaffInitial extends StaffState {}
+
+class RegisterEmployeesLoading extends StaffState {}
+
+class RegisterEmployeesSuccess extends StaffState {}
+
+class RegisterEmployeesError extends StaffState {
+  final String message;
+  RegisterEmployeesError(this.message);
+}
