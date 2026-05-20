@@ -6,6 +6,7 @@ import 'package:front_gestion_minera/modules/staff/domain/entity/entity.dart';
 import 'package:front_gestion_minera/modules/staff/presentation/bloc/staff_bloc.dart';
 import 'package:intl/intl.dart';
 
+import '../../../../core/widgets/custom_alert_widget.dart';
 import '../../../../utils/constants/color.constant.dart';
 import '../widgets/widgets.dart';
 
@@ -27,7 +28,7 @@ class _RegisterStaffScreenState extends State<RegisterStaffScreen> {
   final _departmentController = TextEditingController();
   final _shiftController = TextEditingController();
   final _keyRegisterUser = GlobalKey<FormState>();
-
+  bool _isuploading = false;
   late final StaffBloc _staffBloc;
 
   Future<void> _selectDate(BuildContext context) async {
@@ -64,7 +65,19 @@ class _RegisterStaffScreenState extends State<RegisterStaffScreen> {
           title: Text('Registro de Personal'),
         ),
         body: BlocConsumer<StaffBloc, StaffState>(
-          listener: (context, state) {},
+          listener: (context, state) {
+            if (state is RegisterEmployeesSuccess) {
+              CustomAlert.show(
+                context,
+                title: 'Exito',
+                message: 'El Empleado a sido Registrado Exitosamente',
+                type: AlertType.success,
+              );
+              setState(() {
+                _isuploading = false;
+              });
+            }
+          },
           builder: (context, state) {
             return Padding(
               padding: EdgeInsetsGeometry.all(15),
@@ -263,42 +276,58 @@ class _RegisterStaffScreenState extends State<RegisterStaffScreen> {
                             child: Column(
                               children: [
                                 GestureDetector(
-                                  onTap: () {
-                                    if (!_keyRegisterUser.currentState!
-                                        .validate()) {
-                                      return;
-                                    }
-                                    final employeed = RegisterEmployeesEntity(
-                                      fullName: _fullNameController.text,
-                                      nationalId: _dniController.text,
-                                      position: _opcionseleccionada.toString(),
-                                      department: _departmentController.text,
-                                      baseMonthlySalary:
-                                          double.tryParse(
-                                            _paymentController.text,
-                                          ) ??
-                                          0.0,
-                                      shiftType: _shiftController.text,
-                                      hiredDate: DateFormat('yyyy-MM-dd')
-                                          .format(
-                                            DateFormat(
-                                              'MM/dd/yyyy',
-                                            ).parse(_dateController.text),
-                                          ),
-                                      seniorityLevel: 'Junior',
-                                      profilePhotoUrl: null,
-                                    );
-                                    _staffBloc.add(
-                                      RegisterEmployeesEvent(
-                                        employeed: employeed,
-                                      ),
-                                    );
-                                    
-                                    _fullNameController.clear();
-                                    _dniController.clear();
-                                    _dateController.clear();
-                                    _paymentController.clear();
-                                  },
+                                  onTap: _isuploading
+                                      ? null
+                                      : () {
+                                          if (!_keyRegisterUser.currentState!
+                                              .validate()) {
+                                            return;
+                                          }
+                                          setState(() {
+                                            _isuploading = true;
+                                          });
+                                          final employeed =
+                                              RegisterEmployeesEntity(
+                                                fullName:
+                                                    _fullNameController.text,
+                                                nationalId: _dniController.text,
+                                                position: _opcionseleccionada
+                                                    .toString(),
+                                                department:
+                                                    _departmentController.text,
+                                                baseMonthlySalary:
+                                                    double.tryParse(
+                                                      _paymentController.text,
+                                                    ) ??
+                                                    0.0,
+                                                shiftType:
+                                                    _shiftController.text,
+                                                hiredDate:
+                                                    DateFormat(
+                                                      'yyyy-MM-dd',
+                                                    ).format(
+                                                      DateFormat(
+                                                        'MM/dd/yyyy',
+                                                      ).parse(
+                                                        _dateController.text,
+                                                      ),
+                                                    ),
+                                                seniorityLevel: 'Junior',
+                                                profilePhotoUrl: null,
+                                              );
+                                          _staffBloc.add(
+                                            RegisterEmployeesEvent(
+                                              employeed: employeed,
+                                            ),
+                                          );
+
+                                          _fullNameController.clear();
+                                          _dniController.clear();
+                                          _dateController.clear();
+                                          _paymentController.clear();
+                                          _departmentController.clear();
+                                          _shiftController.clear();
+                                        },
                                   child: Container(
                                     width: double.infinity,
                                     height: 50,
@@ -306,28 +335,39 @@ class _RegisterStaffScreenState extends State<RegisterStaffScreen> {
                                       horizontal: 20,
                                     ),
                                     decoration: BoxDecoration(
-                                      color: TColors.appMainDarkColor,
+                                      color: _isuploading
+                                          ? TColors.appMainDarkColor.withValues(
+                                              alpha: 0.5,
+                                            )
+                                          : TColors.appMainDarkColor,
                                       borderRadius: BorderRadius.circular(20),
                                     ),
-                                    child: const Row(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.center,
-                                      children: [
-                                        Icon(
-                                          Icons.save_outlined,
-                                          color: TColors.white,
-                                        ),
-                                        SizedBox(width: 20),
-                                        Text(
-                                          'Guardar Trabajador',
-                                          style: TextStyle(
-                                            color: TColors.white,
-                                            fontWeight: FontWeight.bold,
-                                            fontSize: 17,
+                                    child: _isuploading
+                                        ? const Center(
+                                            child: CircularProgressIndicator(
+                                              color: TColors.white,
+                                              strokeWidth: 2.5,
+                                            ),
+                                          )
+                                        : const Row(
+                                            mainAxisAlignment:
+                                                MainAxisAlignment.center,
+                                            children: [
+                                              Icon(
+                                                Icons.save_outlined,
+                                                color: TColors.white,
+                                              ),
+                                              SizedBox(width: 20),
+                                              Text(
+                                                'Guardar Trabajador',
+                                                style: TextStyle(
+                                                  color: TColors.white,
+                                                  fontWeight: FontWeight.bold,
+                                                  fontSize: 17,
+                                                ),
+                                              ),
+                                            ],
                                           ),
-                                        ),
-                                      ],
-                                    ),
                                   ),
                                 ),
                                 const SizedBox(height: 15),
