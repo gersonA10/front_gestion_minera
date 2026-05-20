@@ -2,7 +2,7 @@ class RegisterEmployeesEntity {
   final String fullName;
   final String nationalId;
   final String position;
-  final String departament;
+  final String department;
   final double baseMonthlySalary;
   final String shiftType;
   final String hiredDate;
@@ -13,7 +13,7 @@ class RegisterEmployeesEntity {
     required this.fullName,
     required this.nationalId,
     required this.position,
-    required this.departament,
+    required this.department,
     required this.baseMonthlySalary,
     required this.shiftType,
     required this.hiredDate,

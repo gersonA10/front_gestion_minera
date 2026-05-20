@@ -10,11 +10,10 @@ class StaffDatasource {
 
   Future<void> registerEmployees(RegisterEmployeesEntity employees) async {
     final model = RegisterEmployeesModel.fromEntity(employees);
-    await apiClient.postFormData(
+    await apiClient.post(
       '/api/hr/employees',
       operationName: 'registerEmployeed',
       data: model.toJson(),
-      files: []
     );
   }
 }

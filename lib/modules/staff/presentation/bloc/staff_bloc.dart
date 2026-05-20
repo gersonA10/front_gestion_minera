@@ -1,9 +1,8 @@
 import 'dart:async';
 
-import 'package:bloc/bloc.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:front_gestion_minera/modules/staff/domain/entity/entity.dart';
 import 'package:front_gestion_minera/modules/staff/domain/repositories/staff_repository.dart';
-import 'package:meta/meta.dart';
 
 import '../../../../core/networking/base_api_exception.dart';
 import '../../../../utils/error.dart';
