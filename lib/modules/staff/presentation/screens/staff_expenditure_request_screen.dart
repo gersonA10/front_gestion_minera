@@ -12,6 +12,9 @@ class StaffExpenditureRequestScreen extends StatefulWidget {
 
 class _StaffExpenditureRequestScreenState
     extends State<StaffExpenditureRequestScreen> {
+  final double _totalAmount = 20000;
+  final int _totalEmployeed = 10;
+  final double _amountEmployeed = 2000;
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -53,7 +56,7 @@ class _StaffExpenditureRequestScreenState
                     ),
                   ),
                   Text(
-                    '20.000,00 BS',
+                    '$_totalAmount BS',
                     style: TextStyle(fontSize: 25, fontWeight: FontWeight.bold),
                   ),
                   const SizedBox(height: 10),
@@ -64,7 +67,7 @@ class _StaffExpenditureRequestScreenState
                     children: [
                       const Text('Trabajadores Activos'),
                       const Spacer(),
-                      Text('10', style: TextStyle(fontWeight: FontWeight.bold)),
+                      Text('$_totalEmployeed', style: TextStyle(fontWeight: FontWeight.bold)),
                     ],
                   ),
                   Row(
@@ -72,7 +75,7 @@ class _StaffExpenditureRequestScreenState
                       const Text('Monto Por Trabajador'),
                       const Spacer(),
                       Text(
-                        '2.000,00 Bs',
+                        '$_amountEmployeed Bs',
                         style: TextStyle(fontWeight: FontWeight.bold),
                       ),
                     ],
