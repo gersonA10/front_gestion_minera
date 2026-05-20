@@ -32,6 +32,6 @@ class InjectorContainer {
     initAdminContainer(getIt);
     initMachineryContainer(getIt);
     initMinutesMemosContainer(getIt);
-    //initStaffContainer(getIt);
+    initStaffContainer(getIt);
   }
 }

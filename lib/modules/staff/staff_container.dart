@@ -5,7 +5,7 @@ import 'data/repositories/staff_repository_impl.dart';
 import 'domain/repositories/staff_repository.dart';
 import 'presentation/bloc/staff_bloc.dart';
 
-/*void initStaffContainer(GetIt getIt) {
+void initStaffContainer(GetIt getIt) {
   getIt.registerLazySingleton(
     () => StaffDatasource(apiClient: getIt()),
   );
@@ -15,4 +15,4 @@ import 'presentation/bloc/staff_bloc.dart';
   );
 
   getIt.registerFactory(() => StaffBloc(repository: getIt()));
-}*/
+}
