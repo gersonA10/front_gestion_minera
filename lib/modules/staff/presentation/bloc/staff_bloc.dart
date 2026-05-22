@@ -9,9 +9,6 @@ part 'staff_state.dart';
 
 class StaffBloc extends Bloc<StaffEvent, StaffState> {
   final StaffRepository repository;
-  int totalTodos = 0;
-  int totalActivos = 0;
-
   StaffBloc({required this.repository}) : super(StaffInitial()) {
     on<GetEmployeesEvent>(_onGetEmployees);
 

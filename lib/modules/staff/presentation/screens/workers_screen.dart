@@ -21,6 +21,7 @@ class _WorkersScreenState extends State<WorkersScreen> {
   int selectedTab = 0;
   late final StaffBloc _bloc;
   String _search = '';
+  int _totalGeneral = 0;
   final TextEditingController _searchController = TextEditingController();
 
   Future<void> _loadUserData() async {
@@ -286,45 +287,55 @@ class _WorkersScreenState extends State<WorkersScreen> {
   }
 
   Widget _buildTabs() {
-    return BlocBuilder<StaffBloc, StaffState>(
-      builder: (_, state) {
-        final currentState = state is EmployeesPageLoading
-            ? state.previousState
-            : state;
+  return BlocBuilder<StaffBloc, StaffState>(
+    builder: (_, state) {
+      final currentState = state is EmployeesPageLoading
+          ? state.previousState
+          : state;
 
-        final total = currentState is EmployeesLoaded ? currentState.total : 0;
+      if (currentState is EmployeesLoaded) {
+        // Solo actualizar el total si estamos en "Todos"
+        if (currentState.currentStatus == null) {
+          _totalGeneral = currentState.total;
+        }
+      }
 
-        return Padding(
-          padding: const EdgeInsets.only(top: 14),
-          child: Column(
-            children: [
-              Row(
-                children: [
-                  Expanded(
-                    child: _buildTab(
-                      title: 'Todos',
-                      count: total.toString(),
-                      index: 0,
-                    ),
+      return Padding(
+        padding: const EdgeInsets.only(top: 14),
+        child: Column(
+          children: [
+            Row(
+              children: [
+                Expanded(
+                  child: _buildTab(
+                    title: 'Todos',
+                    count: _totalGeneral.toString(),
+                    index: 0,
                   ),
+                ),
 
-                  Expanded(child: _buildTab(title: 'Activos', index: 1)),
-                ],
-              ),
+                Expanded(
+                  child: _buildTab(
+                    title: 'Activos',
+                    index: 1,
+                  ),
+                ),
+              ],
+            ),
 
-              const SizedBox(height: 2),
+            const SizedBox(height: 2),
 
-              Container(
-                width: double.infinity,
-                height: 1,
-                color: TColors.white,
-              ),
-            ],
-          ),
-        );
-      },
-    );
-  }
+            Container(
+              width: double.infinity,
+              height: 1,
+              color: TColors.white,
+            ),
+          ],
+        ),
+      );
+    },
+  );
+}
 
   Widget _buildPagination() {
     return BlocBuilder<StaffBloc, StaffState>(
@@ -354,7 +365,7 @@ class _WorkersScreenState extends State<WorkersScreen> {
                     _bloc.add(
                       GetEmployeesEvent(
                         page: currentPage - 1,
-                        search: _search,
+                        search: _search,                        
                         status: selectedTab == 1 ? 'ACTIVO' : null,
                       ),
                     );
