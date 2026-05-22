@@ -2,6 +2,8 @@ import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:front_gestion_minera/utils/constants/color.constant.dart';
 
+import '../../../../utils/assets.dart';
+
 @RoutePage()
 class EmployeeEntryRegisterScreen extends StatefulWidget {
   final String id;
@@ -17,7 +19,9 @@ class _EmployeeEntryRegisterScreenState
   TimeOfDay? _selectedTime;
   final _hourController = TextEditingController();
   final _observationController = TextEditingController();
-  bool isMorning = false;
+  final _keyForm = GlobalKey<FormState>();
+  static const String _fallbackImage =
+      'https://siu.edu.bd/storage/uploaded/authority/male_1723030204.jpeg';
 
   Future<void> _selectTime(BuildContext context) async {
     final TimeOfDay? picked = await showTimePicker(
@@ -38,7 +42,6 @@ class _EmployeeEntryRegisterScreenState
   void initState() {
     super.initState();
     _hourController.text = '${TimeOfDay.now().hour}:${TimeOfDay.now().minute}';
-    isMorning = (TimeOfDay.now().hour < 12);
   }
 
   @override
@@ -66,13 +69,26 @@ class _EmployeeEntryRegisterScreenState
                     ),
                     child: Row(
                       children: [
-                        Container(
-                          padding: EdgeInsets.all(15),
-                          decoration: BoxDecoration(
+                        ClipRRect(
+                          borderRadius: BorderRadiusGeometry.circular(50),
+                          child: Container(
+                            width: 70,
+                            height: 70,
                             color: TColors.appBackgroundColor,
-                            borderRadius: BorderRadius.circular(50),
+                            child: FadeInImage.assetNetwork(
+                              placeholder: AssetImageApp.getIconLoading,
+                              image: _fallbackImage,
+                              fit: BoxFit.cover,
+                              imageErrorBuilder: (_, _, _) {
+                                return Center(
+                                  child: const Icon(
+                                    Icons.image_not_supported,
+                                    size: 30,
+                                  ),
+                                );
+                              },
+                            ),
                           ),
-                          child: Icon(Icons.person, size: 30),
                         ),
                         const SizedBox(width: 15),
                         Expanded(
@@ -136,7 +152,14 @@ class _EmployeeEntryRegisterScreenState
                           readOnly: true,
                           controller: _hourController,
                           decoration: InputDecoration(
-                            suffix: Text(isMorning ? 'AM' : 'PM'),
+                            suffix: Text(
+                              (int.parse(
+                                        _hourController.text.split(':').first,
+                                      ) <
+                                      12)
+                                  ? 'AM'
+                                  : 'PM',
+                            ),
                           ),
                           onTap: () async {
                             await _selectTime(context);
@@ -174,19 +197,23 @@ class _EmployeeEntryRegisterScreenState
                           ],
                         ),
                         const SizedBox(height: 15),
-                        TextFormField(
-                          maxLines: 3,
-                          validator: (value) {
-                            if (value == null || value.isEmpty) {
-                              return 'Rellene el campo';
-                            }
-                            return null;
-                          },
-                          maxLength: 500,
-                          controller: _observationController,
-                          decoration: InputDecoration(
-                            hintText: 'Ej: Ingreso con equipamiento propio....',
-                            hintStyle: TextStyle(color: TColors.grayText),
+                        Form(
+                          key: _keyForm,
+                          child: TextFormField(
+                            maxLines: 3,
+                            validator: (value) {
+                              if (value == null || value.isEmpty) {
+                                return 'Rellene el campo';
+                              }
+                              return null;
+                            },
+                            maxLength: 500,
+                            controller: _observationController,
+                            decoration: InputDecoration(
+                              hintText:
+                                  'Ej: Ingreso con equipamiento propio....',
+                              hintStyle: TextStyle(color: TColors.grayText),
+                            ),
                           ),
                         ),
                         const SizedBox(height: 15),
@@ -204,9 +231,15 @@ class _EmployeeEntryRegisterScreenState
             color: TColors.white,
             child: InkWell(
               onTap: () {
+                if (!_keyForm.currentState!.validate()) {
+                  return;
+                }
                 final resultado = {
                   "employee_id": widget.id,
-                  "assigned_shift": isMorning ? 'MAÑANA' : 'TARDE',
+                  "assigned_shift":
+                      (int.parse(_hourController.text.split(':').first) < 12)
+                      ? 'MAÑANA'
+                      : 'TARDE',
                   "check_in_time": _hourController.text,
                   "epp_data": {
                     "casco": true,
@@ -214,11 +247,12 @@ class _EmployeeEntryRegisterScreenState
                     "chaleco": true,
                     "orejeras": true,
                   },
-                  "observations": _observationController,
+                  "observations": _observationController.text,
                 };
                 print(resultado);
                 _observationController.clear();
-                _hourController.text = '${TimeOfDay.now().hour}:${TimeOfDay.now().minute}';
+                _hourController.text =
+                    '${TimeOfDay.now().hour}:${TimeOfDay.now().minute}';
               },
               child: Container(
                 height: 60,
