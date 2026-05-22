@@ -1,6 +1,11 @@
+import 'dart:io';
+
 import 'package:dotted_border/dotted_border.dart';
 import 'package:flutter/material.dart';
 import 'package:front_gestion_minera/utils/constants/color.constant.dart';
+import 'package:image_picker/image_picker.dart';
+
+import '../../../../core/widgets/custom_alert_widget.dart';
 
 class StaffExpenditureRequestScreen extends StatefulWidget {
   const StaffExpenditureRequestScreen({super.key});
@@ -15,12 +20,18 @@ class _StaffExpenditureRequestScreenState
   final double _totalAmount = 20000;
   final int _totalEmployeed = 10;
   final double _amountEmployeed = 2000;
+
+  final List<XFile> _pickedImages = [];
+  final int _maxFileSize = 10 * 1024 * 1024;
+  final ImagePicker _picker = ImagePicker();
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: TColors.white,
-      appBar: PreferredSize(preferredSize: const Size(double.infinity, 20),
-      child: AppBar(title: Text('Hacienda Municipal'))),
+      appBar: PreferredSize(
+        preferredSize: const Size(double.infinity, 20),
+        child: AppBar(title: Text('Hacienda Municipal')),
+      ),
       body: Padding(
         padding: EdgeInsets.all(20),
         child: ListView(
@@ -67,7 +78,10 @@ class _StaffExpenditureRequestScreenState
                     children: [
                       const Text('Trabajadores Activos'),
                       const Spacer(),
-                      Text('$_totalEmployeed', style: TextStyle(fontWeight: FontWeight.bold)),
+                      Text(
+                        '$_totalEmployeed',
+                        style: TextStyle(fontWeight: FontWeight.bold),
+                      ),
                     ],
                   ),
                   Row(
@@ -113,50 +127,89 @@ class _StaffExpenditureRequestScreenState
               options: RoundedRectDottedBorderOptions(
                 radius: Radius.circular(15),
                 color: TColors.appDisabledColor,
-
                 dashPattern: [6, 3],
                 strokeWidth: 1,
-                padding: EdgeInsets.zero,
+                padding: EdgeInsets.all(5),
               ),
-              child: GestureDetector(
-                onTap: () {
-                  
-                },
-                child: Container(
-                  height: 70,
-                  width: double.infinity,
-                  padding: EdgeInsets.symmetric(horizontal: 20),
-                  child: Row(
-                    children: [
-                      Container(
-                        padding: EdgeInsets.all(5),
-                        decoration: BoxDecoration(
-                          color: TColors.appMainDarkColor.withValues(
-                            alpha: 0.2,
+              child: _pickedImages.isNotEmpty
+                  ? Stack(
+                      children: [
+                        ClipRRect(
+                          borderRadius: BorderRadiusGeometry.circular(15),
+                          child: Image.file(
+                            File(_pickedImages.first.path),
+                            fit: BoxFit.cover,
                           ),
-                          borderRadius: BorderRadius.circular(7),
                         ),
-                        child: Icon(
-                          Icons.file_present_outlined,
-                          color: TColors.appMainDarkColor,
+                        Positioned(
+                          right: 8,
+                          top: 8,
+                          child: GestureDetector(
+                            onTap: () {
+                              setState(() {
+                                _pickedImages.clear();
+                              });
+                            },
+                            child: Container(
+                              padding: const EdgeInsets.all(6),
+                              decoration: const BoxDecoration(
+                                color: TColors.red,
+                                shape: BoxShape.circle,
+                              ),
+                              child: const Icon(
+                                Icons.delete_forever,
+                                color: TColors.white,
+                                size: 20,
+                              ),
+                            ),
+                          ),
                         ),
-                      ),
-                      const SizedBox(width: 5,),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          mainAxisAlignment: MainAxisAlignment.center,
+                      ],
+                    )
+                  : GestureDetector(
+                      onTap: () {
+                        _showPickerOptions();
+                      },
+                      child: Container(
+                        height: 70,
+                        width: double.infinity,
+                        padding: EdgeInsets.symmetric(horizontal: 20),
+                        child: Row(
                           children: [
-                            Text('Archivo.pdf',style: TextStyle(fontWeight: FontWeight.bold),),
-                            Text('Generado Automaticamente')
+                            Container(
+                              padding: EdgeInsets.all(5),
+                              decoration: BoxDecoration(
+                                color: TColors.appMainDarkColor.withValues(
+                                  alpha: 0.2,
+                                ),
+                                borderRadius: BorderRadius.circular(7),
+                              ),
+                              child: Icon(
+                                Icons.image,
+                                color: TColors.appMainDarkColor,
+                              ),
+                            ),
+                            const SizedBox(width: 5),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Text(
+                                    'Suba un fota de la Nomina',
+                                    style: TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                  Text('Requerido'),
+                                ],
+                              ),
+                            ),
+                            const Icon(Icons.remove_red_eye_outlined),
                           ],
                         ),
                       ),
-                      const Icon(Icons.remove_red_eye_outlined),
-                    ],
-                  ),
-                ),
-              ),
+                    ),
             ),
             const SizedBox(height: 15),
             Container(
@@ -210,5 +263,80 @@ class _StaffExpenditureRequestScreenState
         ),
       ),
     );
+  }
+
+  void _showPickerOptions() {
+    showModalBottomSheet(
+      context: context,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+      ),
+      builder: (BuildContext context) {
+        return SafeArea(
+          child: Wrap(
+            children: <Widget>[
+              const Padding(
+                padding: EdgeInsets.all(16.0),
+                child: Text(
+                  'Seleccionar evidencia',
+                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                ),
+              ),
+              ListTile(
+                leading: const Icon(
+                  Icons.photo_library,
+                  color: Color(0xFF295AF5),
+                ),
+                title: const Text('Elegir de la Galería'),
+                onTap: () {
+                  Navigator.of(context).pop();
+                  _pickImage(ImageSource.gallery);
+                },
+              ),
+              ListTile(
+                leading: const Icon(
+                  Icons.photo_camera,
+                  color: Color(0xFF295AF5),
+                ),
+                title: const Text('Tomar Foto'),
+                onTap: () {
+                  Navigator.of(context).pop();
+                  _pickImage(ImageSource.camera);
+                },
+              ),
+              const SizedBox(height: 60),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  Future<void> _pickImage(ImageSource source) async {
+    try {
+      final XFile? photo = await _picker.pickImage(
+        source: source,
+        imageQuality: 80,
+      );
+      if (photo == null) return;
+      int size = await photo.length();
+
+      if (size > _maxFileSize) {
+        if (!mounted) return;
+        CustomAlert.show(
+          context,
+          title: 'Error',
+          message: 'El archivo ${photo.path.split('/').last} supera los 10MB.',
+          type: AlertType.error,
+        );
+        return;
+      }
+      setState(() {
+        _pickedImages.clear();
+        _pickedImages.add(photo);
+      });
+    } catch (e) {
+      debugPrint("Error al procesar la imagen: $e");
+    }
   }
 }
