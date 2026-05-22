@@ -14,6 +14,24 @@ class EmployeeEntryRegisterScreen extends StatefulWidget {
 
 class _EmployeeEntryRegisterScreenState
     extends State<EmployeeEntryRegisterScreen> {
+  
+  TimeOfDay? _selectedTime;
+  final _hourController = TextEditingController();
+  final _observationController = TextEditingController();
+
+  Future<void> _selectTime(BuildContext context) async {
+    final TimeOfDay? picked = await showTimePicker(
+      context: context,
+      initialTime: TimeOfDay(hour: 7, minute: _selectedTime?.minute ?? 00),
+      initialEntryMode: TimePickerEntryMode.inputOnly
+    );
+    if (picked != null && picked != _selectedTime) {
+      setState(() {
+        _selectedTime = picked;
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -102,7 +120,14 @@ class _EmployeeEntryRegisterScreenState
                     ],
                   ),
                   const SizedBox(height: 15),
-                  TextFormField(decoration: InputDecoration(hintText: '07:00')),
+                  TextFormField(
+                    readOnly: true,
+                    decoration: InputDecoration(hintText: '07:00'),
+                    controller: _hourController,
+                    onTap: () {
+                      _selectTime(context);
+                    },
+                  ),
                   const SizedBox(height: 15),
                   const Text(
                     'Programado 07:00 AM',
