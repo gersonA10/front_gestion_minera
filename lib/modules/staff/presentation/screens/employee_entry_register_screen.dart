@@ -14,22 +14,31 @@ class EmployeeEntryRegisterScreen extends StatefulWidget {
 
 class _EmployeeEntryRegisterScreenState
     extends State<EmployeeEntryRegisterScreen> {
-  
   TimeOfDay? _selectedTime;
   final _hourController = TextEditingController();
   final _observationController = TextEditingController();
+  bool isMorning = false;
 
   Future<void> _selectTime(BuildContext context) async {
     final TimeOfDay? picked = await showTimePicker(
       context: context,
       initialTime: TimeOfDay(hour: 7, minute: _selectedTime?.minute ?? 00),
-      initialEntryMode: TimePickerEntryMode.inputOnly
+      initialEntryMode: TimePickerEntryMode.inputOnly,
     );
     if (picked != null && picked != _selectedTime) {
       setState(() {
         _selectedTime = picked;
+        _hourController.text =
+            '${picked.hour}:${picked.minute.toString().padLeft(2, '0')}';
       });
     }
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _hourController.text = '${TimeOfDay.now().hour}:${TimeOfDay.now().minute}';
+    isMorning = (TimeOfDay.now().hour < 12);
   }
 
   @override
@@ -40,142 +49,203 @@ class _EmployeeEntryRegisterScreenState
         title: Text('Registro de Ingreso'),
         backgroundColor: TColors.white,
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(18.0),
-        child: ListView(
-          children: [
-            Container(
-              padding: EdgeInsets.all(15),
-              width: double.infinity,
-              decoration: BoxDecoration(
-                color: TColors.white,
-                borderRadius: BorderRadius.circular(15),
-                border: Border.all(color: TColors.darkBackgroundAccount),
-              ),
-              child: Row(
+      body: Column(
+        children: [
+          Expanded(
+            child: Padding(
+              padding: const EdgeInsets.all(18.0),
+              child: ListView(
                 children: [
                   Container(
                     padding: EdgeInsets.all(15),
+                    width: double.infinity,
                     decoration: BoxDecoration(
-                      color: TColors.appBackgroundColor,
-                      borderRadius: BorderRadius.circular(50),
+                      color: TColors.white,
+                      borderRadius: BorderRadius.circular(15),
+                      border: Border.all(color: TColors.darkBackgroundAccount),
                     ),
-                    child: Icon(Icons.person, size: 30),
+                    child: Row(
+                      children: [
+                        Container(
+                          padding: EdgeInsets.all(15),
+                          decoration: BoxDecoration(
+                            color: TColors.appBackgroundColor,
+                            borderRadius: BorderRadius.circular(50),
+                          ),
+                          child: Icon(Icons.person, size: 30),
+                        ),
+                        const SizedBox(width: 15),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                'Carlos Rodriguez',
+                                style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 20,
+                                ),
+                              ),
+                              Text('Operador de mauinaria'),
+                              const SizedBox(height: 5),
+                              Container(
+                                padding: EdgeInsets.symmetric(horizontal: 10),
+                                decoration: BoxDecoration(
+                                  color: TColors.appBackgroundColor,
+                                  borderRadius: BorderRadius.circular(15),
+                                ),
+                                child: Text(
+                                  'ID: 65478921',
+                                  style: TextStyle(
+                                    color: TColors.appMainColor,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
-                  const SizedBox(width: 15),
-                  Expanded(
+                  const SizedBox(height: 15),
+                  Container(
+                    padding: EdgeInsets.all(15),
+                    width: double.infinity,
+                    decoration: BoxDecoration(
+                      color: TColors.white,
+                      borderRadius: BorderRadius.circular(15),
+                      border: Border.all(color: TColors.darkBackgroundAccount),
+                    ),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(
-                          'Carlos Rodriguez',
-                          style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 20,
-                          ),
-                        ),
-                        Text('Operador de mauinaria'),
-                        const SizedBox(height: 5),
-                        Container(
-                          padding: EdgeInsets.symmetric(horizontal: 10),
-                          decoration: BoxDecoration(
-                            color: TColors.appBackgroundColor,
-                            borderRadius: BorderRadius.circular(15),
-                          ),
-                          child: Text(
-                            'ID: 65478921',
-                            style: TextStyle(
+                        const Row(
+                          children: [
+                            Icon(
+                              Icons.access_time_outlined,
                               color: TColors.appMainColor,
-                              fontWeight: FontWeight.bold,
+                              size: 18,
                             ),
+                            SizedBox(width: 5),
+                            Text('Hora de Entrada'),
+                          ],
+                        ),
+                        const SizedBox(height: 15),
+                        TextFormField(
+                          readOnly: true,
+                          controller: _hourController,
+                          decoration: InputDecoration(
+                            suffix: Text(isMorning ? 'AM' : 'PM'),
+                          ),
+                          onTap: () async {
+                            await _selectTime(context);
+                          },
+                        ),
+                        const SizedBox(height: 15),
+                        const Text(
+                          'Programado 07:00 AM',
+                          style: TextStyle(color: TColors.appDisabledColor),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 20),
+                  Container(
+                    padding: EdgeInsets.all(15),
+                    width: double.infinity,
+                    decoration: BoxDecoration(
+                      color: TColors.white,
+                      borderRadius: BorderRadius.circular(15),
+                      border: Border.all(color: TColors.darkBackgroundAccount),
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Row(
+                          children: [
+                            Icon(
+                              Icons.density_small_sharp,
+                              color: TColors.appMainColor,
+                              size: 18,
+                            ),
+                            SizedBox(width: 5),
+                            Text('Observaciones / Condición'),
+                          ],
+                        ),
+                        const SizedBox(height: 15),
+                        TextFormField(
+                          maxLines: 3,
+                          validator: (value) {
+                            if (value == null || value.isEmpty) {
+                              return 'Rellene el campo';
+                            }
+                            return null;
+                          },
+                          maxLength: 500,
+                          controller: _observationController,
+                          decoration: InputDecoration(
+                            hintText: 'Ej: Ingreso con equipamiento propio....',
+                            hintStyle: TextStyle(color: TColors.grayText),
                           ),
                         ),
+                        const SizedBox(height: 15),
                       ],
                     ),
                   ),
                 ],
               ),
             ),
-            const SizedBox(height: 15),
-            Container(
-              padding: EdgeInsets.all(15),
-              width: double.infinity,
-              decoration: BoxDecoration(
-                color: TColors.white,
-                borderRadius: BorderRadius.circular(15),
-                border: Border.all(color: TColors.darkBackgroundAccount),
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Row(
-                    children: [
-                      Icon(
-                        Icons.access_time_outlined,
-                        color: TColors.appMainColor,
-                        size: 18,
+          ),
+          const SizedBox(height: 15),
+          Container(
+            height: 80,
+            padding: EdgeInsets.all(15),
+            color: TColors.white,
+            child: InkWell(
+              onTap: () {
+                final resultado = {
+                  "employee_id": widget.id,
+                  "assigned_shift": isMorning ? 'MAÑANA' : 'TARDE',
+                  "check_in_time": _hourController.text,
+                  "epp_data": {
+                    "casco": true,
+                    "lentes": true,
+                    "chaleco": true,
+                    "orejeras": true,
+                  },
+                  "observations": _observationController,
+                };
+                print(resultado);
+                _observationController.clear();
+                _hourController.text = '${TimeOfDay.now().hour}:${TimeOfDay.now().minute}';
+              },
+              child: Container(
+                height: 60,
+                width: double.infinity,
+                decoration: BoxDecoration(
+                  color: TColors.timelineBlue,
+                  borderRadius: BorderRadius.circular(15),
+                ),
+                child: const Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text(
+                      'Confirmar Ingreso',
+                      style: TextStyle(
+                        color: TColors.white,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 18,
                       ),
-                      SizedBox(width: 5),
-                      Text('Hora de Entrada'),
-                    ],
-                  ),
-                  const SizedBox(height: 15),
-                  TextFormField(
-                    readOnly: true,
-                    decoration: InputDecoration(hintText: '07:00'),
-                    controller: _hourController,
-                    onTap: () {
-                      _selectTime(context);
-                    },
-                  ),
-                  const SizedBox(height: 15),
-                  const Text(
-                    'Programado 07:00 AM',
-                    style: TextStyle(color: TColors.appDisabledColor),
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(height: 20),
-            Container(
-              padding: EdgeInsets.all(15),
-              width: double.infinity,
-              decoration: BoxDecoration(
-                color: TColors.white,
-                borderRadius: BorderRadius.circular(15),
-                border: Border.all(color: TColors.darkBackgroundAccount),
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Row(
-                    children: [
-                      Icon(
-                        Icons.density_small_sharp,
-                        color: TColors.appMainColor,
-                        size: 18,
-                      ),
-                      SizedBox(width: 5),
-                      Text('Observaciones / Condición'),
-                    ],
-                  ),
-                  const SizedBox(height: 15),
-                  TextFormField(
-                    maxLines: 3,
-                    decoration: InputDecoration(
-                      hintText: 'Ej: Ingreso con equipamiento propio....',
                     ),
-                  ),
-                  const SizedBox(height: 15),
-                  const Text(
-                    'Programado 07:00 AM',
-                    style: TextStyle(color: TColors.appDisabledColor),
-                  ),
-                ],
+                    SizedBox(width: 15),
+                    Icon(Icons.check_circle, color: TColors.white),
+                  ],
+                ),
               ),
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
