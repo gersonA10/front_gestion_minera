@@ -32,6 +32,7 @@ class _EmployeeEntryRegisterScreenState
               decoration: BoxDecoration(
                 color: TColors.white,
                 borderRadius: BorderRadius.circular(15),
+                border: Border.all(color: TColors.darkBackgroundAccount),
               ),
               child: Row(
                 children: [
@@ -48,7 +49,13 @@ class _EmployeeEntryRegisterScreenState
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text('Carlos Rodriguez',style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20),),
+                        Text(
+                          'Carlos Rodriguez',
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 20,
+                          ),
+                        ),
                         Text('Operador de mauinaria'),
                         const SizedBox(height: 5),
                         Container(
@@ -67,6 +74,77 @@ class _EmployeeEntryRegisterScreenState
                         ),
                       ],
                     ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 15),
+            Container(
+              padding: EdgeInsets.all(15),
+              width: double.infinity,
+              decoration: BoxDecoration(
+                color: TColors.white,
+                borderRadius: BorderRadius.circular(15),
+                border: Border.all(color: TColors.darkBackgroundAccount),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Row(
+                    children: [
+                      Icon(
+                        Icons.access_time_outlined,
+                        color: TColors.appMainColor,
+                        size: 18,
+                      ),
+                      SizedBox(width: 5),
+                      Text('Hora de Entrada'),
+                    ],
+                  ),
+                  const SizedBox(height: 15),
+                  TextFormField(decoration: InputDecoration(hintText: '07:00')),
+                  const SizedBox(height: 15),
+                  const Text(
+                    'Programado 07:00 AM',
+                    style: TextStyle(color: TColors.appDisabledColor),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 20),
+            Container(
+              padding: EdgeInsets.all(15),
+              width: double.infinity,
+              decoration: BoxDecoration(
+                color: TColors.white,
+                borderRadius: BorderRadius.circular(15),
+                border: Border.all(color: TColors.darkBackgroundAccount),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Row(
+                    children: [
+                      Icon(
+                        Icons.density_small_sharp,
+                        color: TColors.appMainColor,
+                        size: 18,
+                      ),
+                      SizedBox(width: 5),
+                      Text('Observaciones / Condición'),
+                    ],
+                  ),
+                  const SizedBox(height: 15),
+                  TextFormField(
+                    maxLines: 3,
+                    decoration: InputDecoration(
+                      hintText: 'Ej: Ingreso con equipamiento propio....',
+                    ),
+                  ),
+                  const SizedBox(height: 15),
+                  const Text(
+                    'Programado 07:00 AM',
+                    style: TextStyle(color: TColors.appDisabledColor),
                   ),
                 ],
               ),
