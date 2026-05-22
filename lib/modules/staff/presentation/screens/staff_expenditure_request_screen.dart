@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:auto_route/auto_route.dart';
 import 'package:dotted_border/dotted_border.dart';
 import 'package:flutter/material.dart';
 import 'package:front_gestion_minera/utils/constants/color.constant.dart';
@@ -57,6 +58,21 @@ class _StaffExpenditureRequestScreenState
             Text(formatDate(DateTime.now()), style: TextStyle(fontSize: 15)),
           ],
         ),
+        actions: [IconButton(
+            onPressed: () {
+              // context.router.push();
+            },
+            splashRadius: 20,
+            padding: EdgeInsets.zero,
+            constraints: const BoxConstraints(),
+            icon: const Icon(
+              Icons.description_outlined,
+              color: TColors.disabled,
+              size: 22,
+            ),
+          ),
+          const SizedBox(width: 10)],
+        
       ),
       body: Padding(
         padding: EdgeInsets.all(20),
