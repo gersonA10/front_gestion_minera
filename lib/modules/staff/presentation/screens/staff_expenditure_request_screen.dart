@@ -24,13 +24,39 @@ class _StaffExpenditureRequestScreenState
   final List<XFile> _pickedImages = [];
   final int _maxFileSize = 10 * 1024 * 1024;
   final ImagePicker _picker = ImagePicker();
+  final _justifyController = TextEditingController();
+  final _keyform = GlobalKey<FormState>();
+
+  String formatDate(DateTime date) {
+    const months = [
+      'Enero',
+      'Febrero',
+      'Marzo',
+      'Abril',
+      'Mayo',
+      'Junio',
+      'Julio',
+      'Agosto',
+      'Septiembre',
+      'Octubre',
+      'Noviembre',
+      'Diciembre',
+    ];
+
+    return 'Ciclo: ${months[date.month - 1]} ${date.year}';
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: TColors.white,
-      appBar: PreferredSize(
-        preferredSize: const Size(double.infinity, 20),
-        child: AppBar(title: Text('Hacienda Municipal')),
+      appBar: AppBar(
+        title: Column(
+          children: [
+            Text('Hacienda Municipal'),
+            Text(formatDate(DateTime.now()), style: TextStyle(fontSize: 15)),
+          ],
+        ),
       ),
       body: Padding(
         padding: EdgeInsets.all(20),
@@ -103,17 +129,21 @@ class _StaffExpenditureRequestScreenState
               style: TextStyle(fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 20),
-            TextFormField(
-              validator: (value) {
-                if (value == null || value.isEmpty) {
-                  return 'Este Campo es Obligatorio';
-                }
-                return null;
-              },
-              maxLines: 4,
-              decoration: InputDecoration(
-                hintText: 'Descriva el motivo del egreso de nómina...',
-                hintStyle: TextStyle(color: TColors.appSecondaryTextColor),
+            Form(
+              key: _keyform,
+              child: TextFormField(
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Este Campo es Obligatorio';
+                  }
+                  return null;
+                },
+                controller: _justifyController,
+                maxLines: 4,
+                decoration: InputDecoration(
+                  hintText: 'Descriva el motivo del egreso de nómina...',
+                  hintStyle: TextStyle(color: TColors.appSecondaryTextColor),
+                ),
               ),
             ),
             const SizedBox(height: 20),
@@ -144,7 +174,7 @@ class _StaffExpenditureRequestScreenState
                         Positioned(
                           right: 8,
                           top: 8,
-                          child: GestureDetector(
+                          child: InkWell(
                             onTap: () {
                               setState(() {
                                 _pickedImages.clear();
@@ -166,7 +196,7 @@ class _StaffExpenditureRequestScreenState
                         ),
                       ],
                     )
-                  : GestureDetector(
+                  : InkWell(
                       onTap: () {
                         _showPickerOptions();
                       },
@@ -234,7 +264,24 @@ class _StaffExpenditureRequestScreenState
               ),
             ),
             const SizedBox(height: 20),
-            GestureDetector(
+            InkWell(
+              onTap: () {
+                if (!_keyform.currentState!.validate()) {
+                  return;
+                }
+                if (_pickedImages.isEmpty) {
+                  return CustomAlert.show(
+                    context,
+                    title: 'Error',
+                    message: 'Seleccione una imagen',
+                    type: AlertType.warning,
+                  );
+                }
+                _justifyController.clear();
+                setState(() {
+                  _pickedImages.clear();
+                });
+              },
               child: Container(
                 height: 60,
                 width: double.infinity,
