@@ -1,6 +1,8 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:front_gestion_minera/utils/constants/color.constant.dart';
+import 'package:front_gestion_minera/core/widgets/custom_alert_widget.dart';
 
 @RoutePage()
 class EmployeeCheckOutLogScreen extends StatefulWidget {
@@ -20,14 +22,12 @@ class _EmployeeCheckOutLogScreenState extends State<EmployeeCheckOutLogScreen> {
   TimeOfDay horaEntrada = const TimeOfDay(hour: 7, minute: 0);
   Duration horasTrabajadas = Duration.zero;
   Duration totalNeto = Duration.zero;
+  bool requiereObservacion = false;
 
   final TextEditingController refrigerioController = TextEditingController();
   final TextEditingController observacionController = TextEditingController();
 
-  int? presetSeleccionado;
 
-  @override
-  @override
   @override
   void initState() {
     super.initState();
@@ -49,6 +49,10 @@ class _EmployeeCheckOutLogScreenState extends State<EmployeeCheckOutLogScreen> {
     final trabajado = salidaMinutos - entradaMinutos;
     horasTrabajadas = Duration(minutes: trabajado < 0 ? 0 : trabajado);
     totalNeto = horasTrabajadas - Duration(minutes: minutosRefrigerio);
+    if (totalNeto.isNegative) {
+      totalNeto = Duration.zero;
+    }
+    requiereObservacion = totalNeto.inHours < 4;
   }
 
   String _formatearDuracion(Duration duracion) {
@@ -388,8 +392,6 @@ class _EmployeeCheckOutLogScreenState extends State<EmployeeCheckOutLogScreen> {
 
     return GestureDetector(
       onTap: () {
-        presetSeleccionado = valor;
-
         _actualizarRefrigerio(valor);
       },
 
@@ -487,14 +489,43 @@ class _EmployeeCheckOutLogScreenState extends State<EmployeeCheckOutLogScreen> {
           child: TextField(
             controller: observacionController,
             maxLines: 5,
+            maxLength: 500,
+            inputFormatters: [LengthLimitingTextInputFormatter(500)],
             decoration: InputDecoration(
               border: InputBorder.none,
               hintText:
                   'Escriba aquí cualquier incidencia o comentario relevante...',
-              hintStyle: TextStyle(color: TColors.disabled),
+              hintStyle: const TextStyle(color: TColors.disabled),
+
+              counterText: '',
             ),
           ),
         ),
+        if (requiereObservacion) ...[
+          const SizedBox(height: 8),
+
+          Container(
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: Colors.orange.shade50,
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(color: Colors.orange),
+            ),
+            child: const Row(
+              children: [
+                Icon(Icons.warning_amber_rounded, color: Colors.orange),
+
+                SizedBox(width: 8),
+
+                Expanded(
+                  child: Text(
+                    'Las jornadas menores a 4 horas requieren observación.',
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
       ],
     );
   }
@@ -506,7 +537,28 @@ class _EmployeeCheckOutLogScreenState extends State<EmployeeCheckOutLogScreen> {
       child: SizedBox(
         height: 54,
         child: ElevatedButton.icon(
-          onPressed: () {},
+          onPressed: () {
+            final requiereObservacion = totalNeto.inMinutes < 240;
+
+            if (requiereObservacion &&
+                observacionController.text.trim().isEmpty) {
+              CustomAlert.show(
+                context,
+                title: 'Observación requerida',
+                message:
+                    'Debe registrar una observación si el turno es menor a 4 horas.',
+                type: AlertType.warning,
+              );
+              return;
+            }
+
+            CustomAlert.show(
+              context,
+              title: 'Registro completado',
+              message: 'La salida del trabajador fue registrada correctamente.',
+              type: AlertType.success,
+            );
+          },
           icon: const Icon(Icons.check_circle),
           label: const Text('Finalizar Registro'),
           style: ElevatedButton.styleFrom(
