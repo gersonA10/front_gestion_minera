@@ -1,5 +1,7 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
+import 'package:front_gestion_minera/config/router/app_router.gr.dart';
+import 'package:front_gestion_minera/modules/staff/presentation/screens/employee_entry_register_screen.dart';
 import 'package:front_gestion_minera/modules/staff/presentation/screens/workers_screen.dart';
 import 'package:front_gestion_minera/utils/constants/color.constant.dart';
 
@@ -26,7 +28,7 @@ class _StaffMainScreenState extends State<StaffMainScreen> {
       WorkersScreen(),
       _PlaceholderScreen(title: 'Nómina'),
       _PlaceholderScreen(title: 'Solicitar Egreso'),
-      _PlaceholderScreen(title: 'Turnos'),
+      EmployeeEntryRegisterScreen(id: 'ddb582a5-1621-4d9d-b1ab-dc04183f9a46')
     ];
   }
 
@@ -110,6 +112,7 @@ class _StaffMainScreenState extends State<StaffMainScreen> {
               icon: Icon(Icons.settings_outlined),
               activeIcon: Icon(Icons.settings),
               label: 'TURNOS',
+              
             ),
           ],
         ),
