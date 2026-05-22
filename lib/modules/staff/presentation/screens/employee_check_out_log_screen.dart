@@ -5,8 +5,7 @@ import 'package:front_gestion_minera/utils/constants/color.constant.dart';
 @RoutePage()
 class EmployeeCheckOutLogScreen extends StatefulWidget {
   final String attendanceId;
-  const EmployeeCheckOutLogScreen({super.key, required this.attendanceId,});
-  
+  const EmployeeCheckOutLogScreen({super.key, required this.attendanceId});
 
   @override
   State<EmployeeCheckOutLogScreen> createState() =>
@@ -14,9 +13,89 @@ class EmployeeCheckOutLogScreen extends StatefulWidget {
 }
 
 class _EmployeeCheckOutLogScreenState extends State<EmployeeCheckOutLogScreen> {
-  static const String _fallbackImage =
-      'https://siu.edu.bd/storage/uploaded/authority/male_1723030204.jpeg';
+  String? fotoTrabajador;
+
   int minutosRefrigerio = 60;
+  late TimeOfDay horaSalida;
+  TimeOfDay horaEntrada = const TimeOfDay(hour: 7, minute: 0);
+  Duration horasTrabajadas = Duration.zero;
+  Duration totalNeto = Duration.zero;
+
+  final TextEditingController refrigerioController = TextEditingController();
+  final TextEditingController observacionController = TextEditingController();
+
+  int? presetSeleccionado;
+
+  @override
+  @override
+  @override
+  void initState() {
+    super.initState();
+    horaSalida = TimeOfDay.now();
+    refrigerioController.text = minutosRefrigerio.toString();
+    _calcularResumen();
+  }
+
+  @override
+  void dispose() {
+    refrigerioController.dispose();
+    observacionController.dispose();
+    super.dispose();
+  }
+
+  void _calcularResumen() {
+    final entradaMinutos = (horaEntrada.hour * 60) + horaEntrada.minute;
+    final salidaMinutos = (horaSalida.hour * 60) + horaSalida.minute;
+    final trabajado = salidaMinutos - entradaMinutos;
+    horasTrabajadas = Duration(minutes: trabajado < 0 ? 0 : trabajado);
+    totalNeto = horasTrabajadas - Duration(minutes: minutosRefrigerio);
+  }
+
+  String _formatearDuracion(Duration duracion) {
+    final horas = duracion.inHours;
+    final minutos = duracion.inMinutes % 60;
+    return '${horas}h ${minutos.toString().padLeft(2, '0')}m';
+  }
+
+  Future<void> _seleccionarHora() async {
+    final hora = await showTimePicker(
+      context: context,
+      initialTime: horaSalida,
+      builder: (BuildContext context, Widget? child) {
+        return MediaQuery(
+          data: MediaQuery.of(context).copyWith(alwaysUse24HourFormat: true),
+          child: child!,
+        );
+      },
+    );
+
+    if (hora == null) return;
+
+    setState(() {
+      horaSalida = hora;
+      _calcularResumen();
+    });
+  }
+
+  String _formatearHora(TimeOfDay hora) {
+    final periodo = hora.hour >= 12 ? 'PM' : 'AM';
+
+    final hora12 = hora.hour > 12
+        ? hora.hour - 12
+        : hora.hour == 0
+        ? 12
+        : hora.hour;
+
+    return '${hora12.toString().padLeft(2, '0')}:${hora.minute.toString().padLeft(2, '0')} $periodo';
+  }
+
+  void _actualizarRefrigerio(int valor) {
+    setState(() {
+      minutosRefrigerio = valor < 0 ? 0 : valor;
+      refrigerioController.text = minutosRefrigerio.toString();
+      _calcularResumen();
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -53,7 +132,7 @@ class _EmployeeCheckOutLogScreenState extends State<EmployeeCheckOutLogScreen> {
 
                     _buildObservations(),
 
-                    const SizedBox(height: 100),
+                    const SizedBox(height: 10),
                   ],
                 ),
               ),
@@ -118,22 +197,18 @@ class _EmployeeCheckOutLogScreenState extends State<EmployeeCheckOutLogScreen> {
       ),
       child: Row(
         children: [
-          ClipRRect(
-            borderRadius: BorderRadius.circular(100),
-            child: Image.network(
-              _fallbackImage,
-              width: 56,
-              height: 56,
-              fit: BoxFit.cover,
-              errorBuilder: (_, __, ___) {
-                return Container(
-                  width: 56,
-                  height: 56,
-                  color: Colors.grey.shade300,
-                  child: const Icon(Icons.person),
-                );
-              },
-            ),
+          CircleAvatar(
+            radius: 28,
+            backgroundColor: Colors.grey.shade200,
+
+            backgroundImage:
+                fotoTrabajador != null && fotoTrabajador!.isNotEmpty
+                ? NetworkImage(fotoTrabajador!)
+                : null,
+
+            child: fotoTrabajador == null || fotoTrabajador!.isEmpty
+                ? const Icon(Icons.person_outline, size: 30, color: Colors.grey)
+                : null,
           ),
 
           const SizedBox(width: 14),
@@ -141,7 +216,7 @@ class _EmployeeCheckOutLogScreenState extends State<EmployeeCheckOutLogScreen> {
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
-              children: const [
+              children: [
                 Text(
                   'TURNO ACTUAL',
                   style: TextStyle(
@@ -161,7 +236,7 @@ class _EmployeeCheckOutLogScreenState extends State<EmployeeCheckOutLogScreen> {
                         style: TextStyle(color: TColors.appMainTextColor),
                       ),
                       TextSpan(
-                        text: '07:00 AM',
+                        text: _formatearHora(horaEntrada),
                         style: TextStyle(fontWeight: FontWeight.bold),
                       ),
                     ],
@@ -201,24 +276,35 @@ class _EmployeeCheckOutLogScreenState extends State<EmployeeCheckOutLogScreen> {
 
         const SizedBox(height: 10),
 
-        Container(
-          height: 58,
-          padding: const EdgeInsets.symmetric(horizontal: 16),
-          decoration: BoxDecoration(
-            color: TColors.white,
-            borderRadius: BorderRadius.circular(16),
-          ),
-          child: Row(
-            children: const [
-              Icon(Icons.access_time, color: TColors.disabled),
+        GestureDetector(
+          onTap: _seleccionarHora,
+          child: Container(
+            height: 58,
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            decoration: BoxDecoration(
+              color: TColors.white,
+              borderRadius: BorderRadius.circular(16),
+            ),
+            child: Row(
+              children: [
+                const Icon(Icons.access_time, color: TColors.disabled),
 
-              SizedBox(width: 10),
+                const SizedBox(width: 10),
 
-              Text(
-                '04:00 PM',
-                style: TextStyle(fontSize: 28, fontWeight: FontWeight.w500),
-              ),
-            ],
+                Expanded(
+                  child: Text(
+                    _formatearHora(horaSalida),
+                    textAlign: TextAlign.center,
+                    style: const TextStyle(
+                      fontSize: 28,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ),
+
+                const Icon(Icons.edit_outlined, color: TColors.disabled),
+              ],
+            ),
           ),
         ),
 
@@ -253,21 +339,34 @@ class _EmployeeCheckOutLogScreenState extends State<EmployeeCheckOutLogScreen> {
           child: Row(
             children: [
               IconButton(
-                onPressed: () {},
+                onPressed: () {
+                  _actualizarRefrigerio(minutosRefrigerio - 5);
+                },
                 icon: const Icon(Icons.remove, color: TColors.appMainDarkColor),
               ),
 
               Expanded(
-                child: Center(
-                  child: Text(
-                    '$minutosRefrigerio',
-                    style: const TextStyle(fontSize: 30),
+                child: TextField(
+                  controller: refrigerioController,
+                  keyboardType: TextInputType.number,
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(fontSize: 30),
+                  decoration: const InputDecoration(
+                    border: InputBorder.none,
+                    suffixText: 'min',
                   ),
+                  onChanged: (valor) {
+                    final numero = int.tryParse(valor);
+                    if (numero == null) return;
+                    _actualizarRefrigerio(numero);
+                  },
                 ),
               ),
 
               IconButton(
-                onPressed: () {},
+                onPressed: () {
+                  _actualizarRefrigerio(minutosRefrigerio + 5);
+                },
                 icon: const Icon(Icons.add, color: TColors.appMainDarkColor),
               ),
             ],
@@ -278,27 +377,37 @@ class _EmployeeCheckOutLogScreenState extends State<EmployeeCheckOutLogScreen> {
 
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-          children: [
-            _presetButton('30 min'),
-            _presetButton('45 min'),
-            _presetButton('60 min', active: true),
-          ],
+          children: [_presetButton(30), _presetButton(45), _presetButton(60)],
         ),
       ],
     );
   }
 
-  Widget _presetButton(String text, {bool active = false}) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 8),
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(30),
-        color: active ? const Color(0xffE6F4FF) : Colors.transparent,
-      ),
-      child: Text(
-        text,
-        style: TextStyle(
-          color: active ? TColors.appMainDarkColor : TColors.disabled,
+  Widget _presetButton(int valor) {
+    final activo = minutosRefrigerio == valor;
+
+    return GestureDetector(
+      onTap: () {
+        presetSeleccionado = valor;
+
+        _actualizarRefrigerio(valor);
+      },
+
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 8),
+
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(30),
+
+          color: activo ? const Color(0xffE6F4FF) : Colors.transparent,
+        ),
+
+        child: Text(
+          '$valor min',
+
+          style: TextStyle(
+            color: activo ? TColors.appMainDarkColor : TColors.disabled,
+          ),
         ),
       ),
     );
@@ -314,17 +423,15 @@ class _EmployeeCheckOutLogScreenState extends State<EmployeeCheckOutLogScreen> {
       ),
       child: Column(
         children: [
-          _row('Horas Trabajadas', '9h 00m'),
-
+          _row('Horas Trabajadas', _formatearDuracion(horasTrabajadas)),
           const SizedBox(height: 14),
-
-          _row('Descuento Refrigerio', '-1h 00m'),
-
+          _row(
+            'Descuento Refrigerio',
+            '-${_formatearDuracion(Duration(minutes: minutosRefrigerio))}',
+          ),
           const Divider(),
-
           const SizedBox(height: 8),
-
-          _row('TOTAL NETO', '8h 00m', highlight: true),
+          _row('TOTAL NETO', _formatearDuracion(totalNeto), highlight: true),
         ],
       ),
     );
@@ -377,7 +484,8 @@ class _EmployeeCheckOutLogScreenState extends State<EmployeeCheckOutLogScreen> {
             color: TColors.white,
             borderRadius: BorderRadius.circular(16),
           ),
-          child: const TextField(
+          child: TextField(
+            controller: observacionController,
             maxLines: 5,
             decoration: InputDecoration(
               border: InputBorder.none,
