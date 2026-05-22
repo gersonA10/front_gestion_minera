@@ -73,6 +73,7 @@ class _RegisterStaffScreenState extends State<RegisterStaffScreen> {
                 message: 'El Empleado a sido Registrado Exitosamente',
                 type: AlertType.success,
               );
+              context.router.popUntil((route) => route.isFirst);
             }
             if (state is RegisterEmployeesError) {
               CustomAlert.show(
@@ -212,8 +213,8 @@ class _RegisterStaffScreenState extends State<RegisterStaffScreen> {
                                     const SizedBox(height: 15),
                                     CustomFormStaffWidget(
                                       icon: Icons.settings,
-                                      titleform: 'Departamento',
-                                      hint: 'Ingrese Departamento',
+                                      titleform: 'Area',
+                                      hint: 'Ingrese el Area',
                                       controller: _departmentController,
                                     ),
                                     const SizedBox(height: 15),
@@ -354,6 +355,7 @@ class _RegisterStaffScreenState extends State<RegisterStaffScreen> {
   InkWell _submitUserButtom() {
     return InkWell(
       onTap: () {
+        FocusScope.of(context).unfocus();
         if (!_keyRegisterUser.currentState!.validate()) {
           return;
         }
