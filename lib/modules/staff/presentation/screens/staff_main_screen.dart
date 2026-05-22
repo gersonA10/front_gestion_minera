@@ -1,5 +1,7 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
+import 'package:front_gestion_minera/config/router/app_router.gr.dart';
+import 'package:front_gestion_minera/modules/staff/presentation/screens/employee_check_out_log_screen.dart';
 import 'package:front_gestion_minera/modules/staff/presentation/screens/workers_screen.dart';
 import 'package:front_gestion_minera/utils/constants/color.constant.dart';
 
@@ -13,6 +15,9 @@ class StaffMainScreen extends StatefulWidget {
 
 class _StaffMainScreenState extends State<StaffMainScreen> {
   final PageController _pageController = PageController();
+  final TextEditingController nombreController = TextEditingController();
+
+  ///
 
   int _currentIndex = 0;
 
@@ -22,11 +27,44 @@ class _StaffMainScreenState extends State<StaffMainScreen> {
   void initState() {
     super.initState();
 
-    _screens = const [
-      WorkersScreen(),
-      _PlaceholderScreen(title: 'Nómina'),
-      _PlaceholderScreen(title: 'Solicitar Egreso'),
-      _PlaceholderScreen(title: 'Turnos'),
+    _screens = [
+      const WorkersScreen(),
+      const _PlaceholderScreen(title: 'Nómina'),
+
+      Padding(
+        padding: const EdgeInsets.all(20),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            TextField(
+              controller: nombreController,
+              decoration: InputDecoration(
+                hintText: 'attendance_id',
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+              ),
+            ),
+
+            const SizedBox(height: 16),
+
+            ElevatedButton(
+              onPressed: () {
+                context.router.push(
+                  EmployeeCheckOutLogRoute(
+                    attendanceId: nombreController.text.trim().isEmpty
+                        ? 'Miguel Sanchez'
+                        : nombreController.text.trim(),
+                  ),
+                );
+              },
+              child: const Text('Abrir Registro'),
+            ),
+          ],
+        ),
+      ),
+
+      const _PlaceholderScreen(title: 'Turnos'),
     ];
   }
 
@@ -51,6 +89,9 @@ class _StaffMainScreenState extends State<StaffMainScreen> {
   @override
   void dispose() {
     _pageController.dispose();
+    nombreController.dispose();
+
+    ///
     super.dispose();
   }
 
@@ -71,7 +112,6 @@ class _StaffMainScreenState extends State<StaffMainScreen> {
         decoration: const BoxDecoration(
           color: TColors.white,
           border: Border(top: BorderSide(color: Color(0xffE5E7EB))),
-          
         ),
         child: BottomNavigationBar(
           currentIndex: _currentIndex,
@@ -88,7 +128,7 @@ class _StaffMainScreenState extends State<StaffMainScreen> {
 
           unselectedLabelStyle: const TextStyle(
             fontSize: 10,
-            fontWeight: FontWeight.normal, 
+            fontWeight: FontWeight.normal,
           ),
           items: const [
             BottomNavigationBarItem(
