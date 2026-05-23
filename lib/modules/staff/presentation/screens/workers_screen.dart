@@ -1,7 +1,13 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
+import 'package:front_gestion_minera/config/router/app_router.gr.dart';
+import 'package:front_gestion_minera/core/widgets/logout_button_widget.dart';
 import 'package:front_gestion_minera/modules/staff/presentation/widgets/worker_card_widget.dart';
 import 'package:front_gestion_minera/utils/constants/color.constant.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:front_gestion_minera/injector_container.dart';
+import 'package:front_gestion_minera/modules/staff/presentation/bloc/staff_bloc.dart';
+import 'package:front_gestion_minera/utils/session/user_session.dart';
 
 @RoutePage()
 class WorkersScreen extends StatefulWidget {
@@ -12,9 +18,34 @@ class WorkersScreen extends StatefulWidget {
 }
 
 class _WorkersScreenState extends State<WorkersScreen> {
+  String rol = "";
   int selectedTab = 0;
-  int currentPage = 1;
-  int totalPages = 12;
+  late final StaffBloc _bloc;
+  String _search = '';
+  int _totalGeneral = 0;
+  final TextEditingController _searchController = TextEditingController();
+
+  Future<void> _loadUserData() async {
+    await UserSession.loadSession();
+    final role = await UserSession.getRole();
+    setState(() {
+      rol = role;
+    });
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _loadUserData();
+    _bloc = InjectorContainer.getIt<StaffBloc>();
+    _bloc.add(GetEmployeesEvent());
+  }
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
 
   void _onTabTap(int index) {
     if (selectedTab == index) return;
@@ -22,85 +53,126 @@ class _WorkersScreenState extends State<WorkersScreen> {
     setState(() {
       selectedTab = index;
     });
+
+    _bloc.add(
+      GetEmployeesEvent(
+        page: 1,
+        search: _search,
+        status: index == 1 ? 'ACTIVO' : null,
+      ),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: TColors.appBackgroundColor,
-
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {},
-        backgroundColor: TColors.appMainDarkColor,
-        elevation: 4,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(90)),
-        child: const Icon(
-          Icons.person_add_alt_1,
-          color: Colors.white,
-          size: 24,
+    return BlocProvider.value(
+      value: _bloc,
+      child: Scaffold(
+        backgroundColor: TColors.appBackgroundColor,
+        floatingActionButton: FloatingActionButton(
+          onPressed: () {
+            context.router.push(RegisterStaffRoute());
+          },
+          backgroundColor: TColors.appMainDarkColor,
+          elevation: 4,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(90),
+          ),
+          child: const Icon(
+            Icons.person_add_alt_1,
+            color: Colors.white,
+            size: 24,
+          ),
         ),
-      ),
 
-      body: SafeArea(
-        child: Column(
-          children: [
-            _buildHeader(),
+        body: SafeArea(
+          child: Column(
+            children: [
+              _buildHeader(),
 
-            _buildSearchSection(),
+              _buildSearchSection(),
 
-            _buildTabs(),
+              _buildTabs(),
 
-            Expanded(
-              child: ListView(
-                padding: const EdgeInsets.fromLTRB(16, 18, 16, 24),
-                children: const [
-                  WorkerCardWidget(
-                    image: '',
-                    name: 'Ricardo Alarcón',
-                    position: 'Ingeniero de Minas Senior',
-                    location: 'Planta Atacama',
-                    status: 'Activo',
-                    actionText: 'Ver Perfil',
-                  ),
+              Expanded(
+                child: BlocBuilder<StaffBloc, StaffState>(
+                  builder: (context, state) {
+                    final currentState = state is EmployeesPageLoading
+                        ? state.previousState
+                        : state;
 
-                  SizedBox(height: 14),
+                    if (state is EmployeesLoading) {
+                      return const Center(child: CircularProgressIndicator());
+                    }
 
-                  WorkerCardWidget(
-                    image: '',
-                    name: 'Elena Valencia',
-                    position: 'Supervisora de Seguridad',
-                    location: 'Sede Corporativa',
-                    status: 'Activo',
-                    actionText: 'Ver Perfil',
-                  ),
+                    if (state is EmployeesError) {
+                      return Center(
+                        child: Text(
+                          state.message,
+                          style: const TextStyle(color: TColors.disabled),
+                        ),
+                      );
+                    }
 
-                  SizedBox(height: 14),
+                    if (currentState is EmployeesLoaded) {
+                      final employees = currentState.employees;
 
-                  WorkerCardWidget(
-                    image: '',
-                    name: 'Javier Montes',
-                    position: 'Operador de Maquinaria',
-                    location: 'Mina San José',
-                    status: 'Descanso',
-                    actionText: 'Ver Perfil',
-                  ),
+                      if (state is EmployeesPageLoading) {
+                        return const Center(child: CircularProgressIndicator());
+                      }
 
-                  SizedBox(height: 14),
+                      if (employees.isEmpty) {
+                        return Center(
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: const [
+                              Icon(
+                                Icons.people_outline,
+                                size: 55,
+                                color: TColors.disabled,
+                              ),
+                              SizedBox(height: 12),
+                              Text(
+                                'No se encontraron trabajadores',
+                                style: TextStyle(
+                                  color: TColors.disabled,
+                                  fontSize: 14,
+                                ),
+                              ),
+                            ],
+                          ),
+                        );
+                      }
 
-                  WorkerCardWidget(
-                    image: '',
-                    name: 'Sofía Méndez',
-                    position: 'Analista de Laboratorio',
-                    location: 'Última actividad',
-                    status: 'Inactivo',
-                    actionText: 'Revisar',
-                  ),
-                ],
+                      return ListView.builder(
+                        padding: const EdgeInsets.fromLTRB(16, 18, 16, 24),
+                        itemCount: employees.length,
+                        itemBuilder: (_, index) {
+                          final employee = employees[index];
+
+                          return Padding(
+                            padding: const EdgeInsets.only(bottom: 14),
+                            child: WorkerCardWidget(
+                              image: employee.profilePhotoUrl,
+                              name: employee.fullName,
+                              position: employee.position,
+                              location: employee.department,
+                              status: employee.status,
+                              actionText: 'Ver Perfil',
+                            ),
+                          );
+                        },
+                      );
+                    }
+
+                    return const SizedBox();
+                  },
+                ),
               ),
-            ),
 
-            _buildPagination(),
-          ],
+              _buildPagination(),
+            ],
+          ),
         ),
       ),
     );
@@ -130,9 +202,9 @@ class _WorkersScreenState extends State<WorkersScreen> {
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
-              children: const [
+              children: [
                 Text(
-                  '14 de septiembre',
+                  UserSession.userName,
                   style: TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
@@ -144,7 +216,7 @@ class _WorkersScreenState extends State<WorkersScreen> {
                 SizedBox(height: 3),
 
                 Text(
-                  'RECURSOS HUMANOS',
+                  (rol == 'jefe_personal') ? 'Jefe de Personal' : '',
                   style: TextStyle(
                     fontSize: 10,
                     fontWeight: FontWeight.w500,
@@ -157,17 +229,7 @@ class _WorkersScreenState extends State<WorkersScreen> {
             ),
           ),
 
-          IconButton(
-            onPressed: () {},
-            splashRadius: 20,
-            padding: EdgeInsets.zero,
-            constraints: const BoxConstraints(),
-            icon: const Icon(
-              Icons.description_outlined,
-              color: TColors.disabled,
-              size: 22,
-            ),
-          ),
+          LogoutButton(),
         ],
       ),
     );
@@ -184,17 +246,32 @@ class _WorkersScreenState extends State<WorkersScreen> {
           border: Border.all(color: const Color(0xffD0D5DD)),
         ),
         child: Row(
-          children: const [
-            SizedBox(width: 12),
+          children: [
+            const SizedBox(width: 12),
 
-            Icon(Icons.search, color: TColors.disabled, size: 22),
+            const Icon(Icons.search, color: TColors.disabled, size: 22),
 
-            SizedBox(width: 10),
+            const SizedBox(width: 10),
 
             Expanded(
               child: TextField(
-                style: TextStyle(fontSize: 12, color: TColors.appMainTextColor),
-                decoration: InputDecoration(
+                controller: _searchController,
+                style: const TextStyle(
+                  fontSize: 12,
+                  color: TColors.appMainTextColor,
+                ),
+                onChanged: (value) {
+                  _search = value.trim();
+
+                  _bloc.add(
+                    GetEmployeesEvent(
+                      page: 1,
+                      search: _search,
+                      status: selectedTab == 1 ? 'ACTIVO' : null,
+                    ),
+                  );
+                },
+                decoration: const InputDecoration(
                   isCollapsed: true,
                   border: InputBorder.none,
                   enabledBorder: InputBorder.none,
@@ -213,78 +290,123 @@ class _WorkersScreenState extends State<WorkersScreen> {
   }
 
   Widget _buildTabs() {
-    return Padding(
-      padding: const EdgeInsets.only(top: 14),
-      child: Column(
-        children: [
-          Row(
-            children: [
-              Expanded(
-                child: _buildTab(title: 'Todos', count: '124', index: 0),
-              ),
+  return BlocBuilder<StaffBloc, StaffState>(
+    builder: (_, state) {
+      final currentState = state is EmployeesPageLoading
+          ? state.previousState
+          : state;
 
-              Expanded(child: _buildTab(title: 'Activos', index: 1)),
-            ],
-          ),
+      if (currentState is EmployeesLoaded) {
+        // Solo actualizar el total si estamos en "Todos"
+        if (currentState.currentStatus == null) {
+          _totalGeneral = currentState.total;
+        }
+      }
 
-          const SizedBox(height: 2),
+      return Padding(
+        padding: const EdgeInsets.only(top: 14),
+        child: Column(
+          children: [
+            Row(
+              children: [
+                Expanded(
+                  child: _buildTab(
+                    title: 'Todos',
+                    count: _totalGeneral.toString(),
+                    index: 0,
+                  ),
+                ),
 
-          Container(
-            width: double.infinity,
-            height: 1,
-            color: const Color(0xffEAECF0),
-          ),
-        ],
-      ),
-    );
-  }
+                Expanded(
+                  child: _buildTab(
+                    title: 'Activos',
+                    index: 1,
+                  ),
+                ),
+              ],
+            ),
+
+            const SizedBox(height: 2),
+
+            Container(
+              width: double.infinity,
+              height: 1,
+              color: TColors.white,
+            ),
+          ],
+        ),
+      );
+    },
+  );
+}
 
   Widget _buildPagination() {
-    final bool isFirstPage = currentPage == 1;
-    final bool isLastPage = currentPage == totalPages;
+    return BlocBuilder<StaffBloc, StaffState>(
+      builder: (_, state) {
+        final currentState = state is EmployeesPageLoading
+            ? state.previousState
+            : state;
 
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
-      decoration: const BoxDecoration(color: TColors.appBackgroundColor),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          if (!isFirstPage) ...[
-            _paginationButton(
-              icon: Icons.chevron_left,
-              onTap: () {
-                setState(() {
-                  currentPage--;
-                });
-              },
-            ),
+        if (currentState is! EmployeesLoaded) {
+          return const SizedBox();
+        }
+        final currentPage = currentState.currentPage;
+        final totalPages = currentState.totalPages;
+        final isFirstPage = currentPage == 1;
+        final isLastPage = currentPage == totalPages;
+        
 
-            const SizedBox(width: 18),
-          ],
+        return Container(
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              if (!isFirstPage) ...[
+                _paginationButton(
+                  icon: Icons.chevron_left,
+                  onTap: () {
+                    _bloc.add(
+                      GetEmployeesEvent(
+                        page: currentPage - 1,
+                        search: _search,                        
+                        status: selectedTab == 1 ? 'ACTIVO' : null,
+                      ),
+                    );
+                  },
+                ),
 
-          Text(
-            'Página $currentPage de $totalPages',
-            style: const TextStyle(
-              fontSize: 13,
-              fontWeight: FontWeight.w600,
-              color: TColors.appMainTextColor,
-            ),
+                const SizedBox(width: 18),
+              ],
+
+              Text(
+                'Página $currentPage de $totalPages',
+                style: const TextStyle(
+                  fontSize: 13,
+                  fontWeight: FontWeight.w600,
+                  color: TColors.appMainTextColor,
+                ),
+              ),
+
+              if (!isLastPage) ...[
+                const SizedBox(width: 18),
+
+                _paginationButton(
+                  icon: Icons.chevron_right,
+                  onTap: () {
+                    _bloc.add(
+                      GetEmployeesEvent(
+                        page: currentPage + 1,
+                        search: _search,
+                        status: selectedTab == 1 ? 'ACTIVO' : null,
+                      ),
+                    );
+                  },
+                ),
+              ],
+            ],
           ),
-
-          if (!isLastPage) ...[
-            const SizedBox(width: 18),
-
-            _paginationButton(
-              icon: Icons.chevron_right,
-              onTap: () {
-                setState(() {
-                  currentPage++;
-                });
-              },
-            ),
-          ],
-        ],
-      ),
+        );
+      },
     );
   }
 
