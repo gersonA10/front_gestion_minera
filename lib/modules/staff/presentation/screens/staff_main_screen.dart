@@ -1,7 +1,6 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:front_gestion_minera/config/router/app_router.gr.dart';
-import 'package:front_gestion_minera/modules/staff/presentation/screens/employee_check_out_log_screen.dart';
 import 'package:front_gestion_minera/modules/staff/presentation/screens/workers_screen.dart';
 import 'package:front_gestion_minera/utils/constants/color.constant.dart';
 
