@@ -21,3 +21,9 @@ class GetEmployeesEvent extends StaffEvent {
 class LoadMoreEmployeesEvent extends StaffEvent {}
 
 class RefreshEmployeesEvent extends StaffEvent {}
+
+class RegisterEmployeesEvent extends StaffEvent {
+  final RegisterEmployeesEntity employeed;
+
+  RegisterEmployeesEvent({required this.employeed});
+}

@@ -1,4 +1,4 @@
-import '../../domain/entity/paginated_employees_entity.dart';
+import '../../domain/entity/entity.dart';
 import '../../domain/repositories/staff_repository.dart';
 import '../datasource/staff_datasource.dart';
 
@@ -25,4 +25,8 @@ class StaffRepositoryImpl implements StaffRepository {
       limit: limit,
     );
   }
+
+  @override
+  Future<void> registerEmployees(RegisterEmployeesEntity employees) =>
+    datasource.registerEmployees(employees);
 }

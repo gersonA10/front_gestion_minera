@@ -1,6 +1,7 @@
 import 'package:front_gestion_minera/core/networking/http_services.dart';
+import 'package:front_gestion_minera/modules/staff/domain/entity/entity.dart';
 
-import '../models/paginated_employees_model.dart';
+import '../models/models.dart';
 
 class StaffDatasource {
   final ApiClient apiClient;
@@ -44,5 +45,14 @@ class StaffDatasource {
     );
 
     return PaginatedEmployeesModel.fromJson(response);
+  }
+
+  Future<void> registerEmployees(RegisterEmployeesEntity employees) async {
+    final model = RegisterEmployeesModel.fromEntity(employees);
+    await apiClient.post(
+      '/api/hr/employees',
+      operationName: 'registerEmployeed',
+      data: model.toJson(),
+    );
   }
 }

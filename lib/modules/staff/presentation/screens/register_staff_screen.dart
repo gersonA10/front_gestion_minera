@@ -1,8 +1,13 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:front_gestion_minera/core/widgets/excavator_loader.dart';
+import 'package:front_gestion_minera/injector_container.dart';
+import 'package:front_gestion_minera/modules/staff/domain/entity/entity.dart';
+import 'package:front_gestion_minera/modules/staff/presentation/bloc/staff_bloc.dart';
 import 'package:intl/intl.dart';
 
+import '../../../../core/widgets/custom_alert_widget.dart';
 import '../../../../utils/constants/color.constant.dart';
 import '../widgets/widgets.dart';
 
@@ -15,15 +20,16 @@ class RegisterStaffScreen extends StatefulWidget {
 }
 
 class _RegisterStaffScreenState extends State<RegisterStaffScreen> {
-  String? _opcionseleccionada;
+  String? _opcionseleccionada = 'Seleccione un Rol';
   final _roles = ['usuario', 'jefe campamento', 'jefe maquinaria'];
   final _fullNameController = TextEditingController();
-  final _ciController = TextEditingController();
+  final _dniController = TextEditingController();
   final _dateController = TextEditingController();
   final _paymentController = TextEditingController();
-  final _departamentController = TextEditingController();
+  final _departmentController = TextEditingController();
   final _shiftController = TextEditingController();
   final _keyRegisterUser = GlobalKey<FormState>();
+  late final StaffBloc _staffBloc;
 
   Future<void> _selectDate(BuildContext context) async {
     DateTime? picked = await showDatePicker(
@@ -43,273 +49,358 @@ class _RegisterStaffScreenState extends State<RegisterStaffScreen> {
   }
 
   @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: Text('Registro de Personal')),
-      body: Padding(
-        padding: EdgeInsetsGeometry.all(15),
-        child: ListView(
-          children: [
-            Container(
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(18),
-                border: Border(
-                  bottom: BorderSide(color: TColors.red, width: 5),
-                ),
-              ),
-              child: Stack(
-                children: [
-                  ClipRRect(
-                    borderRadius: BorderRadius.circular(16),
-                    child: Container(
-                      width: double.infinity,
-                      height: 150,
-                      color: TColors.appSurfaceColor,
-                      child: const Center(
-                        child: Icon(
-                          Icons.image_not_supported,
-                          size: 48,
-                          color: TColors.appDisabledColor,
-                        ),
-                      ),
-                    ),
-                  ),
-                  Positioned(
-                    bottom: 20,
-                    left: 20,
-                    right: 10,
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Text(
-                          'Nuevo Trabajador',
-                          style: TextStyle(
-                            fontSize: 20,
-                            fontWeight: FontWeight.bold,
-                            color: TColors.white,
-                          ),
-                        ),
-                        Text(
-                          'Complete la informacion para dar de alta en el sistema operativo',
-                          softWrap: true,
-                          style: TextStyle(color: TColors.white),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(height: 15),
-            Container(
-              decoration: BoxDecoration(
-                color: TColors.white,
-                borderRadius: BorderRadius.circular(10),
-              ),
-              child: Form(
-                key: _keyRegisterUser,
-                child: Column(
-                  children: [
-                    Padding(
-                      padding: const EdgeInsets.only(
-                        left: 20,
-                        right: 20,
-                        top: 15,
-                        bottom: 10,
-                      ),
-                      child: Row(
-                        children: [
-                          Icon(
-                            Icons.person_add_alt,
-                            color: TColors.appMainDarkColor,
-                          ),
-                          const SizedBox(width: 10),
-                          Text(
-                            'Datos Generales',
-                            style: TextStyle(
-                              fontWeight: FontWeight.bold,
-                              color: TColors.appMainDarkColor,
-                              fontSize: 17,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    Divider(
-                      color: TColors.appDisabledColor.withValues(alpha: 0.2),
-                    ),
-                    Padding(
-                      padding: EdgeInsetsGeometry.all(20),
-                      child: Column(
-                        children: [
-                          CustomFormStaffWidget(
-                            icon: Icons.badge_outlined,
-                            titleform: 'Nombre Completo',
-                            hint: 'Ej: Juan Alberto Perez Garcia',
-                            controller: _fullNameController,
-                          ),
+  void initState() {
+    super.initState();
+    _staffBloc = InjectorContainer.getIt<StaffBloc>();
+  }
 
-                          const SizedBox(height: 15),
-                          CustomFormStaffWidget(
-                            icon: Icons.contact_emergency_outlined,
-                            titleform: 'DNI / Documento de Identidad',
-                            hint: 'Ingrese su documento',
-                            controller: _ciController,
+  @override
+  Widget build(BuildContext context) {
+    return BlocProvider.value(
+      value: _staffBloc,
+      child: Scaffold(
+        appBar: AppBar(
+          automaticallyImplyLeading: false,
+          toolbarHeight: 45,
+          title: Text('Registro de Personal'),
+        ),
+        body: BlocConsumer<StaffBloc, StaffState>(
+          listener: (context, state) {
+            if (state is RegisterEmployeesSuccess) {
+              CustomAlert.show(
+                context,
+                title: 'Exito',
+                message: 'El Empleado a sido Registrado Exitosamente',
+                type: AlertType.success,
+              );
+              context.router.popUntil((route) => route.isFirst);
+            }
+            if (state is RegisterEmployeesError) {
+              CustomAlert.show(
+                context,
+                title: "Error",
+                message: state.message,
+                type: AlertType.error,
+              );
+            }
+          },
+          builder: (context, state) {
+            final isLoading = state is RegisterEmployeesLoading;
+            return Stack(
+              children: [
+                Padding(
+                  padding: EdgeInsetsGeometry.all(15),
+                  child: ListView(
+                    children: [
+                      Container(
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(18),
+                          border: Border(
+                            bottom: BorderSide(color: TColors.red, width: 5),
                           ),
-                          const SizedBox(height: 15),
-                          CustomFormStaffWidget(
-                            icon: Icons.date_range_outlined,
-                            titleform: 'Fecha Ingreso',
-                            hint: 'mm/dd/yyyy',
-                            controller: _dateController,
-                            isOnlyRead: true,
-                            onTap: () => _selectDate(context),
-                          ),
-                          const SizedBox(height: 15),                          
-                          CustomFormStaffWidget(
-                            icon: Icons.settings,
-                            titleform: 'Departamento',
-                            hint: 'Ingrese Departamento',
-                            controller: _departamentController,
-                          ),
-                          const SizedBox(height: 15),                                                    
-                          CustomFormStaffWidget(
-                            icon: Icons.access_time,
-                            titleform: 'Turno',
-                            hint: 'Ingrese turno - Ej: "7x7 Rotativo"',
-                            controller: _shiftController,
-                          ),
-                          const SizedBox(height: 15),
-                          const Row(
-                            children: [
-                              Icon(Icons.person_4_outlined),
-                              Text(
-                                'Cargo / Puesto',
-                                style: TextStyle(
-                                  color: TColors.appMainDarkColor,
-                                  fontWeight: FontWeight.bold,
+                        ),
+                        child: Stack(
+                          children: [
+                            ClipRRect(
+                              borderRadius: BorderRadius.circular(16),
+                              child: Container(
+                                width: double.infinity,
+                                height: 150,
+                                color: TColors.appSurfaceColor,
+                                child: const Center(
+                                  child: Icon(
+                                    Icons.image_not_supported,
+                                    size: 48,
+                                    color: TColors.appDisabledColor,
+                                  ),
                                 ),
                               ),
-                            ],
-                          ),
-                          DropdownButtonFormField<String>(
-                            initialValue: _opcionseleccionada,
-                            hint: const Text('Seleccione un Rol'),
-                            decoration: InputDecoration(
-                              border: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(10),
-                              ),
                             ),
-                            onChanged: (String? newvalue) {
-                              setState(() {
-                                _opcionseleccionada = newvalue;
-                              });
-                            },
-                            validator: (value) {
-                              if (value == null || value.isEmpty) {
-                                return 'Seleccione un rol Valido';
-                              }
-                              return null;
-                            },
-                            items: _roles.map<DropdownMenuItem<String>>((
-                              String value,
-                            ) {
-                              return DropdownMenuItem<String>(
-                                value: value,
-                                child: Text(value),
-                              );
-                            }).toList(),
-                          ),
-                          const SizedBox(height: 15),
-                          CustomFormStaffWidget(
-                            icon: Icons.payments_outlined,
-                            titleform: 'Salario base (Mensual)',
-                            hint: '0.00 Bs',
-                            extraText: 'Bs',
-                            controller: _paymentController,
-                            keyboradtype: TextInputType.number,
-                          ),
-                        ],
-                      ),
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 20.0,
-                        vertical: 10,
-                      ),
-                      child: Column(
-                        children: [
-                          GestureDetector(
-                            onTap: () {
-                              if (_keyRegisterUser.currentState!.validate()) {
-                                _fullNameController.clear();
-                                _ciController.clear();
-                                _dateController.clear();
-                                _paymentController.clear();
-                              }
-                            },
-                            child: Container(
-                              width: double.infinity,
-                              height: 50,
-                              margin: EdgeInsets.symmetric(horizontal: 20),
-                              decoration: BoxDecoration(
-                                color: TColors.appMainDarkColor,
-                                borderRadius: BorderRadius.circular(20),
-                              ),
-                              child: const Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
+                            Positioned(
+                              bottom: 20,
+                              left: 20,
+                              right: 10,
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                mainAxisSize: MainAxisSize.min,
                                 children: [
-                                  Icon(
-                                    Icons.save_outlined,
-                                    color: TColors.white,
-                                  ),
-                                  SizedBox(width: 20),
                                   Text(
-                                    'Guardar Trabajador',
+                                    'Nuevo Trabajador',
                                     style: TextStyle(
-                                      color: TColors.white,
+                                      fontSize: 20,
                                       fontWeight: FontWeight.bold,
-                                      fontSize: 17,
+                                      color: TColors.white,
                                     ),
+                                  ),
+                                  Text(
+                                    'Complete la informacion para dar de alta en el sistema operativo',
+                                    softWrap: true,
+                                    style: TextStyle(color: TColors.white),
                                   ),
                                 ],
                               ),
                             ),
-                          ),
-                          const SizedBox(height: 15),
-                          GestureDetector(
-                            onTap: () {
-                              // context.router.popUntil((route) => route.isFirst);
-                            },
-                            child: Container(
-                              width: double.infinity,
-                              height: 50,
-                              margin: EdgeInsets.symmetric(horizontal: 20),
-                              decoration: BoxDecoration(
-                                color: TColors.white,
-                                borderRadius: BorderRadius.circular(20),
-                                border: Border.all(
-                                  color: TColors.appMainDarkColor,
-                                ),
-                              ),
-                              child: Center(
-                                child: const Text(
-                                  'Cancelar',
-                                  style: TextStyle(
-                                    color: TColors.appMainDarkColor,
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: 17,
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ),
-                        ],
+                          ],
+                        ),
                       ),
-                    ),
-                  ],
+                      const SizedBox(height: 15),
+                      Container(
+                        decoration: BoxDecoration(
+                          color: TColors.white,
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        child: Form(
+                          key: _keyRegisterUser,
+                          child: Column(
+                            children: [
+                              Padding(
+                                padding: const EdgeInsets.only(
+                                  left: 20,
+                                  right: 20,
+                                  top: 15,
+                                  bottom: 10,
+                                ),
+                                child: Row(
+                                  children: [
+                                    Icon(
+                                      Icons.person_add_alt,
+                                      color: TColors.appMainDarkColor,
+                                    ),
+                                    const SizedBox(width: 10),
+                                    Text(
+                                      'Datos Generales',
+                                      style: TextStyle(
+                                        fontWeight: FontWeight.bold,
+                                        color: TColors.appMainDarkColor,
+                                        fontSize: 17,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              Divider(
+                                color: TColors.appDisabledColor.withValues(
+                                  alpha: 0.2,
+                                ),
+                              ),
+                              Padding(
+                                padding: EdgeInsetsGeometry.all(20),
+                                child: Column(
+                                  children: [
+                                    CustomFormStaffWidget(
+                                      icon: Icons.badge_outlined,
+                                      titleform: 'Nombre Completo',
+                                      hint: 'Ej: Juan Alberto Perez Garcia',
+                                      controller: _fullNameController,
+                                    ),
+
+                                    const SizedBox(height: 15),
+                                    CustomFormStaffWidget(
+                                      icon: Icons.contact_emergency_outlined,
+                                      titleform: 'DNI / Documento de Identidad',
+                                      hint: 'Ingrese su documento',
+                                      controller: _dniController,
+                                    ),
+                                    const SizedBox(height: 15),
+                                    CustomFormStaffWidget(
+                                      icon: Icons.date_range_outlined,
+                                      titleform: 'Fecha Ingreso',
+                                      hint: 'mm/dd/yyyy',
+                                      controller: _dateController,
+                                      isOnlyRead: true,
+                                      onTap: () => _selectDate(context),
+                                    ),
+                                    const SizedBox(height: 15),
+                                    CustomFormStaffWidget(
+                                      icon: Icons.settings,
+                                      titleform: 'Area',
+                                      hint: 'Ingrese el Area',
+                                      controller: _departmentController,
+                                    ),
+                                    const SizedBox(height: 15),
+                                    CustomFormStaffWidget(
+                                      icon: Icons.access_time,
+                                      titleform: 'Turno',
+                                      hint:
+                                          'Ingrese turno - Ej: "7x7 Rotativo"',
+                                      controller: _shiftController,
+                                    ),
+                                    const SizedBox(height: 15),
+                                    const Row(
+                                      children: [
+                                        Icon(Icons.person_4_outlined),
+                                        Text(
+                                          'Cargo / Puesto',
+                                          style: TextStyle(
+                                            color: TColors.appMainDarkColor,
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                    DropdownButtonFormField<String>(
+                                      initialValue: _opcionseleccionada,
+                                      decoration: InputDecoration(
+                                        border: OutlineInputBorder(
+                                          borderRadius: BorderRadius.circular(
+                                            10,
+                                          ),
+                                        ),
+                                      ),
+                                      onChanged: (String? newvalue) {
+                                        setState(() {
+                                          _opcionseleccionada = newvalue;
+                                        });
+                                      },
+                                      validator: (value) {
+                                        if (value == null ||
+                                            value == 'Seleccione un Rol') {
+                                          return 'Seleccione un Rol Valido';
+                                        }
+                                        return null;
+                                      },
+                                      items: [
+                                        const DropdownMenuItem<String>(
+                                          value: 'Seleccione un Rol',
+                                          enabled: false,
+                                          child: Text('Seleccione un Rol'),
+                                        ),
+                                        ..._roles.map<DropdownMenuItem<String>>(
+                                          (String value) {
+                                            return DropdownMenuItem<String>(
+                                              value: value,
+                                              child: Text(value),
+                                            );
+                                          },
+                                        ),
+                                      ],
+                                    ),
+                                    const SizedBox(height: 15),
+                                    CustomFormStaffWidget(
+                                      icon: Icons.payments_outlined,
+                                      titleform: 'Salario base (Mensual)',
+                                      hint: '0.00 Bs',
+                                      extraText: 'Bs',
+                                      controller: _paymentController,
+                                      keyboradtype: TextInputType.number,
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              Padding(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 20.0,
+                                  vertical: 10,
+                                ),
+                                child: Column(
+                                  children: [
+                                    _submitUserButtom(),
+                                    const SizedBox(height: 15),
+                                    InkWell(
+                                      onTap: () {
+                                        context.router.popUntil(
+                                          (route) => route.isFirst,
+                                        );
+                                      },
+                                      child: Container(
+                                        width: double.infinity,
+                                        height: 50,
+                                        margin: EdgeInsets.symmetric(
+                                          horizontal: 20,
+                                        ),
+                                        decoration: BoxDecoration(
+                                          color: TColors.white,
+                                          borderRadius: BorderRadius.circular(
+                                            20,
+                                          ),
+                                          border: Border.all(
+                                            color: TColors.appMainDarkColor,
+                                          ),
+                                        ),
+                                        child: Center(
+                                          child: const Text(
+                                            'Cancelar',
+                                            style: TextStyle(
+                                              color: TColors.appMainDarkColor,
+                                              fontWeight: FontWeight.bold,
+                                              fontSize: 17,
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
+                if (isLoading)
+                  Container(
+                    color: Colors.black.withValues(alpha: 0.5),
+                    child: const Center(child: ExcavatorLoader()),
+                  ),
+              ],
+            );
+          },
+        ),
+      ),
+    );
+  }
+
+  InkWell _submitUserButtom() {
+    return InkWell(
+      onTap: () {
+        FocusScope.of(context).unfocus();
+        if (!_keyRegisterUser.currentState!.validate()) {
+          return;
+        }
+        final employeed = RegisterEmployeesEntity(
+          fullName: _fullNameController.text,
+          nationalId: _dniController.text,
+          position: _opcionseleccionada.toString(),
+          department: _departmentController.text,
+          baseMonthlySalary: double.tryParse(_paymentController.text) ?? 0.0,
+          shiftType: _shiftController.text,
+          hiredDate: DateFormat(
+            'yyyy-MM-dd',
+          ).format(DateFormat('MM/dd/yyyy').parse(_dateController.text)),
+          seniorityLevel: 'Junior',
+          profilePhotoUrl: null,
+        );
+        _staffBloc.add(RegisterEmployeesEvent(employeed: employeed));
+
+        _fullNameController.clear();
+        _dniController.clear();
+        _dateController.clear();
+        _paymentController.clear();
+        _departmentController.clear();
+        _shiftController.clear();
+        _opcionseleccionada = 'Seleccione un Rol';
+      },
+      child: Container(
+        width: double.infinity,
+        height: 50,
+        margin: EdgeInsets.symmetric(horizontal: 20),
+        decoration: BoxDecoration(
+          color: TColors.appMainDarkColor,
+          borderRadius: BorderRadius.circular(20),
+        ),
+        child: const Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(Icons.save_outlined, color: TColors.white),
+            SizedBox(width: 20),
+            Text(
+              'Guardar Trabajador',
+              style: TextStyle(
+                color: TColors.white,
+                fontWeight: FontWeight.bold,
+                fontSize: 17,
               ),
             ),
           ],
