@@ -25,7 +25,8 @@ class StaffBloc extends Bloc<StaffEvent, StaffState> {
       await repository.registerEmployees(event.employeed);
       emit(RegisterEmployeesSuccess());
     } on BaseApiException catch (error) {
-      emit(RegisterEmployeesError(mapErrorMessage(error.key)));
+      final responseData = error.response?.data as Map<String, dynamic>?;
+      emit(RegisterEmployeesError(responseData?['error'] ?? error.key));
     } catch (e) {
       emit(RegisterEmployeesError('Error inesperado: $e'));
     }
