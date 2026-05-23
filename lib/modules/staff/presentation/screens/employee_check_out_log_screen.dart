@@ -15,56 +15,56 @@ class EmployeeCheckOutLogScreen extends StatefulWidget {
 }
 
 class _EmployeeCheckOutLogScreenState extends State<EmployeeCheckOutLogScreen> {
-  String? fotoTrabajador;
+  String? workerPhoto;
 
-  int minutosRefrigerio = 60;
-  late TimeOfDay horaSalida;
-  TimeOfDay horaEntrada = const TimeOfDay(hour: 7, minute: 0);
-  Duration horasTrabajadas = Duration.zero;
-  Duration totalNeto = Duration.zero;
-  bool requiereObservacion = false;
+  int breakMinutes = 60;
+  late TimeOfDay endTime;
+  TimeOfDay startTime = const TimeOfDay(hour: 7, minute: 0);
+  Duration hoursWorked = Duration.zero;
+  Duration netTotal = Duration.zero;
+  bool requiresRemark = false;
 
-  final TextEditingController refrigerioController = TextEditingController();
-  final TextEditingController observacionController = TextEditingController();
+  final TextEditingController breakController = TextEditingController();
+  final TextEditingController remarkController = TextEditingController();
 
 
   @override
   void initState() {
     super.initState();
-    horaSalida = TimeOfDay.now();
-    refrigerioController.text = minutosRefrigerio.toString();
-    _calcularResumen();
+    endTime = TimeOfDay.now();
+    breakController.text = breakMinutes.toString();
+    _calculateSummary();
   }
 
   @override
   void dispose() {
-    refrigerioController.dispose();
-    observacionController.dispose();
+    breakController.dispose();
+    remarkController.dispose();
     super.dispose();
   }
 
-  void _calcularResumen() {
-    final entradaMinutos = (horaEntrada.hour * 60) + horaEntrada.minute;
-    final salidaMinutos = (horaSalida.hour * 60) + horaSalida.minute;
-    final trabajado = salidaMinutos - entradaMinutos;
-    horasTrabajadas = Duration(minutes: trabajado < 0 ? 0 : trabajado);
-    totalNeto = horasTrabajadas - Duration(minutes: minutosRefrigerio);
-    if (totalNeto.isNegative) {
-      totalNeto = Duration.zero;
+  void _calculateSummary() {
+    final startMinutes = (startTime.hour * 60) + startTime.minute;
+    final endMinutes = (endTime.hour * 60) + endTime.minute;
+    final minutesWorked = endMinutes - startMinutes;
+    hoursWorked = Duration(minutes: minutesWorked < 0 ? 0 : minutesWorked);
+    netTotal = hoursWorked - Duration(minutes: breakMinutes);
+    if (netTotal.isNegative) {
+      netTotal = Duration.zero;
     }
-    requiereObservacion = totalNeto.inHours < 4;
+    requiresRemark = netTotal.inHours < 4;
   }
 
-  String _formatearDuracion(Duration duracion) {
-    final horas = duracion.inHours;
-    final minutos = duracion.inMinutes % 60;
-    return '${horas}h ${minutos.toString().padLeft(2, '0')}m';
+  String _formatDuration(Duration duracion) {
+    final hours = duracion.inHours;
+    final minutes = duracion.inMinutes % 60;
+    return '${hours}h ${minutes.toString().padLeft(2, '0')}m';
   }
 
-  Future<void> _seleccionarHora() async {
-    final hora = await showTimePicker(
+  Future<void> _selectTime() async {
+    final hour = await showTimePicker(
       context: context,
-      initialTime: horaSalida,
+      initialTime: endTime,
       builder: (BuildContext context, Widget? child) {
         return MediaQuery(
           data: MediaQuery.of(context).copyWith(alwaysUse24HourFormat: true),
@@ -73,31 +73,31 @@ class _EmployeeCheckOutLogScreenState extends State<EmployeeCheckOutLogScreen> {
       },
     );
 
-    if (hora == null) return;
+    if (hour == null) return;
 
     setState(() {
-      horaSalida = hora;
-      _calcularResumen();
+      endTime = hour;
+      _calculateSummary();
     });
   }
 
-  String _formatearHora(TimeOfDay hora) {
-    final periodo = hora.hour >= 12 ? 'PM' : 'AM';
+  String _formatearHora(TimeOfDay hour) {
+    final periodo = hour.hour >= 12 ? 'PM' : 'AM';
 
-    final hora12 = hora.hour > 12
-        ? hora.hour - 12
-        : hora.hour == 0
+    final hora12 = hour.hour > 12
+        ? hour.hour - 12
+        : hour.hour == 0
         ? 12
-        : hora.hour;
+        : hour.hour;
 
-    return '${hora12.toString().padLeft(2, '0')}:${hora.minute.toString().padLeft(2, '0')} $periodo';
+    return '${hora12.toString().padLeft(2, '0')}:${hour.minute.toString().padLeft(2, '0')} $periodo';
   }
 
   void _actualizarRefrigerio(int valor) {
     setState(() {
-      minutosRefrigerio = valor < 0 ? 0 : valor;
-      refrigerioController.text = minutosRefrigerio.toString();
-      _calcularResumen();
+      breakMinutes = valor < 0 ? 0 : valor;
+      breakController.text = breakMinutes.toString();
+      _calculateSummary();
     });
   }
 
@@ -105,9 +105,7 @@ class _EmployeeCheckOutLogScreenState extends State<EmployeeCheckOutLogScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: TColors.appBackgroundColor,
-
       bottomNavigationBar: _buildBottomButton(),
-
       body: SafeArea(
         child: Column(
           children: [
@@ -206,11 +204,16 @@ class _EmployeeCheckOutLogScreenState extends State<EmployeeCheckOutLogScreen> {
             backgroundColor: Colors.grey.shade200,
 
             backgroundImage:
-                fotoTrabajador != null && fotoTrabajador!.isNotEmpty
-                ? NetworkImage(fotoTrabajador!)
+                workerPhoto
+             != null && workerPhoto
+            !.isNotEmpty
+                ? NetworkImage(workerPhoto
+            !)
                 : null,
 
-            child: fotoTrabajador == null || fotoTrabajador!.isEmpty
+            child: workerPhoto
+         == null || workerPhoto
+        !.isEmpty
                 ? const Icon(Icons.person_outline, size: 30, color: Colors.grey)
                 : null,
           ),
@@ -240,7 +243,7 @@ class _EmployeeCheckOutLogScreenState extends State<EmployeeCheckOutLogScreen> {
                         style: TextStyle(color: TColors.appMainTextColor),
                       ),
                       TextSpan(
-                        text: _formatearHora(horaEntrada),
+                        text: _formatearHora(startTime),
                         style: TextStyle(fontWeight: FontWeight.bold),
                       ),
                     ],
@@ -281,7 +284,7 @@ class _EmployeeCheckOutLogScreenState extends State<EmployeeCheckOutLogScreen> {
         const SizedBox(height: 10),
 
         GestureDetector(
-          onTap: _seleccionarHora,
+          onTap: _selectTime,
           child: Container(
             height: 58,
             padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -297,7 +300,7 @@ class _EmployeeCheckOutLogScreenState extends State<EmployeeCheckOutLogScreen> {
 
                 Expanded(
                   child: Text(
-                    _formatearHora(horaSalida),
+                    _formatearHora(endTime),
                     textAlign: TextAlign.center,
                     style: const TextStyle(
                       fontSize: 28,
@@ -344,14 +347,14 @@ class _EmployeeCheckOutLogScreenState extends State<EmployeeCheckOutLogScreen> {
             children: [
               IconButton(
                 onPressed: () {
-                  _actualizarRefrigerio(minutosRefrigerio - 5);
+                  _actualizarRefrigerio(breakMinutes - 5);
                 },
                 icon: const Icon(Icons.remove, color: TColors.appMainDarkColor),
               ),
 
               Expanded(
                 child: TextField(
-                  controller: refrigerioController,
+                  controller: breakController,
                   keyboardType: TextInputType.number,
                   textAlign: TextAlign.center,
                   style: const TextStyle(fontSize: 30),
@@ -369,7 +372,7 @@ class _EmployeeCheckOutLogScreenState extends State<EmployeeCheckOutLogScreen> {
 
               IconButton(
                 onPressed: () {
-                  _actualizarRefrigerio(minutosRefrigerio + 5);
+                  _actualizarRefrigerio(breakMinutes + 5);
                 },
                 icon: const Icon(Icons.add, color: TColors.appMainDarkColor),
               ),
@@ -388,7 +391,7 @@ class _EmployeeCheckOutLogScreenState extends State<EmployeeCheckOutLogScreen> {
   }
 
   Widget _presetButton(int valor) {
-    final activo = minutosRefrigerio == valor;
+    final activo = breakMinutes == valor;
 
     return GestureDetector(
       onTap: () {
@@ -425,15 +428,15 @@ class _EmployeeCheckOutLogScreenState extends State<EmployeeCheckOutLogScreen> {
       ),
       child: Column(
         children: [
-          _row('Horas Trabajadas', _formatearDuracion(horasTrabajadas)),
+          _row('Horas Trabajadas', _formatDuration(hoursWorked)),
           const SizedBox(height: 14),
           _row(
             'Descuento Refrigerio',
-            '-${_formatearDuracion(Duration(minutes: minutosRefrigerio))}',
+            '-${_formatDuration(Duration(minutes: breakMinutes))}',
           ),
           const Divider(),
           const SizedBox(height: 8),
-          _row('TOTAL NETO', _formatearDuracion(totalNeto), highlight: true),
+          _row('TOTAL NETO', _formatDuration(netTotal), highlight: true),
         ],
       ),
     );
@@ -487,7 +490,7 @@ class _EmployeeCheckOutLogScreenState extends State<EmployeeCheckOutLogScreen> {
             borderRadius: BorderRadius.circular(16),
           ),
           child: TextField(
-            controller: observacionController,
+            controller: remarkController,
             maxLines: 5,
             maxLength: 500,
             inputFormatters: [LengthLimitingTextInputFormatter(500)],
@@ -501,7 +504,7 @@ class _EmployeeCheckOutLogScreenState extends State<EmployeeCheckOutLogScreen> {
             ),
           ),
         ),
-        if (requiereObservacion) ...[
+        if (requiresRemark) ...[
           const SizedBox(height: 8),
 
           Container(
@@ -538,10 +541,10 @@ class _EmployeeCheckOutLogScreenState extends State<EmployeeCheckOutLogScreen> {
         height: 54,
         child: ElevatedButton.icon(
           onPressed: () {
-            final requiereObservacion = totalNeto.inMinutes < 240;
+            final requiresRemark = netTotal.inMinutes < 240;
 
-            if (requiereObservacion &&
-                observacionController.text.trim().isEmpty) {
+            if (requiresRemark &&
+                remarkController.text.trim().isEmpty) {
               CustomAlert.show(
                 context,
                 title: 'Observación requerida',

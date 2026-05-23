@@ -1,7 +1,6 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
-import 'package:front_gestion_minera/config/router/app_router.gr.dart';
-import 'package:front_gestion_minera/modules/staff/presentation/screens/workers_screen.dart';
+import 'package:front_gestion_minera/modules/staff/presentation/screens/screens.dart';
 import 'package:front_gestion_minera/utils/constants/color.constant.dart';
 
 @RoutePage()
@@ -14,9 +13,6 @@ class StaffMainScreen extends StatefulWidget {
 
 class _StaffMainScreenState extends State<StaffMainScreen> {
   final PageController _pageController = PageController();
-  final TextEditingController nombreController = TextEditingController();
-
-  ///
 
   int _currentIndex = 0;
 
@@ -28,41 +24,8 @@ class _StaffMainScreenState extends State<StaffMainScreen> {
 
     _screens = [
       const WorkersScreen(),
-      const _PlaceholderScreen(title: 'Nómina'),
-
-      Padding(
-        padding: const EdgeInsets.all(20),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            TextField(
-              controller: nombreController,
-              decoration: InputDecoration(
-                hintText: 'attendance_id',
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
-              ),
-            ),
-
-            const SizedBox(height: 16),
-
-            ElevatedButton(
-              onPressed: () {
-                context.router.push(
-                  EmployeeCheckOutLogRoute(
-                    attendanceId: nombreController.text.trim().isEmpty
-                        ? 'Miguel Sanchez'
-                        : nombreController.text.trim(),
-                  ),
-                );
-              },
-              child: const Text('Abrir Registro'),
-            ),
-          ],
-        ),
-      ),
-
+      const PayrollScreen(),
+      const _PlaceholderScreen(title: 'Solicitar Egreso'),
       const _PlaceholderScreen(title: 'Turnos'),
     ];
   }
@@ -71,7 +34,6 @@ class _StaffMainScreenState extends State<StaffMainScreen> {
     setState(() {
       _currentIndex = index;
     });
-
     _pageController.animateToPage(
       index,
       duration: const Duration(milliseconds: 300),
@@ -88,9 +50,6 @@ class _StaffMainScreenState extends State<StaffMainScreen> {
   @override
   void dispose() {
     _pageController.dispose();
-    nombreController.dispose();
-
-    ///
     super.dispose();
   }
 
@@ -98,14 +57,12 @@ class _StaffMainScreenState extends State<StaffMainScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: TColors.background,
-
       body: PageView(
         controller: _pageController,
         onPageChanged: _onPageChanged,
         physics: const BouncingScrollPhysics(),
         children: _screens,
       ),
-
       bottomNavigationBar: Container(
         height: 70,
         decoration: const BoxDecoration(
@@ -124,7 +81,6 @@ class _StaffMainScreenState extends State<StaffMainScreen> {
             fontSize: 11,
             fontWeight: FontWeight.bold,
           ),
-
           unselectedLabelStyle: const TextStyle(
             fontSize: 10,
             fontWeight: FontWeight.normal,
@@ -159,7 +115,6 @@ class _StaffMainScreenState extends State<StaffMainScreen> {
 
 class _PlaceholderScreen extends StatelessWidget {
   final String title;
-
   const _PlaceholderScreen({required this.title});
 
   @override
