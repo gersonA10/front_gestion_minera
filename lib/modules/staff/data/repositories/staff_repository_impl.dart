@@ -1,3 +1,6 @@
+import 'package:front_gestion_minera/modules/staff/data/models/models.dart';
+import 'package:front_gestion_minera/modules/staff/data/models/payroll_monthly_model.dart';
+
 import '../../domain/entity/entity.dart';
 import '../../domain/repositories/staff_repository.dart';
 import '../datasource/staff_datasource.dart';
@@ -29,4 +32,13 @@ class StaffRepositoryImpl implements StaffRepository {
   @override
   Future<void> registerEmployees(RegisterEmployeesEntity employees) =>
     datasource.registerEmployees(employees);
+
+  @override
+  Future<void> createPayrollMonthly(CreatePayrollMonthlyEntity payrollMonthly) =>
+    datasource.createPayrollMonthly(payrollMonthly);
+
+  @override
+  Future<List<PayrollMonthlyModel>> getPayrollMonthly() {
+    return datasource.getPayrollMonthly();
+  }
 }

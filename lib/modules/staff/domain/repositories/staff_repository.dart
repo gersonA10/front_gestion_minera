@@ -1,3 +1,5 @@
+import 'package:front_gestion_minera/modules/staff/data/models/models.dart';
+
 import '../entity/entity.dart';
 
 abstract class StaffRepository {
@@ -10,4 +12,7 @@ abstract class StaffRepository {
   });
   
   Future<void> registerEmployees(RegisterEmployeesEntity employees);
+
+  Future<List<PayrollMonthlyModel>> getPayrollMonthly();
+  Future<void> createPayrollMonthly(CreatePayrollMonthlyEntity payrollMonthly);
 }
