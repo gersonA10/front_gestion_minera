@@ -69,3 +69,13 @@ class RegisterEmployeesError extends StaffState {
   final String message;
   RegisterEmployeesError(this.message);
 }
+
+class CreatePayrollMonthlyLoading extends StaffState {}
+
+class CreatePayrollMonthlySuccess extends StaffState{}
+
+class CreatePayrollMonthlyError extends StaffState {
+  final String message;
+  CreatePayrollMonthlyError(this.message);
+  
+}

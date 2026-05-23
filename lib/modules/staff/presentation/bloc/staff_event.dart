@@ -27,3 +27,9 @@ class RegisterEmployeesEvent extends StaffEvent {
 
   RegisterEmployeesEvent({required this.employeed});
 }
+
+class CreatePayrollMonthlyEvent extends StaffEvent {
+  final CreatePayrollMonthlyEntity payroll;
+
+  CreatePayrollMonthlyEvent({required this.payroll});
+}

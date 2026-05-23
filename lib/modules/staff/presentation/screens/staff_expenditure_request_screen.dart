@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:auto_route/auto_route.dart';
 import 'package:dotted_border/dotted_border.dart';
 import 'package:flutter/material.dart';
+import 'package:front_gestion_minera/modules/staff/presentation/bloc/staff_bloc.dart';
 import 'package:front_gestion_minera/utils/constants/color.constant.dart';
 import 'package:image_picker/image_picker.dart';
 
@@ -18,6 +19,8 @@ class StaffExpenditureRequestScreen extends StatefulWidget {
 
 class _StaffExpenditureRequestScreenState
     extends State<StaffExpenditureRequestScreen> {
+  
+  late final StaffBloc _blocPayroll;
   final double _totalAmount = 20000;
   final int _totalEmployeed = 10;
   final double _amountEmployeed = 2000;
@@ -46,7 +49,7 @@ class _StaffExpenditureRequestScreenState
 
     return 'Ciclo: ${months[date.month - 1]} ${date.year}';
   }
-
+  
   @override
   Widget build(BuildContext context) {
     return Scaffold(
