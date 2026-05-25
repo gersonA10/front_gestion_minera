@@ -1,4 +1,3 @@
-import 'package:dio/dio.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../domain/entity/entity.dart';
