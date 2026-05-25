@@ -26,7 +26,6 @@ class _StaffExpenditureRequestScreenState
   late final StaffBloc _blocPayroll;
   double _totalAmount = 0;
   int _totalEmployeed = 0;
-  final double _amountEmployeed = 2000;
 
   final List<XFile> _pickedImages = [];
   final int _maxFileSize = 10 * 1024 * 1024;
@@ -96,7 +95,7 @@ class _StaffExpenditureRequestScreenState
               CustomAlert.show(
                 context,
                 title: 'Exito',
-                message: 'Exitosamente',
+                message: 'Solicitud de egreso enviada exitosamente, espere respuesta',
                 type: AlertType.success,
               );
               _justifyController.clear();
@@ -342,7 +341,7 @@ class _StaffExpenditureRequestScreenState
                             SizedBox(width: 10),
                             Expanded(
                               child: Text(
-                                'Esta solicitud sera enviada al departamento de Haciendo para su revisión y aprobación presupuestaria inmediata.',
+                                'Esta solicitud sera enviada al departamento de Hacienda para su revisión y aprobación presupuestaria inmediata.',
                                 style: TextStyle(
                                   color: TColors.amber,
                                   fontSize: 13,
