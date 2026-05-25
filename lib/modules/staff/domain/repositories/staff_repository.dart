@@ -1,4 +1,4 @@
-import '../entity/paginated_employees_entity.dart';
+import '../entity/entity.dart';
 
 abstract class StaffRepository {
   Future<PaginatedEmployeesEntity> getEmployees({
@@ -8,4 +8,6 @@ abstract class StaffRepository {
     int page = 1,
     int limit = 20,
   });
+  
+  Future<void> registerEmployees(RegisterEmployeesEntity employees);
 }
