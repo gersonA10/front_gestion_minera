@@ -1,5 +1,6 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
+import 'package:front_gestion_minera/modules/staff/presentation/widgets/widgets.dart';
 import 'package:front_gestion_minera/utils/constants/color.constant.dart';
 
 import '../../../../utils/assets.dart';
@@ -136,36 +137,24 @@ class _EmployeeEntryRegisterScreenState
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const Row(
-                          children: [
-                            Icon(
-                              Icons.access_time_outlined,
-                              color: TColors.appMainColor,
-                              size: 18,
-                            ),
-                            SizedBox(width: 5),
-                            Text('Hora de Entrada'),
-                          ],
-                        ),
-                        const SizedBox(height: 15),
-                        TextFormField(
-                          readOnly: true,
+                        CustomFormStaffWidget(
+                          icon: Icons.access_time_outlined,
+                          titleform: 'Hora de Entrada',
+                          hint: '',
                           controller: _hourController,
-                          decoration: InputDecoration(
-                            suffix: Text(
-                              (int.parse(
-                                        _hourController.text.split(':').first,
-                                      ) <
-                                      12)
-                                  ? 'AM'
-                                  : 'PM',
-                            ),
-                          ),
+                          isOnlyRead: true,
                           onTap: () async {
                             await _selectTime(context);
                           },
+                          extraText:
+                              (int.parse(
+                                    _hourController.text.split(':').first,
+                                  ) <
+                                  12)
+                              ? 'AM'
+                              : 'PM',
                         ),
-                        const SizedBox(height: 15),
+                        const SizedBox(height: 10),
                         const Text(
                           'Programado 07:00 AM',
                           style: TextStyle(color: TColors.appDisabledColor),
