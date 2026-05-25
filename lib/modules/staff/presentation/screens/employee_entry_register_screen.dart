@@ -57,11 +57,12 @@ class _EmployeeEntryRegisterScreenState
         children: [
           Expanded(
             child: Padding(
-              padding: const EdgeInsets.all(18.0),
+              padding: const EdgeInsets.symmetric(horizontal: 18.0),
               child: ListView(
                 children: [
                   Container(
                     padding: EdgeInsets.all(15),
+                    margin: EdgeInsets.only(top: 18, bottom: 15),
                     width: double.infinity,
                     decoration: BoxDecoration(
                       color: TColors.white,
@@ -125,7 +126,6 @@ class _EmployeeEntryRegisterScreenState
                       ],
                     ),
                   ),
-                  const SizedBox(height: 15),
                   Container(
                     padding: EdgeInsets.all(15),
                     width: double.infinity,
