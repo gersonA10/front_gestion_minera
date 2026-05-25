@@ -71,7 +71,7 @@ class StaffDatasource {
       data: modelpayroll.toJson(),
       files: [
         {
-          'name': 'planilla_url',
+          'name': 'planilla',
           'path': modelpayroll.planillaUrl,
           'filename': modelpayroll.planillaUrl.split('/').last,
         },
