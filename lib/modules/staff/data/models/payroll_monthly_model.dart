@@ -15,15 +15,15 @@ class PayrollMonthlyModel extends PayrollMonthlyEntity {
 
   factory PayrollMonthlyModel.fromJson(Map<String, dynamic> json) {
     return PayrollMonthlyModel(
-      payrollId: json['payroll_id'],
-      employeeId: json['employee_id'],
-      fullName: json['full_name'],
-      position: json['position'],
-      baseSalary: json['base_salary'],
-      totalDeductions: json['total_deductions'],
-      netTotal: json['net_total'],
-      paymentStatus: json['payment_status'],
-      currency: json['currency'],
+      payrollId: json['payroll_id'] ?? '',
+      employeeId: json['employee_id'] ?? '',
+      fullName: json['full_name'] ?? '',
+      position: json['position'] ?? '',
+      baseSalary: (json['base_salary']).toDouble() ?? 0,
+      totalDeductions: (json['total_deductions']).toDouble() ?? 0,
+      netTotal: (json['net_total']).toDouble() ?? 0,
+      paymentStatus: json['payment_status'] ?? '',
+      currency: json['currency'] ?? '',
     );
   }
 }

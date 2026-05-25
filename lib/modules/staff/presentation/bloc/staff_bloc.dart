@@ -1,3 +1,4 @@
+import 'package:dio/dio.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../domain/entity/entity.dart';
@@ -19,6 +20,7 @@ class StaffBloc extends Bloc<StaffEvent, StaffState> {
     on<RefreshEmployeesEvent>(_onRefreshEmployees);
     on<RegisterEmployeesEvent>(_onRegisterEmployees);
     on<CreatePayrollMonthlyEvent>(_onCreatePayrollMonthly);
+    on<GetEmployeePayrollEvent>(_onGetEmployeePayrol);
   }
 
   FutureOr<void> _onRegisterEmployees(
@@ -132,15 +134,41 @@ class StaffBloc extends Bloc<StaffEvent, StaffState> {
     CreatePayrollMonthlyEvent event,
     Emitter<StaffState> emit,
   ) async {
-    emit(CreatePayrollMonthlyLoading());
+    emit(CreatePayrollRequestLoading());
     try {
       await repository.createPayrollMonthly(event.payroll);
-      emit(CreatePayrollMonthlySuccess());
+      emit(CreatePayrollRequestSuccess());
     } on BaseApiException catch (error) {
       final responseData = error.response?.data as Map<String, dynamic>?;
-      emit(CreatePayrollMonthlyError(responseData?['error'] ?? error.key));
+      emit(CreatePayrollRequestError(responseData?['error'] ?? error.key));
     } catch (e) {
-      emit(CreatePayrollMonthlyError('Error inesperado: $e'));
+      emit(CreatePayrollRequestError('Error inesperado: $e'));
+    }
+  }
+
+  FutureOr<void> _onGetEmployeePayrol(
+    GetEmployeePayrollEvent event,
+    Emitter<StaffState> emit,
+  ) async {
+    emit(GenerateEmployeePayrollLoading());
+    try {
+      final response = await repository.getPayrollMonthly();
+      final totalEmployee = response.length;
+      double totalAmount = response.fold(
+        0,
+        (sum, employee) => sum + employee.baseSalary,
+      );
+      emit(
+        GenerateEmployeePayrollSuccess(
+          totalEmployee: totalEmployee,
+          totalAmount: totalAmount,
+        ),
+      );
+    } on BaseApiException catch (error) {
+      final responseData = error.response?.data as Map<String, dynamic>?;
+      emit(GenerateEmployeePayrollError(responseData?['error'] ?? error.key));
+    } catch (e) {
+      emit(GenerateEmployeePayrollError('Error inesperado: $e'));
     }
   }
 }

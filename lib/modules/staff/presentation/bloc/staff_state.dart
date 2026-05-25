@@ -70,12 +70,27 @@ class RegisterEmployeesError extends StaffState {
   RegisterEmployeesError(this.message);
 }
 
-class CreatePayrollMonthlyLoading extends StaffState {}
+class CreatePayrollRequestLoading extends StaffState {}
 
-class CreatePayrollMonthlySuccess extends StaffState{}
+class CreatePayrollRequestSuccess extends StaffState {}
 
-class CreatePayrollMonthlyError extends StaffState {
+class CreatePayrollRequestError extends StaffState {
   final String message;
-  CreatePayrollMonthlyError(this.message);
-  
+  CreatePayrollRequestError(this.message);
+}
+
+class GenerateEmployeePayrollLoading extends StaffState {}
+
+class GenerateEmployeePayrollSuccess extends StaffState {
+  final int totalEmployee;
+  final double totalAmount;
+  GenerateEmployeePayrollSuccess({
+    required this.totalEmployee,
+    required this.totalAmount,
+  });
+}
+
+class GenerateEmployeePayrollError extends StaffState {
+  final String message;
+  GenerateEmployeePayrollError(this.message);
 }

@@ -33,3 +33,5 @@ class CreatePayrollMonthlyEvent extends StaffEvent {
 
   CreatePayrollMonthlyEvent({required this.payroll});
 }
+
+class GetEmployeePayrollEvent extends StaffEvent {}

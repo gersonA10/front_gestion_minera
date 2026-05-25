@@ -24,8 +24,8 @@ class StaffExpenditureRequestScreen extends StatefulWidget {
 class _StaffExpenditureRequestScreenState
     extends State<StaffExpenditureRequestScreen> {
   late final StaffBloc _blocPayroll;
-  final double _totalAmount = 20000;
-  final int _totalEmployeed = 10;
+  double _totalAmount = 0;
+  int _totalEmployeed = 0;
   final double _amountEmployeed = 2000;
 
   final List<XFile> _pickedImages = [];
@@ -56,7 +56,8 @@ class _StaffExpenditureRequestScreenState
   @override
   void initState() {
     super.initState();
-    _blocPayroll = InjectorContainer.getIt<StaffBloc>();
+    _blocPayroll = InjectorContainer.getIt<StaffBloc>()
+      ..add(GetEmployeePayrollEvent());
   }
 
   @override
@@ -91,7 +92,7 @@ class _StaffExpenditureRequestScreenState
         ),
         body: BlocConsumer<StaffBloc, StaffState>(
           listener: (context, state) {
-            if (state is CreatePayrollMonthlySuccess) {
+            if (state is CreatePayrollRequestSuccess) {
               CustomAlert.show(
                 context,
                 title: 'Exito',
@@ -103,7 +104,7 @@ class _StaffExpenditureRequestScreenState
                 _pickedImages.clear();
               });
             }
-            if (state is CreatePayrollMonthlyError) {
+            if (state is CreatePayrollRequestError) {
               CustomAlert.show(
                 context,
                 title: "Error",
@@ -113,7 +114,7 @@ class _StaffExpenditureRequestScreenState
             }
           },
           builder: (context, state) {
-            final isLoading = state is CreatePayrollMonthlyLoading;
+            final isLoading = state is CreatePayrollRequestLoading;
             return Stack(
               children: [
                 Padding(
@@ -122,7 +123,10 @@ class _StaffExpenditureRequestScreenState
                     children: [
                       const Text(
                         'Solicitud de Egreso',
-                        style: TextStyle(fontSize: 25, fontWeight: FontWeight.bold),
+                        style: TextStyle(
+                          fontSize: 25,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
                       const Text(
                         'Módulo de Nómina y tesorería',
@@ -132,62 +136,70 @@ class _StaffExpenditureRequestScreenState
                         ),
                       ),
                       const SizedBox(height: 15),
-                      Container(
-                        width: double.infinity,
-                        padding: EdgeInsets.all(30),
-                        decoration: BoxDecoration(
-                          color: TColors.appBackgroundColor,
-                          borderRadius: BorderRadius.circular(15),
-                          border: Border.all(
-                            color: TColors.appDisabledColor.withValues(alpha: 0.4),
-                          ),
-                        ),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            const Text(
-                              'MONTO TOTAL A SOLICITAR',
-                              style: TextStyle(
-                                fontSize: 14,
-                                fontWeight: FontWeight.bold,
-                                color: TColors.appMainDarkColor,
+                      BlocBuilder<StaffBloc, StaffState>(
+                        builder: (context, state) {
+                          if (state is GenerateEmployeePayrollSuccess) {
+                            _totalAmount = state.totalAmount;
+                            _totalEmployeed = state.totalEmployee;
+                          }
+                          final isLoadingDash =
+                              state is GenerateEmployeePayrollLoading;
+                          final totalAmount = _totalAmount;
+                          final totalEmployeed = _totalEmployeed;
+                          return Container(
+                            width: double.infinity,
+                            padding: EdgeInsets.all(30),
+                            decoration: BoxDecoration(
+                              color: TColors.appBackgroundColor,
+                              borderRadius: BorderRadius.circular(15),
+                              border: Border.all(
+                                color: TColors.appDisabledColor.withValues(
+                                  alpha: 0.4,
+                                ),
                               ),
                             ),
-                            Text(
-                              '$_totalAmount BS',
-                              style: TextStyle(
-                                fontSize: 25,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                            const SizedBox(height: 10),
-                            Divider(
-                              color: TColors.appDisabledColor.withValues(
-                                alpha: 0.2,
-                              ),
-                            ),
-                            Row(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                const Text('Trabajadores Activos'),
-                                const Spacer(),
-                                Text(
-                                  '$_totalEmployeed',
-                                  style: TextStyle(fontWeight: FontWeight.bold),
+                                const Text(
+                                  'MONTO TOTAL A SOLICITAR',
+                                  style: TextStyle(
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.bold,
+                                    color: TColors.appMainDarkColor,
+                                  ),
+                                ),
+                                isLoadingDash
+                                    ? const CircularProgressIndicator()
+                                    : Text(
+                                        '$totalAmount BS',
+                                        style: TextStyle(
+                                          fontSize: 25,
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                const SizedBox(height: 10),
+                                Divider(
+                                  color: TColors.appDisabledColor.withValues(
+                                    alpha: 0.2,
+                                  ),
+                                ),
+                                Row(
+                                  children: [
+                                    const Text('Trabajadores Activos'),
+                                    const Spacer(),
+                                    Text(
+                                      '$totalEmployeed',
+                                      style: TextStyle(
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                  ],
                                 ),
                               ],
                             ),
-                            Row(
-                              children: [
-                                const Text('Monto Por Trabajador'),
-                                const Spacer(),
-                                Text(
-                                  '$_amountEmployeed Bs',
-                                  style: TextStyle(fontWeight: FontWeight.bold),
-                                ),
-                              ],
-                            ),
-                          ],
-                        ),
+                          );
+                        },
                       ),
                       const SizedBox(height: 15),
                       const Text(
@@ -207,7 +219,8 @@ class _StaffExpenditureRequestScreenState
                           controller: _justifyController,
                           maxLines: 4,
                           decoration: InputDecoration(
-                            hintText: 'Descriva el motivo del egreso de nómina...',
+                            hintText:
+                                'Descriva el motivo del egreso de nómina...',
                             hintStyle: TextStyle(
                               color: TColors.appSecondaryTextColor,
                             ),
@@ -220,7 +233,7 @@ class _StaffExpenditureRequestScreenState
                         style: TextStyle(fontWeight: FontWeight.bold),
                       ),
                       const SizedBox(height: 15),
-                
+
                       DottedBorder(
                         options: RoundedRectDottedBorderOptions(
                           radius: Radius.circular(15),
@@ -233,7 +246,9 @@ class _StaffExpenditureRequestScreenState
                             ? Stack(
                                 children: [
                                   ClipRRect(
-                                    borderRadius: BorderRadiusGeometry.circular(15),
+                                    borderRadius: BorderRadiusGeometry.circular(
+                                      15,
+                                    ),
                                     child: Image.file(
                                       File(_pickedImages.first.path),
                                       fit: BoxFit.cover,
@@ -279,7 +294,9 @@ class _StaffExpenditureRequestScreenState
                                         decoration: BoxDecoration(
                                           color: TColors.appMainDarkColor
                                               .withValues(alpha: 0.2),
-                                          borderRadius: BorderRadius.circular(7),
+                                          borderRadius: BorderRadius.circular(
+                                            7,
+                                          ),
                                         ),
                                         child: Icon(
                                           Icons.image,
