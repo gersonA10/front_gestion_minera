@@ -2,7 +2,9 @@ import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:front_gestion_minera/utils/constants/color.constant.dart';
-import 'package:front_gestion_minera/core/widgets/custom_alert_widget.dart';
+
+import '../widgets/current_shift_card.dart';
+import '../widgets/widgets.dart';
 
 @RoutePage()
 class EmployeeCheckOutLogScreen extends StatefulWidget {
@@ -26,7 +28,6 @@ class _EmployeeCheckOutLogScreenState extends State<EmployeeCheckOutLogScreen> {
 
   final TextEditingController breakController = TextEditingController();
   final TextEditingController remarkController = TextEditingController();
-
 
   @override
   void initState() {
@@ -105,34 +106,57 @@ class _EmployeeCheckOutLogScreenState extends State<EmployeeCheckOutLogScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: TColors.appBackgroundColor,
-      bottomNavigationBar: _buildBottomButton(),
+      bottomNavigationBar: BottomButtonWidget(
+        netTotal: netTotal,
+        remarkController: remarkController,
+      ),
       body: SafeArea(
         child: Column(
           children: [
-            _buildHeader(),
+            HeaderWidget(attendanceId: widget.attendanceId),
 
             Expanded(
               child: SingleChildScrollView(
                 padding: const EdgeInsets.all(16),
                 child: Column(
                   children: [
-                    _buildCurrentShiftCard(),
+                    CurrentShiftCard(
+                      workerPhoto: workerPhoto,
+                      startTime: startTime,
+                      formatearHora: _formatearHora,
+                    ),
 
                     const SizedBox(height: 24),
 
-                    _buildExitHour(),
+                    ExitHourWidget(
+                      endTime: endTime,
+                      formatearHora: _formatearHora,
+                      onSelectTime: _selectTime,
+                    ),
 
                     const SizedBox(height: 24),
 
-                    _buildBreakTime(),
+                    BreakTimeWidget(
+                      breakMinutes: breakMinutes,
+                      controller: breakController,
+                      onUpdate: _actualizarRefrigerio,
+                    ),
 
                     const SizedBox(height: 24),
 
-                    _buildSummaryCard(),
+                    SummaryCardWidget(
+                      hoursWorked: hoursWorked,
+                      breakMinutes: breakMinutes,
+                      netTotal: netTotal,
+                      formatDuration: _formatDuration,
+                    ),
 
                     const SizedBox(height: 24),
 
-                    _buildObservations(),
+                    ObservationsWidget(
+                      controller: remarkController,
+                      requiresRemark: requiresRemark,
+                    ),
 
                     const SizedBox(height: 10),
                   ],
@@ -144,8 +168,15 @@ class _EmployeeCheckOutLogScreenState extends State<EmployeeCheckOutLogScreen> {
       ),
     );
   }
+}
 
-  Widget _buildHeader() {
+class HeaderWidget extends StatelessWidget {
+  final String attendanceId;
+
+  const HeaderWidget({super.key, required this.attendanceId});
+
+  @override
+  Widget build(BuildContext context) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
       decoration: const BoxDecoration(
@@ -155,14 +186,14 @@ class _EmployeeCheckOutLogScreenState extends State<EmployeeCheckOutLogScreen> {
       child: Row(
         children: [
           IconButton(
-            onPressed: () => Navigator.of(context).pop(),
+            onPressed: () => Navigator.pop(context),
             icon: const Icon(Icons.arrow_back),
           ),
 
           Expanded(
             child: Column(
               children: [
-                Text(
+                const Text(
                   'Registro de Salida',
                   style: TextStyle(
                     fontSize: 19,
@@ -171,10 +202,10 @@ class _EmployeeCheckOutLogScreenState extends State<EmployeeCheckOutLogScreen> {
                   ),
                 ),
 
-                SizedBox(height: 2),
+                const SizedBox(height: 2),
 
                 Text(
-                  widget.attendanceId,
+                  attendanceId,
                   style: const TextStyle(fontSize: 13, color: TColors.disabled),
                 ),
               ],
@@ -186,146 +217,46 @@ class _EmployeeCheckOutLogScreenState extends State<EmployeeCheckOutLogScreen> {
       ),
     );
   }
+}
 
-  Widget _buildCurrentShiftCard() {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: TColors.white,
-        borderRadius: BorderRadius.circular(18),
-        boxShadow: const [
-          BoxShadow(blurRadius: 10, color: Color.fromRGBO(0, 0, 0, .04)),
-        ],
-      ),
-      child: Row(
-        children: [
-          CircleAvatar(
-            radius: 28,
-            backgroundColor: Colors.grey.shade200,
 
-            backgroundImage:
-                workerPhoto
-             != null && workerPhoto
-            !.isNotEmpty
-                ? NetworkImage(workerPhoto
-            !)
-                : null,
+class BreakTimeWidget extends StatelessWidget {
+  final int breakMinutes;
+  final TextEditingController controller;
+  final Function(int) onUpdate;
 
-            child: workerPhoto
-         == null || workerPhoto
-        !.isEmpty
-                ? const Icon(Icons.person_outline, size: 30, color: Colors.grey)
-                : null,
+  const BreakTimeWidget({
+    super.key,
+    required this.breakMinutes,
+    required this.controller,
+    required this.onUpdate,
+  });
+
+  Widget preset(int value) {
+    final activo = breakMinutes == value;
+
+    return GestureDetector(
+      onTap: () {
+        onUpdate(value);
+      },
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 8),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(30),
+          color: activo ? const Color(0xffE6F4FF) : Colors.transparent,
+        ),
+        child: Text(
+          '$value min',
+          style: TextStyle(
+            color: activo ? TColors.appMainDarkColor : TColors.disabled,
           ),
-
-          const SizedBox(width: 14),
-
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'TURNO ACTUAL',
-                  style: TextStyle(
-                    fontSize: 11,
-                    fontWeight: FontWeight.w700,
-                    color: TColors.disabled,
-                  ),
-                ),
-
-                SizedBox(height: 8),
-
-                Text.rich(
-                  TextSpan(
-                    children: [
-                      TextSpan(
-                        text: 'Entrada: ',
-                        style: TextStyle(color: TColors.appMainTextColor),
-                      ),
-                      TextSpan(
-                        text: _formatearHora(startTime),
-                        style: TextStyle(fontWeight: FontWeight.bold),
-                      ),
-                    ],
-                  ),
-                ),
-
-                SizedBox(height: 6),
-
-                Row(
-                  children: [
-                    Icon(Icons.check_circle, size: 16, color: Colors.green),
-
-                    SizedBox(width: 4),
-
-                    Text(
-                      'En planta - Sector Norte',
-                      style: TextStyle(color: Colors.green, fontSize: 13),
-                    ),
-                  ],
-                ),
-              ],
-            ),
-          ),
-        ],
+        ),
       ),
     );
   }
 
-  Widget _buildExitHour() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        const Text(
-          'Hora de Salida',
-          style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600),
-        ),
-
-        const SizedBox(height: 10),
-
-        GestureDetector(
-          onTap: _selectTime,
-          child: Container(
-            height: 58,
-            padding: const EdgeInsets.symmetric(horizontal: 16),
-            decoration: BoxDecoration(
-              color: TColors.white,
-              borderRadius: BorderRadius.circular(16),
-            ),
-            child: Row(
-              children: [
-                const Icon(Icons.access_time, color: TColors.disabled),
-
-                const SizedBox(width: 10),
-
-                Expanded(
-                  child: Text(
-                    _formatearHora(endTime),
-                    textAlign: TextAlign.center,
-                    style: const TextStyle(
-                      fontSize: 28,
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
-                ),
-
-                const Icon(Icons.edit_outlined, color: TColors.disabled),
-              ],
-            ),
-          ),
-        ),
-
-        const SizedBox(height: 8),
-
-        const Text(
-          'Se utilizará la hora actual del dispositivo por defecto.',
-          style: TextStyle(color: TColors.disabled, fontSize: 12),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildBreakTime() {
+  @override
+  Widget build(BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -337,8 +268,8 @@ class _EmployeeCheckOutLogScreenState extends State<EmployeeCheckOutLogScreen> {
         const SizedBox(height: 10),
 
         Container(
-          padding: const EdgeInsets.symmetric(horizontal: 16),
           height: 60,
+          padding: const EdgeInsets.symmetric(horizontal: 16),
           decoration: BoxDecoration(
             color: TColors.white,
             borderRadius: BorderRadius.circular(16),
@@ -346,35 +277,34 @@ class _EmployeeCheckOutLogScreenState extends State<EmployeeCheckOutLogScreen> {
           child: Row(
             children: [
               IconButton(
-                onPressed: () {
-                  _actualizarRefrigerio(breakMinutes - 5);
-                },
-                icon: const Icon(Icons.remove, color: TColors.appMainDarkColor),
+                onPressed: () => onUpdate(breakMinutes - 5),
+                icon: const Icon(Icons.remove),
               ),
 
               Expanded(
                 child: TextField(
-                  controller: breakController,
+                  controller: controller,
                   keyboardType: TextInputType.number,
                   textAlign: TextAlign.center,
+                  inputFormatters: [FilteringTextInputFormatter.digitsOnly],
                   style: const TextStyle(fontSize: 30),
                   decoration: const InputDecoration(
                     border: InputBorder.none,
                     suffixText: 'min',
                   ),
-                  onChanged: (valor) {
-                    final numero = int.tryParse(valor);
-                    if (numero == null) return;
-                    _actualizarRefrigerio(numero);
+                  onChanged: (value) {
+                    final number = int.tryParse(value);
+
+                    if (number != null) {
+                      onUpdate(number);
+                    }
                   },
                 ),
               ),
 
               IconButton(
-                onPressed: () {
-                  _actualizarRefrigerio(breakMinutes + 5);
-                },
-                icon: const Icon(Icons.add, color: TColors.appMainDarkColor),
+                onPressed: () => onUpdate(breakMinutes + 5),
+                icon: const Icon(Icons.add),
               ),
             ],
           ),
@@ -384,65 +314,28 @@ class _EmployeeCheckOutLogScreenState extends State<EmployeeCheckOutLogScreen> {
 
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-          children: [_presetButton(30), _presetButton(45), _presetButton(60)],
+          children: [preset(30), preset(45), preset(60)],
         ),
       ],
     );
   }
+}
 
-  Widget _presetButton(int valor) {
-    final activo = breakMinutes == valor;
+class SummaryCardWidget extends StatelessWidget {
+  final Duration hoursWorked;
+  final int breakMinutes;
+  final Duration netTotal;
+  final String Function(Duration) formatDuration;
 
-    return GestureDetector(
-      onTap: () {
-        _actualizarRefrigerio(valor);
-      },
+  const SummaryCardWidget({
+    super.key,
+    required this.hoursWorked,
+    required this.breakMinutes,
+    required this.netTotal,
+    required this.formatDuration,
+  });
 
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 8),
-
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(30),
-
-          color: activo ? const Color(0xffE6F4FF) : Colors.transparent,
-        ),
-
-        child: Text(
-          '$valor min',
-
-          style: TextStyle(
-            color: activo ? TColors.appMainDarkColor : TColors.disabled,
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildSummaryCard() {
-    return Container(
-      padding: const EdgeInsets.all(18),
-      decoration: BoxDecoration(
-        color: const Color(0xffF3F8FD),
-        borderRadius: BorderRadius.circular(18),
-        border: Border.all(color: const Color(0xffD6E7F8)),
-      ),
-      child: Column(
-        children: [
-          _row('Horas Trabajadas', _formatDuration(hoursWorked)),
-          const SizedBox(height: 14),
-          _row(
-            'Descuento Refrigerio',
-            '-${_formatDuration(Duration(minutes: breakMinutes))}',
-          ),
-          const Divider(),
-          const SizedBox(height: 8),
-          _row('TOTAL NETO', _formatDuration(netTotal), highlight: true),
-        ],
-      ),
-    );
-  }
-
-  Widget _row(String title, String value, {bool highlight = false}) {
+  Widget rowItem(String title, String value, {bool highlight = false}) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
@@ -471,7 +364,49 @@ class _EmployeeCheckOutLogScreenState extends State<EmployeeCheckOutLogScreen> {
     );
   }
 
-  Widget _buildObservations() {
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(18),
+      decoration: BoxDecoration(
+        color: const Color(0xffF3F8FD),
+        borderRadius: BorderRadius.circular(18),
+        border: Border.all(color: const Color(0xffD6E7F8)),
+      ),
+      child: Column(
+        children: [
+          rowItem('Horas Trabajadas', formatDuration(hoursWorked)),
+
+          const SizedBox(height: 14),
+
+          rowItem(
+            'Descuento Refrigerio',
+            '-${formatDuration(Duration(minutes: breakMinutes))}',
+          ),
+
+          const Divider(),
+
+          const SizedBox(height: 8),
+
+          rowItem('TOTAL NETO', formatDuration(netTotal), highlight: true),
+        ],
+      ),
+    );
+  }
+}
+
+class ObservationsWidget extends StatelessWidget {
+  final TextEditingController controller;
+  final bool requiresRemark;
+
+  const ObservationsWidget({
+    super.key,
+    required this.controller,
+    required this.requiresRemark,
+  });
+
+  @override
+  Widget build(BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -483,27 +418,32 @@ class _EmployeeCheckOutLogScreenState extends State<EmployeeCheckOutLogScreen> {
         const SizedBox(height: 10),
 
         Container(
-          padding: const EdgeInsets.all(16),
           height: 110,
+          padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
             color: TColors.white,
             borderRadius: BorderRadius.circular(16),
           ),
           child: TextField(
-            controller: remarkController,
+            controller: controller,
             maxLines: 5,
             maxLength: 500,
+
             inputFormatters: [LengthLimitingTextInputFormatter(500)],
-            decoration: InputDecoration(
+
+            decoration: const InputDecoration(
               border: InputBorder.none,
+
               hintText:
                   'Escriba aquí cualquier incidencia o comentario relevante...',
-              hintStyle: const TextStyle(color: TColors.disabled),
+
+              hintStyle: TextStyle(color: TColors.disabled),
 
               counterText: '',
             ),
           ),
         ),
+
         if (requiresRemark) ...[
           const SizedBox(height: 8),
 
@@ -532,8 +472,20 @@ class _EmployeeCheckOutLogScreenState extends State<EmployeeCheckOutLogScreen> {
       ],
     );
   }
+}
 
-  Widget _buildBottomButton() {
+class BottomButtonWidget extends StatelessWidget {
+  final Duration netTotal;
+  final TextEditingController remarkController;
+
+  const BottomButtonWidget({
+    super.key,
+    required this.netTotal,
+    required this.remarkController,
+  });
+
+  @override
+  Widget build(BuildContext context) {
     return Container(
       padding: const EdgeInsets.all(16),
       color: TColors.white,
@@ -543,8 +495,7 @@ class _EmployeeCheckOutLogScreenState extends State<EmployeeCheckOutLogScreen> {
           onPressed: () {
             final requiresRemark = netTotal.inMinutes < 240;
 
-            if (requiresRemark &&
-                remarkController.text.trim().isEmpty) {
+            if (requiresRemark && remarkController.text.trim().isEmpty) {
               CustomAlert.show(
                 context,
                 title: 'Observación requerida',
@@ -552,6 +503,7 @@ class _EmployeeCheckOutLogScreenState extends State<EmployeeCheckOutLogScreen> {
                     'Debe registrar una observación si el turno es menor a 4 horas.',
                 type: AlertType.warning,
               );
+
               return;
             }
 
@@ -566,7 +518,7 @@ class _EmployeeCheckOutLogScreenState extends State<EmployeeCheckOutLogScreen> {
           label: const Text('Finalizar Registro'),
           style: ElevatedButton.styleFrom(
             backgroundColor: TColors.appMainDarkColor,
-            foregroundColor: Colors.white,
+            foregroundColor: TColors.white,
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(18),
             ),
