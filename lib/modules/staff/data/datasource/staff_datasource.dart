@@ -48,7 +48,39 @@ class StaffDatasource {
       data: model.toJson(),
     );
   }
-  
+
+  Future<List<PayrollMonthlyModel>> getPayrollMonthly() async {
+    final queryParameters = {
+      'month': DateTime.now().month.toString(),
+      'year': DateTime.now().year.toString(),
+    };
+    final response = await apiClient.get(
+      '/api/hr/payrolls',
+      operationName: 'getPayrollsMonthly',
+      queryParameters: queryParameters,
+    );
+    final List data = response as List;
+    return data.map((json) => PayrollMonthlyModel.fromJson(json)).toList();
+  }
+
+  Future<void> createPayrollMonthly(
+    CreatePayrollMonthlyEntity payrollenitity,
+  ) async {
+    final modelpayroll = CreatePayrollMonthlyModel.fromEntity(payrollenitity);
+    await apiClient.postFormData(
+      '/api/hr/payrolls/request-egreso',
+      operationName: 'requestPayrollsMonthly',
+      data: modelpayroll.toJson(),
+      files: [
+        {
+          'name': 'planilla',
+          'path': modelpayroll.planillaUrl,
+          'filename': modelpayroll.planillaUrl.split('/').last,
+        },
+      ],
+    );
+  }
+
   Future<EmployeeCheckOutModel> checkOutEmployee(
     String attendanceId,
     EmployeeCheckOutRequestModel request,
@@ -59,8 +91,6 @@ class StaffDatasource {
       operationName: 'checkOutEmployee',
     );
 
-    return EmployeeCheckOutModel.fromJson(
-      response['data'],
-    );
+    return EmployeeCheckOutModel.fromJson(response['data']);
   }
 }

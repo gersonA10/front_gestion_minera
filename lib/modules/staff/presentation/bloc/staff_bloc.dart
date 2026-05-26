@@ -1,11 +1,9 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
-
 import '../../domain/entity/entity.dart';
 import '../../domain/repositories/staff_repository.dart';
 import 'dart:async';
 import '../../../../core/networking/base_api_exception.dart';
 import '../../../../utils/error.dart';
-
 part 'staff_event.dart';
 part 'staff_state.dart';
 
@@ -18,6 +16,8 @@ class StaffBloc extends Bloc<StaffEvent, StaffState> {
 
     on<RefreshEmployeesEvent>(_onRefreshEmployees);
     on<RegisterEmployeesEvent>(_onRegisterEmployees);
+    on<CreatePayrollMonthlyEvent>(_onCreatePayrollMonthly);
+    on<GetEmployeePayrollEvent>(_onGetEmployeePayrol);
   }
 
   FutureOr<void> _onRegisterEmployees(
@@ -125,5 +125,47 @@ class StaffBloc extends Bloc<StaffEvent, StaffState> {
         status: currentState.currentStatus,
       ),
     );
+  }
+
+  FutureOr<void> _onCreatePayrollMonthly(
+    CreatePayrollMonthlyEvent event,
+    Emitter<StaffState> emit,
+  ) async {
+    emit(CreatePayrollRequestLoading());
+    try {
+      await repository.createPayrollMonthly(event.payroll);
+      emit(CreatePayrollRequestSuccess());
+    } on BaseApiException catch (error) {
+      final responseData = error.response?.data as Map<String, dynamic>?;
+      emit(CreatePayrollRequestError(responseData?['error'] ?? error.key));
+    } catch (e) {
+      emit(CreatePayrollRequestError('Error inesperado: $e'));
+    }
+  }
+
+  FutureOr<void> _onGetEmployeePayrol(
+    GetEmployeePayrollEvent event,
+    Emitter<StaffState> emit,
+  ) async {
+    emit(GenerateEmployeePayrollLoading());
+    try {
+      final response = await repository.getPayrollMonthly();
+      final totalEmployee = response.length;
+      double totalAmount = response.fold(
+        0,
+        (sum, employee) => sum + employee.baseSalary,
+      );
+      emit(
+        GenerateEmployeePayrollSuccess(
+          totalEmployee: totalEmployee,
+          totalAmount: totalAmount,
+        ),
+      );
+    } on BaseApiException catch (error) {
+      final responseData = error.response?.data as Map<String, dynamic>?;
+      emit(GenerateEmployeePayrollError(responseData?['error'] ?? error.key));
+    } catch (e) {
+      emit(GenerateEmployeePayrollError('Error inesperado: $e'));
+    }
   }
 }
