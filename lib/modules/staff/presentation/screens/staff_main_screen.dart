@@ -25,8 +25,8 @@ class _StaffMainScreenState extends State<StaffMainScreen> {
     _screens = [
       const WorkersScreen(),
       const PayrollScreen(),
-      const _PlaceholderScreen(title: 'Solicitar Egreso'),
-      const _PlaceholderScreen(title: 'Turnos'),
+      StaffExpenditureRequestScreen(),
+      EmployeeEntryRegisterScreen(id: 'ddb582a5-1621-4d9d-b1ab-dc04183f9a46'),
     ];
   }
 
@@ -105,6 +105,7 @@ class _StaffMainScreenState extends State<StaffMainScreen> {
               icon: Icon(Icons.settings_outlined),
               activeIcon: Icon(Icons.settings),
               label: 'TURNOS',
+              
             ),
           ],
         ),
