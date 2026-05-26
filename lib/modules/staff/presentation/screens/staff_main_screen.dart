@@ -1,5 +1,6 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
+import 'package:front_gestion_minera/config/router/app_router.gr.dart';
 import 'package:front_gestion_minera/modules/staff/presentation/screens/screens.dart';
 import 'package:front_gestion_minera/utils/constants/color.constant.dart';
 
@@ -26,7 +27,7 @@ class _StaffMainScreenState extends State<StaffMainScreen> {
       const WorkersScreen(),
       const PayrollScreen(),
       const _PlaceholderScreen(title: 'Solicitar Egreso'),
-      const _PlaceholderScreen(title: 'Turnos'),
+      const _DetailsScreen(),
     ];
   }
 
@@ -123,6 +124,40 @@ class _PlaceholderScreen extends StatelessWidget {
       child: Text(
         title,
         style: const TextStyle(fontSize: 22, fontWeight: FontWeight.w600),
+      ),
+    );
+  }
+}
+
+class _DetailsScreen extends StatelessWidget {
+  const _DetailsScreen({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: Text('Turnos')),
+      body: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            InkWell(
+              onTap: () {
+                context.router.push(AssistanceDetailRoute());
+              },
+              child: Container(
+                padding: EdgeInsets.all(15),
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(15),
+                  color: TColors.appMainColor,
+                ),
+                child: Text(
+                  'Detail Screen',
+                  style: TextStyle(color: TColors.white),
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

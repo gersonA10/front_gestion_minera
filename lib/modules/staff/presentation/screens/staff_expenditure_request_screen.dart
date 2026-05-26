@@ -8,6 +8,7 @@ import 'package:image_picker/image_picker.dart';
 
 import '../../../../core/widgets/custom_alert_widget.dart';
 
+@RoutePage()
 class StaffExpenditureRequestScreen extends StatefulWidget {
   const StaffExpenditureRequestScreen({super.key});
 
