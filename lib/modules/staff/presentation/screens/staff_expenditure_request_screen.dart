@@ -13,6 +13,7 @@ import 'package:image_picker/image_picker.dart';
 import '../../../../core/widgets/custom_alert_widget.dart';
 import '../../../../core/widgets/excavator_loader.dart';
 
+@RoutePage()
 class StaffExpenditureRequestScreen extends StatefulWidget {
   const StaffExpenditureRequestScreen({super.key});
 
@@ -117,9 +118,10 @@ class _StaffExpenditureRequestScreenState
             return Stack(
               children: [
                 Padding(
-                  padding: EdgeInsets.all(20),
+                  padding: EdgeInsets.symmetric(horizontal:20),
                   child: ListView(
                     children: [
+                      const SizedBox(height: 10),
                       const Text(
                         'Solicitud de Egreso',
                         style: TextStyle(
@@ -381,6 +383,7 @@ class _StaffExpenditureRequestScreenState
                         child: Container(
                           height: 60,
                           width: double.infinity,
+                          margin: EdgeInsets.only(bottom: 20),
                           decoration: BoxDecoration(
                             color: TColors.appMainDarkColor,
                             borderRadius: BorderRadius.circular(20),

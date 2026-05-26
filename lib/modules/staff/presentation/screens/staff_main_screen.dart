@@ -25,7 +25,7 @@ class _StaffMainScreenState extends State<StaffMainScreen> {
     _screens = [
       const WorkersScreen(),
       const PayrollScreen(),
-      const _PlaceholderScreen(title: 'Solicitar Egreso'),
+      const StaffExpenditureRequestScreen(),
       const _PlaceholderScreen(title: 'Turnos'),
     ];
   }
