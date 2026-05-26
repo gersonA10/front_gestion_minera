@@ -2,7 +2,6 @@ import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:front_gestion_minera/modules/staff/presentation/widgets/widgets.dart';
 import 'package:front_gestion_minera/utils/constants/color.constant.dart';
-
 import '../../../../utils/assets.dart';
 
 @RoutePage()
@@ -223,22 +222,6 @@ class _EmployeeEntryRegisterScreenState
                 if (!_keyForm.currentState!.validate()) {
                   return;
                 }
-                final resultado = {
-                  "employee_id": widget.id,
-                  "assigned_shift":
-                      (int.parse(_hourController.text.split(':').first) < 12)
-                      ? 'MAÑANA'
-                      : 'TARDE',
-                  "check_in_time": _hourController.text,
-                  "epp_data": {
-                    "casco": true,
-                    "lentes": true,
-                    "chaleco": true,
-                    "orejeras": true,
-                  },
-                  "observations": _observationController.text,
-                };
-                print(resultado);
                 _observationController.clear();
                 _hourController.text =
                     '${TimeOfDay.now().hour}:${TimeOfDay.now().minute}';
