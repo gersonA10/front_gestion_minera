@@ -1,6 +1,7 @@
 import 'package:auto_route/annotations.dart';
 import 'package:flutter/material.dart';
 import 'package:front_gestion_minera/utils/constants/color.constant.dart';
+import 'package:timeline_tile/timeline_tile.dart';
 
 @RoutePage()
 class AssistanceDetailScreen extends StatefulWidget {
@@ -158,6 +159,140 @@ class _AssistanceDetailScreenState extends State<AssistanceDetailScreen> {
                       ),
                     ],
                   ),
+                  TimelineCustomWidget(
+                    isFirst: true,
+                    pointColor: TColors.uploadBlue,
+                    child: Container(
+                      margin: const EdgeInsets.only(
+                        top: 10,
+                        bottom: 10,
+                        left: 5,
+                      ),
+                      padding: const EdgeInsets.symmetric(
+                        vertical: 16,
+                        horizontal: 10,
+                      ),
+                      decoration: BoxDecoration(
+                        color: TColors.uploadBlue.withValues(alpha: 0.1),
+                        borderRadius: BorderRadius.circular(15),
+                        border: Border.all(
+                          color: TColors.uploadBlue.withValues(alpha: 0.5),
+                        ),
+                      ),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                'Entrada Registrada',
+                                style: TextStyle(
+                                  color: TColors.uploadBlue,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                              Text('Lugar'),
+                            ],
+                          ),
+                          Row(
+                            children: [
+                              Text(
+                                '06:55',
+                                style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 25,
+                                ),
+                              ),
+                              SizedBox(width: 4),
+                              Text('AM'),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                  TimelineCustomWidget(
+                    pointColor: TColors.grayText,
+                    size: 10,
+                    child: Container(
+                      padding: EdgeInsets.only(left: 18, right: 10),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text('Refrigerio'),
+                          Container(
+                            padding: EdgeInsets.all(5),
+                            decoration: BoxDecoration(
+                              color: TColors.appBackgroundColor,
+                              borderRadius: BorderRadius.circular(20),
+                            ),
+                            child: Row(
+                              children: [
+                                Icon(Icons.restaurant, size: 15),
+                                SizedBox(width: 4),
+                                Text(
+                                  '45 min',
+                                  style: TextStyle(
+                                    fontSize: 13,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                  TimelineCustomWidget(
+                    isLast: true,
+                    pointColor: TColors.bgColor,
+                    child: Container(
+                      margin: const EdgeInsets.only(
+                        top: 10,
+                        bottom: 10,
+                        left: 5,
+                      ),
+                      padding: const EdgeInsets.symmetric(
+                        vertical: 16,
+                        horizontal: 10,
+                      ),
+                      decoration: BoxDecoration(
+                        color: TColors.appBackgroundColor,
+                        borderRadius: BorderRadius.circular(15),
+                      ),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                'Salida Registrada',
+                                style: TextStyle(fontWeight: FontWeight.bold),
+                              ),
+                              Text('Lugar'),
+                            ],
+                          ),
+                          Row(
+                            children: [
+                              Text(
+                                '16:40',
+                                style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 25,
+                                ),
+                              ),
+                              SizedBox(width: 4),
+                              Text('AM'),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                  Divider(color: TColors.appBackgroundColor,),
                   Row(
                     children: [
                       const Column(
@@ -217,6 +352,36 @@ class _AssistanceDetailScreenState extends State<AssistanceDetailScreen> {
           ],
         ),
       ),
+    );
+  }
+}
+
+class TimelineCustomWidget extends StatelessWidget {
+  final bool isFirst;
+  final bool isLast;
+  final Color pointColor;
+  final Widget child;
+  final double size;
+  const TimelineCustomWidget({
+    super.key,
+    this.isFirst = false,
+    this.isLast = false,
+    required this.pointColor,
+    required this.child,
+    this.size = 14,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return TimelineTile(
+      isFirst: isFirst,
+      isLast: isLast,
+      alignment: TimelineAlign.manual,
+      lineXY: 0.1,
+      indicatorStyle: IndicatorStyle(width: size, color: pointColor),
+      beforeLineStyle: const LineStyle(color: TColors.grayText, thickness: 2),
+      afterLineStyle: const LineStyle(color: TColors.grayText, thickness: 2),
+      endChild: child,
     );
   }
 }
