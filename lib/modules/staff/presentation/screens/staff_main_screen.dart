@@ -22,9 +22,9 @@ class _StaffMainScreenState extends State<StaffMainScreen> {
   void initState() {
     super.initState();
 
-    _screens = const [
-      WorkersScreen(),
-      _PlaceholderScreen(title: 'Nómina'),
+    _screens = [
+      const WorkersScreen(),
+      const PayrollScreen(),
       StaffExpenditureRequestScreen(),
       EmployeeEntryRegisterScreen(id: 'ddb582a5-1621-4d9d-b1ab-dc04183f9a46'),
     ];
@@ -34,7 +34,6 @@ class _StaffMainScreenState extends State<StaffMainScreen> {
     setState(() {
       _currentIndex = index;
     });
-
     _pageController.animateToPage(
       index,
       duration: const Duration(milliseconds: 300),
@@ -58,20 +57,17 @@ class _StaffMainScreenState extends State<StaffMainScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: TColors.background,
-
       body: PageView(
         controller: _pageController,
         onPageChanged: _onPageChanged,
         physics: const BouncingScrollPhysics(),
         children: _screens,
       ),
-
       bottomNavigationBar: Container(
         height: 70,
         decoration: const BoxDecoration(
           color: TColors.white,
           border: Border(top: BorderSide(color: Color(0xffE5E7EB))),
-          
         ),
         child: BottomNavigationBar(
           currentIndex: _currentIndex,
@@ -85,10 +81,9 @@ class _StaffMainScreenState extends State<StaffMainScreen> {
             fontSize: 11,
             fontWeight: FontWeight.bold,
           ),
-
           unselectedLabelStyle: const TextStyle(
             fontSize: 10,
-            fontWeight: FontWeight.normal, 
+            fontWeight: FontWeight.normal,
           ),
           items: const [
             BottomNavigationBarItem(
@@ -121,7 +116,6 @@ class _StaffMainScreenState extends State<StaffMainScreen> {
 
 class _PlaceholderScreen extends StatelessWidget {
   final String title;
-
   const _PlaceholderScreen({required this.title});
 
   @override
