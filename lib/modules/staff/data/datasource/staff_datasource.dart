@@ -93,4 +93,13 @@ class StaffDatasource {
 
     return EmployeeCheckOutModel.fromJson(response['data']);
   }
+
+  Future<void> registerCheckInEmployee(EmployeeCheckInEntity checkIn) async {
+    final model = EmployeeCheckInModel.fromEntity(checkIn);
+    await apiClient.post(
+      '/api/hr/employees/attendances/check-in',
+      operationName: 'CheckInEmployeed',
+      data: model.toJson(),
+    );
+  }
 }

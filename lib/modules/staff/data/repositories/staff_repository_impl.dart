@@ -41,4 +41,7 @@ class StaffRepositoryImpl implements StaffRepository {
   Future<List<PayrollMonthlyModel>> getPayrollMonthly() {
     return datasource.getPayrollMonthly();
   }
+  @override
+  Future<void> registerCheckInEmployee(EmployeeCheckInEntity checkIn) =>
+    datasource.registerCheckInEmployee(checkIn);
 }

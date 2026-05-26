@@ -15,4 +15,6 @@ abstract class StaffRepository {
 
   Future<List<PayrollMonthlyModel>> getPayrollMonthly();
   Future<void> createPayrollMonthly(CreatePayrollMonthlyEntity payrollMonthly);
+
+  Future<void> registerCheckInEmployee(EmployeeCheckInEntity checkIn);
 }
