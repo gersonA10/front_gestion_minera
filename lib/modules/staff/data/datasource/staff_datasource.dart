@@ -63,7 +63,9 @@ class StaffDatasource {
     return data.map((json) => PayrollMonthlyModel.fromJson(json)).toList();
   }
 
-  Future<void> createPayrollMonthly(CreatePayrollMonthlyEntity payrollenitity) async {
+  Future<void> createPayrollMonthly(
+    CreatePayrollMonthlyEntity payrollenitity,
+  ) async {
     final modelpayroll = CreatePayrollMonthlyModel.fromEntity(payrollenitity);
     await apiClient.postFormData(
       '/api/hr/payrolls/request-egreso',
@@ -77,5 +79,18 @@ class StaffDatasource {
         },
       ],
     );
+  }
+
+  Future<EmployeeCheckOutModel> checkOutEmployee(
+    String attendanceId,
+    EmployeeCheckOutRequestModel request,
+  ) async {
+    final response = await apiClient.patch(
+      '/api/hr/employees/attendances/$attendanceId/check-out',
+      data: request.toJson(),
+      operationName: 'checkOutEmployee',
+    );
+
+    return EmployeeCheckOutModel.fromJson(response['data']);
   }
 }
