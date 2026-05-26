@@ -18,6 +18,7 @@ class StaffBloc extends Bloc<StaffEvent, StaffState> {
     on<RegisterEmployeesEvent>(_onRegisterEmployees);
     on<CreatePayrollMonthlyEvent>(_onCreatePayrollMonthly);
     on<GetEmployeePayrollEvent>(_onGetEmployeePayrol);
+    on<RegisterCheckInEmployeeEvent>(_onRegisterCheckInEmployee);
   }
 
   FutureOr<void> _onRegisterEmployees(
@@ -166,6 +167,21 @@ class StaffBloc extends Bloc<StaffEvent, StaffState> {
       emit(GenerateEmployeePayrollError(responseData?['error'] ?? error.key));
     } catch (e) {
       emit(GenerateEmployeePayrollError('Error inesperado: $e'));
+    }
+  }
+
+  FutureOr<void> _onRegisterCheckInEmployee(
+    RegisterCheckInEmployeeEvent event,
+    Emitter<StaffState> emit,
+  ) async {
+    emit(CheckInEmployeeLoading());
+    try {
+      repository.registerCheckInEmployee(event.checkIn);
+    }on BaseApiException catch (error) {
+      final responseData = error.response?.data as Map<String, dynamic>?;
+      emit(CheckInEmployeeError(responseData?['error'] ?? error.key));
+    } catch (e) {
+      emit(CheckInEmployeeError('Error inesperado: $e'));
     }
   }
 }

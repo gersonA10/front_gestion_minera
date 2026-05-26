@@ -35,3 +35,9 @@ class CreatePayrollMonthlyEvent extends StaffEvent {
 }
 
 class GetEmployeePayrollEvent extends StaffEvent {}
+
+class RegisterCheckInEmployeeEvent extends StaffEvent {
+  final EmployeeCheckInEntity checkIn;
+
+  RegisterCheckInEmployeeEvent({required this.checkIn});
+}

@@ -94,3 +94,12 @@ class GenerateEmployeePayrollError extends StaffState {
   final String message;
   GenerateEmployeePayrollError(this.message);
 }
+
+class CheckInEmployeeLoading extends StaffState {}
+
+class CheckInEmployeeSuccess extends StaffState {}
+
+class CheckInEmployeeError extends StaffState {
+  final String message;
+  CheckInEmployeeError(this.message);
+}
