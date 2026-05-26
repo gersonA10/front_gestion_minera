@@ -215,7 +215,7 @@ class _StaffExpenditureRequestScreenState
                             if (value == null || value.isEmpty) {
                               return 'Este Campo es Obligatorio';
                             }
-                            if (value.length > 10) {
+                            if (value.length < 10) {
                               return 'Debe de tener minimo 10 caracteres';
                             }
                             return null;
