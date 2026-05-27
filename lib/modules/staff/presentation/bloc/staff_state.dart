@@ -106,3 +106,42 @@ class GenerateEmployeePayrollError extends StaffState {
   final String message;
   GenerateEmployeePayrollError(this.message);
 }
+
+// Attendance Ingreso
+class AttendanceIngresoLoading extends StaffState {}
+
+class AttendanceIngresoLoaded extends StaffState {
+  final List<AttendanceIngresoEntity> employees;
+  AttendanceIngresoLoaded(this.employees);
+}
+
+class AttendanceIngresoError extends StaffState {
+  final String message;
+  AttendanceIngresoError(this.message);
+}
+
+// Attendance En Planta
+class AttendanceEnPlantaLoading extends StaffState {}
+
+class AttendanceEnPlantaLoaded extends StaffState {
+  final List<AttendanceEnPlantaEntity> employees;
+  AttendanceEnPlantaLoaded(this.employees);
+}
+
+class AttendanceEnPlantaError extends StaffState {
+  final String message;
+  AttendanceEnPlantaError(this.message);
+}
+
+// Attendance Finalizado
+class AttendanceFinalizadoLoading extends StaffState {}
+
+class AttendanceFinalizadoLoaded extends StaffState {
+  final List<AttendanceFinalizadoEntity> employees;
+  AttendanceFinalizadoLoaded(this.employees);
+}
+
+class AttendanceFinalizadoError extends StaffState {
+  final String message;
+  AttendanceFinalizadoError(this.message);
+}

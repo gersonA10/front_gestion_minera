@@ -108,6 +108,46 @@ class StaffDatasource {
     );
     return EmployeeModel.fromJson(response['data']);
   }
+
+  Future<List<AttendanceIngresoModel>> getAttendanceIngreso() async {
+    final response = await apiClient.get(
+      '/api/hr/attendances/daily',
+      operationName: 'getAttendanceIngreso',
+      queryParameters: {'tab': 'INGRESO'},
+    );
+    final List data = (response['pending_employees'] as List?) ?? [];
+    return data
+        .map((e) => AttendanceIngresoModel.fromJson(e as Map<String, dynamic>))
+        .toList();
+  }
+
+  Future<List<AttendanceEnPlantaModel>> getAttendanceEnPlanta() async {
+    final response = await apiClient.get(
+      '/api/hr/attendances/daily',
+      operationName: 'getAttendanceEnPlanta',
+      queryParameters: {'tab': 'EN_PLANTA'},
+    );
+    final List data = (response['active_employees'] as List?) ?? [];
+    return data
+        .map((e) => AttendanceEnPlantaModel.fromJson(e as Map<String, dynamic>))
+        .toList();
+  }
+
+  Future<List<AttendanceFinalizadoModel>> getAttendanceFinalizado({
+    required String date,
+  }) async {
+    final response = await apiClient.get(
+      '/api/hr/attendances/daily',
+      operationName: 'getAttendanceFinalizado',
+      queryParameters: {'tab': 'FINALIZADOS', 'date': date},
+    );
+    final List data = (response['completed_employees'] as List?) ?? [];
+    return data
+        .map(
+          (e) => AttendanceFinalizadoModel.fromJson(e as Map<String, dynamic>),
+        )
+        .toList();
+  }
 }
 
 

@@ -17,7 +17,9 @@ class StaffBloc extends Bloc<StaffEvent, StaffState> {
     on<CreatePayrollMonthlyEvent>(_onCreatePayrollMonthly);
     on<GetEmployeePayrollEvent>(_onGetEmployeePayrol);
     on<GetEmployeeProfileEvent>(_onGetEmployeeProfile);
-
+    on<GetAttendanceIngresoEvent>(_onGetAttendanceIngreso);
+    on<GetAttendanceEnPlantaEvent>(_onGetAttendanceEnPlanta);
+    on<GetAttendanceFinalizadoEvent>(_onGetAttendanceFinalizado);
   }
 
   FutureOr<void> _onRegisterEmployees(
@@ -179,6 +181,53 @@ class StaffBloc extends Bloc<StaffEvent, StaffState> {
       emit(EmployeeProfileError(mapErrorMessage(e.key)));
     } catch (_) {
       emit(EmployeeProfileError('Ocurrió un error inesperado'));
+    }
+  }
+
+  Future<void> _onGetAttendanceIngreso(
+    GetAttendanceIngresoEvent event,
+    Emitter<StaffState> emit,
+  ) async {
+    emit(AttendanceIngresoLoading());
+    try {
+      final employees = await repository.getAttendanceIngreso();
+      emit(AttendanceIngresoLoaded(employees));
+    } on BaseApiException catch (e) {
+      emit(AttendanceIngresoError(mapErrorMessage(e.key)));
+    } catch (_) {
+      emit(AttendanceIngresoError('Ocurrió un error inesperado'));
+    }
+  }
+
+  Future<void> _onGetAttendanceEnPlanta(
+    GetAttendanceEnPlantaEvent event,
+    Emitter<StaffState> emit,
+  ) async {
+    emit(AttendanceEnPlantaLoading());
+    try {
+      final employees = await repository.getAttendanceEnPlanta();
+      emit(AttendanceEnPlantaLoaded(employees));
+    } on BaseApiException catch (e) {
+      emit(AttendanceEnPlantaError(mapErrorMessage(e.key)));
+    } catch (_) {
+      emit(AttendanceEnPlantaError('Ocurrió un error inesperado'));
+    }
+  }
+
+  Future<void> _onGetAttendanceFinalizado(
+    GetAttendanceFinalizadoEvent event,
+    Emitter<StaffState> emit,
+  ) async {
+    emit(AttendanceFinalizadoLoading());
+    try {
+      final employees = await repository.getAttendanceFinalizado(
+        date: event.date,
+      );
+      emit(AttendanceFinalizadoLoaded(employees));
+    } on BaseApiException catch (e) {
+      emit(AttendanceFinalizadoError(mapErrorMessage(e.key)));
+    } catch (_) {
+      emit(AttendanceFinalizadoError('Ocurrió un error inesperado'));
     }
   }
 }

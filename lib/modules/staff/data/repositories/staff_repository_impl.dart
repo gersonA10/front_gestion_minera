@@ -47,4 +47,18 @@ class StaffRepositoryImpl implements StaffRepository {
   Future<EmployeeEntity> getEmployeeById(String id) async {
     return await datasource.getEmployeeById(id);
   }
+
+  @override
+  Future<List<AttendanceIngresoEntity>> getAttendanceIngreso() =>
+      datasource.getAttendanceIngreso();
+
+  @override
+  Future<List<AttendanceEnPlantaEntity>> getAttendanceEnPlanta() =>
+      datasource.getAttendanceEnPlanta();
+
+  @override
+  Future<List<AttendanceFinalizadoEntity>> getAttendanceFinalizado({
+    required String date,
+  }) =>
+      datasource.getAttendanceFinalizado(date: date);
 }

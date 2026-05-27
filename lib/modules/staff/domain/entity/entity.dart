@@ -2,3 +2,6 @@ export 'package:front_gestion_minera/modules/staff/domain/entity/employee_entity
 export 'package:front_gestion_minera/modules/staff/domain/entity/create_payroll_monthly_entity.dart';
 export 'package:front_gestion_minera/modules/staff/domain/entity/payroll_monthly_entity.dart';
 export 'package:front_gestion_minera/modules/staff/domain/entity/register_employees_entity.dart';
+export 'package:front_gestion_minera/modules/staff/domain/entity/attendance_ingreso_entity.dart';
+export 'package:front_gestion_minera/modules/staff/domain/entity/attendance_en_planta_entity.dart';
+export 'package:front_gestion_minera/modules/staff/domain/entity/attendance_finalizado_entity.dart';
