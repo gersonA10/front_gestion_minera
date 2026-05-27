@@ -1,5 +1,6 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
+import 'package:front_gestion_minera/modules/staff/presentation/screens/attendance_tracking_screen.dart';
 import 'package:front_gestion_minera/modules/staff/presentation/screens/payroll_screen.dart';
 import 'package:front_gestion_minera/modules/staff/presentation/screens/screens.dart';
 import 'package:front_gestion_minera/utils/constants/color.constant.dart';
@@ -27,7 +28,7 @@ class _StaffMainScreenState extends State<StaffMainScreen> {
       const WorkersScreen(),
       const PayrollScreen(),
       StaffExpenditureRequestScreen(),
-      EmployeeEntryRegisterScreen(id: 'ddb582a5-1621-4d9d-b1ab-dc04183f9a46'),
+      AttendanceControlScreen()
     ];
   }
 
