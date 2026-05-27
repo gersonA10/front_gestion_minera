@@ -284,7 +284,7 @@ class _EmployeeEntryRegisterScreenState
                           };
 
                           final checkIn = EmployeeCheckInEntity(
-                            employeeId: 'a26c0c71-16d1-437d-83f7-e4adc010c64f',
+                            employeeId: widget.id,
                             assignedShift: _getTurn(TimeOfDay.now().hour),
                             checkInTime: _hourController.text,
                             eppData: isEppData,
