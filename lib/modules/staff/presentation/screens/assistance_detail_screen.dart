@@ -1,6 +1,7 @@
 import 'package:auto_route/annotations.dart';
 import 'package:flutter/material.dart';
 import 'package:front_gestion_minera/utils/constants/color.constant.dart';
+import 'package:share_plus/share_plus.dart';
 import 'package:timeline_tile/timeline_tile.dart';
 
 @RoutePage()
@@ -25,7 +26,11 @@ class _AssistanceDetailScreenState extends State<AssistanceDetailScreen> {
         title: Text('Detalles de Asistencia'),
         actions: [
           IconButton(
-            onPressed: () {},
+            onPressed: () {
+              SharePlus.instance.share(
+                ShareParams(text: 'Compartir Con', subject: 'Compartir datos'),
+              );
+            },
             icon: Icon(
               Icons.share_outlined,
               color: TColors.appBackgroundDarkColor,
@@ -162,55 +167,7 @@ class _AssistanceDetailScreenState extends State<AssistanceDetailScreen> {
                   TimelineCustomWidget(
                     isFirst: true,
                     pointColor: TColors.uploadBlue,
-                    child: Container(
-                      margin: const EdgeInsets.only(
-                        top: 10,
-                        bottom: 10,
-                        left: 5,
-                      ),
-                      padding: const EdgeInsets.symmetric(
-                        vertical: 16,
-                        horizontal: 10,
-                      ),
-                      decoration: BoxDecoration(
-                        color: TColors.uploadBlue.withValues(alpha: 0.1),
-                        borderRadius: BorderRadius.circular(15),
-                        border: Border.all(
-                          color: TColors.uploadBlue.withValues(alpha: 0.5),
-                        ),
-                      ),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                'Entrada Registrada',
-                                style: TextStyle(
-                                  color: TColors.uploadBlue,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                              Text('Lugar'),
-                            ],
-                          ),
-                          Row(
-                            children: [
-                              Text(
-                                '06:55',
-                                style: TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 25,
-                                ),
-                              ),
-                              SizedBox(width: 4),
-                              Text('AM'),
-                            ],
-                          ),
-                        ],
-                      ),
-                    ),
+                    child: _CardTimeLineInOutWidget(isIN: true, hour: '06:55'),
                   ),
                   TimelineCustomWidget(
                     pointColor: TColors.grayText,
@@ -248,51 +205,9 @@ class _AssistanceDetailScreenState extends State<AssistanceDetailScreen> {
                   TimelineCustomWidget(
                     isLast: true,
                     pointColor: TColors.bgColor,
-                    child: Container(
-                      margin: const EdgeInsets.only(
-                        top: 10,
-                        bottom: 10,
-                        left: 5,
-                      ),
-                      padding: const EdgeInsets.symmetric(
-                        vertical: 16,
-                        horizontal: 10,
-                      ),
-                      decoration: BoxDecoration(
-                        color: TColors.appBackgroundColor,
-                        borderRadius: BorderRadius.circular(15),
-                      ),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                'Salida Registrada',
-                                style: TextStyle(fontWeight: FontWeight.bold),
-                              ),
-                              Text('Lugar'),
-                            ],
-                          ),
-                          Row(
-                            children: [
-                              Text(
-                                '16:40',
-                                style: TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 25,
-                                ),
-                              ),
-                              SizedBox(width: 4),
-                              Text('AM'),
-                            ],
-                          ),
-                        ],
-                      ),
-                    ),
+                    child: _CardTimeLineInOutWidget(isIN: false, hour: '16:45'),
                   ),
-                  Divider(color: TColors.appBackgroundColor,),
+                  Divider(color: TColors.appBackgroundColor),
                   Row(
                     children: [
                       const Column(
@@ -342,15 +257,202 @@ class _AssistanceDetailScreenState extends State<AssistanceDetailScreen> {
               ),
             ),
             Container(
-              margin: EdgeInsets.only(top: 15),
-              padding: EdgeInsets.all(20),
+              margin: const EdgeInsets.only(top: 15, bottom: 20),
+              padding: const EdgeInsets.all(20),
               decoration: BoxDecoration(
                 color: TColors.white,
                 borderRadius: BorderRadius.circular(15),
               ),
+              child: Column(
+                children: [
+                  const Row(
+                    children: [
+                      Icon(Icons.verified_outlined, color: TColors.uploadBlue),
+                      SizedBox(width: 5),
+                      Text(
+                        'Validación',
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 17,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 10),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: [
+                            Icon(Icons.fiber_manual_record_sharp),
+                            Text('Firma Supervisor'),
+                          ],
+                        ),
+                      ),
+                      SizedBox(height: 50, child: VerticalDivider()),
+                      Expanded(
+                        child: SizedBox(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            children: [
+                              Container(
+                                padding: const EdgeInsets.all(5),
+                                decoration: BoxDecoration(
+                                  color: TColors.uploadBlue.withValues(
+                                    alpha: 0.2,
+                                  ),
+                                  borderRadius: BorderRadius.circular(50),
+                                ),
+                                child: const Icon(
+                                  Icons.location_on_outlined,
+                                  color: TColors.uploadBlue,
+                                  size: 25,
+                                ),
+                              ),
+                              const SizedBox(height: 5),
+                              Text(
+                                'Sector Norte',
+                                style: TextStyle(fontWeight: FontWeight.bold),
+                              ),
+                              Text(
+                                'Lat: -22.45, Lon: -68.90',
+                                style: TextStyle(fontSize: 11),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+            Container(
+              margin: EdgeInsets.only(bottom: 30),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Ink(
+                    decoration: BoxDecoration(
+                      color: TColors.white,
+                      borderRadius: BorderRadius.circular(15),
+                    ),
+                    child: InkWell(
+                      onTap: () {},
+                      splashColor: TColors.disabled,
+                      borderRadius: BorderRadius.circular(15),
+                      child: const Padding(
+                        padding: EdgeInsets.symmetric(
+                          horizontal: 20,
+                          vertical: 10,
+                        ),
+                        child: Row(
+                          children: [
+                            Icon(
+                              Icons.print_outlined,
+                              color: TColors.appBackgroundDarkColor,
+                            ),
+                            SizedBox(width: 5),
+                            Text(
+                              'Reporte',
+                              style: TextStyle(
+                                color: TColors.appMainTextColor,
+                                fontSize: 18,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 20),
+                  Ink(
+                    decoration: BoxDecoration(
+                      color: TColors.timelineBlue,
+                      borderRadius: BorderRadius.circular(15),
+                    ),
+                    child: InkWell(
+                      onTap: () {},
+                      borderRadius: BorderRadius.circular(15),
+                      child: const Padding(
+                        padding: EdgeInsets.symmetric(
+                          horizontal: 20,
+                          vertical: 10,
+                        ),
+                        child: Row(
+                          children: [
+                            Icon(Icons.edit_outlined, color: TColors.white),
+                            SizedBox(width: 5),
+                            Text(
+                              'Corrección',
+                              style: TextStyle(
+                                color: TColors.white,
+                                fontSize: 18,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
             ),
           ],
         ),
+      ),
+    );
+  }
+}
+
+class _CardTimeLineInOutWidget extends StatelessWidget {
+  final bool isIN;
+  final String hour;
+  const _CardTimeLineInOutWidget({
+    super.key,
+    required this.isIN,
+    required this.hour,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      margin: const EdgeInsets.only(top: 10, bottom: 10, left: 5),
+      padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 10),
+      decoration: BoxDecoration(
+        color: isIN
+            ? TColors.uploadBlue.withValues(alpha: 0.1)
+            : TColors.appBackgroundColor,
+        borderRadius: BorderRadius.circular(15),
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                isIN ? 'Entrada Registrada' : 'Salida Registrada',
+                style: TextStyle(
+                  color: isIN ? TColors.uploadBlue : TColors.appMainTextColor,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              Text('Lugar'),
+            ],
+          ),
+          Row(
+            children: [
+              Text(
+                hour,
+                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 25),
+              ),
+              SizedBox(width: 4),
+              Text('AM'),
+            ],
+          ),
+        ],
       ),
     );
   }
