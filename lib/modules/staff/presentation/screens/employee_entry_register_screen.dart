@@ -4,15 +4,17 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:front_gestion_minera/injector_container.dart';
 import 'package:front_gestion_minera/modules/staff/domain/entity/entity.dart';
 import 'package:front_gestion_minera/modules/staff/presentation/bloc/staff_bloc.dart';
+import 'package:front_gestion_minera/modules/staff/presentation/screens/attendance_ingreso_tab.dart';
 import 'package:front_gestion_minera/modules/staff/presentation/widgets/widgets.dart';
 import 'package:front_gestion_minera/utils/constants/color.constant.dart';
+import '../../../../core/widgets/custom_alert_widget.dart';
 import '../../../../core/widgets/excavator_loader.dart';
 import '../../../../utils/assets.dart';
 
 @RoutePage()
 class EmployeeEntryRegisterScreen extends StatefulWidget {
-  final String id;
-  const EmployeeEntryRegisterScreen({super.key, required this.id});
+  final IngresoWorker usuario;
+  const EmployeeEntryRegisterScreen({super.key, required this.usuario});
 
   @override
   State<EmployeeEntryRegisterScreen> createState() =>
@@ -47,7 +49,7 @@ class _EmployeeEntryRegisterScreenState
   @override
   void initState() {
     super.initState();
-    _hourController.text = '${TimeOfDay.now().hour}:${TimeOfDay.now().minute}';
+    _hourController.text = '${TimeOfDay.now().hour}:${TimeOfDay.now().minute.toString().padLeft(2, '0')}';
     _checkinBloc = InjectorContainer.getIt<StaffBloc>();
   }
 
@@ -136,13 +138,13 @@ class _EmployeeEntryRegisterScreenState
                                           CrossAxisAlignment.start,
                                       children: [
                                         Text(
-                                          'Carlos Rodriguez',
+                                          widget.usuario.name,
                                           style: TextStyle(
                                             fontWeight: FontWeight.bold,
                                             fontSize: 20,
                                           ),
                                         ),
-                                        Text('Operador de mauinaria'),
+                                        Text(widget.usuario.role),
                                         const SizedBox(height: 5),
                                         Container(
                                           padding: EdgeInsets.symmetric(
@@ -284,7 +286,7 @@ class _EmployeeEntryRegisterScreenState
                           };
 
                           final checkIn = EmployeeCheckInEntity(
-                            employeeId: widget.id,
+                            employeeId: widget.usuario.employeeId,
                             assignedShift: _getTurn(TimeOfDay.now().hour),
                             checkInTime: _hourController.text,
                             eppData: isEppData,

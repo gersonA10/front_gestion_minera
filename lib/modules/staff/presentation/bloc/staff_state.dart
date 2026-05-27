@@ -55,12 +55,6 @@ class EmployeesLoaded extends StaffState {
   }
 }
 
-class EmployeesError extends StaffState {
-  final String message;
-
-  EmployeesError(this.message);
-}
-
 class RegisterEmployeesLoading extends StaffState {}
 
 class RegisterEmployeesSuccess extends StaffState {}
@@ -68,6 +62,24 @@ class RegisterEmployeesSuccess extends StaffState {}
 class RegisterEmployeesError extends StaffState {
   final String message;
   RegisterEmployeesError(this.message);
+}
+
+
+class EmployeesError extends StaffState {
+  final String message;
+  EmployeesError(this.message);
+}
+
+class EmployeeProfileLoading extends StaffState {}
+
+class EmployeeProfileLoaded extends StaffState {
+  final EmployeeEntity employee;
+  EmployeeProfileLoaded(this.employee);
+}
+
+class EmployeeProfileError extends StaffState {
+  final String message;
+  EmployeeProfileError(this.message);
 }
 
 class CreatePayrollRequestLoading extends StaffState {}
@@ -93,6 +105,45 @@ class GenerateEmployeePayrollSuccess extends StaffState {
 class GenerateEmployeePayrollError extends StaffState {
   final String message;
   GenerateEmployeePayrollError(this.message);
+}
+
+// Attendance Ingreso
+class AttendanceIngresoLoading extends StaffState {}
+
+class AttendanceIngresoLoaded extends StaffState {
+  final List<AttendanceIngresoEntity> employees;
+  AttendanceIngresoLoaded(this.employees);
+}
+
+class AttendanceIngresoError extends StaffState {
+  final String message;
+  AttendanceIngresoError(this.message);
+}
+
+// Attendance En Planta
+class AttendanceEnPlantaLoading extends StaffState {}
+
+class AttendanceEnPlantaLoaded extends StaffState {
+  final List<AttendanceEnPlantaEntity> employees;
+  AttendanceEnPlantaLoaded(this.employees);
+}
+
+class AttendanceEnPlantaError extends StaffState {
+  final String message;
+  AttendanceEnPlantaError(this.message);
+}
+
+// Attendance Finalizado
+class AttendanceFinalizadoLoading extends StaffState {}
+
+class AttendanceFinalizadoLoaded extends StaffState {
+  final List<AttendanceFinalizadoEntity> employees;
+  AttendanceFinalizadoLoaded(this.employees);
+}
+
+class AttendanceFinalizadoError extends StaffState {
+  final String message;
+  AttendanceFinalizadoError(this.message);
 }
 
 class CheckInEmployeeLoading extends StaffState {}

@@ -1,8 +1,11 @@
+import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
+import 'package:front_gestion_minera/config/router/app_router.gr.dart';
 import 'package:front_gestion_minera/utils/constants/color.constant.dart';
 
 class WorkerCardWidget extends StatelessWidget {
-  final String? image;
+  final String employeeId;
+  final String image;
   final String name;
   final String position;
   final String location;
@@ -11,13 +14,17 @@ class WorkerCardWidget extends StatelessWidget {
 
   const WorkerCardWidget({
     super.key,
-    this.image,
+    required this.employeeId,
+    required this.image,
     required this.name,
     required this.position,
     required this.location,
     required this.status,
     required this.actionText,
   });
+
+  static const String _fallbackImage =
+      'https://siu.edu.bd/storage/uploaded/authority/male_1723030204.jpeg';
 
   @override
   Widget build(BuildContext context) {
@@ -46,32 +53,21 @@ class WorkerCardWidget extends StatelessWidget {
                 Stack(
                   clipBehavior: Clip.none,
                   children: [
-                    Container(
-                      width: 58,
-                      height: 58,
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(8),
-                        color: Colors.grey.shade100,
-                      ),
-                      child: ClipRRect(
-                        borderRadius: BorderRadius.circular(8),
-                        child: image != null && image!.isNotEmpty
-                            ? Image.network(
-                                image!,
-                                fit: BoxFit.cover,
-                                errorBuilder: (_, __, ___) {
-                                  return const Icon(
-                                    Icons.person_outline,
-                                    size: 30,
-                                    color: Colors.grey,
-                                  );
-                                },
-                              )
-                            : const Icon(
-                                Icons.person_outline,
-                                size: 30,
-                                color: Colors.grey,
-                              ),
+                    ClipRRect(
+                      borderRadius: BorderRadius.circular(8),
+                      child: Image.network(
+                        image.isNotEmpty ? image : _fallbackImage,
+                        width: 58,
+                        height: 58,
+                        fit: BoxFit.cover,
+                        errorBuilder: (_, _, _) {
+                          return Image.network(
+                            _fallbackImage,
+                            width: 58,
+                            height: 58,
+                            fit: BoxFit.cover,
+                          );
+                        },
                       ),
                     ),
 
@@ -194,34 +190,17 @@ class WorkerCardWidget extends StatelessWidget {
             height: 1,
             color: const Color(0xffEEF1F4),
           ),
-
-          InkWell(
-            onTap: () {},
-            borderRadius: const BorderRadius.vertical(
-              bottom: Radius.circular(14),
-            ),
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 11),
-              child: Row(
-                children: [
-                  const Icon(
-                    Icons.remove_red_eye_outlined,
-                    size: 15,
-                    color: TColors.appMainDarkColor,
-                  ),
-
-                  const SizedBox(width: 6),
-
-                  Text(
-                    actionText.toUpperCase(),
-                    style: const TextStyle(
-                      fontSize: 11,
-                      fontWeight: FontWeight.w700,
-                      color: TColors.appMainDarkColor,
-                      letterSpacing: 0.3,
-                    ),
-                  ),
-                ],
+          TextButton(
+            onPressed: () {
+              context.router.push(WorkerProfileRoute(employeeId: employeeId));
+            },
+            child: Text(
+              actionText.toUpperCase(),
+              style: const TextStyle(
+                fontSize: 11,
+                fontWeight: FontWeight.w700,
+                color: TColors.appMainDarkColor,
+                letterSpacing: 0.3,
               ),
             ),
           ),

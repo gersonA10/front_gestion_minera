@@ -1,10 +1,10 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:front_gestion_minera/core/widgets/custom_alert_widget.dart';
+import 'package:front_gestion_minera/modules/staff/presentation/widgets/current_shift_card.dart';
+import 'package:front_gestion_minera/modules/staff/presentation/widgets/xit_hour_widget.dart';
 import 'package:front_gestion_minera/utils/constants/color.constant.dart';
-
-import '../widgets/current_shift_card.dart';
-import '../widgets/widgets.dart';
 
 @RoutePage()
 class EmployeeCheckOutLogScreen extends StatefulWidget {

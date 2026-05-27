@@ -22,10 +22,9 @@ class LoadMoreEmployeesEvent extends StaffEvent {}
 
 class RefreshEmployeesEvent extends StaffEvent {}
 
-class RegisterEmployeesEvent extends StaffEvent {
-  final RegisterEmployeesEntity employeed;
-
-  RegisterEmployeesEvent({required this.employeed});
+class GetEmployeeProfileEvent extends StaffEvent {
+  final String employeeId;
+  GetEmployeeProfileEvent(this.employeeId);
 }
 
 class CreatePayrollMonthlyEvent extends StaffEvent {
@@ -36,8 +35,25 @@ class CreatePayrollMonthlyEvent extends StaffEvent {
 
 class GetEmployeePayrollEvent extends StaffEvent {}
 
+class RegisterEmployeesEvent extends StaffEvent {
+  final RegisterEmployeesEntity employeed;
+
+  RegisterEmployeesEvent({required this.employeed});
+}
+
+class GetAttendanceIngresoEvent extends StaffEvent {}
+
+class GetAttendanceEnPlantaEvent extends StaffEvent {}
+
+class GetAttendanceFinalizadoEvent extends StaffEvent {
+  final String date;
+  GetAttendanceFinalizadoEvent({required this.date});
+}
+
 class RegisterCheckInEmployeeEvent extends StaffEvent {
   final EmployeeCheckInEntity checkIn;
 
   RegisterCheckInEmployeeEvent({required this.checkIn});
 }
+
+
