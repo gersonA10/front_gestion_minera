@@ -1,5 +1,6 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
+import 'package:front_gestion_minera/utils/constants/color.constant.dart';
 
 @RoutePage()
 class WorkerProfileScreen extends StatefulWidget {
@@ -15,8 +16,30 @@ class _WorkerProfileScreenState extends State<WorkerProfileScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF5F6FA),
-      appBar: _buildAppBar(),
+      backgroundColor: TColors.appBackgroundColor,
+      appBar: AppBar(
+      elevation: 0,
+      title: const Text(
+        'PERFIL DEL TRABAJADOR',
+        style: TextStyle(
+          fontSize: 12,
+          fontWeight: FontWeight.w700,
+          color: TColors.profileTitleText,
+          letterSpacing: 1.4,
+        ),
+      ),
+      centerTitle: true,
+      actions: [
+        Padding(
+          padding: const EdgeInsets.only(right: 16),
+          child: Icon(
+            Icons.verified_rounded,
+            color: TColors.profileBlue,
+            size: 24,
+          ),
+        ),
+      ],
+    ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
         child: Column(
@@ -36,37 +59,6 @@ class _WorkerProfileScreenState extends State<WorkerProfileScreen> {
     );
   }
 
-  PreferredSizeWidget _buildAppBar() {
-    return AppBar(
-      backgroundColor: const Color(0xFFF5F6FA),
-      elevation: 0,
-      leading: IconButton(
-        icon: const Icon(Icons.arrow_back_ios_new_rounded,
-            color: Color(0xFF2D2D2D), size: 18),
-        onPressed: () {},
-      ),
-      title: const Text(
-        'PERFIL DEL TRABAJADOR',
-        style: TextStyle(
-          fontSize: 12,
-          fontWeight: FontWeight.w700,
-          color: Color(0xFF2D2D2D),
-          letterSpacing: 1.4,
-        ),
-      ),
-      centerTitle: true,
-      actions: [
-        Padding(
-          padding: const EdgeInsets.only(right: 16),
-          child: Icon(
-            Icons.verified_rounded,
-            color: const Color(0xFF1A73E8),
-            size: 24,
-          ),
-        ),
-      ],
-    );
-  }
 
   Widget _buildAvatarSection() {
     return Column(
@@ -79,12 +71,12 @@ class _WorkerProfileScreenState extends State<WorkerProfileScreen> {
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
                 border: Border.all(
-                  color: const Color(0xFFE8EDF5),
+                  color: TColors.border,
                   width: 3,
                 ),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withOpacity(0.08),
+                    color: Colors.black.withValues(alpha: 0.08),
                     blurRadius: 12,
                     offset: const Offset(0, 4),
                   ),
@@ -92,11 +84,11 @@ class _WorkerProfileScreenState extends State<WorkerProfileScreen> {
               ),
               child: ClipOval(
                 child: Container(
-                  color: const Color(0xFFCDD8EC),
+                  color: TColors.avatarBackground,
                   child: const Icon(
                     Icons.person_rounded,
                     size: 52,
-                    color: Color(0xFF7A9CC9),
+                    color: TColors.avatarIconColor,
                   ),
                 ),
               ),
@@ -108,9 +100,9 @@ class _WorkerProfileScreenState extends State<WorkerProfileScreen> {
                 width: 14,
                 height: 14,
                 decoration: BoxDecoration(
-                  color: const Color(0xFF34C759),
+                  color: TColors.statusActiveDot,
                   shape: BoxShape.circle,
-                  border: Border.all(color: Colors.white, width: 2),
+                  border: Border.all(color: TColors.white, width: 2),
                 ),
               ),
             ),
@@ -122,7 +114,7 @@ class _WorkerProfileScreenState extends State<WorkerProfileScreen> {
           style: TextStyle(
             fontSize: 20,
             fontWeight: FontWeight.w700,
-            color: Color(0xFF1A1A2E),
+            color: TColors.profileDarkText,
             letterSpacing: -0.3,
           ),
         ),
@@ -132,7 +124,7 @@ class _WorkerProfileScreenState extends State<WorkerProfileScreen> {
           style: TextStyle(
             fontSize: 11,
             fontWeight: FontWeight.w700,
-            color: Color(0xFF1A73E8),
+            color: TColors.profileBlue,
             letterSpacing: 1.2,
           ),
         ),
@@ -148,14 +140,14 @@ class _WorkerProfileScreenState extends State<WorkerProfileScreen> {
           Row(
             children: [
               const Icon(Icons.tune_rounded,
-                  size: 15, color: Color(0xFF8A8FA8)),
+                  size: 15, color: TColors.profileMutedLabel),
               const SizedBox(width: 6),
               const Text(
                 'ESTADO DEL TRABAJADOR',
                 style: TextStyle(
                   fontSize: 11,
                   fontWeight: FontWeight.w700,
-                  color: Color(0xFF8A8FA8),
+                  color: TColors.profileMutedLabel,
                   letterSpacing: 1.1,
                 ),
               ),
@@ -196,7 +188,7 @@ class _WorkerProfileScreenState extends State<WorkerProfileScreen> {
                     style: TextStyle(
                       fontSize: 11,
                       fontWeight: FontWeight.w700,
-                      color: Color(0xFF8A8FA8),
+                      color: TColors.profileMutedLabel,
                       letterSpacing: 1.1,
                     ),
                   ),
@@ -205,7 +197,7 @@ class _WorkerProfileScreenState extends State<WorkerProfileScreen> {
                     'Último procesamiento: 01 Oct 2023',
                     style: TextStyle(
                       fontSize: 11,
-                      color: Color(0xFFADB5C7),
+                      color: TColors.statusInactiveDot,
                     ),
                   ),
                 ],
@@ -213,13 +205,13 @@ class _WorkerProfileScreenState extends State<WorkerProfileScreen> {
               Container(
                 padding: const EdgeInsets.all(7),
                 decoration: BoxDecoration(
-                  color: const Color(0xFFEFF3FB),
+                  color: TColors.profileIconBg,
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: const Icon(
                   Icons.account_balance_wallet_outlined,
                   size: 16,
-                  color: Color(0xFF1A73E8),
+                  color: TColors.profileBlue,
                 ),
               ),
             ],
@@ -229,22 +221,22 @@ class _WorkerProfileScreenState extends State<WorkerProfileScreen> {
             padding:
                 const EdgeInsets.symmetric(horizontal: 14, vertical: 13),
             decoration: BoxDecoration(
-              color: const Color(0xFFF5F6FA),
+              color: TColors.profileCardInnerBg,
               borderRadius: BorderRadius.circular(10),
-              border: Border.all(color: const Color(0xFFE8EDF5)),
+              border: Border.all(color: TColors.border),
             ),
             child: Row(
               children: [
                 Container(
                   padding: const EdgeInsets.all(6),
                   decoration: BoxDecoration(
-                    color: const Color(0xFFEFF3FB),
+                    color: TColors.profileIconBg,
                     borderRadius: BorderRadius.circular(7),
                   ),
                   child: const Icon(
                     Icons.credit_card_rounded,
                     size: 15,
-                    color: Color(0xFF1A73E8),
+                    color: TColors.profileBlue,
                   ),
                 ),
                 const SizedBox(width: 10),
@@ -254,7 +246,7 @@ class _WorkerProfileScreenState extends State<WorkerProfileScreen> {
                     style: TextStyle(
                       fontSize: 13,
                       fontWeight: FontWeight.w500,
-                      color: Color(0xFF3D4459),
+                      color: TColors.profileBodyText,
                     ),
                   ),
                 ),
@@ -263,7 +255,7 @@ class _WorkerProfileScreenState extends State<WorkerProfileScreen> {
                   style: TextStyle(
                     fontSize: 15,
                     fontWeight: FontWeight.w700,
-                    color: Color(0xFF1A1A2E),
+                    color: TColors.profileDarkText,
                     letterSpacing: -0.3,
                   ),
                 ),
@@ -277,19 +269,19 @@ class _WorkerProfileScreenState extends State<WorkerProfileScreen> {
 
   Widget _buildSeniorityCard() {
     return _Card(
-      backgroundColor: const Color(0xFFFFFBF0),
+      backgroundColor: TColors.seniorityCardBg,
       child: Row(
         children: [
           Container(
             padding: const EdgeInsets.all(8),
             decoration: BoxDecoration(
-              color: const Color(0xFFFFF3CC),
+              color: TColors.seniorityIconBg,
               borderRadius: BorderRadius.circular(9),
             ),
             child: const Icon(
               Icons.calendar_today_rounded,
               size: 16,
-              color: Color(0xFFF5A623),
+              color: TColors.seniorityIconColor,
             ),
           ),
           const SizedBox(width: 14),
@@ -301,7 +293,7 @@ class _WorkerProfileScreenState extends State<WorkerProfileScreen> {
                 style: TextStyle(
                   fontSize: 10,
                   fontWeight: FontWeight.w700,
-                  color: Color(0xFFBF8C2E),
+                  color: TColors.seniorityLabelColor,
                   letterSpacing: 1.1,
                 ),
               ),
@@ -311,7 +303,7 @@ class _WorkerProfileScreenState extends State<WorkerProfileScreen> {
                 style: TextStyle(
                   fontSize: 15,
                   fontWeight: FontWeight.w700,
-                  color: Color(0xFF1A1A2E),
+                  color: TColors.profileDarkText,
                   letterSpacing: -0.2,
                 ),
               ),
@@ -323,7 +315,6 @@ class _WorkerProfileScreenState extends State<WorkerProfileScreen> {
   }
 }
 
-// ─── Enums ───────────────────────────────────────────────────────────────────
 
 enum WorkerStatus { activo, descanso, inactivo }
 
@@ -342,27 +333,26 @@ extension WorkerStatusExt on WorkerStatus {
   Color get dotColor {
     switch (this) {
       case WorkerStatus.activo:
-        return const Color(0xFF34C759);
+        return TColors.statusActiveDot;
       case WorkerStatus.descanso:
-        return const Color(0xFFFF9500);
+        return TColors.statusRestDot;
       case WorkerStatus.inactivo:
-        return const Color(0xFFADB5C7);
+        return TColors.statusInactiveDot;
     }
   }
 
   Color get selectedBg {
     switch (this) {
       case WorkerStatus.activo:
-        return const Color(0xFFE8F9EE);
+        return TColors.statusActiveBg;
       case WorkerStatus.descanso:
-        return const Color(0xFFFFF4E5);
+        return TColors.statusRestBg;
       case WorkerStatus.inactivo:
-        return const Color(0xFFF0F1F5);
+        return TColors.statusInactiveBg;
     }
   }
 }
 
-// ─── Reusable Widgets ─────────────────────────────────────────────────────────
 
 class _Card extends StatelessWidget {
   final Widget child;
@@ -376,11 +366,11 @@ class _Card extends StatelessWidget {
       width: double.infinity,
       padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
-        color: backgroundColor ?? Colors.white,
+        color: backgroundColor ?? TColors.white,
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: const Color(0xFF1A73E8).withOpacity(0.05),
+            color: TColors.profileBlue.withValues(alpha: 0.05),
             blurRadius: 16,
             offset: const Offset(0, 4),
           ),
@@ -408,7 +398,7 @@ class _StatusChip extends StatelessWidget {
         borderRadius: BorderRadius.circular(10),
         border: Border.all(
           color:
-              isSelected ? status.dotColor.withOpacity(0.3) : Colors.transparent,
+              isSelected ? status.dotColor.withValues(alpha: 0.3) : Colors.transparent,
           width: 1.2,
         ),
       ),
@@ -431,8 +421,8 @@ class _StatusChip extends StatelessWidget {
               fontWeight:
                   isSelected ? FontWeight.w600 : FontWeight.w400,
               color: isSelected
-                  ? const Color(0xFF1A1A2E)
-                  : const Color(0xFF8A8FA8),
+                  ? TColors.profileDarkText
+                  : TColors.profileMutedLabel,
             ),
           ),
         ],

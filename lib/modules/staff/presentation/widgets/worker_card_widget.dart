@@ -1,4 +1,6 @@
+import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
+import 'package:front_gestion_minera/config/router/app_router.gr.dart';
 import 'package:front_gestion_minera/utils/constants/color.constant.dart';
 
 class WorkerCardWidget extends StatelessWidget {
@@ -30,9 +32,7 @@ class WorkerCardWidget extends StatelessWidget {
       decoration: BoxDecoration(
         color: TColors.white,
         borderRadius: BorderRadius.circular(14),
-        border: Border.all(
-          color: const Color(0xffE7EAF0),
-        ),
+        border: Border.all(color: const Color(0xffE7EAF0)),
         boxShadow: const [
           BoxShadow(
             color: Color(0x05000000),
@@ -78,10 +78,7 @@ class WorkerCardWidget extends StatelessWidget {
                         decoration: BoxDecoration(
                           color: style.dotColor,
                           shape: BoxShape.circle,
-                          border: Border.all(
-                            color: Colors.white,
-                            width: 2,
-                          ),
+                          border: Border.all(color: Colors.white, width: 2),
                         ),
                       ),
                     ),
@@ -95,8 +92,7 @@ class WorkerCardWidget extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Row(
-                        crossAxisAlignment:
-                            CrossAxisAlignment.start,
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Expanded(
                             child: Text(
@@ -106,8 +102,7 @@ class WorkerCardWidget extends StatelessWidget {
                               style: const TextStyle(
                                 fontSize: 17,
                                 fontWeight: FontWeight.w700,
-                                color:
-                                    TColors.appMainDarkColor,
+                                color: TColors.appMainDarkColor,
                                 height: 1.1,
                               ),
                             ),
@@ -116,15 +111,13 @@ class WorkerCardWidget extends StatelessWidget {
                           const SizedBox(width: 8),
 
                           Container(
-                            padding:
-                                const EdgeInsets.symmetric(
+                            padding: const EdgeInsets.symmetric(
                               horizontal: 9,
                               vertical: 4,
                             ),
                             decoration: BoxDecoration(
                               color: style.backgroundColor,
-                              borderRadius:
-                                  BorderRadius.circular(6),
+                              borderRadius: BorderRadius.circular(6),
                             ),
                             child: Text(
                               style.label,
@@ -159,8 +152,7 @@ class WorkerCardWidget extends StatelessWidget {
                       Row(
                         children: [
                           Icon(
-                            status.toLowerCase() ==
-                                    'inactivo'
+                            status.toLowerCase() == 'inactivo'
                                 ? Icons.access_time
                                 : Icons.location_on_outlined,
                             size: 13,
@@ -173,12 +165,10 @@ class WorkerCardWidget extends StatelessWidget {
                             child: Text(
                               location,
                               maxLines: 1,
-                              overflow:
-                                  TextOverflow.ellipsis,
+                              overflow: TextOverflow.ellipsis,
                               style: const TextStyle(
                                 fontSize: 12,
-                                fontWeight:
-                                    FontWeight.w500,
+                                fontWeight: FontWeight.w500,
                                 color: Color(0xff98A2B3),
                                 height: 1.2,
                               ),
@@ -198,37 +188,17 @@ class WorkerCardWidget extends StatelessWidget {
             height: 1,
             color: const Color(0xffEEF1F4),
           ),
-
-          InkWell(
-            onTap: () {},
-            borderRadius: const BorderRadius.vertical(
-              bottom: Radius.circular(14),
-            ),
-            child: Padding(
-              padding: const EdgeInsets.symmetric(
-                horizontal: 14,
-                vertical: 11,
-              ),
-              child: Row(
-                children: [
-                  const Icon(
-                    Icons.remove_red_eye_outlined,
-                    size: 15,
-                    color: TColors.appMainDarkColor,
-                  ),
-
-                  const SizedBox(width: 6),
-
-                  Text(
-                    actionText.toUpperCase(),
-                    style: const TextStyle(
-                      fontSize: 11,
-                      fontWeight: FontWeight.w700,
-                      color: TColors.appMainDarkColor,
-                      letterSpacing: 0.3,
-                    ),
-                  ),
-                ],
+          TextButton(
+            onPressed: () {
+              context.router.push(WorkerProfileRoute());
+            },
+            child: Text(
+              actionText.toUpperCase(),
+              style: const TextStyle(
+                fontSize: 11,
+                fontWeight: FontWeight.w700,
+                color: TColors.appMainDarkColor,
+                letterSpacing: 0.3,
               ),
             ),
           ),
