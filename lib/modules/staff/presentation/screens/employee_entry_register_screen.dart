@@ -282,12 +282,12 @@ class _EmployeeEntryRegisterScreenState
                             "casco": true,
                             "lentes": true,
                             "chaleco": true,
-                            "orejeras": false,
+                            "orejeras": true,
                           };
-
+                          final int hour = int.parse(_hourController.text.split(':')[0]);
                           final checkIn = EmployeeCheckInEntity(
                             employeeId: widget.usuario.employeeId,
-                            assignedShift: _getTurn(TimeOfDay.now().hour),
+                            assignedShift: _getTurn(hour),
                             checkInTime: _hourController.text,
                             eppData: isEppData,
                             observation: _observationController.text,
