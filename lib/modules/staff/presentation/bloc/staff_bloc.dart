@@ -20,6 +20,7 @@ class StaffBloc extends Bloc<StaffEvent, StaffState> {
     on<GetAttendanceIngresoEvent>(_onGetAttendanceIngreso);
     on<GetAttendanceEnPlantaEvent>(_onGetAttendanceEnPlanta);
     on<GetAttendanceFinalizadoEvent>(_onGetAttendanceFinalizado);
+    on<CheckOutEmployeeEvent>(_onCheckOutEmployee);
   }
 
   FutureOr<void> _onRegisterEmployees(
@@ -97,10 +98,7 @@ class StaffBloc extends Bloc<StaffEvent, StaffState> {
 
       emit(
         currentState.copyWith(
-          employees: [
-            ...currentState.employees,
-            ...response.employees,
-          ],
+          employees: [...currentState.employees, ...response.employees],
           currentPage: response.page,
           hasMore: response.hasMore,
         ),
@@ -169,6 +167,7 @@ class StaffBloc extends Bloc<StaffEvent, StaffState> {
       emit(GenerateEmployeePayrollError('Error inesperado: $e'));
     }
   }
+
   Future<void> _onGetEmployeeProfile(
     GetEmployeeProfileEvent event,
     Emitter<StaffState> emit,
@@ -228,6 +227,29 @@ class StaffBloc extends Bloc<StaffEvent, StaffState> {
       emit(AttendanceFinalizadoError(mapErrorMessage(e.key)));
     } catch (_) {
       emit(AttendanceFinalizadoError('Ocurrió un error inesperado'));
+    }
+  }
+
+  Future<void> _onCheckOutEmployee(
+    CheckOutEmployeeEvent event,
+    Emitter<StaffState> emit,
+  ) async {
+    emit(CheckOutEmployeeLoading());
+
+    try {
+      final response = await repository.checkOutEmployee(
+        event.attendanceId,
+        event.request,
+      );
+
+      emit(CheckOutEmployeeSuccess(response));
+    } on BaseApiException catch (e) {
+      final responseData = e.response?.data as Map<String, dynamic>?;
+      emit(
+        CheckOutEmployeeError(responseData?['error'] ?? mapErrorMessage(e.key)),
+      );
+    } catch (e) {
+      emit(CheckOutEmployeeError('Error inesperado: $e'));
     }
   }
 }

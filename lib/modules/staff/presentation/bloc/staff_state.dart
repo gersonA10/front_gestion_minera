@@ -64,7 +64,6 @@ class RegisterEmployeesError extends StaffState {
   RegisterEmployeesError(this.message);
 }
 
-
 class EmployeesError extends StaffState {
   final String message;
   EmployeesError(this.message);
@@ -144,4 +143,18 @@ class AttendanceFinalizadoLoaded extends StaffState {
 class AttendanceFinalizadoError extends StaffState {
   final String message;
   AttendanceFinalizadoError(this.message);
+}
+
+class CheckOutEmployeeLoading extends StaffState {}
+
+class CheckOutEmployeeSuccess extends StaffState {
+  final EmployeeCheckOutResponseEntity data;
+
+  CheckOutEmployeeSuccess(this.data);
+}
+
+class CheckOutEmployeeError extends StaffState {
+  final String message;
+
+  CheckOutEmployeeError(this.message);
 }

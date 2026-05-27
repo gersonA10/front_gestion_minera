@@ -24,4 +24,8 @@ abstract class StaffRepository {
   Future<List<AttendanceFinalizadoEntity>> getAttendanceFinalizado({
     required String date,
   });
+  Future<EmployeeCheckOutResponseEntity> checkOutEmployee(
+  String attendanceId,
+  EmployeeCheckOutRequestEntity request,
+);
 }

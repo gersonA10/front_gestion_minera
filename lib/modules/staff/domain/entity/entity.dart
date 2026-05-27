@@ -5,3 +5,5 @@ export 'package:front_gestion_minera/modules/staff/domain/entity/register_employ
 export 'package:front_gestion_minera/modules/staff/domain/entity/attendance_ingreso_entity.dart';
 export 'package:front_gestion_minera/modules/staff/domain/entity/attendance_en_planta_entity.dart';
 export 'package:front_gestion_minera/modules/staff/domain/entity/attendance_finalizado_entity.dart';
+export 'package:front_gestion_minera/modules/staff/domain/entity/employee_check_out_response_entity.dart';
+export 'package:front_gestion_minera/modules/staff/domain/entity/employee_check_out_request_entity.dart';
