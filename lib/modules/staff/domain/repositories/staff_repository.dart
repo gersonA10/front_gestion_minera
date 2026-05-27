@@ -12,11 +12,16 @@ abstract class StaffRepository {
     int page = 1,
     int limit = 20,
   });
-  
+
   Future<void> registerEmployees(RegisterEmployeesEntity employees);
 
   Future<List<PayrollMonthlyModel>> getPayrollMonthly();
   Future<void> createPayrollMonthly(CreatePayrollMonthlyEntity payrollMonthly);
   Future<EmployeeEntity> getEmployeeById(String id);
 
+  Future<List<AttendanceIngresoEntity>> getAttendanceIngreso();
+  Future<List<AttendanceEnPlantaEntity>> getAttendanceEnPlanta();
+  Future<List<AttendanceFinalizadoEntity>> getAttendanceFinalizado({
+    required String date,
+  });
 }

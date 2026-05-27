@@ -1,5 +1,11 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:front_gestion_minera/injector_container.dart';
+import 'package:front_gestion_minera/modules/staff/domain/entity/attendance_en_planta_entity.dart';
+import 'package:front_gestion_minera/modules/staff/domain/entity/attendance_finalizado_entity.dart';
+import 'package:front_gestion_minera/modules/staff/domain/entity/attendance_ingreso_entity.dart';
+import 'package:front_gestion_minera/modules/staff/presentation/bloc/staff_bloc.dart';
 import 'package:front_gestion_minera/modules/staff/presentation/screens/attendance_en_planta_tab.dart';
 import 'package:front_gestion_minera/modules/staff/presentation/screens/attendance_finalizados_tab.dart';
 import 'package:front_gestion_minera/modules/staff/presentation/screens/attendance_ingreso_tab.dart';
@@ -17,98 +23,62 @@ class AttendanceControlScreen extends StatefulWidget {
 }
 
 class _AttendanceControlScreenState extends State<AttendanceControlScreen> {
+  late final StaffBloc _bloc;
   _Tab _selectedTab = _Tab.ingreso;
 
-  final List<IngresoWorker> _pendingWorkers = const [
-    IngresoWorker(
-      name: 'Carlos Rodriguez',
-      role: 'Operador de Maquinaria',
-      scheduledTime: '07:00 AM',
-      isLate: true,
-    ),
-    IngresoWorker(
-      name: 'Miguel Sanchez',
-      role: 'Seguridad Industrial',
-      scheduledTime: '07:00 AM',
-      isLate: true,
-    ),
-    IngresoWorker(
-      name: 'Ana Torres',
-      role: 'Geología',
-      scheduledTime: '08:00 AM',
-    ),
-  ];
+  List<AttendanceIngresoEntity> _ingresoData = [];
+  List<AttendanceEnPlantaEntity> _plantaData = [];
+  List<AttendanceFinalizadoEntity> _finalizadoData = [];
 
-  final List<PlantaWorker> _plantaWorkers = const [
-    PlantaWorker(
-      name: 'Roberto Gomez',
-      department: 'Mantenimiento',
-      entryTime: '06:45 AM',
-    ),
-    PlantaWorker(
-      name: 'Laura Mendez',
-      department: 'Logística',
-      entryTime: '07:02 AM',
-    ),
-    PlantaWorker(
-      name: 'Juan Pérez',
-      department: 'Transporte',
-      entryTime: '07:15 AM',
-    ),
-  ];
+  bool _ingresoLoading = false;
+  bool _plantaLoading = false;
+  bool _finalizadoLoading = false;
 
-  final List<FinalizadoWorker> _finalizadoWorkers = const [
-    FinalizadoWorker(
-      name: 'Esteban Soto',
-      shift: 'Turno Noche',
-      department: 'Operaciones',
-      entryTime: '22:00',
-      exitTime: '06:30',
-      totalTime: '8h 30m',
-      totalTimeColor: TColors.primary,
-      status: FinalizadoStatus.finalizado,
-      avatarColor: Color(0xFF1A56FF),
-      initials: 'ES',
-    ),
-    FinalizadoWorker(
-      name: 'Maria Juarez',
-      shift: 'Turno Noche',
-      department: 'Planta',
-      entryTime: '22:15',
-      exitTime: '06:15',
-      totalTime: '8h 00m',
-      totalTimeColor: TColors.primary,
-      status: FinalizadoStatus.finalizado,
-      avatarColor: Color(0xFF6366F1),
-      initials: 'MJ',
-    ),
-    FinalizadoWorker(
-      name: 'Andrés Castro',
-      shift: 'Mantenimiento',
-      department: 'Incidencia',
-      entryTime: '22:00',
-      exitTime: '02:00',
-      totalTime: '4h 00m',
-      totalTimeColor: TColors.warning,
-      status: FinalizadoStatus.revision,
-      avatarColor: Color(0xFFF59E0B),
-      initials: 'AC',
-    ),
-    FinalizadoWorker(
-      name: 'Lucia Ramirez',
-      shift: 'Turno Noche',
-      department: 'Administración',
-      entryTime: '20:00',
-      exitTime: '05:00',
-      totalTime: '9h 00m',
-      totalTimeColor: TColors.primary,
-      status: FinalizadoStatus.finalizado,
-      avatarColor: Color(0xFF10B981),
-      initials: 'LR',
-    ),
-  ];
+  String? _ingresoError;
+  String? _plantaError;
+  String? _finalizadoError;
 
+  DateTime _finalizadoDate = DateTime.now();
   final Set<String> _registeredIngreso = {};
+
+  @override
+  void initState() {
+    super.initState();
+    _bloc = InjectorContainer.getIt<StaffBloc>();
+    _bloc.add(GetAttendanceIngresoEvent());
+  }
+
+  void _fetchFinalizado(DateTime date) =>
+      _bloc.add(GetAttendanceFinalizadoEvent(date: _isoDate(date)));
+
+  void _onTabChanged(_Tab tab) {
+    setState(() => _selectedTab = tab);
+    switch (tab) {
+      case _Tab.ingreso:
+        if (_ingresoData.isEmpty && !_ingresoLoading) {
+          _bloc.add(GetAttendanceIngresoEvent());
+        }
+      case _Tab.enPlanta:
+        if (_plantaData.isEmpty && !_plantaLoading) {
+          _bloc.add(GetAttendanceEnPlantaEvent());
+        }
+      case _Tab.finalizados:
+        if (_finalizadoData.isEmpty && !_finalizadoLoading) {
+          _bloc.add(
+            GetAttendanceFinalizadoEvent(date: _isoDate(_finalizadoDate)),
+          );
+        }
+    }
+  }
+
+  void _onFinalizadoDateChanged(DateTime date) {
+    setState(() {
+      _finalizadoDate = date;
+      _finalizadoData = [];
+      _finalizadoError = null;
+    });
+    _fetchFinalizado(date);
+  }
 
   void _onRegisterEntry(String name) {
     setState(() => _registeredIngreso.add(name));
@@ -143,23 +113,76 @@ class _AttendanceControlScreenState extends State<AttendanceControlScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: TColors.background,
-      appBar: AppBar(
-        title: const Text(
-          'Control de Asistencia',
-          style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
+    return BlocProvider.value(
+      value: _bloc,
+      child: BlocListener<StaffBloc, StaffState>(
+      listener: (context, state) {
+        if (state is AttendanceIngresoLoading) {
+          setState(() {
+            _ingresoLoading = true;
+            _ingresoError = null;
+          });
+        } else if (state is AttendanceIngresoLoaded) {
+          setState(() {
+            _ingresoLoading = false;
+            _ingresoData = state.employees;
+          });
+        } else if (state is AttendanceIngresoError) {
+          setState(() {
+            _ingresoLoading = false;
+            _ingresoError = state.message;
+          });
+        } else if (state is AttendanceEnPlantaLoading) {
+          setState(() {
+            _plantaLoading = true;
+            _plantaError = null;
+          });
+        } else if (state is AttendanceEnPlantaLoaded) {
+          setState(() {
+            _plantaLoading = false;
+            _plantaData = state.employees;
+          });
+        } else if (state is AttendanceEnPlantaError) {
+          setState(() {
+            _plantaLoading = false;
+            _plantaError = state.message;
+          });
+        } else if (state is AttendanceFinalizadoLoading) {
+          setState(() {
+            _finalizadoLoading = true;
+            _finalizadoError = null;
+          });
+        } else if (state is AttendanceFinalizadoLoaded) {
+          setState(() {
+            _finalizadoLoading = false;
+            _finalizadoData = state.employees;
+          });
+        } else if (state is AttendanceFinalizadoError) {
+          setState(() {
+            _finalizadoLoading = false;
+            _finalizadoError = state.message;
+          });
+        }
+      },
+      child: Scaffold(
+        backgroundColor: TColors.background,
+        appBar: AppBar(
+          title: const Text(
+            'Control de Asistencia',
+            style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
+          ),
+          backgroundColor: TColors.surface,
+          foregroundColor: TColors.profileDarkText,
+          elevation: 1,
         ),
-        backgroundColor: TColors.surface,
-        foregroundColor: TColors.profileDarkText,
-        elevation: 1,
+        body: Column(
+          children: [
+            _buildTabBar(),
+            Expanded(child: _buildTabContent()),
+          ],
+        ),
       ),
-      body: Column(
-        children: [
-          _buildTabBar(),
-          Expanded(child: _buildTabContent()),
-        ],
-      ),
+    ),
     );
   }
 
@@ -178,7 +201,7 @@ class _AttendanceControlScreenState extends State<AttendanceControlScreen> {
             final isSelected = _selectedTab == tab;
             return Expanded(
               child: GestureDetector(
-                onTap: () => setState(() => _selectedTab = tab),
+                onTap: () => _onTabChanged(tab),
                 child: AnimatedContainer(
                   duration: const Duration(milliseconds: 200),
                   margin: const EdgeInsets.all(3),
@@ -220,23 +243,113 @@ class _AttendanceControlScreenState extends State<AttendanceControlScreen> {
     switch (_selectedTab) {
       case _Tab.ingreso:
         return AttendanceIngresoTab(
-          workers: _pendingWorkers,
+          workers: _ingresoData.map(_toIngresoWorker).toList(),
           registered: _registeredIngreso,
           onRegister: _onRegisterEntry,
+          isLoading: _ingresoLoading,
+          errorMessage: _ingresoError,
         );
       case _Tab.enPlanta:
         return AttendanceEnPlantaTab(
-          workers: _plantaWorkers,
+          workers: _plantaData.map(_toPlantaWorker).toList(),
           onRegisterExit: _onRegisterExit,
+          isLoading: _plantaLoading,
+          errorMessage: _plantaError,
         );
       case _Tab.finalizados:
+        final totalMinutes = _finalizadoData.fold(
+          0,
+          (sum, e) => sum + e.totalWorkedMinutes,
+        );
         return AttendanceFinalizadosTab(
-          workers: _finalizadoWorkers,
-          totalHours: '29',
-          totalMinutes: '30',
+          workers: _finalizadoData.map(_toFinalizadoWorker).toList(),
+          totalHours: (totalMinutes ~/ 60).toString(),
+          totalMinutes: (totalMinutes % 60).toString().padLeft(2, '0'),
+          selectedDate: _finalizadoDate,
+          onDateChanged: _onFinalizadoDateChanged,
+          isLoading: _finalizadoLoading,
+          errorMessage: _finalizadoError,
         );
     }
   }
+
+  // ─── Entity → UI model mappers ──────────────────────────────────────────────
+
+  IngresoWorker _toIngresoWorker(AttendanceIngresoEntity e) {
+    return IngresoWorker(
+      name: e.fullName,
+      role: e.position,
+      scheduledTime: e.scheduledTime,
+      isLate: _isLate(e.scheduledTime),
+    );
+  }
+
+  PlantaWorker _toPlantaWorker(AttendanceEnPlantaEntity e) {
+    return PlantaWorker(
+      name: e.fullName,
+      department: e.department,
+      entryTime: e.checkInTime,
+    );
+  }
+
+  FinalizadoWorker _toFinalizadoWorker(AttendanceFinalizadoEntity e) {
+    return FinalizadoWorker(
+      name: e.fullName,
+      shift: e.shiftType,
+      department: e.department,
+      entryTime: e.checkInTime,
+      exitTime: e.checkOutTime,
+      totalTime: _formatMinutes(e.totalWorkedMinutes),
+      totalTimeColor: e.hasIncident ? TColors.warning : TColors.primary,
+      status: e.hasIncident
+          ? FinalizadoStatus.revision
+          : FinalizadoStatus.finalizado,
+      avatarColor: _avatarColor(e.fullName),
+      initials: _initials(e.fullName),
+    );
+  }
+
+  // ─── Helpers ────────────────────────────────────────────────────────────────
+
+  bool _isLate(String scheduledTime) {
+    final parts = scheduledTime.split(':');
+    if (parts.length != 2) return false;
+    final scheduledMinutes =
+        int.tryParse(parts[0])! * 60 + int.tryParse(parts[1])!;
+    final now = TimeOfDay.now();
+    return now.hour * 60 + now.minute > scheduledMinutes;
+  }
+
+  String _formatMinutes(int minutes) {
+    final h = minutes ~/ 60;
+    final m = minutes % 60;
+    if (h == 0) return '${m}m';
+    if (m == 0) return '${h}h';
+    return '${h}h ${m}m';
+  }
+
+  Color _avatarColor(String name) {
+    const colors = [
+      Color(0xFF1A56FF),
+      Color(0xFF6366F1),
+      Color(0xFFF59E0B),
+      Color(0xFF10B981),
+      Color(0xFFEF4444),
+      Color(0xFF8B5CF6),
+    ];
+    return colors[name.hashCode.abs() % colors.length];
+  }
+
+  String _initials(String fullName) {
+    final parts = fullName.trim().split(' ');
+    if (parts.length >= 2) {
+      return '${parts[0][0]}${parts[1][0]}'.toUpperCase();
+    }
+    return parts.isNotEmpty ? parts[0][0].toUpperCase() : '?';
+  }
+
+  String _isoDate(DateTime date) =>
+      '${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}';
 
   String _tabLabel(_Tab tab) {
     switch (tab) {

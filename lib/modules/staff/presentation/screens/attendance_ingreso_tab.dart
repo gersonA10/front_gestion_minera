@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
-
 import 'package:front_gestion_minera/utils/constants/color.constant.dart';
-
 import '../widgets/widgets.dart';
 
 class IngresoWorker {
@@ -22,12 +20,16 @@ class AttendanceIngresoTab extends StatelessWidget {
   final List<IngresoWorker> workers;
   final Set<String> registered;
   final void Function(String) onRegister;
+  final bool isLoading;
+  final String? errorMessage;
 
   const AttendanceIngresoTab({
     super.key,
     required this.workers,
     required this.registered,
     required this.onRegister,
+    this.isLoading = false,
+    this.errorMessage,
   });
 
   @override
@@ -42,7 +44,14 @@ class AttendanceIngresoTab extends StatelessWidget {
           const SizedBox(height: 20),
           _buildHeader(pending.length),
           const SizedBox(height: 14),
-          if (pending.isEmpty)
+          if (isLoading)
+            const Padding(
+              padding: EdgeInsets.symmetric(vertical: 32),
+              child: CircularProgressIndicator(),
+            )
+          else if (errorMessage != null)
+            _buildErrorState(errorMessage!)
+          else if (pending.isEmpty)
             _buildEmptyState()
           else
             ...pending.map(
@@ -119,11 +128,11 @@ class AttendanceIngresoTab extends StatelessWidget {
   }
 
   Widget _buildEmptyState() {
-    return Center(
+    return const Center(
       child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 32),
+        padding: EdgeInsets.symmetric(vertical: 32),
         child: Column(
-          children: const [
+          children: [
             Icon(Icons.check_circle_rounded, color: TColors.success, size: 40),
             SizedBox(height: 10),
             Text(
@@ -131,6 +140,32 @@ class AttendanceIngresoTab extends StatelessWidget {
               style: TextStyle(
                 fontSize: 14,
                 fontWeight: FontWeight.w600,
+                color: TColors.textSecondary,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildErrorState(String message) {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 32),
+        child: Column(
+          children: [
+            const Icon(
+              Icons.error_outline_rounded,
+              color: TColors.warning,
+              size: 40,
+            ),
+            const SizedBox(height: 10),
+            Text(
+              message,
+              textAlign: TextAlign.center,
+              style: const TextStyle(
+                fontSize: 13,
                 color: TColors.textSecondary,
               ),
             ),

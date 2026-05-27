@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:front_gestion_minera/modules/staff/presentation/widgets/planta_worker_card_wisget.dart';
-
 import 'package:front_gestion_minera/utils/constants/color.constant.dart';
-
 import '../widgets/widgets.dart';
 
 class PlantaWorker {
@@ -22,11 +20,15 @@ class PlantaWorker {
 class AttendanceEnPlantaTab extends StatefulWidget {
   final List<PlantaWorker> workers;
   final void Function(String) onRegisterExit;
+  final bool isLoading;
+  final String? errorMessage;
 
   const AttendanceEnPlantaTab({
     super.key,
     required this.workers,
     required this.onRegisterExit,
+    this.isLoading = false,
+    this.errorMessage,
   });
 
   @override
@@ -57,7 +59,14 @@ class _AttendanceEnPlantaTabState extends State<AttendanceEnPlantaTab> {
           const SizedBox(height: 20),
           _buildHeader(filtered.length),
           const SizedBox(height: 14),
-          if (filtered.isEmpty)
+          if (widget.isLoading)
+            const Padding(
+              padding: EdgeInsets.symmetric(vertical: 32),
+              child: CircularProgressIndicator(),
+            )
+          else if (widget.errorMessage != null)
+            _buildErrorState(widget.errorMessage!)
+          else if (filtered.isEmpty)
             _buildEmptyState()
           else
             ...filtered.map(
@@ -159,11 +168,11 @@ class _AttendanceEnPlantaTabState extends State<AttendanceEnPlantaTab> {
   }
 
   Widget _buildEmptyState() {
-    return Center(
+    return const Center(
       child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 32),
+        padding: EdgeInsets.symmetric(vertical: 32),
         child: Column(
-          children: const [
+          children: [
             Icon(Icons.people_outline_rounded,
                 color: TColors.profileMutedLabel, size: 40),
             SizedBox(height: 10),
@@ -172,6 +181,32 @@ class _AttendanceEnPlantaTabState extends State<AttendanceEnPlantaTab> {
               style: TextStyle(
                 fontSize: 14,
                 fontWeight: FontWeight.w600,
+                color: TColors.textSecondary,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildErrorState(String message) {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 32),
+        child: Column(
+          children: [
+            const Icon(
+              Icons.error_outline_rounded,
+              color: TColors.warning,
+              size: 40,
+            ),
+            const SizedBox(height: 10),
+            Text(
+              message,
+              textAlign: TextAlign.center,
+              style: const TextStyle(
+                fontSize: 13,
                 color: TColors.textSecondary,
               ),
             ),
