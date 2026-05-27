@@ -55,6 +55,16 @@ class EmployeesLoaded extends StaffState {
   }
 }
 
+class RegisterEmployeesLoading extends StaffState {}
+
+class RegisterEmployeesSuccess extends StaffState {}
+
+class RegisterEmployeesError extends StaffState {
+  final String message;
+  RegisterEmployeesError(this.message);
+}
+
+
 class EmployeesError extends StaffState {
   final String message;
   EmployeesError(this.message);

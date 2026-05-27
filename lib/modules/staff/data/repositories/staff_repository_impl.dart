@@ -1,12 +1,9 @@
-<<<<<<< HEAD
 import '../../domain/entity/employee_entity.dart';
 import '../../domain/entity/paginated_employees_entity.dart';
-=======
 import 'package:front_gestion_minera/modules/staff/data/models/models.dart';
 import 'package:front_gestion_minera/modules/staff/data/models/payroll_monthly_model.dart';
 
 import '../../domain/entity/entity.dart';
->>>>>>> origin/dev
 import '../../domain/repositories/staff_repository.dart';
 import '../datasource/staff_datasource.dart';
 
@@ -35,12 +32,6 @@ class StaffRepositoryImpl implements StaffRepository {
   }
 
   @override
-<<<<<<< HEAD
-  Future<EmployeeEntity> getEmployeeById(String id) async {
-    return await datasource.getEmployeeById(id);
-  }
-}
-=======
   Future<void> registerEmployees(RegisterEmployeesEntity employees) =>
     datasource.registerEmployees(employees);
 
@@ -52,5 +43,8 @@ class StaffRepositoryImpl implements StaffRepository {
   Future<List<PayrollMonthlyModel>> getPayrollMonthly() {
     return datasource.getPayrollMonthly();
   }
+  @override
+  Future<EmployeeEntity> getEmployeeById(String id) async {
+    return await datasource.getEmployeeById(id);
+  }
 }
->>>>>>> origin/dev

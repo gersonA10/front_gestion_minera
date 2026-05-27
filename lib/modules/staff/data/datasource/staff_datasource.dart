@@ -1,4 +1,7 @@
 import 'package:front_gestion_minera/core/networking/http_services.dart';
+
+import 'package:front_gestion_minera/modules/staff/domain/entity/create_payroll_monthly_entity.dart';
+import 'package:front_gestion_minera/modules/staff/domain/entity/register_employees_entity.dart';
 import '../models/models.dart';
 
 

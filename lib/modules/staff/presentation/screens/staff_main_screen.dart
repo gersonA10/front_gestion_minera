@@ -1,5 +1,6 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
+import 'package:front_gestion_minera/modules/staff/presentation/screens/payroll_screen.dart';
 import 'package:front_gestion_minera/modules/staff/presentation/screens/screens.dart';
 import 'package:front_gestion_minera/utils/constants/color.constant.dart';
 
@@ -22,19 +23,11 @@ class _StaffMainScreenState extends State<StaffMainScreen> {
   void initState() {
     super.initState();
 
-<<<<<<< HEAD
-    _screens = const [
-      WorkersScreen(),
-      _PlaceholderScreen(title: 'Nómina'),
-      StaffExpenditureRequestScreen(),
-      _PlaceholderScreen(title: 'Turnos'),
-=======
     _screens = [
       const WorkersScreen(),
       const PayrollScreen(),
       StaffExpenditureRequestScreen(),
       EmployeeEntryRegisterScreen(id: 'ddb582a5-1621-4d9d-b1ab-dc04183f9a46'),
->>>>>>> origin/dev
     ];
   }
 
@@ -93,7 +86,6 @@ class _StaffMainScreenState extends State<StaffMainScreen> {
             fontSize: 11,
             fontWeight: FontWeight.bold,
           ),
-
           unselectedLabelStyle: const TextStyle(
             fontSize: 10,
             fontWeight: FontWeight.normal, 
@@ -127,18 +119,18 @@ class _StaffMainScreenState extends State<StaffMainScreen> {
   }
 }
 
-class _PlaceholderScreen extends StatelessWidget {
-  final String title;
+// class _PlaceholderScreen extends StatelessWidget {
+//   final String title;
 
-  const _PlaceholderScreen({required this.title});
+//   const _PlaceholderScreen({required this.title});
 
-  @override
-  Widget build(BuildContext context) {
-    return Center(
-      child: Text(
-        title,
-        style: const TextStyle(fontSize: 22, fontWeight: FontWeight.w600),
-      ),
-    );
-  }
-}
+//   @override
+//   Widget build(BuildContext context) {
+//     return Center(
+//       child: Text(
+//         title,
+//         style: const TextStyle(fontSize: 22, fontWeight: FontWeight.w600),
+//       ),
+//     );
+//   }
+// }
