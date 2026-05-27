@@ -150,6 +150,7 @@ class _WorkersScreenState extends State<WorkersScreen> {
                           return Padding(
                             padding: const EdgeInsets.only(bottom: 14),
                             child: WorkerCardWidget(
+                              employeeId: employee.employeeId,
                               image: employee.profilePhotoUrl,
                               name: employee.fullName,
                               position: employee.position,

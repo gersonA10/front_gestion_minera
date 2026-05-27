@@ -57,6 +57,17 @@ class EmployeesLoaded extends StaffState {
 
 class EmployeesError extends StaffState {
   final String message;
-
   EmployeesError(this.message);
+}
+
+class EmployeeProfileLoading extends StaffState {}
+
+class EmployeeProfileLoaded extends StaffState {
+  final EmployeeEntity employee;
+  EmployeeProfileLoaded(this.employee);
+}
+
+class EmployeeProfileError extends StaffState {
+  final String message;
+  EmployeeProfileError(this.message);
 }

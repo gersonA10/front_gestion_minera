@@ -4,6 +4,7 @@ import 'package:front_gestion_minera/config/router/app_router.gr.dart';
 import 'package:front_gestion_minera/utils/constants/color.constant.dart';
 
 class WorkerCardWidget extends StatelessWidget {
+  final String employeeId;
   final String image;
   final String name;
   final String position;
@@ -13,6 +14,7 @@ class WorkerCardWidget extends StatelessWidget {
 
   const WorkerCardWidget({
     super.key,
+    required this.employeeId,
     required this.image,
     required this.name,
     required this.position,
@@ -58,7 +60,7 @@ class WorkerCardWidget extends StatelessWidget {
                         width: 58,
                         height: 58,
                         fit: BoxFit.cover,
-                        errorBuilder: (_, __, ___) {
+                        errorBuilder: (_, _, _) {
                           return Image.network(
                             _fallbackImage,
                             width: 58,
@@ -190,7 +192,7 @@ class WorkerCardWidget extends StatelessWidget {
           ),
           TextButton(
             onPressed: () {
-              context.router.push(WorkerProfileRoute());
+              context.router.push(WorkerProfileRoute(employeeId: employeeId));
             },
             child: Text(
               actionText.toUpperCase(),

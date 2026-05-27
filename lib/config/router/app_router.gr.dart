@@ -2082,18 +2082,43 @@ class ViewRequestDetailsRouteArgs {
 
 /// generated route for
 /// [_i64.WorkerProfileScreen]
-class WorkerProfileRoute extends _i66.PageRouteInfo<void> {
-  const WorkerProfileRoute({List<_i66.PageRouteInfo>? children})
-    : super(WorkerProfileRoute.name, initialChildren: children);
+class WorkerProfileRoute
+    extends _i66.PageRouteInfo<WorkerProfileRouteArgs> {
+  WorkerProfileRoute({
+    required String employeeId,
+    _i67.Key? key,
+    List<_i66.PageRouteInfo>? children,
+  }) : super(
+         WorkerProfileRoute.name,
+         args: WorkerProfileRouteArgs(employeeId: employeeId, key: key),
+         initialChildren: children,
+       );
 
   static const String name = 'WorkerProfileRoute';
 
   static _i66.PageInfo page = _i66.PageInfo(
     name,
     builder: (data) {
-      return const _i64.WorkerProfileScreen();
+      final args = data.argsAs<WorkerProfileRouteArgs>();
+      return _i64.WorkerProfileScreen(
+        key: args.key,
+        employeeId: args.employeeId,
+      );
     },
   );
+}
+
+class WorkerProfileRouteArgs {
+  const WorkerProfileRouteArgs({required this.employeeId, this.key});
+
+  final String employeeId;
+
+  final _i67.Key? key;
+
+  @override
+  String toString() {
+    return 'WorkerProfileRouteArgs{employeeId: $employeeId, key: $key}';
+  }
 }
 
 /// generated route for

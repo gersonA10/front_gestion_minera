@@ -1,3 +1,4 @@
+import '../../domain/entity/employee_entity.dart';
 import '../../domain/entity/paginated_employees_entity.dart';
 import '../../domain/repositories/staff_repository.dart';
 import '../datasource/staff_datasource.dart';
@@ -24,5 +25,10 @@ class StaffRepositoryImpl implements StaffRepository {
       page: page,
       limit: limit,
     );
+  }
+
+  @override
+  Future<EmployeeEntity> getEmployeeById(String id) async {
+    return await datasource.getEmployeeById(id);
   }
 }

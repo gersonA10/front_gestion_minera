@@ -1,6 +1,6 @@
 import 'package:front_gestion_minera/core/networking/http_services.dart';
+import '../models/models.dart';
 
-import '../models/paginated_employees_model.dart';
 
 class StaffDatasource {
   final ApiClient apiClient;
@@ -25,10 +25,8 @@ class StaffDatasource {
       queryParameters['search'] = search.trim();
     }
 
-    if (department != null &&
-        department.trim().isNotEmpty) {
-      queryParameters['department'] =
-          department.trim();
+    if (department != null && department.trim().isNotEmpty) {
+      queryParameters['department'] = department.trim();
     }
 
     if (status != null &&
@@ -44,5 +42,13 @@ class StaffDatasource {
     );
 
     return PaginatedEmployeesModel.fromJson(response);
+  }
+
+  Future<EmployeeModel> getEmployeeById(String id) async {
+    final response = await apiClient.get(
+      '/api/hr/employees/$id',
+      operationName: 'getEmployeeById',
+    );
+    return EmployeeModel.fromJson(response['data']);
   }
 }

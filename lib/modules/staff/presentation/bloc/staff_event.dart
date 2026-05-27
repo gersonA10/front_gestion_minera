@@ -21,3 +21,8 @@ class GetEmployeesEvent extends StaffEvent {
 class LoadMoreEmployeesEvent extends StaffEvent {}
 
 class RefreshEmployeesEvent extends StaffEvent {}
+
+class GetEmployeeProfileEvent extends StaffEvent {
+  final String employeeId;
+  GetEmployeeProfileEvent(this.employeeId);
+}
