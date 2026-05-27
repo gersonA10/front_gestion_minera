@@ -176,7 +176,8 @@ class StaffBloc extends Bloc<StaffEvent, StaffState> {
   ) async {
     emit(CheckInEmployeeLoading());
     try {
-      repository.registerCheckInEmployee(event.checkIn);
+      await repository.registerCheckInEmployee(event.checkIn);
+      emit(CheckInEmployeeSuccess());
     }on BaseApiException catch (error) {
       final responseData = error.response?.data as Map<String, dynamic>?;
       emit(CheckInEmployeeError(responseData?['error'] ?? error.key));

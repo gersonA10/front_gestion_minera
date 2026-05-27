@@ -97,7 +97,7 @@ class StaffDatasource {
   Future<void> registerCheckInEmployee(EmployeeCheckInEntity checkIn) async {
     final model = EmployeeCheckInModel.fromEntity(checkIn);
     await apiClient.post(
-      '/api/hr/employees/attendances/check-in',
+      '/api/hr/attendances/check-in',
       operationName: 'CheckInEmployeed',
       data: model.toJson(),
     );
