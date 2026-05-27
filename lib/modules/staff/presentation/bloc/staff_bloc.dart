@@ -1,9 +1,9 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
-import '../../domain/entity/entity.dart';
+import 'package:front_gestion_minera/core/networking/base_api_exception.dart';
+import 'package:front_gestion_minera/utils/error.dart';
 import '../../domain/repositories/staff_repository.dart';
+import '../../domain/entity/entity.dart';
 import 'dart:async';
-import '../../../../core/networking/base_api_exception.dart';
-import '../../../../utils/error.dart';
 part 'staff_event.dart';
 part 'staff_state.dart';
 
@@ -11,13 +11,13 @@ class StaffBloc extends Bloc<StaffEvent, StaffState> {
   final StaffRepository repository;
   StaffBloc({required this.repository}) : super(StaffInitial()) {
     on<GetEmployeesEvent>(_onGetEmployees);
-
     on<LoadMoreEmployeesEvent>(_onLoadMoreEmployees);
-
     on<RefreshEmployeesEvent>(_onRefreshEmployees);
     on<RegisterEmployeesEvent>(_onRegisterEmployees);
     on<CreatePayrollMonthlyEvent>(_onCreatePayrollMonthly);
     on<GetEmployeePayrollEvent>(_onGetEmployeePayrol);
+    on<GetEmployeeProfileEvent>(_onGetEmployeeProfile);
+
   }
 
   FutureOr<void> _onRegisterEmployees(
@@ -81,7 +81,6 @@ class StaffBloc extends Bloc<StaffEvent, StaffState> {
     final currentState = state;
 
     if (currentState is! EmployeesLoaded) return;
-
     if (!currentState.hasMore) return;
 
     final nextPage = currentState.currentPage + 1;
@@ -96,7 +95,10 @@ class StaffBloc extends Bloc<StaffEvent, StaffState> {
 
       emit(
         currentState.copyWith(
-          employees: [...currentState.employees, ...response.employees],
+          employees: [
+            ...currentState.employees,
+            ...response.employees,
+          ],
           currentPage: response.page,
           hasMore: response.hasMore,
         ),
@@ -113,10 +115,7 @@ class StaffBloc extends Bloc<StaffEvent, StaffState> {
     Emitter<StaffState> emit,
   ) async {
     final currentState = state;
-
-    if (currentState is! EmployeesLoaded) {
-      return;
-    }
+    if (currentState is! EmployeesLoaded) return;
 
     add(
       GetEmployeesEvent(
@@ -166,6 +165,20 @@ class StaffBloc extends Bloc<StaffEvent, StaffState> {
       emit(GenerateEmployeePayrollError(responseData?['error'] ?? error.key));
     } catch (e) {
       emit(GenerateEmployeePayrollError('Error inesperado: $e'));
+    }
+  }
+  Future<void> _onGetEmployeeProfile(
+    GetEmployeeProfileEvent event,
+    Emitter<StaffState> emit,
+  ) async {
+    try {
+      emit(EmployeeProfileLoading());
+      final employee = await repository.getEmployeeById(event.employeeId);
+      emit(EmployeeProfileLoaded(employee));
+    } on BaseApiException catch (e) {
+      emit(EmployeeProfileError(mapErrorMessage(e.key)));
+    } catch (_) {
+      emit(EmployeeProfileError('Ocurrió un error inesperado'));
     }
   }
 }

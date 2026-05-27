@@ -111,6 +111,27 @@ class TColors {
   static const grayText = Color(0xFF6B7280);
   static const fieldBorder = Color(0xFFE9EBF0);
 
+  // Worker Profile
+  static const profileBlue = Color(0xFF1A73E8);
+  static const profileDarkText = Color(0xFF1A1A2E);
+  static const profileTitleText = Color(0xFF2D2D2D);
+  static const profileMutedLabel = Color(0xFF8A8FA8);
+  static const profileBodyText = Color(0xFF3D4459);
+  static const avatarBackground = Color(0xFFCDD8EC);
+  static const avatarIconColor = Color(0xFF7A9CC9);
+  static const statusActiveDot = Color(0xFF34C759);
+  static const statusRestDot = Color(0xFFFF9500);
+  static const statusInactiveDot = Color(0xFFADB5C7);
+  static const statusActiveBg = Color(0xFFE8F9EE);
+  static const statusRestBg = Color(0xFFFFF4E5);
+  static const statusInactiveBg = Color(0xFFF0F1F5);
+  static const profileIconBg = Color(0xFFEFF3FB);
+  static const profileCardInnerBg = Color(0xFFF5F6FA);
+  static const seniorityCardBg = Color(0xFFFFFBF0);
+  static const seniorityIconBg = Color(0xFFFFF3CC);
+  static const seniorityIconColor = Color(0xFFF5A623);
+  static const seniorityLabelColor = Color(0xFFBF8C2E);
+
   // Request Progress / Timeline
   static const headerDark = Color(0xFF1A1F2E);
   static const timelineBlue = Color(0xFF2196F3);

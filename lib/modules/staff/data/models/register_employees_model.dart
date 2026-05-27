@@ -1,4 +1,5 @@
-import 'package:front_gestion_minera/modules/staff/domain/entity/entity.dart';
+
+import '../../domain/entity/entity.dart';
 
 class RegisterEmployeesModel extends RegisterEmployeesEntity {
   RegisterEmployeesModel({

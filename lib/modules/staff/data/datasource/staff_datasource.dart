@@ -1,12 +1,16 @@
 import 'package:front_gestion_minera/core/networking/http_services.dart';
-import 'package:front_gestion_minera/modules/staff/domain/entity/entity.dart';
 
+import 'package:front_gestion_minera/modules/staff/domain/entity/create_payroll_monthly_entity.dart';
+import 'package:front_gestion_minera/modules/staff/domain/entity/register_employees_entity.dart';
 import '../models/models.dart';
+
 
 class StaffDatasource {
   final ApiClient apiClient;
 
-  StaffDatasource({required this.apiClient});
+  StaffDatasource({
+    required this.apiClient,
+  });
 
   Future<PaginatedEmployeesModel> getEmployees({
     String? search,
@@ -15,7 +19,10 @@ class StaffDatasource {
     int page = 1,
     int limit = 20,
   }) async {
-    final Map<String, dynamic> queryParameters = {'page': page, 'limit': limit};
+    final Map<String, dynamic> queryParameters = {
+      'page': page,
+      'limit': limit,
+    };
 
     if (search != null && search.trim().isNotEmpty) {
       queryParameters['search'] = search.trim();
@@ -93,4 +100,14 @@ class StaffDatasource {
 
     return EmployeeCheckOutModel.fromJson(response['data']);
   }
+
+  Future<EmployeeModel> getEmployeeById(String id) async {
+    final response = await apiClient.get(
+      '/api/hr/employees/$id',
+      operationName: 'getEmployeeById',
+    );
+    return EmployeeModel.fromJson(response['data']);
+  }
 }
+
+

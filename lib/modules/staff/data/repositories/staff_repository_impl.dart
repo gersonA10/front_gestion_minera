@@ -1,3 +1,5 @@
+import '../../domain/entity/employee_entity.dart';
+import '../../domain/entity/paginated_employees_entity.dart';
 import 'package:front_gestion_minera/modules/staff/data/models/models.dart';
 import 'package:front_gestion_minera/modules/staff/data/models/payroll_monthly_model.dart';
 
@@ -40,5 +42,9 @@ class StaffRepositoryImpl implements StaffRepository {
   @override
   Future<List<PayrollMonthlyModel>> getPayrollMonthly() {
     return datasource.getPayrollMonthly();
+  }
+  @override
+  Future<EmployeeEntity> getEmployeeById(String id) async {
+    return await datasource.getEmployeeById(id);
   }
 }
