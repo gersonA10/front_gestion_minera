@@ -26,3 +26,11 @@ class GetEmployeeProfileEvent extends StaffEvent {
   final String employeeId;
   GetEmployeeProfileEvent(this.employeeId);
 }
+
+class CreatePayrollMonthlyEvent extends StaffEvent {
+  final CreatePayrollMonthlyEntity payroll;
+
+  CreatePayrollMonthlyEvent({required this.payroll});
+}
+
+class GetEmployeePayrollEvent extends StaffEvent {}

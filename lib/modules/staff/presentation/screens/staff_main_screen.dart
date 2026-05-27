@@ -22,11 +22,19 @@ class _StaffMainScreenState extends State<StaffMainScreen> {
   void initState() {
     super.initState();
 
+<<<<<<< HEAD
     _screens = const [
       WorkersScreen(),
       _PlaceholderScreen(title: 'Nómina'),
       StaffExpenditureRequestScreen(),
       _PlaceholderScreen(title: 'Turnos'),
+=======
+    _screens = [
+      const WorkersScreen(),
+      const PayrollScreen(),
+      StaffExpenditureRequestScreen(),
+      EmployeeEntryRegisterScreen(id: 'ddb582a5-1621-4d9d-b1ab-dc04183f9a46'),
+>>>>>>> origin/dev
     ];
   }
 
@@ -110,6 +118,7 @@ class _StaffMainScreenState extends State<StaffMainScreen> {
               icon: Icon(Icons.settings_outlined),
               activeIcon: Icon(Icons.settings),
               label: 'TURNOS',
+              
             ),
           ],
         ),

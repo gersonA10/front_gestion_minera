@@ -71,3 +71,28 @@ class EmployeeProfileError extends StaffState {
   final String message;
   EmployeeProfileError(this.message);
 }
+
+class CreatePayrollRequestLoading extends StaffState {}
+
+class CreatePayrollRequestSuccess extends StaffState {}
+
+class CreatePayrollRequestError extends StaffState {
+  final String message;
+  CreatePayrollRequestError(this.message);
+}
+
+class GenerateEmployeePayrollLoading extends StaffState {}
+
+class GenerateEmployeePayrollSuccess extends StaffState {
+  final int totalEmployee;
+  final double totalAmount;
+  GenerateEmployeePayrollSuccess({
+    required this.totalEmployee,
+    required this.totalAmount,
+  });
+}
+
+class GenerateEmployeePayrollError extends StaffState {
+  final String message;
+  GenerateEmployeePayrollError(this.message);
+}

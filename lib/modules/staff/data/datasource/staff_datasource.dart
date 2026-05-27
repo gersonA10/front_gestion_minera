@@ -44,6 +44,60 @@ class StaffDatasource {
     return PaginatedEmployeesModel.fromJson(response);
   }
 
+  Future<void> registerEmployees(RegisterEmployeesEntity employees) async {
+    final model = RegisterEmployeesModel.fromEntity(employees);
+    await apiClient.post(
+      '/api/hr/employees',
+      operationName: 'registerEmployeed',
+      data: model.toJson(),
+    );
+  }
+
+  Future<List<PayrollMonthlyModel>> getPayrollMonthly() async {
+    final queryParameters = {
+      'month': DateTime.now().month.toString(),
+      'year': DateTime.now().year.toString(),
+    };
+    final response = await apiClient.get(
+      '/api/hr/payrolls',
+      operationName: 'getPayrollsMonthly',
+      queryParameters: queryParameters,
+    );
+    final List data = response as List;
+    return data.map((json) => PayrollMonthlyModel.fromJson(json)).toList();
+  }
+
+  Future<void> createPayrollMonthly(
+    CreatePayrollMonthlyEntity payrollenitity,
+  ) async {
+    final modelpayroll = CreatePayrollMonthlyModel.fromEntity(payrollenitity);
+    await apiClient.postFormData(
+      '/api/hr/payrolls/request-egreso',
+      operationName: 'requestPayrollsMonthly',
+      data: modelpayroll.toJson(),
+      files: [
+        {
+          'name': 'planilla',
+          'path': modelpayroll.planillaUrl,
+          'filename': modelpayroll.planillaUrl.split('/').last,
+        },
+      ],
+    );
+  }
+
+  Future<EmployeeCheckOutModel> checkOutEmployee(
+    String attendanceId,
+    EmployeeCheckOutRequestModel request,
+  ) async {
+    final response = await apiClient.patch(
+      '/api/hr/employees/attendances/$attendanceId/check-out',
+      data: request.toJson(),
+      operationName: 'checkOutEmployee',
+    );
+
+    return EmployeeCheckOutModel.fromJson(response['data']);
+  }
+
   Future<EmployeeModel> getEmployeeById(String id) async {
     final response = await apiClient.get(
       '/api/hr/employees/$id',
@@ -52,3 +106,5 @@ class StaffDatasource {
     return EmployeeModel.fromJson(response['data']);
   }
 }
+
+
