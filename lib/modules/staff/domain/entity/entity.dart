@@ -1,3 +1,4 @@
+export 'package:front_gestion_minera/modules/staff/domain/entity/employee_detail_assistance_entity.dart';
 export 'package:front_gestion_minera/modules/staff/domain/entity/employee_check_in_entity.dart';
 export '../entity/paginated_employees_entity.dart';
 export 'package:front_gestion_minera/modules/staff/domain/entity/employee_entity.dart';

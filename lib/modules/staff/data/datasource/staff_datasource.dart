@@ -150,11 +150,11 @@ class StaffDatasource {
     );
   }
 
-  Future<EmployeeModel> getDetailsEmployee(String employeeId) async {
+  Future<EmployeeDetailAssistanceModel> getDetailsEmployee(String employeeId) async {
     final response = await apiClient.get(
-      '/api/hr/employees/$employeeId',
+      '/api/hr/attendances/$employeeId',
       operationName: 'getDetailsEmployee',
     );
-    return EmployeeModel.fromJson(response['data']);
+    return EmployeeDetailAssistanceModel.fromJson(response['data']);
   }
 }

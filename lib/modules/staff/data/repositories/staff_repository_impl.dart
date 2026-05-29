@@ -76,7 +76,7 @@ class StaffRepositoryImpl implements StaffRepository {
   }
   
   @override
-  Future<EmployeeModel> getDetailsEmployee(String employeeId) {
+  Future<EmployeeDetailAssistanceModel> getDetailsEmployee(String employeeId) {
     return datasource.getDetailsEmployee(employeeId);
   }
 }
