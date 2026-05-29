@@ -1,7 +1,11 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
+<<<<<<< HEAD
 import 'package:front_gestion_minera/modules/staff/presentation/widgets/payroll_employee_card_widget.dart';
 import 'package:front_gestion_minera/modules/staff/presentation/widgets/payroll_summary_card_widget.dart';
+=======
+import 'package:front_gestion_minera/config/router/app_router.gr.dart';
+>>>>>>> origin/dev
 import 'package:front_gestion_minera/utils/constants/color.constant.dart';
 
 @RoutePage()
@@ -12,7 +16,12 @@ class PayrollScreen extends StatefulWidget {
 }
 
 class _PayrollScreenState extends State<PayrollScreen> {
+<<<<<<< HEAD
   final TextEditingController searchController = TextEditingController();
+=======
+  final TextEditingController nombreController = TextEditingController();
+  final _formKey = GlobalKey<FormState>();
+>>>>>>> origin/dev
   @override
   void dispose() {
     searchController.dispose();
@@ -22,6 +31,7 @@ class _PayrollScreenState extends State<PayrollScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+<<<<<<< HEAD
       backgroundColor: TColors.textFieldBackgroundColor,
       appBar: AppBar(
         backgroundColor: TColors.white,
@@ -209,9 +219,49 @@ class _PayrollScreenState extends State<PayrollScreen> {
                     onTap: () {},
                   ),
                 ],
+=======
+      body: Padding(
+        padding: const EdgeInsets.all(20),
+        child: Form(
+          key: _formKey,
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              TextFormField(
+                controller: nombreController,
+                decoration: InputDecoration(
+                  hintText: 'attendance_id temporal para abrir el registro',
+                  hintStyle: TextStyle(color: TColors.disabled, fontSize: 14),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+                validator: (value) {
+                  if (value == null || value.trim().isEmpty) {
+                    return 'attendance_id obligatorio';
+                  }
+                  return null;
+                },
               ),
-            ),
-          ],
+              const SizedBox(height: 16),
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton(
+                  onPressed: () {
+                    if (_formKey.currentState!.validate()) {
+                      context.router.push(
+                        EmployeeCheckOutLogRoute(
+                          attendanceId: nombreController.text.trim(),
+                        ),
+                      );
+                    }
+                  },
+                  child: const Text('Abrir Registro'),
+                ),
+>>>>>>> origin/dev
+              ),
+            ],
+          ),
         ),
       ),
     );
