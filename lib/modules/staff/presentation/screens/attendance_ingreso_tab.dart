@@ -1,8 +1,11 @@
+import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
+import 'package:front_gestion_minera/config/router/app_router.gr.dart';
 import 'package:front_gestion_minera/utils/constants/color.constant.dart';
 import '../widgets/widgets.dart';
 
 class IngresoWorker {
+  final String employeeId;
   final String name;
   final String role;
   final String scheduledTime;
@@ -13,6 +16,7 @@ class IngresoWorker {
     required this.role,
     required this.scheduledTime,
     this.isLate = false,
+    required this.employeeId,
   });
 }
 
@@ -59,7 +63,9 @@ class AttendanceIngresoTab extends StatelessWidget {
                 padding: const EdgeInsets.only(bottom: 14),
                 child: IngresoWorkerCard(
                   worker: w,
-                  onRegister: () => onRegister(w.name),
+                  onRegister: () => context.router.push(
+                    EmployeeEntryRegisterRoute(usuario: w),
+                  ),
                 ),
               ),
             ),
@@ -175,4 +181,3 @@ class AttendanceIngresoTab extends StatelessWidget {
     );
   }
 }
-

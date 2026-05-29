@@ -24,4 +24,6 @@ abstract class StaffRepository {
   Future<List<AttendanceFinalizadoEntity>> getAttendanceFinalizado({
     required String date,
   });
+  
+  Future<void> registerCheckInEmployee(EmployeeCheckInEntity checkIn);
 }

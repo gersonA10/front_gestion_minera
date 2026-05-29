@@ -145,3 +145,12 @@ class AttendanceFinalizadoError extends StaffState {
   final String message;
   AttendanceFinalizadoError(this.message);
 }
+
+class CheckInEmployeeLoading extends StaffState {}
+
+class CheckInEmployeeSuccess extends StaffState {}
+
+class CheckInEmployeeError extends StaffState {
+  final String message;
+  CheckInEmployeeError(this.message);
+}

@@ -61,4 +61,8 @@ class StaffRepositoryImpl implements StaffRepository {
     required String date,
   }) =>
       datasource.getAttendanceFinalizado(date: date);
+  
+  @override
+  Future<void> registerCheckInEmployee(EmployeeCheckInEntity checkIn) =>
+    datasource.registerCheckInEmployee(checkIn);
 }

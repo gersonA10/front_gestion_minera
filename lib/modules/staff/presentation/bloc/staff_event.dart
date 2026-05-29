@@ -50,4 +50,10 @@ class GetAttendanceFinalizadoEvent extends StaffEvent {
   GetAttendanceFinalizadoEvent({required this.date});
 }
 
+class RegisterCheckInEmployeeEvent extends StaffEvent {
+  final EmployeeCheckInEntity checkIn;
+
+  RegisterCheckInEmployeeEvent({required this.checkIn});
+}
+
 

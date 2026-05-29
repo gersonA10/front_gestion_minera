@@ -277,6 +277,7 @@ class _AttendanceControlScreenState extends State<AttendanceControlScreen> {
 
   IngresoWorker _toIngresoWorker(AttendanceIngresoEntity e) {
     return IngresoWorker(
+      employeeId: e.employeeId,
       name: e.fullName,
       role: e.position,
       scheduledTime: e.scheduledTime,
