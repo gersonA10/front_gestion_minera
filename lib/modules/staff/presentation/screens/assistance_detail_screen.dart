@@ -3,6 +3,9 @@ import 'package:flutter/material.dart';
 import 'package:front_gestion_minera/utils/constants/color.constant.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:timeline_tile/timeline_tile.dart';
+import 'package:pdf/pdf.dart';
+import 'package:pdf/widgets.dart' as pw;
+import 'package:printing/printing.dart';
 
 @RoutePage()
 class AssistanceDetailScreen extends StatefulWidget {
@@ -339,7 +342,9 @@ class _AssistanceDetailScreenState extends State<AssistanceDetailScreen> {
                       borderRadius: BorderRadius.circular(15),
                     ),
                     child: InkWell(
-                      onTap: () {},
+                      onTap: () {
+                        _generarPdf(context);
+                      },
                       splashColor: TColors.disabled,
                       borderRadius: BorderRadius.circular(15),
                       child: const Padding(
@@ -403,6 +408,238 @@ class _AssistanceDetailScreenState extends State<AssistanceDetailScreen> {
         ),
       ),
     );
+  }
+
+  Future<void> _generarPdf(BuildContext context) async {
+    final pdf = pw.Document();
+    pdf.addPage(
+      pw.Page(
+        pageFormat: PdfPageFormat.a4,
+        margin: const pw.EdgeInsets.symmetric(horizontal: 100, vertical: 50),
+        build: (pw.Context ctx) => pw.Column(
+          crossAxisAlignment: pw.CrossAxisAlignment.start,
+          children: [
+            pw.SizedBox(height: 30),
+            pw.Row(
+              children: [
+                pw.Container(
+                  padding: pw.EdgeInsets.all(40),
+                  decoration: pw.BoxDecoration(
+                    border: pw.Border.all(color: PdfColor.fromHex('#000000')),
+                  ),
+                  child: pw.Text('Foto'),
+                ),
+                pw.SizedBox(width: 60),
+                pw.Column(
+                  crossAxisAlignment: pw.CrossAxisAlignment.start,
+                  children: [
+                    pw.SizedBox(height: 15),
+                    pw.Text(
+                      _nameEmployee,
+                      style: pw.TextStyle(
+                        fontSize: 25,
+                        fontWeight: pw.FontWeight.bold,
+                      ),
+                    ),
+                    pw.Text(
+                      _role,
+                      style: pw.TextStyle(
+                        fontWeight: pw.FontWeight.bold,
+                        fontSize: 15,
+                      ),
+                    ),
+                    pw.SizedBox(height: 5),
+                    pw.Container(
+                      margin: pw.EdgeInsets.only(bottom: 10),
+                      decoration: pw.BoxDecoration(
+                        borderRadius: pw.BorderRadius.circular(15),
+                      ),
+                      child: pw.Text(
+                        'ID: $_nid',
+                        style: pw.TextStyle(fontSize: 15),
+                      ),
+                    ),
+                    pw.Row(
+                      children: [
+                        pw.Container(
+                          padding: pw.EdgeInsets.symmetric(horizontal: 20),
+                          child: pw.Center(
+                            child: pw.Column(
+                              children: [
+                                pw.Text(
+                                  'Fecha',
+                                  style: pw.TextStyle(
+                                    fontWeight: pw.FontWeight.bold,
+                                    fontSize: 20,
+                                  ),
+                                ),
+                                pw.Text(
+                                  '25 May, 2026',
+                                  style: pw.TextStyle(fontSize: 15),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                        pw.Container(
+                          width: 1,
+                          height: 40,
+                          color: PdfColors.grey,
+                        ),
+                        pw.Container(
+                          padding: pw.EdgeInsets.symmetric(horizontal: 20),
+                          child: pw.Center(
+                            child: pw.Column(
+                              children: [
+                                pw.Text(
+                                  'Turno',
+                                  style: pw.TextStyle(
+                                    fontWeight: pw.FontWeight.bold,
+                                    fontSize: 20,
+                                  ),
+                                ),
+                                pw.Text(
+                                  'MAÑANA',
+                                  style: pw.TextStyle(fontSize: 15),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ],
+            ),
+            pw.SizedBox(height: 50),
+            pw.Column(
+              crossAxisAlignment: pw.CrossAxisAlignment.start,
+              children: [
+                pw.Text(
+                  'Cronologia del Turno',
+                  style: pw.TextStyle(
+                    fontSize: 17,
+                    fontWeight: pw.FontWeight.bold,
+                  ),
+                ),
+                pw.Padding(
+                  padding: pw.EdgeInsets.all(30),
+                  child: pw.Column(
+                    children: [
+                      pw.Row(
+                        children: [
+                          pw.Container(
+                            width: 12,
+                            height: 12,
+                            decoration: pw.BoxDecoration(
+                              color: PdfColors.blue,
+                              shape: pw.BoxShape.circle,
+                            ),
+                          ),
+                          pw.SizedBox(width: 10),
+                          pw.Text(
+                            'Entrada Registrada - 06:55 AM',
+                            style: pw.TextStyle(
+                              fontSize: 15,
+                              fontWeight: pw.FontWeight.bold,
+                            ),
+                          ),
+                        ],
+                      ),
+                      pw.SizedBox(height: 30),
+                      pw.Row(
+                        children: [
+                          pw.Container(
+                            width: 10,
+                            height: 10,
+                            decoration: pw.BoxDecoration(
+                              color: PdfColors.grey,
+                              shape: pw.BoxShape.circle,
+                            ),
+                          ),
+                          pw.SizedBox(width: 10),
+                          pw.Text(
+                            'Tiempo de Refrigerio - 45 Minutos',
+                            style: pw.TextStyle(
+                              fontSize: 15,
+                              fontWeight: pw.FontWeight.bold,
+                            ),
+                          ),
+                        ],
+                      ),
+                      pw.SizedBox(height: 30),
+                      pw.Row(
+                        children: [
+                          pw.Container(
+                            width: 12,
+                            height: 12,
+                            decoration: pw.BoxDecoration(
+                              color: PdfColors.black,
+                              shape: pw.BoxShape.circle,
+                            ),
+                          ),
+                          pw.SizedBox(width: 10),
+                          pw.Text(
+                            'Salida Registrada - 06:55 AM',
+                            style: pw.TextStyle(
+                              fontSize: 15,
+                              fontWeight: pw.FontWeight.bold,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+            pw.SizedBox(height: 30),
+            pw.Divider(),
+            pw.Row(
+              crossAxisAlignment: pw.CrossAxisAlignment.end,
+              children: [
+                pw.Column(
+                  crossAxisAlignment: pw.CrossAxisAlignment.start,
+                  children: [
+                    pw.Text(
+                      'Horas Efectivas: ',
+                      style: pw.TextStyle(
+                        fontSize: 20,
+                        fontWeight: pw.FontWeight.bold,
+                      ),
+                    ),
+                    pw.Text(
+                      'Excluyendo refrigerio',
+                      style: pw.TextStyle(fontSize: 12),
+                    ),
+                  ],
+                ),
+                pw.Spacer(),
+                pw.Text(
+                  _hourTotal.toString(),
+                  style: pw.TextStyle(
+                    fontSize: 30,
+                    fontWeight: pw.FontWeight.bold,
+                  ),
+                ),
+                pw.Text(
+                  'hrs',
+                  style: pw.TextStyle(
+                    fontSize: 15,
+                    fontWeight: pw.FontWeight.bold,
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+    await Printing.layoutPdf(
+      onLayout: (_) async  => pdf.save(),
+      name: 'Reporte_Asistencia_${_nameEmployee.replaceAll(' ', '_')}.pdf',
+      );
   }
 }
 
