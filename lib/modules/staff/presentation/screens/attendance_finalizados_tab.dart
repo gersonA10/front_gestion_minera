@@ -1,9 +1,12 @@
+import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
+import 'package:front_gestion_minera/config/router/app_router.gr.dart';
 import 'package:front_gestion_minera/utils/constants/color.constant.dart';
 
 enum FinalizadoStatus { finalizado, revision }
 
 class FinalizadoWorker {
+  final String idEmployee;
   final String name;
   final String shift;
   final String department;
@@ -16,6 +19,7 @@ class FinalizadoWorker {
   final String initials;
 
   const FinalizadoWorker({
+    required this.idEmployee,
     required this.name,
     required this.shift,
     required this.department,
@@ -59,6 +63,22 @@ class AttendanceFinalizadosTab extends StatelessWidget {
           const SizedBox(height: 20),
           _buildDateRow(context),
           const SizedBox(height: 14),
+          Padding(
+                padding: const EdgeInsets.only(bottom: 14),
+                child: _FinalizadoWorkerCard(worker: FinalizadoWorker(
+                  idEmployee: 'ddb582a5-1621-4d9d-b1ab-dc04183f9a46',
+                  name: 'Pedro Tintaya',
+                  shift: 'Mañana',
+                  department: 'Extracción',
+                  entryTime: '08:00',
+                  exitTime: '16:45',
+                  totalTime: '8h 45m',
+                  totalTimeColor: TColors.success,
+                  status: FinalizadoStatus.finalizado,
+                  avatarColor: TColors.primary,
+                  initials: 'JP',
+                )),
+              ),
           if (isLoading)
             const Padding(
               padding: EdgeInsets.symmetric(vertical: 32),
@@ -262,133 +282,138 @@ class _FinalizadoWorkerCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final isRevision = worker.status == FinalizadoStatus.revision;
 
-    return Container(
-      decoration: BoxDecoration(
-        color: TColors.surface,
-        borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: TColors.border),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.04),
-            blurRadius: 10,
-            offset: const Offset(0, 3),
-          ),
-        ],
-      ),
-      child: Padding(
-        padding: const EdgeInsets.all(14),
-        child: Column(
-          children: [
-            Row(
-              children: [
-                _buildAvatar(),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        worker.name,
-                        style: const TextStyle(
-                          fontSize: 15,
-                          fontWeight: FontWeight.w700,
-                          color: TColors.profileDarkText,
-                        ),
-                      ),
-                      const SizedBox(height: 2),
-                      Text(
-                        '${worker.shift} • ${worker.department}',
-                        style: const TextStyle(
-                          fontSize: 12,
-                          color: TColors.profileMutedLabel,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                _buildStatusBadge(isRevision),
-              ],
-            ),
-            const SizedBox(height: 14),
-            const Divider(height: 1, color: TColors.border),
-            const SizedBox(height: 14),
-            Row(
-              children: [
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const Text(
-                        'Entrada',
-                        style: TextStyle(
-                          fontSize: 11,
-                          color: TColors.profileMutedLabel,
-                        ),
-                      ),
-                      const SizedBox(height: 2),
-                      Text(
-                        worker.entryTime,
-                        style: const TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w800,
-                          color: TColors.profileDarkText,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                const Icon(
-                  Icons.arrow_forward_rounded,
-                  size: 16,
-                  color: TColors.profileMutedLabel,
-                ),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.end,
-                    children: [
-                      const Text(
-                        'Salida',
-                        style: TextStyle(
-                          fontSize: 11,
-                          color: TColors.profileMutedLabel,
-                        ),
-                      ),
-                      const SizedBox(height: 2),
-                      Text(
-                        worker.exitTime,
-                        style: const TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w800,
-                          color: TColors.profileDarkText,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 12),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                const Text(
-                  'Tiempo total trabajado',
-                  style: TextStyle(
-                    fontSize: 12,
-                    color: TColors.profileMutedLabel,
-                  ),
-                ),
-                Text(
-                  worker.totalTime,
-                  style: TextStyle(
-                    fontSize: 13,
-                    fontWeight: FontWeight.w700,
-                    color: worker.totalTimeColor,
-                  ),
-                ),
-              ],
+    return InkWell(
+      onTap: () {
+        context.router.push(AssistanceDetailRoute(idEmployee: worker.idEmployee));
+      },
+      child: Container(
+        decoration: BoxDecoration(
+          color: TColors.surface,
+          borderRadius: BorderRadius.circular(14),
+          border: Border.all(color: TColors.border),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.04),
+              blurRadius: 10,
+              offset: const Offset(0, 3),
             ),
           ],
+        ),
+        child: Padding(
+          padding: const EdgeInsets.all(14),
+          child: Column(
+            children: [
+              Row(
+                children: [
+                  _buildAvatar(),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          worker.name,
+                          style: const TextStyle(
+                            fontSize: 15,
+                            fontWeight: FontWeight.w700,
+                            color: TColors.profileDarkText,
+                          ),
+                        ),
+                        const SizedBox(height: 2),
+                        Text(
+                          '${worker.shift} • ${worker.department}',
+                          style: const TextStyle(
+                            fontSize: 12,
+                            color: TColors.profileMutedLabel,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  _buildStatusBadge(isRevision),
+                ],
+              ),
+              const SizedBox(height: 14),
+              const Divider(height: 1, color: TColors.border),
+              const SizedBox(height: 14),
+              Row(
+                children: [
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Text(
+                          'Entrada',
+                          style: TextStyle(
+                            fontSize: 11,
+                            color: TColors.profileMutedLabel,
+                          ),
+                        ),
+                        const SizedBox(height: 2),
+                        Text(
+                          worker.entryTime,
+                          style: const TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w800,
+                            color: TColors.profileDarkText,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const Icon(
+                    Icons.arrow_forward_rounded,
+                    size: 16,
+                    color: TColors.profileMutedLabel,
+                  ),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.end,
+                      children: [
+                        const Text(
+                          'Salida',
+                          style: TextStyle(
+                            fontSize: 11,
+                            color: TColors.profileMutedLabel,
+                          ),
+                        ),
+                        const SizedBox(height: 2),
+                        Text(
+                          worker.exitTime,
+                          style: const TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w800,
+                            color: TColors.profileDarkText,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 12),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  const Text(
+                    'Tiempo total trabajado',
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: TColors.profileMutedLabel,
+                    ),
+                  ),
+                  Text(
+                    worker.totalTime,
+                    style: TextStyle(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w700,
+                      color: worker.totalTimeColor,
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
         ),
       ),
     );
