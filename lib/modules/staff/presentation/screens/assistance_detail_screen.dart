@@ -9,7 +9,8 @@ import 'package:printing/printing.dart';
 
 @RoutePage()
 class AssistanceDetailScreen extends StatefulWidget {
-  const AssistanceDetailScreen({super.key});
+  final String idEmployee;
+  const AssistanceDetailScreen({super.key, required this.idEmployee});
 
   @override
   State<AssistanceDetailScreen> createState() => _AssistanceDetailScreenState();

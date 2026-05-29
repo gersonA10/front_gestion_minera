@@ -1,6 +1,7 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
-import 'package:front_gestion_minera/config/router/app_router.gr.dart';
+import 'package:front_gestion_minera/modules/staff/presentation/screens/attendance_tracking_screen.dart';
+import 'package:front_gestion_minera/modules/staff/presentation/screens/payroll_screen.dart';
 import 'package:front_gestion_minera/modules/staff/presentation/screens/screens.dart';
 import 'package:front_gestion_minera/utils/constants/color.constant.dart';
 
@@ -26,8 +27,8 @@ class _StaffMainScreenState extends State<StaffMainScreen> {
     _screens = [
       const WorkersScreen(),
       const PayrollScreen(),
-      const _PlaceholderScreen(title: 'Solicitar Egreso'),
-      const _DetailsScreen(),
+      StaffExpenditureRequestScreen(),
+      AttendanceControlScreen()
     ];
   }
 
@@ -35,6 +36,7 @@ class _StaffMainScreenState extends State<StaffMainScreen> {
     setState(() {
       _currentIndex = index;
     });
+
     _pageController.animateToPage(
       index,
       duration: const Duration(milliseconds: 300),
@@ -58,17 +60,20 @@ class _StaffMainScreenState extends State<StaffMainScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: TColors.background,
+
       body: PageView(
         controller: _pageController,
         onPageChanged: _onPageChanged,
         physics: const BouncingScrollPhysics(),
         children: _screens,
       ),
+
       bottomNavigationBar: Container(
         height: 70,
         decoration: const BoxDecoration(
           color: TColors.white,
           border: Border(top: BorderSide(color: Color(0xffE5E7EB))),
+          
         ),
         child: BottomNavigationBar(
           currentIndex: _currentIndex,
@@ -84,7 +89,7 @@ class _StaffMainScreenState extends State<StaffMainScreen> {
           ),
           unselectedLabelStyle: const TextStyle(
             fontSize: 10,
-            fontWeight: FontWeight.normal,
+            fontWeight: FontWeight.normal, 
           ),
           items: const [
             BottomNavigationBarItem(
@@ -106,6 +111,7 @@ class _StaffMainScreenState extends State<StaffMainScreen> {
               icon: Icon(Icons.settings_outlined),
               activeIcon: Icon(Icons.settings),
               label: 'TURNOS',
+              
             ),
           ],
         ),
@@ -114,51 +120,18 @@ class _StaffMainScreenState extends State<StaffMainScreen> {
   }
 }
 
-class _PlaceholderScreen extends StatelessWidget {
-  final String title;
-  const _PlaceholderScreen({required this.title});
+// class _PlaceholderScreen extends StatelessWidget {
+//   final String title;
 
-  @override
-  Widget build(BuildContext context) {
-    return Center(
-      child: Text(
-        title,
-        style: const TextStyle(fontSize: 22, fontWeight: FontWeight.w600),
-      ),
-    );
-  }
-}
+//   const _PlaceholderScreen({required this.title});
 
-class _DetailsScreen extends StatelessWidget {
-  const _DetailsScreen({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: Text('Turnos')),
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            InkWell(
-              onTap: () {
-                context.router.push(AssistanceDetailRoute());
-              },
-              child: Container(
-                padding: EdgeInsets.all(15),
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(15),
-                  color: TColors.appMainColor,
-                ),
-                child: Text(
-                  'Detail Screen',
-                  style: TextStyle(color: TColors.white),
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
+//   @override
+//   Widget build(BuildContext context) {
+//     return Center(
+//       child: Text(
+//         title,
+//         style: const TextStyle(fontSize: 22, fontWeight: FontWeight.w600),
+//       ),
+//     );
+//   }
+// }
