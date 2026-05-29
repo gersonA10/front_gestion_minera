@@ -9,67 +9,121 @@ class EmployeeDetailAssistanceModel extends EmployeeDetailAssistanceEntity {
     required super.employee,
     required super.chronology,
     required super.validation,
-    required super.geoLocation,
     required super.audit,
   });
 
   factory EmployeeDetailAssistanceModel.fromJson(Map<String, dynamic> json) {
     return EmployeeDetailAssistanceModel(
-      attendanceId: json['attendance_id'],
-      date: json['date'],
-      assignedShift: json['assigned_shift'],
-      attendanceStatus: json['attendance_status'],
+      attendanceId: json['attendance_id'] ?? '',
+      date: json['date'] ?? '',
+      assignedShift: json['assigned_shift'] ?? '',
+      attendanceStatus: json['attendance_status'] ?? '',
+      employee: EmployeeDetailModel.fromJson(json['employee'] ?? {}),
+      chronology: ChronologyModel.fromJson(json['chronology'] ?? {}),
+      validation: ValidationModel.fromJson(json['validation'] ?? {}),
+      audit: AuditModel.fromJson(json['audit'] ?? {}),
+    );
+  }
+}
 
-      employee: Employee(
-        employeeId: json['employee']['employee_id'],
-        fullName: json['employee']['full_name'],
-        position: json['employee']['position'],
-        photoUrl: json['employee']['photo_url'],
-      ),
+class AuditModel extends Audit {
+  AuditModel({required super.registeredBy, required super.correctionsHistory});
 
-      chronology: Chronology(
-        checkIn: ChronologyCheckIn(
-          time: json['chronology']['check_in']['time'],
-          location: json['chronology']['check_in']['location'],
-        ),
-        breakMinutes: json['chronology']['break_minutes'],
-        checkOut: ChronologyCheckIn(
-          time: json['chronology']['check_out']['time'],
-          location: json['chronology']['check_out']['location'],
-        ),
-        netHoursWorked: (json['chronology']['net_hours_worked'] as num)
-            .toDouble(),
-      ),
+  factory AuditModel.fromJson(Map<String, dynamic> json) {
+    return AuditModel(
+      registeredBy: RegisteredBymodel.fromJson(json['registered_by'] ?? {}),
+      correctionsHistory: List<dynamic>.from(json['corrections_history'] ?? []),
+    );
+  }
+}
 
-      validation: Validation(
-        autoValidated: json['validation']['auto_validated'],
-        supervisorSignatureUrl: json['validation']['supervisor_signature_url'],
-      ),
+class RegisteredBymodel extends RegisteredBy {
+  RegisteredBymodel({required super.userId, required super.fullName});
+  factory RegisteredBymodel.fromJson(Map<String, dynamic> json) {
+    return RegisteredBymodel(
+      userId: json['user_id'] ?? '',
+      fullName: json['full_name'] ?? '',
+    );
+  }
+}
 
-      geoLocation: GeoLocation(
-        checkIn: GeoLocationCheckIn(
-          latitude: (json['geo_location']['check_in']['latitude'] as num)
-              .toDouble(),
-          longitude: (json['geo_location']['check_in']['longitude'] as num)
-              .toDouble(),
-        ),
-        checkOut: GeoLocationCheckIn(
-          latitude: (json['geo_location']['check_out']['latitude'] as num)
-              .toDouble(),
-          longitude: (json['geo_location']['check_out']['longitude'] as num)
-              .toDouble(),
-        ),
-      ),
+class ChronologyModel extends Chronology {
+  ChronologyModel({
+    required super.checkIn,
+    required super.breakMinutes,
+    required super.checkOut,
+    required super.netHoursWorked,
+  });
+  factory ChronologyModel.fromJson(Map<String, dynamic> json) {
+    return ChronologyModel(
+      checkIn: ChronologyCheckInModel.fromJson(json['check_in'] ?? {}),
+      breakMinutes: json['break_minutes'] ?? 0,
+      checkOut: ChronologyCheckInModel.fromJson(json['check_out'] ?? {}),
+      netHoursWorked: (json['net_hours_worked'] as num?)?.toDouble() ?? 0,
+    );
+  }
+}
 
-      audit: Audit(
-        registeredBy: RegisteredBy(
-          userId: json['audit']['registered_by']['user_id'],
-          fullName: json['audit']['registered_by']['full_name'],
-        ),
-        correctionsHistory: List<dynamic>.from(
-          json['audit']['corrections_history'],
-        ),
-      ),
+class ChronologyCheckInModel extends ChronologyCheckIn {
+  ChronologyCheckInModel({required super.time, required super.location});
+  factory ChronologyCheckInModel.fromJson(Map<String, dynamic> json) {
+    return ChronologyCheckInModel(
+      time: json['time'] ?? '',
+      location: json['location'] ?? '',
+    );
+  }
+}
+
+class EmployeeDetailModel extends Employee {
+  EmployeeDetailModel({
+    required super.employeeId,
+    required super.nationalId,
+    required super.fullName,
+    required super.position,
+    required super.photoUrl,
+  });
+  factory EmployeeDetailModel.fromJson(Map<String, dynamic> json) {
+    return EmployeeDetailModel(
+      employeeId: json['employee_id'] ?? '',
+      nationalId: json['national_id'] ?? '',
+      fullName: json['full_name'] ?? '',
+      position: json['position'] ?? '',
+      photoUrl: json['photo_url'] ?? '',
+    );
+  }
+}
+
+class GeoLocationModel extends GeoLocation {
+  GeoLocationModel({required super.checkIn, required super.checkOut});
+  factory GeoLocationModel.fromJson(Map<String, dynamic> json) {
+    return GeoLocationModel(
+      checkIn: GeoLocationCheckInModel.fromJson(json['check_in'] ?? {}),
+      checkOut: GeoLocationCheckInModel.fromJson(json['check_out'] ?? {}),
+    );
+  }
+}
+
+class GeoLocationCheckInModel extends GeoLocationCheckIn {
+  GeoLocationCheckInModel({required super.latitude, required super.longitude});
+  factory GeoLocationCheckInModel.fromJson(Map<String, dynamic> json) {
+    return GeoLocationCheckInModel(
+      latitude: (json['latitude'] as num?)?.toDouble() ?? 0,
+      longitude: (json['longitude'] as num?)?.toDouble() ?? 0,
+    );
+  }
+}
+
+class ValidationModel extends Validation {
+  ValidationModel({
+    required super.autoValidated,
+    required super.supervisorSignatureUrl,
+    required super.geolocation,
+  });
+  factory ValidationModel.fromJson(Map<String, dynamic> json) {
+    return ValidationModel(
+      autoValidated: json['auto_validated'] ?? false,
+      supervisorSignatureUrl: json['supervisor_signature_url'] ?? '',
+      geolocation: GeoLocationModel.fromJson(json['geolocation'] ?? {})
     );
   }
 }

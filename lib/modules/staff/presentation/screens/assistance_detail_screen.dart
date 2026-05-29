@@ -4,6 +4,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:front_gestion_minera/injector_container.dart';
 import 'package:front_gestion_minera/modules/staff/data/models/models.dart';
 import 'package:front_gestion_minera/utils/constants/color.constant.dart';
+import 'package:intl/intl.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:timeline_tile/timeline_tile.dart';
 import 'package:pdf/pdf.dart';
@@ -102,14 +103,16 @@ class _AssistanceDetailScreenState extends State<AssistanceDetailScreen> {
                 return Center(child: CircularProgressIndicator());
               }
               if (state is DetailAssistanceEmployeeError) {
-                return Center(
-                  child: Text('Error al cargar los detalles de asistencia'),
-                );
+                return Center(child: Text(state.message));
               }
 
               return const SizedBox();
             }
-            final employee = _employeeCache!;
+            final employeeDetail = _employeeCache!;
+            final employeeDate = employeeDetail.employee;
+            final chronology = employeeDetail.chronology;
+            final validation = employeeDetail.validation;
+            final audit = employeeDetail.audit;
             return Padding(
               padding: EdgeInsetsGeometry.symmetric(horizontal: 15),
               child: ListView(
@@ -134,7 +137,8 @@ class _AssistanceDetailScreenState extends State<AssistanceDetailScreen> {
                                   color: TColors.appBackgroundColor,
                                   child: FadeInImage.assetNetwork(
                                     placeholder: AssetImageApp.getIconLoading,
-                                    image: employee.employee.photoUrl,
+                                    image:
+                                        employeeDetail.employee.photoUrl ?? '',
                                     fit: BoxFit.cover,
                                     imageErrorBuilder: (_, _, _) {
                                       return Center(
@@ -149,14 +153,14 @@ class _AssistanceDetailScreenState extends State<AssistanceDetailScreen> {
                               ),
                               const SizedBox(height: 15),
                               Text(
-                                employee.employee.fullName,
+                                employeeDate.fullName,
                                 style: TextStyle(
                                   fontSize: 20,
                                   fontWeight: FontWeight.bold,
                                 ),
                               ),
                               Text(
-                                employee.employee.position,
+                                employeeDate.position,
                                 style: TextStyle(
                                   color: TColors.appDisabledDarkColor,
                                 ),
@@ -172,7 +176,7 @@ class _AssistanceDetailScreenState extends State<AssistanceDetailScreen> {
                                   borderRadius: BorderRadius.circular(15),
                                 ),
                                 child: Text(
-                                  'NID: ${employee.employee.employeeId}',
+                                  'NID: ${employeeDate.nationalId}',
                                   style: TextStyle(
                                     fontSize: 12,
                                     color: TColors.appNewDarkMainColor,
@@ -186,7 +190,7 @@ class _AssistanceDetailScreenState extends State<AssistanceDetailScreen> {
                                 children: [
                                   CardDateTurnWidget(
                                     isDate: true,
-                                    date: '${DateTime.now().day} ${DateTime.now().month}, ${DateTime.now().year}',
+                                    date: employeeDetail.date,
                                   ),
                                   SizedBox(
                                     height: 40,
@@ -198,7 +202,7 @@ class _AssistanceDetailScreenState extends State<AssistanceDetailScreen> {
                                   ),
                                   CardDateTurnWidget(
                                     isDate: false,
-                                    turn: employee.assignedShift,
+                                    turn: employeeDetail.assignedShift,
                                   ),
                                 ],
                               ),
@@ -268,7 +272,10 @@ class _AssistanceDetailScreenState extends State<AssistanceDetailScreen> {
                           pointColor: TColors.uploadBlue,
                           child: _CardTimeLineInOutWidget(
                             isIN: true,
-                            hour: '06:55',
+                            hour: chronology.checkIn.time!.substring(0, 5),
+                            place: (chronology.checkOut.location!.isEmpty)
+                                ? 'Lugar no registrado'
+                                : chronology.checkOut.location!,
                           ),
                         ),
                         TimelineCustomWidget(
@@ -290,13 +297,15 @@ class _AssistanceDetailScreenState extends State<AssistanceDetailScreen> {
                                     children: [
                                       Icon(Icons.restaurant, size: 15),
                                       SizedBox(width: 4),
-                                      Text(
-                                        '45 min',
-                                        style: TextStyle(
-                                          fontSize: 13,
-                                          fontWeight: FontWeight.bold,
-                                        ),
-                                      ),
+                                      (chronology.breakMinutes == 0)
+                                          ? Text('Sin Refrigerio')
+                                          : Text(
+                                              '${chronology.breakMinutes} min',
+                                              style: TextStyle(
+                                                fontSize: 13,
+                                                fontWeight: FontWeight.bold,
+                                              ),
+                                            ),
                                     ],
                                   ),
                                 ),
@@ -309,7 +318,12 @@ class _AssistanceDetailScreenState extends State<AssistanceDetailScreen> {
                           pointColor: TColors.bgColor,
                           child: _CardTimeLineInOutWidget(
                             isIN: false,
-                            hour: '16:45',
+                            hour: (chronology.checkOut.time != null)
+                                ? '00:00'
+                                : chronology.checkOut.time!.substring(0, 5),
+                            place: (chronology.checkOut.location!.isEmpty)
+                                ? 'Lugar no registrado'
+                                : chronology.checkOut.location!,
                           ),
                         ),
                         Divider(color: TColors.appBackgroundColor),
@@ -339,7 +353,7 @@ class _AssistanceDetailScreenState extends State<AssistanceDetailScreen> {
                             Row(
                               children: [
                                 Text(
-                                  _hourTotal.toString(),
+                                  chronology.netHoursWorked.toString(),
                                   style: TextStyle(
                                     fontSize: 30,
                                     color: TColors.uploadBlue,
@@ -393,8 +407,29 @@ class _AssistanceDetailScreenState extends State<AssistanceDetailScreen> {
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.center,
                                 children: [
-                                  Icon(Icons.fiber_manual_record_sharp),
-                                  Text('Firma Supervisor'),
+                                  Container(
+                                    width: 100,
+                                    height: 70,
+                                    color: TColors.appBackgroundColor,
+                                    child: FadeInImage.assetNetwork(
+                                      placeholder: AssetImageApp.getIconLoading,
+                                      image:
+                                          validation.supervisorSignatureUrl.isNotEmpty
+                                              ? validation.supervisorSignatureUrl
+                                              : '',
+                                      fit: BoxFit.cover,
+                                      imageErrorBuilder: (_, _, _) {
+                                        return Center(
+                                          child: const Icon(
+                                            Icons.image_not_supported_outlined,
+                                            size: 30,
+                                          ),
+                                        );
+                                      },
+                                    ),
+                                  ),
+                                  const SizedBox(height: 5),
+                                  Text('Firma Supervisor',style: TextStyle(fontWeight: FontWeight.bold),),
                                 ],
                               ),
                             ),
@@ -420,13 +455,16 @@ class _AssistanceDetailScreenState extends State<AssistanceDetailScreen> {
                                     ),
                                     const SizedBox(height: 5),
                                     Text(
-                                      'Sector Norte',
+                                      (chronology.checkOut.location!.isEmpty)
+                                          ? 'Lugar no registrado'
+                                          : chronology.checkOut.location!,
                                       style: TextStyle(
                                         fontWeight: FontWeight.bold,
                                       ),
+                                      textAlign: TextAlign.center,
                                     ),
                                     Text(
-                                      'Lat: -22.45, Lon: -68.90',
+                                      'Lat: ${validation.geolocation.checkOut.latitude}, Lon: ${validation.geolocation.checkOut.longitude}',
                                       style: TextStyle(fontSize: 11),
                                     ),
                                   ],
@@ -450,7 +488,7 @@ class _AssistanceDetailScreenState extends State<AssistanceDetailScreen> {
                           ),
                           child: InkWell(
                             onTap: () {
-                              _generarPdf(context);
+                              _generarPdf(context, employeeDetail);
                             },
                             splashColor: TColors.disabled,
                             borderRadius: BorderRadius.circular(15),
@@ -523,7 +561,7 @@ class _AssistanceDetailScreenState extends State<AssistanceDetailScreen> {
     );
   }
 
-  Future<void> _generarPdf(BuildContext context) async {
+  Future<void> _generarPdf(BuildContext context, EmployeeDetailAssistanceModel employeeDetail) async {
     final pdf = pw.Document();
     pdf.addPage(
       pw.Page(
@@ -548,14 +586,14 @@ class _AssistanceDetailScreenState extends State<AssistanceDetailScreen> {
                   children: [
                     pw.SizedBox(height: 15),
                     pw.Text(
-                      _nameEmployee,
+                      employeeDetail.employee.fullName,
                       style: pw.TextStyle(
                         fontSize: 25,
                         fontWeight: pw.FontWeight.bold,
                       ),
                     ),
                     pw.Text(
-                      _role,
+                      employeeDetail.employee.position,
                       style: pw.TextStyle(
                         fontWeight: pw.FontWeight.bold,
                         fontSize: 15,
@@ -568,7 +606,7 @@ class _AssistanceDetailScreenState extends State<AssistanceDetailScreen> {
                         borderRadius: pw.BorderRadius.circular(15),
                       ),
                       child: pw.Text(
-                        'ID: $_nid',
+                        'ID: ${employeeDetail.employee.nationalId}',
                         style: pw.TextStyle(fontSize: 15),
                       ),
                     ),
@@ -587,7 +625,7 @@ class _AssistanceDetailScreenState extends State<AssistanceDetailScreen> {
                                   ),
                                 ),
                                 pw.Text(
-                                  '25 May, 2026',
+                                  employeeDetail.date,
                                   style: pw.TextStyle(fontSize: 15),
                                 ),
                               ],
@@ -612,7 +650,7 @@ class _AssistanceDetailScreenState extends State<AssistanceDetailScreen> {
                                   ),
                                 ),
                                 pw.Text(
-                                  'MAÑANA',
+                                  employeeDetail.assignedShift,
                                   style: pw.TextStyle(fontSize: 15),
                                 ),
                               ],
@@ -652,7 +690,7 @@ class _AssistanceDetailScreenState extends State<AssistanceDetailScreen> {
                           ),
                           pw.SizedBox(width: 10),
                           pw.Text(
-                            'Entrada Registrada - 06:55 AM',
+                            'Entrada Registrada - ${employeeDetail.chronology.checkIn.time!.substring(0, 5)} AM',
                             style: pw.TextStyle(
                               fontSize: 15,
                               fontWeight: pw.FontWeight.bold,
@@ -673,7 +711,7 @@ class _AssistanceDetailScreenState extends State<AssistanceDetailScreen> {
                           ),
                           pw.SizedBox(width: 10),
                           pw.Text(
-                            'Tiempo de Refrigerio - 45 Minutos',
+                            employeeDetail.chronology.breakMinutes == 0 ? 'Sin Refrigerio' : 'Tiempo de Refrigerio - ${employeeDetail.chronology.breakMinutes}' ,
                             style: pw.TextStyle(
                               fontSize: 15,
                               fontWeight: pw.FontWeight.bold,
@@ -694,7 +732,9 @@ class _AssistanceDetailScreenState extends State<AssistanceDetailScreen> {
                           ),
                           pw.SizedBox(width: 10),
                           pw.Text(
-                            'Salida Registrada - 06:55 AM',
+                            (!(employeeDetail.chronology.checkOut.time != null))
+                                ? 'Salida Registrada - ${employeeDetail.chronology.checkOut.time!.substring(0, 5)} AM'
+                                : 'Salida no registrada',
                             style: pw.TextStyle(
                               fontSize: 15,
                               fontWeight: pw.FontWeight.bold,
@@ -730,14 +770,14 @@ class _AssistanceDetailScreenState extends State<AssistanceDetailScreen> {
                 ),
                 pw.Spacer(),
                 pw.Text(
-                  _hourTotal.toString(),
+                  employeeDetail.chronology.netHoursWorked.toString(),
                   style: pw.TextStyle(
                     fontSize: 30,
                     fontWeight: pw.FontWeight.bold,
                   ),
                 ),
                 pw.Text(
-                  'hrs',
+                  ' hrs',
                   style: pw.TextStyle(
                     fontSize: 15,
                     fontWeight: pw.FontWeight.bold,
@@ -759,10 +799,12 @@ class _AssistanceDetailScreenState extends State<AssistanceDetailScreen> {
 class _CardTimeLineInOutWidget extends StatelessWidget {
   final bool isIN;
   final String hour;
+  final String place;
   const _CardTimeLineInOutWidget({
     super.key,
     required this.isIN,
     required this.hour,
+    required this.place,
   });
 
   @override
@@ -789,7 +831,10 @@ class _CardTimeLineInOutWidget extends StatelessWidget {
                   fontWeight: FontWeight.bold,
                 ),
               ),
-              Text('Lugar'),
+              Text(
+                place ?? 'Lugar no registrado',
+                style: TextStyle(fontSize: 12, color: TColors.disabled),
+              ),
             ],
           ),
           Row(

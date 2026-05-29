@@ -284,7 +284,7 @@ class _FinalizadoWorkerCard extends StatelessWidget {
 
     return InkWell(
       onTap: () {
-        context.router.push(AssistanceDetailRoute(idEmployee: '8f3b2a1a-4b5c-4d6e-8f7g-9h0i1j2k3l4m'));
+        context.router.push(AssistanceDetailRoute(idEmployee: 'c114811a-ec1c-45ca-84c6-6a9d2aa128ad'));
       },
       child: Container(
         decoration: BoxDecoration(
