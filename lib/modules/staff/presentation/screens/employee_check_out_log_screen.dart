@@ -19,12 +19,14 @@ class EmployeeCheckOutLogScreen extends StatefulWidget {
   final String attendanceId;
   final String? workerPhoto;
   final String? checkInTime;
+  final String? workerName;
 
   const EmployeeCheckOutLogScreen({
     super.key,
     required this.attendanceId,
     this.workerPhoto,
     this.checkInTime,
+    this.workerName,
   });
 
   @override
@@ -49,7 +51,7 @@ class _EmployeeCheckOutLogScreenState extends State<EmployeeCheckOutLogScreen> {
     super.initState();
     _bloc = InjectorContainer.getIt<StaffBloc>();
     endTime = TimeOfDay.now();
-    final parts = (widget.checkInTime ?? '07:05').split(':');
+    final parts = (widget.checkInTime ?? '07:00').split(':');
     startTime = TimeOfDay(
       hour: int.parse(parts[0]),
       minute: int.parse(parts[1]),
@@ -70,9 +72,7 @@ class _EmployeeCheckOutLogScreenState extends State<EmployeeCheckOutLogScreen> {
     final startMinutes = (startTime.hour * 60) + startTime.minute;
     final endMinutes = (endTime.hour * 60) + endTime.minute;
     final minutesWorked = endMinutes - startMinutes;
-    hoursWorked = Duration(
-      minutes: minutesWorked < 0 ? 0 : minutesWorked,
-    );
+    hoursWorked = Duration(minutes: minutesWorked < 0 ? 0 : minutesWorked);
     netTotal = hoursWorked - Duration(minutes: breakMinutes);
     if (netTotal.isNegative) {
       netTotal = Duration.zero;
@@ -80,9 +80,9 @@ class _EmployeeCheckOutLogScreenState extends State<EmployeeCheckOutLogScreen> {
     requiresRemark = netTotal.inHours < 4;
   }
 
-  String _formatDuration(Duration duracion) {
-    final hours = duracion.inHours;
-    final minutes = duracion.inMinutes % 60;
+  String _formatDuration(Duration duration) {
+    final hours = duration.inHours;
+    final minutes = duration.inMinutes % 60;
     return '${hours}h ${minutes.toString().padLeft(2, '0')}m';
   }
 
@@ -106,21 +106,22 @@ class _EmployeeCheckOutLogScreenState extends State<EmployeeCheckOutLogScreen> {
     });
   }
 
-  String _formatearHora(TimeOfDay hour) {
-    final periodo = hour.hour >= 12 ? 'PM' : 'AM';
+  String _formatTime12Hour(TimeOfDay hour) {
+    final period = hour.hour >= 12 ? 'PM' : 'AM';
 
-    final hora12 = hour.hour > 12
+    final hour12 = hour.hour > 12
         ? hour.hour - 12
         : hour.hour == 0
         ? 12
         : hour.hour;
 
-    return '${hora12.toString().padLeft(2, '0')}:${hour.minute.toString().padLeft(2, '0')} $periodo';
+    return '${hour12.toString().padLeft(2, '0')}:${hour.minute.toString().padLeft(2, '0')} $period';
   }
 
-  void _actualizarRefrigerio(int valor) {
+  void _updateBreakTime(int value) {
+    final maxBreakMinutes = hoursWorked.inMinutes;
     setState(() {
-      breakMinutes = valor < 0 ? 0 : valor;
+      breakMinutes = value.clamp(0, maxBreakMinutes);
       breakController.text = breakMinutes.toString();
       _calculateSummary();
     });
@@ -144,7 +145,10 @@ class _EmployeeCheckOutLogScreenState extends State<EmployeeCheckOutLogScreen> {
         body: SafeArea(
           child: Column(
             children: [
-              HeaderWidget(attendanceId: widget.attendanceId),
+              HeaderWidget(
+                attendanceId: widget.attendanceId,
+                workerName: widget.workerName,
+              ),
               Expanded(
                 child: SingleChildScrollView(
                   padding: const EdgeInsets.all(16),
@@ -153,19 +157,20 @@ class _EmployeeCheckOutLogScreenState extends State<EmployeeCheckOutLogScreen> {
                       CurrentShiftCard(
                         workerPhoto: widget.workerPhoto,
                         startTime: startTime,
-                        formatearHora: _formatearHora,
+                        formatearHora: _formatTime12Hour,
                       ),
                       const SizedBox(height: 24),
                       ExitHourWidget(
                         endTime: endTime,
-                        formatearHora: _formatearHora,
+                        formatearHora: _formatTime12Hour,
                         onSelectTime: _selectTime,
                       ),
                       const SizedBox(height: 24),
                       BreakTimeWidget(
                         breakMinutes: breakMinutes,
                         controller: breakController,
-                        onUpdate: _actualizarRefrigerio,
+                        onUpdate: _updateBreakTime,
+                        hoursWorked: hoursWorked,
                       ),
                       const SizedBox(height: 24),
                       SummaryCardWidget(
@@ -194,7 +199,8 @@ class _EmployeeCheckOutLogScreenState extends State<EmployeeCheckOutLogScreen> {
 
 class HeaderWidget extends StatelessWidget {
   final String attendanceId;
-  const HeaderWidget({super.key, required this.attendanceId});
+  final String? workerName;
+  const HeaderWidget({super.key, required this.attendanceId, this.workerName});
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -222,7 +228,9 @@ class HeaderWidget extends StatelessWidget {
                 ),
                 const SizedBox(height: 2),
                 Text(
-                  attendanceId,
+                  workerName?.trim().isNotEmpty == true
+                      ? workerName!
+                      : 'ingreso para pruebas 07:00',
                   style: const TextStyle(fontSize: 13, color: TColors.disabled),
                 ),
               ],
@@ -239,15 +247,17 @@ class BreakTimeWidget extends StatelessWidget {
   final int breakMinutes;
   final TextEditingController controller;
   final Function(int) onUpdate;
+  final Duration hoursWorked;
   const BreakTimeWidget({
     super.key,
     required this.breakMinutes,
     required this.controller,
     required this.onUpdate,
+    required this.hoursWorked,
   });
 
   Widget preset(int value) {
-    final activo = breakMinutes == value;
+    final active = breakMinutes == value;
     return GestureDetector(
       onTap: () {
         onUpdate(value);
@@ -256,12 +266,12 @@ class BreakTimeWidget extends StatelessWidget {
         padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 8),
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(30),
-          color: activo ? const Color(0xffE6F4FF) : Colors.transparent,
+          color: active ? const Color(0xffE6F4FF) : Colors.transparent,
         ),
         child: Text(
           '$value min',
           style: TextStyle(
-            color: activo ? TColors.appMainDarkColor : TColors.disabled,
+            color: active ? TColors.appMainDarkColor : TColors.disabled,
           ),
         ),
       ),
@@ -270,6 +280,7 @@ class BreakTimeWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final bool canIncrease = breakMinutes + 5 <= hoursWorked.inMinutes;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -312,7 +323,9 @@ class BreakTimeWidget extends StatelessWidget {
               ),
 
               IconButton(
-                onPressed: () => onUpdate(breakMinutes + 5),
+                onPressed: canIncrease
+                    ? () => onUpdate(breakMinutes + 5)
+                    : null,
                 icon: const Icon(Icons.add),
               ),
             ],
