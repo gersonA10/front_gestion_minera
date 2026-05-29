@@ -295,6 +295,7 @@ class _AttendanceControlScreenState extends State<AttendanceControlScreen> {
 
   FinalizadoWorker _toFinalizadoWorker(AttendanceFinalizadoEntity e) {
     return FinalizadoWorker(
+      idEmployee: e.employeeId,
       name: e.fullName,
       shift: e.shiftType,
       department: e.department,

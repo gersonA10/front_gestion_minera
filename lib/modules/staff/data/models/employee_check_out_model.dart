@@ -1,8 +1,6 @@
+import 'package:front_gestion_minera/modules/staff/domain/entity/employee_check_out_response_entity.dart';
 
-
-import 'package:front_gestion_minera/modules/staff/domain/entity/employee_check_out_entity.dart';
-
-class EmployeeCheckOutModel extends EmployeeCheckOutEntity {
+class EmployeeCheckOutModel extends EmployeeCheckOutResponseEntity {
   const EmployeeCheckOutModel({
     required super.attendanceId,
     required super.checkInTime,
@@ -12,16 +10,14 @@ class EmployeeCheckOutModel extends EmployeeCheckOutEntity {
     required super.attendanceStatus,
   });
 
-  factory EmployeeCheckOutModel.fromJson(
-    Map<String, dynamic> json,
-  ) {
+  factory EmployeeCheckOutModel.fromJson(Map<String, dynamic> json) {
     return EmployeeCheckOutModel(
-      attendanceId: json['attendance_id'] ?? '',
-      checkInTime: json['check_in_time'] ?? '',
-      checkOutTime: json['check_out_time'] ?? '',
-      breakMinutes: json['break_minutes'] ?? 0,
-      netHoursWorked: json['net_hours_worked'] ?? 0,
-      attendanceStatus: json['attendance_status'] ?? '',
+      attendanceId: json['attendance_id']?.toString() ?? '',
+      checkInTime: json['check_in_time']?.toString() ?? '',
+      checkOutTime: json['check_out_time']?.toString() ?? '',
+      breakMinutes: (json['break_minutes'] as num?)?.toInt() ?? 0,
+      netHoursWorked: (json['net_hours_worked'] as num?)?.toInt() ?? 0,
+      attendanceStatus: json['attendance_status']?.toString() ?? '',
     );
   }
 

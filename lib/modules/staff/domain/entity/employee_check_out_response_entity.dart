@@ -1,4 +1,4 @@
-class EmployeeCheckOutEntity {
+class EmployeeCheckOutResponseEntity {
   final String attendanceId;
   final String checkInTime;
   final String checkOutTime;
@@ -6,7 +6,7 @@ class EmployeeCheckOutEntity {
   final int netHoursWorked;
   final String attendanceStatus;
 
-  const EmployeeCheckOutEntity({
+  const EmployeeCheckOutResponseEntity({
     required this.attendanceId,
     required this.checkInTime,
     required this.checkOutTime,
