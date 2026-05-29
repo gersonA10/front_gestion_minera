@@ -149,12 +149,18 @@ class CheckOutEmployeeLoading extends StaffState {}
 
 class CheckOutEmployeeSuccess extends StaffState {
   final EmployeeCheckOutResponseEntity data;
-
   CheckOutEmployeeSuccess(this.data);
 }
 
 class CheckOutEmployeeError extends StaffState {
   final String message;
-
   CheckOutEmployeeError(this.message);
+}
+class CheckInEmployeeLoading extends StaffState {}
+
+class CheckInEmployeeSuccess extends StaffState {}
+
+class CheckInEmployeeError extends StaffState {
+  final String message;
+  CheckInEmployeeError(this.message);
 }

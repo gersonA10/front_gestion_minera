@@ -60,6 +60,11 @@ class StaffRepositoryImpl implements StaffRepository {
   Future<List<AttendanceFinalizadoEntity>> getAttendanceFinalizado({
     required String date,
   }) => datasource.getAttendanceFinalizado(date: date);
+ 
+  @override
+  Future<void> registerCheckInEmployee(EmployeeCheckInEntity checkIn) =>
+    datasource.registerCheckInEmployee(checkIn);
+  
   @override
   Future<EmployeeCheckOutResponseEntity> checkOutEmployee(
     String attendanceId,

@@ -59,4 +59,10 @@ class CheckOutEmployeeEvent extends StaffEvent{
   });
 }
 
+class RegisterCheckInEmployeeEvent extends StaffEvent {
+  final EmployeeCheckInEntity checkIn;
+
+  RegisterCheckInEmployeeEvent({required this.checkIn});
+}
+
 

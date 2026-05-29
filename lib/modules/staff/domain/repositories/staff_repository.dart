@@ -28,4 +28,6 @@ abstract class StaffRepository {
   String attendanceId,
   EmployeeCheckOutRequestEntity request,
 );
+  
+  Future<void> registerCheckInEmployee(EmployeeCheckInEntity checkIn);
 }
