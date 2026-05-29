@@ -25,9 +25,11 @@ abstract class StaffRepository {
     required String date,
   });
   Future<EmployeeCheckOutResponseEntity> checkOutEmployee(
-  String attendanceId,
-  EmployeeCheckOutRequestEntity request,
-);
-  
+    String attendanceId,
+    EmployeeCheckOutRequestEntity request,
+  );
+
   Future<void> registerCheckInEmployee(EmployeeCheckInEntity checkIn);
+
+  Future<EmployeeModel> getDetailsEmployee(String employeeId);
 }
