@@ -53,8 +53,8 @@ class _PayrollScreenState extends State<PayrollScreen> {
                   onPressed: () {
                     if (_formKey.currentState!.validate()) {
                       context.router.push(
-                        EmployeeCheckOutLogRoute(
-                          attendanceId: nombreController.text.trim(),
+                        ProcessPaymentRoute(
+                          
                         ),
                       );
                     }
