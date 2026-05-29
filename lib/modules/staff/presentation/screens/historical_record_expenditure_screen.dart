@@ -62,103 +62,16 @@ class _HistoricalRecordExpenditureScreenState
                 child: ListView.builder(
                   physics: const NeverScrollableScrollPhysics(),
                   shrinkWrap: true,
-                  itemCount: 1,
+                  itemCount: 8,
                   itemBuilder: (BuildContext context, int index) {
-                    return Container(
-                      padding: EdgeInsets.all(13),
-                      decoration: BoxDecoration(
-                        color: TColors.white,
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      child: Column(
-                        children: [
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text('Ciclo de nómina'),
-                                  Text('Mayo 2026'),
-                                ],
-                              ),
-                              Container(
-                                margin: EdgeInsets.only(left: 20),
-                                padding: EdgeInsets.symmetric(
-                                  horizontal: 10,
-                                  vertical: 5,
-                                ),
-                                decoration: BoxDecoration(
-                                  color: TColors.green,
-                                  borderRadius: BorderRadius.circular(12),
-                                ),
-                                child: Text(
-                                  'Aprobado',
-                                  style: TextStyle(color: TColors.white),
-                                ),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: 10),
-                          Row(
-                            children: [
-                              Expanded(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text('Total Solicitado'),
-                                    Text(
-                                      '\$ 45000.00 BS',
-                                      style: TextStyle(
-                                        fontWeight: FontWeight.bold,
-                                        fontSize: 16,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                              Expanded(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text('Monto Aprobado'),
-                                    Text(
-                                      '\$ 45000.00 BS',
-                                      style: TextStyle(
-                                        color: TColors.green,
-                                        fontWeight: FontWeight.bold,
-                                        fontSize: 16,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ],
-                          ),
-                          const Divider(color: TColors.colorBorderInfo),
-                          Row(
-                            children: [
-                              Icon(Icons.calendar_today_outlined, size: 16,),
-                              SizedBox(width: 5),
-                              Text('Solicitado: 15 Oct'),
-                              SizedBox(width: 5),
-                              Icon(Icons.circle,size: 6,),
-                              SizedBox(width: 5),
-                              Text('Respondito: 20 Oct'),
-                            ],
-                          ),
-                          
-                        ],
-                      ),
-                    );
+                    return CustomCardHistoricalEcpenditureWidget();
                   },
                 ),
               ),
             ),
             Container(
               width: double.infinity,
-              margin: EdgeInsets.symmetric(vertical: 20),
+              margin: EdgeInsets.only(bottom: 10,top: 7),
               padding: EdgeInsets.all(20),
               decoration: BoxDecoration(
                 color: TColors.appMainColor,
@@ -192,6 +105,149 @@ class _HistoricalRecordExpenditureScreenState
             ),
           ],
         ),
+      ),
+    );
+  }
+}
+
+class CustomCardHistoricalEcpenditureWidget extends StatelessWidget {
+  const CustomCardHistoricalEcpenditureWidget({
+    super.key,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: EdgeInsets.all(13),
+      margin: EdgeInsets.only(bottom: 15),
+      decoration: BoxDecoration(
+        color: TColors.white,
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Column(
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text('Ciclo de nómina'),
+                  Text(
+                    'Mayo 2026',
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 20,
+                    ),
+                  ),
+                ],
+              ),
+              Container(
+                margin: EdgeInsets.only(left: 20),
+                padding: EdgeInsets.symmetric(
+                  horizontal: 10,
+                  vertical: 5,
+                ),
+                decoration: BoxDecoration(
+                  color: TColors.success.withValues(alpha: 0.2),
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                child: Row(
+                  children: [
+                    Icon(
+                      Icons.check_circle_outline_outlined,
+                      color: TColors.success,
+                      size: 16,
+                    ),
+                    const SizedBox(width: 5),
+                    Text(
+                      'Aprobado',
+                      style: TextStyle(
+                        color: TColors.success,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 10),
+          Row(
+            children: [
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text('Total Solicitado'),
+                    Text(
+                      '\$ 45000.00 BS',
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 16,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text('Monto Aprobado'),
+                    Text(
+                      '\$ 45000.00 BS',
+                      style: TextStyle(
+                        color: TColors.green,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 16,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          const Divider(color: TColors.colorBorderInfo),
+          Row(
+            children: [
+              Icon(Icons.calendar_today_outlined, size: 11),
+              const SizedBox(width: 5),
+              Text(
+                'Solicitado: 15 Oct',
+                style: TextStyle(fontSize: 12),
+              ),
+              const SizedBox(width: 5),
+              Icon(Icons.circle, size: 6),
+              const SizedBox(width: 5),
+              Text(
+                'Respondito: 20 Oct',
+                style: TextStyle(fontSize: 12),
+              ),
+            ],
+          ),
+          Container(
+            margin: EdgeInsets.symmetric(horizontal: 20, vertical: 7),
+            child: ElevatedButton(
+              onPressed: () {},
+              style: ElevatedButton.styleFrom(
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                backgroundColor: TColors.appBackgroundColor
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text('Ver Detalles', style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
+                  const SizedBox(width: 5),
+                  Icon(Icons.arrow_forward_outlined, size: 16),
+                ],
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
