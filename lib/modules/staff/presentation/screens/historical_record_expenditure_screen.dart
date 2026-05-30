@@ -17,7 +17,56 @@ class _HistoricalRecordExpenditureScreenState
   String? selectedState;
   final List<String> years = ['2023', '2024', '2025', '2026'];
   final List<String> states = ['Todos', 'Aprobado', 'Rechazado', 'Pendiente'];
-
+  final List<Map<String, String>> payrollRequests = [
+    {
+      'ciclo': 'Mayo 2026',
+      'monto total': '45000',
+      'motivo': 'Pagos',
+      'state': 'Rechazado',
+    },
+    {
+      'ciclo': 'Abril 2026',
+      'monto total': '38000',
+      'motivo': 'Bonificaciones',
+      'state': 'Aprobado',
+    },
+    {
+      'ciclo': 'Marzo 2026',
+      'monto total': '52000',
+      'motivo': 'Pago de proveedores',
+      'state': 'Pendiente',
+    },
+    {
+      'ciclo': 'Febrero 2026',
+      'monto total': '41000',
+      'motivo': 'Mantenimiento',
+      'state': 'Aprobado',
+    },
+    {
+      'ciclo': 'Enero 2026',
+      'monto total': '29000',
+      'motivo': 'Servicios básicos',
+      'state': 'Rechazado',
+    },
+    {
+      'ciclo': 'Diciembre 2025',
+      'monto total': '67000',
+      'motivo': 'Aguinaldos',
+      'state': 'Aprobado',
+    },
+    {
+      'ciclo': 'Noviembre 2025',
+      'monto total': '34000',
+      'motivo': 'Capacitación',
+      'state': 'Pendiente',
+    },
+    {
+      'ciclo': 'Octubre 2025',
+      'monto total': '47000',
+      'motivo': 'Equipamiento',
+      'state': 'Rechazado',
+    },
+  ];
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -62,16 +111,18 @@ class _HistoricalRecordExpenditureScreenState
                 child: ListView.builder(
                   physics: const NeverScrollableScrollPhysics(),
                   shrinkWrap: true,
-                  itemCount: 8,
+                  itemCount: payrollRequests.length,
                   itemBuilder: (BuildContext context, int index) {
-                    return CustomCardHistoricalEcpenditureWidget();
+                    return CustomCardHistoricalEcpenditureWidget(
+                      stateHist: payrollRequests[index],
+                    );
                   },
                 ),
               ),
             ),
             Container(
               width: double.infinity,
-              margin: EdgeInsets.only(bottom: 10,top: 7),
+              margin: EdgeInsets.only(bottom: 10, top: 7),
               padding: EdgeInsets.all(20),
               decoration: BoxDecoration(
                 color: TColors.appMainColor,
@@ -111,8 +162,10 @@ class _HistoricalRecordExpenditureScreenState
 }
 
 class CustomCardHistoricalEcpenditureWidget extends StatelessWidget {
+  final Map<String,dynamic> stateHist;
   const CustomCardHistoricalEcpenditureWidget({
     super.key,
+    required this.stateHist,
   });
 
   @override
@@ -135,42 +188,29 @@ class CustomCardHistoricalEcpenditureWidget extends StatelessWidget {
                 children: [
                   Text('Ciclo de nómina'),
                   Text(
-                    'Mayo 2026',
-                    style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 20,
-                    ),
+                    stateHist['ciclo'],
+                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
                   ),
                 ],
               ),
-              Container(
-                margin: EdgeInsets.only(left: 20),
-                padding: EdgeInsets.symmetric(
-                  horizontal: 10,
-                  vertical: 5,
+              if (stateHist['state'] == 'Aprobado')
+                BadgeCardCustomWidget(
+                  icon: Icons.check_circle_outline,
+                  text: 'Aprobado',
+                  color: TColors.success,
                 ),
-                decoration: BoxDecoration(
-                  color: TColors.success.withValues(alpha: 0.2),
-                  borderRadius: BorderRadius.circular(20),
+              if (stateHist['state'] == 'Pendiente')
+                BadgeCardCustomWidget(
+                  icon: Icons.access_time,
+                  text: 'Pendiente',
+                  color: TColors.amber,
                 ),
-                child: Row(
-                  children: [
-                    Icon(
-                      Icons.check_circle_outline_outlined,
-                      color: TColors.success,
-                      size: 16,
-                    ),
-                    const SizedBox(width: 5),
-                    Text(
-                      'Aprobado',
-                      style: TextStyle(
-                        color: TColors.success,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ],
+              if (stateHist['state'] == 'Rechazado')
+                BadgeCardCustomWidget(
+                  icon: Icons.cancel_outlined,
+                  text: 'Rechazado',
+                  color: TColors.red,
                 ),
-              ),
             ],
           ),
           const SizedBox(height: 10),
@@ -182,7 +222,7 @@ class CustomCardHistoricalEcpenditureWidget extends StatelessWidget {
                   children: [
                     Text('Total Solicitado'),
                     Text(
-                      '\$ 45000.00 BS',
+                      '\$ ${stateHist['monto total']}',
                       style: TextStyle(
                         fontWeight: FontWeight.bold,
                         fontSize: 16,
@@ -192,20 +232,37 @@ class CustomCardHistoricalEcpenditureWidget extends StatelessWidget {
                 ),
               ),
               Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text('Monto Aprobado'),
-                    Text(
-                      '\$ 45000.00 BS',
-                      style: TextStyle(
-                        color: TColors.green,
-                        fontWeight: FontWeight.bold,
-                        fontSize: 16,
-                      ),
-                    ),
-                  ],
-                ),
+                child: stateHist['state'] == 'Aprobado'
+                    ? Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text('Monto Aprobado'),
+                          Text(
+                            '\$ ${stateHist['motivo']}',
+                            style: TextStyle(
+                              color: TColors.green,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 16,
+                            ),
+                          ),
+                        ],
+                      )
+                    : stateHist['state'] == 'Rechazado'
+                    ? Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const Text('Motivo'),
+                          Text(
+                            stateHist['motivo'],
+                            style: TextStyle(
+                              color: TColors.red,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 14,
+                            ),
+                          ),
+                        ],
+                      )
+                    : SizedBox(),
               ),
             ],
           ),
@@ -214,17 +271,24 @@ class CustomCardHistoricalEcpenditureWidget extends StatelessWidget {
             children: [
               Icon(Icons.calendar_today_outlined, size: 11),
               const SizedBox(width: 5),
-              Text(
-                'Solicitado: 15 Oct',
-                style: TextStyle(fontSize: 12),
-              ),
+              Text('Solicitado: 15 Oct', style: TextStyle(fontSize: 12)),
               const SizedBox(width: 5),
-              Icon(Icons.circle, size: 6),
-              const SizedBox(width: 5),
-              Text(
-                'Respondito: 20 Oct',
-                style: TextStyle(fontSize: 12),
-              ),
+              if (stateHist['state'] == 'Aprobado')
+                Row(
+                  children: [
+                    Icon(Icons.circle, size: 6),
+                    const SizedBox(width: 5),
+                    Text('Respondido: 20 Oct', style: TextStyle(fontSize: 12)),
+                  ],
+                ),
+              if (stateHist['state'] == 'Rechazado')
+                Row(
+                  children: [
+                    Icon(Icons.circle, size: 6),
+                    const SizedBox(width: 5),
+                    Text('Rechazado: 20 Oct', style: TextStyle(fontSize: 12)),
+                  ],
+                ),
             ],
           ),
           Container(
@@ -235,17 +299,68 @@ class CustomCardHistoricalEcpenditureWidget extends StatelessWidget {
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(10),
                 ),
-                backgroundColor: TColors.appBackgroundColor
+                backgroundColor: stateHist['state'] != 'Pendiente'
+                    ? TColors.appBackgroundColor
+                    : TColors.uploadBlue,
               ),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Text('Ver Detalles', style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
+                  Text(
+                    'Ver Detalles',
+                    style: TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.bold,
+                      color: stateHist['state'] != 'Pendiente'
+                          ? TColors.appMainColor
+                          : TColors.white,
+                    ),
+                  ),
                   const SizedBox(width: 5),
-                  Icon(Icons.arrow_forward_outlined, size: 16),
+                  Icon(
+                    Icons.arrow_forward_outlined,
+                    size: 16,
+                    color: stateHist['state'] != 'Pendiente'
+                        ? TColors.appMainColor
+                        : TColors.white,
+                  ),
                 ],
               ),
             ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class BadgeCardCustomWidget extends StatelessWidget {
+  final IconData icon;
+  final String text;
+  final Color color;
+  const BadgeCardCustomWidget({
+    super.key,
+    required this.icon,
+    required this.text,
+    required this.color,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      margin: EdgeInsets.only(left: 20),
+      padding: EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: 0.2),
+        borderRadius: BorderRadius.circular(20),
+      ),
+      child: Row(
+        children: [
+          Icon(icon, color: color, size: 16),
+          const SizedBox(width: 5),
+          Text(
+            text,
+            style: TextStyle(color: color, fontWeight: FontWeight.bold),
           ),
         ],
       ),
