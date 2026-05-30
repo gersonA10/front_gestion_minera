@@ -51,7 +51,6 @@ class _PayrollScreenState extends State<PayrollScreen> {
         child: Column(
           children: [
             const SizedBox(height: 20),
-
             SizedBox(
               height: 130,
               child: ListView(
@@ -86,9 +85,7 @@ class _PayrollScreenState extends State<PayrollScreen> {
                 ],
               ),
             ),
-
             const SizedBox(height: 20),
-
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 20),
               child: Row(
@@ -131,9 +128,7 @@ class _PayrollScreenState extends State<PayrollScreen> {
                 ],
               ),
             ),
-
             const SizedBox(height: 20),
-
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 20),
               child: Row(
@@ -161,9 +156,7 @@ class _PayrollScreenState extends State<PayrollScreen> {
                 ],
               ),
             ),
-
             const SizedBox(height: 16),
-
             Expanded(
               child: ListView(
                 padding: const EdgeInsets.symmetric(horizontal: 20),

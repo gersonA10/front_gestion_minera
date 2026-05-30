@@ -93,7 +93,6 @@ class PayrollSummaryCardWidget extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(height: 10),
-
                 if (showBottomIndicator)
                   Container(
                     height: 4,
