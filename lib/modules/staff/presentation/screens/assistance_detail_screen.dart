@@ -16,8 +16,8 @@ import '../bloc/staff_bloc.dart';
 
 @RoutePage()
 class AssistanceDetailScreen extends StatefulWidget {
-  final String idEmployee;
-  const AssistanceDetailScreen({super.key, required this.idEmployee});
+  final String attendanceId;
+  const AssistanceDetailScreen({super.key, required this.attendanceId});
 
   @override
   State<AssistanceDetailScreen> createState() => _AssistanceDetailScreenState();
@@ -51,7 +51,7 @@ class _AssistanceDetailScreenState extends State<AssistanceDetailScreen> {
   void initState() {
     super.initState();
     _staffBloc = InjectorContainer.getIt<StaffBloc>()
-      ..add(GetDetailAssistanceEmployeeEvent(employeeId: widget.idEmployee));
+      ..add(GetDetailAssistanceEmployeeEvent(employeeId: widget.attendanceId));
   }
 
   @override

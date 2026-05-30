@@ -66,7 +66,7 @@ class AttendanceFinalizadosTab extends StatelessWidget {
           Padding(
                 padding: const EdgeInsets.only(bottom: 14),
                 child: _FinalizadoWorkerCard(worker: FinalizadoWorker(
-                  idEmployee: 'ddb582a5-1621-4d9d-b1ab-dc04183f9a46',
+                  idEmployee: 'c114811a-ec1c-45ca-84c6-6a9d2aa128ad',
                   name: 'Pedro Tintaya',
                   shift: 'Mañana',
                   department: 'Extracción',
@@ -284,7 +284,7 @@ class _FinalizadoWorkerCard extends StatelessWidget {
 
     return InkWell(
       onTap: () {
-        context.router.push(AssistanceDetailRoute(idEmployee: 'c114811a-ec1c-45ca-84c6-6a9d2aa128ad'));
+        context.router.push(AssistanceDetailRoute(attendanceId: worker.idEmployee)); // cambiar por attendanceId cuando el modelo y entity reciban attendanceId
       },
       child: Container(
         decoration: BoxDecoration(
