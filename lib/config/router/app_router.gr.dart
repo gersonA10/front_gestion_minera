@@ -10,6 +10,7 @@
 
 // ignore_for_file: no_leading_underscores_for_library_prefixes
 import 'package:auto_route/auto_route.dart' as _i73;
+import 'package:flutter/foundation.dart' as _i75;
 import 'package:flutter/material.dart' as _i74;
 import 'package:front_gestion_minera/modules/admin/home/presentation/screens/admin_home_screen.dart'
     as _i2;
@@ -72,7 +73,7 @@ import 'package:front_gestion_minera/modules/partners/presentation/screens/reque
 import 'package:front_gestion_minera/modules/staff/presentation/screens/assistance_detail_screen.dart'
     as _i4;
 import 'package:front_gestion_minera/modules/staff/presentation/screens/attendance_ingreso_tab.dart'
-    as _i76;
+    as _i77;
 import 'package:front_gestion_minera/modules/staff/presentation/screens/attendance_tracking_screen.dart'
     as _i5;
 import 'package:front_gestion_minera/modules/staff/presentation/screens/employee_check_out_log_screen.dart'
@@ -100,11 +101,11 @@ import 'package:front_gestion_minera/modules/surveillance/presentation/screen/hi
 import 'package:front_gestion_minera/modules/surveillance/presentation/screen/home_surveillance_screen.dart'
     as _i26;
 import 'package:front_gestion_minera/modules/treasury/domain/entity/entity.dart'
-    as _i77;
-import 'package:front_gestion_minera/modules/treasury/domain/entity/loans/payment_process_entity.dart'
-    as _i79;
-import 'package:front_gestion_minera/modules/treasury/presentation/bloc/treasury_bloc.dart'
     as _i78;
+import 'package:front_gestion_minera/modules/treasury/domain/entity/loans/payment_process_entity.dart'
+    as _i80;
+import 'package:front_gestion_minera/modules/treasury/presentation/bloc/treasury_bloc.dart'
+    as _i79;
 import 'package:front_gestion_minera/modules/treasury/presentation/screens/contributes/contributes_home_screen.dart'
     as _i10;
 import 'package:front_gestion_minera/modules/treasury/presentation/screens/contributes/contribution_history_screen.dart'
@@ -164,7 +165,7 @@ import 'package:front_gestion_minera/modules/treasury/presentation/screens/repor
 import 'package:front_gestion_minera/modules/treasury/presentation/screens/treasury_screen.dart'
     as _i65;
 import 'package:front_gestion_minera/modules/treasury/presentation/widgets/widgtes.dart'
-    as _i75;
+    as _i76;
 
 /// generated route for
 /// [_i1.ActaDetailsScreen]
@@ -358,12 +359,12 @@ class ApplicationDetailsRouteArgs {
 class AssistanceDetailRoute
     extends _i73.PageRouteInfo<AssistanceDetailRouteArgs> {
   AssistanceDetailRoute({
-    _i74.Key? key,
-    required String idEmployee,
+    _i75.Key? key,
+    required String attendanceId,
     List<_i73.PageRouteInfo>? children,
   }) : super(
          AssistanceDetailRoute.name,
-         args: AssistanceDetailRouteArgs(key: key, idEmployee: idEmployee),
+         args: AssistanceDetailRouteArgs(key: key, attendanceId: attendanceId),
          initialChildren: children,
        );
 
@@ -375,33 +376,33 @@ class AssistanceDetailRoute
       final args = data.argsAs<AssistanceDetailRouteArgs>();
       return _i4.AssistanceDetailScreen(
         key: args.key,
-        idEmployee: args.idEmployee,
+        attendanceId: args.attendanceId,
       );
     },
   );
 }
 
 class AssistanceDetailRouteArgs {
-  const AssistanceDetailRouteArgs({this.key, required this.idEmployee});
+  const AssistanceDetailRouteArgs({this.key, required this.attendanceId});
 
-  final _i74.Key? key;
+  final _i75.Key? key;
 
-  final String idEmployee;
+  final String attendanceId;
 
   @override
   String toString() {
-    return 'AssistanceDetailRouteArgs{key: $key, idEmployee: $idEmployee}';
+    return 'AssistanceDetailRouteArgs{key: $key, attendanceId: $attendanceId}';
   }
 
   @override
   bool operator ==(Object other) {
     if (identical(this, other)) return true;
     if (other is! AssistanceDetailRouteArgs) return false;
-    return key == other.key && idEmployee == other.idEmployee;
+    return key == other.key && attendanceId == other.attendanceId;
   }
 
   @override
-  int get hashCode => key.hashCode ^ idEmployee.hashCode;
+  int get hashCode => key.hashCode ^ attendanceId.hashCode;
 }
 
 /// generated route for
@@ -504,7 +505,7 @@ class ContributeHistoryRoute extends _i73.PageRouteInfo<void> {
 class ContributesDetailRoute
     extends _i73.PageRouteInfo<ContributesDetailRouteArgs> {
   ContributesDetailRoute({
-    _i75.Key? key,
+    _i76.Key? key,
     required String contributionId,
     required DateTime dateContibution,
     required String titleContibuton,
@@ -544,7 +545,7 @@ class ContributesDetailRouteArgs {
     required this.titleContibuton,
   });
 
-  final _i75.Key? key;
+  final _i76.Key? key;
 
   final String contributionId;
 
@@ -749,7 +750,7 @@ class DistributesRoute extends _i73.PageRouteInfo<void> {
 class DividendDistributionDetailsRoute
     extends _i73.PageRouteInfo<DividendDistributionDetailsRouteArgs> {
   DividendDistributionDetailsRoute({
-    _i75.Key? key,
+    _i76.Key? key,
     required String distributionId,
     List<_i73.PageRouteInfo>? children,
   }) : super(
@@ -781,7 +782,7 @@ class DividendDistributionDetailsRouteArgs {
     required this.distributionId,
   });
 
-  final _i75.Key? key;
+  final _i76.Key? key;
 
   final String distributionId;
 
@@ -891,7 +892,7 @@ class EmployeeEntryRegisterRoute
     extends _i73.PageRouteInfo<EmployeeEntryRegisterRouteArgs> {
   EmployeeEntryRegisterRoute({
     _i74.Key? key,
-    required _i76.IngresoWorker usuario,
+    required _i77.IngresoWorker usuario,
     List<_i73.PageRouteInfo>? children,
   }) : super(
          EmployeeEntryRegisterRoute.name,
@@ -918,7 +919,7 @@ class EmployeeEntryRegisterRouteArgs {
 
   final _i74.Key? key;
 
-  final _i76.IngresoWorker usuario;
+  final _i77.IngresoWorker usuario;
 
   @override
   String toString() {
@@ -1135,7 +1136,7 @@ class ListMachineryRoute extends _i73.PageRouteInfo<void> {
 /// [_i29.LoanDetailsScreen]
 class LoanDetailsRoute extends _i73.PageRouteInfo<LoanDetailsRouteArgs> {
   LoanDetailsRoute({
-    _i75.Key? key,
+    _i76.Key? key,
     required String idLoan,
     List<_i73.PageRouteInfo>? children,
   }) : super(
@@ -1158,7 +1159,7 @@ class LoanDetailsRoute extends _i73.PageRouteInfo<LoanDetailsRouteArgs> {
 class LoanDetailsRouteArgs {
   const LoanDetailsRouteArgs({this.key, required this.idLoan});
 
-  final _i75.Key? key;
+  final _i76.Key? key;
 
   final String idLoan;
 
@@ -1214,9 +1215,9 @@ class LoanRoute extends _i73.PageRouteInfo<void> {
 /// [_i32.LoanSimulationScreen]
 class LoanSimulationRoute extends _i73.PageRouteInfo<LoanSimulationRouteArgs> {
   LoanSimulationRoute({
-    _i75.Key? key,
-    required _i77.NewLoansResponseEntity loan,
-    required _i77.CashResponseEntity cash,
+    _i76.Key? key,
+    required _i78.NewLoansResponseEntity loan,
+    required _i78.CashResponseEntity cash,
     required String name,
     required String date,
     required double annualInterestRate,
@@ -1262,11 +1263,11 @@ class LoanSimulationRouteArgs {
     required this.annualInterestRate,
   });
 
-  final _i75.Key? key;
+  final _i76.Key? key;
 
-  final _i77.NewLoansResponseEntity loan;
+  final _i78.NewLoansResponseEntity loan;
 
-  final _i77.CashResponseEntity cash;
+  final _i78.CashResponseEntity cash;
 
   final String name;
 
@@ -1602,7 +1603,7 @@ class PaymentSuccessDistributionRoute
   PaymentSuccessDistributionRoute({
     _i74.Key? key,
     required String receiptId,
-    required _i78.TreasuryBloc bloc,
+    required _i79.TreasuryBloc bloc,
     required bool isFromDetails,
     List<_i73.PageRouteInfo>? children,
   }) : super(
@@ -1644,7 +1645,7 @@ class PaymentSuccessDistributionRouteArgs {
 
   final String receiptId;
 
-  final _i78.TreasuryBloc bloc;
+  final _i79.TreasuryBloc bloc;
 
   final bool isFromDetails;
 
@@ -1676,7 +1677,7 @@ class PaymentSuccessDistributionRouteArgs {
 class PaymentSuccessRoute extends _i73.PageRouteInfo<PaymentSuccessRouteArgs> {
   PaymentSuccessRoute({
     _i74.Key? key,
-    required _i79.PayTheFeeResponseEntity paymentData,
+    required _i80.PayTheFeeResponseEntity paymentData,
     List<_i73.PageRouteInfo>? children,
   }) : super(
          PaymentSuccessRoute.name,
@@ -1703,7 +1704,7 @@ class PaymentSuccessRouteArgs {
 
   final _i74.Key? key;
 
-  final _i79.PayTheFeeResponseEntity paymentData;
+  final _i80.PayTheFeeResponseEntity paymentData;
 
   @override
   String toString() {
@@ -1815,8 +1816,8 @@ class RecordContributionPaymentRoute
     _i74.Key? key,
     required DateTime dateContibution,
     required String titleContibuton,
-    required _i77.ContributionDetailMemberEntity item,
-    required _i77.CashResponseEntity cash,
+    required _i78.ContributionDetailMemberEntity item,
+    required _i78.CashResponseEntity cash,
     List<_i73.PageRouteInfo>? children,
   }) : super(
          RecordContributionPaymentRoute.name,
@@ -1862,9 +1863,9 @@ class RecordContributionPaymentRouteArgs {
 
   final String titleContibuton;
 
-  final _i77.ContributionDetailMemberEntity item;
+  final _i78.ContributionDetailMemberEntity item;
 
-  final _i77.CashResponseEntity cash;
+  final _i78.CashResponseEntity cash;
 
   @override
   String toString() {
@@ -1899,7 +1900,7 @@ class RecordPaymentRoute extends _i73.PageRouteInfo<RecordPaymentRouteArgs> {
     required String quotaId,
     required String textoCuota,
     required int montoTotalCuota,
-    required _i77.CashResponseEntity cash,
+    required _i78.CashResponseEntity cash,
     required String idLoan,
     List<_i73.PageRouteInfo>? children,
   }) : super(
@@ -1951,7 +1952,7 @@ class RecordPaymentRouteArgs {
 
   final int montoTotalCuota;
 
-  final _i77.CashResponseEntity cash;
+  final _i78.CashResponseEntity cash;
 
   final String idLoan;
 
@@ -2251,7 +2252,7 @@ class RequestProgressDetailsRouteArgs {
 class SellPreviewRoute extends _i73.PageRouteInfo<SellPreviewRouteArgs> {
   SellPreviewRoute({
     _i74.Key? key,
-    required _i77.SalePreviewResponseEntity previewData,
+    required _i78.SalePreviewResponseEntity previewData,
     required String salesDate,
     required String buyer,
     required double totalGramsSold,
@@ -2304,7 +2305,7 @@ class SellPreviewRouteArgs {
 
   final _i74.Key? key;
 
-  final _i77.SalePreviewResponseEntity previewData;
+  final _i78.SalePreviewResponseEntity previewData;
 
   final String salesDate;
 
@@ -2350,7 +2351,7 @@ class SellPreviewRouteArgs {
 class SellSummaryRoute extends _i73.PageRouteInfo<SellSummaryRouteArgs> {
   SellSummaryRoute({
     _i74.Key? key,
-    required _i77.RegisterSaleResponseEntity saleData,
+    required _i78.RegisterSaleResponseEntity saleData,
     bool isFromHistory = false,
     List<_i73.PageRouteInfo>? children,
   }) : super(
@@ -2387,7 +2388,7 @@ class SellSummaryRouteArgs {
 
   final _i74.Key? key;
 
-  final _i77.RegisterSaleResponseEntity saleData;
+  final _i78.RegisterSaleResponseEntity saleData;
 
   final bool isFromHistory;
 
@@ -2446,7 +2447,7 @@ class StaffMainRoute extends _i73.PageRouteInfo<void> {
 class TransactionDetailsRoute
     extends _i73.PageRouteInfo<TransactionDetailsRouteArgs> {
   TransactionDetailsRoute({
-    _i75.Key? key,
+    _i76.Key? key,
     required String idTransaction,
     List<_i73.PageRouteInfo>? children,
   }) : super(
@@ -2475,7 +2476,7 @@ class TransactionDetailsRoute
 class TransactionDetailsRouteArgs {
   const TransactionDetailsRouteArgs({this.key, required this.idTransaction});
 
-  final _i75.Key? key;
+  final _i76.Key? key;
 
   final String idTransaction;
 
@@ -2664,7 +2665,7 @@ class UsersManagementRoute extends _i73.PageRouteInfo<void> {
 class ViewRequestDetailsRoute
     extends _i73.PageRouteInfo<ViewRequestDetailsRouteArgs> {
   ViewRequestDetailsRoute({
-    _i75.Key? key,
+    _i76.Key? key,
     required String id,
     List<_i73.PageRouteInfo>? children,
   }) : super(
@@ -2687,7 +2688,7 @@ class ViewRequestDetailsRoute
 class ViewRequestDetailsRouteArgs {
   const ViewRequestDetailsRouteArgs({this.key, required this.id});
 
-  final _i75.Key? key;
+  final _i76.Key? key;
 
   final String id;
 
