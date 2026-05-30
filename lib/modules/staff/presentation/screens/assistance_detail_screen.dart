@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:front_gestion_minera/injector_container.dart';
 import 'package:front_gestion_minera/modules/staff/data/models/models.dart';
-import 'package:front_gestion_minera/modules/staff/presentation/widgets/widgets.dart';
 import 'package:front_gestion_minera/utils/constants/color.constant.dart';
 import 'package:intl/intl.dart';
 import 'package:share_plus/share_plus.dart';
@@ -205,7 +204,11 @@ class _AssistanceDetailScreenState extends State<AssistanceDetailScreen> {
                                 children: [
                                   CardDateTurnWidget(
                                     isDate: true,
-                                    date: formatDate(DateFormat('yyyy-MM-dd').parse(employeeDetail.date)),
+                                    date: formatDate(
+                                      DateFormat(
+                                        'yyyy-MM-dd',
+                                      ).parse(employeeDetail.date),
+                                    ),
                                   ),
                                   SizedBox(
                                     height: 40,
@@ -369,17 +372,19 @@ class _AssistanceDetailScreenState extends State<AssistanceDetailScreen> {
                             const Spacer(),
                             Row(
                               children: [
-                                Text(
-                                  chronology.netHoursWorked.toString(),
-                                  style: TextStyle(
-                                    fontSize: 30,
-                                    color: TColors.uploadBlue,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
+                                (chronology.netHoursWorked == 0)
+                                    ? Text('No registrado')
+                                    : Text(
+                                        chronology.netHoursWorked.toString(),
+                                        style: TextStyle(
+                                          fontSize: 30,
+                                          color: TColors.uploadBlue,
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
                                 const SizedBox(width: 5),
-                                const Text(
-                                  'hrs',
+                                Text(
+                                  (chronology.netHoursWorked == 0) ? '' : 'hrs',
                                   style: TextStyle(
                                     fontSize: 15,
                                     color: TColors.disabled,
@@ -683,7 +688,11 @@ class _AssistanceDetailScreenState extends State<AssistanceDetailScreen> {
                                   ),
                                 ),
                                 pw.Text(
-                                  formatDate(DateFormat('dd/MM/yyyy').parse(employeeDetail.date)),
+                                  formatDate(
+                                    DateFormat(
+                                      'dd/MM/yyyy',
+                                    ).parse(employeeDetail.date),
+                                  ),
                                   style: pw.TextStyle(fontSize: 15),
                                 ),
                               ],
@@ -897,7 +906,7 @@ class _CardTimeLineInOutWidget extends StatelessWidget {
                   : TColors.appBackgroundColor,
               borderRadius: BorderRadius.circular(15),
             ),
-            child: Text('No Registrado'),
+            child: Text('No Registrado', textAlign: TextAlign.center),
           )
         : Container(
             margin: const EdgeInsets.only(top: 10, bottom: 10, left: 5),
