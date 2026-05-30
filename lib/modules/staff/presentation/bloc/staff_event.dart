@@ -65,4 +65,9 @@ class RegisterCheckInEmployeeEvent extends StaffEvent {
   RegisterCheckInEmployeeEvent({required this.checkIn});
 }
 
+class GetDetailAssistanceEmployeeEvent extends StaffEvent {
+  final String employeeId;
+
+  GetDetailAssistanceEmployeeEvent({required this.employeeId});
+}
 

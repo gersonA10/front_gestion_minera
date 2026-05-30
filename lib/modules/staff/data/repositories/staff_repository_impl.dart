@@ -74,4 +74,9 @@ class StaffRepositoryImpl implements StaffRepository {
 
     return await datasource.checkOutEmployee(attendanceId, requestModel);
   }
+  
+  @override
+  Future<EmployeeDetailAssistanceModel> getDetailsEmployee(String employeeId) {
+    return datasource.getDetailsEmployee(employeeId);
+  }
 }

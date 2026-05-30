@@ -1,418 +1,614 @@
 import 'package:auto_route/annotations.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:front_gestion_minera/injector_container.dart';
+import 'package:front_gestion_minera/modules/staff/data/models/models.dart';
 import 'package:front_gestion_minera/utils/constants/color.constant.dart';
+import 'package:intl/intl.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:timeline_tile/timeline_tile.dart';
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:printing/printing.dart';
+import '../../../../utils/assets.dart';
+import '../bloc/staff_bloc.dart';
 
 @RoutePage()
 class AssistanceDetailScreen extends StatefulWidget {
-  final String idEmployee;
-  const AssistanceDetailScreen({super.key, required this.idEmployee});
+  final String attendanceId;
+  const AssistanceDetailScreen({super.key, required this.attendanceId});
 
   @override
   State<AssistanceDetailScreen> createState() => _AssistanceDetailScreenState();
 }
 
 class _AssistanceDetailScreenState extends State<AssistanceDetailScreen> {
-  final _nameEmployee = 'Carlos Rodriguez';
-  final _role = 'Operador de Maquinaria';
-  final _nid = '12345678';
-  final double _hourTotal = 9;
+  final isimage = false;
+  late final StaffBloc _staffBloc;
+  EmployeeDetailAssistanceModel? _employeeCache;
+
+  String formatDate(DateTime date) {
+    const months = [
+      'Ene',
+      'Feb',
+      'Mar',
+      'Abr',
+      'May',
+      'Jun',
+      'Jul',
+      'Agos',
+      'Sep',
+      'Oct',
+      'Nov',
+      'Dic',
+    ];
+
+    return '${date.day} ${months[date.month - 1]}, ${date.year}';
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _staffBloc = InjectorContainer.getIt<StaffBloc>()
+      ..add(GetDetailAssistanceEmployeeEvent(employeeId: widget.attendanceId));
+  }
+
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: TColors.appBackgroundColor,
-      appBar: AppBar(
-        backgroundColor: TColors.white,
-        title: Text('Detalles de Asistencia'),
-        actions: [
-          IconButton(
-            onPressed: () {
-              SharePlus.instance.share(
-                ShareParams(text: 'Compartir Con', subject: 'Compartir datos'),
-              );
-            },
-            icon: Icon(
-              Icons.share_outlined,
-              color: TColors.appBackgroundDarkColor,
-            ),
-          ),
-          SizedBox(width: 10),
-        ],
-      ),
-      body: Padding(
-        padding: EdgeInsetsGeometry.symmetric(horizontal: 15),
-        child: ListView(
-          children: [
-            Container(
-              padding: EdgeInsets.all(20),
-              margin: EdgeInsets.only(top: 15),
-              decoration: BoxDecoration(
-                color: TColors.white,
-                borderRadius: BorderRadius.circular(15),
+    return BlocProvider.value(
+      value: _staffBloc,
+      child: BlocBuilder<StaffBloc, StaffState>(
+        builder: (context, state) {
+          final isLoading = state is DetailAssistanceEmployeeLoading;
+          if (isLoading && _employeeCache == null) {
+            return Scaffold(
+              appBar: AppBar(
+                backgroundColor: TColors.white,
+                title: Text('Detalles de Asistencia'),
               ),
-              child: Stack(
+              body: Center(child: CircularProgressIndicator()),
+            );
+          }
+          if (state is DetailAssistanceEmployeeLoaded) {
+            _employeeCache = state.employee;
+          }
+          if (_employeeCache == null) {
+            if (isLoading) {
+              return Center(child: CircularProgressIndicator());
+            }
+            if (state is DetailAssistanceEmployeeError) {
+              return Center(child: Text(state.message));
+            }
+
+            return const SizedBox();
+          }
+          final employeeDetail = _employeeCache!;
+          final employeeDate = employeeDetail.employee;
+          final chronology = employeeDetail.chronology;
+          final validation = employeeDetail.validation;
+          return Scaffold(
+            backgroundColor: TColors.appBackgroundColor,
+            appBar: AppBar(
+              backgroundColor: TColors.white,
+              title: Text('Detalles de Asistencia'),
+              actions: [
+                IconButton(
+                  onPressed: () async {
+                    try {
+                      final pw.Document myPdf = await _generarPdf(
+                        context,
+                        employeeDetail,
+                        true,
+                      );
+                      final Uint8List pdfBytes = await myPdf.save();
+                      final String fileName =
+                          'Reporte_Asistencia_${employeeDate.fullName.replaceAll(' ', '_')}.pdf';
+                      final XFile pdfFile = XFile.fromData(
+                        pdfBytes,
+                        name: fileName,
+                        mimeType: 'application/pdf',
+                      );
+                      SharePlus.instance.share(
+                        ShareParams(
+                          text:
+                              'Reporte de Asistencia de ${employeeDate.fullName}',
+                          subject: 'Compartir datos',
+                          files: [pdfFile],
+                        ),
+                      );
+                    } catch (_) {}
+                  },
+                  icon: Icon(
+                    Icons.share_outlined,
+                    color: TColors.appBackgroundDarkColor,
+                  ),
+                ),
+                SizedBox(width: 10),
+              ],
+            ),
+            body: Padding(
+              padding: EdgeInsetsGeometry.symmetric(horizontal: 15),
+              child: ListView(
                 children: [
-                  Center(
-                    child: Column(
+                  Container(
+                    padding: EdgeInsets.all(20),
+                    margin: EdgeInsets.only(top: 15),
+                    decoration: BoxDecoration(
+                      color: TColors.white,
+                      borderRadius: BorderRadius.circular(15),
+                    ),
+                    child: Stack(
                       children: [
-                        Container(
-                          padding: EdgeInsets.all(5),
-                          decoration: BoxDecoration(
-                            border: Border.all(color: TColors.uploadBlue),
-                            borderRadius: BorderRadius.circular(50),
-                          ),
-                          child: Icon(Icons.person),
-                        ),
-                        const SizedBox(height: 15),
-                        Text(
-                          _nameEmployee,
-                          style: TextStyle(
-                            fontSize: 20,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        Text(
-                          _role,
-                          style: TextStyle(color: TColors.appDisabledDarkColor),
-                        ),
-                        const SizedBox(height: 5),
-                        Container(
-                          padding: EdgeInsets.symmetric(horizontal: 10),
-                          margin: EdgeInsets.only(bottom: 10),
-                          decoration: BoxDecoration(
-                            color: TColors.uploadBlue.withValues(alpha: 0.5),
-                            borderRadius: BorderRadius.circular(15),
-                          ),
-                          child: Text(
-                            'ID: $_nid',
-                            style: TextStyle(
-                              fontSize: 12,
-                              color: TColors.appNewDarkMainColor,
-                            ),
-                          ),
-                        ),
-                        Divider(color: TColors.disabled.withValues(alpha: 0.3)),
-                        Row(
-                          children: [
-                            CardDateTurnWidget(
-                              isDate: true,
-                              date: '25 May, 2026',
-                            ),
-                            SizedBox(
-                              height: 40,
-                              child: VerticalDivider(
+                        Center(
+                          child: Column(
+                            children: [
+                              ClipRRect(
+                                borderRadius: BorderRadiusGeometry.circular(40),
+                                child: Container(
+                                  width: 70,
+                                  height: 70,
+                                  color: TColors.appBackgroundColor,
+                                  child: FadeInImage.assetNetwork(
+                                    placeholder: AssetImageApp.getIconLoading,
+                                    image:
+                                        employeeDetail.employee.photoUrl ?? '',
+                                    fit: BoxFit.cover,
+                                    imageErrorBuilder: (_, _, _) {
+                                      return Center(
+                                        child: const Icon(
+                                          Icons.person,
+                                          size: 30,
+                                        ),
+                                      );
+                                    },
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(height: 15),
+                              Text(
+                                employeeDate.fullName,
+                                style: TextStyle(
+                                  fontSize: 20,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                              Text(
+                                employeeDate.position,
+                                style: TextStyle(
+                                  color: TColors.appDisabledDarkColor,
+                                ),
+                              ),
+                              const SizedBox(height: 5),
+                              Container(
+                                padding: EdgeInsets.symmetric(horizontal: 10),
+                                margin: EdgeInsets.only(bottom: 10),
+                                decoration: BoxDecoration(
+                                  color: TColors.uploadBlue.withValues(
+                                    alpha: 0.5,
+                                  ),
+                                  borderRadius: BorderRadius.circular(15),
+                                ),
+                                child: Text(
+                                  'NID: ${employeeDate.nationalId}',
+                                  style: TextStyle(
+                                    fontSize: 12,
+                                    color: TColors.appNewDarkMainColor,
+                                  ),
+                                ),
+                              ),
+                              Divider(
                                 color: TColors.disabled.withValues(alpha: 0.3),
                               ),
-                            ),
-                            CardDateTurnWidget(isDate: false, turn: 'Mañana'),
-                          ],
-                        ),
-                      ],
-                    ),
-                  ),
-                  Positioned(
-                    top: 0,
-                    right: 0,
-                    child: Container(
-                      padding: EdgeInsets.symmetric(horizontal: 10),
-                      decoration: BoxDecoration(
-                        color: TColors.green.withValues(alpha: 0.5),
-                        borderRadius: BorderRadius.circular(15),
-                        border: Border.all(color: TColors.green),
-                      ),
-                      child: Row(
-                        children: [
-                          Icon(Icons.circle, size: 8, color: TColors.green),
-                          const SizedBox(width: 5),
-                          Text(
-                            'Finalizado',
-                            style: TextStyle(
-                              fontSize: 12,
-                              color: TColors.appNewDarkMainColor,
-                            ),
+                              Row(
+                                children: [
+                                  CardDateTurnWidget(
+                                    isDate: true,
+                                    date: formatDate(
+                                      DateFormat(
+                                        'yyyy-MM-dd',
+                                      ).parse(employeeDetail.date),
+                                    ),
+                                  ),
+                                  SizedBox(
+                                    height: 40,
+                                    child: VerticalDivider(
+                                      color: TColors.disabled.withValues(
+                                        alpha: 0.3,
+                                      ),
+                                    ),
+                                  ),
+                                  CardDateTurnWidget(
+                                    isDate: false,
+                                    turn: employeeDetail.assignedShift,
+                                  ),
+                                ],
+                              ),
+                            ],
                           ),
-                        ],
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            Container(
-              margin: EdgeInsets.only(top: 15),
-              padding: EdgeInsets.all(20),
-              decoration: BoxDecoration(
-                color: TColors.white,
-                borderRadius: BorderRadius.circular(15),
-              ),
-              child: Column(
-                children: [
-                  const Row(
-                    children: [
-                      Icon(
-                        Icons.access_time,
-                        color: TColors.uploadBlue,
-                        size: 19,
-                      ),
-                      SizedBox(width: 5),
-                      Text(
-                        'Cronologia del Turno',
-                        style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 16,
                         ),
-                      ),
-                    ],
-                  ),
-                  TimelineCustomWidget(
-                    isFirst: true,
-                    pointColor: TColors.uploadBlue,
-                    child: _CardTimeLineInOutWidget(isIN: true, hour: '06:55'),
-                  ),
-                  TimelineCustomWidget(
-                    pointColor: TColors.grayText,
-                    size: 10,
-                    child: Container(
-                      padding: EdgeInsets.only(left: 18, right: 10),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text('Refrigerio'),
-                          Container(
-                            padding: EdgeInsets.all(5),
+                        Positioned(
+                          top: 0,
+                          right: 0,
+                          child: Container(
+                            padding: EdgeInsets.symmetric(horizontal: 10),
                             decoration: BoxDecoration(
-                              color: TColors.appBackgroundColor,
-                              borderRadius: BorderRadius.circular(20),
+                              color: TColors.green.withValues(alpha: 0.5),
+                              borderRadius: BorderRadius.circular(15),
+                              border: Border.all(color: TColors.green),
                             ),
                             child: Row(
                               children: [
-                                Icon(Icons.restaurant, size: 15),
-                                SizedBox(width: 4),
+                                Icon(
+                                  Icons.circle,
+                                  size: 8,
+                                  color: TColors.green,
+                                ),
+                                const SizedBox(width: 5),
                                 Text(
-                                  '45 min',
+                                  'Finalizado',
                                   style: TextStyle(
-                                    fontSize: 13,
-                                    fontWeight: FontWeight.bold,
+                                    fontSize: 12,
+                                    color: TColors.appNewDarkMainColor,
                                   ),
                                 ),
                               ],
                             ),
                           ),
-                        ],
-                      ),
+                        ),
+                      ],
                     ),
                   ),
-                  TimelineCustomWidget(
-                    isLast: true,
-                    pointColor: TColors.bgColor,
-                    child: _CardTimeLineInOutWidget(isIN: false, hour: '16:45'),
-                  ),
-                  Divider(color: TColors.appBackgroundColor),
-                  Row(
-                    children: [
-                      const Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            'HORAS EFECTIVAS',
-                            style: TextStyle(
-                              fontSize: 12,
-                              color: TColors.disabled,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                          Text(
-                            'Excluyendo refrigerio',
-                            style: TextStyle(
-                              fontSize: 10,
-                              color: TColors.disabled,
-                            ),
-                          ),
-                        ],
-                      ),
-                      const Spacer(),
-                      Row(
-                        children: [
-                          Text(
-                            _hourTotal.toString(),
-                            style: TextStyle(
-                              fontSize: 30,
-                              color: TColors.uploadBlue,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                          const SizedBox(width: 5),
-                          const Text(
-                            'hrs',
-                            style: TextStyle(
-                              fontSize: 15,
-                              color: TColors.disabled,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-            ),
-            Container(
-              margin: const EdgeInsets.only(top: 15, bottom: 20),
-              padding: const EdgeInsets.all(20),
-              decoration: BoxDecoration(
-                color: TColors.white,
-                borderRadius: BorderRadius.circular(15),
-              ),
-              child: Column(
-                children: [
-                  const Row(
-                    children: [
-                      Icon(Icons.verified_outlined, color: TColors.uploadBlue),
-                      SizedBox(width: 5),
-                      Text(
-                        'Validación',
-                        style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 17,
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 10),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          children: [
-                            Icon(Icons.fiber_manual_record_sharp),
-                            Text('Firma Supervisor'),
-                          ],
-                        ),
-                      ),
-                      SizedBox(height: 50, child: VerticalDivider()),
-                      Expanded(
-                        child: SizedBox(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.center,
-                            children: [
-                              Container(
-                                padding: const EdgeInsets.all(5),
-                                decoration: BoxDecoration(
-                                  color: TColors.uploadBlue.withValues(
-                                    alpha: 0.2,
-                                  ),
-                                  borderRadius: BorderRadius.circular(50),
-                                ),
-                                child: const Icon(
-                                  Icons.location_on_outlined,
-                                  color: TColors.uploadBlue,
-                                  size: 25,
-                                ),
-                              ),
-                              const SizedBox(height: 5),
-                              Text(
-                                'Sector Norte',
-                                style: TextStyle(fontWeight: FontWeight.bold),
-                              ),
-                              Text(
-                                'Lat: -22.45, Lon: -68.90',
-                                style: TextStyle(fontSize: 11),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-            ),
-            Container(
-              margin: EdgeInsets.only(bottom: 30),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Ink(
+                  Container(
+                    margin: EdgeInsets.only(top: 15),
+                    padding: EdgeInsets.all(20),
                     decoration: BoxDecoration(
                       color: TColors.white,
                       borderRadius: BorderRadius.circular(15),
                     ),
-                    child: InkWell(
-                      onTap: () {
-                        _generarPdf(context);
-                      },
-                      splashColor: TColors.disabled,
-                      borderRadius: BorderRadius.circular(15),
-                      child: const Padding(
-                        padding: EdgeInsets.symmetric(
-                          horizontal: 20,
-                          vertical: 10,
-                        ),
-                        child: Row(
+                    child: Column(
+                      children: [
+                        const Row(
                           children: [
                             Icon(
-                              Icons.print_outlined,
-                              color: TColors.appBackgroundDarkColor,
+                              Icons.access_time,
+                              color: TColors.uploadBlue,
+                              size: 19,
                             ),
                             SizedBox(width: 5),
                             Text(
-                              'Reporte',
+                              'Cronologia del Turno',
                               style: TextStyle(
-                                color: TColors.appMainTextColor,
-                                fontSize: 18,
+                                fontWeight: FontWeight.bold,
+                                fontSize: 16,
                               ),
                             ),
                           ],
                         ),
-                      ),
+                        TimelineCustomWidget(
+                          isFirst: true,
+                          pointColor: TColors.uploadBlue,
+                          child: _CardTimeLineInOutWidget(
+                            isIN: true,
+                            hour: chronology.checkIn.time!.substring(0, 5),
+                            place: (chronology.checkOut.location!.isEmpty)
+                                ? 'Lugar no registrado'
+                                : chronology.checkOut.location!,
+                            isNotRegistered: chronology.checkIn.time == '',
+                          ),
+                        ),
+                        TimelineCustomWidget(
+                          pointColor: TColors.grayText,
+                          size: 10,
+                          child: Container(
+                            padding: EdgeInsets.only(left: 18, right: 10),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Text('Refrigerio'),
+                                Container(
+                                  padding: EdgeInsets.all(5),
+                                  decoration: BoxDecoration(
+                                    color: TColors.appBackgroundColor,
+                                    borderRadius: BorderRadius.circular(20),
+                                  ),
+                                  child: Row(
+                                    children: [
+                                      Icon(Icons.restaurant, size: 15),
+                                      SizedBox(width: 4),
+                                      (chronology.breakMinutes == 0)
+                                          ? Text('Sin Refrigerio')
+                                          : Text(
+                                              '${chronology.breakMinutes} min',
+                                              style: TextStyle(
+                                                fontSize: 13,
+                                                fontWeight: FontWeight.bold,
+                                              ),
+                                            ),
+                                    ],
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                        TimelineCustomWidget(
+                          isLast: true,
+                          pointColor: TColors.bgColor,
+                          child: _CardTimeLineInOutWidget(
+                            isIN: false,
+                            hour: (chronology.checkOut.time == '')
+                                ? '00:00'
+                                : chronology.checkOut.time!.substring(0, 5),
+                            place: (chronology.checkOut.location!.isEmpty)
+                                ? 'Lugar no registrado'
+                                : chronology.checkOut.location!,
+                            isNotRegistered: chronology.checkOut.time == '',
+                          ),
+                        ),
+                        Divider(color: TColors.appBackgroundColor),
+                        Row(
+                          children: [
+                            const Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  'HORAS EFECTIVAS',
+                                  style: TextStyle(
+                                    fontSize: 12,
+                                    color: TColors.disabled,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                                Text(
+                                  'Excluyendo refrigerio',
+                                  style: TextStyle(
+                                    fontSize: 10,
+                                    color: TColors.disabled,
+                                  ),
+                                ),
+                              ],
+                            ),
+                            const Spacer(),
+                            Row(
+                              children: [
+                                (chronology.netHoursWorked == 0)
+                                    ? Text('No registrado')
+                                    : Text(
+                                        chronology.netHoursWorked.toString(),
+                                        style: TextStyle(
+                                          fontSize: 30,
+                                          color: TColors.uploadBlue,
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                const SizedBox(width: 5),
+                                Text(
+                                  (chronology.netHoursWorked == 0) ? '' : 'hrs',
+                                  style: TextStyle(
+                                    fontSize: 15,
+                                    color: TColors.disabled,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
+                      ],
                     ),
                   ),
-                  const SizedBox(width: 20),
-                  Ink(
+                  Container(
+                    margin: const EdgeInsets.only(top: 15, bottom: 20),
+                    padding: const EdgeInsets.all(20),
                     decoration: BoxDecoration(
-                      color: TColors.timelineBlue,
+                      color: TColors.white,
                       borderRadius: BorderRadius.circular(15),
                     ),
-                    child: InkWell(
-                      onTap: () {},
-                      borderRadius: BorderRadius.circular(15),
-                      child: const Padding(
-                        padding: EdgeInsets.symmetric(
-                          horizontal: 20,
-                          vertical: 10,
-                        ),
-                        child: Row(
+                    child: Column(
+                      children: [
+                        const Row(
                           children: [
-                            Icon(Icons.edit_outlined, color: TColors.white),
+                            Icon(
+                              Icons.verified_outlined,
+                              color: TColors.uploadBlue,
+                            ),
                             SizedBox(width: 5),
                             Text(
-                              'Corrección',
+                              'Validación',
                               style: TextStyle(
-                                color: TColors.white,
-                                fontSize: 18,
+                                fontWeight: FontWeight.bold,
+                                fontSize: 17,
                               ),
                             ),
                           ],
                         ),
-                      ),
+                        const SizedBox(height: 10),
+                        Row(
+                          children: [
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.center,
+                                children: [
+                                  Container(
+                                    width: 100,
+                                    height: 70,
+                                    color: TColors.appBackgroundColor,
+                                    child: FadeInImage.assetNetwork(
+                                      placeholder: AssetImageApp.getIconLoading,
+                                      image:
+                                          validation
+                                              .supervisorSignatureUrl
+                                              .isNotEmpty
+                                          ? validation.supervisorSignatureUrl
+                                          : '',
+                                      fit: BoxFit.cover,
+                                      imageErrorBuilder: (_, _, _) {
+                                        return Center(
+                                          child: const Icon(
+                                            Icons.image_not_supported_outlined,
+                                            size: 30,
+                                          ),
+                                        );
+                                      },
+                                    ),
+                                  ),
+                                  const SizedBox(height: 5),
+                                  Text(
+                                    'Firma Supervisor',
+                                    style: TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            SizedBox(height: 50, child: VerticalDivider()),
+                            Expanded(
+                              child: SizedBox(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.center,
+                                  children: [
+                                    Container(
+                                      padding: const EdgeInsets.all(5),
+                                      decoration: BoxDecoration(
+                                        color: TColors.uploadBlue.withValues(
+                                          alpha: 0.2,
+                                        ),
+                                        borderRadius: BorderRadius.circular(50),
+                                      ),
+                                      child: const Icon(
+                                        Icons.location_on_outlined,
+                                        color: TColors.uploadBlue,
+                                        size: 25,
+                                      ),
+                                    ),
+                                    const SizedBox(height: 5),
+                                    Text(
+                                      (chronology.checkOut.location!.isEmpty)
+                                          ? 'Lugar no registrado'
+                                          : chronology.checkOut.location!,
+                                      style: TextStyle(
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                      textAlign: TextAlign.center,
+                                    ),
+                                    Text(
+                                      'Lat: ${validation.geolocation.checkOut.latitude}, Lon: ${validation.geolocation.checkOut.longitude}',
+                                      style: TextStyle(fontSize: 11),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
+                  Container(
+                    margin: EdgeInsets.only(bottom: 30),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Ink(
+                          decoration: BoxDecoration(
+                            color: TColors.white,
+                            borderRadius: BorderRadius.circular(15),
+                          ),
+                          child: InkWell(
+                            onTap: () {
+                              _generarPdf(context, employeeDetail, false);
+                            },
+                            splashColor: TColors.disabled,
+                            borderRadius: BorderRadius.circular(15),
+                            child: const Padding(
+                              padding: EdgeInsets.symmetric(
+                                horizontal: 20,
+                                vertical: 10,
+                              ),
+                              child: Row(
+                                children: [
+                                  Icon(
+                                    Icons.print_outlined,
+                                    color: TColors.appBackgroundDarkColor,
+                                  ),
+                                  SizedBox(width: 5),
+                                  Text(
+                                    'Reporte',
+                                    style: TextStyle(
+                                      color: TColors.appMainTextColor,
+                                      fontSize: 18,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ),
+                        // const SizedBox(width: 20),
+                        // Ink(
+                        //   decoration: BoxDecoration(
+                        //     color: TColors.timelineBlue,
+                        //     borderRadius: BorderRadius.circular(15),
+                        //   ),
+                        //   child: InkWell(
+                        //     onTap: () {
+
+                        //     },
+                        //     borderRadius: BorderRadius.circular(15),
+                        //     child: const Padding(
+                        //       padding: EdgeInsets.symmetric(
+                        //         horizontal: 20,
+                        //         vertical: 10,
+                        //       ),
+                        //       child: Row(
+                        //         children: [
+                        //           Icon(
+                        //             Icons.edit_outlined,
+                        //             color: TColors.white,
+                        //           ),
+                        //           SizedBox(width: 5),
+                        //           Text(
+                        //             'Corrección',
+                        //             style: TextStyle(
+                        //               color: TColors.white,
+                        //               fontSize: 18,
+                        //             ),
+                        //           ),
+                        //         ],
+                        //       ),
+                        //     ),
+                        //   ),
+                        // ),
+                      ],
                     ),
                   ),
                 ],
               ),
             ),
-          ],
-        ),
+          );
+        },
       ),
     );
   }
 
-  Future<void> _generarPdf(BuildContext context) async {
+  Future<pw.Document> _generarPdf(
+    BuildContext context,
+    EmployeeDetailAssistanceModel employeeDetail,
+    bool isShared,
+  ) async {
     final pdf = pw.Document();
+    pw.ImageProvider? fotoEmpleado;
+    final photoUrl = employeeDetail.employee.photoUrl;
+    if (photoUrl != null &&
+        photoUrl.trim().isNotEmpty &&
+        photoUrl.startsWith('http')) {
+      try {
+        fotoEmpleado = await networkImage(photoUrl);
+      } catch (_) {
+        fotoEmpleado = null;
+      }
+    }
     pdf.addPage(
       pw.Page(
         pageFormat: PdfPageFormat.a4,
@@ -424,11 +620,28 @@ class _AssistanceDetailScreenState extends State<AssistanceDetailScreen> {
             pw.Row(
               children: [
                 pw.Container(
-                  padding: pw.EdgeInsets.all(40),
                   decoration: pw.BoxDecoration(
                     border: pw.Border.all(color: PdfColor.fromHex('#000000')),
                   ),
-                  child: pw.Text('Foto'),
+                  child: (fotoEmpleado != null)
+                      ? pw.Image(
+                          fotoEmpleado,
+                          width: 120,
+                          height: 120,
+                          fit: pw.BoxFit.cover,
+                        )
+                      : pw.Container(
+                          width: 120,
+                          height: 120,
+                          decoration: const pw.BoxDecoration(
+                            color: PdfColors.grey300,
+                          ),
+                          alignment: pw.Alignment.center,
+                          child: pw.Text(
+                            '[Sin Foto]',
+                            style: const pw.TextStyle(fontSize: 10),
+                          ),
+                        ),
                 ),
                 pw.SizedBox(width: 60),
                 pw.Column(
@@ -436,14 +649,14 @@ class _AssistanceDetailScreenState extends State<AssistanceDetailScreen> {
                   children: [
                     pw.SizedBox(height: 15),
                     pw.Text(
-                      _nameEmployee,
+                      employeeDetail.employee.fullName,
                       style: pw.TextStyle(
                         fontSize: 25,
                         fontWeight: pw.FontWeight.bold,
                       ),
                     ),
                     pw.Text(
-                      _role,
+                      employeeDetail.employee.position,
                       style: pw.TextStyle(
                         fontWeight: pw.FontWeight.bold,
                         fontSize: 15,
@@ -456,7 +669,7 @@ class _AssistanceDetailScreenState extends State<AssistanceDetailScreen> {
                         borderRadius: pw.BorderRadius.circular(15),
                       ),
                       child: pw.Text(
-                        'ID: $_nid',
+                        'ID: ${employeeDetail.employee.nationalId}',
                         style: pw.TextStyle(fontSize: 15),
                       ),
                     ),
@@ -475,7 +688,11 @@ class _AssistanceDetailScreenState extends State<AssistanceDetailScreen> {
                                   ),
                                 ),
                                 pw.Text(
-                                  '25 May, 2026',
+                                  formatDate(
+                                    DateFormat(
+                                      'dd/MM/yyyy',
+                                    ).parse(employeeDetail.date),
+                                  ),
                                   style: pw.TextStyle(fontSize: 15),
                                 ),
                               ],
@@ -500,7 +717,7 @@ class _AssistanceDetailScreenState extends State<AssistanceDetailScreen> {
                                   ),
                                 ),
                                 pw.Text(
-                                  'MAÑANA',
+                                  employeeDetail.assignedShift,
                                   style: pw.TextStyle(fontSize: 15),
                                 ),
                               ],
@@ -540,7 +757,7 @@ class _AssistanceDetailScreenState extends State<AssistanceDetailScreen> {
                           ),
                           pw.SizedBox(width: 10),
                           pw.Text(
-                            'Entrada Registrada - 06:55 AM',
+                            'Entrada Registrada - ${employeeDetail.chronology.checkIn.time!.substring(0, 5)} AM',
                             style: pw.TextStyle(
                               fontSize: 15,
                               fontWeight: pw.FontWeight.bold,
@@ -561,7 +778,9 @@ class _AssistanceDetailScreenState extends State<AssistanceDetailScreen> {
                           ),
                           pw.SizedBox(width: 10),
                           pw.Text(
-                            'Tiempo de Refrigerio - 45 Minutos',
+                            employeeDetail.chronology.breakMinutes == 0
+                                ? 'Sin Refrigerio'
+                                : 'Tiempo de Refrigerio - ${employeeDetail.chronology.breakMinutes} ${(int.parse(employeeDetail.chronology.checkOut.time!.substring(0, 2)) > 11) ? 'PM' : 'AM'}',
                             style: pw.TextStyle(
                               fontSize: 15,
                               fontWeight: pw.FontWeight.bold,
@@ -582,7 +801,9 @@ class _AssistanceDetailScreenState extends State<AssistanceDetailScreen> {
                           ),
                           pw.SizedBox(width: 10),
                           pw.Text(
-                            'Salida Registrada - 06:55 AM',
+                            (!(employeeDetail.chronology.checkOut.time != null))
+                                ? 'Salida Registrada - ${employeeDetail.chronology.checkOut.time!.substring(0, 5)} ${(int.parse(employeeDetail.chronology.checkOut.time!.substring(0, 2)) > 11) ? 'PM' : 'AM'}'
+                                : 'Salida no registrada',
                             style: pw.TextStyle(
                               fontSize: 15,
                               fontWeight: pw.FontWeight.bold,
@@ -618,14 +839,14 @@ class _AssistanceDetailScreenState extends State<AssistanceDetailScreen> {
                 ),
                 pw.Spacer(),
                 pw.Text(
-                  _hourTotal.toString(),
+                  employeeDetail.chronology.netHoursWorked.toString(),
                   style: pw.TextStyle(
                     fontSize: 30,
                     fontWeight: pw.FontWeight.bold,
                   ),
                 ),
                 pw.Text(
-                  'hrs',
+                  ' hrs',
                   style: pw.TextStyle(
                     fontSize: 15,
                     fontWeight: pw.FontWeight.bold,
@@ -633,66 +854,106 @@ class _AssistanceDetailScreenState extends State<AssistanceDetailScreen> {
                 ),
               ],
             ),
+            pw.SizedBox(height: 80),
+            pw.Center(
+              child: pw.Column(
+                children: [
+                  pw.Text('___________________'),
+                  pw.SizedBox(height: 10),
+                  pw.Text('Firma Supervisor'),
+                  pw.SizedBox(height: 5),
+                  pw.Text(employeeDetail.audit.registeredBy.fullName),
+                ],
+              ),
+            ),
           ],
         ),
       ),
     );
-    await Printing.layoutPdf(
-      onLayout: (_) async  => pdf.save(),
-      name: 'Reporte_Asistencia_${_nameEmployee.replaceAll(' ', '_')}.pdf',
+    if (!isShared) {
+      await Printing.layoutPdf(
+        onLayout: (_) async => pdf.save(),
+        name:
+            'Reporte_Asistencia_${employeeDetail.employee.fullName.replaceAll(' ', '_')}.pdf',
       );
+    }
+    return pdf;
   }
 }
 
 class _CardTimeLineInOutWidget extends StatelessWidget {
   final bool isIN;
   final String hour;
+  final String place;
+  final bool isNotRegistered;
   const _CardTimeLineInOutWidget({
     super.key,
     required this.isIN,
     required this.hour,
+    required this.place,
+    required this.isNotRegistered,
   });
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      margin: const EdgeInsets.only(top: 10, bottom: 10, left: 5),
-      padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 10),
-      decoration: BoxDecoration(
-        color: isIN
-            ? TColors.uploadBlue.withValues(alpha: 0.1)
-            : TColors.appBackgroundColor,
-        borderRadius: BorderRadius.circular(15),
-      ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                isIN ? 'Entrada Registrada' : 'Salida Registrada',
-                style: TextStyle(
-                  color: isIN ? TColors.uploadBlue : TColors.appMainTextColor,
-                  fontWeight: FontWeight.bold,
+    return isNotRegistered
+        ? Container(
+            margin: const EdgeInsets.only(top: 10, bottom: 10, left: 5),
+            padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 10),
+            decoration: BoxDecoration(
+              color: isIN
+                  ? TColors.uploadBlue.withValues(alpha: 0.1)
+                  : TColors.appBackgroundColor,
+              borderRadius: BorderRadius.circular(15),
+            ),
+            child: Text('No Registrado', textAlign: TextAlign.center),
+          )
+        : Container(
+            margin: const EdgeInsets.only(top: 10, bottom: 10, left: 5),
+            padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 10),
+            decoration: BoxDecoration(
+              color: isIN
+                  ? TColors.uploadBlue.withValues(alpha: 0.1)
+                  : TColors.appBackgroundColor,
+              borderRadius: BorderRadius.circular(15),
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      isIN ? 'Entrada Registrada' : 'Salida Registrada',
+                      style: TextStyle(
+                        color: isIN
+                            ? TColors.uploadBlue
+                            : TColors.appMainTextColor,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    Text(
+                      place,
+                      style: TextStyle(fontSize: 12, color: TColors.disabled),
+                    ),
+                  ],
                 ),
-              ),
-              Text('Lugar'),
-            ],
-          ),
-          Row(
-            children: [
-              Text(
-                hour,
-                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 25),
-              ),
-              SizedBox(width: 4),
-              Text('AM'),
-            ],
-          ),
-        ],
-      ),
-    );
+                Row(
+                  children: [
+                    Text(
+                      hour,
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 25,
+                      ),
+                    ),
+                    SizedBox(width: 4),
+                    Text((int.parse(hour.substring(0, 2)) > 11) ? 'PM' : 'AM'),
+                  ],
+                ),
+              ],
+            ),
+          );
   }
 }
 

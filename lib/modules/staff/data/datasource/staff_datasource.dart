@@ -149,4 +149,12 @@ class StaffDatasource {
       data: model.toJson(),
     );
   }
+
+  Future<EmployeeDetailAssistanceModel> getDetailsEmployee(String employeeId) async {
+    final response = await apiClient.get(
+      '/api/hr/attendances/$employeeId',
+      operationName: 'getDetailsEmployee',
+    );
+    return EmployeeDetailAssistanceModel.fromJson(response['data']);
+  }
 }
