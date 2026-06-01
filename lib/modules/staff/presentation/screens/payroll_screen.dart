@@ -1,5 +1,6 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
+import 'package:front_gestion_minera/config/router/app_router.gr.dart';
 import 'package:front_gestion_minera/modules/staff/presentation/widgets/payroll_employee_card_widget.dart';
 import 'package:front_gestion_minera/modules/staff/presentation/widgets/payroll_summary_card_widget.dart';
 import 'package:front_gestion_minera/utils/constants/color.constant.dart';
@@ -118,7 +119,9 @@ class _PayrollScreenState extends State<PayrollScreen> {
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: IconButton(
-                      onPressed: () {},
+                      onPressed: () {
+                        context.router.push(StaffPaymentHistoryRoute());
+                      },
                       icon: const Icon(
                         Icons.tune,
                         color: TColors.appMainDarkColor,
