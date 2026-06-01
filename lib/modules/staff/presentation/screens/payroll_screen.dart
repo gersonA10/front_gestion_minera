@@ -1,5 +1,6 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
+import 'package:front_gestion_minera/modules/staff/presentation/widgets/payroll_cycle_selector_widget.dart';
 import 'package:front_gestion_minera/modules/staff/presentation/widgets/payroll_employee_card_widget.dart';
 import 'package:front_gestion_minera/modules/staff/presentation/widgets/payroll_summary_card_widget.dart';
 import 'package:front_gestion_minera/utils/constants/color.constant.dart';
@@ -13,6 +14,9 @@ class PayrollScreen extends StatefulWidget {
 
 class _PayrollScreenState extends State<PayrollScreen> {
   final TextEditingController searchController = TextEditingController();
+  String cycleLabel = 'Octubre 2023';
+  int selectedMonth = 10;
+  int selectedYear = 2023;
   @override
   void dispose() {
     searchController.dispose();
@@ -27,24 +31,71 @@ class _PayrollScreenState extends State<PayrollScreen> {
         backgroundColor: TColors.white,
         surfaceTintColor: Colors.transparent,
         elevation: 0,
-        titleSpacing: 20,
-        title: const Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'Gestionar Nómina',
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.w700,
-                color: TColors.appMainDarkColor,
+        titleSpacing: 0,
+        title: Padding(
+          padding: const EdgeInsets.only(left: 20, right: 20),
+          child: Row(
+            children: [
+              const Expanded(
+                child: Text(
+                  'Gestionar Nómina',
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.w700,
+                    color: TColors.appMainDarkColor,
+                  ),
+                ),
               ),
-            ),
-            SizedBox(height: 2),
-            Text(
-              'Ciclo: Octubre 2023',
-              style: TextStyle(fontSize: 12, color: TColors.appDisabledColor),
-            ),
-          ],
+              GestureDetector(
+                onTap: () async {
+                  final result = await PayrollCycleSelectorWidget.show(
+                    context,
+                    initialMonth: selectedMonth,
+                    initialYear: selectedYear,
+                  );
+                  if (result != null) {
+                    setState(() {
+                      selectedMonth = result.month;
+                      selectedYear = result.year;
+                      cycleLabel = result.displayText;
+                    });
+                  }
+                },
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: [
+                    const Text(
+                      'Ciclo:',
+                      style: TextStyle(
+                        fontSize: 11,
+                        color: TColors.appDisabledColor,
+                      ),
+                    ),
+                    Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(
+                          cycleLabel,
+                          style: const TextStyle(
+                            fontSize: 13,
+                            fontWeight: FontWeight.w700,
+                            color: TColors.appMainColor,
+                          ),
+                        ),
+                        const SizedBox(width: 2),
+                        const Icon(
+                          Icons.keyboard_arrow_down,
+                          size: 16,
+                          color: TColors.appMainColor,
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
         ),
       ),
       body: SafeArea(
