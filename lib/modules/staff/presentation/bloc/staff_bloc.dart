@@ -1,5 +1,6 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:front_gestion_minera/core/networking/base_api_exception.dart';
+import 'package:front_gestion_minera/modules/staff/data/models/models.dart';
 import 'package:front_gestion_minera/utils/error.dart';
 import '../../domain/repositories/staff_repository.dart';
 import '../../domain/entity/entity.dart';
@@ -22,6 +23,7 @@ class StaffBloc extends Bloc<StaffEvent, StaffState> {
     on<GetAttendanceFinalizadoEvent>(_onGetAttendanceFinalizado);
     on<CheckOutEmployeeEvent>(_onCheckOutEmployee);
     on<RegisterCheckInEmployeeEvent>(_onRegisterCheckInEmployee);
+    on<GetDetailAssistanceEmployeeEvent>(_onGetDetailAssistanceEmployee);
   }
 
   FutureOr<void> _onRegisterEmployees(
@@ -253,6 +255,7 @@ class StaffBloc extends Bloc<StaffEvent, StaffState> {
       emit(CheckOutEmployeeError('Error inesperado: $e'));
     }
   }
+
   FutureOr<void> _onRegisterCheckInEmployee(
     RegisterCheckInEmployeeEvent event,
     Emitter<StaffState> emit,
@@ -261,9 +264,27 @@ class StaffBloc extends Bloc<StaffEvent, StaffState> {
     try {
       await repository.registerCheckInEmployee(event.checkIn);
       emit(CheckInEmployeeSuccess());
-    }on BaseApiException catch (error) {
+    } on BaseApiException catch (error) {
       final responseData = error.response?.data as Map<String, dynamic>?;
       emit(CheckInEmployeeError(responseData?['error'] ?? error.key));
     } catch (e) {
-      emit(CheckInEmployeeError('Error inesperado: $e'));}}
+      emit(CheckInEmployeeError('Error inesperado: $e'));
+    }
+  }
+
+  FutureOr<void> _onGetDetailAssistanceEmployee(
+    GetDetailAssistanceEmployeeEvent event,
+    Emitter<StaffState> emit,
+  ) async {
+    emit(DetailAssistanceEmployeeLoading());
+    try {
+      final employee = await repository.getDetailsEmployee(event.employeeId);
+      emit(DetailAssistanceEmployeeLoaded(employee: employee));
+    } on BaseApiException catch (error) {
+      final responseData = error.response?.data as Map<String, dynamic>?;
+      emit(DetailAssistanceEmployeeError(responseData?['error'] ?? error.key));
+    } catch (e) {
+      emit(DetailAssistanceEmployeeError('Error inesperado: $e'));
+    }
+  }
 }

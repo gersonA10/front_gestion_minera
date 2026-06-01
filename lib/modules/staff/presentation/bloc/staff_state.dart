@@ -164,3 +164,16 @@ class CheckInEmployeeError extends StaffState {
   final String message;
   CheckInEmployeeError(this.message);
 }
+
+class DetailAssistanceEmployeeLoading extends StaffState {}
+
+class DetailAssistanceEmployeeLoaded extends StaffState {
+  final EmployeeDetailAssistanceModel employee;
+
+  DetailAssistanceEmployeeLoaded({required this.employee});
+}
+
+class DetailAssistanceEmployeeError extends StaffState {
+  final String message;
+  DetailAssistanceEmployeeError(this.message);
+}
