@@ -83,55 +83,20 @@ class _PayrollScreenState extends State<PayrollScreen> {
                 ),
               ),
               GestureDetector(
-                onTap: () async {
-                  final result = await PayrollCycleSelectorWidget.show(
-                    context,
-                    initialMonth: selectedMonth,
-                    initialYear: selectedYear,
-                  );
-                  if (result != null) {
-                    setState(() {
-                      selectedMonth = result.month;
-                      selectedYear = result.year;
-                      cycleLabel = result.displayText;
-                    });
-                    _bloc.add(
-                      GetPayrollMonthlyListEvent(
-                        month: selectedMonth,
-                        year: selectedYear,
-                      ),
-                    );
-                  }
-                },
-                child: Column(
+                onTap: () {},
+                child: const Row(
                   mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.end,
                   children: [
-                    const Text(
-                      'Ciclo:',
+                    Icon(Icons.history, size: 16, color: TColors.appMainColor),
+                    SizedBox(width: 4),
+                    Text(
+                      'Historial de pagos',
                       style: TextStyle(
-                        fontSize: 11,
-                        color: TColors.appDisabledColor,
+                        fontSize: 12,
+                        fontWeight: FontWeight.w600,
+                        color: TColors.appMainColor,
+                        decoration: TextDecoration.underline,
                       ),
-                    ),
-                    Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Text(
-                          cycleLabel,
-                          style: const TextStyle(
-                            fontSize: 13,
-                            fontWeight: FontWeight.w700,
-                            color: TColors.appMainColor,
-                          ),
-                        ),
-                        const SizedBox(width: 2),
-                        const Icon(
-                          Icons.keyboard_arrow_down,
-                          size: 16,
-                          color: TColors.appMainColor,
-                        ),
-                      ],
                     ),
                   ],
                 ),
@@ -176,8 +141,63 @@ class _PayrollScreenState extends State<PayrollScreen> {
                   );
                 },
                 child: Column(
-                  children: [
-                    const SizedBox(height: 20),
+                  children: [                    
+                    const SizedBox(height: 10),
+                    GestureDetector(
+                      onTap: () async {
+                        final result = await PayrollCycleSelectorWidget.show(
+                          context,
+                          initialMonth: selectedMonth,
+                          initialYear: selectedYear,
+                        );
+                        if (result != null) {
+                          setState(() {
+                            selectedMonth = result.month;
+                            selectedYear = result.year;
+                            cycleLabel = result.displayText;
+                          });
+                          _bloc.add(
+                            GetPayrollMonthlyListEvent(
+                              month: selectedMonth,
+                              year: selectedYear,
+                            ),
+                          );
+                        }
+                      },
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        crossAxisAlignment: CrossAxisAlignment.end,
+                        children: [
+                          Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              const Text(
+                                'Ciclo:  ',
+                                style: TextStyle(
+                                  fontSize: 13,
+                                  color: TColors.appDisabledColor,
+                                ),
+                              ),
+                              Text(
+                                cycleLabel,
+                                style: const TextStyle(
+                                  fontSize: 13,
+                                  fontWeight: FontWeight.w700,
+                                  color: TColors.appMainColor,
+                                ),
+                              ),
+                              const SizedBox(width: 2),
+                              const Icon(
+                                Icons.keyboard_arrow_down,
+                                size: 16,
+                                color: TColors.appMainColor,
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 10),
                     SizedBox(
                       height: 130,
                       child: ListView(
@@ -212,7 +232,7 @@ class _PayrollScreenState extends State<PayrollScreen> {
                         ],
                       ),
                     ),
-                    const SizedBox(height: 20),
+                    const SizedBox(height: 10),
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 20),
                       child: Row(
