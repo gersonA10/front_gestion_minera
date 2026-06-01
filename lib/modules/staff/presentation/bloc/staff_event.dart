@@ -81,12 +81,4 @@ class GetHistoryRecordExpenditureEvent extends StaffEvent {
   });
 }
 
-class LoadMoreHistoryRecordExpenditureEvent extends StaffEvent {
-  final String year;
-  final String state;
-
-  LoadMoreHistoryRecordExpenditureEvent({
-    required this.year,
-    required this.state,
-  });
-}
+class LoadMoreHistoryRecordExpenditureEvent extends StaffEvent {}

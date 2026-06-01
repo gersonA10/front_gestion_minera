@@ -20,19 +20,36 @@ class _HistoricalRecordExpenditureScreenState
   String? selectedYear;
   String? selectedState;
   late final StaffBloc _staffBloc;
-  final List<String> years = ['2023', '2024', '2025', '2026'];
+
+  final int _startYear = 2024;
+  List<Map<String, String>> get years {
+    final int currentYear = DateTime.now().year;
+
+    return List.generate((currentYear - _startYear) + 1, (index) {
+      final String yearStr = (_startYear + index).toString();
+      return {'label': yearStr, 'value': yearStr};
+    });
+  }
+
   final List<Map<String, String>> states = [
-    {'value': 'TODOS', 'label': 'TODOS'},
-    {'value': 'APROBADO', 'label': 'APPROVED'},
-    {'value': 'RECHAZADO', 'label': 'REJECTED'},
-    {'value': 'PENDIENTE', 'label': 'IN_REVIEW'},
-    {'value': 'PAGADO', 'label': 'PAID'},
+    {'label': 'TODOS', 'value': 'TODOS'},
+    {'label': 'APROBADO', 'value': 'APPROVED'},
+    {'label': 'RECHAZADO', 'value': 'REJECTED'},
+    {'label': 'PENDIENTE', 'value': 'IN_REVIEW'},
+    {'label': 'PAGADO', 'value': 'PAID'},
   ];
   List<HistoryExpenditureEntity> _historicalDate = [];
+  double _cachedTotalExpenses = 0.0;
+  final ScrollController _scrollController = ScrollController();
+  bool _isLoadingMore = false;
+  bool _cachedHasReachedMax = false;
 
   @override
   void initState() {
     super.initState();
+
+    _scrollController.addListener(_onScroll);
+
     _staffBloc = InjectorContainer.getIt<StaffBloc>()
       ..add(
         GetHistoryRecordExpenditureEvent(
@@ -42,6 +59,19 @@ class _HistoricalRecordExpenditureScreenState
       );
   }
 
+  void _onScroll() {
+    if (!_scrollController.hasClients) return;
+    if (_cachedHasReachedMax) return;
+    if (_isLoadingMore) return;
+
+    final position = _scrollController.position;
+
+    if (position.pixels >= position.maxScrollExtent - 200) {
+      _isLoadingMore = true;
+      _staffBloc.add(LoadMoreHistoryRecordExpenditureEvent());
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -49,154 +79,167 @@ class _HistoricalRecordExpenditureScreenState
       appBar: AppBar(
         backgroundColor: TColors.white,
         centerTitle: true,
-        title: Text(
+        title: const Text(
           'Historial de Solicitudes de\nEgresos',
           textAlign: TextAlign.center,
         ),
       ),
       body: BlocProvider.value(
         value: _staffBloc,
-        child: Padding(
-          padding: EdgeInsetsGeometry.symmetric(horizontal: 15),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Container(
-                margin: EdgeInsetsGeometry.symmetric(vertical: 15),
-                height: 50,
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    CustomDropDownWidget(
-                      value: selectedYear ?? DateTime.now().year.toString(),
-                      items: years,
-                      onChanged: (value) {
-                        setState(() => selectedYear = value);
-                        _staffBloc.add(
-                          GetHistoryRecordExpenditureEvent(
-                            year:
-                                selectedYear ?? DateTime.now().year.toString(),
-                            state: selectedState ?? 'TODOS',
-                          ),
-                        );
-                      },
-                      hint: 'Año',
-                    ),
-                    CustomDropDownWidget(
-                      value: selectedState ?? states.first['value']!,
-                      items: states.map((e) => e['value']!).toList(),
-                      onChanged: (value) {
-                        setState(() => selectedState = value);
-                        _staffBloc.add(
-                          GetHistoryRecordExpenditureEvent(
-                            year: selectedYear ?? DateTime.now().year.toString(),
-                            state: selectedState ?? 'TODOS',
-                          ),
-                        );
-                      },
-                      hint: 'Estado',
-                    ),
-                  ],
-                ),
-              ),
-              BlocBuilder<StaffBloc, StaffState>(
-                builder: (context, state) {
-                  if (state is HistoryRecordExpenditureLoading) {
-                    return Expanded(child: const Center(child: CircularProgressIndicator()));
-                  }
-                  if (state is HistoryRecordExpenditureLoaded) {
-                    _historicalDate = state.items;
-                    if (state.items.isEmpty) {
-                      return Expanded(
-                        child: const Center(
-                          child: Text('No hay registros de egresos.'),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Container(
+              margin: const EdgeInsets.symmetric(vertical: 5, horizontal: 15),
+              height: 50,
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  CustomDropDownWidget(
+                    value: selectedYear ?? DateTime.now().year.toString(),
+                    items: years,
+                    onChanged: (value) {
+                      setState(() => selectedYear = value);
+                      _staffBloc.add(
+                        GetHistoryRecordExpenditureEvent(
+                          year: selectedYear ?? DateTime.now().year.toString(),
+                          state: selectedState ?? 'TODOS',
                         ),
                       );
-                    }
+                    },
+                    hint: 'Año',
+                  ),
+                  CustomDropDownWidget(
+                    value: selectedState ?? states.first['value']!,
+                    items: states,
+                    onChanged: (value) {
+                      setState(() => selectedState = value);
+                      _staffBloc.add(
+                        GetHistoryRecordExpenditureEvent(
+                          year: selectedYear ?? DateTime.now().year.toString(),
+                          state: selectedState ?? 'TODOS',
+                        ),
+                      );
+                    },
+                    hint: 'Estado',
+                  ),
+                ],
+              ),
+            ),
+            Expanded(
+              child: BlocBuilder<StaffBloc, StaffState>(
+                builder: (context, state) {
+                  // Actualización de variables de estado
+                  if (state is HistoryRecordExpenditureLoaded) {
+                    _historicalDate = state.items;
+                    _isLoadingMore = false;
+                    _cachedHasReachedMax = !state.hasMore;
+                    _cachedTotalExpenses = state.totalExpenses;
                   }
+
+                  final isInitialLoading =
+                      state is HistoryRecordExpenditureLoading &&
+                      _historicalDate.isEmpty;
                   final isLoading = state is HistoryRecordExpenditureLoading;
-                  if (_historicalDate.isEmpty) {
-                    if (isLoading) {
-                      return Center(child: CircularProgressIndicator());
-                    }
-                    return Expanded(
-                      child: const Center(
-                        child: Text('No hay registros de egresos ahora.'),
+
+                  // 🦾 Estructura fija: El Stack y la Columna siempre existen para que el Resumen no desaparezca
+                  return Stack(
+                    children: [
+                      Column(
+                        children: [
+                          // El área cambiante ahora se limita estrictamente al espacio de la lista
+                          Expanded(
+                            child: isInitialLoading
+                                ? const Center(
+                                    child: CircularProgressIndicator(),
+                                  )
+                                : _historicalDate.isEmpty
+                                ? const Center(
+                                    child: Text('No hay registros de egresos.'),
+                                  )
+                                : RefreshIndicator(
+                                    onRefresh: () async {
+                                      _staffBloc.add(
+                                        LoadMoreHistoryRecordExpenditureEvent(),
+                                      );
+                                    },
+                                    child: ListView.builder(
+                                      controller: _scrollController,
+                                      physics:
+                                          const AlwaysScrollableScrollPhysics(),
+                                      itemCount: _historicalDate.length,
+                                      itemBuilder:
+                                          (BuildContext context, int index) {
+                                            return CustomCardHistoricalEcpenditureWidget(
+                                              history: _historicalDate[index],
+                                            );
+                                          },
+                                    ),
+                                  ),
+                          ),
+
+                          // 🧾 Tarjeta de Resumen: Al estar fuera del operador condicional, es imposible que desaparezca
+                          Container(
+                            width: double.infinity,
+                            margin: const EdgeInsets.only(
+                              bottom: 10,
+                              top: 7,
+                              left: 15,
+                              right: 15,
+                            ),
+                            padding: const EdgeInsets.all(20),
+                            decoration: BoxDecoration(
+                              color: TColors.appMainColor,
+                              borderRadius: BorderRadius.circular(20),
+                            ),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                const Text(
+                                  'Resumen',
+                                  style: TextStyle(
+                                    color: TColors.white,
+                                    fontSize: 15,
+                                  ),
+                                ),
+                                const Text(
+                                  'Total Egresos',
+                                  style: TextStyle(
+                                    color: TColors.white,
+                                    fontSize: 21,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                                Text(
+                                  '$_cachedTotalExpenses BS',
+                                  style: const TextStyle(
+                                    color: TColors.white,
+                                    fontSize: 24,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
                       ),
-                    );
-                  }
-                  final historical = _historicalDate;
-                  return Expanded(
-                    child: SingleChildScrollView(
-                      physics: const AlwaysScrollableScrollPhysics(),
-                      child: ListView.builder(
-                        physics: const NeverScrollableScrollPhysics(),
-                        shrinkWrap: true,
-                        itemCount: historical.length,
-                        itemBuilder: (BuildContext context, int index) {
-                          return CustomCardHistoricalEcpenditureWidget(
-                            history: historical[index],
-                          );
-                        },
-                      ),
-                    ),
+
+                      // 🎨 Capa oscura que se activa sobre la lista y el resumen al cargar en segundo plano
+                      if (isLoading && !isInitialLoading)
+                        Positioned.fill(
+                          child: Container(
+                            color: Colors.black.withValues(alpha: 0.1),
+                            child: const Center(
+                              child: CircularProgressIndicator(),
+                            ),
+                          ),
+                        ),
+                    ],
                   );
                 },
               ),
-              Container(
-                width: double.infinity,
-                margin: EdgeInsets.only(bottom: 10, top: 7),
-                padding: EdgeInsets.all(20),
-                decoration: BoxDecoration(
-                  color: TColors.appMainColor,
-                  borderRadius: BorderRadius.circular(20),
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Resumen',
-                      style: TextStyle(color: TColors.white, fontSize: 15),
-                    ),
-                    Text(
-                      'Total Egresos',
-                      style: TextStyle(
-                        color: TColors.white,
-                        fontSize: 21,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    BlocBuilder<StaffBloc, StaffState>(
-                      builder: (context, state) {
-                        double totalExpenses = 0;
-                        if (state is HistoryRecordExpenditureLoaded) {
-                          totalExpenses = state.totalExpenses;
-                        }
-                        final isLoading =
-                            state is HistoryRecordExpenditureLoading;
-                        return isLoading
-                            ? const SizedBox(
-                                height: 34,
-                                width: 34,
-                                child: CircularProgressIndicator(
-                                  color: TColors.white,
-                                ),
-                              )
-                            : Text(
-                                '$totalExpenses BS',
-                                style: TextStyle(
-                                  color: TColors.white,
-                                  fontSize: 24,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              );
-                      },
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );
@@ -213,7 +256,7 @@ class CustomCardHistoricalEcpenditureWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       padding: EdgeInsets.all(13),
-      margin: EdgeInsets.only(bottom: 15),
+      margin: EdgeInsets.only(bottom: 15, left: 15, right: 15),
       decoration: BoxDecoration(
         color: TColors.white,
         borderRadius: BorderRadius.circular(12),
@@ -423,7 +466,7 @@ class BadgeCardCustomWidget extends StatelessWidget {
 
 class CustomDropDownWidget extends StatelessWidget {
   final String value;
-  final List<String> items;
+  final List<Map<String, String>> items;
   final ValueChanged<String?> onChanged;
   final String hint;
   const CustomDropDownWidget({
@@ -449,9 +492,9 @@ class CustomDropDownWidget extends StatelessWidget {
           value: value,
           items: items.map((e) {
             return DropdownMenuItem<String>(
-              value: e,
+              value: e['value'],
               child: Text(
-                '$hint: $e',
+                '$hint: ${e['label']}',
                 style: TextStyle(
                   fontSize: 13,
                   color: TColors.darkBackgroundAccount,

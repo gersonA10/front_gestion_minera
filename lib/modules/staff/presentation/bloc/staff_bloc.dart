@@ -309,7 +309,7 @@ class StaffBloc extends Bloc<StaffEvent, StaffState> {
       _currentPageHistory = 1;
       _hasReachedMaxHistory = false;
       _isLoadingMoreHistory = false;
-      _historyExpenditure.clear();
+      
       _yearHistory = event.year;
       _statusHistory = event.state;
       emit(HistoryRecordExpenditureLoading());
@@ -342,13 +342,12 @@ class StaffBloc extends Bloc<StaffEvent, StaffState> {
     LoadMoreHistoryRecordExpenditureEvent event,
     Emitter<StaffState> emit,
   ) async {
-    if (_hasReachedMaxHistory ||
-        _historyExpenditure.isEmpty ||
-        _isLoadingMoreHistory) {
+    if (_hasReachedMaxHistory || _isLoadingMoreHistory) {
       return;
     }
     _isLoadingMoreHistory = true;
     _currentPageHistory++;
+    emit(HistoryRecordExpenditureLoading());
     try {
       final response = await repository.getHistoryExpenditure(
         status: _statusHistory,
