@@ -10,7 +10,7 @@ class HistoryExpenditureResponseModel extends HistoryExpenditureResponseEntity {
     required super.items,
   });
   factory HistoryExpenditureResponseModel.fronJson(Map<String, dynamic> json) {
-    final data = json['data'] ?? {};
+    final data = json['meta'] ?? {};
     return HistoryExpenditureResponseModel(
       page: data['page'],
       limit: data['limit'],
