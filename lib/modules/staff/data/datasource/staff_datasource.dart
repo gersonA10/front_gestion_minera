@@ -150,11 +150,34 @@ class StaffDatasource {
     );
   }
 
-  Future<EmployeeDetailAssistanceModel> getDetailsEmployee(String employeeId) async {
+  Future<EmployeeDetailAssistanceModel> getDetailsEmployee(
+    String employeeId,
+  ) async {
     final response = await apiClient.get(
       '/api/hr/attendances/$employeeId',
       operationName: 'getDetailsEmployee',
     );
     return EmployeeDetailAssistanceModel.fromJson(response['data']);
+  }
+
+  Future<HistoryExpenditureResponseModel> getHistoryExpenditure({
+    String? year,
+    String status = 'TODOS',
+    int page = 1,
+    int limit = 10,
+  }) async {
+    year ??= DateTime.now().year.toString();
+    final queryParameters = {
+      'page': page,
+      'limit': limit,
+      'year': year,
+      'status': status,
+    };
+    final response = await apiClient.get(
+      '/api/hr/payroll-egresos',
+      operationName: 'payrollHistory',
+      queryParameters: queryParameters,
+    );
+    return HistoryExpenditureResponseModel.fronJson(response);
   }
 }

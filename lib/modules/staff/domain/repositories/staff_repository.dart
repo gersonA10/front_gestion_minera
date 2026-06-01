@@ -30,4 +30,11 @@ abstract class StaffRepository {
   Future<void> registerCheckInEmployee(EmployeeCheckInEntity checkIn);
 
   Future<EmployeeDetailAssistanceModel> getDetailsEmployee(String employeeId);
+
+  Future<HistoryExpenditureResponseModel> getHistoryExpenditure(
+    int page,
+    int limit,
+    String year,
+    String status,
+  );
 }
