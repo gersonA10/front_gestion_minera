@@ -142,12 +142,10 @@ class _HistoricalRecordExpenditureScreenState
                       _historicalDate.isEmpty;
                   final isLoading = state is HistoryRecordExpenditureLoading;
 
-                  // 🦾 Estructura fija: El Stack y la Columna siempre existen para que el Resumen no desaparezca
                   return Stack(
                     children: [
                       Column(
                         children: [
-                          // El área cambiante ahora se limita estrictamente al espacio de la lista
                           Expanded(
                             child: isInitialLoading
                                 ? const Center(
@@ -177,8 +175,6 @@ class _HistoricalRecordExpenditureScreenState
                                     ),
                                   ),
                           ),
-
-                          // 🧾 Tarjeta de Resumen: Al estar fuera del operador condicional, es imposible que desaparezca
                           Container(
                             width: double.infinity,
                             margin: const EdgeInsets.only(
@@ -223,8 +219,6 @@ class _HistoricalRecordExpenditureScreenState
                           ),
                         ],
                       ),
-
-                      // 🎨 Capa oscura que se activa sobre la lista y el resumen al cargar en segundo plano
                       if (isLoading && !isInitialLoading)
                         Positioned.fill(
                           child: Container(
