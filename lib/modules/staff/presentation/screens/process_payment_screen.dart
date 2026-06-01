@@ -1,13 +1,16 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:front_gestion_minera/modules/staff/domain/entity/payroll_monthly_entity.dart';
 import 'package:intl/intl.dart';
 
 import '../../../../utils/constants/color.constant.dart';
 
 @RoutePage()
 class ProcessPaymentScreen extends StatefulWidget {
-  const ProcessPaymentScreen({super.key});
+  final PayrollMonthlyEntity payroll;
+  final String payrollPeriod;
+  const ProcessPaymentScreen({super.key, required this.payroll, required this.payrollPeriod});
 
   @override
   State<ProcessPaymentScreen> createState() => _ProcessPaymentScreenState();
@@ -15,19 +18,9 @@ class ProcessPaymentScreen extends StatefulWidget {
 
 class _ProcessPaymentScreenState extends State<ProcessPaymentScreen> {
   bool isProcessingPayment = false;
-  final String employeeId = '29481';
-  final String fullName = 'Juan Pérez';
-  final String position = 'Operador Excavadora';
-  final double baseSalary = 2500;
-  final double totalDeductions = 0;
-  final double netTotal = 2500;
-  final String paymentStatus = 'PENDIENTE';
-  final String currency = 'Bs';
-  final String imageUrl = '';
-  final String payrollPeriod = 'Octubre 2026';
-  final String payrollId = '...';
   final formatter = NumberFormat('#,##0.00', 'en_US');
-
+  String get imageUrl => '';
+  PayrollMonthlyEntity get payroll => widget.payroll;
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -99,7 +92,7 @@ class _ProcessPaymentScreenState extends State<ProcessPaymentScreen> {
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
                                     Text(
-                                      fullName,
+                                      payroll.fullName,
                                       style: const TextStyle(
                                         fontSize: 15,
                                         fontWeight: FontWeight.w700,
@@ -108,7 +101,7 @@ class _ProcessPaymentScreenState extends State<ProcessPaymentScreen> {
                                     ),
                                     const SizedBox(height: 2),
                                     Text(
-                                      position,
+                                      payroll.position,
                                       style: const TextStyle(
                                         fontSize: 12,
                                         color: TColors.grayText,
@@ -116,7 +109,7 @@ class _ProcessPaymentScreenState extends State<ProcessPaymentScreen> {
                                     ),
                                     const SizedBox(height: 4),
                                     Text(
-                                      'ID: #$employeeId',
+                                      'ID: #${payroll.employeeId}',
                                       style: const TextStyle(
                                         fontSize: 11,
                                         color: TColors.appDisabledColor,
@@ -143,7 +136,7 @@ class _ProcessPaymentScreenState extends State<ProcessPaymentScreen> {
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
                             Text(
-                              payrollPeriod,
+                              widget.payrollPeriod,
                               style: const TextStyle(
                                 fontSize: 15,
                                 fontWeight: FontWeight.w700,
@@ -208,7 +201,7 @@ class _ProcessPaymentScreenState extends State<ProcessPaymentScreen> {
                                 ),
                               ),
                               Text(
-                                '$currency ${formatter.format(baseSalary)}',
+                                '${payroll.currency} ${formatter.format(payroll.baseSalary)}',
                                 style: const TextStyle(
                                   fontWeight: FontWeight.w700,
                                 ),
@@ -244,7 +237,7 @@ class _ProcessPaymentScreenState extends State<ProcessPaymentScreen> {
                                 children: [
                                   Expanded(
                                     child: Text(
-                                      '$currency ${formatter.format(netTotal)}',
+                                      '${payroll.currency} ${formatter.format(payroll.netTotal)}',
                                       style: const TextStyle(
                                         fontSize: 32,
                                         fontWeight: FontWeight.w800,
@@ -263,7 +256,7 @@ class _ProcessPaymentScreenState extends State<ProcessPaymentScreen> {
                                       borderRadius: BorderRadius.circular(20),
                                     ),
                                     child: Text(
-                                      currency,
+                                      payroll.currency,
                                       style: const TextStyle(
                                         fontSize: 11,
                                         fontWeight: FontWeight.w700,
