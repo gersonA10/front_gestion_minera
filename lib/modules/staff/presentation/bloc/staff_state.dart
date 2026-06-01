@@ -156,6 +156,7 @@ class CheckOutEmployeeError extends StaffState {
   final String message;
   CheckOutEmployeeError(this.message);
 }
+
 class CheckInEmployeeLoading extends StaffState {}
 
 class CheckInEmployeeSuccess extends StaffState {}
@@ -176,4 +177,24 @@ class DetailAssistanceEmployeeLoaded extends StaffState {
 class DetailAssistanceEmployeeError extends StaffState {
   final String message;
   DetailAssistanceEmployeeError(this.message);
+}
+
+class HistoryRecordExpenditureLoading extends StaffState {}
+
+class HistoryRecordExpenditureLoaded extends StaffState {
+  final List<HistoryExpenditureEntity> items;
+  final double totalExpenses;
+  final bool hasMore;
+  final int total;
+  HistoryRecordExpenditureLoaded({
+    required this.items,
+    required this.hasMore,
+    required this.total,
+    required this.totalExpenses,
+  });
+}
+
+class HistoryRecordExpenditureError extends StaffState {
+  final String message;
+  HistoryRecordExpenditureError(this.message);
 }

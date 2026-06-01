@@ -31,10 +31,10 @@ abstract class StaffRepository {
 
   Future<EmployeeDetailAssistanceModel> getDetailsEmployee(String employeeId);
 
-  Future<HistoryExpenditureResponseModel> getHistoryExpenditure(
-    int page,
-    int limit,
-    String year,
-    String status,
-  );
+  Future<HistoryExpenditureResponseModel> getHistoryExpenditure({
+    int page = 1,
+    int limit = 10,
+    String? year,
+    String? status,
+  });
 }

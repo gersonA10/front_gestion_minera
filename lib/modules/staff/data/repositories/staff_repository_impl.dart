@@ -77,12 +77,12 @@ class StaffRepositoryImpl implements StaffRepository {
   }
 
   @override
-  Future<HistoryExpenditureResponseModel> getHistoryExpenditure(
-    int page,
-    int limit,
-    String year,
-    String status,
-  ) {
+  Future<HistoryExpenditureResponseModel> getHistoryExpenditure({
+    int page = 1,
+    int limit = 10,
+    String? year,
+    String? status,
+  }) {
     return datasource.getHistoryExpenditure(
       page: page,
       limit: limit,

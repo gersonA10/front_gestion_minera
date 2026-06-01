@@ -49,14 +49,12 @@ class GetAttendanceFinalizadoEvent extends StaffEvent {
   final String date;
   GetAttendanceFinalizadoEvent({required this.date});
 }
-class CheckOutEmployeeEvent extends StaffEvent{
+
+class CheckOutEmployeeEvent extends StaffEvent {
   final String attendanceId;
   final EmployeeCheckOutRequestEntity request;
 
-  CheckOutEmployeeEvent({
-    required this.attendanceId,
-    required this.request,
-  });
+  CheckOutEmployeeEvent({required this.attendanceId, required this.request});
 }
 
 class RegisterCheckInEmployeeEvent extends StaffEvent {
@@ -71,3 +69,24 @@ class GetDetailAssistanceEmployeeEvent extends StaffEvent {
   GetDetailAssistanceEmployeeEvent({required this.employeeId});
 }
 
+class GetHistoryRecordExpenditureEvent extends StaffEvent {
+  final String year;
+  final String state;
+  final bool isRefresh;
+
+  GetHistoryRecordExpenditureEvent({
+    required this.year,
+    required this.state,
+    this.isRefresh = true,
+  });
+}
+
+class LoadMoreHistoryRecordExpenditureEvent extends StaffEvent {
+  final String year;
+  final String state;
+
+  LoadMoreHistoryRecordExpenditureEvent({
+    required this.year,
+    required this.state,
+  });
+}

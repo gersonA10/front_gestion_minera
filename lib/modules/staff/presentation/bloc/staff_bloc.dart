@@ -9,6 +9,15 @@ part 'staff_event.dart';
 part 'staff_state.dart';
 
 class StaffBloc extends Bloc<StaffEvent, StaffState> {
+  //History Expenditure
+  int _currentPageHistory = 1;
+  bool _hasReachedMaxHistory = false;
+  int _currentTotalHistory = 0;
+  List<HistoryExpenditureEntity> _historyExpenditure = [];
+  bool _isLoadingMoreHistory = false;
+  String? _yearHistory;
+  String? _statusHistory;
+
   final StaffRepository repository;
   StaffBloc({required this.repository}) : super(StaffInitial()) {
     on<GetEmployeesEvent>(_onGetEmployees);
@@ -24,6 +33,10 @@ class StaffBloc extends Bloc<StaffEvent, StaffState> {
     on<CheckOutEmployeeEvent>(_onCheckOutEmployee);
     on<RegisterCheckInEmployeeEvent>(_onRegisterCheckInEmployee);
     on<GetDetailAssistanceEmployeeEvent>(_onGetDetailAssistanceEmployee);
+    on<GetHistoryRecordExpenditureEvent>(_onGetHistoryRecordExpenditure);
+    on<LoadMoreHistoryRecordExpenditureEvent>(
+      _onLoadMoreHistoryRecordExpenditure,
+    );
   }
 
   FutureOr<void> _onRegisterEmployees(
@@ -285,6 +298,78 @@ class StaffBloc extends Bloc<StaffEvent, StaffState> {
       emit(DetailAssistanceEmployeeError(responseData?['error'] ?? error.key));
     } catch (e) {
       emit(DetailAssistanceEmployeeError('Error inesperado: $e'));
+    }
+  }
+
+  FutureOr<void> _onGetHistoryRecordExpenditure(
+    GetHistoryRecordExpenditureEvent event,
+    Emitter<StaffState> emit,
+  ) async {
+    if (event.isRefresh) {
+      _currentPageHistory = 1;
+      _hasReachedMaxHistory = false;
+      _isLoadingMoreHistory = false;
+      _historyExpenditure.clear();
+      _yearHistory = event.year;
+      _statusHistory = event.state;
+      emit(HistoryRecordExpenditureLoading());
+    }
+    try {
+      final response = await repository.getHistoryExpenditure(
+        status: _statusHistory,
+        year: _yearHistory,
+      );
+      _historyExpenditure = response.items;
+      _currentTotalHistory = response.total;
+      _hasReachedMaxHistory = !response.hasMore;
+      emit(
+        HistoryRecordExpenditureLoaded(
+          items: _historyExpenditure,
+          hasMore: response.hasMore,
+          total: _currentTotalHistory,
+          totalExpenses: response.totalExpenses,
+        ),
+      );
+    } on BaseApiException catch (error) {
+      final responseData = error.response?.data as Map<String, dynamic>?;
+      emit(HistoryRecordExpenditureError(responseData?['error'] ?? error.key));
+    } catch (e) {
+      emit(HistoryRecordExpenditureError('Error inesperado: $e'));
+    }
+  }
+
+  FutureOr<void> _onLoadMoreHistoryRecordExpenditure(
+    LoadMoreHistoryRecordExpenditureEvent event,
+    Emitter<StaffState> emit,
+  ) async {
+    if (_hasReachedMaxHistory ||
+        _historyExpenditure.isEmpty ||
+        _isLoadingMoreHistory) {
+      return;
+    }
+    _isLoadingMoreHistory = true;
+    _currentPageHistory++;
+    try {
+      final response = await repository.getHistoryExpenditure(
+        status: _statusHistory,
+        year: _yearHistory,
+        page: _currentPageHistory,
+      );
+      _historyExpenditure.addAll(response.items);
+      _hasReachedMaxHistory = !response.hasMore;
+      emit(
+        HistoryRecordExpenditureLoaded(
+          items: List.from(_historyExpenditure),
+          hasMore: response.hasMore,
+          total: _currentTotalHistory,
+          totalExpenses: response.totalExpenses,
+        ),
+      );
+    } on BaseApiException catch (error) {
+      final responseData = error.response?.data as Map<String, dynamic>?;
+      emit(HistoryRecordExpenditureError(responseData?['error'] ?? error.key));
+    } catch (e) {
+      emit(HistoryRecordExpenditureError('Error inesperado: $e'));
     }
   }
 }

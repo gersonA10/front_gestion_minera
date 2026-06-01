@@ -162,7 +162,7 @@ class StaffDatasource {
 
   Future<HistoryExpenditureResponseModel> getHistoryExpenditure({
     String? year,
-    String status = 'TODOS',
+    String? status = 'TODOS',
     int page = 1,
     int limit = 10,
   }) async {
