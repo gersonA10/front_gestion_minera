@@ -4,6 +4,7 @@ import 'package:auto_route/auto_route.dart';
 import 'package:dotted_border/dotted_border.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:front_gestion_minera/config/router/app_router.gr.dart';
 import 'package:front_gestion_minera/injector_container.dart';
 import 'package:front_gestion_minera/modules/staff/domain/entity/create_payroll_monthly_entity.dart';
 import 'package:front_gestion_minera/modules/staff/presentation/bloc/staff_bloc.dart';
@@ -76,7 +77,7 @@ class _StaffExpenditureRequestScreenState
           actions: [
             IconButton(
               onPressed: () {
-                // context.router.push();
+                context.router.push(HistoricalRecordExpenditureRoute());
               },
               splashRadius: 20,
               padding: EdgeInsets.zero,
