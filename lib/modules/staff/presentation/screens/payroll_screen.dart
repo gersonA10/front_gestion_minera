@@ -144,7 +144,7 @@ class _PayrollScreenState extends State<PayrollScreen> {
                   );
                 },
                 child: Column(
-                  children: [                    
+                  children: [
                     const SizedBox(height: 10),
                     GestureDetector(
                       onTap: () async {
@@ -350,7 +350,14 @@ class _PayrollScreenState extends State<PayrollScreen> {
                                   paid:
                                       payroll.paymentStatus.toUpperCase() ==
                                       'PAGADO',
-                                  onTap: () {},
+                                  onTap: () {
+                                    context.router.push(
+                                      ProcessPaymentRoute(
+                                        payroll: payroll,
+                                        payrollPeriod: cycleLabel,
+                                      ),
+                                    );
+                                  },
                                 );
                               },
                             ),
