@@ -1,5 +1,6 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
+import 'package:front_gestion_minera/config/router/app_router.gr.dart';
 import 'package:front_gestion_minera/modules/staff/presentation/widgets/payroll_cycle_selector_widget.dart';
 import 'package:front_gestion_minera/modules/staff/presentation/widgets/payroll_employee_card_widget.dart';
 import 'package:front_gestion_minera/modules/staff/presentation/widgets/payroll_summary_card_widget.dart';
@@ -141,7 +142,7 @@ class _PayrollScreenState extends State<PayrollScreen> {
                   );
                 },
                 child: Column(
-                  children: [                    
+                  children: [
                     const SizedBox(height: 10),
                     GestureDetector(
                       onTap: () async {
@@ -347,7 +348,14 @@ class _PayrollScreenState extends State<PayrollScreen> {
                                   paid:
                                       payroll.paymentStatus.toUpperCase() ==
                                       'PAGADO',
-                                  onTap: () {},
+                                  onTap: () {
+                                    context.router.push(
+                                      ProcessPaymentRoute(
+                                        payroll: payroll,
+                                        payrollPeriod: cycleLabel,
+                                      ),
+                                    );
+                                  },
                                 );
                               },
                             ),
