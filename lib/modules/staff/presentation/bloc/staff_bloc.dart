@@ -33,6 +33,7 @@ class StaffBloc extends Bloc<StaffEvent, StaffState> {
     on<CheckOutEmployeeEvent>(_onCheckOutEmployee);
     on<RegisterCheckInEmployeeEvent>(_onRegisterCheckInEmployee);
     on<GetDetailAssistanceEmployeeEvent>(_onGetDetailAssistanceEmployee);
+    on<GetPayrollMonthlyListEvent>(_onGetPayrollMonthlyList);
     on<GetHistoryRecordExpenditureEvent>(_onGetHistoryRecordExpenditure);
     on<LoadMoreHistoryRecordExpenditureEvent>(
       _onLoadMoreHistoryRecordExpenditure,
@@ -301,6 +302,47 @@ class StaffBloc extends Bloc<StaffEvent, StaffState> {
     }
   }
 
+  Future<void> _onGetPayrollMonthlyList(
+    GetPayrollMonthlyListEvent event,
+    Emitter<StaffState> emit,
+  ) async {
+    emit(PayrollMonthlyLoading());
+    try {
+      final payrolls = await repository.getPayrollMonthlyList(
+        month: event.month,
+        year: event.year,
+      );
+      double totalPayroll = 0;
+      double totalPaid = 0;
+      double totalPending = 0;
+      for (final payroll in payrolls) {
+        totalPayroll += payroll.netTotal;
+        if (payroll.paymentStatus.toUpperCase() == 'PAGADO') {
+          totalPaid += payroll.netTotal;
+        } else {
+          totalPending += payroll.netTotal;
+        }
+      }
+      emit(
+        PayrollMonthlyLoaded(
+          payrolls: payrolls,
+          totalPayroll: totalPayroll,
+          totalPaid: totalPaid,
+          totalPending: totalPending,
+        ),
+      );
+    } on BaseApiException catch (error) {
+      final responseData = error.response?.data as Map<String, dynamic>?;
+      emit(
+        PayrollMonthlyError(
+          responseData?['error'] ?? mapErrorMessage(error.key),
+        ),
+      );
+    } catch (e) {
+      emit(PayrollMonthlyError('Error inesperado: $e'));
+    }
+  }
+
   FutureOr<void> _onGetHistoryRecordExpenditure(
     GetHistoryRecordExpenditureEvent event,
     Emitter<StaffState> emit,
@@ -309,7 +351,7 @@ class StaffBloc extends Bloc<StaffEvent, StaffState> {
       _currentPageHistory = 1;
       _hasReachedMaxHistory = false;
       _isLoadingMoreHistory = false;
-      
+
       _yearHistory = event.year;
       _statusHistory = event.state;
       emit(HistoryRecordExpenditureLoading());

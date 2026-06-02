@@ -86,6 +86,7 @@ class AppRouter extends RootStackRouter {
     AutoRoute(page: WorkerProfileRoute.page),
     AutoRoute(page: AssistanceDetailRoute.page),
     AutoRoute(page: StaffExpenditureRequestRoute.page),
+    AutoRoute(page: ProcessPaymentRoute.page),
     AutoRoute(page: HistoricalRecordExpenditureRoute.page)
   ];
 }

@@ -77,6 +77,13 @@ class StaffRepositoryImpl implements StaffRepository {
   }
 
   @override
+  Future<List<PayrollMonthlyEntity>> getPayrollMonthlyList({
+    required int month,
+    required int year,
+  }) {
+    return datasource.getPayrollMonthlyList(month: month, year: year);
+  }
+
   Future<HistoryExpenditureResponseModel> getHistoryExpenditure({
     int page = 1,
     int limit = 10,

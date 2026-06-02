@@ -179,6 +179,27 @@ class DetailAssistanceEmployeeError extends StaffState {
   DetailAssistanceEmployeeError(this.message);
 }
 
+class PayrollMonthlyLoading extends StaffState {}
+
+class PayrollMonthlyLoaded extends StaffState {
+  final List<PayrollMonthlyEntity> payrolls;
+  final double totalPayroll;
+  final double totalPaid;
+  final double totalPending;
+  PayrollMonthlyLoaded({
+    required this.payrolls,
+    required this.totalPayroll,
+    required this.totalPaid,
+    required this.totalPending,
+  });
+}
+
+class PayrollMonthlyError extends StaffState {
+  final String message;
+
+  PayrollMonthlyError(this.message);
+}
+
 class HistoryRecordExpenditureLoading extends StaffState {}
 
 class HistoryRecordExpenditureLoaded extends StaffState {

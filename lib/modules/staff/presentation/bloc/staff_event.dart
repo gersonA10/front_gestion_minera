@@ -69,6 +69,12 @@ class GetDetailAssistanceEmployeeEvent extends StaffEvent {
   GetDetailAssistanceEmployeeEvent({required this.employeeId});
 }
 
+class GetPayrollMonthlyListEvent extends StaffEvent {
+  final int month;
+  final int year;
+
+  GetPayrollMonthlyListEvent({required this.month, required this.year});
+}
 class GetHistoryRecordExpenditureEvent extends StaffEvent {
   final String year;
   final String state;
