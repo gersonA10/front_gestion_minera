@@ -151,7 +151,7 @@ class _StaffPaymentHistoryScreenState extends State<StaffPaymentHistoryScreen> {
                                 ),
                                 SizedBox(width: 4),
                                 Text(
-                                  'COMPLETADO',
+                                  'PAGADO',
                                   style: TextStyle(
                                     fontSize: 10,
                                     fontWeight: FontWeight.w700,
