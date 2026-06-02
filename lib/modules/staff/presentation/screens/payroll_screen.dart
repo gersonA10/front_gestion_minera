@@ -1,10 +1,7 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
-<<<<<<< HEAD
 import 'package:front_gestion_minera/config/router/app_router.gr.dart';
-=======
 import 'package:front_gestion_minera/modules/staff/presentation/widgets/payroll_cycle_selector_widget.dart';
->>>>>>> origin/dev
 import 'package:front_gestion_minera/modules/staff/presentation/widgets/payroll_employee_card_widget.dart';
 import 'package:front_gestion_minera/modules/staff/presentation/widgets/payroll_summary_card_widget.dart';
 import 'package:front_gestion_minera/utils/constants/color.constant.dart';
@@ -87,7 +84,9 @@ class _PayrollScreenState extends State<PayrollScreen> {
                 ),
               ),
               GestureDetector(
-                onTap: () {},
+                onTap: () {
+                  context.router.push(StaffPaymentHistoryRoute());
+                },
                 child: const Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
@@ -201,24 +200,6 @@ class _PayrollScreenState extends State<PayrollScreen> {
                         ],
                       ),
                     ),
-<<<<<<< HEAD
-                  ),
-                  const SizedBox(width: 10),
-                  Container(
-                    width: 44,
-                    height: 44,
-                    decoration: BoxDecoration(
-                      color: TColors.white,
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: IconButton(
-                      onPressed: () {
-                        context.router.push(StaffPaymentHistoryRoute());
-                      },
-                      icon: const Icon(
-                        Icons.tune,
-                        color: TColors.appMainDarkColor,
-=======
                     const SizedBox(height: 10),
                     SizedBox(
                       height: 130,
@@ -252,7 +233,6 @@ class _PayrollScreenState extends State<PayrollScreen> {
                             amountColor: TColors.amber,
                           ),
                         ],
->>>>>>> origin/dev
                       ),
                     ),
                     const SizedBox(height: 10),
