@@ -34,4 +34,10 @@ abstract class StaffRepository {
     required int month,
     required int year,
   });
+  Future<HistoryExpenditureResponseModel> getHistoryExpenditure({
+    int page = 1,
+    int limit = 10,
+    String? year,
+    String? status,
+  });
 }

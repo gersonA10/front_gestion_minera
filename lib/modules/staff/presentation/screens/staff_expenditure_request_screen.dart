@@ -82,10 +82,16 @@ class _StaffExpenditureRequestScreenState
               splashRadius: 20,
               padding: EdgeInsets.zero,
               constraints: const BoxConstraints(),
-              icon: const Icon(
-                Icons.description_outlined,
-                color: TColors.disabled,
-                size: 22,
+              icon: const Column(
+                children: [
+                  Icon(
+                    Icons.description_outlined,
+                    color: TColors.disabled,
+                    size: 22,
+                  ),
+                  Text('Historial', style: TextStyle(fontSize: 8, color: TColors.disabled)),
+                  Text('Solicitudes', style: TextStyle(fontSize: 8, color: TColors.disabled))
+                ],
               ),
             ),
             const SizedBox(width: 10),
