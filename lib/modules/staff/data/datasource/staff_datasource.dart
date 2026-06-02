@@ -150,11 +150,32 @@ class StaffDatasource {
     );
   }
 
-  Future<EmployeeDetailAssistanceModel> getDetailsEmployee(String employeeId) async {
+  Future<EmployeeDetailAssistanceModel> getDetailsEmployee(
+    String employeeId,
+  ) async {
     final response = await apiClient.get(
       '/api/hr/attendances/$employeeId',
       operationName: 'getDetailsEmployee',
     );
     return EmployeeDetailAssistanceModel.fromJson(response['data']);
+  }
+
+  Future<List<PayrollMonthlyModel>> getPayrollMonthlyList({
+    required int month,
+    required int year,
+  }) async {
+    final response = await apiClient.get(
+      '/api/hr/payrolls',
+      operationName: 'getPayrollMonthlyList',
+      queryParameters: {'month': month.toString(), 'year': year.toString()},
+    );
+
+    final List data = response as List;
+
+    return data
+        .map(
+          (item) => PayrollMonthlyModel.fromJson(item as Map<String, dynamic>),
+        )
+        .toList();
   }
 }
