@@ -1,5 +1,3 @@
-import '../entity/employee_entity.dart';
-import '../entity/paginated_employees_entity.dart';
 import 'package:front_gestion_minera/modules/staff/data/models/models.dart';
 
 import '../entity/entity.dart';
@@ -25,9 +23,15 @@ abstract class StaffRepository {
     required String date,
   });
   Future<EmployeeCheckOutResponseEntity> checkOutEmployee(
-  String attendanceId,
-  EmployeeCheckOutRequestEntity request,
-);
-  
+    String attendanceId,
+    EmployeeCheckOutRequestEntity request,
+  );
+
   Future<void> registerCheckInEmployee(EmployeeCheckInEntity checkIn);
+
+  Future<EmployeeDetailAssistanceModel> getDetailsEmployee(String employeeId);
+  Future<List<PayrollMonthlyEntity>> getPayrollMonthlyList({
+    required int month,
+    required int year,
+  });
 }

@@ -60,11 +60,11 @@ class StaffRepositoryImpl implements StaffRepository {
   Future<List<AttendanceFinalizadoEntity>> getAttendanceFinalizado({
     required String date,
   }) => datasource.getAttendanceFinalizado(date: date);
- 
+
   @override
   Future<void> registerCheckInEmployee(EmployeeCheckInEntity checkIn) =>
-    datasource.registerCheckInEmployee(checkIn);
-  
+      datasource.registerCheckInEmployee(checkIn);
+
   @override
   Future<EmployeeCheckOutResponseEntity> checkOutEmployee(
     String attendanceId,
@@ -73,5 +73,18 @@ class StaffRepositoryImpl implements StaffRepository {
     final requestModel = EmployeeCheckOutRequestModel.fromEntity(request);
 
     return await datasource.checkOutEmployee(attendanceId, requestModel);
+  }
+
+  @override
+  Future<EmployeeDetailAssistanceModel> getDetailsEmployee(String employeeId) {
+    return datasource.getDetailsEmployee(employeeId);
+  }
+
+  @override
+  Future<List<PayrollMonthlyEntity>> getPayrollMonthlyList({
+    required int month,
+    required int year,
+  }) {
+    return datasource.getPayrollMonthlyList(month: month, year: year);
   }
 }

@@ -156,6 +156,7 @@ class CheckOutEmployeeError extends StaffState {
   final String message;
   CheckOutEmployeeError(this.message);
 }
+
 class CheckInEmployeeLoading extends StaffState {}
 
 class CheckInEmployeeSuccess extends StaffState {}
@@ -163,4 +164,38 @@ class CheckInEmployeeSuccess extends StaffState {}
 class CheckInEmployeeError extends StaffState {
   final String message;
   CheckInEmployeeError(this.message);
+}
+
+class DetailAssistanceEmployeeLoading extends StaffState {}
+
+class DetailAssistanceEmployeeLoaded extends StaffState {
+  final EmployeeDetailAssistanceModel employee;
+
+  DetailAssistanceEmployeeLoaded({required this.employee});
+}
+
+class DetailAssistanceEmployeeError extends StaffState {
+  final String message;
+  DetailAssistanceEmployeeError(this.message);
+}
+
+class PayrollMonthlyLoading extends StaffState {}
+
+class PayrollMonthlyLoaded extends StaffState {
+  final List<PayrollMonthlyEntity> payrolls;
+  final double totalPayroll;
+  final double totalPaid;
+  final double totalPending;
+  PayrollMonthlyLoaded({
+    required this.payrolls,
+    required this.totalPayroll,
+    required this.totalPaid,
+    required this.totalPending,
+  });
+}
+
+class PayrollMonthlyError extends StaffState {
+  final String message;
+
+  PayrollMonthlyError(this.message);
 }

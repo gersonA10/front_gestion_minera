@@ -49,14 +49,12 @@ class GetAttendanceFinalizadoEvent extends StaffEvent {
   final String date;
   GetAttendanceFinalizadoEvent({required this.date});
 }
-class CheckOutEmployeeEvent extends StaffEvent{
+
+class CheckOutEmployeeEvent extends StaffEvent {
   final String attendanceId;
   final EmployeeCheckOutRequestEntity request;
 
-  CheckOutEmployeeEvent({
-    required this.attendanceId,
-    required this.request,
-  });
+  CheckOutEmployeeEvent({required this.attendanceId, required this.request});
 }
 
 class RegisterCheckInEmployeeEvent extends StaffEvent {
@@ -65,4 +63,15 @@ class RegisterCheckInEmployeeEvent extends StaffEvent {
   RegisterCheckInEmployeeEvent({required this.checkIn});
 }
 
+class GetDetailAssistanceEmployeeEvent extends StaffEvent {
+  final String employeeId;
 
+  GetDetailAssistanceEmployeeEvent({required this.employeeId});
+}
+
+class GetPayrollMonthlyListEvent extends StaffEvent {
+  final int month;
+  final int year;
+
+  GetPayrollMonthlyListEvent({required this.month, required this.year});
+}

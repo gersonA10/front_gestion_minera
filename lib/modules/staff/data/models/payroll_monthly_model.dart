@@ -19,9 +19,9 @@ class PayrollMonthlyModel extends PayrollMonthlyEntity {
       employeeId: json['employee_id'] ?? '',
       fullName: json['full_name'] ?? '',
       position: json['position'] ?? '',
-      baseSalary: (json['base_salary']).toDouble() ?? 0,
-      totalDeductions: (json['total_deductions']).toDouble() ?? 0,
-      netTotal: (json['net_total']).toDouble() ?? 0,
+      baseSalary: (json['base_salary'] ?? 0).toDouble(),
+      totalDeductions: (json['total_deductions'] ?? 0).toDouble(),
+      netTotal: (json['net_total'] ?? 0).toDouble(),
       paymentStatus: json['payment_status'] ?? '',
       currency: json['currency'] ?? '',
     );
