@@ -147,9 +147,8 @@ class _PayrollScreenState extends State<PayrollScreen> {
           ),
         ),
       ),
-      body: BlocConsumer<StaffBloc, StaffState>(
+      body: BlocBuilder<StaffBloc, StaffState>(
         bloc: _bloc,
-        listener: (context, state) {},
         builder: (context, state) {
           if (state is PayrollMonthlyLoading) {
             return const Center(child: CircularProgressIndicator());
