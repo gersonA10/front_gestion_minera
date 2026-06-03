@@ -18,10 +18,10 @@ class EmployeeDetailAssistanceModel extends EmployeeDetailAssistanceEntity {
       date: json['date'] ?? '',
       assignedShift: json['assigned_shift'] ?? '',
       attendanceStatus: json['attendance_status'] ?? '',
-      employee: EmployeeDetailModel.fromJson(json['employee'] ?? {}),
-      chronology: ChronologyModel.fromJson(json['chronology'] ?? {}),
-      validation: ValidationModel.fromJson(json['validation'] ?? {}),
-      audit: AuditModel.fromJson(json['audit'] ?? {}),
+      employee: EmployeeDetailModel.fromJson(json['employee']),
+      chronology: ChronologyModel.fromJson(json['chronology']),
+      validation: ValidationModel.fromJson(json['validation']),
+      audit: AuditModel.fromJson(json['audit']),
     );
   }
 }
@@ -56,9 +56,9 @@ class ChronologyModel extends Chronology {
   });
   factory ChronologyModel.fromJson(Map<String, dynamic> json) {
     return ChronologyModel(
-      checkIn: ChronologyCheckInModel.fromJson(json['check_in'] ?? {}),
+      checkIn: ChronologyCheckInModel.fromJson(json['check_in']),
       breakMinutes: json['break_minutes'] ?? 0,
-      checkOut: ChronologyCheckInModel.fromJson(json['check_out'] ?? {}),
+      checkOut: ChronologyCheckInModel.fromJson(json['check_out']),
       netHoursWorked: (json['net_hours_worked'] as num?)?.toDouble() ?? 0,
     );
   }
@@ -68,8 +68,8 @@ class ChronologyCheckInModel extends ChronologyCheckIn {
   ChronologyCheckInModel({required super.time, required super.location});
   factory ChronologyCheckInModel.fromJson(Map<String, dynamic> json) {
     return ChronologyCheckInModel(
-      time: json['time'] ?? '',
-      location: json['location'] ?? '',
+      time: json['time'],
+      location: json['location'],
     );
   }
 }
@@ -88,7 +88,7 @@ class EmployeeDetailModel extends Employee {
       nationalId: json['national_id'] ?? '',
       fullName: json['full_name'] ?? '',
       position: json['position'] ?? '',
-      photoUrl: json['photo_url'] ?? '',
+      photoUrl: json['photo_url'],
     );
   }
 }
@@ -97,8 +97,8 @@ class GeoLocationModel extends GeoLocation {
   GeoLocationModel({required super.checkIn, required super.checkOut});
   factory GeoLocationModel.fromJson(Map<String, dynamic> json) {
     return GeoLocationModel(
-      checkIn: GeoLocationCheckInModel.fromJson(json['check_in'] ?? {}),
-      checkOut: GeoLocationCheckInModel.fromJson(json['check_out'] ?? {}),
+      checkIn: GeoLocationCheckInModel.fromJson(json['check_in']),
+      checkOut: GeoLocationCheckInModel.fromJson(json['check_out']),
     );
   }
 }
@@ -107,8 +107,8 @@ class GeoLocationCheckInModel extends GeoLocationCheckIn {
   GeoLocationCheckInModel({required super.latitude, required super.longitude});
   factory GeoLocationCheckInModel.fromJson(Map<String, dynamic> json) {
     return GeoLocationCheckInModel(
-      latitude: (json['latitude'] as num?)?.toDouble() ?? 0,
-      longitude: (json['longitude'] as num?)?.toDouble() ?? 0,
+      latitude: (json['latitude'] as num?)?.toDouble(),
+      longitude: (json['longitude'] as num?)?.toDouble(),
     );
   }
 }
@@ -122,8 +122,8 @@ class ValidationModel extends Validation {
   factory ValidationModel.fromJson(Map<String, dynamic> json) {
     return ValidationModel(
       autoValidated: json['auto_validated'] ?? false,
-      supervisorSignatureUrl: json['supervisor_signature_url'] ?? '',
-      geolocation: GeoLocationModel.fromJson(json['geolocation'] ?? {})
+      supervisorSignatureUrl: json['supervisor_signature_url'],
+      geolocation: GeoLocationModel.fromJson(json['geo_location'])
     );
   }
 }
