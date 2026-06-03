@@ -356,7 +356,7 @@ class _StaffPaymentHistoryScreenState extends State<StaffPaymentHistoryScreen> {
                               ),
                               const SizedBox(height: 12),
                               Text(
-                                '\$${latest.totalAmount.toStringAsFixed(2)}',
+                                'Bs ${latest.totalAmount.toStringAsFixed(2)}',
                                 style: const TextStyle(
                                   color: TColors.white,
                                   fontSize: 34,
