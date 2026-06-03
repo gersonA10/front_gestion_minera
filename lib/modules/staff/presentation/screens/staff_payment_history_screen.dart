@@ -424,28 +424,75 @@ class _StaffPaymentHistoryScreenState extends State<StaffPaymentHistoryScreen> {
                           ),
                         ),
                         const SizedBox(height: 12),
-                        ListView.separated(
-                          shrinkWrap: true,
-                          physics: const NeverScrollableScrollPhysics(),
-                          itemCount: previous.length,
-                          separatorBuilder: (_, __) =>
-                              const SizedBox(height: 12),
-                          itemBuilder: (context, index) {
-                            final payroll = previous[index];
-                            return PreviousCycleCardWidget(
-                              period: payroll.period,
-                              payrollType: payroll.payrollType,
-                              totalAmount: payroll.totalAmount,
-                              paymentDate: payroll.paymentDate,
-                              status: payroll.status,
-                              onTap: () {
-                                context.router.push(
-                                  PayrollRoute(payrollPeriod: payroll.period),
-                                );
-                              },
-                            );
-                          },
-                        ),
+                        if (previous.isEmpty)
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 20,
+                              vertical: 32,
+                            ),
+                            decoration: BoxDecoration(
+                              color: TColors.white,
+                              borderRadius: BorderRadius.circular(16),
+                            ),
+                            child: Column(
+                              children: [
+                                Container(
+                                  width: 60,
+                                  height: 60,
+                                  decoration: BoxDecoration(
+                                    color: TColors.primaryLight,
+                                    shape: BoxShape.circle,
+                                  ),
+                                  child: const Icon(
+                                    Icons.history,
+                                    color: TColors.appMainColor,
+                                    size: 30,
+                                  ),
+                                ),
+                                const SizedBox(height: 16),
+                                const Text(
+                                  'Sin ciclos anteriores',
+                                  style: TextStyle(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.w700,
+                                    color: TColors.appMainDarkColor,
+                                  ),
+                                ),
+                                const SizedBox(height: 8),
+                                Text(
+                                  'Solo existe un pago registrado para el año $selectedYear.',
+                                  textAlign: TextAlign.center,
+                                  style: const TextStyle(
+                                    fontSize: 13,
+                                    color: TColors.appDisabledColor,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          )
+                        else
+                          ListView.separated(
+                            shrinkWrap: true,
+                            physics: const NeverScrollableScrollPhysics(),
+                            itemCount: previous.length,
+                            separatorBuilder: (_, __) =>
+                                const SizedBox(height: 12),
+                            itemBuilder: (context, index) {
+                              final payroll = previous[index];
+                              return PreviousCycleCardWidget(
+                                period: payroll.period,
+                                payrollType: payroll.payrollType,
+                                totalAmount: payroll.totalAmount,
+                                paymentDate: payroll.paymentDate,
+                                status: payroll.status,
+                                onTap: () {
+                                  context.router.push(
+                                    PayrollRoute(payrollPeriod: payroll.period),
+                                  );
+                                },
+                              );
+                            },
+                          ),
                       ],
                     ),
                   );
