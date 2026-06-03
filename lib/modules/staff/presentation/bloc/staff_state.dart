@@ -230,4 +230,14 @@ class PayrollHistoryLoaded extends StaffState {
 class PayrollHistoryError extends StaffState {
   final String message;
   PayrollHistoryError({required this.message});
+class ProcessPayrollPaymentLoading extends StaffState {}
+
+class ProcessPayrollPaymentSuccess extends StaffState {
+  final ProcessPayrollPaymentEntity payment;
+  ProcessPayrollPaymentSuccess(this.payment);
+}
+
+class ProcessPayrollPaymentError extends StaffState {
+  final String message;
+  ProcessPayrollPaymentError(this.message);
 }

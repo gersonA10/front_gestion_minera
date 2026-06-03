@@ -45,4 +45,8 @@ abstract class StaffRepository {
     required int page,
     required int limit,
   });
+  Future<ProcessPayrollPaymentEntity> processPayrollPayment({
+  required String payrollId,
+  required String idempotencyKey,
+});
 }

@@ -38,7 +38,11 @@ class StaffBloc extends Bloc<StaffEvent, StaffState> {
     on<LoadMoreHistoryRecordExpenditureEvent>(
       _onLoadMoreHistoryRecordExpenditure,
     );
+<<<<<<< HEAD
     on<GetPayrollHistoryEvent>(_onGetPayrollHistory);
+=======
+    on<ProcessPayrollPaymentEvent>(_onProcessPayrollPayment);
+>>>>>>> origin/dev
   }
 
   FutureOr<void> _onRegisterEmployees(
@@ -436,6 +440,19 @@ class StaffBloc extends Bloc<StaffEvent, StaffState> {
       );
     } catch (e) {
       emit(PayrollHistoryError(message: 'Error inesperado: $e'));
+  Future<void> _onProcessPayrollPayment(
+    ProcessPayrollPaymentEvent event,
+    Emitter<StaffState> emit,
+  ) async {
+    emit(ProcessPayrollPaymentLoading());
+    try {
+      final response = await repository.processPayrollPayment(
+        payrollId: event.payrollId,
+        idempotencyKey: event.idempotencyKey,
+      );
+      emit(ProcessPayrollPaymentSuccess(response));
+    } catch (e) {
+      emit(ProcessPayrollPaymentError(e.toString()));
     }
   }
 }

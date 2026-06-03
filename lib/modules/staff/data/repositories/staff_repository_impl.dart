@@ -106,4 +106,14 @@ class StaffRepositoryImpl implements StaffRepository {
   }) {
     return datasource.getPayrollHistory(year: year, page: page, limit: limit);
   }
+
+  Future<ProcessPayrollPaymentEntity> processPayrollPayment({
+    required String payrollId,
+    required String idempotencyKey,
+  }) async {
+    return await datasource.processPayrollPayment(
+      payrollId: payrollId,
+      idempotencyKey: idempotencyKey,
+    );
+  }
 }

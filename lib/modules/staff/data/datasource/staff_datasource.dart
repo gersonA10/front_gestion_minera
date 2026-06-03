@@ -1,3 +1,4 @@
+import 'package:dio/dio.dart';
 import 'package:front_gestion_minera/core/networking/http_services.dart';
 import 'package:front_gestion_minera/modules/staff/domain/entity/entity.dart';
 import '../models/models.dart';
@@ -212,5 +213,19 @@ class StaffDatasource {
     );
 
     return PayrollHistoryResponseModel.fromJson(response);
+  }
+
+  Future<ProcessPayrollPaymentModel> processPayrollPayment({
+    required String payrollId,
+    required String idempotencyKey,
+  }) async {
+    final response = await apiClient.patch(
+      '/api/hr/payrolls/$payrollId/pay',
+      operationName: 'processPayrollPayment',
+      data: {},
+      options: Options(headers: {'X-Idempotency-Key': idempotencyKey}),
+    );
+
+    return ProcessPayrollPaymentModel.fromJson(response['data']);
   }
 }

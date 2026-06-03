@@ -99,5 +99,13 @@ class GetPayrollHistoryEvent extends StaffEvent {
     required this.year,
     this.page = 1,
     this.limit = 10,
+    
+class ProcessPayrollPaymentEvent extends StaffEvent {
+  final String payrollId;
+  final String idempotencyKey;
+
+  ProcessPayrollPaymentEvent({
+    required this.payrollId,
+    required this.idempotencyKey,
   });
 }
