@@ -108,7 +108,7 @@ class PreviousCycleCardWidget extends StatelessWidget {
                     ),
                     const SizedBox(height: 4),
                     Text(
-                      '\$${totalAmount.toStringAsFixed(2)}',
+                      'Bs ${totalAmount.toStringAsFixed(2)}',
                       style: const TextStyle(
                         fontSize: 24,
                         fontWeight: FontWeight.w800,

@@ -11,7 +11,10 @@ import 'package:front_gestion_minera/modules/staff/presentation/bloc/staff_bloc.
 
 @RoutePage()
 class PayrollScreen extends StatefulWidget {
-  const PayrollScreen({super.key});
+  final String? payrollPeriod;
+
+  const PayrollScreen({super.key, this.payrollPeriod});
+
   @override
   State<PayrollScreen> createState() => _PayrollScreenState();
 }
@@ -24,29 +27,60 @@ class _PayrollScreenState extends State<PayrollScreen> {
   late int selectedYear;
   String selectedStatus = 'Todos';
   final List<String> statusFilters = ['Todos', 'Pagado', 'Pendiente'];
+  bool get isHistoryMode => widget.payrollPeriod != null;
+  int _getMonthFromPeriod(String period) {
+    const months = {
+      'Enero': 1,
+      'Febrero': 2,
+      'Marzo': 3,
+      'Abril': 4,
+      'Mayo': 5,
+      'Junio': 6,
+      'Julio': 7,
+      'Agosto': 8,
+      'Septiembre': 9,
+      'Octubre': 10,
+      'Noviembre': 11,
+      'Diciembre': 12,
+    };
+    final parts = period.split(' ');
+    return months[parts[0]] ?? DateTime.now().month;
+  }
+
+  int _getYearFromPeriod(String period) {
+    final parts = period.split(' ');
+    return int.tryParse(parts.last) ?? DateTime.now().year;
+  }
 
   @override
   void initState() {
     super.initState();
     final now = DateTime.now();
-    selectedMonth = now.month;
-    selectedYear = now.year;
-    const meses = [
-      'Enero',
-      'Febrero',
-      'Marzo',
-      'Abril',
-      'Mayo',
-      'Junio',
-      'Julio',
-      'Agosto',
-      'Septiembre',
-      'Octubre',
-      'Noviembre',
-      'Diciembre',
-    ];
-    cycleLabel = '${meses[selectedMonth - 1]} $selectedYear';
 
+    if (isHistoryMode) {
+      selectedMonth = _getMonthFromPeriod(widget.payrollPeriod!);
+      selectedYear = _getYearFromPeriod(widget.payrollPeriod!);
+
+      cycleLabel = widget.payrollPeriod!;
+    } else {
+      selectedMonth = now.month;
+      selectedYear = now.year;
+      const meses = [
+        'Enero',
+        'Febrero',
+        'Marzo',
+        'Abril',
+        'Mayo',
+        'Junio',
+        'Julio',
+        'Agosto',
+        'Septiembre',
+        'Octubre',
+        'Noviembre',
+        'Diciembre',
+      ];
+      cycleLabel = '${meses[selectedMonth - 1]} $selectedYear';
+    }
     _bloc = InjectorContainer.getIt<StaffBloc>();
     _bloc.add(
       GetPayrollMonthlyListEvent(month: selectedMonth, year: selectedYear),
@@ -73,37 +107,42 @@ class _PayrollScreenState extends State<PayrollScreen> {
           padding: const EdgeInsets.only(left: 20, right: 20),
           child: Row(
             children: [
-              const Expanded(
+              Expanded(
                 child: Text(
-                  'Gestionar Nómina',
-                  style: TextStyle(
+                  isHistoryMode ? 'Historial de Pagos' : 'Gestionar Nómina',
+                  style: const TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.w700,
                     color: TColors.appMainDarkColor,
                   ),
                 ),
               ),
-              GestureDetector(
-                onTap: () {
-                  context.router.push(StaffPaymentHistoryRoute());
-                },
-                child: const Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Icon(Icons.history, size: 16, color: TColors.appMainColor),
-                    SizedBox(width: 4),
-                    Text(
-                      'Historial de pagos',
-                      style: TextStyle(
-                        fontSize: 12,
-                        fontWeight: FontWeight.w600,
+              if (!isHistoryMode)
+                GestureDetector(
+                  onTap: () {
+                    context.router.push(StaffPaymentHistoryRoute());
+                  },
+                  child: const Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(
+                        Icons.history,
+                        size: 16,
                         color: TColors.appMainColor,
-                        decoration: TextDecoration.underline,
                       ),
-                    ),
-                  ],
+                      SizedBox(width: 4),
+                      Text(
+                        'Historial de pagos',
+                        style: TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w600,
+                          color: TColors.appMainColor,
+                          decoration: TextDecoration.underline,
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
-              ),
             ],
           ),
         ),
@@ -146,26 +185,29 @@ class _PayrollScreenState extends State<PayrollScreen> {
                   children: [
                     const SizedBox(height: 10),
                     GestureDetector(
-                      onTap: () async {
-                        final result = await PayrollCycleSelectorWidget.show(
-                          context,
-                          initialMonth: selectedMonth,
-                          initialYear: selectedYear,
-                        );
-                        if (result != null) {
-                          setState(() {
-                            selectedMonth = result.month;
-                            selectedYear = result.year;
-                            cycleLabel = result.displayText;
-                          });
-                          _bloc.add(
-                            GetPayrollMonthlyListEvent(
-                              month: selectedMonth,
-                              year: selectedYear,
-                            ),
-                          );
-                        }
-                      },
+                      onTap: isHistoryMode
+                          ? null
+                          : () async {
+                              final result =
+                                  await PayrollCycleSelectorWidget.show(
+                                    context,
+                                    initialMonth: selectedMonth,
+                                    initialYear: selectedYear,
+                                  );
+                              if (result != null) {
+                                setState(() {
+                                  selectedMonth = result.month;
+                                  selectedYear = result.year;
+                                  cycleLabel = result.displayText;
+                                });
+                                _bloc.add(
+                                  GetPayrollMonthlyListEvent(
+                                    month: selectedMonth,
+                                    year: selectedYear,
+                                  ),
+                                );
+                              }
+                            },
                       child: Column(
                         mainAxisSize: MainAxisSize.min,
                         crossAxisAlignment: CrossAxisAlignment.end,
@@ -189,11 +231,12 @@ class _PayrollScreenState extends State<PayrollScreen> {
                                 ),
                               ),
                               const SizedBox(width: 2),
-                              const Icon(
-                                Icons.keyboard_arrow_down,
-                                size: 16,
-                                color: TColors.appMainColor,
-                              ),
+                              if (!isHistoryMode)
+                                const Icon(
+                                  Icons.keyboard_arrow_down,
+                                  size: 16,
+                                  color: TColors.appMainColor,
+                                ),
                             ],
                           ),
                         ],

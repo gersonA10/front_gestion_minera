@@ -11,4 +11,5 @@ export 'package:front_gestion_minera/modules/staff/domain/entity/attendance_en_p
 export 'package:front_gestion_minera/modules/staff/domain/entity/attendance_finalizado_entity.dart';
 export 'package:front_gestion_minera/modules/staff/domain/entity/employee_check_out_response_entity.dart';
 export 'package:front_gestion_minera/modules/staff/domain/entity/employee_check_out_request_entity.dart';
+export 'package:front_gestion_minera/modules/staff/domain/entity/payroll_history_entity.dart';
 export 'package:front_gestion_minera/modules/staff/domain/entity/process_payroll_payment_entity.dart';

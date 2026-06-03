@@ -99,6 +99,14 @@ class StaffRepositoryImpl implements StaffRepository {
   }
 
   @override
+  Future<PayrollHistoryResponseModel> getPayrollHistory({
+    required int year,
+    required int page,
+    required int limit,
+  }) {
+    return datasource.getPayrollHistory(year: year, page: page, limit: limit);
+  }
+
   Future<ProcessPayrollPaymentEntity> processPayrollPayment({
     required String payrollId,
     required String idempotencyKey,
