@@ -1,6 +1,7 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:front_gestion_minera/config/router/app_router.gr.dart';
 import 'package:front_gestion_minera/injector_container.dart';
 import 'package:front_gestion_minera/modules/staff/presentation/bloc/staff_bloc.dart';
 import 'package:front_gestion_minera/modules/staff/presentation/widgets/previous_cycle_card_widget.dart';
@@ -385,7 +386,13 @@ class _StaffPaymentHistoryScreenState extends State<StaffPaymentHistoryScreen> {
                                 width: double.infinity,
                                 height: 48,
                                 child: ElevatedButton.icon(
-                                  onPressed: () {},
+                                  onPressed: () {
+                                    context.router.push(
+                                      PayrollRoute(
+                                        payrollPeriod: latest.period,
+                                      ),
+                                    );
+                                  },
                                   style: ElevatedButton.styleFrom(
                                     backgroundColor: TColors.white,
                                     foregroundColor: TColors.appMainColor,
@@ -431,7 +438,11 @@ class _StaffPaymentHistoryScreenState extends State<StaffPaymentHistoryScreen> {
                               totalAmount: payroll.totalAmount,
                               paymentDate: payroll.paymentDate,
                               status: payroll.status,
-                              onTap: () {},
+                              onTap: () {
+                                context.router.push(
+                                  PayrollRoute(payrollPeriod: payroll.period),
+                                );
+                              },
                             );
                           },
                         ),
