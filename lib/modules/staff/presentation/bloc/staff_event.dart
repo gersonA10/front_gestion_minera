@@ -75,6 +75,7 @@ class GetPayrollMonthlyListEvent extends StaffEvent {
 
   GetPayrollMonthlyListEvent({required this.month, required this.year});
 }
+
 class GetHistoryRecordExpenditureEvent extends StaffEvent {
   final String year;
   final String state;
@@ -88,3 +89,15 @@ class GetHistoryRecordExpenditureEvent extends StaffEvent {
 }
 
 class LoadMoreHistoryRecordExpenditureEvent extends StaffEvent {}
+
+class GetPayrollHistoryEvent extends StaffEvent {
+  final int year;
+  final int page;
+  final int limit;
+
+   GetPayrollHistoryEvent({
+    required this.year,
+    this.page = 1,
+    this.limit = 10,
+  });
+}

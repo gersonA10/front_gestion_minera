@@ -219,3 +219,15 @@ class HistoryRecordExpenditureError extends StaffState {
   final String message;
   HistoryRecordExpenditureError(this.message);
 }
+
+class PayrollHistoryLoading extends StaffState {}
+
+class PayrollHistoryLoaded extends StaffState {
+  final PayrollHistoryResponseModel history;
+  PayrollHistoryLoaded({required this.history});
+}
+
+class PayrollHistoryError extends StaffState {
+  final String message;
+  PayrollHistoryError({required this.message});
+}

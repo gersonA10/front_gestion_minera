@@ -40,4 +40,9 @@ abstract class StaffRepository {
     String? year,
     String? status,
   });
+  Future<PayrollHistoryResponseModel> getPayrollHistory({
+    required int year,
+    required int page,
+    required int limit,
+  });
 }

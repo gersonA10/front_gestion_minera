@@ -97,4 +97,13 @@ class StaffRepositoryImpl implements StaffRepository {
       status: status,
     );
   }
+
+  @override
+  Future<PayrollHistoryResponseModel> getPayrollHistory({
+    required int year,
+    required int page,
+    required int limit,
+  }) {
+    return datasource.getPayrollHistory(year: year, page: page, limit: limit);
+  }
 }
