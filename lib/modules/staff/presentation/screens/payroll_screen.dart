@@ -84,7 +84,9 @@ class _PayrollScreenState extends State<PayrollScreen> {
                 ),
               ),
               GestureDetector(
-                onTap: () {},
+                onTap: () {
+                  context.router.push(StaffPaymentHistoryRoute());
+                },
                 child: const Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
