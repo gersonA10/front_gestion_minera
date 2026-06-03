@@ -201,6 +201,20 @@ class StaffDatasource {
     return HistoryExpenditureResponseModel.fronJson(response);
   }
 
+  Future<PayrollHistoryResponseModel> getPayrollHistory({
+    required int year,
+    required int page,
+    required int limit,
+  }) async {
+    final response = await apiClient.get(
+      '/api/hr/payrolls/history',
+      operationName: 'getPayrollHistory',
+      queryParameters: {'year': year, 'page': page, 'limit': limit},
+    );
+
+    return PayrollHistoryResponseModel.fromJson(response);
+  }
+
   Future<ProcessPayrollPaymentModel> processPayrollPayment({
     required String payrollId,
     required String idempotencyKey,

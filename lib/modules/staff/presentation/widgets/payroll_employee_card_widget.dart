@@ -108,7 +108,7 @@ class PayrollEmployeeCardWidget extends StatelessWidget {
                         crossAxisAlignment: CrossAxisAlignment.end,
                         children: [
                           Text(
-                            '\$ $amount',
+                            'Bs $amount',
                             style: const TextStyle(
                               fontSize: 16,
                               fontWeight: FontWeight.w800,

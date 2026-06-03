@@ -83,7 +83,7 @@ class PayrollSummaryCardWidget extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  '\$ $amount',
+                  'Bs $amount',
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   style: TextStyle(

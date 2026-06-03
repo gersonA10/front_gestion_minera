@@ -1730,18 +1730,54 @@ class PaymentSuccessRouteArgs {
 
 /// generated route for
 /// [_i46.PayrollScreen]
-class PayrollRoute extends _i75.PageRouteInfo<void> {
-  const PayrollRoute({List<_i75.PageRouteInfo>? children})
-    : super(PayrollRoute.name, initialChildren: children);
+class PayrollRoute extends _i75.PageRouteInfo<PayrollRouteArgs> {
+  PayrollRoute({
+    _i76.Key? key,
+    String? payrollPeriod,
+    List<_i75.PageRouteInfo>? children,
+  }) : super(
+         PayrollRoute.name,
+         args: PayrollRouteArgs(key: key, payrollPeriod: payrollPeriod),
+         initialChildren: children,
+       );
 
   static const String name = 'PayrollRoute';
 
   static _i75.PageInfo page = _i75.PageInfo(
     name,
     builder: (data) {
-      return const _i46.PayrollScreen();
+      final args = data.argsAs<PayrollRouteArgs>(
+        orElse: () => const PayrollRouteArgs(),
+      );
+      return _i46.PayrollScreen(
+        key: args.key,
+        payrollPeriod: args.payrollPeriod,
+      );
     },
   );
+}
+
+class PayrollRouteArgs {
+  const PayrollRouteArgs({this.key, this.payrollPeriod});
+
+  final _i76.Key? key;
+
+  final String? payrollPeriod;
+
+  @override
+  String toString() {
+    return 'PayrollRouteArgs{key: $key, payrollPeriod: $payrollPeriod}';
+  }
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) return true;
+    if (other is! PayrollRouteArgs) return false;
+    return key == other.key && payrollPeriod == other.payrollPeriod;
+  }
+
+  @override
+  int get hashCode => key.hashCode ^ payrollPeriod.hashCode;
 }
 
 /// generated route for

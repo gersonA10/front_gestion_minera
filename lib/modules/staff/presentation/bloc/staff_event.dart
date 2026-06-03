@@ -90,6 +90,14 @@ class GetHistoryRecordExpenditureEvent extends StaffEvent {
 
 class LoadMoreHistoryRecordExpenditureEvent extends StaffEvent {}
 
+class GetPayrollHistoryEvent extends StaffEvent {
+  final int year;
+  final int page;
+  final int limit;
+
+  GetPayrollHistoryEvent({required this.year, this.page = 1, this.limit = 10});
+}
+
 class ProcessPayrollPaymentEvent extends StaffEvent {
   final String payrollId;
   final String idempotencyKey;

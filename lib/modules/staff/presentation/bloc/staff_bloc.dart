@@ -38,6 +38,7 @@ class StaffBloc extends Bloc<StaffEvent, StaffState> {
     on<LoadMoreHistoryRecordExpenditureEvent>(
       _onLoadMoreHistoryRecordExpenditure,
     );
+    on<GetPayrollHistoryEvent>(_onGetPayrollHistory);
     on<ProcessPayrollPaymentEvent>(_onProcessPayrollPayment);
   }
 
@@ -414,6 +415,30 @@ class StaffBloc extends Bloc<StaffEvent, StaffState> {
       emit(HistoryRecordExpenditureError('Error inesperado: $e'));
     }
   }
+
+  Future<void> _onGetPayrollHistory(
+    GetPayrollHistoryEvent event,
+    Emitter<StaffState> emit,
+  ) async {
+    emit(PayrollHistoryLoading());
+    try {
+      final history = await repository.getPayrollHistory(
+        year: event.year,
+        page: event.page,
+        limit: event.limit,
+      );
+      emit(PayrollHistoryLoaded(history: history));
+    } on BaseApiException catch (error) {
+      final responseData = error.response?.data as Map<String, dynamic>?;
+      emit(
+        PayrollHistoryError(
+          message: responseData?['error'] ?? mapErrorMessage(error.key),
+        ),
+      );
+    } catch (e) {
+      emit(PayrollHistoryError(message: 'Error inesperado: $e'));
+      }
+      }
 
   Future<void> _onProcessPayrollPayment(
     ProcessPayrollPaymentEvent event,
