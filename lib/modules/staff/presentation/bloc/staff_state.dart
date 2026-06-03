@@ -219,3 +219,15 @@ class HistoryRecordExpenditureError extends StaffState {
   final String message;
   HistoryRecordExpenditureError(this.message);
 }
+
+class ProcessPayrollPaymentLoading extends StaffState {}
+
+class ProcessPayrollPaymentSuccess extends StaffState {
+  final ProcessPayrollPaymentEntity payment;
+  ProcessPayrollPaymentSuccess(this.payment);
+}
+
+class ProcessPayrollPaymentError extends StaffState {
+  final String message;
+  ProcessPayrollPaymentError(this.message);
+}

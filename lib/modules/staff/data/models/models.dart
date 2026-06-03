@@ -11,3 +11,4 @@ export 'package:front_gestion_minera/modules/staff/data/models/register_employee
 export 'package:front_gestion_minera/modules/staff/data/models/attendance_ingreso_model.dart';
 export 'package:front_gestion_minera/modules/staff/data/models/attendance_en_planta_model.dart';
 export 'package:front_gestion_minera/modules/staff/data/models/attendance_finalizado_model.dart';
+export 'package:front_gestion_minera/modules/staff/data/models/process_payroll_payment_model.dart';

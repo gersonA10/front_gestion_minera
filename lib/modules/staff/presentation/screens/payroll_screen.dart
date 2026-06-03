@@ -108,9 +108,8 @@ class _PayrollScreenState extends State<PayrollScreen> {
           ),
         ),
       ),
-      body: BlocConsumer<StaffBloc, StaffState>(
+      body: BlocBuilder<StaffBloc, StaffState>(
         bloc: _bloc,
-        listener: (context, state) {},
         builder: (context, state) {
           if (state is PayrollMonthlyLoading) {
             return const Center(child: CircularProgressIndicator());
@@ -350,13 +349,29 @@ class _PayrollScreenState extends State<PayrollScreen> {
                                   paid:
                                       payroll.paymentStatus.toUpperCase() ==
                                       'PAGADO',
-                                  onTap: () {
-                                    context.router.push(
-                                      ProcessPaymentRoute(
-                                        payroll: payroll,
-                                        payrollPeriod: cycleLabel,
-                                      ),
-                                    );
+                                  onTap: () async {
+                                    final isPaid =
+                                        payroll.paymentStatus.toUpperCase() ==
+                                        'PAGADO';
+                                    if (isPaid) {
+                                      return;
+                                    }
+                                    final result = await context.router
+                                        .push<bool>(
+                                          ProcessPaymentRoute(
+                                            payroll: payroll,
+                                            payrollPeriod: cycleLabel,
+                                          ),
+                                        );
+
+                                    if (result == true) {
+                                      _bloc.add(
+                                        GetPayrollMonthlyListEvent(
+                                          month: selectedMonth,
+                                          year: selectedYear,
+                                        ),
+                                      );
+                                    }
                                   },
                                 );
                               },

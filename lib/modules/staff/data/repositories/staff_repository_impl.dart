@@ -97,4 +97,15 @@ class StaffRepositoryImpl implements StaffRepository {
       status: status,
     );
   }
+
+  @override
+  Future<ProcessPayrollPaymentEntity> processPayrollPayment({
+    required String payrollId,
+    required String idempotencyKey,
+  }) async {
+    return await datasource.processPayrollPayment(
+      payrollId: payrollId,
+      idempotencyKey: idempotencyKey,
+    );
+  }
 }
