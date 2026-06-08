@@ -8,18 +8,20 @@ class PlantaWorker {
   final String department;
   final String entryTime;
   final String? avatarUrl;
+  final String attendanceId;
 
   const PlantaWorker({
     required this.name,
     required this.department,
     required this.entryTime,
+    required this.attendanceId,
     this.avatarUrl,
   });
 }
 
 class AttendanceEnPlantaTab extends StatefulWidget {
   final List<PlantaWorker> workers;
-  final void Function(String) onRegisterExit;
+  final void Function(PlantaWorker) onRegisterExit;
   final bool isLoading;
   final String? errorMessage;
 
@@ -74,7 +76,7 @@ class _AttendanceEnPlantaTabState extends State<AttendanceEnPlantaTab> {
                 padding: const EdgeInsets.only(bottom: 14),
                 child: PlantaWorkerCard(
                   worker: w,
-                  onRegisterExit: () => widget.onRegisterExit(w.name),
+                  onRegisterExit: () => widget.onRegisterExit(w),
                 ),
               ),
             ),

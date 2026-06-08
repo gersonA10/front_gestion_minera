@@ -8,6 +8,7 @@ import 'package:front_gestion_minera/injector_container.dart';
 
 import 'package:front_gestion_minera/modules/staff/domain/entity/employee_check_out_request_entity.dart';
 import 'package:front_gestion_minera/modules/staff/presentation/bloc/staff_bloc.dart';
+import 'package:front_gestion_minera/modules/staff/presentation/screens/attendance_en_planta_tab.dart';
 
 import 'package:front_gestion_minera/modules/staff/presentation/widgets/current_shift_card.dart';
 import 'package:front_gestion_minera/modules/staff/presentation/widgets/exit_hour_widget.dart';
@@ -16,18 +17,9 @@ import 'package:front_gestion_minera/utils/constants/color.constant.dart';
 
 @RoutePage()
 class EmployeeCheckOutLogScreen extends StatefulWidget {
-  final String attendanceId;
-  final String? workerPhoto;
-  final String? checkInTime;
-  final String? workerName;
+  final PlantaWorker worker;
 
-  const EmployeeCheckOutLogScreen({
-    super.key,
-    required this.attendanceId,
-    this.workerPhoto,
-    this.checkInTime,
-    this.workerName,
-  });
+  const EmployeeCheckOutLogScreen({super.key, required this.worker});
 
   @override
   State<EmployeeCheckOutLogScreen> createState() =>
@@ -51,7 +43,7 @@ class _EmployeeCheckOutLogScreenState extends State<EmployeeCheckOutLogScreen> {
     super.initState();
     _bloc = InjectorContainer.getIt<StaffBloc>();
     endTime = TimeOfDay.now();
-    final parts = (widget.checkInTime ?? '07:00').split(':');
+    final parts = (widget.worker.entryTime).split(':');
     startTime = TimeOfDay(
       hour: int.parse(parts[0]),
       minute: int.parse(parts[1]),
@@ -106,16 +98,8 @@ class _EmployeeCheckOutLogScreenState extends State<EmployeeCheckOutLogScreen> {
     });
   }
 
-  String _formatTime12Hour(TimeOfDay hour) {
-    final period = hour.hour >= 12 ? 'PM' : 'AM';
-
-    final hour12 = hour.hour > 12
-        ? hour.hour - 12
-        : hour.hour == 0
-        ? 12
-        : hour.hour;
-
-    return '${hour12.toString().padLeft(2, '0')}:${hour.minute.toString().padLeft(2, '0')} $period';
+  String _formatTime24Hour(TimeOfDay time) {
+    return '${time.hour.toString().padLeft(2, '0')}:${time.minute.toString().padLeft(2, '0')}';
   }
 
   void _updateBreakTime(int value) {
@@ -135,7 +119,7 @@ class _EmployeeCheckOutLogScreenState extends State<EmployeeCheckOutLogScreen> {
         backgroundColor: TColors.appBackgroundColor,
 
         bottomNavigationBar: BottomButtonWidget(
-          attendanceId: widget.attendanceId,
+          attendanceId: widget.worker.attendanceId,
           netTotal: netTotal,
           startTime: startTime,
           endTime: endTime,
@@ -146,8 +130,8 @@ class _EmployeeCheckOutLogScreenState extends State<EmployeeCheckOutLogScreen> {
           child: Column(
             children: [
               HeaderWidget(
-                attendanceId: widget.attendanceId,
-                workerName: widget.workerName,
+                attendanceId: widget.worker.attendanceId,
+                workerName: widget.worker.name,
               ),
               Expanded(
                 child: SingleChildScrollView(
@@ -155,14 +139,14 @@ class _EmployeeCheckOutLogScreenState extends State<EmployeeCheckOutLogScreen> {
                   child: Column(
                     children: [
                       CurrentShiftCard(
-                        workerPhoto: widget.workerPhoto,
+                        workerPhoto: widget.worker.avatarUrl,
                         startTime: startTime,
-                        formatearHora: _formatTime12Hour,
+                        formatearHora: _formatTime24Hour,
                       ),
                       const SizedBox(height: 24),
                       ExitHourWidget(
                         endTime: endTime,
-                        formatearHora: _formatTime12Hour,
+                        formatearHora: _formatTime24Hour,
                         onSelectTime: _selectTime,
                       ),
                       const SizedBox(height: 24),
@@ -522,7 +506,10 @@ class BottomButtonWidget extends StatelessWidget {
                     'La salida del trabajador fue registrada correctamente.',
                 type: AlertType.success,
               );
-              context.router.pop();
+              Future.delayed(const Duration(milliseconds: 500), () {
+                if (!context.mounted) return;
+                context.router.pop(true);
+              });
             }
             if (state is CheckOutEmployeeError) {
               CustomAlert.show(
