@@ -1,5 +1,5 @@
 class AttendanceFinalizadoEntity {
-  final String employeeId;
+  final String attendanceId;
   final String fullName;
   final String shiftType;
   final String department;
@@ -9,7 +9,7 @@ class AttendanceFinalizadoEntity {
   final bool hasIncident;
 
   const AttendanceFinalizadoEntity({
-    required this.employeeId,
+    required this.attendanceId,
     required this.fullName,
     required this.shiftType,
     required this.department,

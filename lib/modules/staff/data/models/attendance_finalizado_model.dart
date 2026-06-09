@@ -2,7 +2,7 @@ import '../../domain/entity/attendance_finalizado_entity.dart';
 
 class AttendanceFinalizadoModel extends AttendanceFinalizadoEntity {
   const AttendanceFinalizadoModel({
-    required super.employeeId,
+    required super.attendanceId,
     required super.fullName,
     required super.shiftType,
     required super.department,
@@ -14,7 +14,7 @@ class AttendanceFinalizadoModel extends AttendanceFinalizadoEntity {
 
   factory AttendanceFinalizadoModel.fromJson(Map<String, dynamic> json) {
     return AttendanceFinalizadoModel(
-      employeeId: json['employee_id'] ?? '',
+      attendanceId: json['attendance_id'] ?? '',
       fullName: json['full_name'] ?? '',
       shiftType: json['shift_type'] ?? '',
       department: json['department'] ?? '',
