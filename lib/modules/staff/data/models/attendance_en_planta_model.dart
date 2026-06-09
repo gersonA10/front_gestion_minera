@@ -6,6 +6,7 @@ class AttendanceEnPlantaModel extends AttendanceEnPlantaEntity {
     required super.fullName,
     required super.department,
     required super.checkInTime,
+    required super.attendanceId,
   });
 
   factory AttendanceEnPlantaModel.fromJson(Map<String, dynamic> json) {
@@ -14,6 +15,7 @@ class AttendanceEnPlantaModel extends AttendanceEnPlantaEntity {
       fullName: json['full_name'] ?? '',
       department: json['department'] ?? '',
       checkInTime: json['check_in_time'] ?? '',
+      attendanceId: json['attendance_id'] ?? '',
     );
   }
 }

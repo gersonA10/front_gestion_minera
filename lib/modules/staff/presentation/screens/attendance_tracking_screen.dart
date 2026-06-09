@@ -1,6 +1,7 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:front_gestion_minera/config/router/app_router.gr.dart';
 import 'package:front_gestion_minera/injector_container.dart';
 import 'package:front_gestion_minera/modules/staff/domain/entity/attendance_en_planta_entity.dart';
 import 'package:front_gestion_minera/modules/staff/domain/entity/attendance_finalizado_entity.dart';
@@ -96,93 +97,90 @@ class _AttendanceControlScreenState extends State<AttendanceControlScreen> {
     );
   }
 
-  void _onRegisterExit(String name) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(
-          'Salida registrada: $name',
-          style: const TextStyle(fontSize: 13),
-        ),
-        backgroundColor: TColors.success,
-        behavior: SnackBarBehavior.floating,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-        duration: const Duration(seconds: 2),
-      ),
-    );
+  Future<void> _onRegisterExit(PlantaWorker worker) async {
+  final result = await context.router.push<bool>(
+    EmployeeCheckOutLogRoute(
+      worker: worker,
+    ),
+  );
+
+  if (result == true) {
+    _bloc.add(GetAttendanceEnPlantaEvent());
   }
+}
 
   @override
   Widget build(BuildContext context) {
     return BlocProvider.value(
       value: _bloc,
       child: BlocListener<StaffBloc, StaffState>(
-      listener: (context, state) {
-        if (state is AttendanceIngresoLoading) {
-          setState(() {
-            _ingresoLoading = true;
-            _ingresoError = null;
-          });
-        } else if (state is AttendanceIngresoLoaded) {
-          setState(() {
-            _ingresoLoading = false;
-            _ingresoData = state.employees;
-          });
-        } else if (state is AttendanceIngresoError) {
-          setState(() {
-            _ingresoLoading = false;
-            _ingresoError = state.message;
-          });
-        } else if (state is AttendanceEnPlantaLoading) {
-          setState(() {
-            _plantaLoading = true;
-            _plantaError = null;
-          });
-        } else if (state is AttendanceEnPlantaLoaded) {
-          setState(() {
-            _plantaLoading = false;
-            _plantaData = state.employees;
-          });
-        } else if (state is AttendanceEnPlantaError) {
-          setState(() {
-            _plantaLoading = false;
-            _plantaError = state.message;
-          });
-        } else if (state is AttendanceFinalizadoLoading) {
-          setState(() {
-            _finalizadoLoading = true;
-            _finalizadoError = null;
-          });
-        } else if (state is AttendanceFinalizadoLoaded) {
-          setState(() {
-            _finalizadoLoading = false;
-            _finalizadoData = state.employees;
-          });
-        } else if (state is AttendanceFinalizadoError) {
-          setState(() {
-            _finalizadoLoading = false;
-            _finalizadoError = state.message;
-          });
-        }
-      },
-      child: Scaffold(
-        backgroundColor: TColors.background,
-        appBar: AppBar(
-          title: const Text(
-            'Control de Asistencia',
-            style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
+        listener: (context, state) {
+          if (state is AttendanceIngresoLoading) {
+            setState(() {
+              _ingresoLoading = true;
+              _ingresoError = null;
+            });
+          } else if (state is AttendanceIngresoLoaded) {
+            setState(() {
+              _ingresoLoading = false;
+              _ingresoData = state.employees;
+            });
+          } else if (state is AttendanceIngresoError) {
+            setState(() {
+              _ingresoLoading = false;
+              _ingresoError = state.message;
+            });
+          } else if (state is AttendanceEnPlantaLoading) {
+            setState(() {
+              _plantaLoading = true;
+              _plantaError = null;
+            });
+          } else if (state is AttendanceEnPlantaLoaded) {
+            setState(() {
+              _plantaLoading = false;
+              _plantaData = state.employees;
+            });
+          } else if (state is AttendanceEnPlantaError) {
+            setState(() {
+              _plantaLoading = false;
+              _plantaError = state.message;
+            });
+          } else if (state is AttendanceFinalizadoLoading) {
+            setState(() {
+              _finalizadoLoading = true;
+              _finalizadoError = null;
+            });
+          } else if (state is AttendanceFinalizadoLoaded) {
+            setState(() {
+              _finalizadoLoading = false;
+              _finalizadoData = state.employees;
+            });
+          } else if (state is AttendanceFinalizadoError) {
+            setState(() {
+              _finalizadoLoading = false;
+              _finalizadoError = state.message;
+            });
+          }
+        },
+        child: Scaffold(
+          backgroundColor: TColors.background,
+          appBar: AppBar(
+            title: const Text(
+              'Control de Asistencia',
+              style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
+            ),
+            backgroundColor: TColors.surface,
+            foregroundColor: TColors.profileDarkText,
+            elevation: 1,
           ),
-          backgroundColor: TColors.surface,
-          foregroundColor: TColors.profileDarkText,
-          elevation: 1,
-        ),
-        body: Column(
-          children: [
-            _buildTabBar(),
-            Expanded(child: _buildTabContent()),
-          ],
+          body: Column(
+            children: [
+              _buildTabBar(),
+              Expanded(child: _buildTabContent()),
+            ],
+          ),
         ),
       ),
-    ),
     );
   }
 
@@ -223,8 +221,9 @@ class _AttendanceControlScreenState extends State<AttendanceControlScreen> {
                     _tabLabel(tab),
                     style: TextStyle(
                       fontSize: 13,
-                      fontWeight:
-                          isSelected ? FontWeight.w600 : FontWeight.w400,
+                      fontWeight: isSelected
+                          ? FontWeight.w600
+                          : FontWeight.w400,
                       color: isSelected
                           ? TColors.primary
                           : TColors.profileMutedLabel,
@@ -290,6 +289,7 @@ class _AttendanceControlScreenState extends State<AttendanceControlScreen> {
       name: e.fullName,
       department: e.department,
       entryTime: e.checkInTime,
+      attendanceId: e.attendanceId,
     );
   }
 
