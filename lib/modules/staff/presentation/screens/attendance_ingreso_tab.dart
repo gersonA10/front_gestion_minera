@@ -63,9 +63,14 @@ class AttendanceIngresoTab extends StatelessWidget {
                 padding: const EdgeInsets.only(bottom: 14),
                 child: IngresoWorkerCard(
                   worker: w,
-                  onRegister: () => context.router.push(
-                    EmployeeEntryRegisterRoute(usuario: w),
-                  ),
+                  onRegister: () async {
+                    final result = await context.router.push<bool>(
+                      EmployeeEntryRegisterRoute(usuario: w),
+                    );
+                    if (result == true) {
+                      onRegister(w.name);
+                    }
+                  },
                 ),
               ),
             ),

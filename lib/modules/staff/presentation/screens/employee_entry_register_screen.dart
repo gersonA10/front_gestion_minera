@@ -41,7 +41,7 @@ class _EmployeeEntryRegisterScreenState
       setState(() {
         _selectedTime = picked;
         _hourController.text =
-            '${picked.hour}:${picked.minute.toString().padLeft(2, '0')}';
+            '${picked.hour.toString().padLeft(2, '0')}:${picked.minute.toString().padLeft(2, '0')}';
       });
     }
   }
@@ -49,7 +49,7 @@ class _EmployeeEntryRegisterScreenState
   @override
   void initState() {
     super.initState();
-    _hourController.text = '${TimeOfDay.now().hour}:${TimeOfDay.now().minute.toString().padLeft(2, '0')}';
+    _hourController.text = '${TimeOfDay.now().hour.toString().padLeft(2, '0')}:${TimeOfDay.now().minute.toString().padLeft(2, '0')}';
     _checkinBloc = InjectorContainer.getIt<StaffBloc>();
   }
 
@@ -72,7 +72,7 @@ class _EmployeeEntryRegisterScreenState
                 message: 'Ingreso correctamente registrado',
                 type: AlertType.success,
               );
-              context.router.back();
+              context.router.pop(true);
             }
             if (state is CheckInEmployeeError) {
               CustomAlert.show(
@@ -297,7 +297,7 @@ class _EmployeeEntryRegisterScreenState
                           );
                           _observationController.clear();
                           _hourController.text =
-                              '${TimeOfDay.now().hour}:${TimeOfDay.now().minute}';
+                              '${TimeOfDay.now().hour.toString().padLeft(2, '0')}:${TimeOfDay.now().minute.toString().padLeft(2, '0')}';
                         },
                         child: Container(
                           height: 60,
