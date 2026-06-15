@@ -307,6 +307,16 @@ class TreasuryBloc extends Bloc<TreasuryEvent, TreasuryState> {
       );
 
       emit(FinancialReportLoaded(report: report));
+    } on BaseApiException catch (e) {
+      if (e.response?.statusCode == 403) {
+        emit(
+          FinancialReportError(
+            message: 'No tienes permisos para ver este reporte.',
+          ),
+        );
+      } else {
+        emit(FinancialReportError(message: 'Error al cargar el reporte: $e'));
+      }
     } catch (e) {
       emit(FinancialReportError(message: 'Error al cargar el reporte: $e'));
     }

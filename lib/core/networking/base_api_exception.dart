@@ -107,4 +107,14 @@ class BaseApiException implements Exception {
         );
     }
   }
+
+  @override
+  String toString() {
+    final status = response?.statusCode;
+    return [
+      message,
+      if (status != null) '(HTTP $status)',
+      if (detail != null && detail!.isNotEmpty) '- $detail',
+    ].join(' ');
+  }
 }
