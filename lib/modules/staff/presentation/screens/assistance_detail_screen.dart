@@ -291,10 +291,10 @@ class _AssistanceDetailScreenState extends State<AssistanceDetailScreen> {
                           child: _CardTimeLineInOutWidget(
                             isIN: true,
                             hour: chronology.checkIn.time!.substring(0, 5),
-                            place: (chronology.checkOut.location!.isEmpty)
-                                ? 'Lugar no registrado'
-                                : chronology.checkOut.location!,
-                            isNotRegistered: chronology.checkIn.time == '',
+                            place: (chronology.checkOut.location != null)
+                                ? chronology.checkOut.location!
+                                : 'Lugar no registrado',
+                            isNotRegistered: chronology.checkIn.time == null,
                           ),
                         ),
                         TimelineCustomWidget(
@@ -337,13 +337,15 @@ class _AssistanceDetailScreenState extends State<AssistanceDetailScreen> {
                           pointColor: TColors.bgColor,
                           child: _CardTimeLineInOutWidget(
                             isIN: false,
-                            hour: (chronology.checkOut.time == '')
+                            hour: (chronology.checkOut.time == null)
                                 ? '00:00'
                                 : chronology.checkOut.time!.substring(0, 5),
-                            place: (chronology.checkOut.location!.isEmpty)
-                                ? 'Lugar no registrado'
-                                : chronology.checkOut.location!,
-                            isNotRegistered: chronology.checkOut.time == '',
+                            place:
+                                (chronology.checkOut.location != null &&
+                                    chronology.checkOut.location!.isNotEmpty)
+                                ? chronology.checkOut.location!
+                                : 'Lugar no registrado',
+                            isNotRegistered: chronology.checkOut.time == null,
                           ),
                         ),
                         Divider(color: TColors.appBackgroundColor),
@@ -436,11 +438,8 @@ class _AssistanceDetailScreenState extends State<AssistanceDetailScreen> {
                                     child: FadeInImage.assetNetwork(
                                       placeholder: AssetImageApp.getIconLoading,
                                       image:
-                                          validation
-                                              .supervisorSignatureUrl
-                                              .isNotEmpty
-                                          ? validation.supervisorSignatureUrl
-                                          : '',
+                                          validation.supervisorSignatureUrl ??
+                                          '',
                                       fit: BoxFit.cover,
                                       imageErrorBuilder: (_, _, _) {
                                         return Center(
@@ -484,7 +483,11 @@ class _AssistanceDetailScreenState extends State<AssistanceDetailScreen> {
                                     ),
                                     const SizedBox(height: 5),
                                     Text(
-                                      (chronology.checkOut.location!.isEmpty)
+                                      (chronology.checkOut.location == null ||
+                                              chronology
+                                                  .checkOut
+                                                  .location!
+                                                  .isEmpty)
                                           ? 'Lugar no registrado'
                                           : chronology.checkOut.location!,
                                       style: TextStyle(
@@ -690,7 +693,7 @@ class _AssistanceDetailScreenState extends State<AssistanceDetailScreen> {
                                 pw.Text(
                                   formatDate(
                                     DateFormat(
-                                      'dd/MM/yyyy',
+                                      'yyyy-MM-dd',
                                     ).parse(employeeDetail.date),
                                   ),
                                   style: pw.TextStyle(fontSize: 15),
@@ -780,7 +783,7 @@ class _AssistanceDetailScreenState extends State<AssistanceDetailScreen> {
                           pw.Text(
                             employeeDetail.chronology.breakMinutes == 0
                                 ? 'Sin Refrigerio'
-                                : 'Tiempo de Refrigerio - ${employeeDetail.chronology.breakMinutes} ${(int.parse(employeeDetail.chronology.checkOut.time!.substring(0, 2)) > 11) ? 'PM' : 'AM'}',
+                                : 'Tiempo de Refrigerio - ${employeeDetail.chronology.breakMinutes}  ${(int.parse(employeeDetail.chronology.checkOut.time!.substring(0, 2)) > 11) ? 'PM' : 'AM'}',
                             style: pw.TextStyle(
                               fontSize: 15,
                               fontWeight: pw.FontWeight.bold,
@@ -801,7 +804,12 @@ class _AssistanceDetailScreenState extends State<AssistanceDetailScreen> {
                           ),
                           pw.SizedBox(width: 10),
                           pw.Text(
-                            (!(employeeDetail.chronology.checkOut.time != null))
+                            (employeeDetail.chronology.checkOut.time != null &&
+                                    employeeDetail
+                                        .chronology
+                                        .checkOut
+                                        .time!
+                                        .isNotEmpty)
                                 ? 'Salida Registrada - ${employeeDetail.chronology.checkOut.time!.substring(0, 5)} ${(int.parse(employeeDetail.chronology.checkOut.time!.substring(0, 2)) > 11) ? 'PM' : 'AM'}'
                                 : 'Salida no registrada',
                             style: pw.TextStyle(

@@ -87,7 +87,7 @@ class GeoLocationCheckIn {
 
 class Validation {
   final bool autoValidated;
-  final String supervisorSignatureUrl;
+  final String? supervisorSignatureUrl;
   final GeoLocation geolocation;
 
   Validation({

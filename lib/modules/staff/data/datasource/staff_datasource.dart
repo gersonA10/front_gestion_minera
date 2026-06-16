@@ -120,7 +120,7 @@ class StaffDatasource {
       operationName: 'getAttendanceEnPlanta',
       queryParameters: {'tab': 'EN_PLANTA'},
     );
-    final List data = (response['active_employees'] as List?) ?? [];
+    final List data = (response['employees'] as List?) ?? [];
     return data
         .map((e) => AttendanceEnPlantaModel.fromJson(e as Map<String, dynamic>))
         .toList();
@@ -134,7 +134,7 @@ class StaffDatasource {
       operationName: 'getAttendanceFinalizado',
       queryParameters: {'tab': 'FINALIZADOS', 'date': date},
     );
-    final List data = (response['completed_employees'] as List?) ?? [];
+    final List data = (response['records'] as List?) ?? [];
     return data
         .map(
           (e) => AttendanceFinalizadoModel.fromJson(e as Map<String, dynamic>),

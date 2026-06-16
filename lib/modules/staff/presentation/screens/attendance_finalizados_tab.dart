@@ -6,7 +6,7 @@ import 'package:front_gestion_minera/utils/constants/color.constant.dart';
 enum FinalizadoStatus { finalizado, revision }
 
 class FinalizadoWorker {
-  final String idEmployee;
+  final String attendanceId;
   final String name;
   final String shift;
   final String department;
@@ -19,7 +19,7 @@ class FinalizadoWorker {
   final String initials;
 
   const FinalizadoWorker({
-    required this.idEmployee,
+    required this.attendanceId,
     required this.name,
     required this.shift,
     required this.department,
@@ -63,22 +63,6 @@ class AttendanceFinalizadosTab extends StatelessWidget {
           const SizedBox(height: 20),
           _buildDateRow(context),
           const SizedBox(height: 14),
-          Padding(
-                padding: const EdgeInsets.only(bottom: 14),
-                child: _FinalizadoWorkerCard(worker: FinalizadoWorker(
-                  idEmployee: 'c114811a-ec1c-45ca-84c6-6a9d2aa128ad',
-                  name: 'Pedro Tintaya',
-                  shift: 'Mañana',
-                  department: 'Extracción',
-                  entryTime: '08:00',
-                  exitTime: '16:45',
-                  totalTime: '8h 45m',
-                  totalTimeColor: TColors.success,
-                  status: FinalizadoStatus.finalizado,
-                  avatarColor: TColors.primary,
-                  initials: 'JP',
-                )),
-              ),
           if (isLoading)
             const Padding(
               padding: EdgeInsets.symmetric(vertical: 32),
@@ -284,7 +268,7 @@ class _FinalizadoWorkerCard extends StatelessWidget {
 
     return InkWell(
       onTap: () {
-        context.router.push(AssistanceDetailRoute(attendanceId: worker.idEmployee)); // cambiar por attendanceId cuando el modelo y entity reciban attendanceId
+        context.router.push(AssistanceDetailRoute(attendanceId: worker.attendanceId)); // cambiar por attendanceId cuando el modelo y entity reciban attendanceId
       },
       child: Container(
         decoration: BoxDecoration(

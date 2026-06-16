@@ -73,11 +73,13 @@ import 'package:front_gestion_minera/modules/partners/presentation/screens/partn
 import 'package:front_gestion_minera/modules/partners/presentation/screens/request_history_screen.dart'
     as _i58;
 import 'package:front_gestion_minera/modules/staff/domain/entity/payroll_monthly_entity.dart'
-    as _i84;
+    as _i85;
 import 'package:front_gestion_minera/modules/staff/presentation/screens/assistance_detail_screen.dart'
     as _i4;
-import 'package:front_gestion_minera/modules/staff/presentation/screens/attendance_ingreso_tab.dart'
+import 'package:front_gestion_minera/modules/staff/presentation/screens/attendance_en_planta_tab.dart'
     as _i80;
+import 'package:front_gestion_minera/modules/staff/presentation/screens/attendance_ingreso_tab.dart'
+    as _i81;
 import 'package:front_gestion_minera/modules/staff/presentation/screens/attendance_tracking_screen.dart'
     as _i5;
 import 'package:front_gestion_minera/modules/staff/presentation/screens/employee_check_out_log_screen.dart'
@@ -109,11 +111,11 @@ import 'package:front_gestion_minera/modules/surveillance/presentation/screen/hi
 import 'package:front_gestion_minera/modules/surveillance/presentation/screen/home_surveillance_screen.dart'
     as _i26;
 import 'package:front_gestion_minera/modules/treasury/domain/entity/entity.dart'
-    as _i81;
-import 'package:front_gestion_minera/modules/treasury/domain/entity/loans/payment_process_entity.dart'
-    as _i83;
-import 'package:front_gestion_minera/modules/treasury/presentation/bloc/treasury_bloc.dart'
     as _i82;
+import 'package:front_gestion_minera/modules/treasury/domain/entity/loans/payment_process_entity.dart'
+    as _i84;
+import 'package:front_gestion_minera/modules/treasury/presentation/bloc/treasury_bloc.dart'
+    as _i83;
 import 'package:front_gestion_minera/modules/treasury/presentation/screens/contributes/contributes_home_screen.dart'
     as _i10;
 import 'package:front_gestion_minera/modules/treasury/presentation/screens/contributes/contribution_history_screen.dart'
@@ -816,20 +818,11 @@ class EmployeeCheckOutLogRoute
     extends _i76.PageRouteInfo<EmployeeCheckOutLogRouteArgs> {
   EmployeeCheckOutLogRoute({
     _i77.Key? key,
-    required String attendanceId,
-    String? workerPhoto,
-    String? checkInTime,
-    String? workerName,
+    required _i80.PlantaWorker worker,
     List<_i76.PageRouteInfo>? children,
   }) : super(
          EmployeeCheckOutLogRoute.name,
-         args: EmployeeCheckOutLogRouteArgs(
-           key: key,
-           attendanceId: attendanceId,
-           workerPhoto: workerPhoto,
-           checkInTime: checkInTime,
-           workerName: workerName,
-         ),
+         args: EmployeeCheckOutLogRouteArgs(key: key, worker: worker),
          initialChildren: children,
        );
 
@@ -839,59 +832,32 @@ class EmployeeCheckOutLogRoute
     name,
     builder: (data) {
       final args = data.argsAs<EmployeeCheckOutLogRouteArgs>();
-      return _i17.EmployeeCheckOutLogScreen(
-        key: args.key,
-        attendanceId: args.attendanceId,
-        workerPhoto: args.workerPhoto,
-        checkInTime: args.checkInTime,
-        workerName: args.workerName,
-      );
+      return _i17.EmployeeCheckOutLogScreen(key: args.key, worker: args.worker);
     },
   );
 }
 
 class EmployeeCheckOutLogRouteArgs {
-  const EmployeeCheckOutLogRouteArgs({
-    this.key,
-    required this.attendanceId,
-    this.workerPhoto,
-    this.checkInTime,
-    this.workerName,
-  });
+  const EmployeeCheckOutLogRouteArgs({this.key, required this.worker});
 
   final _i77.Key? key;
 
-  final String attendanceId;
-
-  final String? workerPhoto;
-
-  final String? checkInTime;
-
-  final String? workerName;
+  final _i80.PlantaWorker worker;
 
   @override
   String toString() {
-    return 'EmployeeCheckOutLogRouteArgs{key: $key, attendanceId: $attendanceId, workerPhoto: $workerPhoto, checkInTime: $checkInTime, workerName: $workerName}';
+    return 'EmployeeCheckOutLogRouteArgs{key: $key, worker: $worker}';
   }
 
   @override
   bool operator ==(Object other) {
     if (identical(this, other)) return true;
     if (other is! EmployeeCheckOutLogRouteArgs) return false;
-    return key == other.key &&
-        attendanceId == other.attendanceId &&
-        workerPhoto == other.workerPhoto &&
-        checkInTime == other.checkInTime &&
-        workerName == other.workerName;
+    return key == other.key && worker == other.worker;
   }
 
   @override
-  int get hashCode =>
-      key.hashCode ^
-      attendanceId.hashCode ^
-      workerPhoto.hashCode ^
-      checkInTime.hashCode ^
-      workerName.hashCode;
+  int get hashCode => key.hashCode ^ worker.hashCode;
 }
 
 /// generated route for
@@ -900,7 +866,7 @@ class EmployeeEntryRegisterRoute
     extends _i76.PageRouteInfo<EmployeeEntryRegisterRouteArgs> {
   EmployeeEntryRegisterRoute({
     _i77.Key? key,
-    required _i80.IngresoWorker usuario,
+    required _i81.IngresoWorker usuario,
     List<_i76.PageRouteInfo>? children,
   }) : super(
          EmployeeEntryRegisterRoute.name,
@@ -927,7 +893,7 @@ class EmployeeEntryRegisterRouteArgs {
 
   final _i77.Key? key;
 
-  final _i80.IngresoWorker usuario;
+  final _i81.IngresoWorker usuario;
 
   @override
   String toString() {
@@ -1224,8 +1190,8 @@ class LoanRoute extends _i76.PageRouteInfo<void> {
 class LoanSimulationRoute extends _i76.PageRouteInfo<LoanSimulationRouteArgs> {
   LoanSimulationRoute({
     _i79.Key? key,
-    required _i81.NewLoansResponseEntity loan,
-    required _i81.CashResponseEntity cash,
+    required _i82.NewLoansResponseEntity loan,
+    required _i82.CashResponseEntity cash,
     required String name,
     required String date,
     required double annualInterestRate,
@@ -1273,9 +1239,9 @@ class LoanSimulationRouteArgs {
 
   final _i79.Key? key;
 
-  final _i81.NewLoansResponseEntity loan;
+  final _i82.NewLoansResponseEntity loan;
 
-  final _i81.CashResponseEntity cash;
+  final _i82.CashResponseEntity cash;
 
   final String name;
 
@@ -1627,7 +1593,7 @@ class PaymentSuccessDistributionRoute
   PaymentSuccessDistributionRoute({
     _i77.Key? key,
     required String receiptId,
-    required _i82.TreasuryBloc bloc,
+    required _i83.TreasuryBloc bloc,
     required bool isFromDetails,
     List<_i76.PageRouteInfo>? children,
   }) : super(
@@ -1669,7 +1635,7 @@ class PaymentSuccessDistributionRouteArgs {
 
   final String receiptId;
 
-  final _i82.TreasuryBloc bloc;
+  final _i83.TreasuryBloc bloc;
 
   final bool isFromDetails;
 
@@ -1701,7 +1667,7 @@ class PaymentSuccessDistributionRouteArgs {
 class PaymentSuccessRoute extends _i76.PageRouteInfo<PaymentSuccessRouteArgs> {
   PaymentSuccessRoute({
     _i77.Key? key,
-    required _i83.PayTheFeeResponseEntity paymentData,
+    required _i84.PayTheFeeResponseEntity paymentData,
     List<_i76.PageRouteInfo>? children,
   }) : super(
          PaymentSuccessRoute.name,
@@ -1728,7 +1694,7 @@ class PaymentSuccessRouteArgs {
 
   final _i77.Key? key;
 
-  final _i83.PayTheFeeResponseEntity paymentData;
+  final _i84.PayTheFeeResponseEntity paymentData;
 
   @override
   String toString() {
@@ -1819,7 +1785,7 @@ class PendingApplicationsRoute extends _i76.PageRouteInfo<void> {
 class ProcessPaymentRoute extends _i76.PageRouteInfo<ProcessPaymentRouteArgs> {
   ProcessPaymentRoute({
     _i77.Key? key,
-    required _i84.PayrollMonthlyEntity payroll,
+    required _i85.PayrollMonthlyEntity payroll,
     required String payrollPeriod,
     List<_i76.PageRouteInfo>? children,
   }) : super(
@@ -1856,7 +1822,7 @@ class ProcessPaymentRouteArgs {
 
   final _i77.Key? key;
 
-  final _i84.PayrollMonthlyEntity payroll;
+  final _i85.PayrollMonthlyEntity payroll;
 
   final String payrollPeriod;
 
@@ -1940,8 +1906,8 @@ class RecordContributionPaymentRoute
     _i77.Key? key,
     required DateTime dateContibution,
     required String titleContibuton,
-    required _i81.ContributionDetailMemberEntity item,
-    required _i81.CashResponseEntity cash,
+    required _i82.ContributionDetailMemberEntity item,
+    required _i82.CashResponseEntity cash,
     List<_i76.PageRouteInfo>? children,
   }) : super(
          RecordContributionPaymentRoute.name,
@@ -1987,9 +1953,9 @@ class RecordContributionPaymentRouteArgs {
 
   final String titleContibuton;
 
-  final _i81.ContributionDetailMemberEntity item;
+  final _i82.ContributionDetailMemberEntity item;
 
-  final _i81.CashResponseEntity cash;
+  final _i82.CashResponseEntity cash;
 
   @override
   String toString() {
@@ -2024,7 +1990,7 @@ class RecordPaymentRoute extends _i76.PageRouteInfo<RecordPaymentRouteArgs> {
     required String quotaId,
     required String textoCuota,
     required int montoTotalCuota,
-    required _i81.CashResponseEntity cash,
+    required _i82.CashResponseEntity cash,
     required String idLoan,
     List<_i76.PageRouteInfo>? children,
   }) : super(
@@ -2076,7 +2042,7 @@ class RecordPaymentRouteArgs {
 
   final int montoTotalCuota;
 
-  final _i81.CashResponseEntity cash;
+  final _i82.CashResponseEntity cash;
 
   final String idLoan;
 
@@ -2376,7 +2342,7 @@ class RequestProgressDetailsRouteArgs {
 class SellPreviewRoute extends _i76.PageRouteInfo<SellPreviewRouteArgs> {
   SellPreviewRoute({
     _i77.Key? key,
-    required _i81.SalePreviewResponseEntity previewData,
+    required _i82.SalePreviewResponseEntity previewData,
     required String salesDate,
     required String buyer,
     required double totalGramsSold,
@@ -2429,7 +2395,7 @@ class SellPreviewRouteArgs {
 
   final _i77.Key? key;
 
-  final _i81.SalePreviewResponseEntity previewData;
+  final _i82.SalePreviewResponseEntity previewData;
 
   final String salesDate;
 
@@ -2475,7 +2441,7 @@ class SellPreviewRouteArgs {
 class SellSummaryRoute extends _i76.PageRouteInfo<SellSummaryRouteArgs> {
   SellSummaryRoute({
     _i77.Key? key,
-    required _i81.RegisterSaleResponseEntity saleData,
+    required _i82.RegisterSaleResponseEntity saleData,
     bool isFromHistory = false,
     List<_i76.PageRouteInfo>? children,
   }) : super(
@@ -2512,7 +2478,7 @@ class SellSummaryRouteArgs {
 
   final _i77.Key? key;
 
-  final _i81.RegisterSaleResponseEntity saleData;
+  final _i82.RegisterSaleResponseEntity saleData;
 
   final bool isFromHistory;
 
