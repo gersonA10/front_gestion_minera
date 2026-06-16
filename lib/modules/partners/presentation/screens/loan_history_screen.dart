@@ -367,7 +367,7 @@ class _LoanHistoryScreenState extends State<LoanHistoryScreen> {
                   Positioned.fill(
                     child: IgnorePointer(
                       child: Container(
-                        color: const Color(0xFFF5F5F7).withValues(alpha: 0.5),
+                        color: const Color.fromARGB(255, 137, 137, 140).withValues(alpha: 0.5),
                       ),
                     ),
                   ),

@@ -104,3 +104,16 @@ final class DistributesDataLoaded extends PartnersState {
     required this.hasReachedMax,
   });
 }
+
+// Estados para la bandeja de socios (memorandos + reuniones)
+final class MemberInboxLoading extends PartnersState {}
+
+final class MemberInboxError extends PartnersState {
+  final String message;
+  MemberInboxError(this.message);
+}
+
+final class MemberInboxLoaded extends PartnersState {
+  final List<MemberInboxItemEntity> items;
+  MemberInboxLoaded(this.items);
+}

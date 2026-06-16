@@ -5,7 +5,6 @@ import 'package:front_gestion_minera/config/router/app_router.dart';
 import 'package:front_gestion_minera/config/router/app_router.gr.dart';
 import 'package:front_gestion_minera/core/widgets/logout_button_widget.dart';
 import 'package:front_gestion_minera/injector_container.dart';
-import 'package:front_gestion_minera/utils/constants/color.constant.dart';
 import 'package:front_gestion_minera/utils/greeting_util.dart';
 import 'package:front_gestion_minera/utils/session/user_session.dart';
 
@@ -32,6 +31,7 @@ class _MenuItem {
   final String subtitle;
   final IconData icon;
   final Color accent;
+  
   final VoidCallback onTap;
 
   const _MenuItem({
@@ -124,94 +124,18 @@ class _PartnersScreenState extends State<PartnersScreen>
       subtitle: 'Asistencia y actividades',
       icon: Icons.groups_2_rounded,
       accent: _AppColors.accentTeal,
+      onTap: () => context.router.push(const MemberSectionRoute()),
+    ),
+     _MenuItem(
+      title: 'Reportes',
+      subtitle: 'Reportes de actividades',
+      icon: Icons.notes_sharp,
+      accent: _AppColors.textPrimary,
       onTap: () {
-        _showComingSoonDialog(context);
+          context.router.push(FinancialReportsRoute());
       },
     ),
   ];
-
-  void _showComingSoonDialog(BuildContext context) {
-    final colors = Theme.of(context).colorScheme;
-
-    showDialog(
-      context: context,
-      barrierDismissible: true,
-      builder: (context) {
-        return Dialog(
-          backgroundColor: Colors.transparent,
-          insetPadding: const EdgeInsets.symmetric(horizontal: 24),
-          child: Container(
-            padding: const EdgeInsets.all(24),
-            decoration: BoxDecoration(
-              color: colors.surface,
-              borderRadius: BorderRadius.circular(24),
-            ),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Container(
-                  width: 64,
-                  height: 64,
-                  decoration: BoxDecoration(
-                    color: colors.primary.withValues(alpha: 0.1),
-                    borderRadius: BorderRadius.circular(18),
-                  ),
-                  child: Icon(
-                    Icons.auto_awesome_rounded,
-                    color: colors.primary,
-                    size: 30,
-                  ),
-                ),
-
-                const SizedBox(height: 20),
-
-                Text(
-                  "Próximamente",
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                    color: colors.onSurface,
-                  ),
-                ),
-
-                const SizedBox(height: 10),
-
-                Text(
-                  "Muy pronto podrás visualizar las actividades y asistencias de los socios desde este módulo.",
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    fontSize: 14,
-                    color: colors.onSurfaceVariant,
-                    height: 1.4,
-                  ),
-                ),
-
-                const SizedBox(height: 24),
-
-                SizedBox(
-                  width: double.infinity,
-                  child: ElevatedButton(
-                    onPressed: () => Navigator.pop(context),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: colors.primary,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(14),
-                      ),
-                      padding: const EdgeInsets.symmetric(vertical: 14),
-                    ),
-                    child: const Text(
-                      "Entendido",
-                      style: TextStyle(fontWeight: FontWeight.w600, color: TColors.appBackgroundColor),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        );
-      },
-    );
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -229,7 +153,7 @@ class _PartnersScreenState extends State<PartnersScreen>
       body: FadeTransition(
         opacity: _fadeIn,
         child: CustomScrollView(
-          physics: const BouncingScrollPhysics(),
+          physics: const ClampingScrollPhysics(),
           slivers: [
             _buildSliverHeader(context),
             SliverPadding(
@@ -251,6 +175,7 @@ class _PartnersScreenState extends State<PartnersScreen>
                 ),
               ),
             ),
+          
           ],
         ),
       ),

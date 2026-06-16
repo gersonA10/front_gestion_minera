@@ -14,7 +14,8 @@ class PartnersBloc extends Bloc<PartnersEvent, PartnersState> {
   final MoneyRequestRepository moneyRepository;
   final LoanHistoryRepository loanHistoryRepository;
   final LoanRegisterRequestRepository loanRegisterRequestRepository;
-  final DistributesRepository distributesRepository; 
+  final DistributesRepository distributesRepository;
+  final MemberInboxRepository memberInboxRepository;
   
   bool _isLoadingMore = false;
   int _currentPage = 1;
@@ -39,6 +40,7 @@ class PartnersBloc extends Bloc<PartnersEvent, PartnersState> {
     required this.loanHistoryRepository,
     required this.loanRegisterRequestRepository,
     required this.distributesRepository,
+    required this.memberInboxRepository,
   }) : super(ContributeDataInitial()) {
     on<FetchContributeDataEvent>(_onFetchContributeData);
 
@@ -55,6 +57,24 @@ class PartnersBloc extends Bloc<PartnersEvent, PartnersState> {
     //Dividendos
     on<FetchDistributesDataEvent>(_onFetchDistributesData);
     on<LoadMoreDistributesEvent>(_onLoadMoreDistributes);
+
+    //Bandeja de socios
+    on<MemberInboxRequestEvent>(_onMemberInboxRequest);
+  }
+
+  Future<void> _onMemberInboxRequest(
+    MemberInboxRequestEvent event,
+    Emitter<PartnersState> emit,
+  ) async {
+    emit(MemberInboxLoading());
+    try {
+      final items = await memberInboxRepository.getInbox();
+      emit(MemberInboxLoaded(items));
+    } on BaseApiException catch (error) {
+      emit(MemberInboxError(mapErrorMessage(error.key)));
+    } catch (e) {
+      emit(MemberInboxError('Error inesperado: $e'));
+    }
   }
 
   Future<void> _onFetchContributeData(

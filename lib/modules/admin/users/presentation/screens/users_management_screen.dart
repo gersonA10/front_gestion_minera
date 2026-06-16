@@ -19,18 +19,29 @@ class UsersManagementScreen extends StatefulWidget {
 
 class _UsersManagementScreenState extends State<UsersManagementScreen> {
   final _searchController = TextEditingController();
+  final _scrollController = ScrollController();
   String _status = 'Todos';
 
   @override
   void initState() {
     super.initState();
     context.read<AdminUsersBloc>().add(GetUsersListEvent(status: _status));
+    _scrollController.addListener(_onScroll);
   }
 
   @override
   void dispose() {
     _searchController.dispose();
+    _scrollController.dispose();
     super.dispose();
+  }
+
+  void _onScroll() {
+    if (!_scrollController.hasClients) return;
+    final position = _scrollController.position;
+    if (position.pixels >= position.maxScrollExtent - 300) {
+      context.read<AdminUsersBloc>().add(LoadMoreUsersEvent());
+    }
   }
 
   void _search(String value) => context.read<AdminUsersBloc>().add(
@@ -138,17 +149,36 @@ class _UsersManagementScreenState extends State<UsersManagementScreen> {
                   ));
                 },
                 child: ListView.separated(
+                  controller: _scrollController,
                   padding: const EdgeInsets.fromLTRB(16, 16, 16, 32),
-                  itemCount: state.users.length,
+                  itemCount:
+                      state.users.length + (state.hasReachedMax ? 0 : 1),
                   separatorBuilder: (_, _) => const SizedBox(height: 8),
-                  itemBuilder: (_, i) => _UserCard(
-                    index: i,
-                    user: state.users[i],
-                    onTap: () => context.router.push(UserFormRoute(userId: state.users[i].id)),
-                    onToggle: () => ctx.read<AdminUsersBloc>().add(
-                      ToggleUserStatusEvent(user: state.users[i]),
-                    ),
-                  ),
+                  itemBuilder: (_, i) {
+                    if (i >= state.users.length) {
+                      return const Padding(
+                        padding: EdgeInsets.symmetric(vertical: 16),
+                        child: Center(
+                          child: SizedBox(
+                            width: 22,
+                            height: 22,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2.2,
+                              color: TColors.appMainDarkColor,
+                            ),
+                          ),
+                        ),
+                      );
+                    }
+                    return _UserCard(
+                      index: i,
+                      user: state.users[i],
+                      onTap: () => context.router.push(UserFormRoute(userId: state.users[i].id)),
+                      onToggle: () => ctx.read<AdminUsersBloc>().add(
+                        ToggleUserStatusEvent(user: state.users[i]),
+                      ),
+                    );
+                  },
                 ),
               );
             }
