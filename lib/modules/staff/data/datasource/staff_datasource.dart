@@ -103,8 +103,20 @@ class StaffDatasource {
         .toList();
   }
 
+  /// Balance del trabajador (total pendiente y atrasado).
+  Future<EmployeeBalanceModel> getEmployeeBalance(String employeeId) async {
+    final response = await apiClient.get(
+      '/api/hr/employees/$employeeId/balance',
+      operationName: 'getEmployeeBalance',
+    );
+    return EmployeeBalanceModel.fromJson(
+      Map<String, dynamic>.from(response['data'] as Map),
+    );
+  }
+
   /// Solicita a Hacienda un pago individual (adelanto o saldo) para un trabajador.
   Future<void> requestEmployeePayment({
+    required String employeeId,
     required String employeeName,
     required String requestType, // 'ADELANTO' | 'SALDO'
     required double amount,
@@ -115,6 +127,7 @@ class StaffDatasource {
       '/api/hr/employees/payment-request',
       operationName: 'requestEmployeePayment',
       data: {
+        'employee_id': employeeId,
         'employee_name': employeeName,
         'request_type': requestType,
         'amount': amount.toString(),

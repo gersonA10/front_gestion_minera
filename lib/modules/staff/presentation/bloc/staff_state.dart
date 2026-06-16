@@ -103,6 +103,11 @@ class EgresoDetailError extends StaffState {
   EgresoDetailError(this.message);
 }
 
+class EmployeeBalanceLoaded extends StaffState {
+  final EmployeeBalanceEntity balance;
+  EmployeeBalanceLoaded(this.balance);
+}
+
 class EmployeePaymentRequestLoading extends StaffState {}
 
 class EmployeePaymentRequestSuccess extends StaffState {}

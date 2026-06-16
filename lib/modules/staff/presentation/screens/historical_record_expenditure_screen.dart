@@ -388,10 +388,7 @@ class CustomCardHistoricalEcpenditureWidget extends StatelessWidget {
               onPressed: () {
                 Navigator.of(context).push(
                   MaterialPageRoute(
-                    builder: (_) => EgresoDetailScreen(
-                      requestId: history.requestId,
-                      cycle: history.payrollCycle,
-                    ),
+                    builder: (_) => EgresoDetailScreen(history: history),
                   ),
                 );
               },

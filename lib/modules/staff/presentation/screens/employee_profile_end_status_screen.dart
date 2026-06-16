@@ -7,6 +7,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:front_gestion_minera/injector_container.dart';
 import 'package:front_gestion_minera/modules/staff/domain/entity/employee_entity.dart';
+import 'package:front_gestion_minera/modules/staff/domain/entity/employee_balance_entity.dart';
 import 'package:front_gestion_minera/modules/staff/presentation/bloc/staff_bloc.dart';
 import 'package:front_gestion_minera/modules/staff/presentation/widgets/employee_profile_end_status_widgets.dart';
 import 'package:front_gestion_minera/utils/constants/color.constant.dart';
@@ -30,12 +31,14 @@ class _WorkerProfileScreenState extends State<WorkerProfileScreen> {
   String? _shiftType;
   bool _saving = false;
   bool _formInit = false;
+  EmployeeBalanceEntity? _balance;
 
   @override
   void initState() {
     super.initState();
     _bloc = InjectorContainer.getIt<StaffBloc>();
     _bloc.add(GetEmployeeProfileEvent(widget.employeeId));
+    _bloc.add(GetEmployeeBalanceEvent(widget.employeeId));
   }
 
   String _statusToApi(WorkerStatusWidget status) {
@@ -151,13 +154,18 @@ class _WorkerProfileScreenState extends State<WorkerProfileScreen> {
         body: BlocConsumer<StaffBloc, StaffState>(
           listenWhen: (_, s) =>
               s is EmployeeProfileUpdateSuccess ||
-              s is EmployeeProfileUpdateError,
+              s is EmployeeProfileUpdateError ||
+              s is EmployeeBalanceLoaded,
           listener: (ctx, state) {
-            if (state is EmployeeProfileUpdateSuccess) {
+            if (state is EmployeeBalanceLoaded) {
+              setState(() => _balance = state.balance);
+            } else if (state is EmployeeProfileUpdateSuccess) {
               setState(() {
                 _saving = false;
                 _formInit = false; // re-inicializa el form con datos frescos
+                _balance = null; // forzar recarga del balance tras cambios
               });
+              _bloc.add(GetEmployeeBalanceEvent(widget.employeeId));
               CustomAlert.show(
                 ctx,
                 title: 'Listo',
@@ -265,8 +273,8 @@ class _WorkerProfileScreenState extends State<WorkerProfileScreen> {
     );
   }
 
-  void _openPaymentRequestSheet(EmployeeEntity e) {
-    showModalBottomSheet(
+  Future<void> _openPaymentRequestSheet(EmployeeEntity e) async {
+    await showModalBottomSheet(
       context: context,
       isScrollControlled: true,
       backgroundColor: TColors.white,
@@ -275,9 +283,17 @@ class _WorkerProfileScreenState extends State<WorkerProfileScreen> {
       ),
       builder: (_) => PaymentRequestSheet(
         bloc: _bloc,
+        employeeId: e.employeeId,
         employeeName: e.fullName,
+        balance: _balance,
       ),
     );
+    // Un adelanto crea una deducción → recarga balance y perfil.
+    if (mounted) {
+      _formInit = false;
+      _bloc.add(GetEmployeeProfileEvent(widget.employeeId));
+      _bloc.add(GetEmployeeBalanceEvent(widget.employeeId));
+    }
   }
 
   bool _hasChanges(EmployeeEntity e) {
@@ -506,6 +522,17 @@ class _WorkerProfileScreenState extends State<WorkerProfileScreen> {
             value: _shiftType ?? e.shiftType,
             onEdit: _editShift,
           ),
+          if (_balance != null && _balance!.totalPendingAmount > 0) ...[
+            const SizedBox(height: 10),
+            _buildInfoRow(
+              icon: Icons.account_balance_wallet_outlined,
+              label: 'Saldo pendiente',
+              value:
+                  '${_balance!.totalPendingAmount.toStringAsFixed(2)} Bs '
+                  '(${_balance!.totalPendingMonths}m'
+                  '${_balance!.overdueMonths > 0 ? ", ${_balance!.overdueMonths} atras." : ""})',
+            ),
+          ],
         ],
       ),
     );
@@ -671,12 +698,16 @@ class _WorkerProfileScreenState extends State<WorkerProfileScreen> {
 // ─── Formulario de solicitud de pago a Hacienda ────────────────────────────────
 class PaymentRequestSheet extends StatefulWidget {
   final StaffBloc bloc;
+  final String employeeId;
   final String employeeName;
+  final EmployeeBalanceEntity? balance;
 
   const PaymentRequestSheet({
     super.key,
     required this.bloc,
+    required this.employeeId,
     required this.employeeName,
+    this.balance,
   });
 
   @override
@@ -691,6 +722,18 @@ class _PaymentRequestSheetState extends State<PaymentRequestSheet> {
   String _type = 'ADELANTO';
   XFile? _image;
   bool _submitting = false;
+
+  bool get _hasOverdue => widget.balance?.hasOverdue ?? false;
+
+  @override
+  void initState() {
+    super.initState();
+    // Si tiene saldos atrasados, no se puede adelantar: arranca en "Pago de saldo".
+    _type = _hasOverdue ? 'SALDO' : 'ADELANTO';
+    if (_hasOverdue) {
+      _amountCtrl.text = widget.balance!.overdueAmount.toStringAsFixed(2);
+    }
+  }
 
   @override
   void dispose() {
@@ -725,6 +768,7 @@ class _PaymentRequestSheetState extends State<PaymentRequestSheet> {
     setState(() => _submitting = true);
     widget.bloc.add(
       RequestEmployeePaymentEvent(
+        employeeId: widget.employeeId,
         employeeName: widget.employeeName,
         requestType: _type,
         amount: double.parse(_amountCtrl.text.replaceAll(',', '.')),
@@ -791,7 +835,27 @@ class _PaymentRequestSheetState extends State<PaymentRequestSheet> {
                     color: TColors.profileMutedLabel,
                   ),
                 ),
-                const SizedBox(height: 16),
+                const SizedBox(height: 12),
+                if (widget.balance != null)
+                  Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.all(10),
+                    margin: const EdgeInsets.only(bottom: 12),
+                    decoration: BoxDecoration(
+                      color: TColors.appBackgroundColor,
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: Text(
+                      'Saldo pendiente: ${widget.balance!.totalPendingAmount.toStringAsFixed(2)} Bs '
+                      '(${widget.balance!.totalPendingMonths} meses) · '
+                      'Atrasado: ${widget.balance!.overdueAmount.toStringAsFixed(2)} Bs '
+                      '(${widget.balance!.overdueMonths} meses)',
+                      style: const TextStyle(
+                        fontSize: 12,
+                        color: TColors.profileBodyText,
+                      ),
+                    ),
+                  ),
                 // Tipo
                 Row(
                   children: [
@@ -799,7 +863,9 @@ class _PaymentRequestSheetState extends State<PaymentRequestSheet> {
                       child: ChoiceChip(
                         label: const Text('Adelanto'),
                         selected: _type == 'ADELANTO',
-                        onSelected: (_) => setState(() => _type = 'ADELANTO'),
+                        onSelected: _hasOverdue
+                            ? null
+                            : (_) => setState(() => _type = 'ADELANTO'),
                       ),
                     ),
                     const SizedBox(width: 10),
@@ -807,10 +873,30 @@ class _PaymentRequestSheetState extends State<PaymentRequestSheet> {
                       child: ChoiceChip(
                         label: const Text('Pago de saldo'),
                         selected: _type == 'SALDO',
-                        onSelected: (_) => setState(() => _type = 'SALDO'),
+                        onSelected: _hasOverdue
+                            ? (_) => setState(() {
+                                  _type = 'SALDO';
+                                  if (_amountCtrl.text.trim().isEmpty) {
+                                    _amountCtrl.text = widget.balance!.overdueAmount
+                                        .toStringAsFixed(2);
+                                  }
+                                })
+                            : null,
                       ),
                     ),
                   ],
+                ),
+                Padding(
+                  padding: const EdgeInsets.only(top: 6),
+                  child: Text(
+                    _hasOverdue
+                        ? 'El trabajador tiene saldos atrasados: solo puedes solicitar el pago de saldo, no un adelanto.'
+                        : 'El pago de saldo solo está disponible si el trabajador tiene meses atrasados.',
+                    style: const TextStyle(
+                      fontSize: 11,
+                      color: TColors.profileMutedLabel,
+                    ),
+                  ),
                 ),
                 const SizedBox(height: 16),
                 // Monto

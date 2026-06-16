@@ -10,8 +10,6 @@ class EgresoDetailItemModel extends EgresoDetailItemEntity {
     required super.netTotal,
     required super.paymentStatus,
     required super.paymentDate,
-    required super.totalPendiente,
-    required super.mesesPendientes,
   });
 
   factory EgresoDetailItemModel.fromJson(Map<String, dynamic> json) =>
@@ -24,7 +22,5 @@ class EgresoDetailItemModel extends EgresoDetailItemEntity {
         netTotal: (json['net_total'] ?? 0).toDouble(),
         paymentStatus: json['payment_status'] ?? 'PENDIENTE',
         paymentDate: json['payment_date'],
-        totalPendiente: (json['total_pendiente'] ?? 0).toDouble(),
-        mesesPendientes: json['meses_pendientes'] ?? 0,
       );
 }

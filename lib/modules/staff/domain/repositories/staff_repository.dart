@@ -18,6 +18,7 @@ abstract class StaffRepository {
   Future<EmployeeEntity> getEmployeeById(String id);
   Future<void> updateEmployee(String id, Map<String, dynamic> data);
   Future<void> requestEmployeePayment({
+    required String employeeId,
     required String employeeName,
     required String requestType,
     required double amount,
@@ -25,6 +26,7 @@ abstract class StaffRepository {
     required String imagePath,
   });
   Future<List<EgresoDetailItemEntity>> getEgresoDetail(String requestId);
+  Future<EmployeeBalanceEntity> getEmployeeBalance(String employeeId);
 
   Future<List<AttendanceIngresoEntity>> getAttendanceIngreso();
   Future<List<AttendanceEnPlantaEntity>> getAttendanceEnPlanta();

@@ -62,15 +62,6 @@ class _StaffPaymentHistoryScreenState extends State<StaffPaymentHistoryScreen> {
             color: TColors.appMainDarkColor,
           ),
         ),
-        actions: [
-          IconButton(
-            onPressed: () {},
-            icon: const Icon(
-              Icons.filter_list,
-              color: TColors.appMainDarkColor,
-            ),
-          ),
-        ],
       ),
       body: Column(
         children: [

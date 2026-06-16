@@ -14,3 +14,4 @@ export 'package:front_gestion_minera/modules/staff/domain/entity/employee_check_
 export 'package:front_gestion_minera/modules/staff/domain/entity/payroll_history_entity.dart';
 export 'package:front_gestion_minera/modules/staff/domain/entity/process_payroll_payment_entity.dart';
 export 'package:front_gestion_minera/modules/staff/domain/entity/egreso_detail_entity.dart';
+export 'package:front_gestion_minera/modules/staff/domain/entity/employee_balance_entity.dart';

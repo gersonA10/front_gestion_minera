@@ -50,6 +50,7 @@ class StaffRepositoryImpl implements StaffRepository {
 
   @override
   Future<void> requestEmployeePayment({
+    required String employeeId,
     required String employeeName,
     required String requestType,
     required double amount,
@@ -57,6 +58,7 @@ class StaffRepositoryImpl implements StaffRepository {
     required String imagePath,
   }) =>
       datasource.requestEmployeePayment(
+        employeeId: employeeId,
         employeeName: employeeName,
         requestType: requestType,
         amount: amount,
@@ -67,6 +69,10 @@ class StaffRepositoryImpl implements StaffRepository {
   @override
   Future<List<EgresoDetailItemEntity>> getEgresoDetail(String requestId) =>
       datasource.getEgresoDetail(requestId);
+
+  @override
+  Future<EmployeeBalanceEntity> getEmployeeBalance(String employeeId) =>
+      datasource.getEmployeeBalance(employeeId);
 
   @override
   Future<List<AttendanceIngresoEntity>> getAttendanceIngreso() =>

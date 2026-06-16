@@ -30,6 +30,7 @@ class StaffBloc extends Bloc<StaffEvent, StaffState> {
     on<UpdateEmployeeProfileEvent>(_onUpdateEmployeeProfile);
     on<RequestEmployeePaymentEvent>(_onRequestEmployeePayment);
     on<GetEgresoDetailEvent>(_onGetEgresoDetail);
+    on<GetEmployeeBalanceEvent>(_onGetEmployeeBalance);
     on<GetAttendanceIngresoEvent>(_onGetAttendanceIngreso);
     on<GetAttendanceEnPlantaEvent>(_onGetAttendanceEnPlanta);
     on<GetAttendanceFinalizadoEvent>(_onGetAttendanceFinalizado);
@@ -250,6 +251,18 @@ class StaffBloc extends Bloc<StaffEvent, StaffState> {
     }
   }
 
+  Future<void> _onGetEmployeeBalance(
+    GetEmployeeBalanceEvent event,
+    Emitter<StaffState> emit,
+  ) async {
+    try {
+      final balance = await repository.getEmployeeBalance(event.employeeId);
+      emit(EmployeeBalanceLoaded(balance));
+    } catch (_) {
+      // El balance es informativo; si falla no bloqueamos el perfil.
+    }
+  }
+
   Future<void> _onRequestEmployeePayment(
     RequestEmployeePaymentEvent event,
     Emitter<StaffState> emit,
@@ -257,6 +270,7 @@ class StaffBloc extends Bloc<StaffEvent, StaffState> {
     emit(EmployeePaymentRequestLoading());
     try {
       await repository.requestEmployeePayment(
+        employeeId: event.employeeId,
         employeeName: event.employeeName,
         requestType: event.requestType,
         amount: event.amount,

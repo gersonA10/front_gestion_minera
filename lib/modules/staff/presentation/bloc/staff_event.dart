@@ -39,13 +39,20 @@ class GetEgresoDetailEvent extends StaffEvent {
   GetEgresoDetailEvent(this.requestId);
 }
 
+class GetEmployeeBalanceEvent extends StaffEvent {
+  final String employeeId;
+  GetEmployeeBalanceEvent(this.employeeId);
+}
+
 class RequestEmployeePaymentEvent extends StaffEvent {
+  final String employeeId;
   final String employeeName;
   final String requestType; // 'ADELANTO' | 'SALDO'
   final double amount;
   final String justification;
   final String imagePath;
   RequestEmployeePaymentEvent({
+    required this.employeeId,
     required this.employeeName,
     required this.requestType,
     required this.amount,
