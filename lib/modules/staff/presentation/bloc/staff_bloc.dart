@@ -51,7 +51,9 @@ class StaffBloc extends Bloc<StaffEvent, StaffState> {
       await repository.registerEmployees(event.employeed);
       emit(RegisterEmployeesSuccess());
     } on BaseApiException catch (error) {
-      final responseData = error.response?.data as Map<String, dynamic>?;
+      final errorData = error.response?.data;
+      final responseData =
+          errorData is Map<String, dynamic> ? errorData : null;
       emit(RegisterEmployeesError(responseData?['error'] ?? error.key));
     } catch (e) {
       emit(RegisterEmployeesError('Error inesperado: $e'));
@@ -154,7 +156,9 @@ class StaffBloc extends Bloc<StaffEvent, StaffState> {
       await repository.createPayrollMonthly(event.payroll);
       emit(CreatePayrollRequestSuccess());
     } on BaseApiException catch (error) {
-      final responseData = error.response?.data as Map<String, dynamic>?;
+      final errorData = error.response?.data;
+      final responseData =
+          errorData is Map<String, dynamic> ? errorData : null;
       emit(CreatePayrollRequestError(responseData?['error'] ?? error.key));
     } catch (e) {
       emit(CreatePayrollRequestError('Error inesperado: $e'));
@@ -180,7 +184,9 @@ class StaffBloc extends Bloc<StaffEvent, StaffState> {
         ),
       );
     } on BaseApiException catch (error) {
-      final responseData = error.response?.data as Map<String, dynamic>?;
+      final errorData = error.response?.data;
+      final responseData =
+          errorData is Map<String, dynamic> ? errorData : null;
       emit(GenerateEmployeePayrollError(responseData?['error'] ?? error.key));
     } catch (e) {
       emit(GenerateEmployeePayrollError('Error inesperado: $e'));
@@ -263,7 +269,9 @@ class StaffBloc extends Bloc<StaffEvent, StaffState> {
 
       emit(CheckOutEmployeeSuccess(response));
     } on BaseApiException catch (e) {
-      final responseData = e.response?.data as Map<String, dynamic>?;
+      final errorData = e.response?.data;
+      final responseData =
+          errorData is Map<String, dynamic> ? errorData : null;
       emit(
         CheckOutEmployeeError(responseData?['error'] ?? mapErrorMessage(e.key)),
       );
@@ -281,7 +289,9 @@ class StaffBloc extends Bloc<StaffEvent, StaffState> {
       await repository.registerCheckInEmployee(event.checkIn);
       emit(CheckInEmployeeSuccess());
     } on BaseApiException catch (error) {
-      final responseData = error.response?.data as Map<String, dynamic>?;
+      final errorData = error.response?.data;
+      final responseData =
+          errorData is Map<String, dynamic> ? errorData : null;
       emit(CheckInEmployeeError(responseData?['error'] ?? error.key));
     } catch (e) {
       emit(CheckInEmployeeError('Error inesperado: $e'));
@@ -297,7 +307,9 @@ class StaffBloc extends Bloc<StaffEvent, StaffState> {
       final employee = await repository.getDetailsEmployee(event.employeeId);
       emit(DetailAssistanceEmployeeLoaded(employee: employee));
     } on BaseApiException catch (error) {
-      final responseData = error.response?.data as Map<String, dynamic>?;
+      final errorData = error.response?.data;
+      final responseData =
+          errorData is Map<String, dynamic> ? errorData : null;
       emit(DetailAssistanceEmployeeError(responseData?['error'] ?? error.key));
     } catch (e) {
       emit(DetailAssistanceEmployeeError('Error inesperado: $e'));
@@ -334,7 +346,8 @@ class StaffBloc extends Bloc<StaffEvent, StaffState> {
         ),
       );
     } on BaseApiException catch (error) {
-      final responseData = error.response?.data as Map<String, dynamic>?;
+      final data = error.response?.data;
+      final responseData = data is Map<String, dynamic> ? data : null;
       emit(
         PayrollMonthlyError(
           responseData?['error'] ?? mapErrorMessage(error.key),
@@ -375,7 +388,9 @@ class StaffBloc extends Bloc<StaffEvent, StaffState> {
         ),
       );
     } on BaseApiException catch (error) {
-      final responseData = error.response?.data as Map<String, dynamic>?;
+      final errorData = error.response?.data;
+      final responseData =
+          errorData is Map<String, dynamic> ? errorData : null;
       emit(HistoryRecordExpenditureError(responseData?['error'] ?? error.key));
     } catch (e) {
       emit(HistoryRecordExpenditureError('Error inesperado: $e'));
@@ -409,7 +424,9 @@ class StaffBloc extends Bloc<StaffEvent, StaffState> {
         ),
       );
     } on BaseApiException catch (error) {
-      final responseData = error.response?.data as Map<String, dynamic>?;
+      final errorData = error.response?.data;
+      final responseData =
+          errorData is Map<String, dynamic> ? errorData : null;
       emit(HistoryRecordExpenditureError(responseData?['error'] ?? error.key));
     } catch (e) {
       emit(HistoryRecordExpenditureError('Error inesperado: $e'));
@@ -429,7 +446,9 @@ class StaffBloc extends Bloc<StaffEvent, StaffState> {
       );
       emit(PayrollHistoryLoaded(history: history));
     } on BaseApiException catch (error) {
-      final responseData = error.response?.data as Map<String, dynamic>?;
+      final errorData = error.response?.data;
+      final responseData =
+          errorData is Map<String, dynamic> ? errorData : null;
       emit(
         PayrollHistoryError(
           message: responseData?['error'] ?? mapErrorMessage(error.key),
