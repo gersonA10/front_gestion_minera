@@ -27,6 +27,33 @@ class GetEmployeeProfileEvent extends StaffEvent {
   GetEmployeeProfileEvent(this.employeeId);
 }
 
+class UpdateEmployeeProfileEvent extends StaffEvent {
+  final String employeeId;
+  final String? status;
+  final String? shiftType;
+  UpdateEmployeeProfileEvent(this.employeeId, {this.status, this.shiftType});
+}
+
+class GetEgresoDetailEvent extends StaffEvent {
+  final String requestId;
+  GetEgresoDetailEvent(this.requestId);
+}
+
+class RequestEmployeePaymentEvent extends StaffEvent {
+  final String employeeName;
+  final String requestType; // 'ADELANTO' | 'SALDO'
+  final double amount;
+  final String justification;
+  final String imagePath;
+  RequestEmployeePaymentEvent({
+    required this.employeeName,
+    required this.requestType,
+    required this.amount,
+    required this.justification,
+    required this.imagePath,
+  });
+}
+
 class CreatePayrollMonthlyEvent extends StaffEvent {
   final CreatePayrollMonthlyEntity payroll;
 

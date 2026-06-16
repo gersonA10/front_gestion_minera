@@ -81,6 +81,37 @@ class EmployeeProfileError extends StaffState {
   EmployeeProfileError(this.message);
 }
 
+class EmployeeProfileUpdateSuccess extends StaffState {
+  final EmployeeEntity employee;
+  EmployeeProfileUpdateSuccess(this.employee);
+}
+
+class EmployeeProfileUpdateError extends StaffState {
+  final String message;
+  EmployeeProfileUpdateError(this.message);
+}
+
+class EgresoDetailLoading extends StaffState {}
+
+class EgresoDetailLoaded extends StaffState {
+  final List<EgresoDetailItemEntity> items;
+  EgresoDetailLoaded(this.items);
+}
+
+class EgresoDetailError extends StaffState {
+  final String message;
+  EgresoDetailError(this.message);
+}
+
+class EmployeePaymentRequestLoading extends StaffState {}
+
+class EmployeePaymentRequestSuccess extends StaffState {}
+
+class EmployeePaymentRequestError extends StaffState {
+  final String message;
+  EmployeePaymentRequestError(this.message);
+}
+
 class CreatePayrollRequestLoading extends StaffState {}
 
 class CreatePayrollRequestSuccess extends StaffState {}

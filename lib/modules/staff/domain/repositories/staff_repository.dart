@@ -16,6 +16,15 @@ abstract class StaffRepository {
   Future<List<PayrollMonthlyModel>> getPayrollMonthly();
   Future<void> createPayrollMonthly(CreatePayrollMonthlyEntity payrollMonthly);
   Future<EmployeeEntity> getEmployeeById(String id);
+  Future<void> updateEmployee(String id, Map<String, dynamic> data);
+  Future<void> requestEmployeePayment({
+    required String employeeName,
+    required String requestType,
+    required double amount,
+    required String justification,
+    required String imagePath,
+  });
+  Future<List<EgresoDetailItemEntity>> getEgresoDetail(String requestId);
 
   Future<List<AttendanceIngresoEntity>> getAttendanceIngreso();
   Future<List<AttendanceEnPlantaEntity>> getAttendanceEnPlanta();

@@ -4,6 +4,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:front_gestion_minera/injector_container.dart';
 import 'package:front_gestion_minera/modules/staff/presentation/bloc/staff_bloc.dart';
 import 'package:front_gestion_minera/utils/constants/color.constant.dart';
+import 'package:front_gestion_minera/modules/staff/presentation/screens/egreso_detail_screen.dart';
 import '../../domain/entity/entity.dart';
 
 @RoutePage()
@@ -384,7 +385,16 @@ class CustomCardHistoricalEcpenditureWidget extends StatelessWidget {
           Container(
             margin: EdgeInsets.symmetric(horizontal: 20, vertical: 7),
             child: ElevatedButton(
-              onPressed: () {},
+              onPressed: () {
+                Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (_) => EgresoDetailScreen(
+                      requestId: history.requestId,
+                      cycle: history.payrollCycle,
+                    ),
+                  ),
+                );
+              },
               style: ElevatedButton.styleFrom(
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(10),

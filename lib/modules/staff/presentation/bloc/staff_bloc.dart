@@ -27,6 +27,9 @@ class StaffBloc extends Bloc<StaffEvent, StaffState> {
     on<CreatePayrollMonthlyEvent>(_onCreatePayrollMonthly);
     on<GetEmployeePayrollEvent>(_onGetEmployeePayrol);
     on<GetEmployeeProfileEvent>(_onGetEmployeeProfile);
+    on<UpdateEmployeeProfileEvent>(_onUpdateEmployeeProfile);
+    on<RequestEmployeePaymentEvent>(_onRequestEmployeePayment);
+    on<GetEgresoDetailEvent>(_onGetEgresoDetail);
     on<GetAttendanceIngresoEvent>(_onGetAttendanceIngreso);
     on<GetAttendanceEnPlantaEvent>(_onGetAttendanceEnPlanta);
     on<GetAttendanceFinalizadoEvent>(_onGetAttendanceFinalizado);
@@ -205,6 +208,66 @@ class StaffBloc extends Bloc<StaffEvent, StaffState> {
       emit(EmployeeProfileError(mapErrorMessage(e.key)));
     } catch (_) {
       emit(EmployeeProfileError('Ocurrió un error inesperado'));
+    }
+  }
+
+  Future<void> _onUpdateEmployeeProfile(
+    UpdateEmployeeProfileEvent event,
+    Emitter<StaffState> emit,
+  ) async {
+    try {
+      final data = <String, dynamic>{};
+      if (event.status != null) data['status'] = event.status;
+      if (event.shiftType != null && event.shiftType!.trim().isNotEmpty) {
+        data['shift_type'] = event.shiftType!.trim();
+      }
+
+      await repository.updateEmployee(event.employeeId, data);
+
+      // Recarga el perfil con los datos frescos del backend.
+      final employee = await repository.getEmployeeById(event.employeeId);
+      emit(EmployeeProfileUpdateSuccess(employee));
+      emit(EmployeeProfileLoaded(employee));
+    } on BaseApiException catch (e) {
+      emit(EmployeeProfileUpdateError(mapErrorMessage(e.key)));
+    } catch (_) {
+      emit(EmployeeProfileUpdateError('Ocurrió un error inesperado'));
+    }
+  }
+
+  Future<void> _onGetEgresoDetail(
+    GetEgresoDetailEvent event,
+    Emitter<StaffState> emit,
+  ) async {
+    emit(EgresoDetailLoading());
+    try {
+      final items = await repository.getEgresoDetail(event.requestId);
+      emit(EgresoDetailLoaded(items));
+    } on BaseApiException catch (e) {
+      emit(EgresoDetailError(mapErrorMessage(e.key)));
+    } catch (_) {
+      emit(EgresoDetailError('Ocurrió un error inesperado'));
+    }
+  }
+
+  Future<void> _onRequestEmployeePayment(
+    RequestEmployeePaymentEvent event,
+    Emitter<StaffState> emit,
+  ) async {
+    emit(EmployeePaymentRequestLoading());
+    try {
+      await repository.requestEmployeePayment(
+        employeeName: event.employeeName,
+        requestType: event.requestType,
+        amount: event.amount,
+        justification: event.justification,
+        imagePath: event.imagePath,
+      );
+      emit(EmployeePaymentRequestSuccess());
+    } on BaseApiException catch (e) {
+      emit(EmployeePaymentRequestError(mapErrorMessage(e.key)));
+    } catch (_) {
+      emit(EmployeePaymentRequestError('Ocurrió un error inesperado'));
     }
   }
 

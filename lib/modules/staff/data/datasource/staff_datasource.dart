@@ -49,6 +49,16 @@ class StaffDatasource {
     );
   }
 
+  /// Actualización parcial de un empleado (PATCH). Solo se envían los campos
+  /// presentes en [data] (p.ej. {'shift_type': ..., 'status': ...}).
+  Future<void> updateEmployee(String id, Map<String, dynamic> data) async {
+    await apiClient.patch(
+      '/api/hr/employees/$id',
+      operationName: 'updateEmployee',
+      data: data,
+    );
+  }
+
   Future<List<PayrollMonthlyModel>> getPayrollMonthly() async {
     final queryParameters = {
       'month': DateTime.now().month.toString(),
@@ -76,6 +86,45 @@ class StaffDatasource {
           'name': 'planilla',
           'path': modelpayroll.planillaUrl,
           'filename': modelpayroll.planillaUrl.split('/').last,
+        },
+      ],
+    );
+  }
+
+  /// Detalle de un egreso: nóminas por trabajador ligadas a [requestId].
+  Future<List<EgresoDetailItemModel>> getEgresoDetail(String requestId) async {
+    final response = await apiClient.get(
+      '/api/hr/payroll-egresos/$requestId/detail',
+      operationName: 'getEgresoDetail',
+    );
+    final List data = (response['data'] as List?) ?? [];
+    return data
+        .map((e) => EgresoDetailItemModel.fromJson(e as Map<String, dynamic>))
+        .toList();
+  }
+
+  /// Solicita a Hacienda un pago individual (adelanto o saldo) para un trabajador.
+  Future<void> requestEmployeePayment({
+    required String employeeName,
+    required String requestType, // 'ADELANTO' | 'SALDO'
+    required double amount,
+    required String justification,
+    required String imagePath,
+  }) async {
+    await apiClient.postFormData(
+      '/api/hr/employees/payment-request',
+      operationName: 'requestEmployeePayment',
+      data: {
+        'employee_name': employeeName,
+        'request_type': requestType,
+        'amount': amount.toString(),
+        'justification': justification,
+      },
+      files: [
+        {
+          'name': 'planilla',
+          'path': imagePath,
+          'filename': imagePath.split('/').last,
         },
       ],
     );

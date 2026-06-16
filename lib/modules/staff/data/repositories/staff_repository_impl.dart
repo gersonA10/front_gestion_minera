@@ -45,6 +45,30 @@ class StaffRepositoryImpl implements StaffRepository {
   }
 
   @override
+  Future<void> updateEmployee(String id, Map<String, dynamic> data) =>
+      datasource.updateEmployee(id, data);
+
+  @override
+  Future<void> requestEmployeePayment({
+    required String employeeName,
+    required String requestType,
+    required double amount,
+    required String justification,
+    required String imagePath,
+  }) =>
+      datasource.requestEmployeePayment(
+        employeeName: employeeName,
+        requestType: requestType,
+        amount: amount,
+        justification: justification,
+        imagePath: imagePath,
+      );
+
+  @override
+  Future<List<EgresoDetailItemEntity>> getEgresoDetail(String requestId) =>
+      datasource.getEgresoDetail(requestId);
+
+  @override
   Future<List<AttendanceIngresoEntity>> getAttendanceIngreso() =>
       datasource.getAttendanceIngreso();
 

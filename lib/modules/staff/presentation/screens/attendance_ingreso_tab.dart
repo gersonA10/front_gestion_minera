@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:front_gestion_minera/config/router/app_router.gr.dart';
@@ -20,7 +22,7 @@ class IngresoWorker {
   });
 }
 
-class AttendanceIngresoTab extends StatelessWidget {
+class AttendanceIngresoTab extends StatefulWidget {
   final List<IngresoWorker> workers;
   final Set<String> registered;
   final void Function(String) onRegister;
@@ -37,8 +39,33 @@ class AttendanceIngresoTab extends StatelessWidget {
   });
 
   @override
+  State<AttendanceIngresoTab> createState() => _AttendanceIngresoTabState();
+}
+
+class _AttendanceIngresoTabState extends State<AttendanceIngresoTab> {
+  Timer? _ticker;
+
+  @override
+  void initState() {
+    super.initState();
+    // Re-evalúa la ventana de habilitación periódicamente para que el botón
+    // se habilite solo cuando llega la hora, sin refrescar manualmente.
+    _ticker = Timer.periodic(const Duration(seconds: 30), (_) {
+      if (mounted) setState(() {});
+    });
+  }
+
+  @override
+  void dispose() {
+    _ticker?.cancel();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    final pending = workers.where((w) => !registered.contains(w.name)).toList();
+    final pending = widget.workers
+        .where((w) => !widget.registered.contains(w.name))
+        .toList();
 
     return SingleChildScrollView(
       padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
@@ -48,13 +75,13 @@ class AttendanceIngresoTab extends StatelessWidget {
           const SizedBox(height: 20),
           _buildHeader(pending.length),
           const SizedBox(height: 14),
-          if (isLoading)
+          if (widget.isLoading)
             const Padding(
               padding: EdgeInsets.symmetric(vertical: 32),
               child: CircularProgressIndicator(),
             )
-          else if (errorMessage != null)
-            _buildErrorState(errorMessage!)
+          else if (widget.errorMessage != null)
+            _buildErrorState(widget.errorMessage!)
           else if (pending.isEmpty)
             _buildEmptyState()
           else
@@ -68,7 +95,7 @@ class AttendanceIngresoTab extends StatelessWidget {
                       EmployeeEntryRegisterRoute(usuario: w),
                     );
                     if (result == true) {
-                      onRegister(w.name);
+                      widget.onRegister(w.name);
                     }
                   },
                 ),
