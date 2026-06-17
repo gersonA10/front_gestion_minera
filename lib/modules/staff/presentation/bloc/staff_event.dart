@@ -27,6 +27,49 @@ class GetEmployeeProfileEvent extends StaffEvent {
   GetEmployeeProfileEvent(this.employeeId);
 }
 
+class UpdateEmployeeProfileEvent extends StaffEvent {
+  final String employeeId;
+  final String? status;
+  final String? shiftType;
+  UpdateEmployeeProfileEvent(this.employeeId, {this.status, this.shiftType});
+}
+
+class GetEgresoDetailEvent extends StaffEvent {
+  final String requestId;
+  GetEgresoDetailEvent(this.requestId);
+}
+
+class GetEmployeeBalanceEvent extends StaffEvent {
+  final String employeeId;
+  GetEmployeeBalanceEvent(this.employeeId);
+}
+
+class GetPersonnelCashEvent extends StaffEvent {}
+
+class GetCashBalanceEvent extends StaffEvent {}
+
+class PayPayrollFromCashEvent extends StaffEvent {
+  final String payrollId;
+  PayPayrollFromCashEvent(this.payrollId);
+}
+
+class RequestEmployeePaymentEvent extends StaffEvent {
+  final String employeeId;
+  final String employeeName;
+  final String requestType; // 'ADELANTO' | 'SALDO'
+  final double amount;
+  final String justification;
+  final String imagePath;
+  RequestEmployeePaymentEvent({
+    required this.employeeId,
+    required this.employeeName,
+    required this.requestType,
+    required this.amount,
+    required this.justification,
+    required this.imagePath,
+  });
+}
+
 class CreatePayrollMonthlyEvent extends StaffEvent {
   final CreatePayrollMonthlyEntity payroll;
 
@@ -101,9 +144,11 @@ class GetPayrollHistoryEvent extends StaffEvent {
 class ProcessPayrollPaymentEvent extends StaffEvent {
   final String payrollId;
   final String idempotencyKey;
+  final double? amount;
 
   ProcessPayrollPaymentEvent({
     required this.payrollId,
     required this.idempotencyKey,
+    this.amount,
   });
 }

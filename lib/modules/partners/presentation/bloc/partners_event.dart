@@ -83,3 +83,8 @@ class FetchDistributesDataEvent extends PartnersEvent {
 }
 
 class LoadMoreDistributesEvent extends PartnersEvent {}
+
+// Bandeja de socios (memorandos + reuniones)
+class MemberInboxRequestEvent extends PartnersEvent {
+  MemberInboxRequestEvent();
+}

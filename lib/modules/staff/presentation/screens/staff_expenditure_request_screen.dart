@@ -127,6 +127,11 @@ class _StaffExpenditureRequestScreenState
                 Padding(
                   padding: EdgeInsets.symmetric(horizontal:20),
                   child: ListView(
+                    keyboardDismissBehavior:
+                        ScrollViewKeyboardDismissBehavior.onDrag,
+                    padding: EdgeInsets.only(
+                      bottom: MediaQuery.of(context).viewInsets.bottom,
+                    ),
                     children: [
                       const SizedBox(height: 10),
                       const Text(

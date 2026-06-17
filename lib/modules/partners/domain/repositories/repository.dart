@@ -3,3 +3,4 @@ export 'package:front_gestion_minera/modules/partners/domain/repositories/partne
 export 'package:front_gestion_minera/modules/partners/domain/repositories/loan_history_repository.dart';
 export 'package:front_gestion_minera/modules/partners/domain/repositories/loan_register_request_repository.dart';
 export 'package:front_gestion_minera/modules/partners/domain/repositories/distributes_repository.dart';
+export 'package:front_gestion_minera/modules/partners/domain/repositories/member_inbox_repository.dart';

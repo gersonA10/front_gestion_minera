@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:front_gestion_minera/modules/minutes_memos/presentation/bloc/minutes_memos_bloc.dart';
@@ -22,9 +24,9 @@ class ParticipantsDialog extends StatefulWidget {
 class _ParticipantsDialogState extends State<ParticipantsDialog> {
   final TextEditingController _searchController = TextEditingController();
   final ScrollController _scrollController = ScrollController();
+  Timer? _debounce;
   late Set<String> _selectedIds;
   late Map<String, SocioEntity> _selectedMap;
-  List<SocioEntity> _allSocios = [];
   List<SocioEntity> _filteredSocios = [];
   bool _isLoading = true;
   bool _hasMore = false;
@@ -42,6 +44,7 @@ class _ParticipantsDialogState extends State<ParticipantsDialog> {
 
   @override
   void dispose() {
+    _debounce?.cancel();
     _searchController.dispose();
     _scrollController.dispose();
     super.dispose();
@@ -55,11 +58,14 @@ class _ParticipantsDialogState extends State<ParticipantsDialog> {
   }
 
   void _onSearchChanged() {
-    final query = _searchController.text.toLowerCase();
-    setState(() {
-      _filteredSocios = _allSocios
-          .where((s) => s.fullName.toLowerCase().contains(query))
-          .toList();
+    // Búsqueda en el backend (cubre todos los socios, no solo los ya cargados).
+    _debounce?.cancel();
+    _debounce = Timer(const Duration(milliseconds: 400), () {
+      if (!mounted) return;
+      final query = _searchController.text.trim();
+      context.read<MinutesMemosBloc>().add(
+        GetSociosEvent(search: query.isEmpty ? null : query),
+      );
     });
   }
 
@@ -93,14 +99,8 @@ class _ParticipantsDialogState extends State<ParticipantsDialog> {
       listenWhen: (_, state) => state is SociosLoaded || state is SociosError,
       listener: (context, state) {
         if (state is SociosLoaded) {
-          final query = _searchController.text.toLowerCase();
           setState(() {
-            _allSocios = state.socios;
-            _filteredSocios = query.isEmpty
-                ? state.socios
-                : state.socios
-                      .where((s) => s.fullName.toLowerCase().contains(query))
-                      .toList();
+            _filteredSocios = state.socios;
             _hasMore = state.hasMore;
             _isLoading = false;
             _error = null;

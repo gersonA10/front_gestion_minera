@@ -49,6 +49,16 @@ class StaffDatasource {
     );
   }
 
+  /// Actualización parcial de un empleado (PATCH). Solo se envían los campos
+  /// presentes en [data] (p.ej. {'shift_type': ..., 'status': ...}).
+  Future<void> updateEmployee(String id, Map<String, dynamic> data) async {
+    await apiClient.patch(
+      '/api/hr/employees/$id',
+      operationName: 'updateEmployee',
+      data: data,
+    );
+  }
+
   Future<List<PayrollMonthlyModel>> getPayrollMonthly() async {
     final queryParameters = {
       'month': DateTime.now().month.toString(),
@@ -76,6 +86,100 @@ class StaffDatasource {
           'name': 'planilla',
           'path': modelpayroll.planillaUrl,
           'filename': modelpayroll.planillaUrl.split('/').last,
+        },
+      ],
+    );
+  }
+
+  /// Detalle de un egreso: nóminas por trabajador ligadas a [requestId].
+  Future<List<EgresoDetailItemModel>> getEgresoDetail(String requestId) async {
+    final response = await apiClient.get(
+      '/api/hr/payroll-egresos/$requestId/detail',
+      operationName: 'getEgresoDetail',
+    );
+    final List data = (response['data'] as List?) ?? [];
+    return data
+        .map((e) => EgresoDetailItemModel.fromJson(e as Map<String, dynamic>))
+        .toList();
+  }
+
+  /// Saldo de la Caja de Personal del jefe.
+  Future<double> getCashBalance() async {
+    final response = await apiClient.get(
+      '/api/hr/cash/balance',
+      operationName: 'getCashBalance',
+    );
+    return (response['data']?['current_balance'] ?? 0).toDouble();
+  }
+
+  /// Movimientos de la Caja de Personal.
+  Future<List<CashMovementModel>> getCashMovements() async {
+    final response = await apiClient.get(
+      '/api/hr/cash/movements',
+      operationName: 'getCashMovements',
+    );
+    final List data = (response['data'] as List?) ?? [];
+    return data
+        .map((e) => CashMovementModel.fromJson(e as Map<String, dynamic>))
+        .toList();
+  }
+
+  /// Nóminas pendientes por pagar.
+  Future<List<CashPayableModel>> getCashPayables() async {
+    final response = await apiClient.get(
+      '/api/hr/cash/payables',
+      operationName: 'getCashPayables',
+    );
+    final List data = (response['data'] as List?) ?? [];
+    return data
+        .map((e) => CashPayableModel.fromJson(e as Map<String, dynamic>))
+        .toList();
+  }
+
+  /// Paga una nómina desde la Caja de Personal.
+  Future<void> payPayrollFromCash(String payrollId) async {
+    await apiClient.post(
+      '/api/hr/cash/pay-payroll',
+      operationName: 'payPayrollFromCash',
+      data: {'payroll_id': payrollId},
+    );
+  }
+
+  /// Balance del trabajador (total pendiente y atrasado).
+  Future<EmployeeBalanceModel> getEmployeeBalance(String employeeId) async {
+    final response = await apiClient.get(
+      '/api/hr/employees/$employeeId/balance',
+      operationName: 'getEmployeeBalance',
+    );
+    return EmployeeBalanceModel.fromJson(
+      Map<String, dynamic>.from(response['data'] as Map),
+    );
+  }
+
+  /// Solicita a Hacienda un pago individual (adelanto o saldo) para un trabajador.
+  Future<void> requestEmployeePayment({
+    required String employeeId,
+    required String employeeName,
+    required String requestType, // 'ADELANTO' | 'SALDO'
+    required double amount,
+    required String justification,
+    required String imagePath,
+  }) async {
+    await apiClient.postFormData(
+      '/api/hr/employees/payment-request',
+      operationName: 'requestEmployeePayment',
+      data: {
+        'employee_id': employeeId,
+        'employee_name': employeeName,
+        'request_type': requestType,
+        'amount': amount.toString(),
+        'justification': justification,
+      },
+      files: [
+        {
+          'name': 'planilla',
+          'path': imagePath,
+          'filename': imagePath.split('/').last,
         },
       ],
     );
@@ -218,11 +322,12 @@ class StaffDatasource {
   Future<ProcessPayrollPaymentModel> processPayrollPayment({
     required String payrollId,
     required String idempotencyKey,
+    double? amount,
   }) async {
     final response = await apiClient.patch(
       '/api/hr/payrolls/$payrollId/pay',
       operationName: 'processPayrollPayment',
-      data: {},
+      data: amount == null ? {} : {'amount': amount},
       options: Options(headers: {'X-Idempotency-Key': idempotencyKey}),
     );
 

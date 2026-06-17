@@ -45,6 +45,51 @@ class StaffRepositoryImpl implements StaffRepository {
   }
 
   @override
+  Future<void> updateEmployee(String id, Map<String, dynamic> data) =>
+      datasource.updateEmployee(id, data);
+
+  @override
+  Future<void> requestEmployeePayment({
+    required String employeeId,
+    required String employeeName,
+    required String requestType,
+    required double amount,
+    required String justification,
+    required String imagePath,
+  }) =>
+      datasource.requestEmployeePayment(
+        employeeId: employeeId,
+        employeeName: employeeName,
+        requestType: requestType,
+        amount: amount,
+        justification: justification,
+        imagePath: imagePath,
+      );
+
+  @override
+  Future<List<EgresoDetailItemEntity>> getEgresoDetail(String requestId) =>
+      datasource.getEgresoDetail(requestId);
+
+  @override
+  Future<EmployeeBalanceEntity> getEmployeeBalance(String employeeId) =>
+      datasource.getEmployeeBalance(employeeId);
+
+  @override
+  Future<double> getCashBalance() => datasource.getCashBalance();
+
+  @override
+  Future<List<CashMovementEntity>> getCashMovements() =>
+      datasource.getCashMovements();
+
+  @override
+  Future<List<CashPayableEntity>> getCashPayables() =>
+      datasource.getCashPayables();
+
+  @override
+  Future<void> payPayrollFromCash(String payrollId) =>
+      datasource.payPayrollFromCash(payrollId);
+
+  @override
   Future<List<AttendanceIngresoEntity>> getAttendanceIngreso() =>
       datasource.getAttendanceIngreso();
 
@@ -110,10 +155,12 @@ class StaffRepositoryImpl implements StaffRepository {
   Future<ProcessPayrollPaymentEntity> processPayrollPayment({
     required String payrollId,
     required String idempotencyKey,
+    double? amount,
   }) async {
     return await datasource.processPayrollPayment(
       payrollId: payrollId,
       idempotencyKey: idempotencyKey,
+      amount: amount,
     );
   }
 }

@@ -132,6 +132,14 @@ class TColors {
   static const seniorityIconColor = Color(0xFFF5A623);
   static const seniorityLabelColor = Color(0xFFBF8C2E);
 
+  // Bandeja de Socios
+  static const cardShadow = Color(0x0A1A56FF);
+  static const statusGreen = Color(0xFF00C896);
+  static const statusGreenBg = Color(0xFFE3F8F1);
+  static const statusOrange = Color(0xFFC79100);
+  static const statusOrangeBg = Color(0xFFFBF3DC);
+  static const statusGreyBg = Color(0xFFEEF1F6);
+
   // Request Progress / Timeline
   static const headerDark = Color(0xFF1A1F2E);
   static const timelineBlue = Color(0xFF2196F3);

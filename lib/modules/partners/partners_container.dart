@@ -17,6 +17,8 @@ void initPartnersContainer(GetIt getIt) {
 
   getIt.registerLazySingleton(() => DistributesDatasource(apiClient: getIt()));
 
+  getIt.registerLazySingleton(() => MemberInboxDatasource(apiClient: getIt()));
+
   // Repository
   getIt.registerFactory<PartnersRepository>(
     () => PartnersRepositoryImpl(datasource: getIt()),
@@ -31,6 +33,9 @@ void initPartnersContainer(GetIt getIt) {
     () => LoanHistoryRepositoryImpl(datasource: getIt()),
   );
   getIt.registerFactory<DistributesRepository>(() => DistributesRepositoryImpl(datasource: getIt()));
+  getIt.registerFactory<MemberInboxRepository>(
+    () => MemberInboxRepositoryImpl(datasource: getIt()),
+  );
 
   // Bloc
   getIt.registerFactory(
@@ -40,6 +45,7 @@ void initPartnersContainer(GetIt getIt) {
       loanHistoryRepository: getIt(),
       loanRegisterRequestRepository: getIt(),
       distributesRepository: getIt(),
+      memberInboxRepository: getIt(),
     ),
   );
 }

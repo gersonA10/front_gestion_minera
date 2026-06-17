@@ -28,7 +28,7 @@ class _StaffMainScreenState extends State<StaffMainScreen> {
       const WorkersScreen(),
       const PayrollScreen(),
       StaffExpenditureRequestScreen(),
-      AttendanceControlScreen()
+      AttendanceControlScreen(),
     ];
   }
 
@@ -111,7 +111,7 @@ class _StaffMainScreenState extends State<StaffMainScreen> {
               icon: Icon(Icons.settings_outlined),
               activeIcon: Icon(Icons.settings),
               label: 'TURNOS',
-              
+
             ),
           ],
         ),

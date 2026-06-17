@@ -81,6 +81,77 @@ class EmployeeProfileError extends StaffState {
   EmployeeProfileError(this.message);
 }
 
+class EmployeeProfileUpdateSuccess extends StaffState {
+  final EmployeeEntity employee;
+  EmployeeProfileUpdateSuccess(this.employee);
+}
+
+class EmployeeProfileUpdateError extends StaffState {
+  final String message;
+  EmployeeProfileUpdateError(this.message);
+}
+
+class EgresoDetailLoading extends StaffState {}
+
+class EgresoDetailLoaded extends StaffState {
+  final List<EgresoDetailItemEntity> items;
+  EgresoDetailLoaded(this.items);
+}
+
+class EgresoDetailError extends StaffState {
+  final String message;
+  EgresoDetailError(this.message);
+}
+
+class EmployeeBalanceLoaded extends StaffState {
+  final EmployeeBalanceEntity balance;
+  EmployeeBalanceLoaded(this.balance);
+}
+
+// Solo saldo de caja (para Gestionar Nómina, sin alterar la lista)
+class CashBalanceLoaded extends StaffState {
+  final double balance;
+  CashBalanceLoaded(this.balance);
+}
+
+// Caja de Personal
+class PersonnelCashLoading extends StaffState {}
+
+class PersonnelCashError extends StaffState {
+  final String message;
+  PersonnelCashError(this.message);
+}
+
+class PersonnelCashLoaded extends StaffState {
+  final double balance;
+  final List<CashMovementEntity> movements;
+  final List<CashPayableEntity> payables;
+  PersonnelCashLoaded({
+    required this.balance,
+    required this.movements,
+    required this.payables,
+  });
+}
+
+class PayPayrollSuccess extends StaffState {
+  final String message;
+  PayPayrollSuccess(this.message);
+}
+
+class PayPayrollError extends StaffState {
+  final String message;
+  PayPayrollError(this.message);
+}
+
+class EmployeePaymentRequestLoading extends StaffState {}
+
+class EmployeePaymentRequestSuccess extends StaffState {}
+
+class EmployeePaymentRequestError extends StaffState {
+  final String message;
+  EmployeePaymentRequestError(this.message);
+}
+
 class CreatePayrollRequestLoading extends StaffState {}
 
 class CreatePayrollRequestSuccess extends StaffState {}

@@ -7,10 +7,38 @@ class IngresoWorkerCard extends StatelessWidget {
   final IngresoWorker worker;
   final VoidCallback onRegister;
 
+  /// Minutos antes de la hora programada en que se habilita el registro.
+  static const int enableMinutesBefore = 30;
+
   const IngresoWorkerCard({super.key, required this.worker, required this.onRegister});
+
+  /// Hora programada de hoy según `worker.scheduledTime` ("HH:mm").
+  /// Devuelve null si no se puede interpretar (en ese caso no se bloquea).
+  DateTime? _scheduledToday() {
+    final parts = worker.scheduledTime.trim().split(':');
+    if (parts.length < 2) return null;
+    final h = int.tryParse(parts[0]);
+    final mm = parts[1].length >= 2 ? parts[1].substring(0, 2) : parts[1];
+    final m = int.tryParse(mm);
+    if (h == null || m == null) return null;
+    final now = DateTime.now();
+    return DateTime(now.year, now.month, now.day, h, m);
+  }
 
   @override
   Widget build(BuildContext context) {
+    final scheduled = _scheduledToday();
+    final enabledAt = scheduled?.subtract(
+      const Duration(minutes: enableMinutesBefore),
+    );
+    // Habilitado desde 30 min antes en adelante (sin límite después).
+    // Si no se puede interpretar la hora, no bloqueamos.
+    final canRegister =
+        enabledAt == null || !DateTime.now().isBefore(enabledAt);
+    final enabledAtLabel = enabledAt == null
+        ? ''
+        : '${enabledAt.hour.toString().padLeft(2, '0')}:${enabledAt.minute.toString().padLeft(2, '0')}';
+
     return Container(
       decoration: BoxDecoration(
         color: TColors.surface,
@@ -97,11 +125,16 @@ class IngresoWorkerCard extends StatelessWidget {
               width: double.infinity,
               height: 44,
               child: ElevatedButton.icon(
-                onPressed: onRegister,
-                icon: const Icon(Icons.login_rounded, size: 16),
-                label: const Text(
-                  'Registrar Entrada',
-                  style: TextStyle(
+                onPressed: canRegister ? onRegister : null,
+                icon: Icon(
+                  canRegister ? Icons.login_rounded : Icons.lock_clock_rounded,
+                  size: 16,
+                ),
+                label: Text(
+                  canRegister
+                      ? 'Registrar Entrada'
+                      : 'Disponible desde $enabledAtLabel',
+                  style: const TextStyle(
                     fontSize: 14,
                     fontWeight: FontWeight.w600,
                     letterSpacing: 0.2,
@@ -110,6 +143,8 @@ class IngresoWorkerCard extends StatelessWidget {
                 style: ElevatedButton.styleFrom(
                   backgroundColor: TColors.primary,
                   foregroundColor: TColors.white,
+                  disabledBackgroundColor: TColors.border,
+                  disabledForegroundColor: TColors.textSecondary,
                   elevation: 0,
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(10),

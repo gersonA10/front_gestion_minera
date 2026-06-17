@@ -30,6 +30,7 @@ class _ProcessPaymentScreenState extends State<ProcessPaymentScreen> {
   final formatter = NumberFormat('#,##0.00', 'en_US');
   late final StaffBloc _bloc;
   final Uuid _uuid = const Uuid();
+  final TextEditingController _amountCtrl = TextEditingController();
   String get imageUrl => '';
   PayrollMonthlyEntity get payroll => widget.payroll;
 
@@ -37,10 +38,13 @@ class _ProcessPaymentScreenState extends State<ProcessPaymentScreen> {
   void initState() {
     super.initState();
     _bloc = InjectorContainer.getIt<StaffBloc>();
+    // Por defecto se cancela todo lo que falta.
+    _amountCtrl.text = payroll.remaining.toStringAsFixed(2);
   }
 
   @override
   void dispose() {
+    _amountCtrl.dispose();
     _bloc.close();
     super.dispose();
   }
@@ -71,6 +75,28 @@ class _ProcessPaymentScreenState extends State<ProcessPaymentScreen> {
   }
 
   Future<void> _showConfirmDialog() async {
+    final amount =
+        double.tryParse(_amountCtrl.text.trim().replaceAll(',', '.'));
+    if (amount == null || amount <= 0) {
+      CustomAlert.show(
+        context,
+        title: 'Monto inválido',
+        message: 'Ingresa un monto mayor a 0.',
+        type: AlertType.warning,
+      );
+      return;
+    }
+    if (amount > payroll.remaining + 0.009) {
+      CustomAlert.show(
+        context,
+        title: 'Monto excede',
+        message:
+            'El monto supera lo que falta por pagar (${payroll.currency} ${formatter.format(payroll.remaining)}).',
+        type: AlertType.warning,
+      );
+      return;
+    }
+
     final result = await showDialog<bool>(
       context: context,
       builder: (dialogContext) {
@@ -78,7 +104,7 @@ class _ProcessPaymentScreenState extends State<ProcessPaymentScreen> {
           title: const Text('Confirmar Pago'),
           content: Text(
             '¿Confirmar pago de '
-            '${payroll.currency} ${formatter.format(payroll.netTotal)} '
+            '${payroll.currency} ${formatter.format(amount)} '
             'a ${payroll.fullName}?',
           ),
           actions: [
@@ -103,7 +129,22 @@ class _ProcessPaymentScreenState extends State<ProcessPaymentScreen> {
       ProcessPayrollPaymentEvent(
         payrollId: payroll.payrollId,
         idempotencyKey: _uuid.v4(),
+        amount: amount,
       ),
+    );
+  }
+
+  Widget _miniStat(String label, String value, Color color) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(label,
+            style: const TextStyle(fontSize: 11, color: TColors.grayText)),
+        const SizedBox(height: 2),
+        Text(value,
+            style: TextStyle(
+                fontSize: 14, fontWeight: FontWeight.w800, color: color)),
+      ],
     );
   }
 
@@ -305,6 +346,35 @@ class _ProcessPaymentScreenState extends State<ProcessPaymentScreen> {
                                 ],
                               ),
                             ),
+                            if (payroll.totalDeductions > 0) ...[
+                              const SizedBox(height: 10),
+                              Container(
+                                width: double.infinity,
+                                padding: const EdgeInsets.all(16),
+                                decoration: BoxDecoration(
+                                  color: TColors.surface,
+                                  borderRadius: BorderRadius.circular(14),
+                                  border: Border.all(color: TColors.border),
+                                ),
+                                child: Row(
+                                  children: [
+                                    const Expanded(
+                                      child: Text(
+                                        'Adelantos / Deducciones',
+                                        style: TextStyle(fontSize: 14),
+                                      ),
+                                    ),
+                                    Text(
+                                      '- ${payroll.currency} ${formatter.format(payroll.totalDeductions)}',
+                                      style: const TextStyle(
+                                        fontWeight: FontWeight.w700,
+                                        color: TColors.red,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
                             const SizedBox(height: 28),
                             Container(
                               width: double.infinity,
@@ -320,52 +390,74 @@ class _ProcessPaymentScreenState extends State<ProcessPaymentScreen> {
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   const Text(
-                                    'Total Neto a Pagar',
+                                    'Neto a Recibir',
                                     style: TextStyle(
                                       fontSize: 13,
                                       fontWeight: FontWeight.w600,
                                       color: TColors.grayText,
                                     ),
                                   ),
+                                  const SizedBox(height: 6),
+                                  Text(
+                                    '${payroll.currency} ${formatter.format(payroll.netToReceive)}',
+                                    style: const TextStyle(
+                                      fontSize: 28,
+                                      fontWeight: FontWeight.w800,
+                                      color: TColors.appMainDarkColor,
+                                      height: 1,
+                                    ),
+                                  ),
                                   const SizedBox(height: 12),
                                   Row(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.center,
                                     children: [
                                       Expanded(
-                                        child: Text(
-                                          '${payroll.currency} ${formatter.format(payroll.netTotal)}',
-                                          style: const TextStyle(
-                                            fontSize: 32,
-                                            fontWeight: FontWeight.w800,
-                                            color: TColors.appMainDarkColor,
-                                            height: 1,
-                                          ),
+                                        child: _miniStat(
+                                          'Ya pagado',
+                                          '${payroll.currency} ${formatter.format(payroll.paidAmount)}',
+                                          TColors.green,
                                         ),
                                       ),
-                                      Container(
-                                        padding: const EdgeInsets.symmetric(
-                                          horizontal: 12,
-                                          vertical: 6,
-                                        ),
-                                        decoration: BoxDecoration(
-                                          color: TColors.white,
-                                          borderRadius: BorderRadius.circular(
-                                            20,
-                                          ),
-                                        ),
-                                        child: Text(
-                                          payroll.currency,
-                                          style: const TextStyle(
-                                            fontSize: 11,
-                                            fontWeight: FontWeight.w700,
-                                            color: TColors.profileBlue,
-                                          ),
+                                      Expanded(
+                                        child: _miniStat(
+                                          'Falta por pagar',
+                                          '${payroll.currency} ${formatter.format(payroll.remaining)}',
+                                          TColors.amber,
                                         ),
                                       ),
                                     ],
                                   ),
                                 ],
+                              ),
+                            ),
+                            const SizedBox(height: 16),
+                            const Text(
+                              '¿Cuánto le cancelas ahora?',
+                              style: TextStyle(
+                                fontSize: 13,
+                                fontWeight: FontWeight.w700,
+                                color: TColors.grayText,
+                              ),
+                            ),
+                            const SizedBox(height: 8),
+                            TextField(
+                              controller: _amountCtrl,
+                              keyboardType: const TextInputType.numberWithOptions(
+                                decimal: true,
+                              ),
+                              decoration: InputDecoration(
+                                prefixText: '${payroll.currency} ',
+                                filled: true,
+                                fillColor: TColors.white,
+                                border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                  borderSide:
+                                      const BorderSide(color: TColors.border),
+                                ),
+                                enabledBorder: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                  borderSide:
+                                      const BorderSide(color: TColors.border),
+                                ),
                               ),
                             ),
                             const Spacer(),
