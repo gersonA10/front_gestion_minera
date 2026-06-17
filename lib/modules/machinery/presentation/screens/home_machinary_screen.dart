@@ -47,75 +47,51 @@ class _HomeMachinaryScreenState extends State<HomeMachinaryScreen> {
       child: Scaffold(
         backgroundColor: TColors.appBackgroundColor,
         body: SafeArea(
-          child: SingleChildScrollView(
-            physics: const AlwaysScrollableScrollPhysics(),
-            child: Padding(
-              padding: const EdgeInsets.all(20.0),
-              child: Column(
-                children: [
-                  BlocBuilder<MachineryBloc, MachineryState>(
-                    buildWhen: (previous, current) =>
-                        current is MetricsMachineryLoading ||
-                        current is MetricsMachineryLoaded ||
-                        current is MetricsMachineryError ||
-                        current is InventoryMachineryLoaded ||
-                        current is InventoryMachineryLoading ||
-                        current is InventoryMachineryError,
-                    builder: (context, state) {
-                      if (state is MetricsMachineryLoading) {
-                        return const SizedBox(
-                          height: 120,
-                          child: Center(child: CircularProgressIndicator()),
-                        );
-                      }
-                      if (state is MetricsMachineryError) {
-                        return Container(
-                          height: 120,
-                          width: double.infinity,
-                          alignment: Alignment.center,
-                          decoration: BoxDecoration(
-                            color: TColors.white,
-                            borderRadius: BorderRadius.circular(18),
-                          ),
-                          child: Text(
-                            state.message,
-                            style: TextStyle(color: TColors.red),
-                          ),
-                        );
-                      }
-                      if (state is MetricsMachineryLoaded) {
-                        _cacheMetrics = state.metrics;
-                        _machineryBloc.add(ListInventoryMachineryEvent());
-                      }
+          child: BlocConsumer<MachineryBloc, MachineryState>(
+            // Los efectos secundarios (cachear datos y encadenar el siguiente
+            // fetch) van en el listener, no en el builder.
+            listenWhen: (previous, current) =>
+                current is MetricsMachineryLoaded ||
+                current is InventoryMachineryLoaded,
+            listener: (context, state) {
+              if (state is MetricsMachineryLoaded) {
+                _cacheMetrics = state.metrics;
+                _machineryBloc.add(ListInventoryMachineryEvent());
+              } else if (state is InventoryMachineryLoaded) {
+                _cacheinventory = state.machinery;
+              }
+            },
+            buildWhen: (previous, current) =>
+                current is MetricsMachineryLoading ||
+                current is MetricsMachineryLoaded ||
+                current is MetricsMachineryError ||
+                current is InventoryMachineryLoaded ||
+                current is InventoryMachineryLoading ||
+                current is InventoryMachineryError,
+            builder: (context, state) {
+              // Error al cargar las métricas sin datos previos en caché.
+              if (state is MetricsMachineryError && _cacheMetrics == null) {
+                return _buildErrorState(state.message);
+              }
+              // Error al cargar el inventario sin datos previos en caché.
+              if (state is InventoryMachineryError &&
+                  _cacheinventory == null) {
+                return _buildErrorState(state.message);
+              }
+              // Todavía esperando los datos iniciales.
+              if (_cacheMetrics == null || _cacheinventory == null) {
+                return const Center(child: CircularProgressIndicator());
+              }
 
-                      if (state is InventoryMachineryLoaded) {
-                        _cacheinventory = state.machinery;
-                      }
+              final metrics = _cacheMetrics!;
+              final inventory = _cacheinventory!;
 
-                      final bool isLoadingM = state is MetricsMachineryLoading;
-                      final bool isLoadingI =
-                          state is InventoryMachineryLoading;
-
-                      if (_cacheMetrics == null || _cacheinventory == null) {
-                        if (isLoadingM || isLoadingI) {
-                          return const Center(
-                            child: CircularProgressIndicator(),
-                          );
-                        }
-                        if (state is MetricsMachineryError) {
-                          return Center(child: Text(state.message));
-                        }
-                        if (state is InventoryMachineryError) {
-                          return Center(child: Text(state.message));
-                        }
-                        return const SizedBox();
-                      }
-
-                      final metrics = _cacheMetrics!;
-                      final inventory = _cacheinventory!;
-
-                      return Column(
-                        children: [
+              return SingleChildScrollView(
+                physics: const AlwaysScrollableScrollPhysics(),
+                child: Padding(
+                  padding: const EdgeInsets.all(20.0),
+                  child: Column(
+                    children: [
                           Container(
                             decoration: BoxDecoration(
                               color: TColors.white,
@@ -277,13 +253,45 @@ class _HomeMachinaryScreenState extends State<HomeMachinaryScreen> {
                             ),
                           ),
                           const SizedBox(height: 15),
-                        ],
-                      );
-                    },
+                    ],
                   ),
-                ],
+                ),
+              );
+            },
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildErrorState(String message) {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(20.0),
+        child: Container(
+          width: double.infinity,
+          alignment: Alignment.center,
+          padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 16),
+          decoration: BoxDecoration(
+            color: TColors.white,
+            borderRadius: BorderRadius.circular(18),
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                message,
+                textAlign: TextAlign.center,
+                style: TextStyle(color: TColors.red),
               ),
-            ),
+              const SizedBox(height: 16),
+              OutlinedButton.icon(
+                onPressed: () =>
+                    _machineryBloc.add(FetchMetricsMachineEvent()),
+                icon: const Icon(Icons.refresh),
+                label: const Text('Reintentar'),
+              ),
+            ],
           ),
         ),
       ),

@@ -9,6 +9,7 @@ class PayrollMonthlyModel extends PayrollMonthlyEntity {
     required super.baseSalary,
     required super.totalDeductions,
     required super.netTotal,
+    super.paidAmount,
     required super.paymentStatus,
     required super.currency,
   });
@@ -22,6 +23,7 @@ class PayrollMonthlyModel extends PayrollMonthlyEntity {
       baseSalary: (json['base_salary'] ?? 0).toDouble(),
       totalDeductions: (json['total_deductions'] ?? 0).toDouble(),
       netTotal: (json['net_total'] ?? 0).toDouble(),
+      paidAmount: (json['paid_amount'] ?? 0).toDouble(),
       paymentStatus: json['payment_status'] ?? '',
       currency: json['currency'] ?? '',
     );

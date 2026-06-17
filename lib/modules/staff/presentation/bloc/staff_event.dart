@@ -44,6 +44,15 @@ class GetEmployeeBalanceEvent extends StaffEvent {
   GetEmployeeBalanceEvent(this.employeeId);
 }
 
+class GetPersonnelCashEvent extends StaffEvent {}
+
+class GetCashBalanceEvent extends StaffEvent {}
+
+class PayPayrollFromCashEvent extends StaffEvent {
+  final String payrollId;
+  PayPayrollFromCashEvent(this.payrollId);
+}
+
 class RequestEmployeePaymentEvent extends StaffEvent {
   final String employeeId;
   final String employeeName;
@@ -135,9 +144,11 @@ class GetPayrollHistoryEvent extends StaffEvent {
 class ProcessPayrollPaymentEvent extends StaffEvent {
   final String payrollId;
   final String idempotencyKey;
+  final double? amount;
 
   ProcessPayrollPaymentEvent({
     required this.payrollId,
     required this.idempotencyKey,
+    this.amount,
   });
 }

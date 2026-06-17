@@ -27,6 +27,10 @@ abstract class StaffRepository {
   });
   Future<List<EgresoDetailItemEntity>> getEgresoDetail(String requestId);
   Future<EmployeeBalanceEntity> getEmployeeBalance(String employeeId);
+  Future<double> getCashBalance();
+  Future<List<CashMovementEntity>> getCashMovements();
+  Future<List<CashPayableEntity>> getCashPayables();
+  Future<void> payPayrollFromCash(String payrollId);
 
   Future<List<AttendanceIngresoEntity>> getAttendanceIngreso();
   Future<List<AttendanceEnPlantaEntity>> getAttendanceEnPlanta();
@@ -59,5 +63,6 @@ abstract class StaffRepository {
   Future<ProcessPayrollPaymentEntity> processPayrollPayment({
   required String payrollId,
   required String idempotencyKey,
+  double? amount,
 });
 }

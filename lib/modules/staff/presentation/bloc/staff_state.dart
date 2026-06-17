@@ -108,6 +108,41 @@ class EmployeeBalanceLoaded extends StaffState {
   EmployeeBalanceLoaded(this.balance);
 }
 
+// Solo saldo de caja (para Gestionar Nómina, sin alterar la lista)
+class CashBalanceLoaded extends StaffState {
+  final double balance;
+  CashBalanceLoaded(this.balance);
+}
+
+// Caja de Personal
+class PersonnelCashLoading extends StaffState {}
+
+class PersonnelCashError extends StaffState {
+  final String message;
+  PersonnelCashError(this.message);
+}
+
+class PersonnelCashLoaded extends StaffState {
+  final double balance;
+  final List<CashMovementEntity> movements;
+  final List<CashPayableEntity> payables;
+  PersonnelCashLoaded({
+    required this.balance,
+    required this.movements,
+    required this.payables,
+  });
+}
+
+class PayPayrollSuccess extends StaffState {
+  final String message;
+  PayPayrollSuccess(this.message);
+}
+
+class PayPayrollError extends StaffState {
+  final String message;
+  PayPayrollError(this.message);
+}
+
 class EmployeePaymentRequestLoading extends StaffState {}
 
 class EmployeePaymentRequestSuccess extends StaffState {}

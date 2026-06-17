@@ -31,6 +31,9 @@ class StaffBloc extends Bloc<StaffEvent, StaffState> {
     on<RequestEmployeePaymentEvent>(_onRequestEmployeePayment);
     on<GetEgresoDetailEvent>(_onGetEgresoDetail);
     on<GetEmployeeBalanceEvent>(_onGetEmployeeBalance);
+    on<GetPersonnelCashEvent>(_onGetPersonnelCash);
+    on<GetCashBalanceEvent>(_onGetCashBalance);
+    on<PayPayrollFromCashEvent>(_onPayPayrollFromCash);
     on<GetAttendanceIngresoEvent>(_onGetAttendanceIngreso);
     on<GetAttendanceEnPlantaEvent>(_onGetAttendanceEnPlanta);
     on<GetAttendanceFinalizadoEvent>(_onGetAttendanceFinalizado);
@@ -260,6 +263,56 @@ class StaffBloc extends Bloc<StaffEvent, StaffState> {
       emit(EmployeeBalanceLoaded(balance));
     } catch (_) {
       // El balance es informativo; si falla no bloqueamos el perfil.
+    }
+  }
+
+  Future<void> _onGetCashBalance(
+    GetCashBalanceEvent event,
+    Emitter<StaffState> emit,
+  ) async {
+    try {
+      final balance = await repository.getCashBalance();
+      emit(CashBalanceLoaded(balance));
+    } catch (_) {
+      // Saldo informativo; no bloquea la pantalla.
+    }
+  }
+
+  Future<void> _onGetPersonnelCash(
+    GetPersonnelCashEvent event,
+    Emitter<StaffState> emit,
+  ) async {
+    emit(PersonnelCashLoading());
+    try {
+      final results = await Future.wait([
+        repository.getCashBalance(),
+        repository.getCashMovements(),
+        repository.getCashPayables(),
+      ]);
+      emit(PersonnelCashLoaded(
+        balance: results[0] as double,
+        movements: results[1] as List<CashMovementEntity>,
+        payables: results[2] as List<CashPayableEntity>,
+      ));
+    } on BaseApiException catch (e) {
+      emit(PersonnelCashError(mapErrorMessage(e.key)));
+    } catch (_) {
+      emit(PersonnelCashError('Ocurrió un error inesperado'));
+    }
+  }
+
+  Future<void> _onPayPayrollFromCash(
+    PayPayrollFromCashEvent event,
+    Emitter<StaffState> emit,
+  ) async {
+    try {
+      await repository.payPayrollFromCash(event.payrollId);
+      emit(PayPayrollSuccess('Pago registrado correctamente'));
+      add(GetPersonnelCashEvent());
+    } on BaseApiException catch (e) {
+      emit(PayPayrollError(mapErrorMessage(e.key)));
+    } catch (_) {
+      emit(PayPayrollError('No se pudo registrar el pago'));
     }
   }
 
@@ -545,6 +598,7 @@ class StaffBloc extends Bloc<StaffEvent, StaffState> {
       final response = await repository.processPayrollPayment(
         payrollId: event.payrollId,
         idempotencyKey: event.idempotencyKey,
+        amount: event.amount,
       );
       emit(ProcessPayrollPaymentSuccess(response));
     } catch (e) {

@@ -6,6 +6,7 @@ class PayrollMonthlyEntity {
   final double baseSalary;
   final double totalDeductions;
   final double netTotal;
+  final double paidAmount;
   final String paymentStatus;
   final String currency;
 
@@ -17,7 +18,17 @@ class PayrollMonthlyEntity {
     required this.baseSalary,
     required this.totalDeductions,
     required this.netTotal,
+    this.paidAmount = 0,
     required this.paymentStatus,
     required this.currency,
   });
+
+  /// Neto a recibir = salario base − deducciones (el adelanto ya descuenta).
+  double get netToReceive => baseSalary - totalDeductions;
+
+  /// Lo que falta por pagar.
+  double get remaining {
+    final r = netToReceive - paidAmount;
+    return r < 0 ? 0 : r;
+  }
 }

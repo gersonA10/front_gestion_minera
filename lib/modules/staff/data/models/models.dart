@@ -15,3 +15,4 @@ export 'package:front_gestion_minera/modules/staff/data/models/paginated_employe
 export 'package:front_gestion_minera/modules/staff/data/models/process_payroll_payment_model.dart';
 export 'package:front_gestion_minera/modules/staff/data/models/egreso_detail_model.dart';
 export 'package:front_gestion_minera/modules/staff/data/models/employee_balance_model.dart';
+export 'package:front_gestion_minera/modules/staff/data/models/personnel_cash_model.dart';

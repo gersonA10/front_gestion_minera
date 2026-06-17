@@ -4,6 +4,7 @@ import 'package:front_gestion_minera/config/router/app_router.gr.dart';
 import 'package:front_gestion_minera/modules/staff/presentation/widgets/payroll_cycle_selector_widget.dart';
 import 'package:front_gestion_minera/modules/staff/presentation/widgets/payroll_employee_card_widget.dart';
 import 'package:front_gestion_minera/modules/staff/presentation/widgets/payroll_summary_card_widget.dart';
+import 'package:front_gestion_minera/modules/staff/presentation/screens/personnel_cash_screen.dart';
 import 'package:front_gestion_minera/utils/constants/color.constant.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:front_gestion_minera/injector_container.dart';
@@ -27,6 +28,7 @@ class _PayrollScreenState extends State<PayrollScreen> {
   late int selectedYear;
   String selectedStatus = 'Todos';
   final List<String> statusFilters = ['Todos', 'Pagado', 'Pendiente'];
+  double? _cajaBalance;
   bool get isHistoryMode => widget.payrollPeriod != null;
   int _getMonthFromPeriod(String period) {
     const months = {
@@ -85,6 +87,7 @@ class _PayrollScreenState extends State<PayrollScreen> {
     _bloc.add(
       GetPayrollMonthlyListEvent(month: selectedMonth, year: selectedYear),
     );
+    _bloc.add(GetCashBalanceEvent());
   }
 
   @override
@@ -147,8 +150,18 @@ class _PayrollScreenState extends State<PayrollScreen> {
           ),
         ),
       ),
-      body: BlocBuilder<StaffBloc, StaffState>(
+      body: BlocConsumer<StaffBloc, StaffState>(
         bloc: _bloc,
+        listenWhen: (_, s) => s is CashBalanceLoaded,
+        listener: (context, state) {
+          if (state is CashBalanceLoaded) {
+            setState(() => _cajaBalance = state.balance);
+          }
+        },
+        buildWhen: (_, s) =>
+            s is PayrollMonthlyLoading ||
+            s is PayrollMonthlyLoaded ||
+            s is PayrollMonthlyError,
         builder: (context, state) {
           if (state is PayrollMonthlyLoading) {
             return const Center(child: CircularProgressIndicator());
@@ -240,6 +253,56 @@ class _PayrollScreenState extends State<PayrollScreen> {
                             ],
                           ),
                         ],
+                      ),
+                    ),
+                    const SizedBox(height: 10),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 20),
+                      child: Container(
+                        width: double.infinity,
+                        padding: const EdgeInsets.all(16),
+                        decoration: BoxDecoration(
+                          color: TColors.appMainColor,
+                          borderRadius: BorderRadius.circular(16),
+                        ),
+                        child: Row(
+                          children: [
+                            const Icon(Icons.account_balance_wallet,
+                                color: TColors.white, size: 26),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  const Text('Caja de Personal',
+                                      style: TextStyle(
+                                          color: TColors.white, fontSize: 12)),
+                                  Text(
+                                    _cajaBalance == null
+                                        ? '...'
+                                        : '${_cajaBalance!.toStringAsFixed(2)} Bs',
+                                    style: const TextStyle(
+                                        color: TColors.white,
+                                        fontSize: 20,
+                                        fontWeight: FontWeight.w800),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            TextButton.icon(
+                              onPressed: () => Navigator.of(context).push(
+                                MaterialPageRoute(
+                                  builder: (_) => const PersonnelCashScreen(),
+                                ),
+                              ),
+                              style: TextButton.styleFrom(
+                                foregroundColor: TColors.white,
+                              ),
+                              icon: const Icon(Icons.receipt_long, size: 16),
+                              label: const Text('Movimientos'),
+                            ),
+                          ],
+                        ),
                       ),
                     ),
                     const SizedBox(height: 10),
@@ -414,6 +477,7 @@ class _PayrollScreenState extends State<PayrollScreen> {
                                           year: selectedYear,
                                         ),
                                       );
+                                      _bloc.add(GetCashBalanceEvent());
                                     }
                                   },
                                 );
