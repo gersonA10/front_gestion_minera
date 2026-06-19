@@ -1,8 +1,8 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:front_gestion_minera/config/router/app_router.gr.dart';
+import 'package:front_gestion_minera/core/widgets/app_network_image.dart';
 import 'package:front_gestion_minera/modules/machinery/domain/entity/entity.dart';
-import 'package:front_gestion_minera/utils/assets.dart';
 import 'package:front_gestion_minera/utils/constants/color.constant.dart';
 
 class CardMachineryWidget extends StatelessWidget {
@@ -17,105 +17,112 @@ class CardMachineryWidget extends StatelessWidget {
       },
       child: Container(
         width: double.infinity,
-        padding: EdgeInsets.all(15),
-        margin: EdgeInsets.symmetric(vertical: 5),
+        padding: const EdgeInsets.all(12),
+        margin: const EdgeInsets.only(bottom: 12),
         decoration: BoxDecoration(
           color: TColors.white,
-          borderRadius: BorderRadius.circular(10),
+          borderRadius: BorderRadius.circular(18),
+          border: Border.all(color: TColors.border),
         ),
         child: Row(
           children: [
             ClipRRect(
-              borderRadius: BorderRadiusGeometry.circular(12),
-              child: Container(
-                width: 70,
-                height: 70,
-                color: TColors.appBackgroundColor,
-                child: FadeInImage.assetNetwork(
-                  placeholder: AssetImageApp.getIconLoading,
-                  image: machine.photoUrl ?? '',
-                  fit: BoxFit.cover,
-                  imageErrorBuilder: (_, _, _) {
-                    return Center(child: const Icon(Icons.image_not_supported, size: 30));
-                  },
-                ),
+              borderRadius: BorderRadius.circular(14),
+              child: AppNetworkImage(
+                url: machine.photoUrl,
+                width: 64,
+                height: 64,
+                errorIcon: Icons.precision_manufacturing_rounded,
+                errorIconSize: 28,
               ),
             ),
-            const SizedBox(width: 15),
+            const SizedBox(width: 14),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
                     machine.name,
-                    style: TextStyle(fontWeight: FontWeight.bold),
-                    maxLines: 2,
+                    style: const TextStyle(
+                      fontWeight: FontWeight.w700,
+                      fontSize: 15,
+                      color: TColors.textPrimary,
+                    ),
+                    maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),
+                  const SizedBox(height: 3),
                   Text(
                     machine.description,
-                    style: TextStyle(color: TColors.textFieldDisabledColor),
-                    maxLines: 2,
+                    style: const TextStyle(
+                      color: TColors.textSecondary,
+                      fontSize: 12.5,
+                      height: 1.25,
+                    ),
+                    maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),
+                  const SizedBox(height: 8),
+                  _statusPill(machine.status.toLowerCase()),
                 ],
               ),
             ),
-            _viewState(machine.status.toLowerCase()),
+            const SizedBox(width: 6),
+            const Icon(
+              Icons.arrow_forward_ios_rounded,
+              size: 14,
+              color: TColors.iconMuted,
+            ),
           ],
         ),
       ),
     );
   }
 
-  Widget _viewState(String tipo) {
+  Widget _statusPill(String tipo) {
+    late final Color color;
+    late final Color bg;
+    late final String label;
+    late final IconData icon;
+
     if (tipo == 'activo') {
-      return Container(
-        padding: EdgeInsets.symmetric(vertical: 5, horizontal: 10),
-        decoration: BoxDecoration(
-          color: TColors.green.withValues(alpha: 0.2),
-          borderRadius: BorderRadius.circular(30),
-        ),
-        child: Text(
-          'ACTIVO',
-          style: TextStyle(
-            fontWeight: FontWeight.bold,
-            color: TColors.green.withValues(alpha: 0.9),
-            fontSize: 10,
-          ),
-        ),
-      );
+      color = TColors.success;
+      bg = TColors.successLight;
+      label = 'ACTIVO';
+      icon = Icons.check_circle_rounded;
+    } else if (tipo == 'en mantenimiento') {
+      color = TColors.warning;
+      bg = TColors.warningLight;
+      label = 'MANTENIMIENTO';
+      icon = Icons.build_rounded;
+    } else {
+      color = TColors.danger;
+      bg = TColors.dangerLight;
+      label = 'INACTIVO';
+      icon = Icons.cancel_rounded;
     }
-    if (tipo == 'en mantenimiento') {
-      return Container(
-        padding: EdgeInsets.symmetric(vertical: 5, horizontal: 10),
-        decoration: BoxDecoration(
-          color: TColors.amber.withValues(alpha: 0.2),
-          borderRadius: BorderRadius.circular(30),
-        ),
-        child: Text(
-          'MANTENIMIENTO',
-          style: TextStyle(
-            fontWeight: FontWeight.bold,
-            color: TColors.amber.withValues(alpha: 0.9),
-            fontSize: 10,
-          ),
-        ),
-      );
-    }
+
     return Container(
-      padding: EdgeInsets.symmetric(vertical: 5, horizontal: 10),
+      padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 9),
       decoration: BoxDecoration(
-        color: TColors.red.withValues(alpha: 0.2),
+        color: bg,
         borderRadius: BorderRadius.circular(30),
       ),
-      child: Text(
-        'INACTIVO',
-        style: TextStyle(
-          fontWeight: FontWeight.bold,
-          color: TColors.red.withValues(alpha: 0.9),
-          fontSize: 10,
-        ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, size: 12, color: color),
+          const SizedBox(width: 4),
+          Text(
+            label,
+            style: TextStyle(
+              fontWeight: FontWeight.w700,
+              color: color,
+              fontSize: 10,
+              letterSpacing: 0.2,
+            ),
+          ),
+        ],
       ),
     );
   }

@@ -1,15 +1,14 @@
-import 'dart:io';
-
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:front_gestion_minera/core/widgets/custom_alert_widget.dart';
 import 'package:front_gestion_minera/core/widgets/excavator_loader.dart';
-import 'package:front_gestion_minera/utils/text_util.dart';
-import 'package:image_picker/image_picker.dart';
 import 'package:front_gestion_minera/injector_container.dart';
 import 'package:front_gestion_minera/modules/machinery/presentation/bloc/machinery_bloc.dart';
+import 'package:front_gestion_minera/modules/machinery/presentation/widgets/info_banner_widget.dart';
 import 'package:front_gestion_minera/utils/constants/color.constant.dart';
+import 'package:image_picker/image_picker.dart';
 
 import '../../domain/entity/entity.dart';
 
@@ -28,10 +27,17 @@ class _RequestMaintenanceScreenState extends State<RequestMaintenanceScreen> {
   late MachineryBloc _machineryBloc;
   List<FailureTypeEntity> _failureTypes = [];
   String? _selectedFaultType;
+
+  final _formKey = GlobalKey<FormState>();
   final _descriptionController = TextEditingController();
   final _costController = TextEditingController();
-  final List<XFile> _pickedImages = [];
   final _picker = ImagePicker();
+  XFile? _evidence;
+
+  AutovalidateMode _autoValidate = AutovalidateMode.disabled;
+  bool _typeError = false;
+  bool _photoError = false;
+  bool _typesLoadFailed = false;
 
   @override
   void initState() {
@@ -47,139 +53,49 @@ class _RequestMaintenanceScreenState extends State<RequestMaintenanceScreen> {
     super.dispose();
   }
 
-  Future<void> _showImageSourceSheet() async {
-    await showModalBottomSheet(
-      context: context,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-      ),
-      builder: (_) => SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 16),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Container(
-                width: 40,
-                height: 4,
-                decoration: BoxDecoration(
-                  color: Colors.grey[300],
-                  borderRadius: BorderRadius.circular(2),
-                ),
-              ),
-              const SizedBox(height: 16),
-              const Text(
-                'Agregar evidencia',
-                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-              ),
-              const SizedBox(height: 16),
-              ListTile(
-                leading: Container(
-                  padding: const EdgeInsets.all(10),
-                  decoration: BoxDecoration(
-                    color: TColors.appSecondaryColor.withValues(alpha: 0.1),
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                  child: const Icon(
-                    Icons.camera_alt_outlined,
-                    color: TColors.appSecondaryColor,
-                  ),
-                ),
-                title: const Text(
-                  'Tomar foto',
-                  style: TextStyle(fontWeight: FontWeight.w600),
-                ),
-                subtitle: const Text('Usar la cámara del dispositivo'),
-                onTap: () {
-                  Navigator.pop(context);
-                  _pickImage(ImageSource.camera);
-                },
-              ),
-              ListTile(
-                leading: Container(
-                  padding: const EdgeInsets.all(10),
-                  decoration: BoxDecoration(
-                    color: TColors.appSecondaryColor.withValues(alpha: 0.1),
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                  child: const Icon(
-                    Icons.photo_library_outlined,
-                    color: TColors.appSecondaryColor,
-                  ),
-                ),
-                title: const Text(
-                  'Elegir de galería',
-                  style: TextStyle(fontWeight: FontWeight.w600),
-                ),
-                subtitle: const Text('Seleccionar una imagen existente'),
-                onTap: () {
-                  Navigator.pop(context);
-                  _pickImage(ImageSource.gallery);
-                },
-              ),
-              const SizedBox(height: 8),
-            ],
-          ),
-        ),
-      ),
-    );
+  void _retryTypes() {
+    setState(() => _typesLoadFailed = false);
+    _machineryBloc.add(FetchFailureTypesEvent());
   }
 
-  Future<void> _pickImage(ImageSource source) async {
-    final XFile? photo = await _picker.pickImage(source: source);
+  Future<void> _pickImage() async {
+    final source = await showModalBottomSheet<ImageSource>(
+      context: context,
+      backgroundColor: TColors.white,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(22)),
+      ),
+      builder: (_) => const _EvidenceSourceSheet(),
+    );
+    if (source == null) return;
+    final photo = await _picker.pickImage(source: source, imageQuality: 80);
     if (photo != null) {
       setState(() {
-        _pickedImages.add(photo);
+        _evidence = photo;
+        _photoError = false;
       });
     }
   }
 
-  void _removeImage(int index) => setState(() => _pickedImages.removeAt(index));
-
-  // ── Submit ───────────────────────────────────────────────────────────────────
-
   void _submit() {
-    final description = _descriptionController.text.trim();
-    final cost = _costController.text.trim();
+    final formValid = _formKey.currentState?.validate() ?? false;
+    final typeValid = _selectedFaultType != null;
+    final photoValid = _evidence != null;
 
-    if (_selectedFaultType == null) {
-      CustomAlert.show(
-        context,
-        title: 'Campos incompletos',
-        message: 'Por favor, selecciona un tipo de falla.',
-        type: AlertType.warning,
-      );
-      return;
-    }
+    setState(() {
+      _autoValidate = AutovalidateMode.onUserInteraction;
+      _typeError = !typeValid;
+      _photoError = !photoValid;
+    });
 
-    if (description.isEmpty || cost.isEmpty) {
-      CustomAlert.show(
-        context,
-        title: 'Campos incompletos',
-        message: 'Por favor, completa la descripción y el costo estimado.',
-        type: AlertType.warning,
-      );
-      return;
-    }
-
-    if (_pickedImages.isEmpty) {
-      CustomAlert.show(
-        context,
-        title: 'Falta evidencia',
-        message: 'Por favor, agrega al menos una imagen de evidencia.',
-        type: AlertType.warning,
-      );
-      return;
-    }
-
-    final evidence = _pickedImages.first;
+    if (!formValid || !typeValid || !photoValid) return;
 
     final request = CreateMaintenanceRequestEntity(
       machineId: widget.machineId,
       failureType: _selectedFaultType!,
-      description: description,
-      estimatedAmount: cost,
-      evidenceUrlPath: evidence.path,
+      description: _descriptionController.text.trim(),
+      estimatedAmount: _costController.text.trim(),
+      evidenceUrlPath: _evidence!.path,
     );
     _machineryBloc.add(CreateMaintenanceRequestEvent(request: request));
   }
@@ -193,17 +109,13 @@ class _RequestMaintenanceScreenState extends State<RequestMaintenanceScreen> {
           if (state is FailureTypesLoaded) {
             setState(() {
               _failureTypes = state.failureTypes;
+              _typesLoadFailed = false;
               _selectedFaultType = state.failureTypes.isNotEmpty
                   ? state.failureTypes.first.value
                   : null;
             });
           } else if (state is FailureTypesError) {
-            CustomAlert.show(
-              context,
-              title: 'Error',
-              message: state.message,
-              type: AlertType.error,
-            );
+            setState(() => _typesLoadFailed = true);
           } else if (state is CreateMaintenanceRequestSuccess) {
             CustomAlert.show(
               context,
@@ -222,126 +134,106 @@ class _RequestMaintenanceScreenState extends State<RequestMaintenanceScreen> {
           }
         },
         builder: (context, state) {
-          final isLoading = state is CreateMaintenanceRequestLoading;
+          final isSubmitting = state is CreateMaintenanceRequestLoading;
+
           return Stack(
             children: [
               Scaffold(
-                backgroundColor: TColors.appBackgroundColor,
+                backgroundColor: TColors.background,
                 appBar: AppBar(
-                  backgroundColor: TColors.appSecondaryColor,
+                  backgroundColor: TColors.white,
+                  surfaceTintColor: TColors.white,
                   elevation: 0,
-                  leadingWidth: 40,
-                  leading: Padding(
-                    padding: const EdgeInsets.only(left: 12),
-                    child: IconButton(
-                      icon: const Icon(
-                        Icons.arrow_back,
-                        color: Colors.white,
-                        size: 22,
-                      ),
-                      onPressed: () => context.router.back(),
+                  scrolledUnderElevation: 0,
+                  foregroundColor: TColors.textPrimary,
+                  systemOverlayStyle: SystemUiOverlayStyle.dark,
+                  leading: const BackButton(color: TColors.textPrimary),
+                  title: const Text(
+                    'Solicitar mantenimiento',
+                    style: TextStyle(
+                      color: TColors.textPrimary,
+                      fontSize: 17,
+                      fontWeight: FontWeight.w700,
                     ),
                   ),
-                  title: const Text(
-                    'SOLICITAR MANTENIMIENTO',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                    ),
+                  centerTitle: true,
+                  bottom: PreferredSize(
+                    preferredSize: const Size.fromHeight(1),
+                    child: Container(height: 1, color: TColors.border),
                   ),
                 ),
                 body: SafeArea(
+                  top: false,
                   child: Column(
                     children: [
                       Expanded(
-                        child: SingleChildScrollView(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 20,
-                            vertical: 24,
-                          ),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              _buildSectionTitle(
-                                Icons.warning_amber_outlined,
-                                'Tipo de Falla',
-                              ),
-                              const SizedBox(height: 10),
-                              _buildFailureTypeDropdown(),
-                              const SizedBox(height: 20),
-                              _buildSectionTitle(
-                                Icons.description_outlined,
-                                'Detalles',
-                              ),
-                              const SizedBox(height: 16),
-                              Text('Descripción', style: AppTextStyles.mainStyle12(context),),
-                              const SizedBox(height: 6),
-                              _buildTextArea(),
-                              const SizedBox(height: 20),
-                              Text('Costo Estimado', style: AppTextStyles.mainStyle12(context),),
-                              const SizedBox(height: 6),
-                              _buildCostField(),
-                              const SizedBox(height: 28),
-                              _buildSectionTitle(
-                                Icons.add_a_photo_outlined,
-                                'Evidencia',
-                              ),
-                              const SizedBox(height: 16),
-                              _buildUploadArea(),
-                              if (_pickedImages.isNotEmpty) ...[
-                                const SizedBox(height: 16),
-                                _buildImageGrid(),
+                        child: Form(
+                          key: _formKey,
+                          autovalidateMode: _autoValidate,
+                          child: SingleChildScrollView(
+                            padding: const EdgeInsets.fromLTRB(20, 18, 20, 24),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                const _Hint(),
+                                const SizedBox(height: 22),
+
+                                // ── Tipo de falla ──────────────────────
+                                _sectionTitle(
+                                  Icons.report_problem_outlined,
+                                  'Tipo de falla',
+                                ),
+                                const SizedBox(height: 14),
+                                _label('¿Qué falla presenta?'),
+                                const SizedBox(height: 8),
+                                _buildFailureTypeSelector(),
+                                if (_typeError)
+                                  _errorText('Selecciona un tipo de falla'),
+                                const SizedBox(height: 24),
+
+                                // ── Detalles ───────────────────────────
+                                _sectionTitle(
+                                  Icons.description_outlined,
+                                  'Detalles',
+                                ),
+                                const SizedBox(height: 14),
+                                _label('Descripción del problema'),
+                                const SizedBox(height: 8),
+                                _buildDescriptionField(isSubmitting),
+                                const SizedBox(height: 18),
+                                _label('Costo estimado'),
+                                const SizedBox(height: 8),
+                                _buildCostField(isSubmitting),
+                                const SizedBox(height: 24),
+
+                                // ── Evidencia ──────────────────────────
+                                _sectionTitle(
+                                  Icons.photo_camera_outlined,
+                                  'Evidencia',
+                                ),
+                                const SizedBox(height: 14),
+                                PhotoUploadBox(
+                                  pickedImage: _evidence,
+                                  enabled: !isSubmitting,
+                                  hasError: _photoError,
+                                  onTap: _pickImage,
+                                  onRemove: () =>
+                                      setState(() => _evidence = null),
+                                ),
+                                if (_photoError)
+                                  _errorText('Agrega una foto de evidencia'),
                               ],
-                              const SizedBox(height: 24),
-                            ],
-                          ),
-                        ),
-                      ),
-                      Container(
-                        color: TColors.appBackgroundColor,
-                        padding: const EdgeInsets.fromLTRB(20, 12, 20, 28),
-                        child: SizedBox(
-                          width: double.infinity,
-                          height: 52,
-                          child: ElevatedButton.icon(
-                            onPressed: () {
-                              _submit();
-                            },
-                            icon: const Icon(
-                              Icons.send,
-                              color: Colors.white,
-                              size: 18,
-                            ),
-                            label: const Text(
-                              'Enviar Solicitud',
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontSize: 15,
-                                fontWeight: FontWeight.w600,
-                              ),
-                            ),
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: TColors.appSecondaryColor,
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(12),
-                              ),
-                              elevation: 0,
                             ),
                           ),
                         ),
                       ),
+                      _buildBottomBar(isSubmitting),
                     ],
                   ),
                 ),
               ),
-              if (isLoading)
-                const Positioned.fill(
-                  child: ColoredBox(
-                    color: Colors.black45,
-                    child: Center(child: ExcavatorLoader()),
-                  ),
-                ),
+              if (isSubmitting)
+                const Positioned.fill(child: _SubmittingOverlay()),
             ],
           );
         },
@@ -349,199 +241,356 @@ class _RequestMaintenanceScreenState extends State<RequestMaintenanceScreen> {
     );
   }
 
+  // ── Componentes ───────────────────────────────────────────────────────
 
+  Widget _buildBottomBar(bool isSubmitting) {
+    return Container(
+      padding: const EdgeInsets.fromLTRB(20, 12, 20, 20),
+      decoration: const BoxDecoration(
+        color: TColors.white,
+        border: Border(top: BorderSide(color: TColors.border)),
+      ),
+      child: SizedBox(
+        width: double.infinity,
+        height: 54,
+        child: FilledButton.icon(
+          onPressed: isSubmitting ? null : _submit,
+          style: FilledButton.styleFrom(
+            backgroundColor: TColors.appMainColor,
+            foregroundColor: TColors.white,
+            disabledBackgroundColor:
+                TColors.appMainColor.withValues(alpha: 0.5),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(16),
+            ),
+          ),
+          icon: const Icon(Icons.send_rounded, size: 20),
+          label: const Text(
+            'Enviar solicitud',
+            style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
+          ),
+        ),
+      ),
+    );
+  }
 
+  Widget _buildFailureTypeSelector() {
+    final loading = _failureTypes.isEmpty && !_typesLoadFailed;
+    final borderColor = _typeError ? TColors.danger : TColors.border;
 
-  Widget _buildSectionTitle(IconData icon, String title) {
+    return Container(
+      constraints: const BoxConstraints(minHeight: 54),
+      padding: const EdgeInsets.symmetric(horizontal: 14),
+      decoration: BoxDecoration(
+        color: TColors.white,
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: borderColor),
+      ),
+      child: Row(
+        children: [
+          const Icon(Icons.report_problem_outlined,
+              color: TColors.iconMuted, size: 20),
+          const SizedBox(width: 10),
+          Expanded(child: _selectorContent(loading)),
+        ],
+      ),
+    );
+  }
+
+  Widget _selectorContent(bool loading) {
+    if (_typesLoadFailed) {
+      return GestureDetector(
+        onTap: _retryTypes,
+        behavior: HitTestBehavior.opaque,
+        child: Row(
+          children: const [
+            Expanded(
+              child: Text(
+                'No se pudieron cargar los tipos',
+                style: TextStyle(color: TColors.danger, fontSize: 14),
+              ),
+            ),
+            Icon(Icons.refresh_rounded, color: TColors.appMainColor, size: 20),
+          ],
+        ),
+      );
+    }
+    if (loading) {
+      return Row(
+        children: const [
+          Text(
+            'Cargando tipos de falla...',
+            style: TextStyle(color: TColors.hintColor, fontSize: 14),
+          ),
+          Spacer(),
+          SizedBox(
+            width: 16,
+            height: 16,
+            child: CircularProgressIndicator(
+                strokeWidth: 2, color: TColors.appMainColor),
+          ),
+        ],
+      );
+    }
+    return DropdownButtonHideUnderline(
+      child: DropdownButton<String>(
+        value: _selectedFaultType,
+        isExpanded: true,
+        borderRadius: BorderRadius.circular(14),
+        hint: const Text(
+          'Selecciona el tipo de falla',
+          style: TextStyle(color: TColors.hintColor, fontSize: 14),
+        ),
+        icon: const Icon(Icons.keyboard_arrow_down_rounded,
+            color: TColors.textSecondary),
+        style:
+            const TextStyle(color: TColors.textPrimary, fontSize: 14.5),
+        items: _failureTypes
+            .map((e) => DropdownMenuItem(
+                  value: e.value,
+                  child: Text(
+                    e.label,
+                    style: const TextStyle(
+                        color: TColors.textPrimary, fontSize: 14.5),
+                  ),
+                ))
+            .toList(),
+        onChanged: (val) => setState(() {
+          _selectedFaultType = val;
+          _typeError = false;
+        }),
+      ),
+    );
+  }
+
+  Widget _buildDescriptionField(bool isSubmitting) {
+    return TextFormField(
+      controller: _descriptionController,
+      enabled: !isSubmitting,
+      maxLines: 4,
+      textCapitalization: TextCapitalization.sentences,
+      style: const TextStyle(fontSize: 14.5, color: TColors.textPrimary),
+      validator: (v) => (v == null || v.trim().isEmpty)
+          ? 'Describe el problema de la maquinaria'
+          : null,
+      decoration: _decoration(
+        hint: 'Describe el problema, síntomas y cuándo comenzó...',
+      ),
+    );
+  }
+
+  Widget _buildCostField(bool isSubmitting) {
+    return TextFormField(
+      controller: _costController,
+      enabled: !isSubmitting,
+      keyboardType: const TextInputType.numberWithOptions(decimal: true),
+      inputFormatters: [
+        FilteringTextInputFormatter.allow(RegExp(r'[0-9.]')),
+      ],
+      style: const TextStyle(fontSize: 14.5, color: TColors.textPrimary),
+      validator: _costValidator,
+      decoration: _decoration(
+        hint: '0.00',
+        icon: Icons.payments_outlined,
+        prefixText: 'Bs ',
+      ),
+    );
+  }
+
+  String? _costValidator(String? v) {
+    final t = (v ?? '').trim();
+    if (t.isEmpty) return 'Ingresa el costo estimado';
+    final parsed = double.tryParse(t);
+    if (parsed == null || parsed <= 0) return 'Ingresa un costo válido';
+    return null;
+  }
+
+  InputDecoration _decoration({
+    required String hint,
+    IconData? icon,
+    String? prefixText,
+  }) {
+    return InputDecoration(
+      hintText: hint,
+      hintStyle: const TextStyle(color: TColors.hintColor, fontSize: 14),
+      filled: true,
+      fillColor: TColors.white,
+      isDense: true,
+      prefixIcon: icon == null
+          ? null
+          : Icon(icon, color: TColors.iconMuted, size: 20),
+      prefixText: prefixText,
+      prefixStyle: const TextStyle(
+        color: TColors.textPrimary,
+        fontSize: 14.5,
+        fontWeight: FontWeight.w600,
+      ),
+      contentPadding:
+          const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
+      enabledBorder: _fieldBorder(TColors.border),
+      focusedBorder: _fieldBorder(TColors.appMainColor, width: 1.4),
+      disabledBorder: _fieldBorder(TColors.border),
+      errorBorder: _fieldBorder(TColors.danger),
+      focusedErrorBorder: _fieldBorder(TColors.danger, width: 1.4),
+      errorStyle: const TextStyle(color: TColors.danger, fontSize: 12),
+    );
+  }
+
+  OutlineInputBorder _fieldBorder(Color color, {double width = 1}) {
+    return OutlineInputBorder(
+      borderRadius: BorderRadius.circular(14),
+      borderSide: BorderSide(color: color, width: width),
+    );
+  }
+
+  Widget _sectionTitle(IconData icon, String title) {
     return Row(
       children: [
-        Icon(icon, color: TColors.appSecondaryColor, size: 22),
-        const SizedBox(width: 8),
+        Container(
+          width: 32,
+          height: 32,
+          alignment: Alignment.center,
+          decoration: BoxDecoration(
+            color: TColors.primaryLight,
+            borderRadius: BorderRadius.circular(9),
+          ),
+          child: Icon(icon, color: TColors.appMainColor, size: 18),
+        ),
+        const SizedBox(width: 10),
         Text(
           title,
           style: const TextStyle(
-            fontSize: 16,
-            fontWeight: FontWeight.bold,
-            color: TColors.appSecondaryColor,
+            color: TColors.textPrimary,
+            fontSize: 15,
+            fontWeight: FontWeight.w700,
           ),
         ),
       ],
     );
   }
 
-  Widget _buildFailureTypeDropdown() {
-    final isLoading = _failureTypes.isEmpty;
-    return Container(
-      decoration: BoxDecoration(
-        color: Colors.white,
-        border: Border.all(color: TColors.appSurfaceColor),
-        borderRadius: BorderRadius.circular(8),
-      ),
-      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 4),
-      child: isLoading
-          ? const SizedBox(
-              height: 48,
-              child: Center(
-                child: SizedBox(
-                  width: 20,
-                  height: 20,
-                  child: CircularProgressIndicator(
-                    strokeWidth: 2,
-                    color: TColors.appSecondaryColor,
-                  ),
-                ),
-              ),
-            )
-          : DropdownButtonHideUnderline(
-              child: DropdownButton<String>(
-                value: _selectedFaultType,
-                isExpanded: true,
-                dropdownColor: Colors.white,
-                icon: const Icon(
-                  Icons.keyboard_arrow_down,
-                  color: TColors.appSecondaryColor,
-                  size: 22,
-                ),
-                style: const TextStyle(
-                  fontSize: 15,
-                  fontWeight: FontWeight.w600,
-                  color: TColors.appMainTextColor,
-                ),
-                items: _failureTypes
-                    .map((e) => DropdownMenuItem(value: e.value, child: Text(e.label)))
-                    .toList(),
-                onChanged: (val) => setState(() => _selectedFaultType = val),
-              ),
-            ),
-    );
-  }
-
-  Widget _buildTextArea() {
-    return Container(
-      height: 100,
-      decoration: BoxDecoration(
-        color: Colors.white,
-        border: Border.all(color: TColors.appSurfaceColor),
-        borderRadius: BorderRadius.circular(8),
-      ),
-      child: TextField(
-        controller: _descriptionController,
-        maxLines: null,
-        expands: true,
-        style: const TextStyle(fontSize: 14, color: TColors.appMainTextColor),
-        decoration: const InputDecoration(
-          contentPadding: EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-          border: InputBorder.none,
-          hintText: 'Describe el problema de la maquinaria...',
-          hintStyle: TextStyle(
-            color: TColors.appSecondaryTextColor,
+  Widget _label(String text) {
+    return Row(
+      children: [
+        Text(
+          text,
+          style: const TextStyle(
+            color: TColors.textPrimary,
             fontSize: 13,
+            fontWeight: FontWeight.w600,
           ),
         ),
-      ),
+        const Text(
+          ' *',
+          style: TextStyle(
+            color: TColors.danger,
+            fontSize: 13,
+            fontWeight: FontWeight.w700,
+          ),
+        ),
+      ],
     );
   }
 
-  Widget _buildCostField() {
+  Widget _errorText(String message) {
+    return Padding(
+      padding: const EdgeInsets.only(top: 6, left: 4),
+      child: Row(
+        children: [
+          const Icon(Icons.error_outline_rounded,
+              color: TColors.danger, size: 14),
+          const SizedBox(width: 5),
+          Text(
+            message,
+            style: const TextStyle(color: TColors.danger, fontSize: 12),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// Aviso informativo de la cabecera.
+class _Hint extends StatelessWidget {
+  const _Hint();
+
+  @override
+  Widget build(BuildContext context) {
     return Container(
+      padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
-        color: Colors.white,
-        border: Border.all(color: TColors.appSurfaceColor),
-        borderRadius: BorderRadius.circular(8),
+        color: TColors.primaryLight,
+        borderRadius: BorderRadius.circular(14),
       ),
-      child: TextField(
-        controller: _costController,
-        keyboardType: const TextInputType.numberWithOptions(decimal: true),
-        style: const TextStyle(fontSize: 15, color: TColors.appMainTextColor),
-        decoration: const InputDecoration(
-          contentPadding: EdgeInsets.symmetric(horizontal: 14, vertical: 14),
-          border: InputBorder.none,
-          prefixText: 'Bs ',
-          prefixStyle: TextStyle(
-            fontSize: 15,
-            color: TColors.appSecondaryTextColor,
-            fontWeight: FontWeight.w500,
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: const [
+          Icon(Icons.info_outline_rounded,
+              color: TColors.appMainColor, size: 20),
+          SizedBox(width: 10),
+          Expanded(
+            child: Text(
+              'Describe la falla con el mayor detalle posible y adjunta una '
+              'foto clara. Esto agiliza la aprobación del mantenimiento.',
+              style: TextStyle(
+                color: TColors.appMainColor,
+                fontSize: 12.5,
+                height: 1.4,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
           ),
-          hintText: '0.00',
-          hintStyle: TextStyle(
-            color: TColors.appSecondaryTextColor,
-            fontSize: 15,
-          ),
-        ),
+        ],
       ),
     );
   }
+}
 
-  Widget _buildUploadArea() {
-    return GestureDetector(
-      onTap: _showImageSourceSheet,
-      child: Container(
-        width: double.infinity,
-        padding: const EdgeInsets.symmetric(vertical: 28),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          border: Border.all(
-            color: TColors.appSecondaryColor.withValues(alpha: 0.4),
-            width: 1.5,
-          ),
-          borderRadius: BorderRadius.circular(12),
-        ),
+/// Hoja inferior para elegir el origen de la evidencia.
+class _EvidenceSourceSheet extends StatelessWidget {
+  const _EvidenceSourceSheet();
+
+  @override
+  Widget build(BuildContext context) {
+    return SafeArea(
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(20, 12, 20, 20),
         child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Container(
-              width: 60,
-              height: 60,
-              decoration: BoxDecoration(
-                color: TColors.appSecondaryColor.withValues(alpha: 0.08),
-                shape: BoxShape.circle,
-              ),
-              child: const Icon(
-                Icons.add_a_photo_outlined,
-                color: TColors.appSecondaryColor,
-                size: 28,
+            Center(
+              child: Container(
+                width: 42,
+                height: 4,
+                decoration: BoxDecoration(
+                  color: TColors.border,
+                  borderRadius: BorderRadius.circular(2),
+                ),
               ),
             ),
-            const SizedBox(height: 12),
+            const SizedBox(height: 18),
             const Text(
-              'Agregar foto de evidencia',
+              'Agregar evidencia',
               style: TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.w600,
-                color: TColors.appSecondaryColor,
+                color: TColors.textPrimary,
+                fontSize: 16,
+                fontWeight: FontWeight.w700,
               ),
             ),
-            const SizedBox(height: 4),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                const Icon(
-                  Icons.camera_alt_outlined,
-                  size: 14,
-                  color: TColors.appSecondaryTextColor,
-                ),
-                const SizedBox(width: 4),
-                const Text(
-                  'Cámara',
-                  style: TextStyle(
-                    fontSize: 12,
-                    color: TColors.appSecondaryTextColor,
-                  ),
-                ),
-                const SizedBox(width: 12),
-                const Icon(
-                  Icons.photo_library_outlined,
-                  size: 14,
-                  color: TColors.appSecondaryTextColor,
-                ),
-                const SizedBox(width: 4),
-                const Text(
-                  'Galería',
-                  style: TextStyle(
-                    fontSize: 12,
-                    color: TColors.appSecondaryTextColor,
-                  ),
-                ),
-              ],
+            const SizedBox(height: 16),
+            _option(
+              context,
+              icon: Icons.camera_alt_rounded,
+              label: 'Tomar una foto',
+              source: ImageSource.camera,
+            ),
+            const SizedBox(height: 10),
+            _option(
+              context,
+              icon: Icons.photo_library_rounded,
+              label: 'Elegir de la galería',
+              source: ImageSource.gallery,
             ),
           ],
         ),
@@ -549,62 +598,89 @@ class _RequestMaintenanceScreenState extends State<RequestMaintenanceScreen> {
     );
   }
 
-  Widget _buildImageGrid() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          '${_pickedImages.length} foto seleccionada(s)',
-          style: const TextStyle(
-            fontSize: 12,
-            color: TColors.appSecondaryTextColor,
-            fontWeight: FontWeight.w500,
+  Widget _option(
+    BuildContext context, {
+    required IconData icon,
+    required String label,
+    required ImageSource source,
+  }) {
+    return GestureDetector(
+      onTap: () => Navigator.of(context).pop(source),
+      behavior: HitTestBehavior.opaque,
+      child: Container(
+        padding: const EdgeInsets.all(14),
+        decoration: BoxDecoration(
+          color: TColors.background,
+          borderRadius: BorderRadius.circular(14),
+          border: Border.all(color: TColors.border),
+        ),
+        child: Row(
+          children: [
+            Container(
+              width: 40,
+              height: 40,
+              alignment: Alignment.center,
+              decoration: BoxDecoration(
+                color: TColors.primaryLight,
+                borderRadius: BorderRadius.circular(11),
+              ),
+              child: Icon(icon, color: TColors.appMainColor, size: 21),
+            ),
+            const SizedBox(width: 14),
+            Text(
+              label,
+              style: const TextStyle(
+                color: TColors.textPrimary,
+                fontSize: 14.5,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+            const Spacer(),
+            const Icon(Icons.chevron_right_rounded, color: TColors.iconMuted),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// Overlay mostrado mientras se envía la solicitud.
+class _SubmittingOverlay extends StatelessWidget {
+  const _SubmittingOverlay();
+
+  @override
+  Widget build(BuildContext context) {
+    return ColoredBox(
+      color: Colors.black.withValues(alpha: 0.35),
+      child: Center(
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 26),
+          decoration: BoxDecoration(
+            color: TColors.white,
+            borderRadius: BorderRadius.circular(22),
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: const [
+              ExcavatorLoader(width: 120, height: 120),
+              SizedBox(height: 8),
+              Text(
+                'Enviando solicitud...',
+                style: TextStyle(
+                  color: TColors.textPrimary,
+                  fontSize: 15,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+              SizedBox(height: 4),
+              Text(
+                'Espera un momento',
+                style: TextStyle(color: TColors.textSecondary, fontSize: 12.5),
+              ),
+            ],
           ),
         ),
-        const SizedBox(height: 10),
-        Wrap(
-          spacing: 10,
-          runSpacing: 10,
-          children: _pickedImages.asMap().entries.map((entry) {
-            final index = entry.key;
-            final file = entry.value;
-            return Stack(
-              clipBehavior: Clip.none,
-              children: [
-                ClipRRect(
-                  borderRadius: BorderRadius.circular(10),
-                  child: Image.file(
-                    File(file.path),
-                    width: 90,
-                    height: 90,
-                    fit: BoxFit.cover,
-                  ),
-                ),
-                Positioned(
-                  top: -6,
-                  right: -6,
-                  child: GestureDetector(
-                    onTap: () => _removeImage(index),
-                    child: Container(
-                      width: 24,
-                      height: 24,
-                      decoration: const BoxDecoration(
-                        color: Colors.red,
-                        shape: BoxShape.circle,
-                      ),
-                      child: const Icon(
-                        Icons.close,
-                        color: Colors.white,
-                        size: 14,
-                      ),
-                    ),
-                  ),
-                ),
-              ],
-            );
-          }).toList(),
-        ),
-      ],
+      ),
     );
   }
 }

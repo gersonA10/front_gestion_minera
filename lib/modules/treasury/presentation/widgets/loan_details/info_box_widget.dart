@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
-import 'package:front_gestion_minera/utils/constants/color.constant.dart';
+import '../../screens/loans/loan_ui.dart';
 
 class InfoBox extends StatelessWidget {
   final IconData icon;
   final String label;
   final String value;
 
-  const InfoBox({super.key, 
+  const InfoBox({
+    super.key,
     required this.icon,
     required this.label,
     required this.value,
@@ -17,24 +18,22 @@ class InfoBox extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: TColors.cardInnerBg,
+        color: LoanUi.bg,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(
-          color: TColors.cardBorderDark.withValues(alpha: 0.5),
-        ),
+        border: Border.all(color: LoanUi.border),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             children: [
-              Icon(icon, color: TColors.amber, size: 14),
+              Icon(icon, color: LoanUi.primary, size: 14),
               const SizedBox(width: 6),
               Expanded(
                 child: Text(
                   label,
-                  style: TextStyle(
-                    color: TColors.amber.withValues(alpha: 0.7),
+                  style: const TextStyle(
+                    color: LoanUi.textSecondary,
                     fontSize: 10,
                     fontWeight: FontWeight.w600,
                     letterSpacing: 0.5,
@@ -47,10 +46,12 @@ class InfoBox extends StatelessWidget {
           const SizedBox(height: 8),
           Text(
             value,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
             style: const TextStyle(
-              color: TColors.white,
+              color: LoanUi.textPrimary,
               fontSize: 14,
-              fontWeight: FontWeight.w700,
+              fontWeight: FontWeight.w800,
             ),
           ),
         ],

@@ -134,7 +134,7 @@ class _SolicitudesPendientesPageState
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   _buildHeader(),
-                  _buildTitleSection(_totalRecords),
+                  _buildHero(_totalRecords),
                   Expanded(
                     child: RefreshIndicator(
                       onRefresh: _onRefresh,
@@ -237,41 +237,100 @@ class _SolicitudesPendientesPageState
     );
   }
 
-  Widget _buildTitleSection(int totalRecords) {
+  Widget _buildHero(int totalRecords) {
     return Padding(
-      padding: const EdgeInsets.fromLTRB(20, 18, 20, 16),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const Text(
-            'GESTIÓN CENTRAL',
-            style: TextStyle(
-              fontFamily: 'Poppins',
-              fontSize: 11,
-              fontWeight: FontWeight.w500,
-              color: Color(0xFF8A96A8),
-              letterSpacing: 1.4,
+      padding: const EdgeInsets.fromLTRB(20, 6, 20, 16),
+      child: Container(
+        width: double.infinity,
+        padding: const EdgeInsets.fromLTRB(20, 18, 20, 18),
+        decoration: BoxDecoration(
+          gradient: const LinearGradient(
+            colors: [Color(0xFF152D49), Color(0xFF20416B)],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
+          borderRadius: BorderRadius.circular(22),
+          boxShadow: [
+            BoxShadow(
+              color: const Color(0xFF152D49).withValues(alpha: 0.32),
+              blurRadius: 22,
+              offset: const Offset(0, 12),
             ),
-          ),
-          const SizedBox(height: 4),
-          const Text(
-            'Solicitudes\nPendientes',
-            style: TextStyle(
-              fontFamily: 'Poppins',
-              fontSize: 28,
-              fontWeight: FontWeight.w800,
-              color: Color(0xFF0D1B2A),
-              height: 1.15,
+          ],
+        ),
+        child: Row(
+          children: [
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'BANDEJA DE APROBACIÓN',
+                    style: TextStyle(
+                      fontFamily: 'Poppins',
+                      fontSize: 10.5,
+                      fontWeight: FontWeight.w700,
+                      letterSpacing: 1.2,
+                      color: Colors.white.withValues(alpha: 0.6),
+                    ),
+                  ),
+                  const SizedBox(height: 10),
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    children: [
+                      Text(
+                        '$totalRecords',
+                        style: const TextStyle(
+                          fontFamily: 'Poppins',
+                          fontSize: 40,
+                          fontWeight: FontWeight.w800,
+                          color: Colors.white,
+                          height: 1.0,
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      Padding(
+                        padding: const EdgeInsets.only(bottom: 5),
+                        child: Text(
+                          totalRecords == 1 ? 'solicitud' : 'solicitudes',
+                          style: TextStyle(
+                            fontFamily: 'Poppins',
+                            fontSize: 14,
+                            fontWeight: FontWeight.w600,
+                            color: Colors.white.withValues(alpha: 0.85),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    'Pendientes de tu revisión',
+                    style: TextStyle(
+                      fontFamily: 'Poppins',
+                      fontSize: 12.5,
+                      color: Colors.white.withValues(alpha: 0.65),
+                    ),
+                  ),
+                ],
+              ),
             ),
-          ),
-          const SizedBox(height: 14),
-          Row(
-            children: [
-              _PendienteBadge(total: totalRecords),
-              const SizedBox(width: 12),
-            ],
-          ),
-        ],
+            const SizedBox(width: 12),
+            Container(
+              width: 56,
+              height: 56,
+              decoration: BoxDecoration(
+                color: Colors.white.withValues(alpha: 0.12),
+                borderRadius: BorderRadius.circular(18),
+              ),
+              child: const Icon(
+                Icons.assignment_turned_in_outlined,
+                color: Colors.white,
+                size: 28,
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -357,42 +416,3 @@ class _SolicitudesPendientesPageState
   }
 }
 
-class _PendienteBadge extends StatelessWidget {
-  final int total;
-  const _PendienteBadge({required this.total});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-      decoration: BoxDecoration(
-        color: const Color(0xFFFFF4ED),
-        borderRadius: BorderRadius.circular(20),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Container(
-            width: 7,
-            height: 7,
-            decoration: const BoxDecoration(
-              color: Color(0xFFE8533F),
-              shape: BoxShape.circle,
-            ),
-          ),
-          const SizedBox(width: 6),
-          Text(
-            '$total PENDIENTES',
-            style: const TextStyle(
-              fontFamily: 'Poppins',
-              fontSize: 11,
-              fontWeight: FontWeight.w700,
-              color: Color(0xFFE8533F),
-              letterSpacing: 0.4,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}

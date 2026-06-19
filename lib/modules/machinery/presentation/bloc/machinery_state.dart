@@ -147,3 +147,26 @@ class GetCloseUpOfAMachineError extends MachineryState {
   final String message;
   GetCloseUpOfAMachineError(this.message);
 }
+
+// ── Editar maquinaria ────────────────────────────────────────────────
+class UpdateMachineryLoading extends MachineryState {}
+
+class UpdateMachinerySuccess extends MachineryState {}
+
+class UpdateMachineryError extends MachineryState {
+  final String message;
+  UpdateMachineryError(this.message);
+}
+
+// ── Cambiar estado de maquinaria ─────────────────────────────────────
+class ChangeMachineryStatusLoading extends MachineryState {}
+
+class ChangeMachineryStatusSuccess extends MachineryState {
+  final String status;
+  ChangeMachineryStatusSuccess(this.status);
+}
+
+class ChangeMachineryStatusError extends MachineryState {
+  final String message;
+  ChangeMachineryStatusError(this.message);
+}

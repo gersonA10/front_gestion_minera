@@ -155,12 +155,11 @@ class _DividendDistributionDetailsScreenState
                         children: [
                           Expanded(
                             child: SummaryCardDistributes(
-                              label: 'Monto Registrado',
-                              value: _formatCurrency(
-                                header.totalRegisteredAmount,
-                              ),
-                              valueColor: TColors.textPrimary,
-                              bgColor: TColors.primaryLight,
+                              label: 'Total Pagado',
+                              value: _formatCurrency(header.totalPaidAmount),
+                              valueColor: TColors.success,
+                              bgColor: TColors.successLight,
+                              icon: Icons.check_circle_outline_rounded,
                             ),
                           ),
                           const SizedBox(width: 10),
@@ -170,19 +169,12 @@ class _DividendDistributionDetailsScreenState
                               value: _formatCurrency(header.totalPendingAmount),
                               valueColor: TColors.warning,
                               bgColor: TColors.warningLight,
+                              icon: Icons.schedule_rounded,
                             ),
                           ),
                         ],
                       ),
-                      const SizedBox(height: 10),
-                      SummaryCardDistributes(
-                        label: 'Total Pagado',
-                        value: _formatCurrency(header.totalPaidAmount),
-                        valueColor: TColors.success,
-                        bgColor: TColors.successLight,
-                        fullWidth: true,
-                      ),
-                      const SizedBox(height: 14),
+                      const SizedBox(height: 12),
 
                       Container(
                         width: double.infinity,
@@ -223,7 +215,39 @@ class _DividendDistributionDetailsScreenState
                           ],
                         ),
                       ),
-                      const SizedBox(height: 16),
+                      const SizedBox(height: 18),
+                      Row(
+                        children: [
+                          const Text(
+                            'Socios',
+                            style: TextStyle(
+                              color: TColors.textPrimary,
+                              fontSize: 15,
+                              fontWeight: FontWeight.w800,
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 8,
+                              vertical: 2,
+                            ),
+                            decoration: BoxDecoration(
+                              color: TColors.primaryLight,
+                              borderRadius: BorderRadius.circular(20),
+                            ),
+                            child: Text(
+                              '${filtered.length}',
+                              style: const TextStyle(
+                                color: TColors.primary,
+                                fontSize: 12,
+                                fontWeight: FontWeight.w700,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 12),
                       Row(
                         children: ['Todos', 'Pendientes', 'Pagados'].map((f) {
                           final selected = _filtro == f;
@@ -266,15 +290,42 @@ class _DividendDistributionDetailsScreenState
                       const SizedBox(height: 14),
 
                       if (filtered.isEmpty)
-                        const Padding(
-                          padding: EdgeInsets.only(top: 40),
+                        Padding(
+                          padding: const EdgeInsets.only(top: 48, bottom: 24),
                           child: Center(
-                            child: Text(
-                              'Sin registros',
-                              style: TextStyle(
-                                color: TColors.textSecondary,
-                                fontSize: 13,
-                              ),
+                            child: Column(
+                              children: [
+                                Container(
+                                  width: 56,
+                                  height: 56,
+                                  decoration: BoxDecoration(
+                                    color: TColors.primaryLight,
+                                    shape: BoxShape.circle,
+                                  ),
+                                  child: const Icon(
+                                    Icons.people_outline_rounded,
+                                    color: TColors.primary,
+                                    size: 26,
+                                  ),
+                                ),
+                                const SizedBox(height: 14),
+                                const Text(
+                                  'Sin socios en este filtro',
+                                  style: TextStyle(
+                                    color: TColors.textPrimary,
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.w700,
+                                  ),
+                                ),
+                                const SizedBox(height: 4),
+                                const Text(
+                                  'Prueba seleccionando otro estado',
+                                  style: TextStyle(
+                                    color: TColors.textSecondary,
+                                    fontSize: 12,
+                                  ),
+                                ),
+                              ],
                             ),
                           ),
                         )

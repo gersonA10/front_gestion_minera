@@ -222,7 +222,9 @@ class _NewDistributionScreenState extends State<NewDistributionScreen> {
                           ),
                         ),
                       ),
-                      const SizedBox(height: 20),
+                      const SizedBox(height: 24),
+                      _label('Resumen de la distribución'),
+                      const SizedBox(height: 8),
                       BlocBuilder<TreasuryBloc, TreasuryState>(
                         buildWhen: (_, curr) =>
                             curr is SimulateDistributionLoading ||
@@ -245,11 +247,13 @@ class _NewDistributionScreenState extends State<NewDistributionScreen> {
 
                           return Container(
                             width: double.infinity,
-                            padding: const EdgeInsets.all(16),
+                            padding: const EdgeInsets.all(18),
                             decoration: BoxDecoration(
-                              color: TColors.surface,
-                              borderRadius: BorderRadius.circular(12),
-                              border: Border.all(color: TColors.border),
+                              color: TColors.primaryLight,
+                              borderRadius: BorderRadius.circular(16),
+                              border: Border.all(
+                                color: TColors.primary.withValues(alpha: 0.15),
+                              ),
                             ),
                             child: isLoading
                                 ? const Center(

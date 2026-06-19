@@ -19,179 +19,188 @@ class DistribucionCardHome extends StatelessWidget {
   bool get _isCerrado => item.status.toLowerCase() == 'cerrado';
   bool get _tieneEstado => item.status.isNotEmpty;
 
-  Color get _estadoColor =>
-      _isAbierto ? const Color(0xFF0EA5E9) : TColors.success;
+  Color get _accentColor =>
+      _isAbierto ? const Color(0xFF38BDF8) : TColors.success;
+
+  List<Color> get _heroGradient => _isCerrado
+      ? const [Color(0xFF13321D), Color(0xFF265A32)]
+      : _isAbierto
+          ? const [Color(0xFF0C2340), Color(0xFF153D63)]
+          : const [Color(0xFF0D2137), Color(0xFF1B3C58)];
+
+  bool get _hasProgress => item.progressPct > 0 && item.progressPct < 100;
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      margin: const EdgeInsets.only(bottom: 10),
+      margin: const EdgeInsets.only(bottom: 14),
       decoration: BoxDecoration(
         color: TColors.surface,
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(20),
         border: Border.all(color: TColors.border),
         boxShadow: [
           BoxShadow(
-            color: TColors.textPrimary.withValues(alpha: 0.04),
-            blurRadius: 8,
-            offset: const Offset(0, 2),
+            color: TColors.textPrimary.withValues(alpha: 0.06),
+            blurRadius: 18,
+            offset: const Offset(0, 8),
+          ),
+          BoxShadow(
+            color: TColors.textPrimary.withValues(alpha: 0.03),
+            blurRadius: 4,
+            offset: const Offset(0, 1),
           ),
         ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          // ---------- Hero gradiente ----------
           ClipRRect(
-            borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
+            borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
             child: Stack(
               children: [
-                Container(
-                  height: 110,
-                  width: double.infinity,
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
-                      colors: _isCerrado
-                          ? [const Color(0xFF1A2A1A), const Color(0xFF2D4A2D)]
-                          : _isAbierto
-                          ? [const Color(0xFF0C2340), const Color(0xFF1A4060)]
-                          : [const Color(0xFF0D2137), const Color(0xFF1A3A55)],
+                Positioned.fill(
+                  child: DecoratedBox(
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                        colors: _heroGradient,
+                      ),
                     ),
-                  ),
-                  child: CustomPaint(
-                    painter: GeometricPainter(
-                      color: Colors.black.withValues(alpha: 0.01),
+                    child: CustomPaint(
+                      painter: GeometricPainter(
+                        color: Colors.white.withValues(alpha: 0.04),
+                      ),
                     ),
                   ),
                 ),
-                Positioned(
-                  bottom: 12,
-                  left: 14,
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(18, 16, 16, 18),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
+                      Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  'Registrado · ${item.registeredDate}',
+                                  style: TextStyle(
+                                    color: Colors.white.withValues(alpha: 0.6),
+                                    fontSize: 11,
+                                    fontWeight: FontWeight.w500,
+                                  ),
+                                ),
+                                const SizedBox(height: 3),
+                                Text(
+                                  item.period,
+                                  style: const TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 19,
+                                    fontWeight: FontWeight.w800,
+                                    letterSpacing: -0.2,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          if (_tieneEstado)
+                            _StatusPill(label: item.status, color: _accentColor),
+                        ],
+                      ),
+                      const SizedBox(height: 16),
                       Text(
-                        'Registro: ${item.registeredDate}',
+                        'VALOR DISTRIBUIDO',
                         style: TextStyle(
-                          color: Colors.white.withValues(alpha: 0.75),
-                          fontSize: 11,
-                          fontWeight: FontWeight.w500,
+                          color: Colors.white.withValues(alpha: 0.55),
+                          fontSize: 10,
+                          fontWeight: FontWeight.w700,
+                          letterSpacing: 0.8,
                         ),
                       ),
-                      const SizedBox(height: 2),
+                      const SizedBox(height: 4),
                       Text(
-                        item.period,
+                        formatCurrency(item.registeredAmount),
                         style: const TextStyle(
                           color: Colors.white,
-                          fontSize: 20,
+                          fontSize: 26,
                           fontWeight: FontWeight.w800,
+                          letterSpacing: -0.5,
                         ),
                       ),
                     ],
                   ),
                 ),
-                if (_tieneEstado)
-                  Positioned(
-                    top: 12,
-                    right: 12,
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 10,
-                        vertical: 5,
-                      ),
-                      decoration: BoxDecoration(
-                        color: _estadoColor.withValues(alpha: 0.2),
-                        borderRadius: BorderRadius.circular(20),
-                        border: Border.all(
-                          color: _estadoColor.withValues(alpha: 0.5),
-                        ),
-                      ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Container(
-                            width: 6,
-                            height: 6,
-                            decoration: BoxDecoration(
-                              color: _estadoColor,
-                              shape: BoxShape.circle,
-                            ),
-                          ),
-                          const SizedBox(width: 5),
-                          Text(
-                            item.status,
-                            style: TextStyle(
-                              color: _estadoColor,
-                              fontSize: 11,
-                              fontWeight: FontWeight.w700,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
               ],
             ),
           ),
+
+          // ---------- Cuerpo blanco ----------
           Padding(
-            padding: const EdgeInsets.fromLTRB(14, 12, 14, 0),
+            padding: const EdgeInsets.fromLTRB(16, 14, 16, 4),
             child: Column(
               children: [
+                if (_hasProgress) ...[
+                  Row(
+                    children: [
+                      Expanded(
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.circular(10),
+                          child: LinearProgressIndicator(
+                            value: item.progressPct / 100,
+                            minHeight: 6,
+                            backgroundColor: TColors.border,
+                            valueColor: AlwaysStoppedAnimation<Color>(
+                              _accentColor,
+                            ),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 10),
+                      Text(
+                        '${item.progressPct.toStringAsFixed(0)}%',
+                        style: TextStyle(
+                          color: _accentColor,
+                          fontSize: 12,
+                          fontWeight: FontWeight.w800,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 14),
+                ],
                 Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    DataColumn(
-                      label: 'Monto Registrado',
-                      value: formatCurrency(item.registeredAmount),
-                      labelColor: TColors.primary,
-                      valueColor: TColors.textPrimary,
-                    ),
-                    DataColumn(
-                      label: 'Pendiente',
-                      value: formatCurrency(item.amountDue),
-                      labelColor: TColors.primary,
-                      valueColor: item.amountDue > 0
-                          ? TColors.primary
-                          : TColors.textPrimary,
-                      alignRight: true,
-                    ),
-                  ],
-                ),
-
-                if (item.progressPct > 0 && item.progressPct < 100) ...[
-                  const SizedBox(height: 5),
-                  ClipRRect(
-                    borderRadius: BorderRadius.circular(4),
-                    child: LinearProgressIndicator(
-                      value: item.progressPct / 100,
-                      minHeight: 5,
-                      backgroundColor: TColors.border,
-                      valueColor: const AlwaysStoppedAnimation<Color>(
-                        Color(0xFF0EA5E9),
+                    Expanded(
+                      child: _MetricColumn(
+                        label: 'PAGADO',
+                        value: formatCurrency(item.amountPaid),
+                        valueColor: TColors.success,
                       ),
                     ),
-                  ),
-                ],
-
-                const SizedBox(height: 8),
-
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.end,
-                  children: [
-                    DataColumn(
-                      label: 'Pagado',
-                      value: formatCurrency(item.amountPaid),
-                      labelColor: TColors.textSecondary,
-                      valueColor: TColors.textPrimary,
-                      alignRight: true,
+                    Container(
+                      width: 1,
+                      height: 30,
+                      color: TColors.border,
+                    ),
+                    Expanded(
+                      child: _MetricColumn(
+                        label: 'PENDIENTE',
+                        value: formatCurrency(item.amountDue),
+                        valueColor: item.amountDue > 0
+                            ? TColors.warning
+                            : TColors.textPrimary,
+                        alignRight: true,
+                      ),
                     ),
                   ],
                 ),
-
-                const SizedBox(height: 12),
+                const SizedBox(height: 8),
                 Divider(height: 1, color: TColors.border),
-
                 SizedBox(
                   width: double.infinity,
                   child: TextButton(
@@ -203,34 +212,26 @@ class DistribucionCardHome extends StatelessWidget {
                       );
                     },
                     style: TextButton.styleFrom(
-                      foregroundColor: _isAbierto
-                          ? TColors.primary
-                          : TColors.textSecondary,
-                      padding: const EdgeInsets.symmetric(vertical: 10),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(0),
-                      ),
+                      foregroundColor: TColors.primary,
+                      padding: const EdgeInsets.symmetric(vertical: 12),
+                      shape: const RoundedRectangleBorder(),
                     ),
-                    child: Row(
+                    child: const Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         Text(
                           'Ver detalle',
                           style: TextStyle(
-                            color: _isAbierto
-                                ? TColors.primary
-                                : TColors.textSecondary,
+                            color: TColors.primary,
                             fontSize: 13,
-                            fontWeight: FontWeight.w600,
+                            fontWeight: FontWeight.w700,
                           ),
                         ),
-                        const SizedBox(width: 5),
+                        SizedBox(width: 6),
                         Icon(
-                          Icons.arrow_forward,
-                          size: 15,
-                          color: _isAbierto
-                              ? TColors.primary
-                              : TColors.textSecondary,
+                          Icons.arrow_forward_rounded,
+                          size: 16,
+                          color: TColors.primary,
                         ),
                       ],
                     ),
@@ -245,18 +246,52 @@ class DistribucionCardHome extends StatelessWidget {
   }
 }
 
-class DataColumn extends StatelessWidget {
+class _StatusPill extends StatelessWidget {
+  final String label;
+  final Color color;
+  const _StatusPill({required this.label, required this.color});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: 0.18),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: color.withValues(alpha: 0.45)),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Container(
+            width: 6,
+            height: 6,
+            decoration: BoxDecoration(color: color, shape: BoxShape.circle),
+          ),
+          const SizedBox(width: 6),
+          Text(
+            label,
+            style: TextStyle(
+              color: color,
+              fontSize: 11,
+              fontWeight: FontWeight.w700,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _MetricColumn extends StatelessWidget {
   final String label;
   final String value;
-  final Color labelColor;
   final Color valueColor;
   final bool alignRight;
 
-  const DataColumn({
-    super.key,
+  const _MetricColumn({
     required this.label,
     required this.value,
-    required this.labelColor,
     required this.valueColor,
     this.alignRight = false,
   });
@@ -264,25 +299,25 @@ class DataColumn extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Column(
-      crossAxisAlignment: alignRight
-          ? CrossAxisAlignment.end
-          : CrossAxisAlignment.start,
+      crossAxisAlignment:
+          alignRight ? CrossAxisAlignment.end : CrossAxisAlignment.start,
       children: [
         Text(
           label,
-          style: TextStyle(
-            color: labelColor,
-            fontSize: 11,
-            fontWeight: FontWeight.w500,
+          style: const TextStyle(
+            color: TColors.textSecondary,
+            fontSize: 10,
+            fontWeight: FontWeight.w600,
+            letterSpacing: 0.5,
           ),
         ),
-        const SizedBox(height: 2),
+        const SizedBox(height: 3),
         Text(
           value,
           style: TextStyle(
             color: valueColor,
-            fontSize: 13,
-            fontWeight: FontWeight.w700,
+            fontSize: 14,
+            fontWeight: FontWeight.w800,
           ),
         ),
       ],
@@ -290,6 +325,7 @@ class DataColumn extends StatelessWidget {
   }
 }
 
+/// Pintura geométrica sutil para dar textura al hero.
 class GeometricPainter extends CustomPainter {
   final Color color;
   const GeometricPainter({required this.color});
@@ -309,7 +345,7 @@ class GeometricPainter extends CustomPainter {
     canvas.drawPath(path1, paint);
 
     final paint2 = Paint()
-      ..color = color.withValues(alpha: 0.5)
+      ..color = color.withValues(alpha: color.a * 0.5)
       ..style = PaintingStyle.fill;
 
     final path2 = Path()
@@ -321,5 +357,5 @@ class GeometricPainter extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(GeometricPainter old) => false;
+  bool shouldRepaint(GeometricPainter old) => old.color != color;
 }

@@ -20,6 +20,8 @@ import 'package:front_gestion_minera/modules/treasury/domain/entity/financial_re
 import 'package:front_gestion_minera/modules/treasury/presentation/bloc/treasury_bloc.dart';
 import 'package:front_gestion_minera/modules/treasury/presentation/widgets/reports/chart_card_widget.dart';
 import 'package:front_gestion_minera/modules/treasury/presentation/widgets/reports/metric_card_widget.dart';
+import 'package:front_gestion_minera/modules/treasury/presentation/widgets/reports/expense_donut_widget.dart';
+import 'package:fl_chart/fl_chart.dart';
 
 @RoutePage()
 class FinancialReportsScreen extends StatefulWidget {
@@ -159,6 +161,9 @@ class _FinancialReportsScreenState extends State<FinancialReportsScreen> {
                         _buildDateSelector(context, colors),
                         SizedBox(height: smallSpacing * 1.5),
 
+                        _buildHeroBalance(context, colors, _cachedReport!),
+                        SizedBox(height: smallSpacing * 1.5),
+
                         _buildSummaryCards(
                           context,
                           colors,
@@ -166,28 +171,15 @@ class _FinancialReportsScreenState extends State<FinancialReportsScreen> {
                         ),
                         SizedBox(height: smallSpacing * 1.5),
 
-                        _buildNetBalanceCard(
-                          context,
-                          colors,
-                          _cachedReport!.resumenGeneral,
-                        ),
+                        _buildSectionLabel(context, 'INDICADORES CLAVE'),
+                        SizedBox(height: smallSpacing),
+                        _buildKpiSection(context, colors, _cachedReport!),
                         SizedBox(height: smallSpacing * 1.5),
 
                         ChartCardWidget(colors, _cachedReport!.datosGrafica),
                         SizedBox(height: smallSpacing * 2),
 
-                        Text(
-                          'GASTOS POR RESPONSABLE',
-                          style: AppTextStyles.mainStyleGrey10(context)
-                              .copyWith(
-                                fontWeight: FontWeight.bold,
-                                letterSpacing: 0.5,
-                              ),
-                        ),
-                        SizedBox(height: smallSpacing),
-
-                        _buildExpensesList(
-                          context,
+                        ExpenseDonutWidget(
                           colors,
                           _cachedReport!.gastosPorResponsable,
                         ),
@@ -368,6 +360,12 @@ class _FinancialReportsScreenState extends State<FinancialReportsScreen> {
     ColorScheme colors,
     GeneralSummaryEntity summary,
   ) {
+    final total = summary.ingresosTotales + summary.egresosTotales;
+    final ingresoShare =
+        total == 0 ? 0.0 : (summary.ingresosTotales / total) * 100;
+    final egresoShare =
+        total == 0 ? 0.0 : (summary.egresosTotales / total) * 100;
+
     return Row(
       children: [
         MetricCardWidget(
@@ -376,7 +374,7 @@ class _FinancialReportsScreenState extends State<FinancialReportsScreen> {
           amount: summary.ingresosTotales,
           icon: Icons.trending_up,
           iconColor: const Color(0xFF10B981),
-          percentage: summary.ingresosTotales,
+          subtitle: '${ingresoShare.toStringAsFixed(0)}% del flujo',
         ),
         const SizedBox(width: 12),
         MetricCardWidget(
@@ -385,205 +383,482 @@ class _FinancialReportsScreenState extends State<FinancialReportsScreen> {
           amount: summary.egresosTotales,
           icon: Icons.trending_down,
           iconColor: const Color(0xFFEF4444),
-          percentage: summary.egresosTotales,
+          subtitle: '${egresoShare.toStringAsFixed(0)}% del flujo',
         ),
       ],
     );
   }
 
-  Widget _buildNetBalanceCard(
+  // ---------- Helpers de KPIs ----------
+  double _pct(double part, double whole) => whole == 0 ? 0 : (part / whole) * 100;
+
+  String _money(double v) =>
+      '${NumberFormat.currency(symbol: '', decimalDigits: 2).format(v)} Bs';
+
+  /// Color del estado de salud financiera según su texto.
+  Color _healthColor(String estado) {
+    final e = estado.toLowerCase();
+    if (e.contains('salud') ||
+        e.contains('positiv') ||
+        e.contains('estable') ||
+        e.contains('bueno') ||
+        e.contains('óptim') ||
+        e.contains('optim') ||
+        e.contains('super')) {
+      return const Color(0xFF10B981); // verde
+    }
+    if (e.contains('riesgo') ||
+        e.contains('alerta') ||
+        e.contains('crit') ||
+        e.contains('crít') ||
+        e.contains('negativ') ||
+        e.contains('defic') ||
+        e.contains('défic') ||
+        e.contains('malo')) {
+      return const Color(0xFFEF4444); // rojo
+    }
+    return const Color(0xFFF59E0B); // ámbar (neutro / desconocido)
+  }
+
+  Widget _buildSectionLabel(BuildContext context, String text) {
+    return Text(
+      text,
+      style: AppTextStyles.mainStyleGrey10(
+        context,
+      ).copyWith(fontWeight: FontWeight.bold, letterSpacing: 0.5),
+    );
+  }
+
+  // ---------- Hero: Balance neto + estado de salud ----------
+  Widget _buildHeroBalance(
     BuildContext context,
     ColorScheme colors,
-    GeneralSummaryEntity summary,
+    FinancialReportEntity report,
   ) {
-    final formatCurrency = NumberFormat.currency(symbol: '', decimalDigits: 2);
-    const mainColor = Color(0xFF1D54F3);
+    final s = report.resumenGeneral;
+    final margen = _pct(s.balanceNeto, s.ingresosTotales);
+    final healthColor = _healthColor(s.estadoSalud);
+    final isPositive = s.balanceNeto >= 0;
+    final estadoLabel = s.estadoSalud.length > 16
+        ? '${s.estadoSalud.substring(0, 15)}…'
+        : s.estadoSalud;
 
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
+      width: double.infinity,
+      padding: const EdgeInsets.fromLTRB(20, 18, 20, 20),
       decoration: BoxDecoration(
-        color: const Color(0xFFF2F6FF),
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: mainColor.withValues(alpha: 0.2)),
-      ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                'BALANCE NETO HACIENDA',
-                style: AppTextStyles.mainStyleGrey10(
-                  context,
-                ).copyWith(fontWeight: FontWeight.bold, letterSpacing: 0.5),
-              ),
-              const SizedBox(height: 8),
-              Text(
-                '${formatCurrency.format(summary.balanceNeto)} Bs.',
-                style: AppTextStyles.mainStyleBlue25Bold(
-                  context,
-                ).copyWith(fontSize: 26, color: mainColor),
-              ),
-            ],
-          ),
-          Container(
-            padding: const EdgeInsets.all(12),
-            decoration: BoxDecoration(
-              color: mainColor.withValues(alpha: 0.15),
-              shape: BoxShape.circle,
-            ),
-            child: const Icon(
-              Icons.account_balance_wallet_outlined,
-              color: mainColor,
-              size: 24,
-            ),
+        gradient: const LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [Color(0xFF0C2340), Color(0xFF153D63)],
+        ),
+        borderRadius: BorderRadius.circular(20),
+        boxShadow: [
+          BoxShadow(
+            color: const Color(0xFF0C2340).withValues(alpha: 0.30),
+            blurRadius: 20,
+            offset: const Offset(0, 10),
           ),
         ],
       ),
-    );
-  }
-
-  Widget _buildExpensesList(
-    BuildContext context,
-    ColorScheme colors,
-    List<ExpenseByResponsibleEntity> expenses,
-  ) {
-    if (expenses.isEmpty) {
-      return Container(
-        padding: const EdgeInsets.all(20),
-        decoration: BoxDecoration(
-          color: colors.white,
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: colors.lead.withValues(alpha: 0.15)),
-        ),
-        child: const Center(
-          child: Text(
-            "No hay gastos registrados",
-            style: TextStyle(color: Colors.grey),
-          ),
-        ),
-      );
-    }
-
-    final formatCurrency = NumberFormat.currency(symbol: '', decimalDigits: 2);
-
-    return Container(
-      decoration: BoxDecoration(
-        color: colors.white,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: colors.lead.withValues(alpha: 0.15)),
-      ),
-      child: ListView.separated(
-        shrinkWrap: true,
-        physics: const NeverScrollableScrollPhysics(),
-        itemCount: expenses.length,
-        separatorBuilder: (_, __) =>
-            Divider(height: 1, color: colors.lead.withValues(alpha: 0.1)),
-        itemBuilder: (context, index) {
-          final expense = expenses[index];
-
-          IconData icon = Icons.payments_outlined;
-          Color iconColor = colors.black;
-          Color iconBg = colors.lead.withValues(alpha: 0.1);
-
-          if (expense.area.contains("Urgentes")) {
-            icon = Icons.priority_high;
-            iconColor = const Color(0xFFEF4444);
-            iconBg = const Color(0xFFFEF2F2);
-          } else if (expense.area.contains("Máquinas")) {
-            icon = Icons.settings_outlined;
-          } else if (expense.area.contains("Campamento") ||
-              expense.area.contains("Socios")) {
-            icon = Icons.business_outlined;
-          }
-
-          return _buildExpenseItem(
-            context: context,
-            icon: icon,
-            iconBg: iconBg,
-            iconColor: iconColor,
-            title: expense.area,
-            subtitle: 'Egresos',
-            amount: '${formatCurrency.format(expense.monto)} Bs.',
-            percentage:
-                '${expense.porcentajeDelTotal.toStringAsFixed(0)}% del total',
-            colors: colors,
-            isDanger: expense.area.contains("Urgentes"),
-          );
-        },
-      ),
-    );
-  }
-
-  Widget _buildExpenseItem({
-    required BuildContext context,
-    required IconData icon,
-    required Color iconBg,
-    required Color iconColor,
-    required String title,
-    required String subtitle,
-    required String amount,
-    required String percentage,
-    required ColorScheme colors,
-    bool isDanger = false,
-  }) {
-    return Padding(
-      padding: const EdgeInsets.all(16.0),
-      child: Row(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Container(
-            padding: const EdgeInsets.all(12),
-            decoration: BoxDecoration(
-              color: iconBg,
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: Icon(icon, color: iconColor, size: 24),
-          ),
-          const SizedBox(width: 16),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  title,
-                  style: AppTextStyles.mainStyle14Bold(context).copyWith(
-                    color: isDanger ? const Color(0xFFEF4444) : colors.black,
+          Row(
+            children: [
+              Expanded(
+                child: Text(
+                  'BALANCE NETO · ${_getFormattedDateLabel().toUpperCase()}',
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    color: Colors.white.withValues(alpha: 0.6),
+                    fontSize: 10,
+                    fontWeight: FontWeight.w700,
+                    letterSpacing: 0.6,
                   ),
                 ),
-                const SizedBox(height: 4),
-                Text(
-                  subtitle,
-                  style: AppTextStyles.mainStyle12(
-                    context,
-                  ).copyWith(color: colors.lead),
-                ),
-              ],
-            ),
-          ),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.end,
-            children: [
-              Text(
-                amount,
-                style: AppTextStyles.mainStyle14Bold(context).copyWith(
-                  color: isDanger ? const Color(0xFFEF4444) : colors.black,
-                ),
               ),
-              const SizedBox(height: 4),
-              Text(
-                percentage,
-                style: AppTextStyles.mainStyle10(
-                  context,
-                ).copyWith(color: colors.lead.withValues(alpha: 0.8)),
+              const SizedBox(width: 8),
+              Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 10,
+                  vertical: 5,
+                ),
+                decoration: BoxDecoration(
+                  color: healthColor.withValues(alpha: 0.18),
+                  borderRadius: BorderRadius.circular(20),
+                  border: Border.all(
+                    color: healthColor.withValues(alpha: 0.45),
+                  ),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Container(
+                      width: 6,
+                      height: 6,
+                      decoration: BoxDecoration(
+                        color: healthColor,
+                        shape: BoxShape.circle,
+                      ),
+                    ),
+                    const SizedBox(width: 6),
+                    Text(
+                      estadoLabel,
+                      style: TextStyle(
+                        color: healthColor,
+                        fontSize: 11,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ],
           ),
+          const SizedBox(height: 14),
+          FittedBox(
+            fit: BoxFit.scaleDown,
+            alignment: Alignment.centerLeft,
+            child: Text(
+              '${_money(s.balanceNeto)}.',
+              style: const TextStyle(
+                color: Colors.white,
+                fontSize: 30,
+                fontWeight: FontWeight.w800,
+                letterSpacing: -0.5,
+              ),
+            ),
+          ),
+          const SizedBox(height: 12),
+          Row(
+            children: [
+              Icon(
+                isPositive
+                    ? Icons.trending_up_rounded
+                    : Icons.trending_down_rounded,
+                size: 16,
+                color: isPositive
+                    ? const Color(0xFF34D399)
+                    : const Color(0xFFF87171),
+              ),
+              const SizedBox(width: 6),
+              Expanded(
+                child: Text(
+                  '${margen.toStringAsFixed(1)}% de margen sobre ingresos',
+                  style: TextStyle(
+                    color: Colors.white.withValues(alpha: 0.8),
+                    fontSize: 12,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          if (report.datosGrafica.length >= 2) ...[
+            const SizedBox(height: 16),
+            _heroSparkline(report.datosGrafica),
+          ],
+          const SizedBox(height: 16),
+          _heroFlowRow(context, s),
         ],
       ),
     );
   }
 
+  Widget _heroSparkline(List<ChartDataEntity> data) {
+    double minY = data.first.margen;
+    double maxY = data.first.margen;
+    for (final d in data) {
+      if (d.margen < minY) minY = d.margen;
+      if (d.margen > maxY) maxY = d.margen;
+    }
+    if (minY == maxY) {
+      minY -= 1;
+      maxY += 1;
+    }
+    final pad = (maxY - minY) * 0.18;
+
+    return SizedBox(
+      height: 46,
+      child: LineChart(
+        LineChartData(
+          minX: 0,
+          maxX: (data.length - 1).toDouble(),
+          minY: minY - pad,
+          maxY: maxY + pad,
+          lineTouchData: const LineTouchData(enabled: false),
+          gridData: const FlGridData(show: false),
+          borderData: FlBorderData(show: false),
+          titlesData: const FlTitlesData(show: false),
+          lineBarsData: [
+            LineChartBarData(
+              spots: [
+                for (int i = 0; i < data.length; i++)
+                  FlSpot(i.toDouble(), data[i].margen),
+              ],
+              isCurved: true,
+              preventCurveOverShooting: true,
+              color: Colors.white.withValues(alpha: 0.9),
+              barWidth: 2,
+              dotData: const FlDotData(show: false),
+              belowBarData: BarAreaData(
+                show: true,
+                gradient: LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  colors: [
+                    Colors.white.withValues(alpha: 0.28),
+                    Colors.white.withValues(alpha: 0.0),
+                  ],
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _heroFlowRow(BuildContext context, GeneralSummaryEntity s) {
+    return Row(
+      children: [
+        Expanded(
+          child: _heroMiniStat(
+            'Ingresos',
+            _money(s.ingresosTotales),
+            const Color(0xFF34D399),
+          ),
+        ),
+        const SizedBox(width: 16),
+        Container(
+          width: 1,
+          height: 30,
+          color: Colors.white.withValues(alpha: 0.15),
+        ),
+        const SizedBox(width: 16),
+        Expanded(
+          child: _heroMiniStat(
+            'Egresos',
+            _money(s.egresosTotales),
+            const Color(0xFFF87171),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _heroMiniStat(String label, String value, Color dot) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            Container(
+              width: 6,
+              height: 6,
+              decoration: BoxDecoration(color: dot, shape: BoxShape.circle),
+            ),
+            const SizedBox(width: 6),
+            Text(
+              label,
+              style: TextStyle(
+                color: Colors.white.withValues(alpha: 0.7),
+                fontSize: 11,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 4),
+        FittedBox(
+          fit: BoxFit.scaleDown,
+          alignment: Alignment.centerLeft,
+          child: Text(
+            value,
+            style: const TextStyle(
+              color: Colors.white,
+              fontSize: 15,
+              fontWeight: FontWeight.w700,
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  // ---------- Sección de KPIs (derivados de datos reales) ----------
+  Widget _buildKpiSection(
+    BuildContext context,
+    ColorScheme colors,
+    FinancialReportEntity report,
+  ) {
+    final s = report.resumenGeneral;
+    final detalle = report.detalleAbsolutoPdf;
+
+    final margen = _pct(s.balanceNeto, s.ingresosTotales);
+    final gastoPct = _pct(s.egresosTotales, s.ingresosTotales);
+    final movimientos = detalle.length;
+    final ticket = detalle.isEmpty
+        ? 0.0
+        : detalle.fold<double>(0, (sum, e) => sum + e.monto) / detalle.length;
+    final mayor = detalle.isEmpty
+        ? 0.0
+        : detalle.map((e) => e.monto).reduce((a, b) => a > b ? a : b);
+    final cajas = detalle
+        .map((e) => e.caja)
+        .where((c) => c.trim().isNotEmpty)
+        .toSet()
+        .length;
+
+    final margenColor = s.balanceNeto >= 0
+        ? const Color(0xFF10B981)
+        : const Color(0xFFEF4444);
+    const primary = Color(0xFF1D54F3);
+
+    final tiles = <Widget>[
+      _buildKpiTile(
+        context,
+        colors,
+        icon: Icons.savings_outlined,
+        accent: margenColor,
+        label: 'MARGEN NETO',
+        value: '${margen.toStringAsFixed(1)}%',
+        sub: 'sobre ingresos',
+      ),
+      _buildKpiTile(
+        context,
+        colors,
+        icon: Icons.pie_chart_outline,
+        accent: const Color(0xFFF59E0B),
+        label: 'TASA DE GASTO',
+        value: '${gastoPct.toStringAsFixed(1)}%',
+        sub: 'egresos / ingresos',
+      ),
+      _buildKpiTile(
+        context,
+        colors,
+        icon: Icons.receipt_long_outlined,
+        accent: primary,
+        label: 'MOVIMIENTOS',
+        value: '$movimientos',
+        sub: 'transacciones',
+      ),
+      _buildKpiTile(
+        context,
+        colors,
+        icon: Icons.sell_outlined,
+        accent: primary,
+        label: 'TICKET PROMEDIO',
+        value: _money(ticket),
+        sub: 'por movimiento',
+      ),
+      _buildKpiTile(
+        context,
+        colors,
+        icon: Icons.arrow_outward_rounded,
+        accent: const Color(0xFFEF4444),
+        label: 'MAYOR MOVIMIENTO',
+        value: _money(mayor),
+        sub: 'monto máximo',
+      ),
+      _buildKpiTile(
+        context,
+        colors,
+        icon: Icons.account_balance_outlined,
+        accent: primary,
+        label: 'CAJAS ACTIVAS',
+        value: '$cajas',
+        sub: 'con movimiento',
+      ),
+    ];
+
+    final rows = <Widget>[];
+    for (var i = 0; i < tiles.length; i += 2) {
+      rows.add(
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Expanded(child: tiles[i]),
+            const SizedBox(width: 12),
+            if (i + 1 < tiles.length)
+              Expanded(child: tiles[i + 1])
+            else
+              const Spacer(),
+          ],
+        ),
+      );
+      if (i + 2 < tiles.length) rows.add(const SizedBox(height: 12));
+    }
+    return Column(children: rows);
+  }
+
+  Widget _buildKpiTile(
+    BuildContext context,
+    ColorScheme colors, {
+    required IconData icon,
+    required Color accent,
+    required String label,
+    required String value,
+    String? sub,
+  }) {
+    return Container(
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: colors.white,
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: colors.lead.withValues(alpha: 0.15)),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.03),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: accent.withValues(alpha: 0.12),
+              borderRadius: BorderRadius.circular(10),
+            ),
+            child: Icon(icon, size: 16, color: accent),
+          ),
+          const SizedBox(height: 12),
+          Text(
+            label,
+            style: AppTextStyles.mainStyleGrey10(
+              context,
+            ).copyWith(fontWeight: FontWeight.bold, letterSpacing: 0.4),
+          ),
+          const SizedBox(height: 4),
+          FittedBox(
+            fit: BoxFit.scaleDown,
+            alignment: Alignment.centerLeft,
+            child: Text(
+              value,
+              style: AppTextStyles.mainStyle20Bold(
+                context,
+              ).copyWith(fontSize: 18, color: colors.black),
+            ),
+          ),
+          if (sub != null) ...[
+            const SizedBox(height: 3),
+            Text(
+              sub,
+              style: AppTextStyles.mainStyle10(
+                context,
+              ).copyWith(color: colors.lead.withValues(alpha: 0.8)),
+            ),
+          ],
+        ],
+      ),
+    );
+  }
 
   Widget _buildExportButton(
     BuildContext context,

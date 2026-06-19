@@ -6,7 +6,6 @@ import 'package:front_gestion_minera/core/widgets/excavator_loader.dart';
 import 'package:front_gestion_minera/modules/machinery/presentation/bloc/machinery_bloc.dart';
 import 'package:front_gestion_minera/modules/machinery/presentation/widgets/info_banner_widget.dart';
 import 'package:front_gestion_minera/utils/constants/color.constant.dart';
-import 'package:front_gestion_minera/utils/text_util.dart';
 import 'package:image_picker/image_picker.dart';
 
 import '../../domain/entity/entity.dart';
@@ -19,6 +18,7 @@ class RegistrationFormBody extends StatefulWidget {
 }
 
 class _RegistrationFormBodyState extends State<RegistrationFormBody> {
+  final _formKey = GlobalKey<FormState>();
   final TextEditingController _nameController = TextEditingController();
   final TextEditingController _codeController = TextEditingController();
   final TextEditingController _descriptionController = TextEditingController();
@@ -26,6 +26,10 @@ class _RegistrationFormBodyState extends State<RegistrationFormBody> {
   TypeMachineryEntity? _selectedType;
   List<TypeMachineryEntity> _types = [];
   XFile? _pickedImage;
+
+  AutovalidateMode _autoValidate = AutovalidateMode.disabled;
+  bool _typeError = false;
+  bool _photoError = false;
 
   @override
   void dispose() {
@@ -38,100 +42,49 @@ class _RegistrationFormBodyState extends State<RegistrationFormBody> {
   Future<void> _pickImage() async {
     final source = await showModalBottomSheet<ImageSource>(
       context: context,
+      backgroundColor: TColors.white,
       shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+        borderRadius: BorderRadius.vertical(top: Radius.circular(22)),
       ),
-      builder: (_) => SafeArea(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const SizedBox(height: 8),
-            Container(
-              width: 40,
-              height: 4,
-              decoration: BoxDecoration(
-                color: TColors.inputBorder,
-                borderRadius: BorderRadius.circular(2),
-              ),
-            ),
-            const SizedBox(height: 16),
-            ListTile(
-              leading: const Icon(
-                Icons.photo_library_outlined,
-                color: TColors.textPrimary,
-              ),
-              title: const Text(
-                'Seleccionar de galería',
-                style: TextStyle(color: TColors.textPrimary),
-              ),
-              onTap: () => Navigator.of(context).pop(ImageSource.gallery),
-            ),
-            ListTile(
-              leading: const Icon(
-                Icons.camera_alt_outlined,
-                color: TColors.textPrimary,
-              ),
-              title: const Text(
-                'Tomar una foto',
-                style: TextStyle(color: TColors.textPrimary),
-              ),
-              onTap: () => Navigator.of(context).pop(ImageSource.camera),
-            ),
-            const SizedBox(height: 8),
-          ],
-        ),
-      ),
+      builder: (_) => const _ImageSourceSheet(),
     );
     if (source == null) return;
-    final image = await ImagePicker().pickImage(source: source);
-    if (image != null) setState(() => _pickedImage = image);
+    final image = await ImagePicker().pickImage(
+      source: source,
+      imageQuality: 80,
+    );
+    if (image != null) {
+      setState(() {
+        _pickedImage = image;
+        _photoError = false;
+      });
+    }
   }
 
   void _submit(BuildContext context) {
-    final name = _nameController.text.trim();
-    final code = _codeController.text.trim();
-    final description = _descriptionController.text.trim();
+    final formValid = _formKey.currentState?.validate() ?? false;
+    final typeValid = _selectedType != null;
+    final photoValid = _pickedImage != null;
 
-    if (name.isEmpty || code.isEmpty || description.isEmpty) {
-      CustomAlert.show(
-        context,
-        title: 'Error',
-        message: 'Complete todos los campos',
-        type: AlertType.error,
-      );
-      return;
-    }
-    if (_selectedType == null) {
-      CustomAlert.show(
-        context,
-        title: 'Error',
-        message: 'Seleccione un tipo de maquinaria',
-        type: AlertType.error,
-      );
-      return;
-    }
-    if (_pickedImage == null) {
-      CustomAlert.show(
-        context,
-        title: 'Error',
-        message: 'Seleccione una fotografía',
-        type: AlertType.error,
-      );
+    setState(() {
+      _autoValidate = AutovalidateMode.onUserInteraction;
+      _typeError = !typeValid;
+      _photoError = !photoValid;
+    });
 
-      return;
-    }
+    if (!formValid || !typeValid || !photoValid) return;
 
     context.read<MachineryBloc>().add(
-      RegisterMachineryEvent(
-        request: RegisterMachineryRequestEntity(
-          name: name,
-          uniqueCode: code,
-          typeId: _selectedType!.id,
-          description: description,
-          photoPath: _pickedImage!.path,
-        ),
-      ),
-    );
+          RegisterMachineryEvent(
+            request: RegisterMachineryRequestEntity(
+              name: _nameController.text.trim(),
+              uniqueCode: _codeController.text.trim(),
+              typeId: _selectedType!.id,
+              description: _descriptionController.text.trim(),
+              photoPath: _pickedImage!.path,
+            ),
+          ),
+        );
   }
 
   @override
@@ -154,16 +107,16 @@ class _RegistrationFormBodyState extends State<RegistrationFormBody> {
             message: 'Maquinaria registrada exitosamente.',
             type: AlertType.success,
           );
-            context.router.maybePop(true);
+          context.router.maybePop(true);
         }
         if (state is RegisterMachineryError) {
+          // Mantenemos el formulario para que el usuario pueda reintentar.
           CustomAlert.show(
             context,
             title: 'Error',
             message: state.message,
             type: AlertType.error,
           );
-          context.router.back();
         }
       },
       buildWhen: (_, current) =>
@@ -173,175 +126,409 @@ class _RegistrationFormBodyState extends State<RegistrationFormBody> {
           current is TypeMachineryLoading ||
           current is TypeMachineryLoaded,
       builder: (context, state) {
-        final isLoading =
-            state is RegisterMachineryLoading || state is TypeMachineryLoading;
+        final submitting = state is RegisterMachineryLoading;
+        final loadingTypes = state is TypeMachineryLoading;
+
         return Stack(
           children: [
-            SingleChildScrollView(
-              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  InfoBanner(),
-                  const SizedBox(height: 24),
-                  Text(
-                    'NOMBRE DE LA MAQUINARIA',
-                    style: AppTextStyles.mainStyleBluePrimary12(context),
-                  ),
-                  const SizedBox(height: 8),
-                  TextField(
-                    controller: _nameController,
-                    decoration: InputDecoration(
-                      hintText: 'Ej. Excavadora Hidráulica 320',
-                      hintStyle: const TextStyle(
-                        color: TColors.hintColor,
-                        fontSize: 14,
-                      ),
+            Form(
+              key: _formKey,
+              autovalidateMode: _autoValidate,
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.fromLTRB(20, 16, 20, 32),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const InfoBanner(),
+                    const SizedBox(height: 24),
+
+                    // ── Identificación ──────────────────────────────────
+                    _sectionTitle(
+                      Icons.badge_outlined,
+                      'Identificación',
                     ),
-                    enabled: !isLoading,
-                  ),
-                  const SizedBox(height: 20),
-                  Text(
-                    'CÓDIGO DE MÁQUINA',
-                    style: AppTextStyles.mainStyleBluePrimary12(context),
-                  ),
-                  const SizedBox(height: 8),
-                  TextField(
-                    controller: _codeController,
-                    decoration: InputDecoration(
-                      hintText: 'MH-2024-001',
-                      hintStyle: const TextStyle(
-                        color: TColors.hintColor,
-                        fontSize: 14,
-                      ),
+                    const SizedBox(height: 16),
+                    _label('Nombre de la maquinaria'),
+                    const SizedBox(height: 8),
+                    _textField(
+                      controller: _nameController,
+                      hint: 'Ej. Excavadora Hidráulica 320',
+                      icon: Icons.precision_manufacturing_outlined,
+                      enabled: !submitting,
+                      textCapitalization: TextCapitalization.words,
                     ),
-                    enabled: !isLoading,
-                  ),
-                  const SizedBox(height: 20),
-                  Text(
-                    'TIPO DE MAQUINARIA',
-                    style: AppTextStyles.mainStyleBluePrimary12(context),
-                  ),
-                  const SizedBox(height: 8),
-                  if (state is TypeMachineryLoading)
-                    const Center(child: CircularProgressIndicator())
-                  else
+                    const SizedBox(height: 18),
+                    _label('Código de máquina'),
+                    const SizedBox(height: 8),
+                    _textField(
+                      controller: _codeController,
+                      hint: 'MH-2024-001',
+                      icon: Icons.tag_rounded,
+                      enabled: !submitting,
+                      textCapitalization: TextCapitalization.characters,
+                    ),
+                    const SizedBox(height: 18),
+                    _label('Tipo de maquinaria'),
+                    const SizedBox(height: 8),
                     TypeDropdown(
                       value: _selectedType,
                       types: _types,
-                      enabled: !isLoading,
-                      onChanged: (t) => setState(() => _selectedType = t),
+                      enabled: !submitting,
+                      loading: loadingTypes,
+                      hasError: _typeError,
+                      onChanged: (t) => setState(() {
+                        _selectedType = t;
+                        _typeError = false;
+                      }),
                     ),
-                  const SizedBox(height: 20),
-                  Text(
-                    'DESCRIPCIÓN TÉCNICA',
-                    style: AppTextStyles.mainStyleBluePrimary12(context),
-                  ),
-                  const SizedBox(height: 8),
-                  TextField(
-                    controller: _descriptionController,
-                    decoration: InputDecoration(
-                      hintText:
-                          'Ingrese especificaciones del motor, capacidad de carga, '
-                          'horas de uso iniciales y estado actual...',
-                      hintStyle: const TextStyle(
-                        color: TColors.hintColor,
-                        fontSize: 14,
-                      ),
-                    ),
-                    maxLines: 5,
-                    enabled: !isLoading,
-                  ),
-                  const SizedBox(height: 20),
-                  Text(
-                    'FOTOGRAFÍA DE LA UNIDAD',
-                    style: AppTextStyles.mainStyleBluePrimary12(context),
-                  ),
-                  const SizedBox(height: 8),
-                  PhotoUploadBox(
-                    pickedImage: _pickedImage,
-                    enabled: !isLoading,
-                    onTap: _pickImage,
-                  ),
-                  const SizedBox(height: 32),
+                    if (_typeError)
+                      _errorText('Selecciona un tipo de maquinaria'),
+                    const SizedBox(height: 24),
 
-                  SizedBox(
-                    width: double.infinity,
-                    height: 52,
-                    child: ElevatedButton.icon(
-                      onPressed: isLoading ? null : () => _submit(context),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: TColors.textPrimary,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                        elevation: 0,
-                      ),
-                      icon: const Icon(
-                        Icons.save_outlined,
-                        color: TColors.white,
-                        size: 20,
-                      ),
-                      label: Text(
-                        'GUARDAR REGISTRO',
-                        style: const TextStyle(
-                          color: TColors.white,
-                          fontWeight: FontWeight.bold,
-                          fontSize: 15,
-                          letterSpacing: 1,
-                        ),
-                      ),
+                    // ── Descripción ─────────────────────────────────────
+                    _sectionTitle(
+                      Icons.description_outlined,
+                      'Descripción técnica',
                     ),
-                  ),
-                  const SizedBox(height: 12),
+                    const SizedBox(height: 16),
+                    _label('Especificaciones'),
+                    const SizedBox(height: 8),
+                    _textField(
+                      controller: _descriptionController,
+                      hint:
+                          'Motor, capacidad de carga, horas de uso iniciales y '
+                          'estado actual...',
+                      enabled: !submitting,
+                      maxLines: 5,
+                      textCapitalization: TextCapitalization.sentences,
+                    ),
+                    const SizedBox(height: 24),
 
-                  SizedBox(
-                    width: double.infinity,
-                    height: 52,
-                    child: OutlinedButton.icon(
-                      onPressed: isLoading
-                          ? null
-                          : () => Navigator.of(context).pop(),
-                      style: OutlinedButton.styleFrom(
-                        side: const BorderSide(
-                          color: TColors.danger,
-                          width: 1.5,
+                    // ── Fotografía ──────────────────────────────────────
+                    _sectionTitle(
+                      Icons.photo_camera_outlined,
+                      'Fotografía de la unidad',
+                    ),
+                    const SizedBox(height: 16),
+                    PhotoUploadBox(
+                      pickedImage: _pickedImage,
+                      enabled: !submitting,
+                      hasError: _photoError,
+                      onTap: _pickImage,
+                      onRemove: () => setState(() => _pickedImage = null),
+                    ),
+                    if (_photoError)
+                      _errorText('Agrega una fotografía de la unidad'),
+                    const SizedBox(height: 32),
+
+                    // ── Acciones ────────────────────────────────────────
+                    SizedBox(
+                      width: double.infinity,
+                      height: 54,
+                      child: FilledButton.icon(
+                        onPressed: submitting ? null : () => _submit(context),
+                        style: FilledButton.styleFrom(
+                          backgroundColor: TColors.appMainColor,
+                          foregroundColor: TColors.white,
+                          disabledBackgroundColor:
+                              TColors.appMainColor.withValues(alpha: 0.5),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(16),
+                          ),
                         ),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                      ),
-                      icon: const Icon(
-                        Icons.cancel_outlined,
-                        color: TColors.danger,
-                        size: 20,
-                      ),
-                      label: const Text(
-                        'CANCELAR',
-                        style: TextStyle(
-                          color: TColors.danger,
-                          fontWeight: FontWeight.bold,
-                          fontSize: 15,
-                          letterSpacing: 1,
+                        icon: const Icon(Icons.check_circle_outline_rounded,
+                            size: 21),
+                        label: const Text(
+                          'Guardar registro',
+                          style: TextStyle(
+                              fontSize: 16, fontWeight: FontWeight.w700),
                         ),
                       ),
                     ),
-                  ),
-                  const SizedBox(height: 24),
-                ],
-              ),
-            ),
-            if (isLoading) ...[
-              Positioned.fill(
-                child: Container(
-                  color: Colors.black.withValues(alpha: 0.3),
-                  child: const Center(child: ExcavatorLoader()),
+                    const SizedBox(height: 10),
+                    SizedBox(
+                      width: double.infinity,
+                      height: 52,
+                      child: TextButton(
+                        onPressed: submitting
+                            ? null
+                            : () => Navigator.of(context).pop(),
+                        style: TextButton.styleFrom(
+                          foregroundColor: TColors.textSecondary,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(16),
+                          ),
+                        ),
+                        child: const Text(
+                          'Cancelar',
+                          style: TextStyle(
+                              fontSize: 15, fontWeight: FontWeight.w600),
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
               ),
-            ],
+            ),
+            if (submitting)
+              const Positioned.fill(child: _SubmittingOverlay()),
           ],
         );
       },
+    );
+  }
+
+  // ── Helpers de UI ─────────────────────────────────────────────────────
+
+  Widget _sectionTitle(IconData icon, String title) {
+    return Row(
+      children: [
+        Container(
+          width: 32,
+          height: 32,
+          alignment: Alignment.center,
+          decoration: BoxDecoration(
+            color: TColors.primaryLight,
+            borderRadius: BorderRadius.circular(9),
+          ),
+          child: Icon(icon, color: TColors.appMainColor, size: 18),
+        ),
+        const SizedBox(width: 10),
+        Text(
+          title,
+          style: const TextStyle(
+            color: TColors.textPrimary,
+            fontSize: 15,
+            fontWeight: FontWeight.w700,
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _label(String text) {
+    return Row(
+      children: [
+        Text(
+          text,
+          style: const TextStyle(
+            color: TColors.textPrimary,
+            fontSize: 13,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+        const Text(
+          ' *',
+          style: TextStyle(
+            color: TColors.danger,
+            fontSize: 13,
+            fontWeight: FontWeight.w700,
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _errorText(String message) {
+    return Padding(
+      padding: const EdgeInsets.only(top: 6, left: 4),
+      child: Row(
+        children: [
+          const Icon(Icons.error_outline_rounded,
+              color: TColors.danger, size: 14),
+          const SizedBox(width: 5),
+          Text(
+            message,
+            style: const TextStyle(color: TColors.danger, fontSize: 12),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _textField({
+    required TextEditingController controller,
+    required String hint,
+    IconData? icon,
+    bool enabled = true,
+    int maxLines = 1,
+    TextCapitalization textCapitalization = TextCapitalization.none,
+  }) {
+    return TextFormField(
+      controller: controller,
+      enabled: enabled,
+      maxLines: maxLines,
+      textCapitalization: textCapitalization,
+      style: const TextStyle(fontSize: 14.5, color: TColors.textPrimary),
+      validator: (v) =>
+          (v == null || v.trim().isEmpty) ? 'Este campo es obligatorio' : null,
+      decoration: InputDecoration(
+        hintText: hint,
+        hintStyle: const TextStyle(color: TColors.hintColor, fontSize: 14),
+        filled: true,
+        fillColor: TColors.white,
+        isDense: true,
+        prefixIcon: icon == null
+            ? null
+            : Padding(
+                padding: EdgeInsets.only(bottom: maxLines > 1 ? 60 : 0),
+                child: Icon(icon, color: TColors.iconMuted, size: 20),
+              ),
+        contentPadding:
+            const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
+        enabledBorder: _fieldBorder(TColors.border),
+        focusedBorder: _fieldBorder(TColors.appMainColor, width: 1.4),
+        disabledBorder: _fieldBorder(TColors.border),
+        errorBorder: _fieldBorder(TColors.danger),
+        focusedErrorBorder: _fieldBorder(TColors.danger, width: 1.4),
+        errorStyle: const TextStyle(color: TColors.danger, fontSize: 12),
+      ),
+    );
+  }
+
+  OutlineInputBorder _fieldBorder(Color color, {double width = 1}) {
+    return OutlineInputBorder(
+      borderRadius: BorderRadius.circular(14),
+      borderSide: BorderSide(color: color, width: width),
+    );
+  }
+}
+
+/// Hoja inferior para elegir el origen de la imagen.
+class _ImageSourceSheet extends StatelessWidget {
+  const _ImageSourceSheet();
+
+  @override
+  Widget build(BuildContext context) {
+    return SafeArea(
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(20, 12, 20, 20),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Center(
+              child: Container(
+                width: 42,
+                height: 4,
+                decoration: BoxDecoration(
+                  color: TColors.border,
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+            ),
+            const SizedBox(height: 18),
+            const Text(
+              'Agregar fotografía',
+              style: TextStyle(
+                color: TColors.textPrimary,
+                fontSize: 16,
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+            const SizedBox(height: 16),
+            _option(
+              context,
+              icon: Icons.camera_alt_rounded,
+              label: 'Tomar una foto',
+              source: ImageSource.camera,
+            ),
+            const SizedBox(height: 10),
+            _option(
+              context,
+              icon: Icons.photo_library_rounded,
+              label: 'Elegir de la galería',
+              source: ImageSource.gallery,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _option(
+    BuildContext context, {
+    required IconData icon,
+    required String label,
+    required ImageSource source,
+  }) {
+    return GestureDetector(
+      onTap: () => Navigator.of(context).pop(source),
+      behavior: HitTestBehavior.opaque,
+      child: Container(
+        padding: const EdgeInsets.all(14),
+        decoration: BoxDecoration(
+          color: TColors.background,
+          borderRadius: BorderRadius.circular(14),
+          border: Border.all(color: TColors.border),
+        ),
+        child: Row(
+          children: [
+            Container(
+              width: 40,
+              height: 40,
+              alignment: Alignment.center,
+              decoration: BoxDecoration(
+                color: TColors.primaryLight,
+                borderRadius: BorderRadius.circular(11),
+              ),
+              child: Icon(icon, color: TColors.appMainColor, size: 21),
+            ),
+            const SizedBox(width: 14),
+            Text(
+              label,
+              style: const TextStyle(
+                color: TColors.textPrimary,
+                fontSize: 14.5,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+            const Spacer(),
+            const Icon(Icons.chevron_right_rounded, color: TColors.iconMuted),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// Overlay mostrado mientras se registra la maquinaria.
+class _SubmittingOverlay extends StatelessWidget {
+  const _SubmittingOverlay();
+
+  @override
+  Widget build(BuildContext context) {
+    return ColoredBox(
+      color: Colors.black.withValues(alpha: 0.35),
+      child: Center(
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 26),
+          decoration: BoxDecoration(
+            color: TColors.white,
+            borderRadius: BorderRadius.circular(22),
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: const [
+              ExcavatorLoader(width: 120, height: 120),
+              SizedBox(height: 8),
+              Text(
+                'Registrando maquinaria...',
+                style: TextStyle(
+                  color: TColors.textPrimary,
+                  fontSize: 15,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+              SizedBox(height: 4),
+              Text(
+                'Espera un momento',
+                style: TextStyle(color: TColors.textSecondary, fontSize: 12.5),
+              ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 }

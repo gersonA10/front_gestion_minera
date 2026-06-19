@@ -6,11 +6,11 @@ import 'package:front_gestion_minera/core/widgets/excavator_loader.dart';
 import 'package:front_gestion_minera/injector_container.dart';
 import 'package:front_gestion_minera/modules/treasury/domain/entity/contributes/contribution_receipt_entity.dart';
 import 'package:front_gestion_minera/modules/treasury/presentation/bloc/treasury_bloc.dart';
-import 'package:front_gestion_minera/utils/constants/color.constant.dart';
 import 'package:intl/intl.dart';
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:printing/printing.dart';
+import 'contributes_ui.dart';
 
 @RoutePage()
 class ReceiptsHistoryScreen extends StatefulWidget {
@@ -43,13 +43,13 @@ class _ReceiptsHistoryScreenState extends State<ReceiptsHistoryScreen> {
 
   List<ContributionReceiptEntity> _filtered(
     List<ContributionReceiptEntity> all,
-  ) => _query.isEmpty
-      ? all
-      : all
-            .where(
-              (r) => r.memberName.toLowerCase().contains(_query.toLowerCase()),
-            )
-            .toList();
+  ) =>
+      _query.isEmpty
+          ? all
+          : all
+              .where((r) =>
+                  r.memberName.toLowerCase().contains(_query.toLowerCase()))
+              .toList();
 
   @override
   Widget build(BuildContext context) {
@@ -61,116 +61,90 @@ class _ReceiptsHistoryScreenState extends State<ReceiptsHistoryScreen> {
           if (!didPop) context.router.back();
         },
         child: Scaffold(
-        backgroundColor: TColors.appBackgroundColor,
-        appBar: AppBar(
-          backgroundColor: TColors.lightContainerAccount,
-          elevation: 0,
-          leading: IconButton(
-            icon: const Icon(
-              Icons.arrow_back,
-              color: TColors.appMainTextColor,
-              size: 22,
-            ),
-            onPressed: () => context.router.back(),
-          ),
-          title: const Text(
-            'Historial de Recibos',
-            style: TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.w700,
-              color: TColors.appMainTextColor,
-            ),
-          ),
-          centerTitle: true,
-        ),
-        body: BlocBuilder<TreasuryBloc, TreasuryState>(
-          buildWhen: (_, state) =>
-              state is ContributionReceiptsLoading ||
-              state is ContributionReceiptsLoaded ||
-              state is ContributionReceiptsError,
-          builder: (context, state) {
-            if (state is ContributionReceiptsLoading) {
-              return const Center(child: ExcavatorLoader());
-            }
-            if (state is ContributionReceiptsError) {
-              return Center(
-                child: Text(
-                  state.message,
-                  style: const TextStyle(
-                    fontSize: 14,
-                    color: TColors.appSecondaryTextColor,
-                  ),
-                ),
-              );
-            }
-            if (state is ContributionReceiptsLoaded) {
-              final lista = _filtered(state.receipts);
-              return Column(
-                children: [
-                  Padding(
-                    padding: const EdgeInsets.fromLTRB(16, 14, 16, 8),
-                    child: Container(
-                      decoration: BoxDecoration(
-                        color: TColors.white,
-                        borderRadius: BorderRadius.circular(12),
-                        border: Border.all(color: TColors.appSurfaceColor),
-                      ),
-                      child: TextField(
-                        controller: _searchController,
-                        onChanged: (v) => setState(() => _query = v),
-                        style: const TextStyle(
-                          fontSize: 14,
-                          color: TColors.appMainTextColor,
+          backgroundColor: CUi.bg,
+          appBar: contribAppBar(context, title: 'Historial de Recibos'),
+          body: BlocBuilder<TreasuryBloc, TreasuryState>(
+            buildWhen: (_, state) =>
+                state is ContributionReceiptsLoading ||
+                state is ContributionReceiptsLoaded ||
+                state is ContributionReceiptsError,
+            builder: (context, state) {
+              if (state is ContributionReceiptsLoading) {
+                return const Center(child: ExcavatorLoader());
+              }
+              if (state is ContributionReceiptsError) {
+                return CStateView(
+                  icon: Icons.cloud_off_rounded,
+                  color: CUi.danger,
+                  title: 'No pudimos cargar los recibos',
+                  subtitle: state.message,
+                );
+              }
+              if (state is ContributionReceiptsLoaded) {
+                final lista = _filtered(state.receipts);
+                return Column(
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(16, 14, 16, 8),
+                      child: Container(
+                        height: 46,
+                        decoration: BoxDecoration(
+                          color: CUi.surface,
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(color: CUi.border),
                         ),
-                        decoration: const InputDecoration(
-                          hintText: 'Buscar socio por nombre...',
-                          hintStyle: TextStyle(
+                        child: TextField(
+                          controller: _searchController,
+                          onChanged: (v) => setState(() => _query = v),
+                          textAlignVertical: TextAlignVertical.center,
+                          style: const TextStyle(
                             fontSize: 14,
-                            color: TColors.appSecondaryTextColor,
+                            color: CUi.textPrimary,
                           ),
-                          prefixIcon: Icon(
-                            Icons.search,
-                            color: TColors.appSecondaryTextColor,
-                            size: 20,
+                          decoration: const InputDecoration(
+                            isDense: true,
+                            hintText: 'Buscar socio por nombre...',
+                            hintStyle: TextStyle(
+                              fontSize: 13.5,
+                              color: CUi.muted,
+                            ),
+                            prefixIcon: Icon(
+                              Icons.search_rounded,
+                              color: CUi.muted,
+                              size: 20,
+                            ),
+                            border: InputBorder.none,
                           ),
-                          border: InputBorder.none,
-                          contentPadding: EdgeInsets.symmetric(
-                            horizontal: 12,
-                            vertical: 14,
-                          ),
-
                         ),
                       ),
                     ),
-                  ),
-                  Expanded(
-                    child: lista.isEmpty
-                        ? const Center(
-                            child: Text(
-                              'No se encontraron resultados.',
-                              style: TextStyle(
-                                fontSize: 14,
-                                color: TColors.appSecondaryTextColor,
-                              ),
+                    Expanded(
+                      child: lista.isEmpty
+                          ? const CStateView(
+                              icon: Icons.receipt_long_outlined,
+                              color: CUi.primary,
+                              title: 'Sin recibos',
+                              subtitle: 'No se encontraron resultados.',
+                            )
+                          : ListView.separated(
+                              padding:
+                                  const EdgeInsets.fromLTRB(16, 6, 16, 24),
+                              itemCount: lista.length,
+                              separatorBuilder: (_, _) =>
+                                  const SizedBox(height: 12),
+                              itemBuilder: (_, i) =>
+                                  ReciboCard(item: lista[i]),
                             ),
-                          )
-                        : ListView.separated(
-                            padding: const EdgeInsets.fromLTRB(16, 6, 16, 24),
-                            itemCount: lista.length,
-                            separatorBuilder: (_, _) =>
-                                const SizedBox(height: 12),
-                            itemBuilder: (_, i) => ReciboCard(item: lista[i]),
-                          ),
-                  ),
-                ],
-              );
-            }
-            return const SizedBox.shrink();
-          },
+                    ),
+                  ],
+                );
+              }
+              return const SizedBox.shrink();
+            },
+          ),
         ),
       ),
-    ),
-  );
+    );
   }
 }
 
@@ -186,10 +160,10 @@ class ReciboCard extends StatelessWidget {
     Color(0xFFDCFCE7),
   ];
   static const List<Color> _fgColors = [
-    TColors.appMainColor,
+    CUi.primary,
     Color(0xFFD97706),
     Color(0xFF7C3AED),
-    TColors.green,
+    CUi.success,
   ];
 
   String get _initials {
@@ -296,29 +270,18 @@ class ReciboCard extends StatelessWidget {
             pw.Text(label,
                 style: pw.TextStyle(fontSize: 12, color: PdfColors.grey600)),
             pw.Text(value,
-                style: pw.TextStyle(
-                    fontSize: 12, fontWeight: pw.FontWeight.bold)),
+                style:
+                    pw.TextStyle(fontSize: 12, fontWeight: pw.FontWeight.bold)),
           ],
         ),
       );
 
   @override
   Widget build(BuildContext context) {
+    final fmt = NumberFormat('#,##0.00', 'es_PE');
     final int idx = item.memberName.codeUnitAt(0) % _bgColors.length;
-    return Container(
+    return CCard(
       padding: const EdgeInsets.all(14),
-      decoration: BoxDecoration(
-        color: TColors.lightContainerAccount,
-        borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: TColors.appSurfaceColor),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha:  0.04),
-            blurRadius: 6,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -331,22 +294,24 @@ class ReciboCard extends StatelessWidget {
                   _initials,
                   style: TextStyle(
                     fontSize: 13,
-                    fontWeight: FontWeight.w700,
+                    fontWeight: FontWeight.w800,
                     color: _fgColors[idx],
                   ),
                 ),
               ),
-              const SizedBox(width: 10),
+              const SizedBox(width: 12),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
                       item.memberName,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
                       style: const TextStyle(
                         fontSize: 15,
-                        fontWeight: FontWeight.w700,
-                        color: TColors.appMainTextColor,
+                        fontWeight: FontWeight.w800,
+                        color: CUi.textPrimary,
                       ),
                     ),
                     const SizedBox(height: 2),
@@ -354,45 +319,33 @@ class ReciboCard extends StatelessWidget {
                       item.referenceCode,
                       style: const TextStyle(
                         fontSize: 12,
-                        color: TColors.appSecondaryTextColor,
+                        color: CUi.textSecondary,
                       ),
                     ),
                   ],
                 ),
               ),
-              Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 10,
-                  vertical: 4,
-                ),
-                decoration: BoxDecoration(
-                  color: TColors.green.withValues(alpha: 0.12),
-                  borderRadius: BorderRadius.circular(20),
-                ),
-                child: const Text(
-                  'Pagado',
-                  style: TextStyle(
-                    fontSize: 11,
-                    fontWeight: FontWeight.w600,
-                    color: TColors.green,
-                  ),
-                ),
+              const CPill(
+                label: 'Pagado',
+                color: CUi.success,
+                bg: CUi.successBg,
+                icon: Icons.check_circle_rounded,
               ),
             ],
           ),
           const SizedBox(height: 12),
-
-          DetalleRow(label: 'Referencia:', value: item.referenceCode),
-          const SizedBox(height: 4),
-          DetalleRow(label: 'Fecha de pago:', value: _formattedDate),
-          const SizedBox(height: 4),
+          DetalleRow(label: 'Fecha de pago', value: _formattedDate),
+          const SizedBox(height: 6),
           DetalleRow(
-            label: 'Monto:',
-            value: '${item.amount.toStringAsFixed(2)} Bs',
-            valueColor: TColors.appMainColor,
+            label: 'Monto',
+            value: '${fmt.format(item.amount)} Bs',
+            valueColor: CUi.primary,
             valueBold: true,
           ),
-          Divider(color: TColors.appSurfaceColor),
+          const Padding(
+            padding: EdgeInsets.symmetric(vertical: 10),
+            child: Divider(color: CUi.border, height: 1),
+          ),
           Row(
             children: [
               Expanded(
@@ -423,51 +376,44 @@ class ReciboCard extends StatelessWidget {
     );
   }
 }
+
 class ActionBtn extends StatelessWidget {
   final IconData icon;
   final String label;
   final VoidCallback onTap;
   final bool filled;
- 
-  const ActionBtn({super.key, 
+
+  const ActionBtn({
+    super.key,
     required this.icon,
     required this.label,
     required this.onTap,
     this.filled = false,
   });
- 
+
   @override
   Widget build(BuildContext context) {
+    final fg = filled ? CUi.primary : CUi.textPrimary;
     return GestureDetector(
       onTap: onTap,
       child: Container(
         padding: const EdgeInsets.symmetric(vertical: 11),
         decoration: BoxDecoration(
-          color: filled
-              ? TColors.appMainColor.withValues(alpha: 0.08)
-              : TColors.appBackgroundColor,
+          color: filled ? CUi.primarySoft : CUi.bg,
           borderRadius: BorderRadius.circular(10),
-          border: Border.all(color: TColors.appSurfaceColor),
+          border: Border.all(color: filled ? CUi.primary.withValues(alpha: 0.25) : CUi.border),
         ),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(
-              icon,
-              size: 16,
-              color: filled
-                  ? TColors.appMainColor
-                  : TColors.appMainTextColor,
-            ),
+            Icon(icon, size: 16, color: fg),
             const SizedBox(width: 6),
             Text(
               label,
               style: TextStyle(
                 fontSize: 13,
-                fontWeight: FontWeight.w600,
-                color: filled
-                    ? TColors.appMainColor
-                    : TColors.appMainTextColor,
+                fontWeight: FontWeight.w700,
+                color: fg,
               ),
             ),
           ],
@@ -483,7 +429,8 @@ class DetalleRow extends StatelessWidget {
   final Color? valueColor;
   final bool valueBold;
 
-  const DetalleRow({super.key, 
+  const DetalleRow({
+    super.key,
     required this.label,
     required this.value,
     this.valueColor,
@@ -497,17 +444,14 @@ class DetalleRow extends StatelessWidget {
       children: [
         Text(
           label,
-          style: const TextStyle(
-            fontSize: 13,
-            color: TColors.appSecondaryTextColor,
-          ),
+          style: const TextStyle(fontSize: 13, color: CUi.textSecondary),
         ),
         Text(
           value,
           style: TextStyle(
             fontSize: 13,
-            fontWeight: valueBold ? FontWeight.w700 : FontWeight.w400,
-            color: valueColor ?? TColors.appMainTextColor,
+            fontWeight: valueBold ? FontWeight.w800 : FontWeight.w500,
+            color: valueColor ?? CUi.textPrimary,
           ),
         ),
       ],

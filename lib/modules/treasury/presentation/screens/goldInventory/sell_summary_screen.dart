@@ -3,6 +3,21 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:front_gestion_minera/modules/treasury/domain/entity/entity.dart';
 import 'package:front_gestion_minera/utils/constants/color.constant.dart';
+import 'package:intl/intl.dart';
+
+String _formatCurrency(double value) => NumberFormat.currency(
+      locale: 'es_BO',
+      symbol: 'Bs',
+      decimalDigits: 2,
+    ).format(value);
+
+String _formatGrams(double value) {
+  final formatter = NumberFormat.decimalPatternDigits(
+    locale: 'es_BO',
+    decimalDigits: 2,
+  );
+  return '${formatter.format(value)} g';
+}
 
 @RoutePage()
 class SellSummaryScreen extends StatelessWidget {
@@ -177,12 +192,12 @@ class _DetailCard extends StatelessWidget {
           const Divider(color: TColors.border, height: 20),
           _DetailRow(
             label: 'Peso vendido',
-            value: '${saleData.pesoVendidoG.toStringAsFixed(2)} g',
+            value: _formatGrams(saleData.pesoVendidoG),
           ),
           const Divider(color: TColors.border, height: 20),
           _DetailRow(
             label: 'Precio por gramo',
-            value: 'Bs ${saleData.precioPorGramoBS.toStringAsFixed(2)}',
+            value: _formatCurrency(saleData.precioPorGramoBS),
           ),
           const Divider(color: TColors.border, height: 20),
           _DetailRow(
@@ -202,7 +217,7 @@ class _DetailCard extends StatelessWidget {
                 ),
               ),
               Text(
-                'Bs ${_formatNum(saleData.totalBs)}',
+                _formatCurrency(saleData.totalBs),
                 style: const TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.w800,
@@ -223,15 +238,6 @@ class _DetailCard extends StatelessWidget {
     } catch (_) {
       return iso;
     }
-  }
-
-  static String _formatNum(double v) {
-    final parts = v.toStringAsFixed(2).split('.');
-    final intPart = parts[0].replaceAllMapped(
-      RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'),
-      (m) => '${m[1]},',
-    );
-    return '$intPart.${parts[1]}';
   }
 }
 
@@ -318,7 +324,7 @@ class _LotCard extends StatelessWidget {
                 const SizedBox(height: 4),
                 Text(
                   'Pureza ${lot.pureza.toStringAsFixed(0)}% · '
-                  '${lot.gramosDescontados.toStringAsFixed(2)} g descontados',
+                  '${_formatGrams(lot.gramosDescontados)} descontados',
                   style: const TextStyle(
                     fontSize: 12,
                     color: TColors.textSecondary,

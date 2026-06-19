@@ -43,9 +43,9 @@ class TransactionTypeSelectorWidget extends StatelessWidget {
         duration: const Duration(milliseconds: 200),
         padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 2),
         decoration: BoxDecoration(
-          color: isSelected ? color.withOpacity(0.1) : Colors.transparent,
+          color: isSelected ? color.withValues(alpha: 0.1) : Colors.white,
           border: Border.all(
-            color: isSelected ? color : Colors.grey.shade300,
+            color: isSelected ? color : const Color(0xFFE8EDF5),
             width: isSelected ? 2 : 1,
           ),
           borderRadius: BorderRadius.circular(12),

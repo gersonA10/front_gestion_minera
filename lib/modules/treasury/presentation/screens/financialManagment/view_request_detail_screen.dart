@@ -5,10 +5,15 @@ import 'package:front_gestion_minera/config/theme/extension_theme.dart';
 import 'package:front_gestion_minera/core/widgets/custom_alert_widget.dart';
 import 'package:front_gestion_minera/core/widgets/zoomable_evidence_image.dart';
 import 'package:front_gestion_minera/injector_container.dart';
+import 'package:front_gestion_minera/utils/date_util.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:intl/intl.dart';
 import '../../../domain/entity/entity.dart';
 import '../../bloc/treasury_bloc.dart';
 import '../../widgets/widgtes.dart';
+
+String _money(num v) => 'Bs ${NumberFormat('#,##0.00', 'en_US').format(v)}';
+String _moneyStr(String v) => _money(double.tryParse(v) ?? 0);
 
 @RoutePage()
 class ViewRequestDetailsScreen extends StatefulWidget {
@@ -65,7 +70,7 @@ class _ViewRequestDetailsScreenState extends State<ViewRequestDetailsScreen> {
               ListTile(
                 leading: const Icon(
                   Icons.photo_library,
-                  color: Color(0xFF295AF5),
+                  color: Color(0xFF1A56FF),
                 ),
                 title: const Text('Elegir de la Galería'),
                 onTap: () {
@@ -76,7 +81,7 @@ class _ViewRequestDetailsScreenState extends State<ViewRequestDetailsScreen> {
               ListTile(
                 leading: const Icon(
                   Icons.photo_camera,
-                  color: Color(0xFF295AF5),
+                  color: Color(0xFF1A56FF),
                 ),
                 title: const Text('Tomar Foto'),
                 onTap: () {
@@ -107,16 +112,19 @@ class _ViewRequestDetailsScreenState extends State<ViewRequestDetailsScreen> {
           backgroundColor: colors.backgroundColor,
           appBar: AppBar(
             backgroundColor: Colors.white,
+            surfaceTintColor: Colors.white,
             elevation: 0,
+            centerTitle: true,
             leading: IconButton(
-              icon: const Icon(Icons.arrow_back, color: Colors.black),
+              icon: const Icon(Icons.arrow_back_ios_new_rounded,
+                  color: Color(0xFF0D1B3E), size: 20),
               onPressed: () => context.router.back(),
             ),
-            title: Text(
-              'Detalle de Solicitud',
+            title: const Text(
+              'Detalle de solicitud',
               style: TextStyle(
-                color: Colors.black,
-                fontWeight: FontWeight.bold,
+                color: Color(0xFF0D1B3E),
+                fontWeight: FontWeight.w800,
                 fontSize: 18,
               ),
             ),
@@ -139,212 +147,122 @@ class _ViewRequestDetailsScreenState extends State<ViewRequestDetailsScreen> {
               }
               if (state is DetailsofanapplicationSuccess) {
                 final data = state.data;
-                return SingleChildScrollView(
-                  child: Column(
-                    children: [
-                      Container(
-                        width: double.infinity,
-                        color: Colors.white,
-                        padding: EdgeInsets.symmetric(vertical: 23),
-                        child: Column(
-                          children: [
-                            Text(
-                              data.monto.toString(),
-                              style: TextStyle(
-                                fontSize: 23,
-                                fontWeight: FontWeight.bold,
-                                color: Color(0xFF1C1C1E),
-                              ),
-                            ),
-                            const SizedBox(height: 12),
-                            Container(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 16,
-                                vertical: 6,
-                              ),
-                              decoration: BoxDecoration(
-                                color: const Color(0xFFE8F5E9),
-                                borderRadius: BorderRadius.circular(20),
-                              ),
-                              child: Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: const [
-                                  Icon(
-                                    Icons.check_circle,
-                                    color: Colors.green,
-                                    size: 16,
-                                  ),
-                                  SizedBox(width: 8),
-                                  Text(
-                                    'Aprobado por Administración y Vigilancia',
-                                    style: TextStyle(
-                                      color: Colors.green,
-                                      fontWeight: FontWeight.bold,
-                                      fontSize: 10,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.all(20.0),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            const SectionTitle(title: 'Información General'),
-                            WhiteCard(
-                              child: Column(
-                                children: [
-                                  _infoRow('Descripción', data.descripcion),
-                                  Divider(
-                                    height: 24,
-                                    color: Theme.of(context).colorScheme.alpa,
-                                  ),
-                                  _infoRow('Solicitante', data.solicitante),
-                                  Divider(
-                                    height: 24,
-                                    color: Theme.of(context).colorScheme.alpa,
-                                  ),
-                                  _infoRow(
-                                    'Fecha Creación',
-                                    data.createdAt.toString(),
-                                  ),
-                                ],
-                              ),
-                            ),
-                            const SizedBox(height: 24),
-                            const SectionTitle(
-                              title: 'Historial de Aprobaciones',
-                            ),
-                            data.flujoAprobacion.isEmpty
-                                ? const Text("No hay historial disponible")
-                                : WhiteCard(
-                                    child: Column(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      children: data.flujoAprobacion
-                                          .asMap()
-                                          .entries
-                                          .map((entry) {
-                                            final index = entry.key;
-                                            final res = entry.value;
-                                            final isLast =
-                                                index ==
-                                                data.flujoAprobacion.length - 1;
+                final cajaMatches =
+                    state.cash.data.where((c) => c.id == selectedSourceId);
+                final cajaSel = cajaMatches.isEmpty ? null : cajaMatches.first;
+                final evidencia = data.evidenciaUrl ?? '';
 
-                                            return _timelineItem(
-                                              res.etapa,
-                                              'Aprobado por: ${res.aprobador}\n${res.fecha}',
-                                              true,
-                                              isLast: isLast,
-                                            );
-                                          })
-                                          .toList(),
-                                    ),
-                                  ),
-                            const SizedBox(height: 24),
-                            const SectionTitle(title: 'Evidencia Adjunta'),
-                            ZoomableEvidenceImage(
-                              imageUrl: data.evidenciaUrl == null
-                                  ? ''
-                                  : data.evidenciaUrl!.startsWith('http')
-                                      ? data.evidenciaUrl!
-                                      : '$baseUrl${data.evidenciaUrl!}',
-                            ),
-                            const SizedBox(height: 24),
-                            const SectionTitle(title: 'Gestión de Pago'),
-                            Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                const Text(
-                                  'Origen de Fondos',
-                                  style: TextStyle(
-                                    color: Colors.grey,
-                                    fontSize: 12,
-                                  ),
-                                ),
-                                const SizedBox(height: 12),
-                                Row(
-                                  children: state.cash.data.map((res) {
-                                    final isSelected =
-                                        selectedSourceId == res.id;
-                                    return Expanded(
-                                      child: GestureDetector(
-                                        onTap: () {
-                                          setState(() {
-                                            selectedSourceId = res.id;
-                                          });
-                                        },
-                                        child: Padding(
-                                          padding: const EdgeInsets.symmetric(
-                                            horizontal: 4.0,
-                                          ),
-                                          child: _sourceOption(
-                                            res.nombre,
-                                            res.nombre.contains('Chica')
-                                                ? Icons.money
-                                                : Icons.account_balance,
-                                            isSelected,
-                                          ),
-                                        ),
-                                      ),
-                                    );
-                                  }).toList(),
-                                ),
-                                const SizedBox(height: 20),
-                                const Text(
-                                  'Nota de Pago (Opcional)',
-                                  style: TextStyle(
-                                    color: Colors.grey,
-                                    fontSize: 12,
-                                  ),
-                                ),
-                                const SizedBox(height: 8),
-                                TextField(
-                                  controller: _noteController,
-                                  decoration: InputDecoration(
-                                    hintText:
-                                        'Añadir observaciones sobre el desembolso...',
-                                    hintStyle: const TextStyle(
-                                      fontSize: 12,
-                                      color: Colors.grey,
-                                    ),
-                                    filled: true,
-                                    fillColor: Colors.white,
-                                    border: OutlineInputBorder(
-                                      borderRadius: BorderRadius.circular(12),
-                                      borderSide: BorderSide(
-                                        color: Colors.grey.shade200,
-                                      ),
-                                    ),
-                                    enabledBorder: OutlineInputBorder(
-                                      borderRadius: BorderRadius.circular(12),
-                                      borderSide: BorderSide(
-                                        color: Colors.grey.shade200,
-                                      ),
-                                    ),
-                                  ),
-                                  maxLines: 3,
-                                ),
-                                const SizedBox(height: 20),
-                                const Text(
-                                  'Comprobante de Pago',
-                                  style: TextStyle(
-                                    color: Colors.grey,
-                                    fontSize: 12,
-                                  ),
-                                ),
-                                const SizedBox(height: 8),
-                                _buildUploadArea(),
-                              ],
-                            ),
-                            const SizedBox(height: 100),
+                return SingleChildScrollView(
+                  padding: const EdgeInsets.fromLTRB(16, 16, 16, 120),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      _AmountHero(
+                        monto: data.monto,
+                        solicitante: data.solicitante,
+                      ),
+                      const SizedBox(height: 16),
+                      _InfoCard(
+                        descripcion: data.descripcion,
+                        fecha: formatDate(data.createdAt),
+                      ),
+                      if (evidencia.isNotEmpty) ...[
+                        const SizedBox(height: 14),
+                        const _MiniLabel('Evidencia de la solicitud'),
+                        const SizedBox(height: 8),
+                        ClipRRect(
+                          borderRadius: BorderRadius.circular(16),
+                          child: ZoomableEvidenceImage(
+                            imageUrl: evidencia.startsWith('http')
+                                ? evidencia
+                                : '$baseUrl$evidencia',
+                          ),
+                        ),
+                      ],
+                      const SizedBox(height: 14),
+                      _ApprovalsCard(flujo: data.flujoAprobacion),
+                      const SizedBox(height: 24),
+                      const Text(
+                        'Autoriza el pago',
+                        style: TextStyle(
+                          fontSize: 17,
+                          fontWeight: FontWeight.w800,
+                          color: Color(0xFF0D1B3E),
+                          letterSpacing: -0.3,
+                        ),
+                      ),
+                      const SizedBox(height: 2),
+                      const Text(
+                        'Completa los pasos para desembolsar.',
+                        style: TextStyle(
+                          fontSize: 12.5,
+                          color: Color(0xFF6B7A99),
+                        ),
+                      ),
+                      const SizedBox(height: 14),
+                      _StepCard(
+                        number: 1,
+                        title: 'Elige la caja de origen',
+                        done: selectedSourceId != null,
+                        child: Column(
+                          children: [
+                            for (final c in state.cash.data)
+                              _CajaTile(
+                                nombre: c.nombre,
+                                saldo: c.saldoDisponible,
+                                monto: data.monto,
+                                selected: selectedSourceId == c.id,
+                                onTap: () =>
+                                    setState(() => selectedSourceId = c.id),
+                              ),
                           ],
                         ),
                       ),
+                      const SizedBox(height: 12),
+                      _StepCard(
+                        number: 2,
+                        title: 'Sube el comprobante del pago',
+                        done: _selectedImage != null,
+                        child: _buildUploadArea(),
+                      ),
+                      const SizedBox(height: 14),
+                      const _MiniLabel('Nota del desembolso (opcional)'),
+                      const SizedBox(height: 8),
+                      TextField(
+                        controller: _noteController,
+                        maxLines: 3,
+                        decoration: InputDecoration(
+                          hintText: 'Observaciones sobre el desembolso...',
+                          hintStyle: const TextStyle(
+                            fontSize: 12.5,
+                            color: Color(0xFF6B7A99),
+                          ),
+                          filled: true,
+                          fillColor: Colors.white,
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(14),
+                            borderSide:
+                                const BorderSide(color: Color(0xFFE8EDF5)),
+                          ),
+                          enabledBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(14),
+                            borderSide:
+                                const BorderSide(color: Color(0xFFE8EDF5)),
+                          ),
+                          focusedBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(14),
+                            borderSide: const BorderSide(
+                                color: Color(0xFF1A56FF), width: 1.6),
+                          ),
+                        ),
+                      ),
+                      if (cajaSel != null &&
+                          cajaSel.saldoDisponible < data.monto) ...[
+                        const SizedBox(height: 14),
+                        _InsufficientBanner(
+                          faltante: data.monto - cajaSel.saldoDisponible,
+                        ),
+                      ],
                     ],
                   ),
                 );
@@ -365,20 +283,25 @@ class _ViewRequestDetailsScreenState extends State<ViewRequestDetailsScreen> {
                   child: Row(
                     children: [
                       Expanded(
-                        child: TextButton(
+                        child: OutlinedButton.icon(
                           onPressed: () =>
                               showRejectPaymentDialog(context, data.requestId),
-                          style: TextButton.styleFrom(
-                            foregroundColor: Colors.red,
-                            padding: const EdgeInsets.symmetric(vertical: 16),
+                          icon: const Icon(Icons.close_rounded, size: 18),
+                          label: const Text(
+                            'Rechazar',
+                            style: TextStyle(fontWeight: FontWeight.w700),
                           ),
-                          child: const Text(
-                            '✕ Rechazar',
-                            style: TextStyle(fontWeight: FontWeight.bold),
+                          style: OutlinedButton.styleFrom(
+                            foregroundColor: const Color(0xFFD32F2F),
+                            side: const BorderSide(color: Color(0xFFFFD0D2)),
+                            padding: const EdgeInsets.symmetric(vertical: 15),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(14),
+                            ),
                           ),
                         ),
                       ),
-                      const SizedBox(width: 16),
+                      const SizedBox(width: 12),
                       Expanded(
                         flex: 2,
                         child: ElevatedButton(
@@ -402,19 +325,25 @@ class _ViewRequestDetailsScreenState extends State<ViewRequestDetailsScreen> {
                               return;
                             }
 
-                            final cajaNombre = state.cash.data
-                                .firstWhere((c) => c.id == selectedSourceId)
-                                .nombre;
-                            final saldoDisponible = state.cash.data
-                                .firstWhere((c) => c.id == selectedSourceId)
-                                .saldoDisponible;
+                            final caja = state.cash.data
+                                .firstWhere((c) => c.id == selectedSourceId);
+                            if (caja.saldoDisponible < data.monto) {
+                              CustomAlert.show(
+                                context,
+                                title: 'Fondos insuficientes',
+                                message:
+                                    'La caja "${caja.nombre}" no tiene saldo suficiente para este pago.',
+                                type: AlertType.error,
+                              );
+                              return;
+                            }
 
                             showConfirmPaymentDialog(
                               parentContext: context,
                               monto: data.monto.toString(),
-                              cajaSeleccionada: cajaNombre,
-                              saldoActual: saldoDisponible.toDouble(),
-                              disponible: saldoDisponible.toDouble(),
+                              cajaSeleccionada: caja.nombre,
+                              saldoActual: caja.saldoDisponible,
+                              disponible: caja.saldoDisponible,
                               idCash: selectedSourceId ?? '',
                               idPayment: data.requestId,
                               comprobante: _selectedImage!,
@@ -422,18 +351,27 @@ class _ViewRequestDetailsScreenState extends State<ViewRequestDetailsScreen> {
                             );
                           },
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: const Color(0xFF295AF5),
-                            padding: const EdgeInsets.symmetric(vertical: 16),
+                            backgroundColor: const Color(0xFF1A56FF),
+                            elevation: 0,
+                            padding: const EdgeInsets.symmetric(vertical: 15),
                             shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(12),
+                              borderRadius: BorderRadius.circular(14),
                             ),
                           ),
-                          child: const Text(
-                            '✓ Confirmar Pago',
-                            style: TextStyle(
-                              fontWeight: FontWeight.bold,
-                              color: Colors.white,
-                            ),
+                          child: const Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Icon(Icons.check_circle_rounded,
+                                  color: Colors.white, size: 18),
+                              SizedBox(width: 8),
+                              Text(
+                                'Confirmar pago',
+                                style: TextStyle(
+                                  fontWeight: FontWeight.w700,
+                                  color: Colors.white,
+                                ),
+                              ),
+                            ],
                           ),
                         ),
                       ),
@@ -517,24 +455,23 @@ class _ViewRequestDetailsScreenState extends State<ViewRequestDetailsScreen> {
                           mainAxisSize: MainAxisSize.min,
                           children: [
                             Padding(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 10,
-                              ),
+                              padding: const EdgeInsets.only(left: 20, right: 8),
                               child: Row(
                                 mainAxisAlignment:
                                     MainAxisAlignment.spaceBetween,
                                 children: [
                                   const Text(
-                                    'Confirmar Desembolso',
+                                    'Confirmar desembolso',
                                     style: TextStyle(
-                                      fontWeight: FontWeight.bold,
-                                      fontSize: 14,
+                                      fontWeight: FontWeight.w800,
+                                      fontSize: 16,
+                                      color: Color(0xFF0D1B3E),
                                     ),
                                   ),
                                   IconButton(
                                     icon: const Icon(
-                                      Icons.close,
-                                      color: Colors.grey,
+                                      Icons.close_rounded,
+                                      color: Color(0xFF6B7A99),
                                     ),
                                     onPressed: isLoading
                                         ? null
@@ -544,36 +481,48 @@ class _ViewRequestDetailsScreenState extends State<ViewRequestDetailsScreen> {
                                 ],
                               ),
                             ),
-                            const Divider(),
+                            const Divider(height: 1, color: Color(0xFFE8EDF5)),
                             const SizedBox(height: 20),
                             Container(
-                              padding: const EdgeInsets.all(16),
+                              width: 56,
+                              height: 56,
                               decoration: BoxDecoration(
-                                color: const Color(0xFFF1F4FF),
+                                color: const Color(0xFF1A56FF)
+                                    .withValues(alpha: 0.10),
                                 shape: BoxShape.circle,
                               ),
                               child: const Icon(
-                                Icons.payments_outlined,
-                                color: Color(0xFF295AF5),
-                                size: 25,
+                                Icons.payments_rounded,
+                                color: Color(0xFF1A56FF),
+                                size: 28,
                               ),
                             ),
-                            const SizedBox(height: 16),
+                            const SizedBox(height: 14),
                             const Text(
-                              '¿Estás seguro?',
+                              'Vas a desembolsar',
                               style: TextStyle(
-                                fontWeight: FontWeight.bold,
-                                fontSize: 18,
+                                color: Color(0xFF6B7A99),
+                                fontSize: 12.5,
                               ),
                             ),
-                            const SizedBox(height: 8),
+                            const SizedBox(height: 4),
+                            Text(
+                              _moneyStr(monto),
+                              style: const TextStyle(
+                                fontWeight: FontWeight.w800,
+                                fontSize: 26,
+                                color: Color(0xFF0D1B3E),
+                                letterSpacing: -0.5,
+                              ),
+                            ),
+                            const SizedBox(height: 6),
                             const Padding(
                               padding: EdgeInsets.symmetric(horizontal: 40),
                               child: Text(
-                                'Estás a punto de autorizar un desembolso significativo.',
+                                'Revisa los datos antes de confirmar.',
                                 textAlign: TextAlign.center,
                                 style: TextStyle(
-                                  color: Colors.grey,
+                                  color: Color(0xFF6B7A99),
                                   fontSize: 12,
                                 ),
                               ),
@@ -599,7 +548,7 @@ class _ViewRequestDetailsScreenState extends State<ViewRequestDetailsScreen> {
                                 children: [
                                   _buildDialogRow(
                                     'Monto a desembolsar',
-                                    monto,
+                                    _moneyStr(monto),
                                     isBold: true,
                                   ),
                                   const Divider(height: 24),
@@ -610,13 +559,15 @@ class _ViewRequestDetailsScreenState extends State<ViewRequestDetailsScreen> {
                                   const Divider(height: 24),
                                   _buildDialogRow(
                                     'Saldo actual',
-                                    disponible.toString(),
+                                    _money(disponible),
                                   ),
                                   const Divider(height: 24),
                                   _buildDialogRow(
                                     'Saldo final estimado',
-                                    '$saldoFinal',
-                                    color: const Color(0xFF295AF5),
+                                    _money(saldoFinal),
+                                    color: saldoFinal < 0
+                                        ? const Color(0xFFD32F2F)
+                                        : const Color(0xFF1A56FF),
                                     isBold: true,
                                   ),
                                 ],
@@ -678,7 +629,7 @@ class _ViewRequestDetailsScreenState extends State<ViewRequestDetailsScreen> {
                                             );
                                           },
                                     style: ElevatedButton.styleFrom(
-                                      backgroundColor: const Color(0xFF295AF5),
+                                      backgroundColor: const Color(0xFF1A56FF),
                                       minimumSize: const Size(
                                         double.infinity,
                                         50,
@@ -705,8 +656,8 @@ class _ViewRequestDetailsScreenState extends State<ViewRequestDetailsScreen> {
                                             'Procesando...',
                                             style: TextStyle(
                                               color: Colors.white,
-                                              fontWeight: FontWeight.bold,
-                                              fontSize: 10,
+                                              fontWeight: FontWeight.w700,
+                                              fontSize: 15,
                                             ),
                                           ),
                                         ] else ...[
@@ -716,11 +667,11 @@ class _ViewRequestDetailsScreenState extends State<ViewRequestDetailsScreen> {
                                           ),
                                           const SizedBox(width: 8),
                                           const Text(
-                                            'Confirmar Pago',
+                                            'Confirmar pago',
                                             style: TextStyle(
                                               color: Colors.white,
-                                              fontWeight: FontWeight.bold,
-                                              fontSize: 10,
+                                              fontWeight: FontWeight.w700,
+                                              fontSize: 15,
                                             ),
                                           ),
                                         ],
@@ -742,9 +693,9 @@ class _ViewRequestDetailsScreenState extends State<ViewRequestDetailsScreen> {
                                     child: const Text(
                                       'Cancelar',
                                       style: TextStyle(
-                                        color: Colors.grey,
-                                        fontWeight: FontWeight.bold,
-                                        fontSize: 10,
+                                        color: Color(0xFF6B7A99),
+                                        fontWeight: FontWeight.w700,
+                                        fontSize: 14,
                                       ),
                                     ),
                                   ),
@@ -1066,173 +1017,67 @@ class _ViewRequestDetailsScreenState extends State<ViewRequestDetailsScreen> {
     );
   }
 
-  Widget _infoRow(String label, String value) {
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Expanded(
-          flex: 2,
-          child: Text(
-            label,
-            style: const TextStyle(color: Colors.grey, fontSize: 12),
-          ),
-        ),
-        Expanded(
-          flex: 3,
-          child: Text(
-            value,
-            style: const TextStyle(
-              fontWeight: FontWeight.bold,
-              fontSize: 12,
-              color: Color(0xFF1C1C1E),
-            ),
-            textAlign: TextAlign.right,
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _timelineItem(
-    String title,
-    String date,
-    bool completed, {
-    bool isLast = false,
-  }) {
-    return Row(
-      children: [
-        Column(
-          children: [
-            Icon(
-              Icons.check_circle,
-              color: completed ? const Color(0xFF295AF5) : Colors.grey,
-              size: 18,
-            ),
-            if (!isLast)
-              Container(
-                width: 2,
-                height: 20,
-                color: const Color(0xFF295AF5).withValues(alpha: 0.2),
-              ),
-          ],
-        ),
-        const SizedBox(width: 12),
-        Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              title,
-              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12),
-            ),
-            Text(
-              date,
-              style: const TextStyle(color: Colors.grey, fontSize: 10),
-            ),
-          ],
-        ),
-      ],
-    );
-  }
-
-  Widget _sourceOption(String title, IconData icon, bool selected) {
-    return Container(
-      padding: const EdgeInsets.symmetric(vertical: 16),
-      decoration: BoxDecoration(
-        color: selected ? const Color(0xFFF1F4FF) : Colors.white,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(
-          color: selected ? const Color(0xFF295AF5) : Colors.grey.shade200,
-          width: 2,
-        ),
-      ),
-      child: Column(
-        children: [
-          Icon(
-            icon,
-            color: selected ? const Color(0xFF295AF5) : Colors.grey,
-            size: 15,
-          ),
-          const SizedBox(height: 8),
-          Text(
-            title,
-            style: TextStyle(
-              color: selected ? const Color(0xFF295AF5) : Colors.grey,
-              fontWeight: FontWeight.bold,
-              fontSize: 12,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
   Widget _buildUploadArea() {
+    final hasImage = _selectedImage != null;
     return GestureDetector(
       onTap: _showPickerOptions,
       child: Container(
         width: double.infinity,
-        padding: _selectedImage == null
-            ? const EdgeInsets.symmetric(vertical: 30)
-            : EdgeInsets.zero,
+        height: hasImage ? 150 : 128,
         decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(12),
+          color: hasImage
+              ? Colors.white
+              : const Color(0xFF1A56FF).withValues(alpha: 0.04),
+          borderRadius: BorderRadius.circular(14),
           border: Border.all(
-            color: const Color(0xFF295AF5).withValues(alpha: 0.2),
-            style: BorderStyle.solid,
+            color: hasImage
+                ? const Color(0xFFE8EDF5)
+                : const Color(0xFF1A56FF).withValues(alpha: 0.3),
+            width: 1.4,
           ),
         ),
-        child: _selectedImage != null
+        clipBehavior: Clip.antiAlias,
+        child: hasImage
             ? Stack(
-                alignment: Alignment.topRight,
+                fit: StackFit.expand,
                 children: [
-                  ClipRRect(
-                    borderRadius: BorderRadius.circular(12),
-                    child: Image.file(
-                      _selectedImage!,
-                      width: double.infinity,
-                      height: 80,
-                      fit: BoxFit.cover,
-                    ),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: CircleAvatar(
-                      backgroundColor: Colors.white,
-                      radius: 16,
-                      child: IconButton(
-                        padding: EdgeInsets.zero,
-                        icon: const Icon(
-                          Icons.close,
-                          color: Colors.red,
-                          size: 15,
+                  Image.file(_selectedImage!, fit: BoxFit.cover),
+                  Positioned(
+                    top: 8,
+                    right: 8,
+                    child: GestureDetector(
+                      onTap: () => setState(() => _selectedImage = null),
+                      child: Container(
+                        padding: const EdgeInsets.all(6),
+                        decoration: BoxDecoration(
+                          color: Colors.black.withValues(alpha: 0.55),
+                          shape: BoxShape.circle,
                         ),
-                        onPressed: () {
-                          setState(() {
-                            _selectedImage = null;
-                          });
-                        },
+                        child: const Icon(Icons.close_rounded,
+                            color: Colors.white, size: 16),
                       ),
                     ),
                   ),
                 ],
               )
-            : Column(
-                children: const [
-                  Icon(
-                    Icons.cloud_upload_outlined,
-                    color: Color(0xFF295AF5),
-                    size: 30,
-                  ),
-                  SizedBox(height: 8),
+            : const Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(Icons.add_a_photo_rounded,
+                      color: Color(0xFF1A56FF), size: 30),
+                  SizedBox(height: 10),
                   Text(
-                    'Subir Evidencia de Desembolso',
-                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12),
+                    'Subir comprobante del desembolso',
+                    style: TextStyle(
+                      fontWeight: FontWeight.w600,
+                      fontSize: 13,
+                      color: Color(0xFF0D1B3E),
+                    ),
                   ),
-                  SizedBox(height: 4),
+                  SizedBox(height: 2),
                   Text(
-                    'Toca para abrir cámara o galería',
-                    style: TextStyle(color: Colors.grey, fontSize: 10),
+                    'Cámara o galería',
+                    style: TextStyle(color: Color(0xFF6B7A99), fontSize: 11.5),
                   ),
                 ],
               ),
@@ -1249,16 +1094,530 @@ class _ViewRequestDetailsScreenState extends State<ViewRequestDetailsScreen> {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        Text(label, style: const TextStyle(color: Colors.grey, fontSize: 13)),
+        Text(label,
+            style: const TextStyle(color: Color(0xFF6B7A99), fontSize: 13)),
         Text(
           value,
           style: TextStyle(
-            color: color ?? Colors.black,
-            fontWeight: isBold ? FontWeight.bold : FontWeight.normal,
-            fontSize: 10,
+            color: color ?? const Color(0xFF0D1B3E),
+            fontWeight: isBold ? FontWeight.w800 : FontWeight.w600,
+            fontSize: 13.5,
           ),
         ),
       ],
+    );
+  }
+}
+
+// ─── Widgets del rediseño ────────────────────────────────────────────────────
+
+const _kCardBorder = Color(0xFFE8EDF5);
+const _kPrimary = Color(0xFF1A56FF);
+const _kTextPrimary = Color(0xFF0D1B3E);
+const _kTextSecondary = Color(0xFF6B7A99);
+const _kGreen = Color(0xFF17A05D);
+const _kRed = Color(0xFFD32F2F);
+
+BoxDecoration _mlCard() => BoxDecoration(
+      color: Colors.white,
+      borderRadius: BorderRadius.circular(18),
+      border: Border.all(color: _kCardBorder),
+      boxShadow: [
+        BoxShadow(
+          color: const Color(0xFF0D1B3E).withValues(alpha: 0.03),
+          blurRadius: 10,
+          offset: const Offset(0, 4),
+        ),
+      ],
+    );
+
+class _AmountHero extends StatelessWidget {
+  final double monto;
+  final String solicitante;
+  const _AmountHero({required this.monto, required this.solicitante});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      decoration: BoxDecoration(
+        gradient: const LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [_kPrimary, Color(0xFF0B33B8)],
+        ),
+        borderRadius: BorderRadius.circular(22),
+        boxShadow: [
+          BoxShadow(
+            color: _kPrimary.withValues(alpha: 0.28),
+            blurRadius: 18,
+            offset: const Offset(0, 10),
+          ),
+        ],
+      ),
+      clipBehavior: Clip.antiAlias,
+      child: Stack(
+        children: [
+          Positioned(
+            top: -28,
+            right: -24,
+            child: Container(
+              width: 110,
+              height: 110,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: Colors.white.withValues(alpha: 0.08),
+              ),
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.all(20),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Container(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withValues(alpha: 0.16),
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  child: const Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(Icons.verified_rounded,
+                          color: Colors.white, size: 13),
+                      SizedBox(width: 5),
+                      Text(
+                        'Aprobado · Listo para pagar',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 11,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 14),
+                Text(
+                  'Total a desembolsar',
+                  style: TextStyle(
+                    color: Colors.white.withValues(alpha: 0.8),
+                    fontSize: 12.5,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  _money(monto),
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 30,
+                    fontWeight: FontWeight.w800,
+                    letterSpacing: -0.5,
+                  ),
+                ),
+                const SizedBox(height: 14),
+                Row(
+                  children: [
+                    Icon(Icons.person_rounded,
+                        color: Colors.white.withValues(alpha: 0.85), size: 16),
+                    const SizedBox(width: 6),
+                    Expanded(
+                      child: Text(
+                        'Solicita: $solicitante',
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(
+                          color: Colors.white.withValues(alpha: 0.9),
+                          fontSize: 12.5,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _InfoCard extends StatelessWidget {
+  final String descripcion;
+  final String fecha;
+  const _InfoCard({required this.descripcion, required this.fecha});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: _mlCard(),
+      child: Column(
+        children: [
+          _row(Icons.notes_rounded, 'Motivo', descripcion),
+          const Padding(
+            padding: EdgeInsets.symmetric(vertical: 12),
+            child: Divider(height: 1, color: _kCardBorder),
+          ),
+          _row(Icons.event_rounded, 'Fecha', fecha),
+        ],
+      ),
+    );
+  }
+
+  Widget _row(IconData icon, String label, String value) => Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Icon(icon, size: 16, color: _kTextSecondary),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(label,
+                    style: const TextStyle(
+                        fontSize: 11.5, color: _kTextSecondary)),
+                const SizedBox(height: 2),
+                Text(value,
+                    style: const TextStyle(
+                        fontSize: 13.5,
+                        fontWeight: FontWeight.w700,
+                        color: _kTextPrimary)),
+              ],
+            ),
+          ),
+        ],
+      );
+}
+
+class _MiniLabel extends StatelessWidget {
+  final String text;
+  const _MiniLabel(this.text);
+
+  @override
+  Widget build(BuildContext context) => Text(
+        text,
+        style: const TextStyle(
+          fontSize: 12.5,
+          fontWeight: FontWeight.w700,
+          color: _kTextSecondary,
+        ),
+      );
+}
+
+class _ApprovalsCard extends StatelessWidget {
+  final List<FlujoAprobacionEntity> flujo;
+  const _ApprovalsCard({required this.flujo});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      decoration: _mlCard(),
+      clipBehavior: Clip.antiAlias,
+      child: Theme(
+        data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
+        child: ExpansionTile(
+          tilePadding: const EdgeInsets.symmetric(horizontal: 16),
+          childrenPadding: const EdgeInsets.fromLTRB(16, 0, 16, 14),
+          leading: Container(
+            width: 38,
+            height: 38,
+            decoration: BoxDecoration(
+              color: _kGreen.withValues(alpha: 0.12),
+              borderRadius: BorderRadius.circular(11),
+            ),
+            child: const Icon(Icons.fact_check_rounded,
+                color: _kGreen, size: 20),
+          ),
+          title: const Text(
+            'Aprobaciones',
+            style: TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.w800,
+                color: _kTextPrimary),
+          ),
+          subtitle: Text(
+            flujo.isEmpty
+                ? 'Sin historial'
+                : '${flujo.length} ${flujo.length == 1 ? 'etapa aprobada' : 'etapas aprobadas'}',
+            style: const TextStyle(fontSize: 11.5, color: _kTextSecondary),
+          ),
+          children: [
+            for (int i = 0; i < flujo.length; i++)
+              _approvalRow(flujo[i], i == flujo.length - 1),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _approvalRow(FlujoAprobacionEntity res, bool isLast) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Column(
+          children: [
+            const Icon(Icons.check_circle_rounded, color: _kGreen, size: 18),
+            if (!isLast)
+              Container(
+                width: 2,
+                height: 26,
+                color: _kGreen.withValues(alpha: 0.25),
+              ),
+          ],
+        ),
+        const SizedBox(width: 12),
+        Expanded(
+          child: Padding(
+            padding: const EdgeInsets.only(bottom: 8),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(res.etapa,
+                    style: const TextStyle(
+                        fontWeight: FontWeight.w700,
+                        fontSize: 12.5,
+                        color: _kTextPrimary)),
+                const SizedBox(height: 1),
+                Text('${res.aprobador} · ${formatDate(res.fecha)}',
+                    style: const TextStyle(
+                        color: _kTextSecondary, fontSize: 11)),
+              ],
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _StepCard extends StatelessWidget {
+  final int number;
+  final String title;
+  final bool done;
+  final Widget child;
+  const _StepCard({
+    required this.number,
+    required this.title,
+    required this.done,
+    required this.child,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: _mlCard(),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                width: 26,
+                height: 26,
+                decoration: BoxDecoration(
+                  color: (done ? _kGreen : _kPrimary).withValues(alpha: 0.12),
+                  shape: BoxShape.circle,
+                ),
+                child: done
+                    ? const Icon(Icons.check_rounded, color: _kGreen, size: 16)
+                    : Center(
+                        child: Text(
+                          '$number',
+                          style: const TextStyle(
+                            color: _kPrimary,
+                            fontWeight: FontWeight.w800,
+                            fontSize: 13,
+                          ),
+                        ),
+                      ),
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Text(
+                  title,
+                  style: const TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w700,
+                    color: _kTextPrimary,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 14),
+          child,
+        ],
+      ),
+    );
+  }
+}
+
+class _CajaTile extends StatelessWidget {
+  final String nombre;
+  final double saldo;
+  final double monto;
+  final bool selected;
+  final VoidCallback onTap;
+  const _CajaTile({
+    required this.nombre,
+    required this.saldo,
+    required this.monto,
+    required this.selected,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final insufficient = saldo < monto;
+    final restante = saldo - monto;
+    final isChica = nombre.toLowerCase().contains('chica');
+    return GestureDetector(
+      onTap: onTap,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 180),
+        margin: const EdgeInsets.only(bottom: 10),
+        padding: const EdgeInsets.all(13),
+        decoration: BoxDecoration(
+          color: selected ? _kPrimary.withValues(alpha: 0.05) : Colors.white,
+          borderRadius: BorderRadius.circular(14),
+          border: Border.all(
+            color: selected ? _kPrimary : _kCardBorder,
+            width: selected ? 1.6 : 1,
+          ),
+        ),
+        child: Column(
+          children: [
+            Row(
+              children: [
+                Container(
+                  width: 38,
+                  height: 38,
+                  decoration: BoxDecoration(
+                    color: _kPrimary.withValues(alpha: 0.1),
+                    borderRadius: BorderRadius.circular(11),
+                  ),
+                  child: Icon(
+                    isChica ? Icons.payments_rounded : Icons.account_balance_rounded,
+                    color: _kPrimary,
+                    size: 19,
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(nombre,
+                          style: const TextStyle(
+                              fontSize: 13.5,
+                              fontWeight: FontWeight.w700,
+                              color: _kTextPrimary)),
+                      const SizedBox(height: 1),
+                      Text('Disponible: ${_money(saldo)}',
+                          style: const TextStyle(
+                              fontSize: 11.5, color: _kTextSecondary)),
+                    ],
+                  ),
+                ),
+                Container(
+                  width: 22,
+                  height: 22,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    border: Border.all(
+                      color: selected ? _kPrimary : _kCardBorder,
+                      width: 2,
+                    ),
+                    color: selected ? _kPrimary : Colors.transparent,
+                  ),
+                  child: selected
+                      ? const Icon(Icons.check_rounded,
+                          color: Colors.white, size: 14)
+                      : null,
+                ),
+              ],
+            ),
+            if (selected) ...[
+              const SizedBox(height: 10),
+              Container(
+                width: double.infinity,
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                decoration: BoxDecoration(
+                  color: (insufficient ? _kRed : _kGreen)
+                      .withValues(alpha: 0.08),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: Row(
+                  children: [
+                    Icon(
+                      insufficient
+                          ? Icons.error_outline_rounded
+                          : Icons.check_circle_rounded,
+                      size: 15,
+                      color: insufficient ? _kRed : _kGreen,
+                    ),
+                    const SizedBox(width: 6),
+                    Expanded(
+                      child: Text(
+                        insufficient
+                            ? 'Fondos insuficientes (faltan ${_money(monto - saldo)})'
+                            : 'Saldo tras el pago: ${_money(restante)}',
+                        style: TextStyle(
+                          fontSize: 11.5,
+                          fontWeight: FontWeight.w700,
+                          color: insufficient ? _kRed : _kGreen,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _InsufficientBanner extends StatelessWidget {
+  final double faltante;
+  const _InsufficientBanner({required this.faltante});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: _kRed.withValues(alpha: 0.08),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: _kRed.withValues(alpha: 0.2)),
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Icon(Icons.warning_amber_rounded, color: _kRed, size: 18),
+          const SizedBox(width: 8),
+          Expanded(
+            child: Text(
+              'La caja seleccionada no alcanza para este pago (faltan ${_money(faltante)}). Elige otra caja.',
+              style: const TextStyle(
+                fontSize: 12,
+                height: 1.35,
+                color: _kRed,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

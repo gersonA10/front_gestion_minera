@@ -1,34 +1,44 @@
 import 'package:auto_route/auto_route.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:front_gestion_minera/config/router/app_router.gr.dart';
-import 'package:front_gestion_minera/config/theme/extension_theme.dart';
 import 'package:front_gestion_minera/injector_container.dart';
 import 'package:front_gestion_minera/modules/treasury/presentation/bloc/treasury_bloc.dart';
 
 import '../../../domain/entity/entity.dart';
 import '../../widgets/widgtes.dart';
+import 'loan_ui.dart';
 
 extension LoanStatusX on LoanStatus {
   Color get color {
     switch (this) {
       case LoanStatus.activo:
-        return const Color(0xFF3B82F6);
+        return LoanUi.activo;
       case LoanStatus.enMora:
-        return const Color(0xFFEF4444);
+        return LoanUi.mora;
       case LoanStatus.finalizado:
-        return const Color(0xFF16A34A);
+        return LoanUi.finalizado;
     }
   }
 
   Color get backgroundColor {
     switch (this) {
       case LoanStatus.activo:
-        return const Color(0xFFEFF6FF);
+        return LoanUi.activoBg;
       case LoanStatus.enMora:
-        return const Color(0xFFFEF2F2);
+        return LoanUi.moraBg;
       case LoanStatus.finalizado:
-        return const Color(0xFFF0FDF4);
+        return LoanUi.finalizadoBg;
+    }
+  }
+
+  IconData get icon {
+    switch (this) {
+      case LoanStatus.activo:
+        return Icons.autorenew_rounded;
+      case LoanStatus.enMora:
+        return Icons.error_outline_rounded;
+      case LoanStatus.finalizado:
+        return Icons.check_circle_outline_rounded;
     }
   }
 }
@@ -104,40 +114,30 @@ class _LoansHomeScreenState extends State<LoansHomeScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final colors = Theme.of(context).colorScheme;
-
     return BlocProvider(
       create: (context) => _treasuryBloc,
       child: Scaffold(
-        backgroundColor: const Color(0xFFF8F9FB),
-        floatingActionButton: FloatingActionButton(
+        backgroundColor: LoanUi.bg,
+        floatingActionButton: FloatingActionButton.extended(
           onPressed: () async {
             await context.router.push(NewLoansRoute());
             if (context.mounted) {
               _treasuryBloc.add(InternalLoansRequestsEvent());
             }
           },
-          backgroundColor: const Color(0xFF3B82F6),
+          backgroundColor: LoanUi.primary,
           elevation: 2,
-          child: const Icon(Icons.add, color: Colors.white, size: 20),
-        ),
-        appBar: AppBar(
-          backgroundColor: colors.white,
-          surfaceTintColor: colors.white,
-          centerTitle: true,
-          title: Text(
-            'Préstamos Internos',
+          icon: const Icon(Icons.add_rounded, color: Colors.white, size: 20),
+          label: const Text(
+            'Nuevo',
             style: TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.w600,
-              color: Color(0xFF1F2937),
+              color: Colors.white,
+              fontWeight: FontWeight.w700,
+              fontSize: 14,
             ),
           ),
-          bottom: PreferredSize(
-            preferredSize: const Size.fromHeight(1),
-            child: Container(color: const Color(0xFFE5E7EB), height: 1),
-          ),
         ),
+        appBar: loanAppBar(context, title: 'Préstamos Internos'),
         body: SafeArea(
           child: BlocBuilder<TreasuryBloc, TreasuryState>(
             buildWhen: (previous, current) =>
@@ -154,7 +154,8 @@ class _LoansHomeScreenState extends State<LoansHomeScreen> {
 
               if (_cachedList == null) {
                 if (isLoading) {
-                  return const Center(child: CircularProgressIndicator());
+                  return const Center(
+                    child: CircularProgressIndicator(color: LoanUi.primary));
                 }
                 if (state is InternalLoansError) {
                   return ErrorView(
@@ -163,7 +164,8 @@ class _LoansHomeScreenState extends State<LoansHomeScreen> {
                         _treasuryBloc.add(InternalLoansRequestsEvent()),
                   );
                 }
-                return const Center(child: CircularProgressIndicator());
+                return const Center(
+                    child: CircularProgressIndicator(color: LoanUi.primary));
               }
 
               final list = _cachedList!;
@@ -232,15 +234,15 @@ class _LoansHomeScreenState extends State<LoansHomeScreen> {
                                     label: 'Todos',
                                     icon: Icons.list_alt_rounded,
                                     isActive: _activeFilter == 'todos',
-                                    activeColor: const Color(0xFF1F2937),
+                                    activeColor: LoanUi.primary,
                                     onTap: () => _applyFilter('todos'),
                                   ),
                                   const SizedBox(width: 8),
                                   FilterChip(
                                     label: 'Activos',
-                                    icon: Icons.check_circle_outline,
+                                    icon: Icons.autorenew_rounded,
                                     isActive: _activeFilter == 'activos',
-                                    activeColor: const Color(0xFF3B82F6),
+                                    activeColor: LoanUi.activo,
                                     onTap: () => _applyFilter('activos'),
                                   ),
                                   const SizedBox(width: 8),
@@ -248,15 +250,15 @@ class _LoansHomeScreenState extends State<LoansHomeScreen> {
                                     label: 'En Mora',
                                     icon: Icons.error_outline,
                                     isActive: _activeFilter == 'en mora',
-                                    activeColor: const Color(0xFFEF4444),
+                                    activeColor: LoanUi.mora,
                                     onTap: () => _applyFilter('en mora'),
                                   ),
                                   const SizedBox(width: 8),
                                   FilterChip(
                                     label: 'Finalizado',
-                                    icon: Icons.history,
+                                    icon: Icons.check_circle_outline_rounded,
                                     isActive: _activeFilter == 'finalizado',
-                                    activeColor: const Color(0xFF16A34A),
+                                    activeColor: LoanUi.finalizado,
                                     onTap: () => _applyFilter('finalizado'),
                                   ),
                                 ],
@@ -375,7 +377,7 @@ class FilterChip extends StatelessWidget {
           color: isActive ? activeColor : Colors.white,
           borderRadius: BorderRadius.circular(20),
           border: Border.all(
-            color: isActive ? activeColor : const Color(0xFFE5E7EB),
+            color: isActive ? activeColor : LoanUi.border,
           ),
         ),
         child: Row(
@@ -384,7 +386,7 @@ class FilterChip extends StatelessWidget {
             Icon(
               icon,
               size: 16,
-              color: isActive ? Colors.white : const Color(0xFF374151),
+              color: isActive ? Colors.white : LoanUi.textSecondary,
             ),
             const SizedBox(width: 6),
             Text(
@@ -392,7 +394,7 @@ class FilterChip extends StatelessWidget {
               style: TextStyle(
                 fontSize: 12,
                 fontWeight: FontWeight.w600,
-                color: isActive ? Colors.white : const Color(0xFF374151),
+                color: isActive ? Colors.white : LoanUi.textSecondary,
               ),
             ),
           ],

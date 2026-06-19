@@ -1,9 +1,9 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:front_gestion_minera/config/router/app_router.gr.dart';
-import 'package:front_gestion_minera/utils/constants/color.constant.dart';
-
+import 'package:intl/intl.dart';
 import '../../../../domain/entity/entity.dart';
+import '../../../screens/contributes/contributes_ui.dart';
 
 class SocioCard extends StatelessWidget {
   final ContributionDetailMemberEntity item;
@@ -19,14 +19,12 @@ class SocioCard extends StatelessWidget {
     required this.dateContibution,
     required this.titleContibuton,
   });
+
   @override
   Widget build(BuildContext context) {
-    final Color montoColor = isPendiente
-        ? TColors.pendingYellow
-        : TColors.green;
-    final IconData statusIcon = isPendiente
-        ? Icons.schedule_outlined
-        : Icons.check_circle_outline;
+    final fmt = NumberFormat('#,##0.00', 'es_PE');
+    final montoColor = isPendiente ? CUi.warning : CUi.success;
+    final montoBg = isPendiente ? CUi.warningBg : CUi.successBg;
 
     final initials = item.fullName
         .trim()
@@ -57,21 +55,26 @@ class SocioCard extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
         decoration: BoxDecoration(
-          color: TColors.lightContainerAccount,
+          color: CUi.surface,
           borderRadius: BorderRadius.circular(14),
-          border: Border.all(color: TColors.appSurfaceColor),
+          border: Border.all(color: CUi.border),
         ),
         child: Row(
           children: [
-            CircleAvatar(
-              radius: 24,
-              backgroundColor: TColors.shimmer,
+            Container(
+              width: 46,
+              height: 46,
+              alignment: Alignment.center,
+              decoration: BoxDecoration(
+                color: CUi.primarySoft,
+                shape: BoxShape.circle,
+              ),
               child: Text(
-                initials,
+                initials.isEmpty ? '?' : initials,
                 style: const TextStyle(
-                  fontSize: 13,
-                  fontWeight: FontWeight.w700,
-                  color: TColors.appSecondaryColor,
+                  fontSize: 14,
+                  fontWeight: FontWeight.w800,
+                  color: CUi.primary,
                 ),
               ),
             ),
@@ -82,27 +85,44 @@ class SocioCard extends StatelessWidget {
                 children: [
                   Text(
                     item.fullName,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
                     style: const TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w700,
-                      color: TColors.appMainTextColor,
+                      fontSize: 14.5,
+                      fontWeight: FontWeight.w800,
+                      color: CUi.textPrimary,
                     ),
                   ),
-                  const SizedBox(height: 3),
-                  Text(
-                    isPendiente
-                        ? 'Deuda: ${item.amountToPay.toStringAsFixed(2)} Bs'
-                        : 'Pagado: ${item.amountToPay.toStringAsFixed(2)} Bs',
-                    style: TextStyle(
-                      fontSize: 13,
-                      fontWeight: FontWeight.w500,
-                      color: montoColor,
+                  const SizedBox(height: 6),
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 8,
+                      vertical: 3,
+                    ),
+                    decoration: BoxDecoration(
+                      color: montoBg,
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Text(
+                      '${isPendiente ? 'Deuda' : 'Pagado'}: ${fmt.format(item.amountToPay)} Bs',
+                      style: TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w700,
+                        color: montoColor,
+                      ),
                     ),
                   ),
                 ],
               ),
             ),
-            Icon(statusIcon, size: 20, color: montoColor),
+            const SizedBox(width: 8),
+            Icon(
+              isPendiente
+                  ? Icons.chevron_right_rounded
+                  : Icons.check_circle_rounded,
+              size: isPendiente ? 24 : 20,
+              color: isPendiente ? CUi.muted : CUi.success,
+            ),
           ],
         ),
       ),

@@ -1,5 +1,6 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:front_gestion_minera/injector_container.dart';
 import 'package:front_gestion_minera/modules/machinery/presentation/bloc/machinery_bloc.dart';
@@ -36,23 +37,28 @@ class _RegistrationOfNewMachineryScreenState
     return BlocProvider.value(
       value: _bloc,
       child: Scaffold(
-        backgroundColor: TColors.surface,
+        backgroundColor: TColors.background,
         appBar: AppBar(
-          backgroundColor: TColors.surface,
+          backgroundColor: TColors.white,
+          surfaceTintColor: TColors.white,
           elevation: 0,
+          scrolledUnderElevation: 0,
+          foregroundColor: TColors.textPrimary,
+          systemOverlayStyle: SystemUiOverlayStyle.dark,
           leading: const BackButton(color: TColors.textPrimary),
           title: const Text(
-            'REGISTRAR NUEVA MAQUINARIA',
-            textAlign: TextAlign.center,
+            'Registrar maquinaria',
             style: TextStyle(
               color: TColors.textPrimary,
-              fontWeight: FontWeight.bold,
-              fontSize: 18,
-              height: 1.3,
-              overflow: TextOverflow.ellipsis
+              fontWeight: FontWeight.w700,
+              fontSize: 17,
             ),
           ),
           centerTitle: true,
+          bottom: PreferredSize(
+            preferredSize: const Size.fromHeight(1),
+            child: Container(height: 1, color: TColors.border),
+          ),
         ),
         body: const RegistrationFormBody(),
       ),

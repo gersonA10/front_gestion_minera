@@ -46,7 +46,7 @@ final class RequestHistoryLoaded extends PartnersState {
   RequestHistoryLoaded({required this.history, required this.hasReachedMax});
 }
 
-// Estados para el historial de préstamos
+// Estados para el historial de préstamos del socio (métricas + lista)
 final class LoanHistoryLoading extends PartnersState {}
 
 final class LoanHistoryError extends PartnersState {
@@ -54,24 +54,29 @@ final class LoanHistoryError extends PartnersState {
   LoanHistoryError(this.message);
 }
 
-final class LoanHistorySuccess extends PartnersState {
-  final List<LoanHistoryDataEntity> history;
+final class LoanHistoryLoaded extends PartnersState {
+  final LoanMetricsEntity metrics;
+  final List<LoanHistoryDataEntity> items;
+  final bool hasReachedMax;
 
-  LoanHistorySuccess(this.history);
+  LoanHistoryLoaded({
+    required this.metrics,
+    required this.items,
+    required this.hasReachedMax,
+  });
 }
 
-// Estados para el historial de préstamos filtrado por estado
-final class LoanHistoryStatusLoading extends PartnersState {}
+// Estados para el detalle de un préstamo del socio
+final class LoanDetailLoading extends PartnersState {}
 
-final class LoanHistoryStatusError extends PartnersState {
+final class LoanDetailError extends PartnersState {
   final String message;
-  LoanHistoryStatusError(this.message);
+  LoanDetailError(this.message);
 }
 
-final class LoanHistoryStatusSuccess extends PartnersState {
-  final List<LoanHistoryDataEntity> history;
-
-  LoanHistoryStatusSuccess(this.history);
+final class LoanDetailLoaded extends PartnersState {
+  final LoanDetailEntity detail;
+  LoanDetailLoaded(this.detail);
 }
 
 //Estados para registar un prestamo

@@ -46,12 +46,21 @@ class AdminDatasource {
     final List<dynamic> data = response['data'] ?? [];
     final Map<String, dynamic> meta = response['meta'] ?? {};
 
+    bool toBool(dynamic v) => v == true || v == 'true' || v == 1 || v == '1';
+    int toInt(dynamic v) =>
+        v is num ? v.toInt() : int.tryParse(v?.toString() ?? '') ?? 0;
+
     return {
       'items': data
-          .map((item) => RequestHistoryModelAdmin.fromJson(item))
+          .whereType<Map>()
+          .map(
+            (item) => RequestHistoryModelAdmin.fromJson(
+              Map<String, dynamic>.from(item),
+            ),
+          )
           .toList(),
-      'has_more_data': meta['has_more_data'] ?? false,
-      'total_records': meta['total_records'] ?? 0,
+      'has_more_data': toBool(meta['has_more_data']),
+      'total_records': toInt(meta['total_records']),
     };
   }
 

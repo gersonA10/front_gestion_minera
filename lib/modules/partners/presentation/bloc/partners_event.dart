@@ -39,18 +39,29 @@ class GetHistoryEvent extends PartnersEvent {
 
 class LoadMoreRequestHistoryEvent extends PartnersEvent {}
 
-class LoanHistoryRequestEvent extends PartnersEvent {
-  LoanHistoryRequestEvent();
+// Historial de préstamos del socio (métricas + lista paginada)
+class LoanHistoryFetchEvent extends PartnersEvent {
+  final String? status; // null = Todos
+  final String? search;
+  final String? period;
+  final String? exactDate;
+  final bool isRefresh;
+
+  LoanHistoryFetchEvent({
+    this.status,
+    this.search,
+    this.period,
+    this.exactDate,
+    this.isRefresh = true,
+  });
 }
 
-class LoanHistoryStatustEvent extends PartnersEvent {
-  final String status;
-  LoanHistoryStatustEvent({required this.status});
-}
+class LoanHistoryLoadMoreEvent extends PartnersEvent {}
 
-class LoanHistorySearchEvent extends PartnersEvent {
-  final String search;
-  LoanHistorySearchEvent({required this.search});
+// Detalle de un préstamo del socio
+class LoanDetailFetchEvent extends PartnersEvent {
+  final String loanId;
+  LoanDetailFetchEvent(this.loanId);
 }
 
 class LoanRegisterEvent extends PartnersEvent {
@@ -58,11 +69,15 @@ class LoanRegisterEvent extends PartnersEvent {
   final double amount;
   final String description;
   final String comprobanteImg;
+  final bool hasInterest;
+  final double? interestRate;
   LoanRegisterEvent({
     required this.loanType,
     required this.amount,
     required this.description,
     required this.comprobanteImg,
+    this.hasInterest = false,
+    this.interestRate,
   });
 }
 

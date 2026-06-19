@@ -6,9 +6,9 @@ import 'package:front_gestion_minera/config/router/app_router.gr.dart';
 import 'package:front_gestion_minera/core/widgets/custom_alert_widget.dart';
 import 'package:front_gestion_minera/modules/treasury/presentation/bloc/treasury_bloc.dart';
 import 'package:front_gestion_minera/modules/treasury/presentation/screens/loans/record_payment_screen.dart';
-import 'package:front_gestion_minera/utils/constants/color.constant.dart';
 import 'package:image_picker/image_picker.dart';
 import '../../../domain/entity/entity.dart';
+import '../../screens/loans/loan_ui.dart';
 
 class ConfirmarPagoDialog extends StatefulWidget {
   final String textoCuota;
@@ -51,7 +51,7 @@ class _ConfirmarPagoDialogState extends State<ConfirmarPagoDialog> {
   void _showImageSourceSheet() {
     showModalBottomSheet(
       context: context,
-      backgroundColor: TColors.cardBgDark,
+      backgroundColor: LoanUi.surface,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
@@ -65,7 +65,7 @@ class _ConfirmarPagoDialogState extends State<ConfirmarPagoDialog> {
                 width: 36,
                 height: 4,
                 decoration: BoxDecoration(
-                  color: TColors.cardBorderDark,
+                  color: LoanUi.border,
                   borderRadius: BorderRadius.circular(2),
                 ),
               ),
@@ -73,7 +73,7 @@ class _ConfirmarPagoDialogState extends State<ConfirmarPagoDialog> {
               const Text(
                 'Adjuntar comprobante',
                 style: TextStyle(
-                  color: TColors.white,
+                  color: LoanUi.textPrimary,
                   fontSize: 16,
                   fontWeight: FontWeight.w700,
                 ),
@@ -133,7 +133,7 @@ class _ConfirmarPagoDialogState extends State<ConfirmarPagoDialog> {
         builder: (context, state) {
           final isLoading = state is PayTheFeeLoading;
           return Dialog(
-            backgroundColor: TColors.cardBgDark,
+            backgroundColor: LoanUi.surface,
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(20),
             ),
@@ -157,13 +157,14 @@ class _ConfirmarPagoDialogState extends State<ConfirmarPagoDialog> {
                       Container(
                         width: 56,
                         height: 56,
+                        alignment: Alignment.center,
                         decoration: BoxDecoration(
-                          color: const Color(0xFF1E3A5F),
+                          color: LoanUi.primarySoft,
                           borderRadius: BorderRadius.circular(14),
                         ),
                         child: const Icon(
                           Icons.payments_outlined,
-                          color: Color(0xFF2563EB),
+                          color: LoanUi.primary,
                           size: 30,
                         ),
                       ),
@@ -171,7 +172,7 @@ class _ConfirmarPagoDialogState extends State<ConfirmarPagoDialog> {
                       const Text(
                         'Confirmar Pago',
                         style: TextStyle(
-                          color: TColors.white,
+                          color: LoanUi.textPrimary,
                           fontSize: 20,
                           fontWeight: FontWeight.w700,
                         ),
@@ -181,7 +182,7 @@ class _ConfirmarPagoDialogState extends State<ConfirmarPagoDialog> {
                         textAlign: TextAlign.center,
                         text: TextSpan(
                           style: const TextStyle(
-                            color: TColors.textSecondary1,
+                            color: LoanUi.textSecondary,
                             fontSize: 13.5,
                             height: 1.5,
                           ),
@@ -192,7 +193,7 @@ class _ConfirmarPagoDialogState extends State<ConfirmarPagoDialog> {
                             TextSpan(
                               text: '${widget.montoFormateado} Bs',
                               style: const TextStyle(
-                                color: Color(0xFF2563EB),
+                                color: LoanUi.primary,
                                 fontWeight: FontWeight.w700,
                               ),
                             ),
@@ -200,7 +201,7 @@ class _ConfirmarPagoDialogState extends State<ConfirmarPagoDialog> {
                             TextSpan(
                               text: widget.textoCuota,
                               style: const TextStyle(
-                                color: TColors.white,
+                                color: LoanUi.textPrimary,
                                 fontWeight: FontWeight.w600,
                               ),
                             ),
@@ -220,16 +221,18 @@ class _ConfirmarPagoDialogState extends State<ConfirmarPagoDialog> {
                             vertical: 12,
                           ),
                           decoration: BoxDecoration(
-                            color: const Color(0xFF3B1515),
+                            color: LoanUi.moraBg,
                             borderRadius: BorderRadius.circular(10),
-                            border: Border.all(color: const Color(0xFF7B2020)),
+                            border: Border.all(
+                              color: LoanUi.mora.withValues(alpha: 0.3),
+                            ),
                           ),
                           child: const Row(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Icon(
                                 Icons.warning_amber_rounded,
-                                color: Color(0xFFEF4444),
+                                color: LoanUi.mora,
                                 size: 18,
                               ),
                               SizedBox(width: 8),
@@ -237,7 +240,7 @@ class _ConfirmarPagoDialogState extends State<ConfirmarPagoDialog> {
                                 child: Text(
                                   'Para confirmar el pago tienes que subir el comprobante electronico o recibo',
                                   style: TextStyle(
-                                    color: Color(0xFFEF4444),
+                                    color: LoanUi.mora,
                                     fontSize: 12.5,
                                     fontWeight: FontWeight.w500,
                                     height: 1.4,
@@ -247,7 +250,6 @@ class _ConfirmarPagoDialogState extends State<ConfirmarPagoDialog> {
                             ],
                           ),
                         ),
-
                       const SizedBox(height: 14),
                       GestureDetector(
                         onTap: _showImageSourceSheet,
@@ -256,13 +258,13 @@ class _ConfirmarPagoDialogState extends State<ConfirmarPagoDialog> {
                           width: double.infinity,
                           decoration: BoxDecoration(
                             color: _comprobanteSubido
-                                ? const Color(0xFF0F1E3A)
-                                : const Color(0xFF1A2236),
+                                ? LoanUi.primarySoft
+                                : LoanUi.fieldBg,
                             borderRadius: BorderRadius.circular(14),
                             border: Border.all(
                               color: _comprobanteSubido
-                                  ? const Color(0xFF2563EB)
-                                  : const Color(0xFF2A3A55),
+                                  ? LoanUi.primary
+                                  : LoanUi.border,
                               width: _comprobanteSubido ? 1.5 : 1,
                             ),
                           ),
@@ -289,9 +291,8 @@ class _ConfirmarPagoDialogState extends State<ConfirmarPagoDialog> {
                                             color: Colors.black.withValues(
                                               alpha: 0.6,
                                             ),
-                                            borderRadius: BorderRadius.circular(
-                                              20,
-                                            ),
+                                            borderRadius:
+                                                BorderRadius.circular(20),
                                           ),
                                           child: const Row(
                                             mainAxisSize: MainAxisSize.min,
@@ -362,19 +363,19 @@ class _ConfirmarPagoDialogState extends State<ConfirmarPagoDialog> {
                                   height: 160,
                                   width: double.infinity,
                                   child: Column(
-                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.center,
                                     children: [
                                       Container(
                                         padding: const EdgeInsets.all(14),
                                         decoration: BoxDecoration(
-                                          color: const Color(0xFF1E3A5F),
-                                          borderRadius: BorderRadius.circular(
-                                            12,
-                                          ),
+                                          color: LoanUi.primarySoft,
+                                          borderRadius:
+                                              BorderRadius.circular(12),
                                         ),
                                         child: const Icon(
                                           Icons.add_a_photo_outlined,
-                                          color: Color(0xFF2563EB),
+                                          color: LoanUi.primary,
                                           size: 28,
                                         ),
                                       ),
@@ -382,7 +383,7 @@ class _ConfirmarPagoDialogState extends State<ConfirmarPagoDialog> {
                                       const Text(
                                         'Subir foto del comprobante',
                                         style: TextStyle(
-                                          color: TColors.white,
+                                          color: LoanUi.textPrimary,
                                           fontSize: 13.5,
                                           fontWeight: FontWeight.w600,
                                         ),
@@ -391,7 +392,7 @@ class _ConfirmarPagoDialogState extends State<ConfirmarPagoDialog> {
                                       const Text(
                                         'JPG, PNG hasta 5MB',
                                         style: TextStyle(
-                                          color: TColors.textSecondary1,
+                                          color: LoanUi.textSecondary,
                                           fontSize: 12,
                                         ),
                                       ),
@@ -407,8 +408,8 @@ class _ConfirmarPagoDialogState extends State<ConfirmarPagoDialog> {
                             child: OutlinedButton(
                               onPressed: () => Navigator.pop(context),
                               style: OutlinedButton.styleFrom(
-                                foregroundColor: TColors.white,
-                                side: BorderSide(color: TColors.cardBorderDark),
+                                foregroundColor: LoanUi.textSecondary,
+                                side: const BorderSide(color: LoanUi.border),
                                 shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(12),
                                 ),
@@ -438,7 +439,8 @@ class _ConfirmarPagoDialogState extends State<ConfirmarPagoDialog> {
                                         );
                                         return;
                                       }
-                                      final payRequest = PayTheFeeRequetsEntity(
+                                      final payRequest =
+                                          PayTheFeeRequetsEntity(
                                         cajaOrigenId: widget.cajaOrigenId,
                                         metodoPago: widget.metodoPago,
                                         referencia: widget.referencia,
@@ -456,11 +458,11 @@ class _ConfirmarPagoDialogState extends State<ConfirmarPagoDialog> {
                                       );
                                     },
                               style: ElevatedButton.styleFrom(
-                                backgroundColor: const Color(0xFF2563EB),
-                                disabledBackgroundColor: const Color(
-                                  0xFF2563EB,
-                                ).withValues(alpha: 0.4),
+                                backgroundColor: LoanUi.primary,
+                                disabledBackgroundColor:
+                                    LoanUi.primary.withValues(alpha: 0.4),
                                 foregroundColor: Colors.white,
+                                elevation: 0,
                                 shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(12),
                                 ),

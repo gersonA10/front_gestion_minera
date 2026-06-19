@@ -677,6 +677,9 @@ class CustomForm extends StatelessWidget {
     required this.amountController,
     required this.reasonController,
     required this.applicantController,
+    required this.hasInterest,
+    required this.onInterestChanged,
+    required this.interestRateController,
   });
 
   final double smallSpacing;
@@ -688,8 +691,133 @@ class CustomForm extends StatelessWidget {
   final TextEditingController reasonController;
   final TextEditingController applicantController;
 
+  /// Si el socio decide cobrar interés por su préstamo a la empresa.
+  final bool hasInterest;
+  final ValueChanged<bool> onInterestChanged;
+  final TextEditingController interestRateController;
+
+  bool get _isMoney => title == 'Monto';
+
   String get fileName =>
       image != null ? path.basename(image!.path) : 'Ningún archivo seleccionado';
+
+  Widget _buildInterestSection(BuildContext context) {
+    const brandBlue = Color(0xFF1A56FF);
+    const brandGold = Color(0xFFEFC805);
+
+    return Container(
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: hasInterest
+            ? brandBlue.withValues(alpha: 0.05)
+            : const Color(0xFFF5F7FB),
+        borderRadius: BorderRadius.circular(18),
+        border: Border.all(
+          color: hasInterest
+              ? brandBlue.withValues(alpha: 0.25)
+              : Colors.grey.withValues(alpha: 0.15),
+        ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                width: 40,
+                height: 40,
+                decoration: BoxDecoration(
+                  color: brandGold.withValues(alpha: 0.18),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: const Icon(
+                  Icons.percent_rounded,
+                  color: Color(0xFFB68F00),
+                  size: 20,
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      '¿Cobrar interés?',
+                      style: AppTextStyles.mainStyle14Bold(context),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      'Mensual, cada 30 días',
+                      style: TextStyle(
+                        fontSize: 11.5,
+                        color: colors.onSurfaceVariant,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              Switch.adaptive(
+                value: hasInterest,
+                activeThumbColor: brandBlue,
+                onChanged: onInterestChanged,
+              ),
+            ],
+          ),
+          AnimatedSize(
+            duration: const Duration(milliseconds: 220),
+            curve: Curves.easeOut,
+            child: hasInterest
+                ? Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const SizedBox(height: 14),
+                      Text(
+                        _isMoney
+                            ? 'Tasa de interés mensual (%)'
+                            : 'Interés mensual (gramos)',
+                        style: AppTextStyles.mainStyle14Bold(context),
+                      ),
+                      const SizedBox(height: 8),
+                      TextLoanScreen(
+                        hintText: _isMoney ? 'Ej: 5' : 'Ej: 5 gr',
+                        controller: interestRateController,
+                        enabled: true,
+                        keyboardType: const TextInputType.numberWithOptions(
+                          decimal: true,
+                        ),
+                      ),
+                      const SizedBox(height: 10),
+                      Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Icon(
+                            Icons.info_outline_rounded,
+                            size: 15,
+                            color: colors.onSurfaceVariant,
+                          ),
+                          const SizedBox(width: 6),
+                          Expanded(
+                            child: Text(
+                              _isMoney
+                                  ? 'El interés se calcula sobre el saldo pendiente y se paga en Bs. hasta cancelar el capital.'
+                                  : 'Gramos de interés a cobrar cada mes hasta que se cancele el capital.',
+                              style: TextStyle(
+                                fontSize: 11.5,
+                                height: 1.35,
+                                color: colors.onSurfaceVariant,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  )
+                : const SizedBox(width: double.infinity),
+          ),
+        ],
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -697,12 +825,13 @@ class CustomForm extends StatelessWidget {
       padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
         color: colors.surface,
-        borderRadius: BorderRadius.circular(28),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: const Color(0xFFE8EDF5)),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.04),
-            blurRadius: 24,
-            offset: const Offset(0, 10),
+            color: Colors.black.withValues(alpha: 0.02),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
           ),
         ],
       ),
@@ -733,6 +862,10 @@ class CustomForm extends StatelessWidget {
             enabled: true,
             keyboardType: const TextInputType.numberWithOptions(decimal: true),
           ),
+
+          const SizedBox(height: 16),
+
+          _buildInterestSection(context),
 
           const SizedBox(height: 16),
 

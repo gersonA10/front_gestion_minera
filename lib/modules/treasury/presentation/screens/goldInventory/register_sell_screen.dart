@@ -1,7 +1,6 @@
 import 'dart:io';
 
 import 'package:auto_route/auto_route.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:front_gestion_minera/config/router/app_router.gr.dart';
@@ -67,7 +66,7 @@ class _RegisterSellBodyState extends State<_RegisterSellBody> {
       lastDate: DateTime(2100),
       builder: (context, child) => Theme(
         data: Theme.of(context).copyWith(
-          colorScheme: const ColorScheme.light(primary: TColors.appMainColor),
+          colorScheme: const ColorScheme.light(primary: TColors.primary),
         ),
         child: child!,
       ),
@@ -112,7 +111,7 @@ class _RegisterSellBodyState extends State<_RegisterSellBody> {
               ListTile(
                 leading: const Icon(
                   Icons.photo_library,
-                  color: Color(0xFF295AF5),
+                  color: TColors.primary,
                 ),
                 title: const Text('Elegir de la Galería'),
                 onTap: () {
@@ -123,7 +122,7 @@ class _RegisterSellBodyState extends State<_RegisterSellBody> {
               ListTile(
                 leading: const Icon(
                   Icons.photo_camera,
-                  color: Color(0xFF295AF5),
+                  color: TColors.primary,
                 ),
                 title: const Text('Tomar Foto'),
                 onTap: () {
@@ -186,6 +185,7 @@ class _RegisterSellBodyState extends State<_RegisterSellBody> {
         }
       },
       child: Scaffold(
+        backgroundColor: TColors.background,
         appBar: _buildAppBar(context),
         body: BlocBuilder<TreasuryBloc, TreasuryState>(
           builder: (context, state) {
@@ -196,13 +196,15 @@ class _RegisterSellBodyState extends State<_RegisterSellBody> {
                 physics: const BouncingScrollPhysics(),
                 padding: const EdgeInsets.fromLTRB(16, 16, 16, 32),
                 children: [
-                  FieldLabel(text: 'Comprador'),
+                  const _SellHeaderBanner(),
+                  const SizedBox(height: 20),
+                  FieldLabel(text: 'COMPRADOR'),
                   const SizedBox(height: 8),
                   TextFormField(
                     controller: _buyerController,
-                    style: TextStyle(
+                    style: const TextStyle(
                       fontSize: 14,
-                      color: TColors.appMainTextColor,
+                      color: TColors.textPrimary,
                       fontWeight: FontWeight.w600,
                     ),
                     decoration: _inputDecoration(hint: 'Nombre del comprador'),
@@ -210,7 +212,7 @@ class _RegisterSellBodyState extends State<_RegisterSellBody> {
                         (v == null || v.trim().isEmpty) ? 'Requerido' : null,
                   ),
                   const SizedBox(height: 20),
-                  FieldLabel(text: 'Fecha de Venta'),
+                  FieldLabel(text: 'FECHA DE VENTA'),
                   const SizedBox(height: 8),
                   TapField(
                     text: _formatDate(_selectedDate),
@@ -218,7 +220,7 @@ class _RegisterSellBodyState extends State<_RegisterSellBody> {
                     onTap: _pickDate,
                   ),
                   const SizedBox(height: 20),
-                  FieldLabel(text: 'Peso a Vender (g)'),
+                  FieldLabel(text: 'PESO A VENDER (g)'),
                   const SizedBox(height: 8),
                   TextFormField(
                     controller: _weightController,
@@ -231,7 +233,7 @@ class _RegisterSellBodyState extends State<_RegisterSellBody> {
                     ],
                     style: const TextStyle(
                       fontSize: 14,
-                      color: TColors.appMainTextColor,
+                      color: TColors.textPrimary,
                       fontWeight: FontWeight.w600,
                     ),
                     decoration: _inputDecoration(
@@ -245,7 +247,7 @@ class _RegisterSellBodyState extends State<_RegisterSellBody> {
                             style: TextStyle(
                               fontSize: 13,
                               fontWeight: FontWeight.w700,
-                              color: TColors.appSecondaryTextColor,
+                              color: TColors.textSecondary,
                             ),
                           ),
                         ),
@@ -261,7 +263,7 @@ class _RegisterSellBodyState extends State<_RegisterSellBody> {
                   ),
 
                   const SizedBox(height: 20),
-                  FieldLabel(text: 'Precio por Gramo (Bs)'),
+                  FieldLabel(text: 'PRECIO POR GRAMO (Bs)'),
                   const SizedBox(height: 8),
                   TextFormField(
                     controller: _priceController,
@@ -274,7 +276,7 @@ class _RegisterSellBodyState extends State<_RegisterSellBody> {
                     ],
                     style: const TextStyle(
                       fontSize: 14,
-                      color: TColors.appMainTextColor,
+                      color: TColors.textPrimary,
                       fontWeight: FontWeight.w600,
                     ),
                     decoration: _inputDecoration(
@@ -288,7 +290,7 @@ class _RegisterSellBodyState extends State<_RegisterSellBody> {
                             style: TextStyle(
                               fontSize: 13,
                               fontWeight: FontWeight.w700,
-                              color: TColors.appSecondaryTextColor,
+                              color: TColors.textSecondary,
                             ),
                           ),
                         ),
@@ -306,7 +308,7 @@ class _RegisterSellBodyState extends State<_RegisterSellBody> {
                   const SizedBox(height: 20),
                   TotalCard(total: _estimatedTotal),
                   const SizedBox(height: 20),
-                  FieldLabel(text: 'Comprobante de Venta'),
+                  FieldLabel(text: 'COMPROBANTE DE VENTA'),
                   const SizedBox(height: 8),
                   UploadFileWidget(
                     onTap: _showPickerOptions,
@@ -336,14 +338,14 @@ class _RegisterSellBodyState extends State<_RegisterSellBody> {
     return PreferredSize(
       preferredSize: const Size.fromHeight(56),
       child: Container(
-        color: TColors.appBackgroundColor,
+        color: TColors.surface,
         child: SafeArea(
           bottom: false,
           child: Container(
             height: 56,
             decoration: const BoxDecoration(
               border: Border(
-                bottom: BorderSide(color: TColors.appSurfaceColor),
+                bottom: BorderSide(color: TColors.border),
               ),
             ),
             child: Stack(
@@ -356,7 +358,7 @@ class _RegisterSellBodyState extends State<_RegisterSellBody> {
                     icon: const Icon(
                       Icons.arrow_back_ios_new_rounded,
                       size: 18,
-                      color: TColors.appMainTextColor,
+                      color: TColors.textPrimary,
                     ),
                   ),
                 ),
@@ -364,8 +366,8 @@ class _RegisterSellBodyState extends State<_RegisterSellBody> {
                   'Registrar Venta',
                   style: TextStyle(
                     fontSize: 16,
-                    fontWeight: FontWeight.w800,
-                    color: TColors.appMainTextColor,
+                    fontWeight: FontWeight.w700,
+                    color: TColors.textPrimary,
                     letterSpacing: -0.3,
                   ),
                 ),
@@ -373,6 +375,67 @@ class _RegisterSellBodyState extends State<_RegisterSellBody> {
             ),
           ),
         ),
+      ),
+    );
+  }
+}
+
+class _SellHeaderBanner extends StatelessWidget {
+  const _SellHeaderBanner();
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        gradient: const LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [TColors.vaultGradientStart, TColors.vaultGradientEnd],
+        ),
+        borderRadius: BorderRadius.circular(16),
+      ),
+      child: Row(
+        children: [
+          Container(
+            width: 44,
+            height: 44,
+            decoration: BoxDecoration(
+              color: TColors.goldAccent.withValues(alpha: 0.18),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: const Icon(
+              Icons.sell_outlined,
+              color: TColors.goldAccent,
+              size: 22,
+            ),
+          ),
+          const SizedBox(width: 14),
+          const Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Registrar venta de oro',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 15,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+                SizedBox(height: 2),
+                Text(
+                  'Los lotes se descuentan por orden FIFO',
+                  style: TextStyle(
+                    color: Colors.white70,
+                    fontSize: 12,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -388,28 +451,28 @@ InputDecoration _inputDecoration({
     hintText: hint,
     hintStyle: const TextStyle(
       fontSize: 14,
-      color: TColors.disabled,
+      color: TColors.hintColor,
       fontWeight: FontWeight.w500,
     ),
     suffixIcon: suffix,
     prefixIcon: prefix,
     filled: true,
-    fillColor: TColors.white,
+    fillColor: TColors.surface,
     contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
     border: OutlineInputBorder(
       borderRadius: BorderRadius.circular(14),
-      borderSide: const BorderSide(color: TColors.red),
+      borderSide: BorderSide(color: hasError ? TColors.danger : TColors.border),
     ),
     enabledBorder: OutlineInputBorder(
       borderRadius: BorderRadius.circular(14),
       borderSide: BorderSide(
-        color: hasError ? TColors.red : TColors.appSurfaceColor,
+        color: hasError ? TColors.danger : TColors.border,
       ),
     ),
     focusedBorder: OutlineInputBorder(
       borderRadius: BorderRadius.circular(14),
       borderSide: BorderSide(
-        color: hasError ? TColors.disabledAccount : TColors.appSurfaceColor,
+        color: hasError ? TColors.danger : TColors.primary,
         width: 1.5,
       ),
     ),

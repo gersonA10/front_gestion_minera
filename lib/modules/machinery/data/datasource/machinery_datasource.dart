@@ -127,4 +127,38 @@ class MachineryDatasource {
     );
     return CloseUpOfAMachineResponseModel.fromJson(response);
   }
+
+  /// PUT /api/machinery/:machine_id (multipart). La foto es opcional: si no
+  /// se envía, el backend conserva la actual.
+  Future<void> updateMachinery(UpdateMachineryRequestEntity request) async {
+    final model = UpdateMachineryRequestModel.fromEntity(request);
+    final hasPhoto =
+        request.photoPath != null && request.photoPath!.isNotEmpty;
+    await apiClient.putFormData(
+      '/api/machinery/${request.machineId}',
+      operationName: 'updateMachinery',
+      data: model.toFormDataMap(),
+      files: hasPhoto
+          ? [
+              {
+                'name': 'photo_url',
+                'path': request.photoPath,
+                'filename': request.photoPath!.split('/').last,
+              },
+            ]
+          : null,
+    );
+  }
+
+  /// PATCH /api/machinery/:machine_id/status (JSON).
+  Future<void> changeMachineryStatus({
+    required String machineId,
+    required String status,
+  }) async {
+    await apiClient.patch(
+      '/api/machinery/$machineId/status',
+      operationName: 'changeMachineryStatus',
+      data: {'status': status},
+    );
+  }
 }

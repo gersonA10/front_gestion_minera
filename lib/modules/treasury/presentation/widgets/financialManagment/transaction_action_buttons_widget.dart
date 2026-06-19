@@ -18,21 +18,32 @@ class TransactionActionButtonsWidget extends StatelessWidget {
           child: OutlinedButton(
             onPressed: onCancel,
             style: OutlinedButton.styleFrom(
-              padding: const EdgeInsets.symmetric(vertical: 16),
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+              foregroundColor: const Color(0xFF6B7A99),
+              side: const BorderSide(color: Color(0xFFE8EDF5)),
+              padding: const EdgeInsets.symmetric(vertical: 15),
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(14)),
             ),
-            child: const Text('Cancelar'),
+            child: const Text('Cancelar',
+                style: TextStyle(fontWeight: FontWeight.w700)),
           ),
         ),
-        const SizedBox(width: 16),
+        const SizedBox(width: 12),
         Expanded(
+          flex: 2,
           child: ElevatedButton(
             onPressed: onSubmit,
             style: ElevatedButton.styleFrom(
-              padding: const EdgeInsets.symmetric(vertical: 16),
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+              backgroundColor: const Color(0xFF1A56FF),
+              foregroundColor: Colors.white,
+              disabledBackgroundColor: const Color(0xFFAFC2F0),
+              elevation: 0,
+              padding: const EdgeInsets.symmetric(vertical: 15),
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(14)),
             ),
-            child: const Text('Registrar'),
+            child: const Text('Registrar',
+                style: TextStyle(fontWeight: FontWeight.w700)),
           ),
         ),
       ],

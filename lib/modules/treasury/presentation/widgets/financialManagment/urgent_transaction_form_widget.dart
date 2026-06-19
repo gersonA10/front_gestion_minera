@@ -49,6 +49,31 @@ class _UrgentTransactionFormWidgetState
     super.dispose();
   }
 
+  InputDecoration _dec({
+    required String label,
+    String? hint,
+    IconData? icon,
+    bool alignHint = false,
+  }) {
+    OutlineInputBorder b(Color c, [double w = 1]) => OutlineInputBorder(
+          borderRadius: BorderRadius.circular(14),
+          borderSide: BorderSide(color: c, width: w),
+        );
+    return InputDecoration(
+      labelText: label,
+      hintText: hint,
+      alignLabelWithHint: alignHint,
+      prefixIcon: icon == null
+          ? null
+          : Icon(icon, color: const Color(0xFF6B7A99), size: 20),
+      filled: true,
+      fillColor: Colors.white,
+      border: b(const Color(0xFFE8EDF5)),
+      enabledBorder: b(const Color(0xFFE8EDF5)),
+      focusedBorder: b(const Color(0xFF1A56FF), 1.6),
+    );
+  }
+
   Future<void> _pickImage(ImageSource source) async {
     try {
       final XFile? pickedFile = await _picker.pickImage(
@@ -217,10 +242,9 @@ class _UrgentTransactionFormWidgetState
                       children: [
                         DropdownButtonFormField<String>(
                           value: _selectedCajaOrigenId,
-                          decoration: InputDecoration(
-                            labelText: 'Caja Origen',
-                            prefixIcon: const Icon(Icons.outbox_rounded),
-                            border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                          decoration: _dec(
+                            label: 'Caja origen',
+                            icon: Icons.outbox_rounded,
                           ),
                           items: dropdownItems,
                           onChanged: (value) => setState(() => _selectedCajaOrigenId = value),
@@ -229,10 +253,9 @@ class _UrgentTransactionFormWidgetState
                         const SizedBox(height: 20),
                         DropdownButtonFormField<String>(
                           value: _selectedCajaDestinoId,
-                          decoration: InputDecoration(
-                            labelText: 'Caja Destino',
-                            prefixIcon: const Icon(Icons.move_to_inbox_rounded),
-                            border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                          decoration: _dec(
+                            label: 'Caja destino',
+                            icon: Icons.move_to_inbox_rounded,
                           ),
                           items: dropdownItems,
                           onChanged: (value) => setState(() => _selectedCajaDestinoId = value),
@@ -244,10 +267,11 @@ class _UrgentTransactionFormWidgetState
                   else {
                     return DropdownButtonFormField<String>(
                       value: _selectedCajaId,
-                      decoration: InputDecoration(
-                        labelText: _selectedType == 'Ingreso' ? 'Caja Destino' : 'Caja Origen',
-                        prefixIcon: const Icon(Icons.wallet),
-                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                      decoration: _dec(
+                        label: _selectedType == 'Ingreso'
+                            ? 'Caja destino'
+                            : 'Caja origen',
+                        icon: Icons.wallet_rounded,
                       ),
                       items: dropdownItems,
                       onChanged: (value) => setState(() => _selectedCajaId = value),
@@ -272,13 +296,10 @@ class _UrgentTransactionFormWidgetState
                   if (monto <= 0) return 'El monto debe ser mayor a 0';
                   return null;
                 },
-                decoration: InputDecoration(
-                  labelText: 'Monto (Bs.)',
-                  hintText: '0.00',
-                  prefixIcon: const Icon(Icons.attach_money),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
+                decoration: _dec(
+                  label: 'Monto (Bs.)',
+                  hint: '0.00',
+                  icon: Icons.attach_money_rounded,
                 ),
               ),
                   
@@ -288,13 +309,10 @@ class _UrgentTransactionFormWidgetState
                 controller: _conceptoController,
                 maxLines: 3,
                 validator: (value) => value == null || value.isEmpty ? 'Requerido' : null,
-                decoration: InputDecoration(
-                  labelText: 'Concepto / Motivo',
-                  hintText: 'Describe el motivo de la transacción...',
-                  alignLabelWithHint: true,
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
+                decoration: _dec(
+                  label: 'Concepto / Motivo',
+                  hint: 'Describe el motivo de la transacción...',
+                  alignHint: true,
                 ),
               ),
                   
@@ -302,41 +320,63 @@ class _UrgentTransactionFormWidgetState
                   
               // Evidencia requerida SOLO para Ingreso o Egreso
               if (_selectedType == 'Ingreso' || _selectedType == 'Egreso') ...[
-                Text(
-                  'Evidencia (Requerida)',
-                  style: Theme.of(context).textTheme.titleSmall,
+                const Text(
+                  'Evidencia (requerida)',
+                  style: TextStyle(
+                    fontSize: 12.5,
+                    fontWeight: FontWeight.w700,
+                    color: Color(0xFF6B7A99),
+                  ),
                 ),
                 const SizedBox(height: 8),
                 GestureDetector(
                   onTap: () => _showImageSourceActionSheet(context),
                   child: Container(
                     height: 150,
+                    width: double.infinity,
                     decoration: BoxDecoration(
-                      border: Border.all(color: Colors.grey.shade400),
-                      borderRadius: BorderRadius.circular(12),
-                      color: Colors.grey.shade100,
+                      border: Border.all(
+                        color: _evidenciaFile == null
+                            ? const Color(0xFF1A56FF).withValues(alpha: 0.3)
+                            : const Color(0xFFE8EDF5),
+                        width: 1.4,
+                      ),
+                      borderRadius: BorderRadius.circular(14),
+                      color: _evidenciaFile == null
+                          ? const Color(0xFF1A56FF).withValues(alpha: 0.04)
+                          : Colors.white,
                     ),
+                    clipBehavior: Clip.antiAlias,
                     child: _evidenciaFile != null
-                        ? ClipRRect(
-                            borderRadius: BorderRadius.circular(12),
-                            child: Image.file(
-                              _evidenciaFile!,
-                              width: double.infinity,
-                              fit: BoxFit.cover,
-                            ),
+                        ? Image.file(
+                            _evidenciaFile!,
+                            width: double.infinity,
+                            fit: BoxFit.cover,
                           )
                         : const Column(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
                               Icon(
-                                Icons.camera_alt_outlined,
-                                size: 40,
-                                color: Colors.grey,
+                                Icons.add_a_photo_rounded,
+                                size: 34,
+                                color: Color(0xFF1A56FF),
                               ),
-                              SizedBox(height: 8),
+                              SizedBox(height: 10),
                               Text(
                                 'Toca para añadir foto',
-                                style: TextStyle(color: Colors.grey),
+                                style: TextStyle(
+                                  color: Color(0xFF0D1B3E),
+                                  fontWeight: FontWeight.w600,
+                                  fontSize: 13,
+                                ),
+                              ),
+                              SizedBox(height: 2),
+                              Text(
+                                'Cámara o galería',
+                                style: TextStyle(
+                                  color: Color(0xFF6B7A99),
+                                  fontSize: 11.5,
+                                ),
                               ),
                             ],
                           ),

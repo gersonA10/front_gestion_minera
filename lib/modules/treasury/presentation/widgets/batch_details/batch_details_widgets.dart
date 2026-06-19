@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:front_gestion_minera/utils/constants/color.constant.dart';
 
 class SectionTitle extends StatelessWidget {
   final String title;
@@ -9,19 +10,21 @@ class SectionTitle extends StatelessWidget {
     return Text(
       title,
       style: const TextStyle(
-        color: Color(0xFF0F172A),
-        fontSize: 13,
-        fontWeight: FontWeight.w800,
-        letterSpacing: 0.6,
+        color: TColors.textSecondary,
+        fontSize: 11,
+        fontWeight: FontWeight.w700,
+        letterSpacing: 0.4,
       ),
     );
   }
 }
+
 class StatBox extends StatelessWidget {
   final String label;
   final String value;
   final bool highlight;
-  const StatBox({super.key, 
+  const StatBox({
+    super.key,
     required this.label,
     required this.value,
     this.highlight = false,
@@ -31,13 +34,14 @@ class StatBox extends StatelessWidget {
   Widget build(BuildContext context) {
     return Expanded(
       child: Container(
-        padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 8),
+        padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 10),
         decoration: BoxDecoration(
-          color: highlight ? const Color(0xFFEFF6FF) : const Color(0xFFF8FAFC),
-          borderRadius: BorderRadius.circular(10),
+          color: highlight ? TColors.primaryLight : TColors.background,
+          borderRadius: BorderRadius.circular(12),
           border: Border.all(
-            color:
-                highlight ? const Color(0xFFBFDBFE) : const Color(0xFFE2E8F0),
+            color: highlight
+                ? TColors.primary.withValues(alpha: 0.18)
+                : TColors.border,
           ),
         ),
         child: Column(
@@ -46,21 +50,17 @@ class StatBox extends StatelessWidget {
             Text(
               label,
               style: TextStyle(
-                color: highlight
-                    ? const Color(0xFF2563EB)
-                    : const Color(0xFF94A3B8),
+                color: highlight ? TColors.primary : TColors.textSecondary,
                 fontSize: 9,
                 fontWeight: FontWeight.w700,
-                letterSpacing: 0.5,
+                letterSpacing: 0.4,
               ),
             ),
             const SizedBox(height: 4),
             Text(
               value,
               style: TextStyle(
-                color: highlight
-                    ? const Color(0xFF2563EB)
-                    : const Color(0xFF0F172A),
+                color: highlight ? TColors.primary : TColors.textPrimary,
                 fontSize: 15,
                 fontWeight: FontWeight.w700,
               ),
@@ -76,7 +76,8 @@ class ExtractionDetail extends StatelessWidget {
   final IconData icon;
   final String label;
   final String value;
-  const ExtractionDetail({super.key, 
+  const ExtractionDetail({
+    super.key,
     required this.icon,
     required this.label,
     required this.value,
@@ -84,35 +85,39 @@ class ExtractionDetail extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Icon(icon, color: const Color(0xFF94A3B8), size: 18),
-        const SizedBox(width: 8),
-        Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              label,
-              style: const TextStyle(
-                color: Color(0xFF94A3B8),
-                fontSize: 10,
-                fontWeight: FontWeight.w600,
-                letterSpacing: 0.5,
-              ),
+    return Expanded(
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Icon(icon, color: TColors.textSecondary, size: 18),
+          const SizedBox(width: 8),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  label,
+                  style: const TextStyle(
+                    color: TColors.textSecondary,
+                    fontSize: 10,
+                    fontWeight: FontWeight.w700,
+                    letterSpacing: 0.4,
+                  ),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  value,
+                  style: const TextStyle(
+                    color: TColors.textPrimary,
+                    fontSize: 14,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ],
             ),
-            const SizedBox(height: 2),
-            Text(
-              value,
-              style: const TextStyle(
-                color: Color(0xFF0F172A),
-                fontSize: 14,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-          ],
-        ),
-      ],
+          ),
+        ],
+      ),
     );
   }
 }
@@ -128,7 +133,8 @@ class MovementItem extends StatelessWidget {
   final bool isFirst;
   final bool isLast;
 
-  const MovementItem({super.key, 
+  const MovementItem({
+    super.key,
     required this.icon,
     required this.iconColor,
     required this.iconBg,
@@ -163,7 +169,7 @@ class MovementItem extends StatelessWidget {
                   Expanded(
                     child: Container(
                       width: 1.5,
-                      color: const Color(0xFFE2E8F0),
+                      color: TColors.border,
                       margin: const EdgeInsets.symmetric(vertical: 4),
                     ),
                   ),
@@ -184,7 +190,7 @@ class MovementItem extends StatelessWidget {
                         Text(
                           title,
                           style: const TextStyle(
-                            color: Color(0xFF0F172A),
+                            color: TColors.textPrimary,
                             fontSize: 13,
                             fontWeight: FontWeight.w600,
                           ),
@@ -193,7 +199,7 @@ class MovementItem extends StatelessWidget {
                         Text(
                           date,
                           style: const TextStyle(
-                            color: Color(0xFF94A3B8),
+                            color: TColors.textSecondary,
                             fontSize: 11,
                           ),
                         ),

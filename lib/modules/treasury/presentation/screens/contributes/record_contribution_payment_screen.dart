@@ -7,11 +7,11 @@ import 'package:front_gestion_minera/core/widgets/custom_alert_widget.dart';
 import 'package:front_gestion_minera/core/widgets/excavator_loader.dart';
 import 'package:front_gestion_minera/injector_container.dart';
 import 'package:front_gestion_minera/modules/treasury/presentation/bloc/treasury_bloc.dart';
-import 'package:front_gestion_minera/utils/constants/color.constant.dart';
 import 'package:front_gestion_minera/utils/date_util.dart';
 import 'package:image_picker/image_picker.dart';
-
+import 'package:intl/intl.dart';
 import '../../../domain/entity/entity.dart';
+import 'contributes_ui.dart';
 
 @RoutePage()
 class RecordContributionPaymentScreen extends StatefulWidget {
@@ -36,6 +36,7 @@ class _RecordContributionPaymentScreenState
     extends State<RecordContributionPaymentScreen> {
   final TextEditingController _observacionController = TextEditingController();
   final TextEditingController _fechaController = TextEditingController();
+  final _fmt = NumberFormat('#,##0.00', 'es_PE');
 
   late TreasuryBloc treasuryBloc;
   String? _selectedCajaId;
@@ -48,7 +49,6 @@ class _RecordContributionPaymentScreenState
       source: source,
       imageQuality: 80,
     );
-
     if (pickedFile != null) {
       setState(() {
         _imageFile = File(pickedFile.path);
@@ -59,6 +59,7 @@ class _RecordContributionPaymentScreenState
   void _showImageSourceOptions() {
     showModalBottomSheet(
       context: context,
+      backgroundColor: CUi.surface,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
@@ -66,8 +67,9 @@ class _RecordContributionPaymentScreenState
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
+            const SizedBox(height: 8),
             ListTile(
-              leading: const Icon(Icons.camera_alt_outlined),
+              leading: const Icon(Icons.camera_alt_outlined, color: CUi.primary),
               title: const Text('Tomar Foto'),
               onTap: () {
                 Navigator.pop(context);
@@ -75,13 +77,15 @@ class _RecordContributionPaymentScreenState
               },
             ),
             ListTile(
-              leading: const Icon(Icons.photo_library_outlined),
+              leading:
+                  const Icon(Icons.photo_library_outlined, color: CUi.primary),
               title: const Text('Elegir de Galería'),
               onTap: () {
                 Navigator.pop(context);
                 _pickImage(ImageSource.gallery);
               },
             ),
+            const SizedBox(height: 8),
           ],
         ),
       ),
@@ -113,87 +117,80 @@ class _RecordContributionPaymentScreenState
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF8FAFC),
-      appBar: AppBar(
-        backgroundColor: Colors.white,
-        elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.black),
-          onPressed: () => context.router.back(),
-        ),
-        title: const Text(
-          'Registrar Pago',
-          style: TextStyle(
-            color: Color(0xFF1E293B),
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-        centerTitle: true,
-        bottom: PreferredSize(
-          preferredSize: const Size.fromHeight(1.0),
-          child: Container(
-            color: Colors.grey.withValues(alpha: 0.2),
-            height: 1.0,
-          ),
-        ),
-      ),
+      backgroundColor: CUi.bg,
+      appBar: contribAppBar(context, title: 'Registrar Pago'),
       body: Column(
         children: [
           Expanded(
             child: SingleChildScrollView(
-              padding: const EdgeInsets.all(10.0),
+              padding: const EdgeInsets.fromLTRB(16, 14, 16, 8),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
+                  // Hero del monto a pagar.
                   Container(
                     width: double.infinity,
-                    padding: const EdgeInsets.symmetric(vertical: 10),
+                    padding: const EdgeInsets.symmetric(
+                      vertical: 22,
+                      horizontal: 20,
+                    ),
                     decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(16),
-                      border: Border.all(
-                        color: Colors.grey.withValues(alpha: 0.2),
-                      ),
+                      gradient: CUi.gradient,
+                      borderRadius: BorderRadius.circular(20),
+                      boxShadow: [
+                        BoxShadow(
+                          color: CUi.primary.withValues(alpha: 0.28),
+                          blurRadius: 18,
+                          offset: const Offset(0, 10),
+                        ),
+                      ],
                     ),
                     child: Column(
                       children: [
-                        const Text(
-                          'Monto Fijo a Pagar',
-                          style: TextStyle(color: Colors.grey, fontSize: 16),
+                        Text(
+                          'MONTO FIJO A PAGAR',
+                          style: TextStyle(
+                            color: Colors.white.withValues(alpha: 0.8),
+                            fontSize: 11,
+                            fontWeight: FontWeight.w700,
+                            letterSpacing: 1,
+                          ),
                         ),
                         const SizedBox(height: 8),
                         Text(
-                          widget.item.amountToPay.toStringAsFixed(2),
-                          style: TextStyle(
-                            fontSize: 36,
-                            fontWeight: FontWeight.bold,
-                            color: Color(0xFF1E293B),
+                          '${_fmt.format(widget.item.amountToPay)} Bs',
+                          style: const TextStyle(
+                            fontSize: 34,
+                            fontWeight: FontWeight.w800,
+                            color: Colors.white,
+                            letterSpacing: -0.5,
                           ),
                         ),
                         const SizedBox(height: 12),
                         Container(
                           padding: const EdgeInsets.symmetric(
-                            horizontal: 6,
-                            vertical: 3,
+                            horizontal: 10,
+                            vertical: 5,
                           ),
                           decoration: BoxDecoration(
-                            color: const Color(0xFFF0FDF4),
+                            color: Colors.white.withValues(alpha: 0.18),
                             borderRadius: BorderRadius.circular(20),
                           ),
-                          child: const Row(
+                          child: Row(
                             mainAxisSize: MainAxisSize.min,
                             children: [
                               Icon(
-                                Icons.check_circle_outline,
-                                color: Colors.green,
-                                size: 16,
+                                Icons.verified_rounded,
+                                color: Colors.white.withValues(alpha: 0.95),
+                                size: 14,
                               ),
-                              SizedBox(width: 4),
+                              const SizedBox(width: 5),
                               Text(
-                                'Monto Validado',
-                                style: TextStyle(
-                                  color: Colors.green,
-                                  fontWeight: FontWeight.w500,
+                                widget.item.fullName,
+                                style: const TextStyle(
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.w700,
+                                  fontSize: 12,
                                 ),
                               ),
                             ],
@@ -202,20 +199,20 @@ class _RecordContributionPaymentScreenState
                       ],
                     ),
                   ),
-                  const SizedBox(height: 10),
-                  _buildLabel("Convocatoria de Aporte"),
+                  const SizedBox(height: 22),
+                  _buildLabel('Convocatoria de Aporte'),
                   _buildReadOnlyField(
-                    "${widget.titleContibuton} - ${formatDate(widget.dateContibution)}",
+                    '${widget.titleContibuton} · ${formatDate(widget.dateContibution)}',
                     Icons.lock_outline,
                   ),
-                  const SizedBox(height: 20),
-                  _buildLabel("Fecha y Hora de Pago"),
+                  const SizedBox(height: 18),
+                  _buildLabel('Fecha y Hora de Pago'),
                   _buildReadOnlyField(
                     _fechaController.text,
                     Icons.calendar_today_outlined,
                   ),
-                  const SizedBox(height: 20),
-                  _buildLabel("Evidencia de Pago"),
+                  const SizedBox(height: 18),
+                  _buildLabel('Evidencia de Pago', isRequired: true),
                   if (_imageFile != null)
                     Stack(
                       children: [
@@ -231,15 +228,19 @@ class _RecordContributionPaymentScreenState
                         Positioned(
                           top: 8,
                           right: 8,
-                          child: CircleAvatar(
-                            backgroundColor: Colors.red,
-                            child: IconButton(
-                              icon: const Icon(
-                                Icons.delete,
-                                color: Colors.white,
+                          child: GestureDetector(
+                            onTap: () => setState(() => _imageFile = null),
+                            child: Container(
+                              padding: const EdgeInsets.all(6),
+                              decoration: BoxDecoration(
+                                color: Colors.black.withValues(alpha: 0.55),
+                                shape: BoxShape.circle,
                               ),
-                              onPressed: () =>
-                                  setState(() => _imageFile = null),
+                              child: const Icon(
+                                Icons.delete_outline_rounded,
+                                color: Colors.white,
+                                size: 20,
+                              ),
                             ),
                           ),
                         ),
@@ -250,28 +251,32 @@ class _RecordContributionPaymentScreenState
                       onTap: _showImageSourceOptions,
                       child: Container(
                         width: double.infinity,
-                        height: 120,
+                        height: 124,
                         decoration: BoxDecoration(
-                          color: Colors.white,
+                          color: CUi.surface,
                           borderRadius: BorderRadius.circular(16),
-                          border: Border.all(
-                            color: Colors.grey.withValues(alpha: 0.3),
-                            style: BorderStyle.solid,
-                          ),
+                          border: Border.all(color: CUi.border),
                         ),
                         child: Column(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            Icon(
-                              Icons.add_a_photo_outlined,
-                              color: TColors.appMainColor,
-                              size: 32,
+                            Container(
+                              padding: const EdgeInsets.all(12),
+                              decoration: const BoxDecoration(
+                                color: CUi.primarySoft,
+                                shape: BoxShape.circle,
+                              ),
+                              child: const Icon(
+                                Icons.add_a_photo_outlined,
+                                color: CUi.primary,
+                                size: 26,
+                              ),
                             ),
-                            const SizedBox(height: 8),
+                            const SizedBox(height: 10),
                             const Text(
-                              "Toca para tomar foto o subir recibo",
+                              'Toca para tomar foto o subir recibo',
                               style: TextStyle(
-                                color: Colors.grey,
+                                color: CUi.textSecondary,
                                 fontSize: 13,
                               ),
                             ),
@@ -279,364 +284,376 @@ class _RecordContributionPaymentScreenState
                         ),
                       ),
                     ),
-                  const SizedBox(height: 20),
-
-                  _buildLabel("Caja de Destino", isRequired: true),
-                  DropdownButtonFormField<String>(
-                    value: _selectedCajaId,
-                    isExpanded: true,
-                    icon: const Icon(
-                      Icons.keyboard_arrow_down,
-                      color: Colors.grey,
-                    ),
+                  const SizedBox(height: 18),
+                  _buildLabel('Caja de Destino', isRequired: true),
+                  _buildCajaSelector(),
+                  const SizedBox(height: 18),
+                  _buildLabel('Observación', isOptional: true),
+                  TextField(
+                    maxLines: 3,
+                    controller: _observacionController,
+                    style: const TextStyle(color: CUi.textPrimary, fontSize: 14),
                     decoration: InputDecoration(
                       filled: true,
-                      fillColor: Colors.white,
-                      contentPadding: const EdgeInsets.symmetric(
-                        horizontal: 16,
-                        vertical: 14,
+                      fillColor: CUi.surface,
+                      hintText: 'Añadir notas adicionales sobre el pago...',
+                      hintStyle: const TextStyle(color: CUi.muted, fontSize: 14),
+                      contentPadding: const EdgeInsets.all(14),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: const BorderSide(color: CUi.border),
                       ),
                       enabledBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
-                        borderSide: BorderSide(
-                          color: Colors.grey.withValues(alpha: 0.3),
-                        ),
+                        borderSide: const BorderSide(color: CUi.border),
                       ),
                       focusedBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
-                        borderSide: const BorderSide(
-                          color: Color(0xFF2563EB),
-                          width: 1.5,
-                        ),
-                      ),
-                    ),
-                    hint: const Text(
-                      "Seleccionar caja...",
-                      style: TextStyle(color: Colors.grey, fontSize: 14),
-                    ),
-                    items: widget.cash.data.map((caja) {
-                      return DropdownMenuItem<String>(
-                        value: caja.id,
-                        child: Row(
-                          children: [
-                            const Icon(
-                              Icons.account_balance_wallet_outlined,
-                              size: 18,
-                              color: Colors.blueGrey,
-                            ),
-                            const SizedBox(width: 10),
-                            Text(
-                              caja.nombre,
-                              style: const TextStyle(
-                                fontSize: 14,
-                                color: Color(0xFF1E293B),
-                              ),
-                            ),
-                          ],
-                        ),
-                      );
-                    }).toList(),
-                    onChanged: (String? newValue) {
-                      setState(() {
-                        _selectedCajaId = newValue;
-                        _selectedCajaName = widget.cash.data
-                            .firstWhere((caja) => caja.id == newValue)
-                            .nombre;
-                      });
-                    },
-                  ),
-                  const SizedBox(height: 20),
-                  _buildLabel("Observación", isOptional: true),
-                  Container(
-                    padding: const EdgeInsets.all(16),
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(12),
-                      border: Border.all(
-                        color: Colors.grey.withValues(alpha: 0.3),
-                      ),
-                    ),
-                    child: TextField(
-                      maxLines: 3,
-                      controller: _observacionController,
-                      decoration: InputDecoration(
-                        filled: false,
-                        border: InputBorder.none,
-                        enabledBorder: InputBorder.none,
-                        focusedBorder: InputBorder.none,
-                        disabledBorder: InputBorder.none,
-                        errorBorder: InputBorder.none,
-                        hintText: "Añadir notas adicionales sobre el pago...",
-                        hintStyle: const TextStyle(
-                          color: Colors.grey,
-                          fontSize: 14,
-                        ),
+                        borderSide:
+                            const BorderSide(color: CUi.primary, width: 1.5),
                       ),
                     ),
                   ),
-                  const SizedBox(height: 20),
+                  const SizedBox(height: 18),
                 ],
               ),
             ),
           ),
-
-          Padding(
-            padding: const EdgeInsets.all(20.0),
-            child: SizedBox(
-              width: double.infinity,
-              height: 56,
-              child: ElevatedButton(
-                onPressed: () {
-                  if (_imageFile == null) {
-                    CustomAlert.show(
-                      context,
-                      title: 'Error',
-                      message:
-                          'Debes agregar una evidencia antes de continuar.',
-                      type: AlertType.error,
-                    );
-                    return;
-                  }
-
-                  if (_selectedCajaId == null) {
-                    CustomAlert.show(
-                      context,
-                      title: 'Atención',
-                      message: 'Por favor, selecciona una caja destino.',
-                      type: AlertType.warning,
-                    );
-                    return;
-                  }
-
-                  showDialog(
-                    context: context,
-                    builder: (BuildContext dialogContext) {
-                      return BlocProvider.value(
-                        value: treasuryBloc,
-                        child: BlocConsumer<TreasuryBloc, TreasuryState>(
-                          listener: (context, state) {
-                            if (state is RecordContributionPaymentLoaded) {
-                              context.router.push(
-                                PaymentConfirmationRoute(
-                                  transactionId: widget.item.detailId,
-                                  screen: true,
-                                ),
-                              );
-                            }
-                            if (state is RecordContributionPaymentError) {
-                              context.router.back();
-                              CustomAlert.show(
-                                context,
-                                title: 'Error',
-                                message: state.message,
-                                type: AlertType.error,
-                              );
-                            }
-                          },
-                          builder: (context, state) {
-                            final isLoading =
-                                state is RecordContributionPaymentLoading;
-                            return Dialog(
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(24.0),
-                              ),
-                              child: Stack(
-                                clipBehavior: Clip.none,
-                                children: [
-                                  Container(
-                                    padding: const EdgeInsets.all(24.0),
-                                    decoration: BoxDecoration(
-                                      color: Colors.white,
-                                      borderRadius: BorderRadius.circular(24.0),
-                                    ),
-                                    child: Column(
-                                      mainAxisSize: MainAxisSize.min,
-                                      children: [
-                                        Container(
-                                          padding: const EdgeInsets.all(16),
-                                          decoration: BoxDecoration(
-                                            color: const Color(0xFFFFF1F1),
-                                            shape: BoxShape.circle,
-                                          ),
-                                          child: const Icon(
-                                            Icons.lock_clock_outlined,
-                                            color: Color(0xFFEF4444),
-                                            size: 40,
-                                          ),
-                                        ),
-                                        const SizedBox(height: 20),
-                                        const Text(
-                                          'Confirmación Final',
-                                          style: TextStyle(
-                                            fontSize: 22,
-                                            fontWeight: FontWeight.bold,
-                                            color: Color(0xFF1E293B),
-                                          ),
-                                        ),
-                                        const SizedBox(height: 12),
-                                        Text(
-                                          'Vas a registrar un pago de ${widget.item.amountToPay.toStringAsFixed(2)} Bs. Por favor revisa los detalles cuidadosamente.',
-                                          textAlign: TextAlign.center,
-                                          style: TextStyle(
-                                            color: Colors.grey,
-                                            fontSize: 14,
-                                          ),
-                                        ),
-                                        const SizedBox(height: 24),
-                                        Container(
-                                          padding: const EdgeInsets.all(16),
-                                          decoration: BoxDecoration(
-                                            color: const Color(0xFFF8FAFC),
-                                            borderRadius: BorderRadius.circular(
-                                              16,
-                                            ),
-                                            border: Border.all(
-                                              color: Colors.grey.withValues(
-                                                alpha: 0.1,
-                                              ),
-                                            ),
-                                          ),
-                                          child: Column(
-                                            children: [
-                                              _buildRowDetail(
-                                                "Socio",
-                                                widget.item.fullName,
-                                                isBold: true,
-                                              ),
-                                              SizedBox(height: 10),
-                                              _buildRowDetail(
-                                                "Concepto",
-                                                _observacionController
-                                                        .text
-                                                        .isEmpty
-                                                    ? 'Sin observación'
-                                                    : _observacionController
-                                                          .text,
-                                              ),
-                                              SizedBox(height: 10),
-                                              _buildRowDetail(
-                                                "Monto Total",
-                                                "${widget.item.amountToPay.toStringAsFixed(2)} Bs",
-                                                valueColor: const Color(
-                                                  0xFF2563EB,
-                                                ),
-                                                isBold: true,
-                                              ),
-                                              SizedBox(height: 10),
-                                              _buildRowDetail(
-                                                "Caja Destino",
-                                                _selectedCajaName ?? '',
-                                                valueColor: const Color(
-                                                  0xFF2563EB,
-                                                ),
-                                                isBold: true,
-                                              ),
-                                            ],
-                                          ),
-                                        ),
-                                        const SizedBox(height: 30),
-                                        SizedBox(
-                                          width: double.infinity,
-                                          height: 50,
-                                          child: ElevatedButton(
-                                            onPressed: () {
-                                              treasuryBloc.add(
-                                                RecordContributionPaymentEvent(
-                                                  recordContributionPaymentRequestModel:
-                                                      RecordContributionPaymentRequestEntity(
-                                                        detailid: widget
-                                                            .item
-                                                            .detailId,
-                                                        cashRegisterid:
-                                                            _selectedCajaId ??
-                                                            '',
-                                                        observacion:
-                                                            _observacionController
-                                                                .text,
-                                                        evidencia:
-                                                            _imageFile!.path,
-                                                      ),
-                                                ),
-                                              );
-                                            },
-                                            style: ElevatedButton.styleFrom(
-                                              backgroundColor:
-                                                  TColors.appMainColor,
-                                              shape: RoundedRectangleBorder(
-                                                borderRadius:
-                                                    BorderRadius.circular(12),
-                                              ),
-                                              elevation: 0,
-                                            ),
-                                            child: const Text(
-                                              "Confirmar Pago",
-                                              style: TextStyle(
-                                                color: Colors.white,
-                                                fontWeight: FontWeight.bold,
-                                              ),
-                                            ),
-                                          ),
-                                        ),
-                                        TextButton(
-                                          onPressed: () =>
-                                              Navigator.pop(context),
-                                          child: const Text(
-                                            "Cancelar",
-                                            style: TextStyle(
-                                              color: Colors.grey,
-                                              fontWeight: FontWeight.w500,
-                                            ),
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                  if (isLoading)
-                                    const Positioned(
-                                      top: -60,
-                                      left: 0,
-                                      right: 0,
-                                      child: ExcavatorLoader(
-                                        width: 120,
-                                        height: 120,
-                                      ),
-                                    ),
-                                ],
-                              ),
-                            );
-                          },
-                        ),
-                      );
-                    },
-                  );
-                },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF2563EB), // Azul brillante
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  elevation: 0,
-                ),
-                child: const Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text(
-                      "Continuar",
-                      style: TextStyle(
-                        fontSize: 18,
-                        color: Colors.white,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    SizedBox(width: 8),
-                    Icon(Icons.arrow_forward, color: Colors.white),
-                  ],
-                ),
+          SafeArea(
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
+              child: CPrimaryButton(
+                label: 'Continuar',
+                icon: Icons.arrow_forward_rounded,
+                onPressed: _onContinue,
               ),
             ),
           ),
         ],
       ),
+    );
+  }
+
+  void _onContinue() {
+    if (_imageFile == null) {
+      CustomAlert.show(
+        context,
+        title: 'Error',
+        message: 'Debes agregar una evidencia antes de continuar.',
+        type: AlertType.error,
+      );
+      return;
+    }
+    if (_selectedCajaId == null) {
+      CustomAlert.show(
+        context,
+        title: 'Atención',
+        message: 'Por favor, selecciona una caja destino.',
+        type: AlertType.warning,
+      );
+      return;
+    }
+    _showConfirmDialog();
+  }
+
+  // Selector de caja tipo campo (no se estira como el dropdown de Material).
+  Widget _buildCajaSelector() {
+    final hasSelection = _selectedCajaName != null;
+    return GestureDetector(
+      onTap: _showCajaSheet,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+        decoration: BoxDecoration(
+          color: CUi.surface,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: CUi.border),
+        ),
+        child: Row(
+          children: [
+            const Icon(
+              Icons.account_balance_wallet_outlined,
+              size: 18,
+              color: CUi.primary,
+            ),
+            const SizedBox(width: 10),
+            Expanded(
+              child: Text(
+                hasSelection ? _selectedCajaName! : 'Seleccionar caja...',
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(
+                  fontSize: 14,
+                  fontWeight: hasSelection ? FontWeight.w600 : FontWeight.w400,
+                  color: hasSelection ? CUi.textPrimary : CUi.muted,
+                ),
+              ),
+            ),
+            const Icon(
+              Icons.keyboard_arrow_down_rounded,
+              color: CUi.textSecondary,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _showCajaSheet() {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: CUi.surface,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (sheetContext) => SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(16, 14, 16, 16),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Center(
+                child: Container(
+                  width: 36,
+                  height: 4,
+                  decoration: BoxDecoration(
+                    color: CUi.border,
+                    borderRadius: BorderRadius.circular(2),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 16),
+              const Text(
+                'Caja de destino',
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w800,
+                  color: CUi.textPrimary,
+                ),
+              ),
+              const SizedBox(height: 12),
+              ...widget.cash.data.map((caja) {
+                final selected = caja.id == _selectedCajaId;
+                return Padding(
+                  padding: const EdgeInsets.only(bottom: 8),
+                  child: GestureDetector(
+                    onTap: () {
+                      setState(() {
+                        _selectedCajaId = caja.id;
+                        _selectedCajaName = caja.nombre;
+                      });
+                      Navigator.pop(sheetContext);
+                    },
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 14,
+                        vertical: 14,
+                      ),
+                      decoration: BoxDecoration(
+                        color: selected ? CUi.primarySoft : CUi.bg,
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(
+                          color: selected ? CUi.primary : CUi.border,
+                          width: selected ? 1.5 : 1,
+                        ),
+                      ),
+                      child: Row(
+                        children: [
+                          Icon(
+                            Icons.account_balance_wallet_outlined,
+                            size: 18,
+                            color: selected ? CUi.primary : CUi.muted,
+                          ),
+                          const SizedBox(width: 10),
+                          Expanded(
+                            child: Text(
+                              caja.nombre,
+                              style: TextStyle(
+                                fontSize: 14,
+                                fontWeight: selected
+                                    ? FontWeight.w700
+                                    : FontWeight.w500,
+                                color: selected
+                                    ? CUi.textPrimary
+                                    : CUi.textSecondary,
+                              ),
+                            ),
+                          ),
+                          if (selected)
+                            const Icon(
+                              Icons.check_circle_rounded,
+                              size: 18,
+                              color: CUi.primary,
+                            ),
+                        ],
+                      ),
+                    ),
+                  ),
+                );
+              }),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  void _showConfirmDialog() {
+    showDialog(
+      context: context,
+      builder: (BuildContext dialogContext) {
+        return BlocProvider.value(
+          value: treasuryBloc,
+          child: BlocConsumer<TreasuryBloc, TreasuryState>(
+            listener: (context, state) {
+              if (state is RecordContributionPaymentLoaded) {
+                final router = context.router;
+                // Cierra el diálogo de confirmación.
+                Navigator.of(context).pop();
+                // Reemplaza "registrar pago" por el comprobante: al volver del
+                // comprobante se cae directo al detalle del aporte, sin dejar
+                // la pantalla de "registrar pago" colgada en el stack.
+                router.replace(
+                  PaymentConfirmationRoute(
+                    transactionId: widget.item.detailId,
+                    screen: true,
+                  ),
+                );
+              }
+              if (state is RecordContributionPaymentError) {
+                context.router.back();
+                CustomAlert.show(
+                  context,
+                  title: 'Error',
+                  message: state.message,
+                  type: AlertType.error,
+                );
+              }
+            },
+            builder: (context, state) {
+              final isLoading = state is RecordContributionPaymentLoading;
+              return Dialog(
+                backgroundColor: CUi.surface,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(24),
+                ),
+                child: Padding(
+                  padding: const EdgeInsets.all(24),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.all(16),
+                        decoration: const BoxDecoration(
+                          color: CUi.primarySoft,
+                          shape: BoxShape.circle,
+                        ),
+                        child: const Icon(
+                          Icons.payments_rounded,
+                          color: CUi.primary,
+                          size: 36,
+                        ),
+                      ),
+                      const SizedBox(height: 18),
+                      const Text(
+                        'Confirmación Final',
+                        style: TextStyle(
+                          fontSize: 21,
+                          fontWeight: FontWeight.w800,
+                          color: CUi.textPrimary,
+                        ),
+                      ),
+                      const SizedBox(height: 10),
+                      Text(
+                        'Vas a registrar un pago de ${_fmt.format(widget.item.amountToPay)} Bs. Revisa los detalles antes de confirmar.',
+                        textAlign: TextAlign.center,
+                        style: const TextStyle(
+                          color: CUi.textSecondary,
+                          fontSize: 14,
+                          height: 1.4,
+                        ),
+                      ),
+                      const SizedBox(height: 20),
+                      Container(
+                        padding: const EdgeInsets.all(16),
+                        decoration: BoxDecoration(
+                          color: CUi.bg,
+                          borderRadius: BorderRadius.circular(16),
+                          border: Border.all(color: CUi.border),
+                        ),
+                        child: Column(
+                          children: [
+                            _buildRowDetail(
+                              'Socio',
+                              widget.item.fullName,
+                              isBold: true,
+                            ),
+                            const SizedBox(height: 10),
+                            _buildRowDetail(
+                              'Concepto',
+                              _observacionController.text.isEmpty
+                                  ? 'Sin observación'
+                                  : _observacionController.text,
+                            ),
+                            const SizedBox(height: 10),
+                            _buildRowDetail(
+                              'Monto Total',
+                              '${_fmt.format(widget.item.amountToPay)} Bs',
+                              valueColor: CUi.primary,
+                              isBold: true,
+                            ),
+                            const SizedBox(height: 10),
+                            _buildRowDetail(
+                              'Caja Destino',
+                              _selectedCajaName ?? '',
+                              valueColor: CUi.primary,
+                              isBold: true,
+                            ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(height: 22),
+                      if (isLoading)
+                        const Padding(
+                          padding: EdgeInsets.symmetric(vertical: 6),
+                          child: ExcavatorLoader(width: 90, height: 90),
+                        )
+                      else ...[
+                        CPrimaryButton(
+                          label: 'Confirmar Pago',
+                          onPressed: () {
+                            treasuryBloc.add(
+                              RecordContributionPaymentEvent(
+                                recordContributionPaymentRequestModel:
+                                    RecordContributionPaymentRequestEntity(
+                                  detailid: widget.item.detailId,
+                                  cashRegisterid: _selectedCajaId ?? '',
+                                  observacion: _observacionController.text,
+                                  evidencia: _imageFile!.path,
+                                ),
+                              ),
+                            );
+                          },
+                        ),
+                        TextButton(
+                          onPressed: () => Navigator.pop(context),
+                          child: const Text(
+                            'Cancelar',
+                            style: TextStyle(
+                              color: CUi.textSecondary,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ],
+                  ),
+                ),
+              );
+            },
+          ),
+        );
+      },
     );
   }
 
@@ -651,22 +668,23 @@ class _RecordContributionPaymentScreenState
         text: TextSpan(
           text: text,
           style: const TextStyle(
-            color: Color(0xFF1E293B),
-            fontWeight: FontWeight.bold,
+            color: CUi.textPrimary,
+            fontWeight: FontWeight.w700,
             fontSize: 14,
           ),
           children: [
             if (isRequired)
               const TextSpan(
                 text: ' *',
-                style: TextStyle(color: Colors.red),
+                style: TextStyle(color: CUi.danger),
               ),
             if (isOptional)
               const TextSpan(
-                text: ' (Opcional)',
+                text: '  (Opcional)',
                 style: TextStyle(
-                  color: Colors.grey,
-                  fontWeight: FontWeight.normal,
+                  color: CUi.muted,
+                  fontWeight: FontWeight.w500,
+                  fontSize: 12.5,
                 ),
               ),
           ],
@@ -679,14 +697,24 @@ class _RecordContributionPaymentScreenState
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
       decoration: BoxDecoration(
-        color: const Color(0xFFF1F5F9),
+        color: CUi.fieldBg,
         borderRadius: BorderRadius.circular(12),
       ),
       child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Text(text, style: const TextStyle(color: Colors.blueGrey)),
-          Icon(icon, color: Colors.grey, size: 20),
+          Expanded(
+            child: Text(
+              text,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: const TextStyle(
+                color: CUi.textSecondary,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          ),
+          const SizedBox(width: 8),
+          Icon(icon, color: CUi.muted, size: 18),
         ],
       ),
     );
@@ -702,16 +730,20 @@ Widget _buildRowDetail(
   return Row(
     mainAxisAlignment: MainAxisAlignment.spaceBetween,
     children: [
-      Text(label, style: const TextStyle(color: Colors.blueGrey, fontSize: 14)),
-      Text(
-        value,
-        style: TextStyle(
-          color: valueColor ?? const Color(0xFF1E293B),
-          fontWeight: isBold ? FontWeight.bold : FontWeight.normal,
-          fontSize: 14,
+      Text(label, style: const TextStyle(color: CUi.textSecondary, fontSize: 14)),
+      const SizedBox(width: 12),
+      Flexible(
+        child: Text(
+          value,
+          textAlign: TextAlign.right,
+          style: TextStyle(
+            color: valueColor ?? CUi.textPrimary,
+            fontWeight: isBold ? FontWeight.w800 : FontWeight.w500,
+            fontSize: 14,
+          ),
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
         ),
-        maxLines: 1,
-        overflow: TextOverflow.ellipsis,
       ),
     ],
   );

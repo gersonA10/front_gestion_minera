@@ -5,8 +5,9 @@ import 'package:front_gestion_minera/core/widgets/custom_alert_widget.dart';
 import 'package:front_gestion_minera/injector_container.dart';
 import 'package:front_gestion_minera/modules/treasury/presentation/bloc/treasury_bloc.dart';
 import 'package:front_gestion_minera/modules/treasury/presentation/widgets/record_payment/confirmar_pago_dialogo_widget.dart';
-import 'package:front_gestion_minera/utils/constants/color.constant.dart';
+import 'package:intl/intl.dart';
 import '../../../domain/entity/entity.dart';
+import 'loan_ui.dart';
 
 @RoutePage()
 class RecordPaymentScreen extends StatefulWidget {
@@ -33,8 +34,9 @@ class _RecordPaymentScreenState extends State<RecordPaymentScreen> {
   String _metodoPago = 'Efectivo';
   final TextEditingController _referenciaController = TextEditingController();
   final TextEditingController _fechaController = TextEditingController();
-  // Cajas estáticas — reemplaza con tu servicio cuando esté disponible
-late TreasuryBloc treasuryBloc;
+  final _fmt = NumberFormat('#,##0.00', 'es_PE');
+  late TreasuryBloc treasuryBloc;
+
   @override
   void initState() {
     super.initState();
@@ -42,9 +44,8 @@ late TreasuryBloc treasuryBloc;
     treasuryBloc = InjectorContainer.getIt<TreasuryBloc>();
     _fechaController.text =
         '${now.month.toString().padLeft(2, '0')}/${now.day.toString().padLeft(2, '0')}/${now.year}';
-    _selectedCaja = widget.cash.data.isNotEmpty
-        ? widget.cash.data.first.id
-        : null;
+    _selectedCaja =
+        widget.cash.data.isNotEmpty ? widget.cash.data.first.id : null;
   }
 
   @override
@@ -58,7 +59,7 @@ late TreasuryBloc treasuryBloc;
     showDialog(
       context: context,
       builder: (context) => BlocProvider.value(
-        value:treasuryBloc,
+        value: treasuryBloc,
         child: ConfirmarPagoDialog(
           textoCuota: widget.textoCuota,
           montoFormateado: widget.montoTotalCuota.toStringAsFixed(2),
@@ -81,15 +82,15 @@ late TreasuryBloc treasuryBloc;
         return StatefulBuilder(
           builder: (context, setStateDialog) {
             return AlertDialog(
-              backgroundColor: TColors.cardBgDark,
+              backgroundColor: LoanUi.surface,
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(16),
-                side: BorderSide(color: TColors.cardBorderDark),
+                side: const BorderSide(color: LoanUi.border),
               ),
               title: const Text(
                 'Seleccionar Caja',
                 style: TextStyle(
-                  color: TColors.white,
+                  color: LoanUi.textPrimary,
                   fontSize: 16,
                   fontWeight: FontWeight.w700,
                 ),
@@ -101,7 +102,8 @@ late TreasuryBloc treasuryBloc;
                   children: widget.cash.data.map((caja) {
                     final isSelected = tempSelected == caja.id;
                     return GestureDetector(
-                      onTap: () => setStateDialog(() => tempSelected = caja.id),
+                      onTap: () =>
+                          setStateDialog(() => tempSelected = caja.id),
                       child: Container(
                         margin: const EdgeInsets.only(bottom: 8),
                         padding: const EdgeInsets.symmetric(
@@ -109,14 +111,12 @@ late TreasuryBloc treasuryBloc;
                           vertical: 12,
                         ),
                         decoration: BoxDecoration(
-                          color: isSelected
-                              ? TColors.amber.withValues(alpha: 0.1)
-                              : TColors.cardInnerBg,
+                          color:
+                              isSelected ? LoanUi.primarySoft : LoanUi.bg,
                           borderRadius: BorderRadius.circular(10),
                           border: Border.all(
-                            color: isSelected
-                                ? TColors.amber
-                                : TColors.cardBorderDark.withValues(alpha: 0.5),
+                            color:
+                                isSelected ? LoanUi.primary : LoanUi.border,
                             width: isSelected ? 1.5 : 1,
                           ),
                         ),
@@ -125,8 +125,8 @@ late TreasuryBloc treasuryBloc;
                             Icon(
                               Icons.account_balance_outlined,
                               color: isSelected
-                                  ? TColors.amber
-                                  : TColors.textSecondary1,
+                                  ? LoanUi.primary
+                                  : LoanUi.muted,
                               size: 18,
                             ),
                             const SizedBox(width: 10),
@@ -135,8 +135,8 @@ late TreasuryBloc treasuryBloc;
                                 caja.nombre,
                                 style: TextStyle(
                                   color: isSelected
-                                      ? TColors.white
-                                      : TColors.textSecondary1,
+                                      ? LoanUi.textPrimary
+                                      : LoanUi.textSecondary,
                                   fontSize: 13,
                                   fontWeight: isSelected
                                       ? FontWeight.w600
@@ -147,7 +147,7 @@ late TreasuryBloc treasuryBloc;
                             if (isSelected)
                               const Icon(
                                 Icons.check_circle,
-                                color: TColors.amber,
+                                color: LoanUi.primary,
                                 size: 18,
                               ),
                           ],
@@ -168,8 +168,8 @@ late TreasuryBloc treasuryBloc;
                       child: OutlinedButton(
                         onPressed: () => Navigator.pop(context),
                         style: OutlinedButton.styleFrom(
-                          foregroundColor: TColors.textSecondary1,
-                          side: BorderSide(color: TColors.cardBorderDark),
+                          foregroundColor: LoanUi.textSecondary,
+                          side: const BorderSide(color: LoanUi.border),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(10),
                           ),
@@ -186,8 +186,9 @@ late TreasuryBloc treasuryBloc;
                           Navigator.pop(context);
                         },
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: TColors.amber,
-                          foregroundColor: TColors.bgColor,
+                          backgroundColor: LoanUi.primary,
+                          foregroundColor: Colors.white,
+                          elevation: 0,
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(10),
                           ),
@@ -214,46 +215,26 @@ late TreasuryBloc treasuryBloc;
     return BlocProvider.value(
       value: treasuryBloc,
       child: Scaffold(
-        backgroundColor: TColors.bgColor,
-        appBar: AppBar(
-          backgroundColor: TColors.bgColor,
-          elevation: 0,
-          centerTitle: true,
-          foregroundColor: Colors.white,
-          iconTheme: const IconThemeData(color: Colors.white),
-          title: const Text(
-            'Registrar Pago',
-            style: TextStyle(
-              color: TColors.white,
-              fontSize: 16,
-              fontWeight: FontWeight.w600,
-            ),
-          ),
-        ),
+        backgroundColor: LoanUi.bg,
+        appBar: loanAppBar(context, title: 'Registrar Pago'),
         body: SafeArea(
           child: SingleChildScrollView(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text(
+                const LoanSectionTitle(
                   'Detalle de la Cuota',
-                  style: TextStyle(
-                    color: TColors.white,
-                    fontSize: 16,
-                    fontWeight: FontWeight.w700,
-                  ),
+                  icon: Icons.receipt_long_rounded,
                 ),
                 const SizedBox(height: 12),
                 Container(
                   width: double.infinity,
-                  padding: const EdgeInsets.all(16),
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
                   decoration: BoxDecoration(
-                    color: TColors.cardBgDark,
+                    color: LoanUi.surface,
                     borderRadius: BorderRadius.circular(14),
-                    border: Border.all(
-                      color: TColors.cardBorderDark.withValues(alpha: 0.5),
-                    ),
+                    border: Border.all(color: LoanUi.border),
                   ),
                   child: Column(
                     children: [
@@ -261,30 +242,26 @@ late TreasuryBloc treasuryBloc;
                       _buildDivider(),
                       _buildDetailRow(
                         'Capital',
-                        (widget.montoTotalCuota * 0.89).toStringAsFixed(2),
+                        _fmt.format(widget.montoTotalCuota * 0.89),
                       ),
                       _buildDivider(),
                       _buildDetailRow(
                         'Interés',
-                        (widget.montoTotalCuota * 0.11).toStringAsFixed(2),
+                        _fmt.format(widget.montoTotalCuota * 0.11),
                       ),
                       _buildDivider(),
                       _buildDetailRow(
                         'Total a Pagar',
-                        widget.montoTotalCuota.toStringAsFixed(2),
+                        _fmt.format(widget.montoTotalCuota),
                         isTotal: true,
                       ),
                     ],
                   ),
                 ),
                 const SizedBox(height: 24),
-                const Text(
+                const LoanSectionTitle(
                   'Datos del Pago',
-                  style: TextStyle(
-                    color: TColors.white,
-                    fontSize: 16,
-                    fontWeight: FontWeight.w700,
-                  ),
+                  icon: Icons.edit_note_rounded,
                 ),
                 const SizedBox(height: 16),
                 _buildLabel('Fecha de Pago'),
@@ -292,12 +269,15 @@ late TreasuryBloc treasuryBloc;
                 TextField(
                   controller: _fechaController,
                   readOnly: true,
-                  style: const TextStyle(color: TColors.white, fontSize: 14),
+                  style: const TextStyle(
+                    color: LoanUi.textPrimary,
+                    fontSize: 14,
+                  ),
                   decoration: _inputDecoration(
                     hint: 'mm/dd/yyyy',
                     suffix: const Icon(
                       Icons.calendar_today_outlined,
-                      color: TColors.textSecondary1,
+                      color: LoanUi.muted,
                       size: 16,
                     ),
                   ),
@@ -314,17 +294,15 @@ late TreasuryBloc treasuryBloc;
                       vertical: 14,
                     ),
                     decoration: BoxDecoration(
-                      color: TColors.cardInnerBg,
+                      color: LoanUi.fieldBg,
                       borderRadius: BorderRadius.circular(10),
-                      border: Border.all(
-                        color: TColors.cardBorderDark.withValues(alpha: 0.5),
-                      ),
+                      border: Border.all(color: LoanUi.border),
                     ),
                     child: Row(
                       children: [
                         const Icon(
                           Icons.account_balance_outlined,
-                          color: TColors.textSecondary1,
+                          color: LoanUi.muted,
                           size: 16,
                         ),
                         const SizedBox(width: 10),
@@ -332,22 +310,22 @@ late TreasuryBloc treasuryBloc;
                           child: Text(
                             _selectedCaja != null
                                 ? widget.cash.data
-                                      .firstWhere(
-                                        (caja) => caja.id == _selectedCaja,
-                                      )
-                                      .nombre
+                                    .firstWhere(
+                                      (caja) => caja.id == _selectedCaja,
+                                    )
+                                    .nombre
                                 : 'Seleccionar caja',
                             style: TextStyle(
                               color: _selectedCaja != null
-                                  ? TColors.white
-                                  : TColors.textSecondary1,
+                                  ? LoanUi.textPrimary
+                                  : LoanUi.muted,
                               fontSize: 14,
                             ),
                           ),
                         ),
                         const Icon(
-                          Icons.keyboard_arrow_down,
-                          color: TColors.textSecondary1,
+                          Icons.keyboard_arrow_down_rounded,
+                          color: LoanUi.muted,
                           size: 20,
                         ),
                       ],
@@ -384,59 +362,49 @@ late TreasuryBloc treasuryBloc;
                 const SizedBox(height: 8),
                 TextField(
                   controller: _referenciaController,
-                  style: const TextStyle(color: TColors.white, fontSize: 14),
+                  style: const TextStyle(
+                    color: LoanUi.textPrimary,
+                    fontSize: 14,
+                  ),
                   maxLines: 3,
-                  decoration: _inputDecoration(hint: 'Ej. Depósito Nº 123456...'),
+                  decoration:
+                      _inputDecoration(hint: 'Ej. Depósito Nº 123456...'),
                 ),
                 const SizedBox(height: 32),
-                SizedBox(
-                  width: double.infinity,
-                  height: 52,
-                  child: ElevatedButton.icon(
-                    onPressed: () {
-                      if (_referenciaController.text.isEmpty) {
-                        CustomAlert.show(
-                          context,
-                          title: 'Error',
-                          message:
-                              'Por favor, ingresa una referencia u observación para el pago.',
-                          type: AlertType.error,
-                        );
-                        return;
-                      }
-                      if (_metodoPago.isEmpty) {
-                        CustomAlert.show(
-                          context,
-                          title: 'Error',
-                          message: 'Por favor, selecciona un método de pago.',
-                          type: AlertType.error,
-                        );
-                        return;
-                      }
-                      if (_selectedCaja == null) {
-                        CustomAlert.show(
-                          context,
-                          title: 'Error',
-                          message: 'Por favor, selecciona una caja.',
-                          type: AlertType.error,
-                        );
-                        return;
-                      }
-                      _showConfirmarPagoDialog();
-                    },
-                    icon: const Icon(Icons.check, size: 18),
-                    label: const Text(
-                      'Continuar',
-                      style: TextStyle(fontSize: 15, fontWeight: FontWeight.w700),
-                    ),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFF2563EB),
-                      foregroundColor: Colors.white,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(14),
-                      ),
-                    ),
-                  ),
+                LoanPrimaryButton(
+                  label: 'Continuar',
+                  icon: Icons.check_rounded,
+                  onPressed: () {
+                    if (_referenciaController.text.isEmpty) {
+                      CustomAlert.show(
+                        context,
+                        title: 'Error',
+                        message:
+                            'Por favor, ingresa una referencia u observación para el pago.',
+                        type: AlertType.error,
+                      );
+                      return;
+                    }
+                    if (_metodoPago.isEmpty) {
+                      CustomAlert.show(
+                        context,
+                        title: 'Error',
+                        message: 'Por favor, selecciona un método de pago.',
+                        type: AlertType.error,
+                      );
+                      return;
+                    }
+                    if (_selectedCaja == null) {
+                      CustomAlert.show(
+                        context,
+                        title: 'Error',
+                        message: 'Por favor, selecciona una caja.',
+                        type: AlertType.error,
+                      );
+                      return;
+                    }
+                    _showConfirmarPagoDialog();
+                  },
                 ),
                 const SizedBox(height: 24),
               ],
@@ -449,24 +417,24 @@ late TreasuryBloc treasuryBloc;
 
   Widget _buildDetailRow(String label, String value, {bool isTotal = false}) {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 10),
+      padding: const EdgeInsets.symmetric(vertical: 12),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           Text(
             label,
             style: TextStyle(
-              color: isTotal ? TColors.white : TColors.textSecondary1,
+              color: isTotal ? LoanUi.textPrimary : LoanUi.textSecondary,
               fontSize: isTotal ? 14 : 13,
-              fontWeight: isTotal ? FontWeight.w600 : FontWeight.w400,
+              fontWeight: isTotal ? FontWeight.w700 : FontWeight.w400,
             ),
           ),
           Text(
             value,
             style: TextStyle(
-              color: isTotal ? const Color(0xFF2563EB) : TColors.white,
+              color: isTotal ? LoanUi.primary : LoanUi.textPrimary,
               fontSize: isTotal ? 18 : 13,
-              fontWeight: FontWeight.w700,
+              fontWeight: FontWeight.w800,
             ),
           ),
         ],
@@ -474,44 +442,39 @@ late TreasuryBloc treasuryBloc;
     );
   }
 
-  Widget _buildDivider() =>
-      Divider(color: TColors.cardBorderDark.withValues(alpha: 0.4), height: 1);
+  Widget _buildDivider() => const Divider(color: LoanUi.border, height: 1);
 
   Widget _buildLabel(String text) => Text(
-    text,
-    style: const TextStyle(
-      color: TColors.white,
-      fontSize: 13,
-      fontWeight: FontWeight.w500,
-    ),
-  );
+        text,
+        style: const TextStyle(
+          color: LoanUi.textSecondary,
+          fontSize: 13,
+          fontWeight: FontWeight.w500,
+        ),
+      );
 
   InputDecoration _inputDecoration({required String hint, Widget? suffix}) =>
       InputDecoration(
         hintText: hint,
-        hintStyle: TextStyle(color: TColors.textSecondary1, fontSize: 14),
+        hintStyle: const TextStyle(color: LoanUi.muted, fontSize: 14),
         suffixIcon: suffix,
         filled: true,
-        fillColor: TColors.cardInnerBg,
+        fillColor: LoanUi.fieldBg,
         contentPadding: const EdgeInsets.symmetric(
           horizontal: 14,
           vertical: 14,
         ),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(10),
-          borderSide: BorderSide(
-            color: TColors.cardBorderDark.withValues(alpha: 0.5),
-          ),
+          borderSide: const BorderSide(color: LoanUi.border),
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(10),
-          borderSide: BorderSide(
-            color: TColors.cardBorderDark.withValues(alpha: 0.5),
-          ),
+          borderSide: const BorderSide(color: LoanUi.border),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(10),
-          borderSide: const BorderSide(color: TColors.amber),
+          borderSide: const BorderSide(color: LoanUi.primary, width: 1.5),
         ),
       );
 }
@@ -536,41 +499,37 @@ class _MetodoPagoCard extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.symmetric(vertical: 16),
         decoration: BoxDecoration(
-          color: selected
-              ? TColors.amber.withValues(alpha: 0.08)
-              : TColors.cardInnerBg,
+          color: selected ? LoanUi.primarySoft : LoanUi.fieldBg,
           borderRadius: BorderRadius.circular(12),
           border: Border.all(
-            color: selected
-                ? TColors.amber
-                : TColors.cardBorderDark.withValues(alpha: 0.5),
+            color: selected ? LoanUi.primary : LoanUi.border,
             width: selected ? 1.5 : 1,
           ),
         ),
         child: Column(
           children: [
             if (selected)
-              Align(
+              const Align(
                 alignment: Alignment.topRight,
                 child: Padding(
-                  padding: const EdgeInsets.only(right: 8, bottom: 4),
+                  padding: EdgeInsets.only(right: 8, bottom: 4),
                   child: Icon(
                     Icons.check_circle,
-                    color: TColors.amber,
+                    color: LoanUi.primary,
                     size: 16,
                   ),
                 ),
               ),
             Icon(
               icon,
-              color: selected ? TColors.amber : TColors.textSecondary1,
+              color: selected ? LoanUi.primary : LoanUi.muted,
               size: 24,
             ),
             const SizedBox(height: 6),
             Text(
               label,
               style: TextStyle(
-                color: selected ? TColors.white : TColors.textSecondary1,
+                color: selected ? LoanUi.textPrimary : LoanUi.textSecondary,
                 fontSize: 13,
                 fontWeight: selected ? FontWeight.w600 : FontWeight.w400,
               ),
@@ -602,20 +561,18 @@ class SourceOption extends StatelessWidget {
         width: double.infinity,
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
         decoration: BoxDecoration(
-          color: TColors.cardInnerBg,
+          color: LoanUi.fieldBg,
           borderRadius: BorderRadius.circular(12),
-          border: Border.all(
-            color: TColors.cardBorderDark.withValues(alpha: 0.5),
-          ),
+          border: Border.all(color: LoanUi.border),
         ),
         child: Row(
           children: [
-            Icon(icon, color: TColors.textSecondary1, size: 22),
+            Icon(icon, color: LoanUi.primary, size: 22),
             const SizedBox(width: 14),
             Text(
               label,
               style: const TextStyle(
-                color: TColors.white,
+                color: LoanUi.textPrimary,
                 fontSize: 14,
                 fontWeight: FontWeight.w500,
               ),

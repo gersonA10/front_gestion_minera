@@ -1,16 +1,14 @@
-import 'package:flutter/material.dart';
 import 'package:front_gestion_minera/utils/constants/color.constant.dart';
 
 import '../widgtes.dart';
-
-
 
 class ScrollAwareFabs extends StatelessWidget {
   final bool visible;
   final VoidCallback onAddTap;
   final VoidCallback onMoneyTap;
 
-  const ScrollAwareFabs({super.key, 
+  const ScrollAwareFabs({
+    super.key,
     required this.visible,
     required this.onAddTap,
     required this.onMoneyTap,
@@ -30,17 +28,17 @@ class ScrollAwareFabs extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           children: [
             FabButton(
-              icon: Icons.add,
-              backgroundColor: const Color(0xFF2563EB),
-              onTap: onAddTap,
-              tooltip: 'Nueva extracción',
-            ),
-            const SizedBox(width: 10),
-            FabButton(
-              icon: Icons.attach_money_outlined,
-              backgroundColor: TColors.lightBackgroundSplash,
+              icon: Icons.attach_money_rounded,
+              backgroundColor: TColors.goldAccent,
               onTap: onMoneyTap,
               tooltip: 'Registrar venta',
+            ),
+            const SizedBox(width: 12),
+            FabButton(
+              icon: Icons.add_rounded,
+              backgroundColor: TColors.primary,
+              onTap: onAddTap,
+              tooltip: 'Nueva extracción',
             ),
           ],
         ),

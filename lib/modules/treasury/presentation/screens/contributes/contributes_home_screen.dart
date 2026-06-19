@@ -3,8 +3,10 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:front_gestion_minera/core/widgets/excavator_loader.dart';
 import 'package:front_gestion_minera/injector_container.dart';
 import 'package:front_gestion_minera/modules/treasury/presentation/bloc/treasury_bloc.dart';
-import 'package:front_gestion_minera/utils/constants/color.constant.dart';
+import 'package:intl/intl.dart';
+import '../../../domain/entity/entity.dart';
 import '../../widgets/widgtes.dart';
+import 'contributes_ui.dart';
 
 @RoutePage()
 class ContributesHomeScreen extends StatefulWidget {
@@ -18,7 +20,7 @@ class _ContributesHomeScreenState extends State<ContributesHomeScreen> {
   late final TreasuryBloc _bloc;
   final ScrollController _scrollController = ScrollController();
   final TextEditingController _searchController = TextEditingController();
-  bool _showSearch = false;
+  final _money = NumberFormat('#,##0', 'es_PE');
 
   @override
   void initState() {
@@ -36,17 +38,10 @@ class _ContributesHomeScreenState extends State<ContributesHomeScreen> {
   }
 
   void _onSearchChanged(String value) {
-    _bloc.add(GetContributionsEvent(isRefresh: true, search: value.trim().isEmpty ? null : value.trim()));
-  }
-
-  void _toggleSearch() {
-    setState(() {
-      _showSearch = !_showSearch;
-      if (!_showSearch) {
-        _searchController.clear();
-        _bloc.add(GetContributionsEvent(isRefresh: true));
-      }
-    });
+    _bloc.add(GetContributionsEvent(
+      isRefresh: true,
+      search: value.trim().isEmpty ? null : value.trim(),
+    ));
   }
 
   void _onScroll() {
@@ -61,78 +56,177 @@ class _ContributesHomeScreenState extends State<ContributesHomeScreen> {
     return BlocProvider.value(
       value: _bloc,
       child: Scaffold(
-        backgroundColor: TColors.background,
-        appBar: AppBar(
-          backgroundColor: TColors.white,
-          elevation: 0,
-          leading: IconButton(
-            icon: const Icon(
-              Icons.arrow_back,
-              color: TColors.textPrimary,
-              size: 22,
-            ),
-            onPressed: () => context.router.back(),
-          ),
-          title: _showSearch
-              ? SizedBox(
-                height: 40,
-                child: TextField(
-                    controller: _searchController,
-                    autofocus: true,
-                    decoration: const InputDecoration(
-                      hintText: 'Buscar socio...',
-                      border: InputBorder.none,
-                      hintStyle: TextStyle(color: TColors.textSecondary),
-                    ),
-                    style: const TextStyle(
-                      fontSize: 14,
-                      color: TColors.textPrimary,
-                    ),
-                    onChanged: _onSearchChanged,
-                  ),
-              )
-              : const Text(
-                  'Aportes',
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w700,
-                    color: TColors.textPrimary,
-                  ),
-                ),
-          centerTitle: !_showSearch,
-          actions: [
-            IconButton(
-              icon: Icon(
-                _showSearch ? Icons.close : Icons.search,
-                color: TColors.textPrimary,
-                size: 22,
+        backgroundColor: CUi.bg,
+        body: Column(
+          children: [
+            // Header hero con métricas (solo las métricas se reconstruyen).
+            ContribHeader(
+              title: 'Aportes',
+              subtitle: 'Aportaciones de capital de los socios',
+              bottom: BlocBuilder<TreasuryBloc, TreasuryState>(
+                buildWhen: (p, c) =>
+                    c is ContributionsLoading ||
+                    c is ContributionsLoaded ||
+                    c is ContributionsError,
+                builder: (context, state) {
+                  final metrics =
+                      state is ContributionsLoaded ? state.metrics : null;
+                  return _heroMetrics(metrics);
+                },
               ),
-              onPressed: _toggleSearch,
+            ),
+            // Buscador persistente (fuera del área que se reconstruye).
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 14, 16, 6),
+              child: _searchBar(),
+            ),
+            Expanded(
+              child: BlocBuilder<TreasuryBloc, TreasuryState>(
+                buildWhen: (previous, current) =>
+                    current is ContributionsLoading ||
+                    current is ContributionsLoaded ||
+                    current is ContributionsError,
+                builder: (context, state) {
+                  if (state is ContributionsLoading) {
+                    return const Center(child: ExcavatorLoader());
+                  }
+                  if (state is ContributionsError) {
+                    return CStateView(
+                      icon: Icons.cloud_off_rounded,
+                      color: CUi.danger,
+                      title: 'No pudimos cargar los aportes',
+                      subtitle: state.message,
+                    );
+                  }
+                  if (state is ContributionsLoaded) {
+                    return _buildContent(state);
+                  }
+                  return const SizedBox.shrink();
+                },
+              ),
             ),
           ],
         ),
-        body: BlocBuilder<TreasuryBloc, TreasuryState>(
-          buildWhen: (previous, current) =>
-              current is ContributionsLoading ||
-              current is ContributionsLoaded ||
-              current is ContributionsError,
-          builder: (context, state) {
-            if (state is ContributionsLoading) {
-              return const Center(child: ExcavatorLoader());
-            }
-            if (state is ContributionsError) {
-              return Center(
-                child: Text(
-                  state.message,
-                  style: const TextStyle(color: TColors.textSecondary),
+      ),
+    );
+  }
+
+  // ── Hero de métricas sobre el degradado ──────────────────────────────────
+  Widget _heroMetrics(ContributeMetricsEntity? m) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 16),
+      decoration: BoxDecoration(
+        color: Colors.white.withValues(alpha: 0.12),
+        borderRadius: BorderRadius.circular(18),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.18)),
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Expanded(
+            child: _heroItem(
+              Icons.savings_outlined,
+              'RECAUDADO',
+              m == null ? '—' : '${_money.format(m.totalCollected)} Bs',
+              'Total recaudado',
+            ),
+          ),
+          Container(
+            width: 1,
+            height: 46,
+            margin: const EdgeInsets.symmetric(horizontal: 16),
+            color: Colors.white.withValues(alpha: 0.18),
+          ),
+          Expanded(
+            child: _heroItem(
+              Icons.pending_outlined,
+              'PENDIENTE',
+              m == null ? '—' : '${_money.format(m.totalPending)} Bs',
+              m == null ? '' : 'De ${m.totalSocio ?? '—'} socios',
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _heroItem(IconData icon, String label, String value, String sub) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            Icon(icon, color: Colors.white.withValues(alpha: 0.85), size: 15),
+            const SizedBox(width: 5),
+            Text(
+              label,
+              style: TextStyle(
+                fontSize: 10,
+                fontWeight: FontWeight.w700,
+                letterSpacing: 0.6,
+                color: Colors.white.withValues(alpha: 0.75),
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 6),
+        Text(
+          value,
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+          style: const TextStyle(
+            fontSize: 20,
+            fontWeight: FontWeight.w800,
+            color: Colors.white,
+            letterSpacing: -0.5,
+          ),
+        ),
+        if (sub.isNotEmpty) ...[
+          const SizedBox(height: 2),
+          Text(
+            sub,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: TextStyle(
+              fontSize: 11,
+              color: Colors.white.withValues(alpha: 0.7),
+            ),
+          ),
+        ],
+      ],
+    );
+  }
+
+  // ── Buscador ─────────────────────────────────────────────────────────────
+  Widget _searchBar() {
+    return Container(
+      height: 46,
+      decoration: BoxDecoration(
+        color: CUi.surface,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: CUi.border),
+      ),
+      child: TextField(
+        controller: _searchController,
+        onChanged: _onSearchChanged,
+        textAlignVertical: TextAlignVertical.center,
+        style: const TextStyle(fontSize: 14, color: CUi.textPrimary),
+        decoration: InputDecoration(
+          isDense: true,
+          border: InputBorder.none,
+          hintText: 'Buscar por motivo o socio...',
+          hintStyle: const TextStyle(color: CUi.muted, fontSize: 13.5),
+          prefixIcon: const Icon(Icons.search_rounded, color: CUi.muted, size: 20),
+          suffixIcon: _searchController.text.isEmpty
+              ? null
+              : IconButton(
+                  icon: const Icon(Icons.close_rounded, size: 18, color: CUi.muted),
+                  onPressed: () {
+                    _searchController.clear();
+                    _onSearchChanged('');
+                    setState(() {});
+                  },
                 ),
-              );
-            }
-            if (state is ContributionsLoaded) {
-              return _buildContent(state);
-            }
-            return const SizedBox.shrink();
-          },
         ),
       ),
     );
@@ -140,59 +234,44 @@ class _ContributesHomeScreenState extends State<ContributesHomeScreen> {
 
   Widget _buildContent(ContributionsLoaded state) {
     return RefreshIndicator(
+      color: CUi.primary,
       onRefresh: () async {
         _bloc.add(GetContributionsEvent(isRefresh: true));
       },
       child: ListView(
         controller: _scrollController,
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        physics: const AlwaysScrollableScrollPhysics(),
+        padding: const EdgeInsets.fromLTRB(16, 10, 16, 24),
         children: [
-          Row(
-            children: [
-              Expanded(
-                child: SummaryCardContributes(
-                  icon: Icons.savings_outlined,
-                  iconColor: TColors.primary,
-                  label: 'RECAUDADO',
-                  amount:
-                      '${state.metrics.totalCollected.toStringAsFixed(0)} Bs',
-                  subtitle: 'Total recaudado',
-                  subtitleColor: TColors.success,
-                ),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: SummaryCardContributes(
-                  icon: Icons.pending_outlined,
-                  iconColor: TColors.pendingYellow,
-                  label: 'PENDIENTE',
-                  amount: '${state.metrics.totalPending.toStringAsFixed(0)} Bs',
-                  subtitle: 'De ${state.metrics.totalSocio ?? '—'} socios',
-                  subtitleColor: TColors.textSecondary,
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 20),
-          const Text(
+          CSectionTitle(
             'Listado de Aportes',
-            style: TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.w700,
-              color: TColors.textPrimary,
-            ),
+            icon: Icons.list_alt_rounded,
+            trailing: state.items.isNotEmpty ? '${state.items.length}' : null,
           ),
           const SizedBox(height: 12),
-          ...state.items.map(
-            (item) => Padding(
-              padding: const EdgeInsets.only(bottom: 12),
-              child: AporteCard(item: item),
+          if (state.items.isEmpty)
+            const Padding(
+              padding: EdgeInsets.only(top: 40),
+              child: CStateView(
+                icon: Icons.savings_outlined,
+                color: CUi.primary,
+                title: 'No hay aportes',
+                subtitle: 'No se encontraron convocatorias para estos criterios.',
+              ),
+            )
+          else
+            ...state.items.map(
+              (item) => Padding(
+                padding: const EdgeInsets.only(bottom: 12),
+                child: AporteCard(item: item),
+              ),
             ),
-          ),
-          if (!state.hasReachedMax)
+          if (state.items.isNotEmpty && !state.hasReachedMax)
             const Padding(
               padding: EdgeInsets.symmetric(vertical: 16),
-              child: Center(child: CircularProgressIndicator()),
+              child: Center(
+                child: CircularProgressIndicator(color: CUi.primary),
+              ),
             )
           else if (state.items.isNotEmpty)
             const Padding(
@@ -200,22 +279,12 @@ class _ContributesHomeScreenState extends State<ContributesHomeScreen> {
               child: Center(
                 child: Text(
                   'No hay más aportes.',
-                  style: TextStyle(fontSize: 13, color: TColors.textSecondary),
+                  style: TextStyle(fontSize: 13, color: CUi.textSecondary),
                 ),
               ),
             ),
-          if (state.items.isEmpty)
-            const Center(
-              child: Text(
-                'No hay convocatorias para estos criterios.',
-                textAlign: TextAlign.center,
-                style: TextStyle(fontSize: 13, color: TColors.textSecondary),
-              ),
-            ),
-          const SizedBox(height: 24),
         ],
       ),
     );
   }
 }
-

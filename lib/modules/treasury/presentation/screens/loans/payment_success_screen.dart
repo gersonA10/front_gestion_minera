@@ -1,12 +1,14 @@
 import 'dart:io';
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:open_filex/open_filex.dart';
 import 'package:share_plus/share_plus.dart';
 import '../../../domain/entity/loans/payment_process_entity.dart';
+import 'loan_ui.dart';
 
 @RoutePage()
 class PaymentSuccessScreen extends StatefulWidget {
@@ -117,7 +119,8 @@ class _PaymentSuccessScreenState extends State<PaymentSuccessScreen> {
     try {
       final bytes = await _buildPdfBytes();
       final dir = await getTemporaryDirectory();
-      final file = File('${dir.path}/recibo_pago_${widget.paymentData.referencia}.pdf');
+      final file = File(
+          '${dir.path}/recibo_pago_${widget.paymentData.referencia}.pdf');
       await file.writeAsBytes(bytes);
 
       await SharePlus.instance.share(
@@ -142,7 +145,8 @@ class _PaymentSuccessScreenState extends State<PaymentSuccessScreen> {
     try {
       final bytes = await _buildPdfBytes();
       final dir = await getApplicationDocumentsDirectory();
-      final fileName = 'recibo_${widget.paymentData.referencia}_${DateTime.now().millisecondsSinceEpoch}.pdf';
+      final fileName =
+          'recibo_${widget.paymentData.referencia}_${DateTime.now().millisecondsSinceEpoch}.pdf';
       final file = File('${dir.path}/$fileName');
       await file.writeAsBytes(bytes);
 
@@ -150,7 +154,7 @@ class _PaymentSuccessScreenState extends State<PaymentSuccessScreen> {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             content: Text('Recibo guardado correctamente'),
-            backgroundColor: Color(0xFF22C55E),
+            backgroundColor: LoanUi.finalizado,
             behavior: SnackBarBehavior.floating,
             duration: Duration(seconds: 3),
           ),
@@ -170,22 +174,13 @@ class _PaymentSuccessScreenState extends State<PaymentSuccessScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final fmt = NumberFormat('#,##0.00', 'es_PE');
     return Scaffold(
-      backgroundColor: const Color(0xFF0A150C),
-      appBar: AppBar(
-        backgroundColor: const Color(0xFF0A150C),
-        automaticallyImplyLeading: false,
-        elevation: 0,
-        centerTitle: true,
-        title: const Text(
-          'CONFIRMACIÓN',
-          style: TextStyle(
-            color: Colors.white,
-            fontSize: 13,
-            fontWeight: FontWeight.w700,
-            letterSpacing: 1.2,
-          ),
-        ),
+      backgroundColor: LoanUi.bg,
+      appBar: loanAppBar(
+        context,
+        title: 'Confirmación',
+        showBack: false,
       ),
       body: SafeArea(
         child: Column(
@@ -201,23 +196,22 @@ class _PaymentSuccessScreenState extends State<PaymentSuccessScreen> {
                     Container(
                       width: 90,
                       height: 90,
+                      alignment: Alignment.center,
                       decoration: BoxDecoration(
-                        color: const Color(0xFF22C55E),
+                        color: LoanUi.finalizado,
                         shape: BoxShape.circle,
                         boxShadow: [
                           BoxShadow(
-                            color: const Color(0xFF22C55E).withValues(
-                              alpha: 0.45,
-                            ),
-                            blurRadius: 40,
-                            spreadRadius: 8,
+                            color: LoanUi.finalizado.withValues(alpha: 0.35),
+                            blurRadius: 36,
+                            spreadRadius: 4,
                           ),
                         ],
                       ),
                       child: const Icon(
-                        Icons.check,
+                        Icons.check_rounded,
                         color: Colors.white,
-                        size: 44,
+                        size: 46,
                       ),
                     ),
                     const SizedBox(height: 28),
@@ -225,7 +219,7 @@ class _PaymentSuccessScreenState extends State<PaymentSuccessScreen> {
                       'Pago registrado\ncon éxito',
                       textAlign: TextAlign.center,
                       style: TextStyle(
-                        color: Colors.white,
+                        color: LoanUi.textPrimary,
                         fontSize: 26,
                         fontWeight: FontWeight.w800,
                         height: 1.25,
@@ -236,7 +230,7 @@ class _PaymentSuccessScreenState extends State<PaymentSuccessScreen> {
                       'La transacción se ha procesado correctamente. Puedes revisar los detalles de tu pago o compartir el recibo.',
                       textAlign: TextAlign.center,
                       style: TextStyle(
-                        color: Color(0xFF86ABAB),
+                        color: LoanUi.textSecondary,
                         fontSize: 13.5,
                         height: 1.5,
                       ),
@@ -249,19 +243,16 @@ class _PaymentSuccessScreenState extends State<PaymentSuccessScreen> {
                         vertical: 24,
                       ),
                       decoration: BoxDecoration(
-                        color: const Color(0xFF0C2010),
+                        color: LoanUi.surface,
                         borderRadius: BorderRadius.circular(16),
-                        border: Border.all(
-                          color: const Color(0xFF1C4020),
-                          width: 1,
-                        ),
+                        border: Border.all(color: LoanUi.border),
                       ),
                       child: Column(
                         children: [
                           const Text(
                             'MONTO PAGADO',
                             style: TextStyle(
-                              color: Color(0xFF86ABAB),
+                              color: LoanUi.textSecondary,
                               fontSize: 11,
                               fontWeight: FontWeight.w600,
                               letterSpacing: 1.1,
@@ -269,16 +260,17 @@ class _PaymentSuccessScreenState extends State<PaymentSuccessScreen> {
                           ),
                           const SizedBox(height: 10),
                           Text(
-                            widget.paymentData.montoPagado.toStringAsFixed(2),
+                            'Bs ${fmt.format(widget.paymentData.montoPagado)}',
                             style: const TextStyle(
-                              color: Colors.white,
-                              fontSize: 34,
+                              color: LoanUi.textPrimary,
+                              fontSize: 32,
                               fontWeight: FontWeight.w800,
+                              letterSpacing: -0.5,
                             ),
                           ),
                           const SizedBox(height: 20),
                           const Divider(
-                            color: Color(0xFF1C4020),
+                            color: LoanUi.border,
                             thickness: 1,
                             height: 1,
                           ),
@@ -318,8 +310,9 @@ class _PaymentSuccessScreenState extends State<PaymentSuccessScreen> {
                         context.router.back();
                       },
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFF22C55E),
-                        foregroundColor: Colors.black,
+                        backgroundColor: LoanUi.finalizado,
+                        foregroundColor: Colors.white,
+                        elevation: 0,
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(14),
                         ),
@@ -380,14 +373,17 @@ class _DetailRow extends StatelessWidget {
       children: [
         Text(
           label,
-          style: const TextStyle(color: Color(0xFF86ABAB), fontSize: 13),
+          style: const TextStyle(color: LoanUi.textSecondary, fontSize: 13),
         ),
-        Text(
-          value,
-          style: TextStyle(
-            color: Colors.white,
-            fontSize: 13,
-            fontWeight: valueBold ? FontWeight.w700 : FontWeight.w500,
+        Flexible(
+          child: Text(
+            value,
+            textAlign: TextAlign.right,
+            style: TextStyle(
+              color: LoanUi.textPrimary,
+              fontSize: 13,
+              fontWeight: valueBold ? FontWeight.w700 : FontWeight.w500,
+            ),
           ),
         ),
       ],
@@ -420,18 +416,18 @@ class _ActionButton extends StatelessWidget {
               height: 18,
               child: CircularProgressIndicator(
                 strokeWidth: 2,
-                color: Color(0xFF86ABAB),
+                color: LoanUi.primary,
               ),
             )
           else
-            Icon(icon, color: const Color(0xFF86ABAB), size: 18),
+            Icon(icon, color: LoanUi.primary, size: 18),
           const SizedBox(width: 6),
           Text(
             label,
             style: const TextStyle(
-              color: Color(0xFF86ABAB),
+              color: LoanUi.primary,
               fontSize: 13,
-              fontWeight: FontWeight.w500,
+              fontWeight: FontWeight.w600,
             ),
           ),
         ],

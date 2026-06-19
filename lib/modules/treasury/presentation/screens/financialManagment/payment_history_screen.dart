@@ -7,6 +7,15 @@ import '../../../../../injector_container.dart';
 import '../../bloc/treasury_bloc.dart';
 import '../../widgets/widgtes.dart';
 
+class _C {
+  static const primary = Color(0xFF1A56FF);
+  static const background = Color(0xFFF5F7FB);
+  static const surface = Color(0xFFFFFFFF);
+  static const textPrimary = Color(0xFF0D1B3E);
+  static const textSecondary = Color(0xFF6B7A99);
+  static const border = Color(0xFFE8EDF5);
+}
+
 enum DateFilterType { ultimos30Dias, dia, mes, anio }
 
 extension DateFilterTypeExt on DateFilterType {
@@ -23,25 +32,6 @@ extension DateFilterTypeExt on DateFilterType {
     }
   }
 }
-
-IconData iconForTransaction(String operationType, String destino) {
-  if (operationType == 'INCOME') return Icons.arrow_downward_rounded;
-  if (destino.toLowerCase().contains('chica')) return Icons.wallet_rounded;
-  return Icons.account_balance_wallet_rounded;
-}
-
-Color iconColorForTransaction(String operationType, String destino) {
-  if (operationType == 'INCOME') return const Color(0xFF10B981);
-  if (destino.toLowerCase().contains('chica')) return const Color(0xFFF97316);
-  return const Color(0xFF3B82F6);
-}
-
-Color iconBgForTransaction(String operationType, String destino) {
-  if (operationType == 'INCOME') return const Color(0xFFD1FAE5);
-  if (destino.toLowerCase().contains('chica')) return const Color(0xFFFFF7ED);
-  return const Color(0xFFDBEAFE);
-}
-
 
 @RoutePage()
 class PaymentHistoryScreen extends StatelessWidget {
@@ -71,7 +61,7 @@ class _PaymentHistoryViewState extends State<_PaymentHistoryView> {
   int? _selectedYear;
   final ScrollController _scrollController = ScrollController();
 
-  // VARIABLES DE CACHÉ VISUAL 
+  // Caché visual para no perder la lista durante recargas.
   List<PaymentHistoryItemEntity>? _cachedItems;
   PaymentHistorySummaryEntity? _cachedSummary;
   int _cachedTotalRecords = 0;
@@ -209,10 +199,13 @@ class _PaymentHistoryViewState extends State<_PaymentHistoryView> {
     return DateFormat("d 'de' MMM", 'es').format(date);
   }
 
+  String _money(double value) =>
+      'Bs ${NumberFormat('#,##0.00', 'en_US').format(value)}';
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF8F9FB),
+      backgroundColor: _C.background,
       body: SafeArea(
         child: BlocBuilder<TreasuryBloc, TreasuryState>(
           buildWhen: (_, state) =>
@@ -220,64 +213,40 @@ class _PaymentHistoryViewState extends State<_PaymentHistoryView> {
               state is PaymentHistoryLoaded ||
               state is PaymentHistoryError,
           builder: (context, state) {
-            bool isLoading = state is PaymentHistoryLoading;
-        
+            final isLoading = state is PaymentHistoryLoading;
+
             if (state is PaymentHistoryLoaded) {
               _cachedItems = state.items;
               _cachedSummary = state.summary;
               _cachedTotalRecords = state.totalRecords;
               _cachedHasReachedMax = state.hasReachedMax;
             }
-        
+
             if (_cachedItems == null || _cachedSummary == null) {
               if (isLoading) {
                 return const Center(
-                  child: CircularProgressIndicator(color: Color(0xFF3B82F6)),
+                  child: CircularProgressIndicator(color: _C.primary),
                 );
               }
-        
               if (state is PaymentHistoryError) {
-                return Center(
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      const Icon(Icons.error_outline_rounded,
-                          size: 56, color: Color(0xFFD1D5DB)),
-                      const SizedBox(height: 12),
-                      Text(
-                        state.message,
-                        style: const TextStyle(
-                          color: Color(0xFF6B7280),
-                          fontSize: 14,
-                        ),
-                        textAlign: TextAlign.center,
-                      ),
-                      const SizedBox(height: 16),
-                      TextButton(
-                        onPressed: () => context
-                            .read<TreasuryBloc>()
-                            .add(GetPaymentHistoryEvent(isRefresh: true)),
-                        child: const Text('Reintentar'),
-                      ),
-                    ],
-                  ),
+                return _ErrorView(
+                  message: state.message,
+                  onRetry: () => context
+                      .read<TreasuryBloc>()
+                      .add(GetPaymentHistoryEvent(isRefresh: true)),
                 );
               }
-        
               return const SizedBox.shrink();
             }
-        
+
             final grouped = _groupByDate(_cachedItems!);
             final sortedKeys = grouped.keys.toList()
               ..sort((a, b) => b.compareTo(a));
-        
-            // final totalObtained =
-            //     _cachedItems!.fold<double>(0, (sum, t) => sum + t.monto);
-        
+
             return Stack(
               children: [
                 RefreshIndicator(
-                  color: const Color(0xFF3B82F6),
+                  color: _C.primary,
                   onRefresh: () async {
                     context
                         .read<TreasuryBloc>()
@@ -285,20 +254,20 @@ class _PaymentHistoryViewState extends State<_PaymentHistoryView> {
                   },
                   child: CustomScrollView(
                     controller: _scrollController,
+                    physics: const AlwaysScrollableScrollPhysics(),
                     slivers: [
                       SliverToBoxAdapter(
                         child: Padding(
-                          padding: const EdgeInsets.fromLTRB(16, 20, 16, 0),
+                          padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
                           child: Row(
                             children: [
                               Expanded(
                                 child: SummaryCard(
-                                  icon: Icons.account_balance_wallet_rounded,
-                                  iconColor: const Color(0xFF3B82F6),
-                                  iconBg: const Color(0xFFDBEAFE),
-                                  label: 'TOTAL HOY EGRESOS',
-                                  value: _formatCurrency(
-                                      _cachedSummary!.totalMontoHoy),
+                                  icon: Icons.payments_rounded,
+                                  iconColor: _C.primary,
+                                  iconBg: _C.primary.withValues(alpha: 0.12),
+                                  label: 'Egresos de hoy',
+                                  value: _money(_cachedSummary!.totalMontoHoy),
                                   isHighlighted: true,
                                 ),
                               ),
@@ -306,9 +275,9 @@ class _PaymentHistoryViewState extends State<_PaymentHistoryView> {
                               Expanded(
                                 child: SummaryCard(
                                   icon: Icons.receipt_long_rounded,
-                                  iconColor: const Color(0xFF6B7280),
-                                  iconBg: const Color(0xFFF3F4F6),
-                                  label: 'TRANSACCIONES HOY',
+                                  iconColor: _C.textSecondary,
+                                  iconBg: const Color(0xFFEDEFF4),
+                                  label: 'Transacciones de hoy',
                                   value:
                                       '${_cachedSummary!.totalTransaccionesHoy}',
                                   isHighlighted: false,
@@ -318,10 +287,9 @@ class _PaymentHistoryViewState extends State<_PaymentHistoryView> {
                           ),
                         ),
                       ),
-        
                       SliverToBoxAdapter(
                         child: Padding(
-                          padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
+                          padding: const EdgeInsets.fromLTRB(16, 16, 16, 4),
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
@@ -329,29 +297,31 @@ class _PaymentHistoryViewState extends State<_PaymentHistoryView> {
                                 onTap: _showFilterBottomSheet,
                                 child: Container(
                                   padding: const EdgeInsets.symmetric(
-                                      horizontal: 14, vertical: 10),
+                                      horizontal: 12, vertical: 9),
                                   decoration: BoxDecoration(
-                                    color: Colors.white,
-                                    borderRadius: BorderRadius.circular(24),
-                                    border: Border.all(
-                                        color: const Color(0xFFE5E7EB)),
+                                    color: _C.surface,
+                                    borderRadius: BorderRadius.circular(12),
+                                    border: Border.all(color: _C.border),
                                   ),
                                   child: Row(
                                     mainAxisSize: MainAxisSize.min,
                                     children: [
+                                      const Icon(Icons.calendar_today_rounded,
+                                          size: 14, color: _C.primary),
+                                      const SizedBox(width: 7),
                                       Text(
-                                        'Fecha: $_filterDisplayText',
+                                        _filterDisplayText,
                                         style: const TextStyle(
-                                          fontSize: 13,
-                                          fontWeight: FontWeight.w500,
-                                          color: Color(0xFF374151),
+                                          fontSize: 12.5,
+                                          fontWeight: FontWeight.w600,
+                                          color: _C.textPrimary,
                                         ),
                                       ),
-                                      const SizedBox(width: 6),
+                                      const SizedBox(width: 4),
                                       const Icon(
                                           Icons.keyboard_arrow_down_rounded,
                                           size: 18,
-                                          color: Color(0xFF6B7280)),
+                                          color: _C.textSecondary),
                                     ],
                                   ),
                                 ),
@@ -360,57 +330,17 @@ class _PaymentHistoryViewState extends State<_PaymentHistoryView> {
                                 '${_cachedItems!.length} de $_cachedTotalRecords',
                                 style: const TextStyle(
                                   fontSize: 12,
-                                  color: Color(0xFF9CA3AF),
+                                  color: _C.textSecondary,
                                 ),
                               ),
                             ],
                           ),
                         ),
                       ),
-        
-                      // if (_cachedItems!.isNotEmpty)
-                      //   SliverToBoxAdapter(
-                      //     child: Padding(
-                      //       padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
-                      //       child: Text(
-                      //         'Total listado: ${_formatCurrency(totalObtained)}',
-                      //         style: const TextStyle(
-                      //           fontSize: 13,
-                      //           fontWeight: FontWeight.w600,
-                      //           color: Color(0xFF3B82F6),
-                      //         ),
-                      //       ),
-                      //     ),
-                      //   ),
-        
                       if (sortedKeys.isEmpty)
                         const SliverFillRemaining(
-                          child: Center(
-                            child: Column(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Icon(Icons.inbox_rounded,
-                                    size: 56, color: Color(0xFFD1D5DB)),
-                                SizedBox(height: 12),
-                                Text(
-                                  'No hay transacciones',
-                                  style: TextStyle(
-                                    color: Color(0xFF9CA3AF),
-                                    fontSize: 15,
-                                    fontWeight: FontWeight.w500,
-                                  ),
-                                ),
-                                SizedBox(height: 4),
-                                Text(
-                                  'Intenta con otro filtro de fecha',
-                                  style: TextStyle(
-                                    color: Color(0xFFD1D5DB),
-                                    fontSize: 13,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
+                          hasScrollBody: false,
+                          child: _EmptyView(),
                         )
                       else
                         ...sortedKeys.map((dateKey) {
@@ -418,7 +348,8 @@ class _PaymentHistoryViewState extends State<_PaymentHistoryView> {
                           return SliverMainAxisGroup(slivers: [
                             SliverToBoxAdapter(
                               child: Padding(
-                                padding: const EdgeInsets.fromLTRB(16, 20, 16, 8),
+                                padding:
+                                    const EdgeInsets.fromLTRB(16, 18, 16, 8),
                                 child: Row(
                                   mainAxisAlignment:
                                       MainAxisAlignment.spaceBetween,
@@ -426,17 +357,18 @@ class _PaymentHistoryViewState extends State<_PaymentHistoryView> {
                                     Text(
                                       _dateGroupLabel(dateKey),
                                       style: const TextStyle(
-                                        fontSize: 16,
-                                        fontWeight: FontWeight.w700,
-                                        color: Color(0xFF1F2937),
+                                        fontSize: 15,
+                                        fontWeight: FontWeight.w800,
+                                        color: _C.textPrimary,
+                                        letterSpacing: -0.2,
                                       ),
                                     ),
                                     Text(
                                       _dateGroupSubtitle(dateKey),
                                       style: const TextStyle(
-                                        fontSize: 13,
-                                        fontWeight: FontWeight.w500,
-                                        color: Color(0xFF3B82F6),
+                                        fontSize: 12.5,
+                                        fontWeight: FontWeight.w600,
+                                        color: _C.primary,
                                       ),
                                     ),
                                   ],
@@ -444,10 +376,11 @@ class _PaymentHistoryViewState extends State<_PaymentHistoryView> {
                               ),
                             ),
                             SliverPadding(
-                              padding: const EdgeInsets.symmetric(horizontal: 16),
+                              padding:
+                                  const EdgeInsets.symmetric(horizontal: 16),
                               sliver: SliverList.separated(
                                 itemCount: txns.length,
-                                separatorBuilder: (_, _) =>
+                                separatorBuilder: (context, index) =>
                                     const SizedBox(height: 10),
                                 itemBuilder: (_, i) =>
                                     TransactionTile(item: txns[i]),
@@ -455,37 +388,42 @@ class _PaymentHistoryViewState extends State<_PaymentHistoryView> {
                             ),
                           ]);
                         }),
-        
                       if (!_cachedHasReachedMax)
                         const SliverToBoxAdapter(
                           child: Padding(
                             padding: EdgeInsets.symmetric(vertical: 20),
                             child: Center(
-                              child: CircularProgressIndicator(
-                                color: Color(0xFF3B82F6),
-                                strokeWidth: 2,
+                              child: SizedBox(
+                                width: 22,
+                                height: 22,
+                                child: CircularProgressIndicator(
+                                  color: _C.primary,
+                                  strokeWidth: 2.4,
+                                ),
                               ),
                             ),
                           ),
                         ),
-        
                       const SliverToBoxAdapter(child: SizedBox(height: 32)),
                     ],
                   ),
                 ),
-        
                 if (isLoading)
                   const Positioned(
                     top: 0,
                     left: 0,
                     right: 0,
-                    child: LinearProgressIndicator(color: Color(0xFF2563EB)),
+                    child: LinearProgressIndicator(
+                      minHeight: 2.5,
+                      color: _C.primary,
+                      backgroundColor: Colors.transparent,
+                    ),
                   ),
                 if (isLoading)
                   Positioned.fill(
                     child: IgnorePointer(
                       child: Container(
-                        color: const Color(0xFFF5F5F7).withValues(alpha: 0.5),
+                        color: _C.background.withValues(alpha: 0.4),
                       ),
                     ),
                   ),
@@ -496,9 +434,96 @@ class _PaymentHistoryViewState extends State<_PaymentHistoryView> {
       ),
     );
   }
+}
 
-  String _formatCurrency(double value) {
-    final formatter = NumberFormat('#,##0.00', 'en_US');
-    return '${formatter.format(value)} Bs';
+class _EmptyView extends StatelessWidget {
+  const _EmptyView();
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Container(
+            width: 96,
+            height: 96,
+            decoration: BoxDecoration(
+              color: _C.primary.withValues(alpha: 0.06),
+              shape: BoxShape.circle,
+            ),
+            child: Icon(Icons.inbox_rounded,
+                size: 44, color: _C.primary.withValues(alpha: 0.5)),
+          ),
+          const SizedBox(height: 16),
+          const Text(
+            'No hay transacciones',
+            style: TextStyle(
+              color: _C.textPrimary,
+              fontSize: 15,
+              fontWeight: FontWeight.w700,
+            ),
+          ),
+          const SizedBox(height: 6),
+          const Text(
+            'Prueba con otro filtro de fecha.',
+            style: TextStyle(color: _C.textSecondary, fontSize: 12.5),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _ErrorView extends StatelessWidget {
+  final String message;
+  final VoidCallback onRetry;
+  const _ErrorView({required this.message, required this.onRetry});
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(32),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              width: 96,
+              height: 96,
+              decoration: BoxDecoration(
+                color: const Color(0xFFD32F2F).withValues(alpha: 0.08),
+                shape: BoxShape.circle,
+              ),
+              child: const Icon(Icons.cloud_off_rounded,
+                  size: 44, color: Color(0xFFD32F2F)),
+            ),
+            const SizedBox(height: 16),
+            const Text(
+              'No pudimos cargar el historial',
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontSize: 15,
+                fontWeight: FontWeight.w700,
+                color: _C.textPrimary,
+              ),
+            ),
+            const SizedBox(height: 6),
+            Text(
+              message,
+              textAlign: TextAlign.center,
+              style: const TextStyle(fontSize: 12.5, color: _C.textSecondary),
+            ),
+            const SizedBox(height: 16),
+            TextButton(
+              onPressed: onRetry,
+              child: const Text('Reintentar',
+                  style: TextStyle(
+                      color: _C.primary, fontWeight: FontWeight.w700)),
+            ),
+          ],
+        ),
+      ),
+    );
   }
 }

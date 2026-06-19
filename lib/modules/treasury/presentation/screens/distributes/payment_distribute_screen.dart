@@ -181,16 +181,26 @@ class _PaymentSuccessDistributionScreenState
                         child: Column(
                           children: [
                             Container(
-                              width: 72,
-                              height: 72,
+                              width: 88,
+                              height: 88,
                               decoration: BoxDecoration(
-                                color: TColors.primary.withValues(alpha: 0.12),
+                                color: TColors.successLight,
                                 shape: BoxShape.circle,
                               ),
-                              child: const Icon(
-                                Icons.check_circle_outline_rounded,
-                                color: TColors.primary,
-                                size: 36,
+                              child: Center(
+                                child: Container(
+                                  width: 60,
+                                  height: 60,
+                                  decoration: const BoxDecoration(
+                                    color: TColors.success,
+                                    shape: BoxShape.circle,
+                                  ),
+                                  child: const Icon(
+                                    Icons.check_rounded,
+                                    color: TColors.white,
+                                    size: 34,
+                                  ),
+                                ),
                               ),
                             ),
                             const SizedBox(height: 20),

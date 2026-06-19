@@ -28,7 +28,9 @@ class RequestHistoryEntity {
 
   String get shortCode {
     final clean = requestId.replaceAll('-', '');
-    return '#SOL-${clean.substring(0, 4).toUpperCase()}';
+    if (clean.isEmpty) return '#SOL-----';
+    final take = clean.length >= 4 ? clean.substring(0, 4) : clean;
+    return '#SOL-${take.toUpperCase()}';
   }
 }
 

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:front_gestion_minera/utils/constants/color.constant.dart';
+import 'package:intl/intl.dart';
 import '../../../domain/entity/entity.dart';
+import '../../screens/loans/loan_ui.dart';
 
 class InstallmentCard extends StatelessWidget {
   final String month;
@@ -12,7 +13,7 @@ class InstallmentCard extends StatelessWidget {
   final String quotaId;
   final String idLoan;
   final CashResponseEntity cash;
-final VoidCallback? onTap;
+  final VoidCallback? onTap;
   const InstallmentCard({
     super.key,
     required this.month,
@@ -27,237 +28,198 @@ final VoidCallback? onTap;
     required this.onTap,
   });
 
+  bool get _atrasado => status == 'Atrasado';
+  bool get _pagado => status == 'Pagado';
+  bool get _pendiente => status == 'Pendiente';
+
+  Color get _accent {
+    if (_atrasado) return LoanUi.mora;
+    if (_pagado) return LoanUi.finalizado;
+    if (_pendiente) return LoanUi.pendiente;
+    return LoanUi.muted;
+  }
+
+  IconData get _icon {
+    if (_atrasado) return Icons.warning_amber_rounded;
+    if (_pagado) return Icons.check_circle_outline_rounded;
+    if (_pendiente) return Icons.access_time_rounded;
+    return Icons.calendar_today_outlined;
+  }
+
+  String get _statusText {
+    if (_atrasado) return 'Atrasado';
+    if (_pagado) return 'Pagado';
+    if (_pendiente) return 'Pendiente';
+    return 'Programado';
+  }
+
   @override
   Widget build(BuildContext context) {
+    final fmt = NumberFormat('#,##0.00', 'es_PE');
+    final showPayButton = _pendiente || _atrasado;
+
     return Padding(
-      padding: EdgeInsets.symmetric(vertical: 8),
+      padding: const EdgeInsets.symmetric(vertical: 6),
       child: ClipRRect(
         borderRadius: BorderRadius.circular(14),
         child: Container(
-          width: double.infinity,
           decoration: BoxDecoration(
-            color: TColors.cardBgDark,
+            color: LoanUi.surface,
             borderRadius: BorderRadius.circular(14),
-            border: Border.all(
-              color: TColors.cardBorderDark.withValues(alpha: 0.3),
-            ),
+            border: Border.all(color: LoanUi.border),
           ),
-          child: Stack(
-            children: [
-              Positioned(
-                left: 0,
-                top: 0,
-                bottom: 0,
-                child: Container(
-                  width: 3,
-                  decoration: BoxDecoration(
-                    color: status == 'Atrasado'
-                        ? TColors.danger
-                        : status == 'Pagado'
-                        ? TColors.green
-                        : status == 'Pendiente'
-                        ? TColors.pendingYellow
-                        : TColors.disabled,
-                    borderRadius: const BorderRadius.only(
-                      topLeft: Radius.circular(14),
-                      bottomLeft: Radius.circular(14),
-                    ),
-                  ),
-                ),
-              ),
-              Column(
-                children: [
-                  if (status == 'Pendiente')
-                    Container(
-                      width: double.infinity,
-                      alignment: Alignment.centerRight,
-                      padding: const EdgeInsets.only(right: 12, top: 8),
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 10,
-                          vertical: 3,
-                        ),
-                        decoration: BoxDecoration(
-                          color: TColors.amber,
-                          borderRadius: BorderRadius.circular(4),
-                        ),
-                        child: const Text(
-                          'PRÓXIMO PAGO',
-                          style: TextStyle(
-                            color: TColors.bgColor,
-                            fontSize: 9,
-                            fontWeight: FontWeight.w700,
-                            letterSpacing: 0.5,
+          child: IntrinsicHeight(
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Container(width: 4, color: _accent),
+                Expanded(
+                  child: Column(
+                    children: [
+                      if (_pendiente)
+                        Container(
+                          width: double.infinity,
+                          alignment: Alignment.centerRight,
+                          padding: const EdgeInsets.only(right: 12, top: 8),
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 9,
+                              vertical: 3,
+                            ),
+                            decoration: BoxDecoration(
+                              color: LoanUi.pendienteBg,
+                              borderRadius: BorderRadius.circular(6),
+                            ),
+                            child: const Text(
+                              'PRÓXIMO PAGO',
+                              style: TextStyle(
+                                color: LoanUi.pendiente,
+                                fontSize: 9,
+                                fontWeight: FontWeight.w800,
+                                letterSpacing: 0.5,
+                              ),
+                            ),
                           ),
                         ),
-                      ),
-                    ),
-                  Padding(
-                    padding: EdgeInsets.fromLTRB(
-                      16,
-                      status == 'Pendiente' ? 6 : 14,
-                      14,
-                      14,
-                    ),
-                    child: Row(
-                      children: [
-                        SizedBox(
-                          width: 44,
-                          child: Column(
-                            children: [
-                              Text(
-                                month,
-                                style: TextStyle(
-                                  color: status == 'Atrasado'
-                                      ? TColors.danger
-                                      : TColors.textSecondary1,
-                                  fontSize: 10,
-                                  fontWeight: FontWeight.w700,
-                                  letterSpacing: 0.5,
-                                ),
-                              ),
-                              Text(
-                                day,
-                                style: TextStyle(
-                                  color: status == 'Atrasado'
-                                      ? TColors.danger
-                                      : TColors.white,
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.w700,
-                                ),
-                              ),
-                            ],
-                          ),
+                      Padding(
+                        padding: EdgeInsets.fromLTRB(
+                          14,
+                          _pendiente ? 6 : 14,
+                          14,
+                          showPayButton ? 6 : 14,
                         ),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                'Cuota #$number',
-                                style: const TextStyle(
-                                  color: TColors.white,
-                                  fontSize: 13,
-                                  fontWeight: FontWeight.w600,
-                                ),
-                              ),
-                              const SizedBox(height: 3),
-                              Row(
+                        child: Row(
+                          children: [
+                            SizedBox(
+                              width: 44,
+                              child: Column(
                                 children: [
-                                  Icon(
-                                    status == 'Atrasado'
-                                        ? Icons.warning_amber_rounded
-                                        : status == 'Pagado'
-                                        ? Icons.check_circle_outline
-                                        : status == 'Pendiente'
-                                        ? Icons.access_time
-                                        : Icons.calendar_today_outlined,
-                                    color: status == 'Atrasado'
-                                        ? TColors.danger
-                                        : status == 'Pagado'
-                                        ? TColors.green
-                                        : status == 'Pendiente'
-                                        ? TColors.pendingYellow
-                                        : TColors.textSecondary1,
-                                    size: 12,
-                                  ),
-                                  const SizedBox(width: 4),
                                   Text(
-                                    status == 'Atrasado'
-                                        ? 'Atrasado'
-                                        : status == 'Pagado'
-                                        ? 'Pagado'
-                                        : status == 'Pendiente'
-                                        ? 'Pendiente'
-                                        : 'Programado',
+                                    month,
                                     style: TextStyle(
-                                      color: status == 'Atrasado'
-                                          ? TColors.danger
-                                          : status == 'Pagado'
-                                          ? TColors.green
-                                          : status == 'Pendiente'
-                                          ? TColors.pendingYellow
-                                          : TColors.textSecondary1,
-                                      fontSize: 11,
-                                      fontWeight: FontWeight.w500,
+                                      color: _atrasado
+                                          ? LoanUi.mora
+                                          : LoanUi.textSecondary,
+                                      fontSize: 10,
+                                      fontWeight: FontWeight.w700,
+                                      letterSpacing: 0.5,
+                                    ),
+                                  ),
+                                  Text(
+                                    day,
+                                    style: TextStyle(
+                                      color: _atrasado
+                                          ? LoanUi.mora
+                                          : LoanUi.textPrimary,
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.w800,
                                     ),
                                   ),
                                 ],
                               ),
-                            ],
-                          ),
-                        ),
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.end,
-                          children: [
-                            Text(
-                              amount.toStringAsFixed(2),
-                              style: TextStyle(
-                                color: status == 'Atrasado'
-                                    ? TColors.danger
-                                    : TColors.white,
-                                fontSize: 14,
-                                fontWeight: FontWeight.w700,
+                            ),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    'Cuota #$number',
+                                    style: const TextStyle(
+                                      color: LoanUi.textPrimary,
+                                      fontSize: 13,
+                                      fontWeight: FontWeight.w700,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 3),
+                                  Row(
+                                    children: [
+                                      Icon(_icon, color: _accent, size: 13),
+                                      const SizedBox(width: 4),
+                                      Text(
+                                        _statusText,
+                                        style: TextStyle(
+                                          color: _accent,
+                                          fontSize: 11,
+                                          fontWeight: FontWeight.w600,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ],
                               ),
                             ),
-                            if (status == 'Atrasado') ...[
-                              const SizedBox(height: 3),
-                              Text(
-                                'Registrar Pago',
-                                style: TextStyle(
-                                  color: status == 'Atrasado'
-                                      ? TColors.danger
-                                      : TColors.textSecondary1,
-                                  fontSize: 10,
-                                  fontWeight: FontWeight.w500,
-                                  decoration: status == 'Atrasado'
-                                      ? TextDecoration.underline
-                                      : TextDecoration.none,
-                                  decorationColor: TColors.danger,
-                                ),
+                            Text(
+                              fmt.format(amount),
+                              style: TextStyle(
+                                color: _atrasado
+                                    ? LoanUi.mora
+                                    : LoanUi.textPrimary,
+                                fontSize: 14,
+                                fontWeight: FontWeight.w800,
                               ),
-                            ],
+                            ),
                           ],
                         ),
-                      ],
-                    ),
-                  ),
-                  if (status == 'Pendiente')
-                    Padding(
-                      padding: const EdgeInsets.fromLTRB(14, 0, 14, 14),
-                      child: SizedBox(
-                        width: double.infinity,
-                        height: 40,
-                        child: OutlinedButton.icon(
-                          onPressed: onTap,
-                          icon: const Icon(
-                            Icons.account_balance_wallet_outlined,
-                            size: 15,
-                          ),
-                          label: const Text(
-                            'Registrar Pago Anticipado',
-                            style: TextStyle(
-                              fontSize: 12,
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
-                          style: OutlinedButton.styleFrom(
-                            foregroundColor: TColors.amber,
-                            side: BorderSide(
-                              color: TColors.amber.withValues(alpha: 0.4),
-                            ),
-                            backgroundColor: TColors.amberLight,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(10),
+                      ),
+                      if (showPayButton)
+                        Padding(
+                          padding: const EdgeInsets.fromLTRB(14, 0, 14, 12),
+                          child: SizedBox(
+                            width: double.infinity,
+                            height: 42,
+                            child: ElevatedButton.icon(
+                              onPressed: onTap,
+                              icon: const Icon(
+                                Icons.account_balance_wallet_outlined,
+                                size: 16,
+                              ),
+                              label: Text(
+                                _atrasado
+                                    ? 'Registrar pago'
+                                    : 'Registrar pago anticipado',
+                                style: const TextStyle(
+                                  fontSize: 12.5,
+                                  fontWeight: FontWeight.w700,
+                                ),
+                              ),
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor:
+                                    _atrasado ? LoanUi.mora : LoanUi.primary,
+                                foregroundColor: Colors.white,
+                                elevation: 0,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(10),
+                                ),
+                              ),
                             ),
                           ),
                         ),
-                      ),
-                    ),
-                ],
-              ),
-            ],
+                    ],
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       ),

@@ -1,52 +1,50 @@
 import 'package:flutter/material.dart';
 import 'package:front_gestion_minera/utils/constants/color.constant.dart';
+import 'package:intl/intl.dart';
 
 class TotalCard extends StatelessWidget {
   final double total;
   const TotalCard({super.key, required this.total});
 
+  String _formatCurrency(double value) => NumberFormat.currency(
+        locale: 'es_BO',
+        symbol: 'Bs',
+        decimalDigits: 2,
+      ).format(value);
+
   @override
   Widget build(BuildContext context) {
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.symmetric(vertical: 20),
+      padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 16),
       decoration: BoxDecoration(
-        color: TColors.appMainColor.withValues(alpha: 0.1),
+        color: TColors.primaryLight,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: TColors.appMainColor.withValues(alpha: 0.15)),
+        border: Border.all(color: TColors.primary.withValues(alpha: 0.15)),
       ),
       child: Column(
         children: [
           const Text(
-            'Total Estimado (Bs)',
+            'TOTAL ESTIMADO',
             style: TextStyle(
-              fontSize: 13,
-              color: TColors.appMainColor,
-              fontWeight: FontWeight.w600,
-              letterSpacing: 0.1,
+              fontSize: 11,
+              color: TColors.primary,
+              fontWeight: FontWeight.w700,
+              letterSpacing: 0.4,
             ),
           ),
-          const SizedBox(height: 6),
+          const SizedBox(height: 8),
           Text(
-            'Bs ${_formatCurrency(total)}',
+            _formatCurrency(total),
             style: const TextStyle(
               fontSize: 30,
               fontWeight: FontWeight.w800,
-              color: TColors.appMainColor,
+              color: TColors.primary,
               letterSpacing: -1.0,
             ),
           ),
         ],
       ),
     );
-  }
-
-  static String _formatCurrency(double v) {
-    final parts = v.toStringAsFixed(2).split('.');
-    final intPart = parts[0].replaceAllMapped(
-      RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'),
-      (m) => '${m[1]},',
-    );
-    return '$intPart.${parts[1]}';
   }
 }

@@ -85,4 +85,20 @@ class MachineryRepositoryImpl extends MachineryRepository {
       limit: limit,
     );
   }
+
+  @override
+  Future<void> updateMachinery(UpdateMachineryRequestEntity request) {
+    return datasource.updateMachinery(request);
+  }
+
+  @override
+  Future<void> changeMachineryStatus({
+    required String machineId,
+    required String status,
+  }) {
+    return datasource.changeMachineryStatus(
+      machineId: machineId,
+      status: status,
+    );
+  }
 }

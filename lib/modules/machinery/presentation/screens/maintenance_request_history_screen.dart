@@ -1,5 +1,6 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:front_gestion_minera/config/router/app_router.gr.dart';
 import 'package:front_gestion_minera/injector_container.dart';
@@ -39,21 +40,29 @@ class _MaintenanceRequestHistoryScreenState
     super.dispose();
   }
 
+  void _reload() => _machineryBloc
+      .add(FetchMaintenanceHistoryEvent(machineId: widget.machineId));
+
   @override
   Widget build(BuildContext context) {
     return BlocProvider.value(
       value: _machineryBloc,
       child: Scaffold(
-        backgroundColor: Colors.white,
+        backgroundColor: TColors.background,
         appBar: AppBar(
-          backgroundColor: Colors.white,
+          backgroundColor: TColors.white,
+          surfaceTintColor: TColors.white,
           elevation: 0,
+          scrolledUnderElevation: 0,
+          foregroundColor: TColors.textPrimary,
+          systemOverlayStyle: SystemUiOverlayStyle.dark,
+          leading: const BackButton(color: TColors.textPrimary),
           title: const Text(
-            'Solicitudes de Mantenimiento',
+            'Solicitudes de mantenimiento',
             style: TextStyle(
-              color: Color(0xFF1A1A2E),
-              fontSize: 18,
-              fontWeight: FontWeight.w600,
+              color: TColors.textPrimary,
+              fontSize: 17,
+              fontWeight: FontWeight.w700,
             ),
           ),
           centerTitle: true,
@@ -61,63 +70,44 @@ class _MaintenanceRequestHistoryScreenState
             controller: _tabController,
             isScrollable: true,
             tabAlignment: TabAlignment.start,
-            labelColor: TColors.textPrimary,
-            unselectedLabelColor: const Color(0xFF9CA3AF),
-            indicatorColor: TColors.textPrimary,
+            labelColor: TColors.appMainColor,
+            unselectedLabelColor: TColors.textSecondary,
+            indicatorColor: TColors.appMainColor,
             indicatorWeight: 2.5,
-            labelPadding: const EdgeInsets.symmetric(horizontal: 20),
+            indicatorSize: TabBarIndicatorSize.label,
+            dividerColor: TColors.border,
+            labelPadding: const EdgeInsets.symmetric(horizontal: 16),
             labelStyle: const TextStyle(
               fontSize: 14,
-              fontWeight: FontWeight.w600,
+              fontWeight: FontWeight.w700,
             ),
-            dividerColor: TColors.appSecondaryTextColor,
             unselectedLabelStyle: const TextStyle(
               fontSize: 14,
-              fontWeight: FontWeight.w400,
+              fontWeight: FontWeight.w500,
             ),
             tabs: const [
-              Tab(height: 48, text: 'Historial'),
-              Tab(height: 48, text: 'Pendientes'),
-              Tab(height: 48, text: 'Completadas'),
-              Tab(height: 48, text: 'Rechazadas'),
-              Tab(height: 48, text: 'Pagadas'),
+              Tab(height: 46, text: 'Historial'),
+              Tab(height: 46, text: 'Pendientes'),
+              Tab(height: 46, text: 'Completadas'),
+              Tab(height: 46, text: 'Rechazadas'),
+              Tab(height: 46, text: 'Pagadas'),
             ],
           ),
         ),
         body: BlocBuilder<MachineryBloc, MachineryState>(
           builder: (context, state) {
             if (state is MaintenanceHistoryLoading) {
-              return const Center(child: CircularProgressIndicator());
+              return const _HistorySkeleton();
             }
             if (state is MaintenanceHistoryError) {
-              return Center(
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text(
-                      state.message,
-                      style: const TextStyle(color: Color(0xFF9CA3AF)),
-                    ),
-                    const SizedBox(height: 12),
-                    TextButton(
-                      onPressed: () => context.read<MachineryBloc>().add(
-                        FetchMaintenanceHistoryEvent(
-                          machineId: widget.machineId,
-                        ),
-                      ),
-                      child: const Text('Reintentar'),
-                    ),
-                  ],
-                ),
-              );
+              return _HistoryError(message: state.message, onRetry: _reload);
             }
 
             final items = state is MaintenanceHistoryLoaded
                 ? state.items
                 : <MaintenanceHistoryItemEntity>[];
-            final hasReachedMax = state is MaintenanceHistoryLoaded
-                ? state.hasReachedMax
-                : true;
+            final hasReachedMax =
+                state is MaintenanceHistoryLoaded ? state.hasReachedMax : true;
 
             final pending = items
                 .where((e) => e.globalStatus == MaintenanceGlobalStatus.inReview)
@@ -131,17 +121,21 @@ class _MaintenanceRequestHistoryScreenState
                 .where((e) => e.globalStatus == MaintenanceGlobalStatus.rejected)
                 .toList();
             final paid = items
-                .where((e) => e.globalStatus == 'PAID')
+                .where((e) => e.globalStatus == MaintenanceGlobalStatus.paid)
                 .toList();
 
             return TabBarView(
               controller: _tabController,
               children: [
-                _buildList(items, hasReachedMax),
-                _buildList(pending, true),
-                _buildList(completed, true),
-                _buildList(rejected, true),
-                _buildList(paid, true),
+                _buildList(items, hasReachedMax,
+                    'Esta unidad aún no tiene solicitudes registradas.'),
+                _buildList(pending, true,
+                    'No hay solicitudes en revisión.'),
+                _buildList(completed, true,
+                    'No hay solicitudes completadas.'),
+                _buildList(rejected, true,
+                    'No hay solicitudes rechazadas.'),
+                _buildList(paid, true, 'No hay solicitudes pagadas.'),
               ],
             );
           },
@@ -153,14 +147,10 @@ class _MaintenanceRequestHistoryScreenState
   Widget _buildList(
     List<MaintenanceHistoryItemEntity> items,
     bool hasReachedMax,
+    String emptyMessage,
   ) {
     if (items.isEmpty) {
-      return const Center(
-        child: Text(
-          'Sin solicitudes',
-          style: TextStyle(color: Color(0xFF9CA3AF), fontSize: 15),
-        ),
-      );
+      return _HistoryEmpty(message: emptyMessage);
     }
 
     return NotificationListener<ScrollNotification>(
@@ -169,33 +159,261 @@ class _MaintenanceRequestHistoryScreenState
             notification is ScrollEndNotification &&
             notification.metrics.extentAfter < 200) {
           context.read<MachineryBloc>().add(
-            LoadMoreMaintenanceHistoryEvent(machineId: widget.machineId),
-          );
+                LoadMoreMaintenanceHistoryEvent(machineId: widget.machineId),
+              );
         }
         return false;
       },
-      child: SafeArea(
-        child: ListView.builder(
-          padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
-          itemCount: items.length + (hasReachedMax ? 0 : 1),
-          itemBuilder: (context, index) {
-            if (index == items.length) {
-              return const Padding(
-                padding: EdgeInsets.all(16),
-                child: Center(child: CircularProgressIndicator()),
-              );
-            }
-            return GestureDetector(
-              onTap: () {
-                context.router.push(
-                  DetailMaintenanceRoute(maintenanceId: items[index].maintenanceId),
-                );
-              },
-              child: MaintenanceCard(item: items[index]));
-          },
+      child: ListView.builder(
+        padding: const EdgeInsets.fromLTRB(16, 14, 16, 24),
+        itemCount: items.length + (hasReachedMax ? 0 : 1),
+        itemBuilder: (context, index) {
+          if (index == items.length) {
+            return const Padding(
+              padding: EdgeInsets.symmetric(vertical: 18),
+              child: Center(
+                child: SizedBox(
+                  width: 22,
+                  height: 22,
+                  child: CircularProgressIndicator(
+                    strokeWidth: 2.4,
+                    color: TColors.appMainColor,
+                  ),
+                ),
+              ),
+            );
+          }
+          final item = items[index];
+          return MaintenanceCard(
+            item: item,
+            onTap: () => context.router.push(
+              DetailMaintenanceRoute(maintenanceId: item.maintenanceId),
+            ),
+          );
+        },
+      ),
+    );
+  }
+}
+
+/// Estado vacío por pestaña.
+class _HistoryEmpty extends StatelessWidget {
+  final String message;
+
+  const _HistoryEmpty({required this.message});
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(32),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              padding: const EdgeInsets.all(18),
+              decoration: const BoxDecoration(
+                color: TColors.primaryLight,
+                shape: BoxShape.circle,
+              ),
+              child: const Icon(
+                Icons.fact_check_outlined,
+                size: 32,
+                color: TColors.appMainColor,
+              ),
+            ),
+            const SizedBox(height: 16),
+            const Text(
+              'Sin solicitudes',
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.w700,
+                color: TColors.textPrimary,
+              ),
+            ),
+            const SizedBox(height: 6),
+            Text(
+              message,
+              textAlign: TextAlign.center,
+              style: const TextStyle(
+                fontSize: 13,
+                height: 1.4,
+                color: TColors.textSecondary,
+              ),
+            ),
+          ],
         ),
       ),
     );
   }
 }
 
+/// Estado de error con reintento.
+class _HistoryError extends StatelessWidget {
+  final String message;
+  final VoidCallback onRetry;
+
+  const _HistoryError({required this.message, required this.onRetry});
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(32),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              padding: const EdgeInsets.all(18),
+              decoration: const BoxDecoration(
+                color: TColors.dangerLight,
+                shape: BoxShape.circle,
+              ),
+              child: const Icon(Icons.cloud_off_rounded,
+                  size: 32, color: TColors.danger),
+            ),
+            const SizedBox(height: 16),
+            const Text(
+              'No se pudo cargar',
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.w700,
+                color: TColors.textPrimary,
+              ),
+            ),
+            const SizedBox(height: 6),
+            Text(
+              message,
+              textAlign: TextAlign.center,
+              style: const TextStyle(
+                fontSize: 13,
+                height: 1.4,
+                color: TColors.textSecondary,
+              ),
+            ),
+            const SizedBox(height: 20),
+            FilledButton.icon(
+              onPressed: onRetry,
+              style: FilledButton.styleFrom(
+                backgroundColor: TColors.appMainColor,
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 22, vertical: 12),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(14),
+                ),
+              ),
+              icon: const Icon(Icons.refresh_rounded, size: 20),
+              label: const Text(
+                'Reintentar',
+                style: TextStyle(fontWeight: FontWeight.w700),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// Skeleton de carga del historial.
+class _HistorySkeleton extends StatefulWidget {
+  const _HistorySkeleton();
+
+  @override
+  State<_HistorySkeleton> createState() => _HistorySkeletonState();
+}
+
+class _HistorySkeletonState extends State<_HistorySkeleton>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _ac = AnimationController(
+    vsync: this,
+    duration: const Duration(milliseconds: 1100),
+  )..repeat();
+  late final Animation<double> _a =
+      CurvedAnimation(parent: _ac, curve: Curves.easeInOut);
+
+  @override
+  void dispose() {
+    _ac.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedBuilder(
+      animation: _a,
+      builder: (_, _) {
+        final c = Color.lerp(
+          const Color(0xFFEAEDF2),
+          const Color(0xFFF6F8FB),
+          _a.value,
+        )!;
+        return ListView.builder(
+          physics: const NeverScrollableScrollPhysics(),
+          padding: const EdgeInsets.fromLTRB(16, 14, 16, 24),
+          itemCount: 5,
+          itemBuilder: (_, _) => _cardBone(c),
+        );
+      },
+    );
+  }
+
+  Widget _bone(Color c,
+      {double? width, required double height, double radius = 6}) {
+    return Container(
+      width: width ?? double.infinity,
+      height: height,
+      decoration: BoxDecoration(
+        color: c,
+        borderRadius: BorderRadius.circular(radius),
+      ),
+    );
+  }
+
+  Widget _cardBone(Color c) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 12),
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: TColors.white,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: TColors.border),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              _bone(c, width: 42, height: 42, radius: 12),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    _bone(c, width: 150, height: 13, radius: 6),
+                    const SizedBox(height: 8),
+                    _bone(c, width: 110, height: 11, radius: 6),
+                  ],
+                ),
+              ),
+              const SizedBox(width: 8),
+              _bone(c, width: 70, height: 22, radius: 20),
+            ],
+          ),
+          const SizedBox(height: 14),
+          _bone(c, height: 11, radius: 6),
+          const SizedBox(height: 8),
+          _bone(c, width: 220, height: 11, radius: 6),
+          const SizedBox(height: 14),
+          Row(
+            children: [
+              _bone(c, width: 90, height: 11, radius: 6),
+              const Spacer(),
+              _bone(c, width: 70, height: 14, radius: 6),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+}

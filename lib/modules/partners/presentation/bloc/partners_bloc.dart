@@ -34,6 +34,17 @@ class PartnersBloc extends Bloc<PartnersEvent, PartnersState> {
   String? _distPeriod;
   String? _distExactDate;
 
+  // Paginación para préstamos del socio (Loans)
+  int _loanPage = 1;
+  bool _loanReachedMax = false;
+  bool _loanLoadingMore = false;
+  List<LoanHistoryDataEntity> _currentLoanHistory = [];
+  LoanMetricsEntity? _currentLoanMetrics;
+  String? _loanStatus;
+  String? _loanSearch;
+  String? _loanPeriod;
+  String? _loanExactDate;
+
   PartnersBloc({
     required this.repository,
     required this.moneyRepository,
@@ -48,9 +59,9 @@ class PartnersBloc extends Bloc<PartnersEvent, PartnersState> {
     on<GetHistoryEvent>(_onGetRequestHistory);
     on<LoadMoreRequestHistoryEvent>(_onLoadMoreHistory);
 
-    on<LoanHistoryRequestEvent>(_onLoanHistoryRequest);
-    on<LoanHistoryStatustEvent>(_onLoanHistoryStatusRequest);
-    on<LoanHistorySearchEvent>(_onLoanHistorySearchRequest);
+    on<LoanHistoryFetchEvent>(_onLoanHistoryFetch);
+    on<LoanHistoryLoadMoreEvent>(_onLoanHistoryLoadMore);
+    on<LoanDetailFetchEvent>(_onLoanDetailFetch);
 
     on<LoanRegisterEvent>(_onLoanRegister);
 
@@ -250,14 +261,43 @@ class PartnersBloc extends Bloc<PartnersEvent, PartnersState> {
     }
   }
 
-  Future<void> _onLoanHistoryRequest(
-    LoanHistoryRequestEvent event,
+  Future<void> _onLoanHistoryFetch(
+    LoanHistoryFetchEvent event,
     Emitter<PartnersState> emit,
   ) async {
+    // Guardamos los filtros activos para la paginación.
+    _loanStatus = event.status;
+    _loanSearch = event.search;
+    _loanPeriod = event.period;
+    _loanExactDate = event.exactDate;
+    _loanPage = 1;
+    _loanReachedMax = false;
+    _loanLoadingMore = false;
+
     emit(LoanHistoryLoading());
     try {
-      final response = await loanHistoryRepository.getLoanHistory();
-      emit(LoanHistorySuccess(response));
+      final metrics = await loanHistoryRepository.getMetrics(
+        period: event.period,
+        exactDate: event.exactDate,
+      );
+      final page = await loanHistoryRepository.getHistory(
+        status: event.status,
+        search: event.search,
+        period: event.period,
+        exactDate: event.exactDate,
+        page: 1,
+        limit: 10,
+      );
+
+      _currentLoanMetrics = metrics;
+      _currentLoanHistory = page.items;
+      _loanReachedMax = !page.hasMore;
+
+      emit(LoanHistoryLoaded(
+        metrics: metrics,
+        items: List.of(_currentLoanHistory),
+        hasReachedMax: _loanReachedMax,
+      ));
     } on BaseApiException catch (error) {
       emit(LoanHistoryError(mapErrorMessage(error.key)));
     } catch (e) {
@@ -265,37 +305,53 @@ class PartnersBloc extends Bloc<PartnersEvent, PartnersState> {
     }
   }
 
-  Future<void> _onLoanHistoryStatusRequest(
-    LoanHistoryStatustEvent event,
+  Future<void> _onLoanHistoryLoadMore(
+    LoanHistoryLoadMoreEvent event,
     Emitter<PartnersState> emit,
   ) async {
-    emit(LoanHistoryStatusLoading());
+    if (_loanLoadingMore || _loanReachedMax) return;
+    if (_currentLoanMetrics == null) return;
+    _loanLoadingMore = true;
+
     try {
-      final response = await loanHistoryRepository.getLoanHistoryStatus(
-        event.status,
+      final nextPage = _loanPage + 1;
+      final page = await loanHistoryRepository.getHistory(
+        status: _loanStatus,
+        search: _loanSearch,
+        period: _loanPeriod,
+        exactDate: _loanExactDate,
+        page: nextPage,
+        limit: 10,
       );
-      emit(LoanHistoryStatusSuccess(response));
-    } on BaseApiException catch (error) {
-      emit(LoanHistoryStatusError(mapErrorMessage(error.key)));
-    } catch (e) {
-      emit(LoanHistoryStatusError('Error inesperado: $e'));
+
+      _loanPage = nextPage;
+      _currentLoanHistory = [..._currentLoanHistory, ...page.items];
+      _loanReachedMax = !page.hasMore;
+
+      emit(LoanHistoryLoaded(
+        metrics: _currentLoanMetrics!,
+        items: List.of(_currentLoanHistory),
+        hasReachedMax: _loanReachedMax,
+      ));
+    } catch (_) {
+      // Silencioso: mantenemos lo ya cargado si falla el "cargar más".
+    } finally {
+      _loanLoadingMore = false;
     }
   }
 
-  Future<void> _onLoanHistorySearchRequest(
-    LoanHistorySearchEvent event,
+  Future<void> _onLoanDetailFetch(
+    LoanDetailFetchEvent event,
     Emitter<PartnersState> emit,
   ) async {
-    emit(LoanHistoryStatusLoading());
+    emit(LoanDetailLoading());
     try {
-      final response = await loanHistoryRepository.getLoanHistoryFillter(
-        event.search,
-      );
-      emit(LoanHistoryStatusSuccess(response));
+      final detail = await loanHistoryRepository.getDetail(event.loanId);
+      emit(LoanDetailLoaded(detail));
     } on BaseApiException catch (error) {
-      emit(LoanHistoryStatusError(mapErrorMessage(error.key)));
+      emit(LoanDetailError(mapErrorMessage(error.key)));
     } catch (e) {
-      emit(LoanHistoryStatusError('Error inesperado: $e'));
+      emit(LoanDetailError('Error inesperado: $e'));
     }
   }
 
@@ -315,6 +371,8 @@ class PartnersBloc extends Bloc<PartnersEvent, PartnersState> {
         amountOrQuantity: event.amount,
         description: event.description,
         comprobanteImg: event.comprobanteImg,
+        hasInterest: event.hasInterest,
+        interestRate: event.interestRate,
       );
 
       await loanRegisterRequestRepository.loanRegister(requestEntity);

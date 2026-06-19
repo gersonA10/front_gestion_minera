@@ -5,10 +5,25 @@ import 'package:front_gestion_minera/core/widgets/excavator_loader.dart';
 import 'package:front_gestion_minera/core/widgets/zoomable_evidence_image.dart';
 import 'package:front_gestion_minera/injector_container.dart';
 import 'package:front_gestion_minera/modules/treasury/presentation/widgets/batch_details/batch_details_widgets.dart';
+import 'package:front_gestion_minera/utils/constants/color.constant.dart';
 import 'package:intl/intl.dart';
 
 import '../../../domain/entity/entity.dart';
 import '../../bloc/treasury_bloc.dart';
+
+String _formatCurrency(double value) => NumberFormat.currency(
+      locale: 'es_BO',
+      symbol: 'Bs',
+      decimalDigits: 2,
+    ).format(value);
+
+String _formatGrams(double value) {
+  final formatter = NumberFormat.decimalPatternDigits(
+    locale: 'es_BO',
+    decimalDigits: value == value.roundToDouble() ? 0 : 2,
+  );
+  return '${formatter.format(value)} g';
+}
 
 @RoutePage()
 class BatchDetailScreen extends StatelessWidget {
@@ -22,11 +37,18 @@ class BatchDetailScreen extends StatelessWidget {
         ..add(BatchLotDetailsEvent(batchId: batchId)),
       child: BlocBuilder<TreasuryBloc, TreasuryState>(
         builder: (context, state) => Scaffold(
-          backgroundColor: Colors.white,
+          backgroundColor: TColors.background,
           appBar: AppBar(
-            backgroundColor: Colors.white,
+            backgroundColor: TColors.surface,
+            elevation: 0,
+            surfaceTintColor: Colors.transparent,
+            centerTitle: true,
             leading: IconButton(
-              icon: const Icon(Icons.arrow_back, color: Color(0xFF1F2937)),
+              icon: const Icon(
+                Icons.arrow_back_ios_new_rounded,
+                color: TColors.textPrimary,
+                size: 18,
+              ),
               onPressed: () => context.router.back(),
             ),
             title: _AppBarTitle(state: state),
@@ -45,9 +67,9 @@ class _AppBarTitle extends StatelessWidget {
   const _AppBarTitle({required this.state});
 
   Color _statusColor(int pct) {
-    if (pct == 0) return const Color(0xFF22C55E);
-    if (pct < 100) return const Color(0xFFF59E0B);
-    return const Color(0xFF6B7280);
+    if (pct == 0) return TColors.success;
+    if (pct < 100) return TColors.warning;
+    return TColors.textSecondary;
   }
 
   String _statusLabel(int pct) {
@@ -62,19 +84,21 @@ class _AppBarTitle extends StatelessWidget {
       return const Text(
         'Detalle de Lote',
         style: TextStyle(
-          color: Color(0xFF0F172A),
+          color: TColors.textPrimary,
           fontSize: 16,
           fontWeight: FontWeight.w700,
         ),
       );
     }
     final data = (state as BatchLotDetailsLoaded).lotDetails;
+    final color = _statusColor(data.progresoConsumoPct);
     return Column(
+      mainAxisSize: MainAxisSize.min,
       children: [
         Text(
           'Lote #${data.batchCode}',
           style: const TextStyle(
-            color: Color(0xFF0F172A),
+            color: TColors.textPrimary,
             fontSize: 16,
             fontWeight: FontWeight.w700,
           ),
@@ -86,19 +110,16 @@ class _AppBarTitle extends StatelessWidget {
             Container(
               width: 7,
               height: 7,
-              decoration: BoxDecoration(
-                color: _statusColor(data.progresoConsumoPct),
-                shape: BoxShape.circle,
-              ),
+              decoration: BoxDecoration(color: color, shape: BoxShape.circle),
             ),
-            const SizedBox(width: 4),
+            const SizedBox(width: 5),
             Text(
               _statusLabel(data.progresoConsumoPct),
               style: TextStyle(
-                color: _statusColor(data.progresoConsumoPct),
+                color: color,
                 fontSize: 10,
                 fontWeight: FontWeight.w700,
-                letterSpacing: 0.8,
+                letterSpacing: 0.6,
               ),
             ),
           ],
@@ -123,17 +144,19 @@ class _Body extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Icon(Icons.error_outline, color: Color(0xFFEF4444), size: 48),
+            const Icon(Icons.error_outline, color: TColors.danger, size: 48),
             const SizedBox(height: 12),
             Text(
               (state as BatchLotDetailsError).message,
-              style: const TextStyle(color: Color(0xFF64748B)),
+              style: const TextStyle(color: TColors.textSecondary),
+              textAlign: TextAlign.center,
             ),
             const SizedBox(height: 16),
             TextButton(
               onPressed: () => context
                   .read<TreasuryBloc>()
                   .add(BatchLotDetailsEvent(batchId: batchId)),
+              style: TextButton.styleFrom(foregroundColor: TColors.primary),
               child: const Text('Reintentar'),
             ),
           ],
@@ -154,9 +177,17 @@ class _Content extends StatelessWidget {
   String _formatDate(DateTime date) =>
       DateFormat('dd MMM yyyy', 'es').format(date);
 
+  Color get _statusColor {
+    final pct = data.progresoConsumoPct;
+    if (pct == 0) return TColors.success;
+    if (pct < 100) return TColors.warning;
+    return TColors.textSecondary;
+  }
+
   @override
   Widget build(BuildContext context) {
     final pct = (data.progresoConsumoPct / 100.0).clamp(0.0, 1.0);
+    final accent = _statusColor;
 
     return SafeArea(
       child: SingleChildScrollView(
@@ -164,18 +195,19 @@ class _Content extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            // ── Progreso card ──────────────────────────────────────
             Container(
               width: double.infinity,
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(14),
-                border: Border.all(color: const Color(0xFFE2E8F0)),
+                color: TColors.surface,
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(color: TColors.border),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.04),
-                    blurRadius: 8,
-                    offset: const Offset(0, 2),
+                    color: TColors.textPrimary.withValues(alpha: 0.04),
+                    blurRadius: 10,
+                    offset: const Offset(0, 3),
                   ),
                 ],
               ),
@@ -188,57 +220,59 @@ class _Content extends StatelessWidget {
                         width: 44,
                         height: 44,
                         decoration: BoxDecoration(
-                          color: const Color(0xFFEFF6FF),
-                          borderRadius: BorderRadius.circular(10),
+                          color: TColors.goldAccentLight,
+                          borderRadius: BorderRadius.circular(12),
                         ),
                         child: const Icon(
-                          Icons.device_hub_outlined,
-                          color: Color(0xFF2563EB),
+                          Icons.inventory_2_outlined,
+                          color: TColors.goldAccent,
                           size: 22,
                         ),
                       ),
                       const SizedBox(width: 12),
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          const Text(
-                            'REFERENCIA DE INVENTARIO',
-                            style: TextStyle(
-                              color: Color(0xFF94A3B8),
-                              fontSize: 10,
-                              fontWeight: FontWeight.w600,
-                              letterSpacing: 0.6,
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const Text(
+                              'REFERENCIA DE INVENTARIO',
+                              style: TextStyle(
+                                color: TColors.textSecondary,
+                                fontSize: 10,
+                                fontWeight: FontWeight.w700,
+                                letterSpacing: 0.4,
+                              ),
                             ),
-                          ),
-                          const SizedBox(height: 2),
-                          Text(
-                            'Lote ID: ${data.batchCode}',
-                            style: const TextStyle(
-                              color: Color(0xFF0F172A),
-                              fontSize: 16,
-                              fontWeight: FontWeight.w700,
+                            const SizedBox(height: 2),
+                            Text(
+                              'Lote ID: ${data.batchCode}',
+                              style: const TextStyle(
+                                color: TColors.textPrimary,
+                                fontSize: 16,
+                                fontWeight: FontWeight.w700,
+                              ),
                             ),
-                          ),
-                        ],
+                          ],
+                        ),
                       ),
                     ],
                   ),
-                  const SizedBox(height: 16),
+                  const SizedBox(height: 18),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       const Text(
-                        'Progreso de Consumo',
+                        'Progreso de consumo',
                         style: TextStyle(
-                          color: Color(0xFF475569),
+                          color: TColors.textSecondary,
                           fontSize: 13,
                           fontWeight: FontWeight.w500,
                         ),
                       ),
                       Text(
                         '${data.progresoConsumoPct}%',
-                        style: const TextStyle(
-                          color: Color(0xFF2563EB),
+                        style: TextStyle(
+                          color: accent,
                           fontSize: 13,
                           fontWeight: FontWeight.w700,
                         ),
@@ -251,10 +285,8 @@ class _Content extends StatelessWidget {
                     child: LinearProgressIndicator(
                       value: pct,
                       minHeight: 8,
-                      backgroundColor: const Color(0xFFE2E8F0),
-                      valueColor: const AlwaysStoppedAnimation<Color>(
-                        Color(0xFF2563EB),
-                      ),
+                      backgroundColor: TColors.border,
+                      valueColor: AlwaysStoppedAnimation<Color>(accent),
                     ),
                   ),
                   const SizedBox(height: 8),
@@ -262,16 +294,16 @@ class _Content extends StatelessWidget {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Text(
-                        'Vendido: ${data.pesoVendido}g',
+                        'Vendido: ${_formatGrams(data.pesoVendido)}',
                         style: const TextStyle(
-                          color: Color(0xFF94A3B8),
+                          color: TColors.textSecondary,
                           fontSize: 12,
                         ),
                       ),
                       Text(
-                        'Restante: ${data.pesoDisponible}g',
-                        style: const TextStyle(
-                          color: Color(0xFF2563EB),
+                        'Restante: ${_formatGrams(data.pesoDisponible)}',
+                        style: TextStyle(
+                          color: accent,
                           fontSize: 12,
                           fontWeight: FontWeight.w600,
                         ),
@@ -282,14 +314,18 @@ class _Content extends StatelessWidget {
                   Row(
                     children: [
                       StatBox(
-                          label: 'INICIAL', value: '${data.pesoInicial}g'),
+                        label: 'INICIAL',
+                        value: _formatGrams(data.pesoInicial),
+                      ),
                       const SizedBox(width: 10),
                       StatBox(
-                          label: 'VENDIDO', value: '${data.pesoVendido}g'),
+                        label: 'VENDIDO',
+                        value: _formatGrams(data.pesoVendido),
+                      ),
                       const SizedBox(width: 10),
                       StatBox(
                         label: 'DISPONIBLE',
-                        value: '${data.pesoDisponible}g',
+                        value: _formatGrams(data.pesoDisponible),
                         highlight: true,
                       ),
                     ],
@@ -304,9 +340,9 @@ class _Content extends StatelessWidget {
               width: double.infinity,
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(14),
-                border: Border.all(color: const Color(0xFFE2E8F0)),
+                color: TColors.surface,
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(color: TColors.border),
               ),
               child: Row(
                 children: [
@@ -315,7 +351,7 @@ class _Content extends StatelessWidget {
                     label: 'FECHA',
                     value: _formatDate(data.detallesExtraccion.fecha),
                   ),
-                  const SizedBox(width: 32),
+                  const SizedBox(width: 16),
                   ExtractionDetail(
                     icon: Icons.person_outline,
                     label: 'RESPONSABLE',
@@ -331,16 +367,16 @@ class _Content extends StatelessWidget {
               width: double.infinity,
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(14),
-                border: Border.all(color: const Color(0xFFE2E8F0)),
+                color: TColors.surface,
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(color: TColors.border),
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   if (data.evidenciaUrl.isNotEmpty)
                     ClipRRect(
-                      borderRadius: BorderRadius.circular(10),
+                      borderRadius: BorderRadius.circular(12),
                       child: SizedBox(
                         width: double.infinity,
                         height: 160,
@@ -356,13 +392,13 @@ class _Content extends StatelessWidget {
                       width: double.infinity,
                       height: 80,
                       decoration: BoxDecoration(
-                        color: const Color(0xFFF1F5F9),
-                        borderRadius: BorderRadius.circular(10),
-                        border: Border.all(color: const Color(0xFFE2E8F0)),
+                        color: TColors.background,
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(color: TColors.border),
                       ),
                       child: const Icon(
                         Icons.image_not_supported_outlined,
-                        color: Color(0xFF94A3B8),
+                        color: TColors.textSecondary,
                         size: 28,
                       ),
                     ),
@@ -370,10 +406,10 @@ class _Content extends StatelessWidget {
                   const Text(
                     'OBSERVACIONES ORIGINALES',
                     style: TextStyle(
-                      color: Color(0xFF94A3B8),
+                      color: TColors.textSecondary,
                       fontSize: 10,
-                      fontWeight: FontWeight.w600,
-                      letterSpacing: 0.5,
+                      fontWeight: FontWeight.w700,
+                      letterSpacing: 0.4,
                     ),
                   ),
                   const SizedBox(height: 6),
@@ -382,8 +418,9 @@ class _Content extends StatelessWidget {
                         ? data.observaciones
                         : 'Sin observaciones.',
                     style: const TextStyle(
-                      color: Color(0xFF0F172A),
+                      color: TColors.textPrimary,
                       fontSize: 13,
+                      height: 1.4,
                     ),
                   ),
                 ],
@@ -392,30 +429,53 @@ class _Content extends StatelessWidget {
             const SizedBox(height: 20),
             const SectionTitle(title: 'HISTORIAL DE MOVIMIENTOS'),
             const SizedBox(height: 10),
-            ...data.historialMovimientos.asMap().entries.map((entry) {
-              final i = entry.key;
-              final mov = entry.value;
-              final isFirst = i == 0;
-              final isLast = i == data.historialMovimientos.length - 1;
-              final isIngreso = mov.monto.startsWith('+');
-              return MovementItem(
-                icon: isFirst ? Icons.add_circle : Icons.sell_outlined,
-                iconColor: isFirst
-                    ? const Color(0xFF2563EB)
-                    : const Color(0xFF64748B),
-                iconBg: isFirst
-                    ? const Color(0xFFEFF6FF)
-                    : const Color(0xFFF1F5F9),
-                title: mov.tipo,
-                date: _formatDate(mov.fecha),
-                amount: mov.monto,
-                amountColor: isIngreso
-                    ? const Color(0xFF22C55E)
-                    : const Color(0xFFEF4444),
-                isFirst: isFirst,
-                isLast: isLast,
-              );
-            }),
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: TColors.surface,
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(color: TColors.border),
+              ),
+              child: Column(
+                children: [
+                  ...data.historialMovimientos.asMap().entries.map((entry) {
+                    final i = entry.key;
+                    final mov = entry.value;
+                    final isFirst = i == 0;
+                    final isLast =
+                        i == data.historialMovimientos.length - 1;
+                    final isIngreso = mov.monto.startsWith('+');
+                    return MovementItem(
+                      icon: isFirst
+                          ? Icons.add_circle_outline_rounded
+                          : Icons.sell_outlined,
+                      iconColor: isFirst ? TColors.primary : TColors.textSecondary,
+                      iconBg:
+                          isFirst ? TColors.primaryLight : TColors.background,
+                      title: mov.tipo,
+                      date: _formatDate(mov.fecha),
+                      amount: mov.monto,
+                      amountColor:
+                          isIngreso ? TColors.success : TColors.danger,
+                      isFirst: isFirst,
+                      isLast: isLast,
+                    );
+                  }),
+                  if (data.historialMovimientos.isEmpty)
+                    const Padding(
+                      padding: EdgeInsets.symmetric(vertical: 8),
+                      child: Text(
+                        'Sin movimientos registrados.',
+                        style: TextStyle(
+                          color: TColors.textSecondary,
+                          fontSize: 13,
+                        ),
+                      ),
+                    ),
+                ],
+              ),
+            ),
             const SizedBox(height: 20),
             const SectionTitle(title: 'RESUMEN FINANCIERO'),
             const SizedBox(height: 10),
@@ -423,9 +483,9 @@ class _Content extends StatelessWidget {
               width: double.infinity,
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: const Color(0xFFF8FAFF),
-                borderRadius: BorderRadius.circular(14),
-                border: Border.all(color: const Color(0xFFDBEAFE)),
+                color: TColors.primaryLight,
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(color: TColors.primary.withValues(alpha: 0.12)),
               ),
               child: Column(
                 children: [
@@ -439,17 +499,19 @@ class _Content extends StatelessWidget {
                           const Text(
                             'TOTAL VENDIDO',
                             style: TextStyle(
-                              color: Color(0xFF94A3B8),
+                              color: TColors.textSecondary,
                               fontSize: 10,
-                              fontWeight: FontWeight.w600,
-                              letterSpacing: 0.5,
+                              fontWeight: FontWeight.w700,
+                              letterSpacing: 0.4,
                             ),
                           ),
                           const SizedBox(height: 4),
                           Text(
-                            'Bs ${data.resumenFinanciero.totalVendidoBs.toStringAsFixed(2)}',
+                            _formatCurrency(
+                              data.resumenFinanciero.totalVendidoBs,
+                            ),
                             style: const TextStyle(
-                              color: Color(0xFF2563EB),
+                              color: TColors.primary,
                               fontSize: 22,
                               fontWeight: FontWeight.w800,
                             ),
@@ -462,17 +524,17 @@ class _Content extends StatelessWidget {
                           const Text(
                             'VENTAS TOTALES',
                             style: TextStyle(
-                              color: Color(0xFF94A3B8),
+                              color: TColors.textSecondary,
                               fontSize: 10,
-                              fontWeight: FontWeight.w600,
-                              letterSpacing: 0.5,
+                              fontWeight: FontWeight.w700,
+                              letterSpacing: 0.4,
                             ),
                           ),
                           const SizedBox(height: 4),
                           Text(
                             '${data.resumenFinanciero.ventasTotales}',
                             style: const TextStyle(
-                              color: Color(0xFF0F172A),
+                              color: TColors.textPrimary,
                               fontSize: 22,
                               fontWeight: FontWeight.w800,
                             ),
@@ -482,7 +544,7 @@ class _Content extends StatelessWidget {
                     ],
                   ),
                   const SizedBox(height: 14),
-                  Container(height: 1, color: const Color(0xFFE2E8F0)),
+                  Container(height: 1, color: TColors.border),
                   const SizedBox(height: 14),
                   Align(
                     alignment: Alignment.centerLeft,
@@ -492,17 +554,19 @@ class _Content extends StatelessWidget {
                         const Text(
                           'PRECIO PROMEDIO / GRAMO',
                           style: TextStyle(
-                            color: Color(0xFF94A3B8),
+                            color: TColors.textSecondary,
                             fontSize: 10,
-                            fontWeight: FontWeight.w600,
-                            letterSpacing: 0.5,
+                            fontWeight: FontWeight.w700,
+                            letterSpacing: 0.4,
                           ),
                         ),
                         const SizedBox(height: 4),
                         Text(
-                          'Bs ${data.resumenFinanciero.precioPromedio.toStringAsFixed(2)}',
+                          _formatCurrency(
+                            data.resumenFinanciero.precioPromedio,
+                          ),
                           style: const TextStyle(
-                            color: Color(0xFF0F172A),
+                            color: TColors.textPrimary,
                             fontSize: 16,
                             fontWeight: FontWeight.w700,
                           ),
@@ -513,7 +577,6 @@ class _Content extends StatelessWidget {
                 ],
               ),
             ),
-
             const SizedBox(height: 24),
           ],
         ),

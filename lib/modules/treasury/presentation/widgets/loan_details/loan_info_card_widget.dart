@@ -1,39 +1,57 @@
-import 'package:front_gestion_minera/utils/constants/color.constant.dart';
+import 'package:intl/intl.dart';
 import '../../../domain/entity/entity.dart';
+import '../../screens/loans/loan_ui.dart';
 import '../widgtes.dart';
 
 class LoanInfoCard extends StatelessWidget {
   final CabeceraEntity cabecera;
   const LoanInfoCard({super.key, required this.cabecera});
 
+  String _money(num v) =>
+      '${NumberFormat('#,##0.##', 'es_PE').format(v)} ${cabecera.moneda}';
+
+  /// (color, fondo, ícono) según la etiqueta de estado del préstamo.
+  (Color, Color, IconData) _statusStyle() {
+    final l = cabecera.estadoEtiqueta.toLowerCase();
+    if (l.contains('mora') || l.contains('atras')) {
+      return (LoanUi.mora, LoanUi.moraBg, Icons.error_outline_rounded);
+    }
+    if (l.contains('final') || l.contains('pagad')) {
+      return (
+        LoanUi.finalizado,
+        LoanUi.finalizadoBg,
+        Icons.check_circle_outline_rounded
+      );
+    }
+    return (LoanUi.activo, LoanUi.activoBg, Icons.autorenew_rounded);
+  }
+
   @override
   Widget build(BuildContext context) {
     final progress = cabecera.progresoPagoPct / 100.0;
+    final (sColor, sBg, sIcon) = _statusStyle();
+
     return Container(
       width: double.infinity,
       decoration: BoxDecoration(
-        color: TColors.cardBgDark,
+        color: LoanUi.surface,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: TColors.cardBorderDark, width: 1),
+        border: Border.all(color: LoanUi.border),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          // Cabecera con leve degradado azul.
           Container(
             width: double.infinity,
-            padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
-            decoration: BoxDecoration(
+            padding: const EdgeInsets.fromLTRB(16, 16, 16, 16),
+            decoration: const BoxDecoration(
               gradient: LinearGradient(
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
-                colors: [
-                  TColors.amber.withValues(alpha: 0.15),
-                  TColors.cardBgDark,
-                ],
+                colors: [LoanUi.primarySoft, LoanUi.surface],
               ),
-              borderRadius: const BorderRadius.vertical(
-                top: Radius.circular(16),
-              ),
+              borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -44,47 +62,25 @@ class LoanInfoCard extends StatelessWidget {
                     Container(
                       width: 44,
                       height: 44,
+                      alignment: Alignment.center,
                       decoration: BoxDecoration(
-                        color: TColors.amberLight,
+                        color: LoanUi.primarySoft,
                         borderRadius: BorderRadius.circular(12),
+                        border: Border.all(
+                          color: LoanUi.primary.withValues(alpha: 0.15),
+                        ),
                       ),
                       child: const Icon(
-                        Icons.account_balance,
-                        color: TColors.amber,
+                        Icons.account_balance_rounded,
+                        color: LoanUi.primary,
                         size: 22,
                       ),
                     ),
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 10,
-                        vertical: 4,
-                      ),
-                      decoration: BoxDecoration(
-                        color: TColors.green.withValues(alpha: 0.15),
-                        borderRadius: BorderRadius.circular(20),
-                        border: Border.all(
-                          color: TColors.green.withValues(alpha: 0.3),
-                        ),
-                      ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          const Icon(
-                            Icons.check_circle_outline,
-                            color: TColors.green,
-                            size: 13,
-                          ),
-                          const SizedBox(width: 4),
-                          Text(
-                            cabecera.estadoEtiqueta,
-                            style: const TextStyle(
-                              color: TColors.green,
-                              fontSize: 11,
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
-                        ],
-                      ),
+                    LoanPill(
+                      label: cabecera.estadoEtiqueta,
+                      color: sColor,
+                      bg: sBg,
+                      icon: sIcon,
                     ),
                   ],
                 ),
@@ -92,9 +88,9 @@ class LoanInfoCard extends StatelessWidget {
                 Text(
                   'Préstamo #${cabecera.loanCode}',
                   style: const TextStyle(
-                    color: TColors.textSecondary1,
+                    color: LoanUi.textSecondary,
                     fontSize: 11,
-                    fontWeight: FontWeight.w400,
+                    fontWeight: FontWeight.w500,
                   ),
                 ),
                 const SizedBox(height: 4),
@@ -103,25 +99,26 @@ class LoanInfoCard extends StatelessWidget {
                   textBaseline: TextBaseline.alphabetic,
                   children: [
                     Text(
-                      cabecera.montoPrincipal.toString(),
+                      NumberFormat('#,##0.##', 'es_PE')
+                          .format(cabecera.montoPrincipal),
                       style: const TextStyle(
-                        color: TColors.white,
-                        fontSize: 16,
-                        fontWeight: FontWeight.w700,
+                        color: LoanUi.textPrimary,
+                        fontSize: 24,
+                        fontWeight: FontWeight.w800,
+                        letterSpacing: -0.5,
                       ),
                     ),
                     const SizedBox(width: 6),
                     Text(
                       cabecera.moneda,
                       style: const TextStyle(
-                        color: TColors.textSecondary1,
-                        fontSize: 11,
-                        fontWeight: FontWeight.w400,
+                        color: LoanUi.textSecondary,
+                        fontSize: 12,
+                        fontWeight: FontWeight.w500,
                       ),
                     ),
                   ],
                 ),
-                const SizedBox(height: 16),
               ],
             ),
           ),
@@ -131,9 +128,9 @@ class LoanInfoCard extends StatelessWidget {
               children: [
                 Expanded(
                   child: InfoBox(
-                    icon: Icons.percent,
+                    icon: Icons.percent_rounded,
                     label: 'INTERÉS\nTOTAL',
-                    value: cabecera.interesTotal.toString(),
+                    value: _money(cabecera.interesTotal),
                   ),
                 ),
                 const SizedBox(width: 12),
@@ -141,7 +138,7 @@ class LoanInfoCard extends StatelessWidget {
                   child: InfoBox(
                     icon: Icons.account_balance_wallet_outlined,
                     label: 'TOTAL A\nPAGAR',
-                    value: cabecera.totalAPagar.toString(),
+                    value: _money(cabecera.totalAPagar),
                   ),
                 ),
               ],
@@ -153,11 +150,9 @@ class LoanInfoCard extends StatelessWidget {
               width: double.infinity,
               padding: const EdgeInsets.all(14),
               decoration: BoxDecoration(
-                color: TColors.cardInnerBg,
+                color: LoanUi.bg,
                 borderRadius: BorderRadius.circular(12),
-                border: Border.all(
-                  color: TColors.cardBorderDark.withValues(alpha: 0.5),
-                ),
+                border: Border.all(color: LoanUi.border),
               ),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -165,10 +160,10 @@ class LoanInfoCard extends StatelessWidget {
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(
+                      const Text(
                         'SALDO PENDIENTE',
                         style: TextStyle(
-                          color: TColors.amber.withValues(alpha: 0.7),
+                          color: LoanUi.textSecondary,
                           fontSize: 10,
                           fontWeight: FontWeight.w600,
                           letterSpacing: 0.8,
@@ -176,35 +171,34 @@ class LoanInfoCard extends StatelessWidget {
                       ),
                       const SizedBox(height: 4),
                       Text(
-                        cabecera.saldoPendiente.toString(),
+                        _money(cabecera.saldoPendiente),
                         style: const TextStyle(
-                          color: TColors.white,
-                          fontSize: 15,
-                          fontWeight: FontWeight.w700,
+                          color: LoanUi.textPrimary,
+                          fontSize: 16,
+                          fontWeight: FontWeight.w800,
                         ),
                       ),
                     ],
                   ),
                   SizedBox(
-                    width: 44,
-                    height: 44,
+                    width: 46,
+                    height: 46,
                     child: Stack(
                       alignment: Alignment.center,
                       children: [
                         CircularProgressIndicator(
-                          value: progress,
+                          value: progress.clamp(0.0, 1.0),
                           strokeWidth: 4,
-                          backgroundColor: TColors.inputBg,
-                          valueColor: const AlwaysStoppedAnimation<Color>(
-                            TColors.amber,
-                          ),
+                          backgroundColor: LoanUi.fieldBg,
+                          valueColor:
+                              const AlwaysStoppedAnimation<Color>(LoanUi.primary),
                         ),
                         Text(
                           '${cabecera.progresoPagoPct.toStringAsFixed(cabecera.progresoPagoPct % 1 == 0 ? 0 : 1)}%',
                           style: const TextStyle(
-                            color: TColors.amber,
+                            color: LoanUi.primary,
                             fontSize: 10,
-                            fontWeight: FontWeight.w700,
+                            fontWeight: FontWeight.w800,
                           ),
                         ),
                       ],

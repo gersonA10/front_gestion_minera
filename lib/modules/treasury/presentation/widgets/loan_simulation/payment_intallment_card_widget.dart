@@ -1,5 +1,6 @@
-
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
+import '../../screens/loans/loan_ui.dart';
 
 class PaymentInstallmentCard extends StatelessWidget {
   final int number;
@@ -19,14 +20,28 @@ class PaymentInstallmentCard extends StatelessWidget {
     required this.status,
   });
 
+  Color get _statusColor {
+    switch (status) {
+      case 'Pendiente':
+        return LoanUi.pendiente;
+      case 'Futura':
+        return LoanUi.muted;
+      default:
+        return LoanUi.primary;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
+    final fmt = NumberFormat('#,##0.00', 'es_PE');
+
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: const Color(0xFF161B22),
+        color: LoanUi.surface,
         borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: LoanUi.border),
       ),
       child: Column(
         children: [
@@ -35,13 +50,14 @@ class PaymentInstallmentCard extends StatelessWidget {
               Container(
                 width: 44,
                 height: 44,
+                alignment: Alignment.center,
                 decoration: BoxDecoration(
-                  color: const Color(0xFF1E2530),
+                  color: LoanUi.primarySoft,
                   borderRadius: BorderRadius.circular(10),
                 ),
-                child: Icon(
+                child: const Icon(
                   Icons.calendar_today_outlined,
-                  color: Colors.grey[400],
+                  color: LoanUi.primary,
                   size: 20,
                 ),
               ),
@@ -53,15 +69,18 @@ class PaymentInstallmentCard extends StatelessWidget {
                     Text(
                       'Cuota #$number',
                       style: const TextStyle(
-                        color: Colors.white,
+                        color: LoanUi.textPrimary,
                         fontSize: 13,
-                        fontWeight: FontWeight.w600,
+                        fontWeight: FontWeight.w700,
                       ),
                     ),
                     const SizedBox(height: 2),
                     Text(
                       'Vence: $dueDate',
-                      style: TextStyle(color: Colors.grey[500], fontSize: 11),
+                      style: const TextStyle(
+                        color: LoanUi.textSecondary,
+                        fontSize: 11,
+                      ),
                     ),
                   ],
                 ),
@@ -70,11 +89,11 @@ class PaymentInstallmentCard extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
                   Text(
-                    amount.toStringAsFixed(2),
+                    fmt.format(amount),
                     style: const TextStyle(
-                      color: Colors.white,
+                      color: LoanUi.textPrimary,
                       fontSize: 14,
-                      fontWeight: FontWeight.w700,
+                      fontWeight: FontWeight.w800,
                     ),
                   ),
                   const SizedBox(height: 4),
@@ -85,11 +104,7 @@ class PaymentInstallmentCard extends StatelessWidget {
                         width: 8,
                         height: 8,
                         decoration: BoxDecoration(
-                          color: status == 'Pendiente'
-                              ? const Color(0xFF2EA043)
-                              : status == 'Futura'
-                              ? Colors.grey
-                              : const Color(0xFF3B82F6),
+                          color: _statusColor,
                           shape: BoxShape.circle,
                         ),
                       ),
@@ -97,13 +112,9 @@ class PaymentInstallmentCard extends StatelessWidget {
                       Text(
                         status,
                         style: TextStyle(
-                          color: status == 'Pendiente'
-                              ? const Color(0xFF2EA043)
-                              : status == 'Futura'
-                              ? Colors.grey
-                              : const Color(0xFF3B82F6),
+                          color: _statusColor,
                           fontSize: 11,
-                          fontWeight: FontWeight.w500,
+                          fontWeight: FontWeight.w600,
                         ),
                       ),
                     ],
@@ -113,33 +124,33 @@ class PaymentInstallmentCard extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 14),
-          Divider(color: Colors.grey[800], height: 1),
+          const Divider(color: LoanUi.border, height: 1),
           const SizedBox(height: 12),
           Row(
             children: [
-              Text(
+              const Text(
                 'Capital: ',
-                style: TextStyle(color: Colors.grey[500], fontSize: 11),
+                style: TextStyle(color: LoanUi.textSecondary, fontSize: 11),
               ),
               Text(
-                capital.toStringAsFixed(2),
+                fmt.format(capital),
                 style: const TextStyle(
-                  color: Color(0xFF3B82F6),
+                  color: LoanUi.primary,
                   fontSize: 11,
-                  fontWeight: FontWeight.w600,
+                  fontWeight: FontWeight.w700,
                 ),
               ),
               const SizedBox(width: 24),
-              Text(
+              const Text(
                 'Interés: ',
-                style: TextStyle(color: Colors.grey[500], fontSize: 11),
+                style: TextStyle(color: LoanUi.textSecondary, fontSize: 11),
               ),
               Text(
-                interest.toStringAsFixed(2),
+                fmt.format(interest),
                 style: const TextStyle(
-                  color: Colors.white,
+                  color: LoanUi.textPrimary,
                   fontSize: 11,
-                  fontWeight: FontWeight.w600,
+                  fontWeight: FontWeight.w700,
                 ),
               ),
             ],

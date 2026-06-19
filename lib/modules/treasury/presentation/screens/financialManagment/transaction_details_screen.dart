@@ -220,27 +220,24 @@ class TransactionDetailsScreen extends StatelessWidget {
           InjectorContainer.getIt<TreasuryBloc>()
             ..add(TransactionDetailsEvent(idTransaction: idTransaction)),
       child: Scaffold(
-        backgroundColor: const Color(0xFFF8F9FB),
+        backgroundColor: const Color(0xFFF5F7FB),
         appBar: AppBar(
-          backgroundColor: Colors.white,
+          backgroundColor: const Color(0xFFF5F7FB),
           elevation: 0,
-          surfaceTintColor: Colors.transparent,
+          surfaceTintColor: const Color(0xFFF5F7FB),
           leading: IconButton(
-            icon: const Icon(Icons.arrow_back, color: Color(0xFF1F2937)),
+            icon: const Icon(Icons.arrow_back_ios_new_rounded,
+                color: Color(0xFF0D1B3E), size: 20),
             onPressed: () => context.router.back(),
           ),
           centerTitle: true,
           title: const Text(
-            'Detalle de Transacción',
+            'Detalle de transacción',
             style: TextStyle(
-              color: Color(0xFF1F2937),
+              color: Color(0xFF0D1B3E),
               fontSize: 18,
-              fontWeight: FontWeight.w600,
+              fontWeight: FontWeight.w800,
             ),
-          ),
-          bottom: PreferredSize(
-            preferredSize: const Size.fromHeight(1),
-            child: Container(color: const Color(0xFFE5E7EB), height: 1),
           ),
         ),
         body: BlocConsumer<TreasuryBloc, TreasuryState>(

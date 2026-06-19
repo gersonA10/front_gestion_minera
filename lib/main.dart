@@ -11,6 +11,7 @@ import 'package:in_app_update/in_app_update.dart';
 import 'package:front_gestion_minera/config/theme/app_theme.dart';
 import 'package:front_gestion_minera/injector_container.dart';
 import 'package:front_gestion_minera/config/router/app_router.dart';
+import 'package:front_gestion_minera/config/router/app_route_observer.dart';
 import 'package:front_gestion_minera/utils/session/user_session.dart';
 import 'package:intl/date_symbol_data_local.dart';
 
@@ -142,7 +143,9 @@ class _MainAppState extends State<MainApp> {
         themeMode: ThemeMode.light,
         theme: TAppTheme.lightTheme,
         darkTheme: TAppTheme.lightTheme,
-        routerConfig: appRouter.config(),
+        routerConfig: appRouter.config(
+          navigatorObservers: () => [appRouteObserver],
+        ),
         builder: (context, child) => ConnectivityWrapper(
           child: SafeArea(
             bottom: true,

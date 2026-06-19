@@ -5,7 +5,7 @@ import 'package:front_gestion_minera/config/router/app_router.gr.dart';
 import 'package:front_gestion_minera/core/widgets/custom_alert_widget.dart';
 import 'package:front_gestion_minera/injector_container.dart';
 import 'package:front_gestion_minera/modules/treasury/presentation/bloc/treasury_bloc.dart';
-import 'package:front_gestion_minera/utils/constants/color.constant.dart';
+import 'loan_ui.dart';
 
 @RoutePage()
 class NewLoansScreen extends StatefulWidget {
@@ -25,7 +25,7 @@ class _NewLoansScreenState extends State<NewLoansScreen> {
   late TreasuryBloc _treasuryBloc;
 
   late final DateTime _fechaInicio;
-  final colors = TColors;
+
   @override
   void initState() {
     super.initState();
@@ -35,8 +35,6 @@ class _NewLoansScreenState extends State<NewLoansScreen> {
 
   String get _fechaFormateada =>
       '${_fechaInicio.month.toString().padLeft(2, '0')}/${_fechaInicio.day.toString().padLeft(2, '0')}/${_fechaInicio.year}';
-
-  // Colors matching the design
 
   @override
   void dispose() {
@@ -54,23 +52,23 @@ class _NewLoansScreenState extends State<NewLoansScreen> {
   }) {
     return InputDecoration(
       hintText: hint,
-      hintStyle: const TextStyle(color: TColors.textSecondary1, fontSize: 14),
+      hintStyle: const TextStyle(color: LoanUi.muted, fontSize: 14),
       prefixIcon: prefix,
       suffixIcon: suffix,
       filled: true,
-      fillColor: TColors.inputBg,
+      fillColor: LoanUi.fieldBg,
       contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
       border: OutlineInputBorder(
         borderRadius: BorderRadius.circular(12),
-        borderSide: const BorderSide(color: TColors.borderColor),
+        borderSide: const BorderSide(color: LoanUi.border),
       ),
       enabledBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(12),
-        borderSide: const BorderSide(color: TColors.borderColor),
+        borderSide: const BorderSide(color: LoanUi.border),
       ),
       focusedBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(12),
-        borderSide: const BorderSide(color: TColors.amber, width: 1.5),
+        borderSide: const BorderSide(color: LoanUi.primary, width: 1.5),
       ),
     );
   }
@@ -84,29 +82,8 @@ class _NewLoansScreenState extends State<NewLoansScreen> {
           FocusManager.instance.primaryFocus?.unfocus();
         },
         child: Scaffold(
-          backgroundColor: TColors.bgColor,
-          appBar: AppBar(
-            backgroundColor: TColors.bgColor,
-            elevation: 0,
-            centerTitle: true,
-            foregroundColor: Colors.white,
-            iconTheme: const IconThemeData(color: Colors.white),
-            title: const Text(
-              'Nuevo Préstamo',
-              style: TextStyle(
-                color: TColors.textPrimaryWhite,
-                fontWeight: FontWeight.bold,
-                fontSize: 18,
-              ),
-            ),
-            bottom: PreferredSize(
-              preferredSize: const Size.fromHeight(1),
-              child: Container(
-                height: 1,
-                color: TColors.amber.withValues(alpha: 0.3),
-              ),
-            ),
-          ),
+          backgroundColor: LoanUi.bg,
+          appBar: loanAppBar(context, title: 'Nuevo Préstamo'),
           body: BlocConsumer<TreasuryBloc, TreasuryState>(
             listener: (context, state) {
               if (state is NewLoansSimulateError) {
@@ -131,7 +108,7 @@ class _NewLoansScreenState extends State<NewLoansScreen> {
             builder: (context, state) {
               if (state is NewLoansSimulateLoading) {
                 return const Center(
-                  child: CircularProgressIndicator(color: TColors.amber),
+                  child: CircularProgressIndicator(color: LoanUi.primary),
                 );
               }
               return SingleChildScrollView(
@@ -139,27 +116,28 @@ class _NewLoansScreenState extends State<NewLoansScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    _sectionHeader(
-                      Icons.person_outline,
+                    const LoanSectionTitle(
                       'Detalles del Prestamista',
+                      icon: Icons.person_outline_rounded,
                     ),
                     const SizedBox(height: 12),
                     _label('Prestamista (Entidad / Persona)'),
                     const SizedBox(height: 8),
                     TextField(
                       controller: prestamista,
-                      style: const TextStyle(color: TColors.textPrimaryWhite),
+                      style: const TextStyle(color: LoanUi.textPrimary),
                       decoration: _inputDecoration(
                         hint: 'Ej. Banco Nacional, Juan Pérez',
                       ),
                     ),
-                    const SizedBox(height: 28),
-                    _sectionHeader(
-                      Icons.account_balance,
+                    const SizedBox(height: 26),
+                    const LoanSectionTitle(
                       'Condiciones del Préstamo',
+                      icon: Icons.account_balance_rounded,
                     ),
                     const SizedBox(height: 12),
                     Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Expanded(
                           flex: 3,
@@ -172,13 +150,14 @@ class _NewLoansScreenState extends State<NewLoansScreen> {
                                 controller: _monto,
                                 keyboardType: TextInputType.number,
                                 style: const TextStyle(
-                                  color: TColors.textPrimaryWhite,
+                                  color: LoanUi.textPrimary,
                                 ),
                                 decoration: _inputDecoration(
                                   hint: '10000',
-                                  prefix: const Padding(
-                                    padding: EdgeInsets.all(12),
-                                    child: Icon(Icons.wallet_rounded, color: TColors.appDisabledColor,)
+                                  prefix: const Icon(
+                                    Icons.wallet_rounded,
+                                    color: LoanUi.muted,
+                                    size: 20,
                                   ),
                                 ),
                               ),
@@ -194,26 +173,28 @@ class _NewLoansScreenState extends State<NewLoansScreen> {
                               _label('Moneda'),
                               const SizedBox(height: 8),
                               Container(
+                                height: 52,
                                 padding: const EdgeInsets.symmetric(
                                   horizontal: 16,
                                 ),
                                 decoration: BoxDecoration(
-                                  color: TColors.inputBg,
+                                  color: LoanUi.fieldBg,
                                   borderRadius: BorderRadius.circular(12),
-                                  border: Border.all(color: TColors.borderColor),
+                                  border: Border.all(color: LoanUi.border),
                                 ),
                                 child: DropdownButtonHideUnderline(
                                   child: DropdownButton<String>(
                                     value: _moneda,
                                     isExpanded: true,
-                                    dropdownColor: TColors.cardColor,
+                                    dropdownColor: LoanUi.surface,
                                     style: const TextStyle(
-                                      color: TColors.textPrimaryWhite,
+                                      color: LoanUi.textPrimary,
                                       fontSize: 14,
+                                      fontWeight: FontWeight.w600,
                                     ),
                                     icon: const Icon(
-                                      Icons.keyboard_arrow_down,
-                                      color: TColors.textSecondary,
+                                      Icons.keyboard_arrow_down_rounded,
+                                      color: LoanUi.textSecondary,
                                     ),
                                     items: ['BOB']
                                         .map(
@@ -246,7 +227,7 @@ class _NewLoansScreenState extends State<NewLoansScreen> {
                                 controller: _plazo,
                                 keyboardType: TextInputType.number,
                                 style: const TextStyle(
-                                  color: TColors.textPrimaryWhite,
+                                  color: LoanUi.textPrimary,
                                 ),
                                 decoration: _inputDecoration(hint: '12'),
                               ),
@@ -264,11 +245,9 @@ class _NewLoansScreenState extends State<NewLoansScreen> {
                                 controller: tasa,
                                 keyboardType: TextInputType.number,
                                 style: const TextStyle(
-                                  color: TColors.textPrimaryWhite,
+                                  color: LoanUi.textPrimary,
                                 ),
-                                decoration: _inputDecoration(
-                                  hint: '5'
-                                ),
+                                decoration: _inputDecoration(hint: '5'),
                               ),
                             ],
                           ),
@@ -284,15 +263,15 @@ class _NewLoansScreenState extends State<NewLoansScreen> {
                         vertical: 14,
                       ),
                       decoration: BoxDecoration(
-                        color: TColors.inputBg,
+                        color: LoanUi.fieldBg,
                         borderRadius: BorderRadius.circular(12),
-                        border: Border.all(color: TColors.borderColor),
+                        border: Border.all(color: LoanUi.border),
                       ),
                       child: Row(
                         children: [
                           const Icon(
                             Icons.calendar_today_outlined,
-                            color: TColors.textSecondary,
+                            color: LoanUi.textSecondary,
                             size: 18,
                           ),
                           const SizedBox(width: 10),
@@ -300,27 +279,29 @@ class _NewLoansScreenState extends State<NewLoansScreen> {
                             child: Text(
                               _fechaFormateada,
                               style: const TextStyle(
-                                color: TColors.textPrimaryWhite,
+                                color: LoanUi.textPrimary,
                                 fontSize: 14,
+                                fontWeight: FontWeight.w600,
                               ),
                             ),
                           ),
                           const Icon(
                             Icons.lock_outline,
-                            color: TColors.textSecondary,
+                            color: LoanUi.muted,
                             size: 18,
                           ),
                         ],
                       ),
                     ),
                     const SizedBox(height: 20),
+                    // Tipo de interés (bloqueado: simple).
                     Container(
                       padding: const EdgeInsets.all(16),
                       decoration: BoxDecoration(
-                        color: TColors.amberLight,
+                        color: LoanUi.primarySoft,
                         borderRadius: BorderRadius.circular(16),
                         border: Border.all(
-                          color: TColors.amber.withValues(alpha: 0.3),
+                          color: LoanUi.primary.withValues(alpha: 0.18),
                         ),
                       ),
                       child: Row(
@@ -328,13 +309,14 @@ class _NewLoansScreenState extends State<NewLoansScreen> {
                           Container(
                             width: 44,
                             height: 44,
+                            alignment: Alignment.center,
                             decoration: BoxDecoration(
-                              color: TColors.amber.withValues(alpha: 0.25),
+                              color: LoanUi.primary.withValues(alpha: 0.12),
                               shape: BoxShape.circle,
                             ),
                             child: const Icon(
-                              Icons.percent,
-                              color: TColors.amber,
+                              Icons.percent_rounded,
+                              color: LoanUi.primary,
                               size: 20,
                             ),
                           ),
@@ -343,10 +325,10 @@ class _NewLoansScreenState extends State<NewLoansScreen> {
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                Text(
+                                const Text(
                                   'TIPO DE INTERÉS',
                                   style: TextStyle(
-                                    color: TColors.textSecondary1,
+                                    color: LoanUi.textSecondary,
                                     fontSize: 11,
                                     fontWeight: FontWeight.w600,
                                     letterSpacing: 0.8,
@@ -356,7 +338,7 @@ class _NewLoansScreenState extends State<NewLoansScreen> {
                                 Text(
                                   tipoInteres,
                                   style: const TextStyle(
-                                    color: TColors.textPrimaryWhite,
+                                    color: LoanUi.textPrimary,
                                     fontSize: 16,
                                     fontWeight: FontWeight.bold,
                                   ),
@@ -366,28 +348,29 @@ class _NewLoansScreenState extends State<NewLoansScreen> {
                           ),
                           const Icon(
                             Icons.lock_outline,
-                            color: TColors.textSecondary1,
+                            color: LoanUi.muted,
                             size: 20,
                           ),
                         ],
                       ),
                     ),
                     const SizedBox(height: 16),
+                    // Nota informativa.
                     Container(
                       padding: const EdgeInsets.all(16),
                       decoration: BoxDecoration(
-                        color: TColors.amberLight,
+                        color: LoanUi.primarySoft,
                         borderRadius: BorderRadius.circular(16),
                         border: Border.all(
-                          color: TColors.amber.withValues(alpha: 0.2),
+                          color: LoanUi.primary.withValues(alpha: 0.12),
                         ),
                       ),
                       child: Row(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           const Icon(
-                            Icons.info_outline,
-                            color: TColors.amber,
+                            Icons.info_outline_rounded,
+                            color: LoanUi.primary,
                             size: 22,
                           ),
                           const SizedBox(width: 12),
@@ -395,7 +378,7 @@ class _NewLoansScreenState extends State<NewLoansScreen> {
                             child: RichText(
                               text: const TextSpan(
                                 style: TextStyle(
-                                  color: TColors.textSecondary1,
+                                  color: LoanUi.textSecondary,
                                   fontSize: 13,
                                   height: 1.5,
                                 ),
@@ -407,7 +390,7 @@ class _NewLoansScreenState extends State<NewLoansScreen> {
                                     text: 'interés simple',
                                     style: TextStyle(
                                       fontWeight: FontWeight.bold,
-                                      color: TColors.textPrimaryWhite,
+                                      color: LoanUi.textPrimary,
                                     ),
                                   ),
                                   TextSpan(
@@ -430,73 +413,59 @@ class _NewLoansScreenState extends State<NewLoansScreen> {
           bottomNavigationBar: SafeArea(
             child: Padding(
               padding: const EdgeInsets.fromLTRB(20, 8, 20, 16),
-              child: SizedBox(
-                height: 52,
-                child: ElevatedButton.icon(
-                  onPressed: () async {
-                    if (prestamista.text.isEmpty ) {
-                      CustomAlert.show(
-                        context,
-                        title: 'Error',
-                        message: 'Por favor ingrese el nombre del prestamista.',
-                        type: AlertType.error,
-                      );
-                      return;
-                    }
-                    if (_monto.text.isEmpty ||
-                        int.tryParse(_monto.text.replaceAll(',', '')) == null) {
-                      CustomAlert.show(
-                        context,
-                        title: 'Error',
-                        message: 'Por favor ingresa un monto válido.',
-                        type: AlertType.error,
-                      );
-                      return;
-                    }
-                    if (_plazo.text.isEmpty ||
-                        int.tryParse(_plazo.text) == null) {
-                      CustomAlert.show(
-                        context,
-                        title: 'Error',
-                        message: 'Por favor ingresa un plazo válido.',
-                        type: AlertType.error,
-                      );
-                      return;
-                    }
-                    if (tasa.text.isEmpty ) {
-                      CustomAlert.show(
-                        context,
-                        title: 'Error',
-                        message: 'Por favor ingresa una tasa de interés válida.',
-                        type: AlertType.error,
-                      );
-                      return;
-                    }
-                    _treasuryBloc.add(
-                      NewLoansSimulateEvent(
-                        amount:
-                            double.tryParse(_monto.text.replaceAll(',', '')) ??
-                            0.0,
-                        termMonths: int.tryParse(_plazo.text) ?? 0,
-                        annualInterestRate: tasa.text,
-                        startDate: _fechaInicio.toIso8601String(),
-                      ),
+              child: LoanPrimaryButton(
+                label: 'Simular Préstamo',
+                icon: Icons.grid_view_rounded,
+                onPressed: () {
+                  if (prestamista.text.isEmpty) {
+                    CustomAlert.show(
+                      context,
+                      title: 'Error',
+                      message: 'Por favor ingrese el nombre del prestamista.',
+                      type: AlertType.error,
                     );
-                  },
-                  icon: const Icon(Icons.grid_view_rounded, size: 20),
-                  label: const Text(
-                    'Simular Préstamo',
-                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                  ),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: TColors.amber,
-                    foregroundColor: Colors.black,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(14),
+                    return;
+                  }
+                  if (_monto.text.isEmpty ||
+                      int.tryParse(_monto.text.replaceAll(',', '')) == null) {
+                    CustomAlert.show(
+                      context,
+                      title: 'Error',
+                      message: 'Por favor ingresa un monto válido.',
+                      type: AlertType.error,
+                    );
+                    return;
+                  }
+                  if (_plazo.text.isEmpty ||
+                      int.tryParse(_plazo.text) == null) {
+                    CustomAlert.show(
+                      context,
+                      title: 'Error',
+                      message: 'Por favor ingresa un plazo válido.',
+                      type: AlertType.error,
+                    );
+                    return;
+                  }
+                  if (tasa.text.isEmpty) {
+                    CustomAlert.show(
+                      context,
+                      title: 'Error',
+                      message: 'Por favor ingresa una tasa de interés válida.',
+                      type: AlertType.error,
+                    );
+                    return;
+                  }
+                  _treasuryBloc.add(
+                    NewLoansSimulateEvent(
+                      amount:
+                          double.tryParse(_monto.text.replaceAll(',', '')) ??
+                          0.0,
+                      termMonths: int.tryParse(_plazo.text) ?? 0,
+                      annualInterestRate: tasa.text,
+                      startDate: _fechaInicio.toIso8601String(),
                     ),
-                    elevation: 0,
-                  ),
-                ),
+                  );
+                },
               ),
             ),
           ),
@@ -505,27 +474,14 @@ class _NewLoansScreenState extends State<NewLoansScreen> {
     );
   }
 
-  Widget _sectionHeader(IconData icon, String title) {
-    return Row(
-      children: [
-        Icon(icon, color: TColors.amber, size: 22),
-        const SizedBox(width: 8),
-        Text(
-          title,
-          style: const TextStyle(
-            color: TColors.textPrimaryWhite,
-            fontSize: 16,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-      ],
-    );
-  }
-
   Widget _label(String text) {
     return Text(
       text,
-      style: const TextStyle(color: TColors.textSecondary1, fontSize: 13),
+      style: const TextStyle(
+        color: LoanUi.textSecondary,
+        fontSize: 13,
+        fontWeight: FontWeight.w500,
+      ),
     );
   }
 }

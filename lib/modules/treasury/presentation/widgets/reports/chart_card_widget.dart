@@ -20,6 +20,7 @@ class _ChartCardWidgetState extends State<ChartCardWidget> {
 
   static const _blueColor = Color(0xFF2563EB);
   static const _orangeColor = Color(0xFFF97316);
+  static const _greenColor = Color(0xFF10B981);
 
   static const double _leftReserved = 56;
   static const double _bottomReserved = 28;
@@ -286,6 +287,28 @@ class _ChartCardWidgetState extends State<ChartCardWidget> {
                   lineTouchData: const LineTouchData(enabled: false),
                   gridData: const FlGridData(show: false),
                   borderData: FlBorderData(show: false),
+                  lineBarsData: [
+                    LineChartBarData(
+                      spots: [
+                        for (int i = 0; i < n; i++)
+                          FlSpot(i.toDouble(), data[i].margen),
+                      ],
+                      isCurved: true,
+                      preventCurveOverShooting: true,
+                      color: _greenColor,
+                      barWidth: 2.5,
+                      dotData: FlDotData(
+                        show: true,
+                        getDotPainter: (spot, percent, bar, index) =>
+                            FlDotCirclePainter(
+                              radius: 3,
+                              color: Colors.white,
+                              strokeWidth: 2,
+                              strokeColor: _greenColor,
+                            ),
+                      ),
+                    ),
+                  ],
                   titlesData: FlTitlesData(
                     leftTitles: AxisTitles(
                       sideTitles: SideTitles(
@@ -316,8 +339,38 @@ class _ChartCardWidgetState extends State<ChartCardWidget> {
     return Row(
       children: [
         _barLegend(context, _blueColor, 'Ingresos', colors),
-        const SizedBox(width: 20),
+        const SizedBox(width: 18),
         _barLegend(context, _orangeColor, 'Egresos', colors),
+        const SizedBox(width: 18),
+        _lineLegend(context, _greenColor, 'Margen', colors),
+      ],
+    );
+  }
+
+  Widget _lineLegend(
+    BuildContext context,
+    Color color,
+    String label,
+    ColorScheme colors,
+  ) {
+    return Row(
+      children: [
+        Container(
+          width: 14,
+          height: 3,
+          decoration: BoxDecoration(
+            color: color,
+            borderRadius: BorderRadius.circular(2),
+          ),
+        ),
+        const SizedBox(width: 5),
+        Text(
+          label,
+          style: AppTextStyles.mainStyle10(context).copyWith(
+            color: colors.lead.withValues(alpha: 0.75),
+            fontWeight: FontWeight.w500,
+          ),
+        ),
       ],
     );
   }

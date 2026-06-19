@@ -32,4 +32,11 @@ abstract class MachineryRepository {
     int page = 1,
     int limit = 10,
   });
+
+  Future<void> updateMachinery(UpdateMachineryRequestEntity request);
+
+  Future<void> changeMachineryStatus({
+    required String machineId,
+    required String status,
+  });
 }

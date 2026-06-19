@@ -100,17 +100,17 @@ class _MemberCardState extends State<MemberCard> {
           curr is! PayDividendError,
       builder: (context, state) {
         return Container(
-          margin: const EdgeInsets.only(bottom: 10),
-          padding: const EdgeInsets.all(14),
+          margin: const EdgeInsets.only(bottom: 12),
+          padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
             color: TColors.surface,
-            borderRadius: BorderRadius.circular(14),
+            borderRadius: BorderRadius.circular(16),
             border: Border.all(color: TColors.border),
             boxShadow: [
               BoxShadow(
-                color: TColors.textPrimary.withValues(alpha: 0.03),
-                blurRadius: 6,
-                offset: const Offset(0, 2),
+                color: TColors.textPrimary.withValues(alpha: 0.04),
+                blurRadius: 12,
+                offset: const Offset(0, 4),
               ),
             ],
           ),
@@ -253,19 +253,30 @@ class _StatusBadge extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
       decoration: BoxDecoration(
-        color: TColors.surface,
-        borderRadius: BorderRadius.circular(6),
-        border: Border.all(color: color),
+        color: color.withValues(alpha: 0.10),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: color.withValues(alpha: 0.30)),
       ),
-      child: Text(
-        label,
-        style: TextStyle(
-          color: color,
-          fontSize: 11,
-          fontWeight: FontWeight.w600,
-        ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Container(
+            width: 6,
+            height: 6,
+            decoration: BoxDecoration(color: color, shape: BoxShape.circle),
+          ),
+          const SizedBox(width: 6),
+          Text(
+            label,
+            style: TextStyle(
+              color: color,
+              fontSize: 11,
+              fontWeight: FontWeight.w700,
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -290,13 +301,14 @@ class _AmountColumn extends StatelessWidget {
             letterSpacing: 0.4,
           ),
         ),
-        const SizedBox(height: 2),
+        const SizedBox(height: 3),
         Text(
           value,
           style: const TextStyle(
             color: TColors.textPrimary,
-            fontSize: 13,
-            fontWeight: FontWeight.w700,
+            fontSize: 16,
+            fontWeight: FontWeight.w800,
+            letterSpacing: -0.3,
           ),
         ),
       ],
@@ -310,18 +322,19 @@ class _PayButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ElevatedButton(
+    return ElevatedButton.icon(
       onPressed: onPressed,
       style: ElevatedButton.styleFrom(
         backgroundColor: TColors.primary,
         foregroundColor: TColors.white,
         elevation: 0,
-        padding: const EdgeInsets.symmetric(horizontal: 22, vertical: 10),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 11),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
         minimumSize: Size.zero,
         tapTargetSize: MaterialTapTargetSize.shrinkWrap,
       ),
-      child: const Text(
+      icon: const Icon(Icons.payments_outlined, size: 16),
+      label: const Text(
         'Pagar',
         style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700),
       ),

@@ -15,17 +15,31 @@ class RequestHistoryModelAdmin extends RequestHistoryEntity {
   });
 
   factory RequestHistoryModelAdmin.fromJson(Map<String, dynamic> json) {
+    // Coerción segura: el backend puede enviar null o tipos distintos a String.
+    String str(dynamic v, [String def = '']) => v == null ? def : v.toString();
+    String? strN(dynamic v) => v?.toString();
+
+    final montoRaw = json['monto'];
+    final double monto = montoRaw is num
+        ? montoRaw.toDouble()
+        : double.tryParse(str(montoRaw)) ?? 0.0;
+
     return RequestHistoryModelAdmin(
-      requestId: json['request_id'] as String? ?? '',
-      fechaDecision: DateTime.tryParse(json['fecha_decision'] ?? json['updated_at'] ?? '') ?? DateTime.now(),
-      solicitante: json['solicitante'] as String? ?? 'Desconocido',
-      rol: json['rol'] as String? ?? '',
-      descripcion: json['descripcion'] as String? ?? '',
-      monto: (json['monto'] as num?)?.toDouble() ?? 0.0,
-      evidenciaUrl: json['evidencia_url'] as String?,
-      estadoGlobalActual: json['estado_global_actual'] ?? json['status'] ?? 'UNKNOWN',
-      motivoRechazo: json['motivo_rechazo'] as String?,
-       decisionTomada: json['decision_tomada'],
+      requestId: str(json['request_id']),
+      fechaDecision: DateTime.tryParse(
+            str(json['fecha_decision'], str(json['updated_at'])),
+          ) ??
+          DateTime.now(),
+      solicitante: str(json['solicitante'], 'Desconocido'),
+      rol: str(json['rol']),
+      descripcion: str(json['descripcion']),
+      monto: monto,
+      evidenciaUrl: strN(json['evidencia_url']),
+      estadoGlobalActual: json['estado_global_actual'] != null
+          ? str(json['estado_global_actual'])
+          : str(json['status'], 'UNKNOWN'),
+      motivoRechazo: strN(json['motivo_rechazo']),
+      decisionTomada: str(json['decision_tomada']),
     );
   }
 

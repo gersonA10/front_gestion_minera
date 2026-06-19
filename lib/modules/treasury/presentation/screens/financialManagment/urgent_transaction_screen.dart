@@ -22,10 +22,20 @@ class UrgentTransactionScreen extends StatelessWidget {
 
 
           return Scaffold(
+            backgroundColor: const Color(0xFFF5F7FB),
             appBar: AppBar(
-              title: const Text('Registro Urgente'),
-              centerTitle: true,
+              backgroundColor: const Color(0xFFF5F7FB),
+              surfaceTintColor: const Color(0xFFF5F7FB),
               elevation: 0,
+              centerTitle: true,
+              title: const Text(
+                'Registro urgente',
+                style: TextStyle(
+                  color: Color(0xFF0D1B3E),
+                  fontWeight: FontWeight.w800,
+                  fontSize: 18,
+                ),
+              ),
             ),
             body: AppLoadingOverlay(
               isLoading: isLoading,

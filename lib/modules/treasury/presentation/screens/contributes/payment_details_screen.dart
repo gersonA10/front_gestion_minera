@@ -3,7 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:front_gestion_minera/injector_container.dart';
 import 'package:front_gestion_minera/modules/treasury/presentation/bloc/treasury_bloc.dart';
-import 'package:front_gestion_minera/utils/constants/color.constant.dart';
+import 'package:intl/intl.dart';
+import 'contributes_ui.dart';
 
 @RoutePage()
 class PaymentConfirmationScreen extends StatefulWidget {
@@ -42,32 +43,25 @@ class _PaymentConfirmationScreenState extends State<PaymentConfirmationScreen> {
           if (!didPop) context.router.back();
         },
         child: Scaffold(
-          backgroundColor: TColors.appBackgroundColor,
-          appBar: AppBar(
-            backgroundColor: TColors.lightContainerAccount,
-            elevation: 0,
-            automaticallyImplyLeading: false,
-            title: const Text(
-              'Confirmación',
-              style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.w700,
-                color: TColors.appMainTextColor,
-              ),
-            ),
-            centerTitle: true,
+          backgroundColor: CUi.bg,
+          appBar: contribAppBar(
+            context,
+            title: 'Comprobante de pago',
+            showBack: false,
           ),
           body: BlocBuilder<TreasuryBloc, TreasuryState>(
             builder: (context, state) {
               if (state is ContributionPaymentReceiptLoading) {
-                return const Center(child: CircularProgressIndicator());
+                return const Center(
+                  child: CircularProgressIndicator(color: CUi.primary),
+                );
               }
               if (state is ContributionPaymentReceiptError) {
-                return Center(
-                  child: Text(
-                    state.message,
-                    style: const TextStyle(color: Colors.red),
-                  ),
+                return CStateView(
+                  icon: Icons.cloud_off_rounded,
+                  color: CUi.danger,
+                  title: 'No pudimos cargar el comprobante',
+                  subtitle: state.message,
                 );
               }
               if (state is ContributionPaymentReceiptLoaded) {
@@ -84,16 +78,17 @@ class _PaymentConfirmationScreenState extends State<PaymentConfirmationScreen> {
                           crossAxisAlignment: CrossAxisAlignment.center,
                           children: [
                             Container(
-                              width: 72,
-                              height: 72,
+                              width: 76,
+                              height: 76,
+                              alignment: Alignment.center,
                               decoration: BoxDecoration(
-                                color: TColors.green.withValues(alpha: 0.12),
+                                color: CUi.success.withValues(alpha: 0.12),
                                 shape: BoxShape.circle,
                               ),
                               child: const Icon(
                                 Icons.check_circle_outline_rounded,
-                                color: TColors.green,
-                                size: 42,
+                                color: CUi.success,
+                                size: 44,
                               ),
                             ),
                             const SizedBox(height: 16),
@@ -102,7 +97,7 @@ class _PaymentConfirmationScreenState extends State<PaymentConfirmationScreen> {
                               style: TextStyle(
                                 fontSize: 22,
                                 fontWeight: FontWeight.w800,
-                                color: TColors.appMainTextColor,
+                                color: CUi.textPrimary,
                               ),
                             ),
                             const SizedBox(height: 6),
@@ -111,7 +106,7 @@ class _PaymentConfirmationScreenState extends State<PaymentConfirmationScreen> {
                               textAlign: TextAlign.center,
                               style: const TextStyle(
                                 fontSize: 13,
-                                color: TColors.appSecondaryTextColor,
+                                color: CUi.textSecondary,
                               ),
                             ),
                             const SizedBox(height: 24),
@@ -128,7 +123,7 @@ class _PaymentConfirmationScreenState extends State<PaymentConfirmationScreen> {
                               registeredBy: receipt.registeredBy,
                               observation: receipt.observation,
                             ),
-                            const SizedBox(height: 32),
+                            const SizedBox(height: 24),
                           ],
                         ),
                       ),
@@ -136,34 +131,23 @@ class _PaymentConfirmationScreenState extends State<PaymentConfirmationScreen> {
                     SafeArea(
                       child: Padding(
                         padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
-                        child: SizedBox(
-                          width: double.infinity,
-                          height: 52,
-                          child: OutlinedButton(
-                            onPressed: () {
-                              if (widget.screen) {
-                                context.router.back();
-                              } else {
-                                context.router.back();
-                              }
-                            },
-                            style: OutlinedButton.styleFrom(
-                              side: const BorderSide(
-                                color: TColors.appSurfaceColor,
-                              ),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(14),
+                        child: Row(
+                          children: [
+                            Expanded(
+                              child: COutlinedButton(
+                                label: 'Volver al detalle',
+                                onPressed: () => context.router.back(),
                               ),
                             ),
-                            child: const Text(
-                              'Volver al Detalle',
-                              style: TextStyle(
-                                fontSize: 14,
-                                fontWeight: FontWeight.w600,
-                                color: TColors.appMainTextColor,
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: CPrimaryButton(
+                                label: 'Ir al inicio',
+                                icon: Icons.home_rounded,
+                                onPressed: () => CUi.goHome(context),
                               ),
                             ),
-                          ),
+                          ],
                         ),
                       ),
                     ),
@@ -191,46 +175,55 @@ class TotalPagadoCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final fmt = NumberFormat('#,##0.00', 'es_PE');
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 20),
       decoration: BoxDecoration(
-        color: TColors.green,
-        borderRadius: BorderRadius.circular(16),
+        color: CUi.success,
+        borderRadius: BorderRadius.circular(18),
+        boxShadow: [
+          BoxShadow(
+            color: CUi.success.withValues(alpha: 0.28),
+            blurRadius: 18,
+            offset: const Offset(0, 10),
+          ),
+        ],
       ),
       child: Column(
         children: [
-          const Text(
+          Text(
             'TOTAL PAGADO',
             style: TextStyle(
               fontSize: 11,
-              fontWeight: FontWeight.w600,
-              color: TColors.white,
+              fontWeight: FontWeight.w700,
+              color: Colors.white.withValues(alpha: 0.9),
               letterSpacing: 1.2,
             ),
           ),
           const SizedBox(height: 10),
           Text(
-            'Bs ${amountPaid.toStringAsFixed(2)}',
+            'Bs ${fmt.format(amountPaid)}',
             style: const TextStyle(
               fontSize: 32,
               fontWeight: FontWeight.w800,
-              color: TColors.white,
+              color: Colors.white,
+              letterSpacing: -0.5,
             ),
           ),
           const SizedBox(height: 14),
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
             decoration: BoxDecoration(
-              color: TColors.white.withValues(alpha: 0.20),
+              color: Colors.white.withValues(alpha: 0.20),
               borderRadius: BorderRadius.circular(20),
             ),
             child: Text(
-              'ID: ${transactionId.substring(0, 8).toUpperCase()}',
+              'ID: ${transactionId.length >= 8 ? transactionId.substring(0, 8).toUpperCase() : transactionId.toUpperCase()}',
               style: const TextStyle(
                 fontSize: 12,
-                fontWeight: FontWeight.w600,
-                color: TColors.white,
+                fontWeight: FontWeight.w700,
+                color: Colors.white,
               ),
             ),
           ),
@@ -265,20 +258,8 @@ class DetalleCard extends StatelessWidget {
     final formattedTime =
         '${paymentDate.hour.toString().padLeft(2, '0')}:${paymentDate.minute.toString().padLeft(2, '0')}';
 
-    return Container(
-      width: double.infinity,
-      decoration: BoxDecoration(
-        color: TColors.lightContainerAccount,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: TColors.appSurfaceColor),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.04),
-            blurRadius: 8,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
+    return CCard(
+      padding: EdgeInsets.zero,
       child: Column(
         children: [
           Padding(
@@ -286,52 +267,52 @@ class DetalleCard extends StatelessWidget {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Text(
-                      'SOCIO',
-                      style: TextStyle(
-                        fontSize: 11,
-                        fontWeight: FontWeight.w600,
-                        color: TColors.appSecondaryTextColor,
-                        letterSpacing: 0.8,
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text(
+                        'SOCIO',
+                        style: TextStyle(
+                          fontSize: 11,
+                          fontWeight: FontWeight.w700,
+                          color: CUi.textSecondary,
+                          letterSpacing: 0.8,
+                        ),
                       ),
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      paidBy,
-                      style: const TextStyle(
-                        fontSize: 15,
-                        fontWeight: FontWeight.w700,
-                        color: TColors.appMainTextColor,
+                      const SizedBox(height: 4),
+                      Text(
+                        paidBy,
+                        style: const TextStyle(
+                          fontSize: 15,
+                          fontWeight: FontWeight.w800,
+                          color: CUi.textPrimary,
+                        ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
                 Container(
-                  width: 38,
-                  height: 38,
+                  width: 40,
+                  height: 40,
+                  alignment: Alignment.center,
                   decoration: BoxDecoration(
-                    color: TColors.appSurfaceColor,
+                    color: CUi.primarySoft,
                     borderRadius: BorderRadius.circular(10),
                   ),
                   child: const Icon(
-                    Icons.person_outline,
+                    Icons.person_outline_rounded,
                     size: 20,
-                    color: TColors.appSecondaryTextColor,
+                    color: CUi.primary,
                   ),
                 ),
               ],
             ),
           ),
-
-          // Divisor punteado
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16),
-            child: DashedDivider(),
+          const Padding(
+            padding: EdgeInsets.symmetric(horizontal: 16),
+            child: Divider(color: CUi.border, height: 1),
           ),
-
           Padding(
             padding: const EdgeInsets.fromLTRB(16, 14, 16, 16),
             child: Column(
@@ -372,10 +353,7 @@ class DetalleRow extends StatelessWidget {
           flex: 2,
           child: Text(
             label,
-            style: const TextStyle(
-              fontSize: 13,
-              color: TColors.appSecondaryTextColor,
-            ),
+            style: const TextStyle(fontSize: 13, color: CUi.textSecondary),
           ),
         ),
         const SizedBox(width: 12),
@@ -386,37 +364,12 @@ class DetalleRow extends StatelessWidget {
             textAlign: TextAlign.right,
             style: const TextStyle(
               fontSize: 13,
-              fontWeight: FontWeight.w600,
-              color: TColors.appMainTextColor,
+              fontWeight: FontWeight.w700,
+              color: CUi.textPrimary,
             ),
           ),
         ),
       ],
-    );
-  }
-}
-
-class DashedDivider extends StatelessWidget {
-  const DashedDivider({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        const dashWidth = 6.0;
-        const dashSpace = 4.0;
-        final count = (constraints.maxWidth / (dashWidth + dashSpace)).floor();
-        return Row(
-          children: List.generate(count, (_) {
-            return Container(
-              width: dashWidth,
-              height: 1,
-              margin: const EdgeInsets.only(right: dashSpace),
-              color: TColors.appSurfaceColor,
-            );
-          }),
-        );
-      },
     );
   }
 }

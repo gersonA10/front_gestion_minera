@@ -3,14 +3,15 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:front_gestion_minera/config/router/app_router.dart';
 import 'package:front_gestion_minera/config/router/app_router.gr.dart';
-import 'package:front_gestion_minera/core/widgets/logout_button_widget.dart';
 import 'package:front_gestion_minera/injector_container.dart';
 import 'package:front_gestion_minera/utils/greeting_util.dart';
+import 'package:front_gestion_minera/utils/session/session_actions.dart';
 import 'package:front_gestion_minera/utils/session/user_session.dart';
 
 class _AppColors {
   static const primary = Color(0xFF1A56FF);
-  static const primaryLight = Color(0xFFEEF2FF);
+  static const primaryDeep = Color(0xFF0B33B8);
+  static const gold = Color(0xFFEFC805);
   static const surface = Color(0xFFFFFFFF);
   static const background = Color(0xFFF5F7FB);
   static const textPrimary = Color(0xFF0D1B3E);
@@ -144,7 +145,7 @@ class _PartnersScreenState extends State<PartnersScreen>
     SystemChrome.setSystemUIOverlayStyle(
       const SystemUiOverlayStyle(
         statusBarColor: Colors.transparent,
-        statusBarIconBrightness: Brightness.dark,
+        statusBarIconBrightness: Brightness.light,
       ),
     );
 
@@ -155,13 +156,26 @@ class _PartnersScreenState extends State<PartnersScreen>
         child: CustomScrollView(
           physics: const ClampingScrollPhysics(),
           slivers: [
-            _buildSliverHeader(context),
+            const _GradientHeader(),
+            const SliverToBoxAdapter(
+              child: Padding(
+                padding: EdgeInsets.fromLTRB(22, 22, 22, 12),
+                child: Text(
+                  'Accesos rápidos',
+                  style: TextStyle(
+                    fontSize: 15,
+                    fontWeight: FontWeight.w800,
+                    color: _AppColors.textPrimary,
+                    letterSpacing: -0.3,
+                  ),
+                ),
+              ),
+            ),
             SliverPadding(
-              padding: const EdgeInsets.fromLTRB(20, 8, 20, 32),
+              padding: const EdgeInsets.fromLTRB(20, 0, 20, 32),
               sliver: SliverGrid(
                 delegate: SliverChildBuilderDelegate((context, index) {
                   final item = items[index];
-                  // Last item full width if odd count
                   return _MenuCard(
                     item: item,
                     delay: Duration(milliseconds: 60 * index),
@@ -171,7 +185,7 @@ class _PartnersScreenState extends State<PartnersScreen>
                   crossAxisCount: 2,
                   mainAxisSpacing: 14,
                   crossAxisSpacing: 14,
-                  childAspectRatio: 1.05,
+                  childAspectRatio: 1.02,
                 ),
               ),
             ),
@@ -181,98 +195,217 @@ class _PartnersScreenState extends State<PartnersScreen>
       ),
     );
   }
+}
 
-  Widget _buildSliverHeader(BuildContext context) {
+// ─── Header con degradado curvo y decoración ───────────────────────────────────
+
+class _GradientHeader extends StatelessWidget {
+  const _GradientHeader();
+
+  Widget _circle(double size, Color color) => Container(
+    width: size,
+    height: size,
+    decoration: BoxDecoration(shape: BoxShape.circle, color: color),
+  );
+
+  @override
+  Widget build(BuildContext context) {
     return SliverToBoxAdapter(
       child: Container(
-        decoration: const BoxDecoration(
-          color: _AppColors.surface,
-          border: Border(
-            bottom: BorderSide(color: _AppColors.border, width: 1),
+        decoration: BoxDecoration(
+          gradient: const LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [_AppColors.primary, _AppColors.primaryDeep],
           ),
+          borderRadius: const BorderRadius.vertical(
+            bottom: Radius.circular(30),
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: _AppColors.primary.withValues(alpha: 0.35),
+              blurRadius: 24,
+              offset: const Offset(0, 12),
+            ),
+          ],
         ),
-        child: SafeArea(
-          bottom: false,
-          child: Padding(
-            padding: const EdgeInsets.fromLTRB(20, 12, 20, 20),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // Top bar
-                Row(
+        clipBehavior: Clip.antiAlias,
+        child: Stack(
+          children: [
+            // Círculos decorativos
+            Positioned(
+              top: -36,
+              right: -28,
+              child: _circle(140, Colors.white.withValues(alpha: 0.08)),
+            ),
+            Positioned(
+              top: 44,
+              right: 48,
+              child: _circle(70, _AppColors.gold.withValues(alpha: 0.18)),
+            ),
+            Positioned(
+              bottom: -50,
+              left: -30,
+              child: _circle(120, Colors.white.withValues(alpha: 0.05)),
+            ),
+            SafeArea(
+              bottom: false,
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(20, 14, 20, 26),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // Avatar
+                    // Top bar
+                    Row(
+                      children: [
+                        // Avatar glass
+                        Container(
+                          width: 46,
+                          height: 46,
+                          decoration: BoxDecoration(
+                            color: Colors.white.withValues(alpha: 0.18),
+                            borderRadius: BorderRadius.circular(14),
+                            border: Border.all(
+                              color: Colors.white.withValues(alpha: 0.25),
+                            ),
+                          ),
+                          child: const Icon(
+                            Icons.account_balance_rounded,
+                            color: Colors.white,
+                            size: 23,
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                GreetingUtil.getGreeting(),
+                                style: TextStyle(
+                                  fontSize: 11,
+                                  color: Colors.white.withValues(alpha: 0.75),
+                                  fontWeight: FontWeight.w600,
+                                  letterSpacing: 0.4,
+                                ),
+                              ),
+                              const SizedBox(height: 2),
+                              Text(
+                                UserSession.userName,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: const TextStyle(
+                                  fontSize: 15,
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.w700,
+                                  letterSpacing: -0.3,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        const _GlassLogoutButton(),
+                      ],
+                    ),
+
+                    const SizedBox(height: 22),
+                    const Text(
+                      'Tigres Dorados',
+                      style: TextStyle(
+                        fontSize: 26,
+                        fontWeight: FontWeight.w800,
+                        color: Colors.white,
+                        letterSpacing: -0.6,
+                        height: 1.1,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    // Acento dorado
                     Container(
-                      width: 44,
-                      height: 44,
+                      width: 48,
+                      height: 4,
                       decoration: BoxDecoration(
-                        color: _AppColors.primaryLight,
-                        borderRadius: BorderRadius.circular(14),
-                      ),
-                      child: const Icon(
-                        Icons.account_balance_rounded,
-                        color: _AppColors.primary,
-                        size: 22,
+                        color: _AppColors.gold,
+                        borderRadius: BorderRadius.circular(4),
                       ),
                     ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            GreetingUtil.getGreeting(),
-                            style: const TextStyle(
-                              fontSize: 12,
-                              color: _AppColors.textSecondary,
-                              fontWeight: FontWeight.w500,
-                              letterSpacing: 0.2,
-                            ),
-                          ),
-                          Text(
-                            UserSession.userName,
-                            style: const TextStyle(
-                              fontSize: 15,
-                              color: _AppColors.textPrimary,
-                              fontWeight: FontWeight.w700,
-                              letterSpacing: -0.3,
-                            ),
-                          ),
-                        ],
+                    const SizedBox(height: 10),
+                    Text(
+                      'Gestión de socios financiero',
+                      style: TextStyle(
+                        fontSize: 13,
+                        color: Colors.white.withValues(alpha: 0.78),
+                        fontWeight: FontWeight.w400,
                       ),
                     ),
-                    LogoutButton(),
                   ],
                 ),
-
-                const SizedBox(height: 20),
-                const Text(
-                  'Tigres Dorados',
-                  style: TextStyle(
-                    fontSize: 24,
-                    fontWeight: FontWeight.w800,
-                    color: _AppColors.textPrimary,
-                    letterSpacing: -0.6,
-                    height: 1.1,
-                  ),
-                ),
-                const SizedBox(height: 4),
-                const Text(
-                  'Gestión de socios financiero',
-                  style: TextStyle(
-                    fontSize: 13,
-                    color: _AppColors.textSecondary,
-                    fontWeight: FontWeight.w400,
-                  ),
-                ),
-              ],
+              ),
             ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+// ─── Logout estilo glass (sobre el header de color) ─────────────────────────────
+
+class _GlassLogoutButton extends StatefulWidget {
+  const _GlassLogoutButton();
+
+  @override
+  State<_GlassLogoutButton> createState() => _GlassLogoutButtonState();
+}
+
+class _GlassLogoutButtonState extends State<_GlassLogoutButton> {
+  bool _pressing = false;
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTapDown: (_) => setState(() => _pressing = true),
+      onTapUp: (_) {
+        setState(() => _pressing = false);
+        SessionActions.logout();
+      },
+      onTapCancel: () => setState(() => _pressing = false),
+      child: AnimatedScale(
+        scale: _pressing ? 0.94 : 1.0,
+        duration: const Duration(milliseconds: 100),
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 9),
+          decoration: BoxDecoration(
+            color: Colors.white.withValues(alpha: 0.16),
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(
+              color: Colors.white.withValues(alpha: 0.28),
+              width: 1,
+            ),
+          ),
+          child: const Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(Icons.logout_rounded, color: Colors.white, size: 16),
+              SizedBox(width: 6),
+              Text(
+                'Salir',
+                style: TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w700,
+                  color: Colors.white,
+                  letterSpacing: 0.1,
+                ),
+              ),
+            ],
           ),
         ),
       ),
     );
   }
 }
+
+// ─── Tarjeta de menú ────────────────────────────────────────────────────────────
 
 class _MenuCard extends StatefulWidget {
   final _MenuItem item;
@@ -334,32 +467,76 @@ class _MenuCardState extends State<_MenuCard>
             child: Container(
               decoration: BoxDecoration(
                 color: _AppColors.surface,
-                borderRadius: BorderRadius.circular(20),
+                borderRadius: BorderRadius.circular(22),
                 border: Border.all(color: _AppColors.border, width: 1),
                 boxShadow: [
+                  // Glow tenue del color de acento
+                  BoxShadow(
+                    color: accent.withValues(alpha: 0.14),
+                    blurRadius: 18,
+                    spreadRadius: -4,
+                    offset: const Offset(0, 8),
+                  ),
                   BoxShadow(
                     color: _AppColors.cardShadow,
-                    blurRadius: 16,
+                    blurRadius: 14,
                     offset: const Offset(0, 4),
                   ),
                 ],
               ),
-              padding: const EdgeInsets.all(18),
+              padding: const EdgeInsets.all(16),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Icon container
-                  Container(
-                    width: 46,
-                    height: 46,
-                    decoration: BoxDecoration(
-                      color: accent.withOpacity(0.12),
-                      borderRadius: BorderRadius.circular(14),
-                    ),
-                    child: Icon(widget.item.icon, color: accent, size: 22),
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // Badge de ícono con degradado + glow
+                      Container(
+                        width: 48,
+                        height: 48,
+                        decoration: BoxDecoration(
+                          gradient: LinearGradient(
+                            begin: Alignment.topLeft,
+                            end: Alignment.bottomRight,
+                            colors: [
+                              accent,
+                              Color.lerp(accent, Colors.white, 0.28)!,
+                            ],
+                          ),
+                          borderRadius: BorderRadius.circular(15),
+                          boxShadow: [
+                            BoxShadow(
+                              color: accent.withValues(alpha: 0.4),
+                              blurRadius: 10,
+                              offset: const Offset(0, 4),
+                            ),
+                          ],
+                        ),
+                        child: Icon(
+                          widget.item.icon,
+                          color: Colors.white,
+                          size: 24,
+                        ),
+                      ),
+                      const Spacer(),
+                      // Chevron
+                      Container(
+                        width: 26,
+                        height: 26,
+                        decoration: BoxDecoration(
+                          color: accent.withValues(alpha: 0.1),
+                          shape: BoxShape.circle,
+                        ),
+                        child: Icon(
+                          Icons.arrow_forward_ios_rounded,
+                          color: accent,
+                          size: 12,
+                        ),
+                      ),
+                    ],
                   ),
                   const Spacer(),
-                  // Title
                   Text(
                     widget.item.title,
                     style: const TextStyle(
@@ -373,7 +550,6 @@ class _MenuCardState extends State<_MenuCard>
                     overflow: TextOverflow.ellipsis,
                   ),
                   const SizedBox(height: 3),
-                  // Subtitle
                   Text(
                     widget.item.subtitle,
                     style: const TextStyle(
@@ -383,16 +559,6 @@ class _MenuCardState extends State<_MenuCard>
                     ),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
-                  ),
-                  const SizedBox(height: 10),
-                  // Accent bottom bar
-                  Container(
-                    height: 3,
-                    width: 28,
-                    decoration: BoxDecoration(
-                      color: accent,
-                      borderRadius: BorderRadius.circular(4),
-                    ),
                   ),
                 ],
               ),

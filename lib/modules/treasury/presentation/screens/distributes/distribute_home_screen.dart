@@ -249,14 +249,44 @@ class _DistributeHomeScreenState extends State<DistributeHomeScreen> {
                                       ),
                                     )
                                   else
-                                    const Padding(
-                                      padding: EdgeInsets.only(top: 80),
+                                    Padding(
+                                      padding: const EdgeInsets.only(top: 90),
                                       child: Center(
-                                        child: Text(
-                                          'Sin registros',
-                                          style: TextStyle(
-                                              color: TColors.textSecondary,
-                                              fontSize: 13),
+                                        child: Column(
+                                          children: [
+                                            Container(
+                                              width: 72,
+                                              height: 72,
+                                              decoration: BoxDecoration(
+                                                color: TColors.primaryLight,
+                                                shape: BoxShape.circle,
+                                              ),
+                                              child: const Icon(
+                                                Icons.pie_chart_outline_rounded,
+                                                color: TColors.primary,
+                                                size: 34,
+                                              ),
+                                            ),
+                                            const SizedBox(height: 18),
+                                            const Text(
+                                              'Aún no hay dividendos',
+                                              style: TextStyle(
+                                                color: TColors.textPrimary,
+                                                fontSize: 15,
+                                                fontWeight: FontWeight.w800,
+                                              ),
+                                            ),
+                                            const SizedBox(height: 6),
+                                            const Text(
+                                              'Crea tu primer dividendo con el\nbotón "Nuevo Dividendo"',
+                                              textAlign: TextAlign.center,
+                                              style: TextStyle(
+                                                color: TColors.textSecondary,
+                                                fontSize: 13,
+                                                height: 1.5,
+                                              ),
+                                            ),
+                                          ],
                                         ),
                                       ),
                                     ),

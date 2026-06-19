@@ -6,6 +6,7 @@ import 'package:front_gestion_minera/core/widgets/custom_alert_widget.dart';
 import 'package:front_gestion_minera/core/widgets/excavator_loader.dart';
 import 'package:front_gestion_minera/injector_container.dart';
 import 'package:front_gestion_minera/modules/treasury/presentation/bloc/treasury_bloc.dart';
+import 'package:front_gestion_minera/utils/constants/color.constant.dart';
 
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
@@ -127,7 +128,7 @@ class _NewExtractionBodyState extends State<_NewExtractionBody> {
       builder: (ctx) => Container(
         padding: const EdgeInsets.fromLTRB(20, 12, 20, 20),
         decoration: const BoxDecoration(
-          color: Colors.white,
+          color: TColors.surface,
           borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
         ),
         child: Column(
@@ -137,7 +138,7 @@ class _NewExtractionBodyState extends State<_NewExtractionBody> {
               width: 40,
               height: 4,
               decoration: BoxDecoration(
-                color: const Color(0xFFE5E7EB),
+                color: TColors.border,
                 borderRadius: BorderRadius.circular(2),
               ),
             ),
@@ -147,14 +148,14 @@ class _NewExtractionBodyState extends State<_NewExtractionBody> {
               style: TextStyle(
                 fontSize: 17,
                 fontWeight: FontWeight.w700,
-                color: Color(0xFF1F2937),
+                color: TColors.textPrimary,
               ),
             ),
             const SizedBox(height: 20),
             ImageSourceOption(
               icon: Icons.camera_alt_rounded,
               label: 'Tomar foto',
-              color: const Color(0xFF3B82F6),
+              color: TColors.primary,
               onTap: () {
                 Navigator.pop(ctx);
                 _pickImage(ImageSource.camera);
@@ -164,7 +165,7 @@ class _NewExtractionBodyState extends State<_NewExtractionBody> {
             ImageSourceOption(
               icon: Icons.photo_library_rounded,
               label: 'Galería',
-              color: const Color(0xFF8B5CF6),
+              color: TColors.goldAccent,
               onTap: () {
                 Navigator.pop(ctx);
                 _pickImage(ImageSource.gallery);
@@ -197,27 +198,31 @@ class _NewExtractionBodyState extends State<_NewExtractionBody> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF8F9FB),
+      backgroundColor: TColors.background,
       appBar: AppBar(
-        backgroundColor: Colors.white,
+        backgroundColor: TColors.surface,
         elevation: 0,
         surfaceTintColor: Colors.transparent,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Color(0xFF1F2937)),
+          icon: const Icon(
+            Icons.arrow_back_ios_new_rounded,
+            color: TColors.textPrimary,
+            size: 18,
+          ),
           onPressed: () => context.router.back(),
         ),
         centerTitle: true,
         title: const Text(
           'Nueva Extracción',
           style: TextStyle(
-            color: Color(0xFF1F2937),
-            fontSize: 18,
-            fontWeight: FontWeight.w600,
+            color: TColors.textPrimary,
+            fontSize: 16,
+            fontWeight: FontWeight.w700,
           ),
         ),
         bottom: PreferredSize(
           preferredSize: const Size.fromHeight(1),
-          child: Container(color: const Color(0xFFE5E7EB), height: 1),
+          child: Container(color: TColors.border, height: 1),
         ),
       ),
       body: SafeArea(
@@ -279,7 +284,7 @@ class _NewExtractionBodyState extends State<_NewExtractionBody> {
                 ),
                 if (isLoading)
                   Container(
-                    color: Colors.black.withValues(alpha: 0.1),
+                    color: TColors.textPrimary.withValues(alpha: 0.1),
                     child: const Center(
                       child: ExcavatorLoader(),
                     ),
@@ -345,7 +350,7 @@ class _NewExtractionBodyState extends State<_NewExtractionBody> {
     }
 
     return Container(
-      color: Colors.white,
+      color: TColors.surface,
       padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
       child: Column(
         children: [
@@ -359,7 +364,7 @@ class _NewExtractionBodyState extends State<_NewExtractionBody> {
                   child: Icon(
                     Icons.chevron_left_rounded,
                     size: 24,
-                    color: Color(0xFF374151),
+                    color: TColors.textSecondary,
                   ),
                 ),
               ),
@@ -368,7 +373,7 @@ class _NewExtractionBodyState extends State<_NewExtractionBody> {
                 style: const TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.w700,
-                  color: Color(0xFF1F2937),
+                  color: TColors.textPrimary,
                 ),
               ),
               GestureDetector(
@@ -378,7 +383,7 @@ class _NewExtractionBodyState extends State<_NewExtractionBody> {
                   child: Icon(
                     Icons.chevron_right_rounded,
                     size: 24,
-                    color: Color(0xFF374151),
+                    color: TColors.textSecondary,
                   ),
                 ),
               ),
@@ -394,7 +399,7 @@ class _NewExtractionBodyState extends State<_NewExtractionBody> {
                     style: const TextStyle(
                       fontSize: 13,
                       fontWeight: FontWeight.w600,
-                      color: Color(0xFF9CA3AF),
+                      color: TColors.textSecondary,
                     ),
                   ),
                 ),
@@ -414,13 +419,13 @@ class _NewExtractionBodyState extends State<_NewExtractionBody> {
 
                   Color textColor;
                   if (!cell.isCurrentMonth) {
-                    textColor = const Color(0xFFD1D5DB);
+                    textColor = TColors.greyShade400;
                   } else if (isSelected) {
                     textColor = Colors.white;
                   } else if (!isSelectable) {
-                    textColor = const Color(0xFFD1D5DB);
+                    textColor = TColors.greyShade400;
                   } else {
-                    textColor = const Color(0xFF1F2937);
+                    textColor = TColors.textPrimary;
                   }
 
                   return Expanded(
@@ -433,7 +438,7 @@ class _NewExtractionBodyState extends State<_NewExtractionBody> {
                         margin: const EdgeInsets.all(2),
                         decoration: BoxDecoration(
                           color: isSelected
-                              ? const Color(0xFF3B82F6)
+                              ? TColors.primary
                               : Colors.transparent,
                           shape: BoxShape.circle,
                         ),
@@ -466,19 +471,20 @@ class _NewExtractionBodyState extends State<_NewExtractionBody> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         const Text(
-          'Peso Total (g)',
+          'PESO TOTAL (g)',
           style: TextStyle(
-            fontSize: 14,
-            fontWeight: FontWeight.w600,
-            color: Color(0xFF374151),
+            fontSize: 11,
+            fontWeight: FontWeight.w700,
+            color: TColors.textSecondary,
+            letterSpacing: 0.4,
           ),
         ),
         const SizedBox(height: 8),
         Container(
           decoration: BoxDecoration(
-            color: Colors.white,
+            color: TColors.surface,
             borderRadius: BorderRadius.circular(12),
-            border: Border.all(color: const Color(0xFFE5E7EB)),
+            border: Border.all(color: TColors.border),
           ),
           child: TextField(
             controller: _pesoController,
@@ -494,8 +500,8 @@ class _NewExtractionBodyState extends State<_NewExtractionBody> {
             onChanged: (_) => setState(() {}),
             style: const TextStyle(
               fontSize: 15,
-              fontWeight: FontWeight.w500,
-              color: Color(0xFF1F2937),
+              fontWeight: FontWeight.w600,
+              color: TColors.textPrimary,
             ),
             decoration: const InputDecoration(
               contentPadding: EdgeInsets.symmetric(
@@ -504,13 +510,13 @@ class _NewExtractionBodyState extends State<_NewExtractionBody> {
               ),
               border: InputBorder.none,
               hintText: '0.00',
-              hintStyle: TextStyle(color: Color(0xFFD1D5DB)),
+              hintStyle: TextStyle(color: TColors.hintColor),
               suffixIcon: Padding(
                 padding: EdgeInsets.all(10),
                 child: Icon(
                   Icons.scale_rounded,
                   size: 22,
-                  color: Color(0xFF9CA3AF),
+                  color: TColors.textSecondary,
                 ),
               ),
             ),
@@ -525,19 +531,20 @@ class _NewExtractionBodyState extends State<_NewExtractionBody> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         const Text(
-          'Pureza (%)',
+          'PUREZA (%)',
           style: TextStyle(
-            fontSize: 14,
-            fontWeight: FontWeight.w600,
-            color: Color(0xFF374151),
+            fontSize: 11,
+            fontWeight: FontWeight.w700,
+            color: TColors.textSecondary,
+            letterSpacing: 0.4,
           ),
         ),
         const SizedBox(height: 8),
         Container(
           decoration: BoxDecoration(
-            color: Colors.white,
+            color: TColors.surface,
             borderRadius: BorderRadius.circular(12),
-            border: Border.all(color: const Color(0xFFE5E7EB)),
+            border: Border.all(color: TColors.border),
           ),
           child: TextField(
             controller: _purezaController,
@@ -548,8 +555,8 @@ class _NewExtractionBodyState extends State<_NewExtractionBody> {
             onChanged: (_) => setState(() {}),
             style: const TextStyle(
               fontSize: 15,
-              fontWeight: FontWeight.w500,
-              color: Color(0xFF1F2937),
+              fontWeight: FontWeight.w600,
+              color: TColors.textPrimary,
             ),
             decoration: const InputDecoration(
               contentPadding: EdgeInsets.symmetric(
@@ -558,7 +565,7 @@ class _NewExtractionBodyState extends State<_NewExtractionBody> {
               ),
               border: InputBorder.none,
               hintText: '96',
-              hintStyle: TextStyle(color: Color(0xFFD1D5DB)),
+              hintStyle: TextStyle(color: TColors.hintColor),
               suffixIcon: Padding(
                 padding: EdgeInsets.all(10),
                 child: Text(
@@ -566,7 +573,7 @@ class _NewExtractionBodyState extends State<_NewExtractionBody> {
                   style: TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.w600,
-                    color: Color(0xFF9CA3AF),
+                    color: TColors.textSecondary,
                   ),
                 ),
               ),
@@ -586,16 +593,16 @@ class _NewExtractionBodyState extends State<_NewExtractionBody> {
       width: double.infinity,
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
-        color: const Color(0xFFF0F5FF),
+        color: TColors.primaryLight,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: const Color(0xFFDBEAFE)),
+        border: Border.all(color: TColors.primary.withValues(alpha: 0.15)),
       ),
       child: Row(
         children: [
           const Icon(
             Icons.info_outline_rounded,
             size: 18,
-            color: Color(0xFF3B82F6),
+            color: TColors.primary,
           ),
           const SizedBox(width: 10),
           Expanded(
@@ -604,7 +611,7 @@ class _NewExtractionBodyState extends State<_NewExtractionBody> {
                 style: const TextStyle(
                   fontSize: 13,
                   fontWeight: FontWeight.w400,
-                  color: Color(0xFF374151),
+                  color: TColors.textSecondary,
                   height: 1.4,
                 ),
                 children: [
@@ -613,12 +620,12 @@ class _NewExtractionBodyState extends State<_NewExtractionBody> {
                     text: '${_pesoController.text} g',
                     style: const TextStyle(
                       fontWeight: FontWeight.w700,
-                      color: Color(0xFF3B82F6),
+                      color: TColors.primary,
                     ),
                   ),
                   const TextSpan(
                     text:
-                        ' de oro puro al inventario basado en el peso y pureza indicados.',
+                        ' de oro al inventario basado en el peso y pureza indicados.',
                   ),
                 ],
               ),
@@ -637,19 +644,20 @@ class _NewExtractionBodyState extends State<_NewExtractionBody> {
           text: const TextSpan(
             children: [
               TextSpan(
-                text: 'Evidencia Fotográfica ',
+                text: 'EVIDENCIA FOTOGRÁFICA ',
                 style: TextStyle(
-                  fontSize: 14,
-                  fontWeight: FontWeight.w600,
-                  color: Color(0xFF374151),
+                  fontSize: 11,
+                  fontWeight: FontWeight.w700,
+                  color: TColors.textSecondary,
+                  letterSpacing: 0.4,
                 ),
               ),
               TextSpan(
                 text: '*',
                 style: TextStyle(
-                  fontSize: 14,
-                  fontWeight: FontWeight.w600,
-                  color: Color(0xFFEF4444),
+                  fontSize: 11,
+                  fontWeight: FontWeight.w700,
+                  color: TColors.danger,
                 ),
               ),
             ],
@@ -671,31 +679,31 @@ class _NewExtractionBodyState extends State<_NewExtractionBody> {
       width: double.infinity,
       height: 160,
       decoration: BoxDecoration(
-        color: const Color(0xFFF0F5FF),
+        color: TColors.primaryLight,
         borderRadius: BorderRadius.circular(14),
       ),
       child: CustomPaint(
         painter: DashedBorderPainter(
-          color: const Color(0xFFBFDBFE),
+          color: TColors.primary.withValues(alpha: 0.3),
           radius: 14,
         ),
         child: const Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.add_a_photo_rounded, size: 36, color: Color(0xFF93C5FD)),
+            Icon(Icons.add_a_photo_rounded, size: 36, color: TColors.primary),
             SizedBox(height: 10),
             Text(
               'Subir foto del pesaje',
               style: TextStyle(
                 fontSize: 14,
                 fontWeight: FontWeight.w600,
-                color: Color(0xFF374151),
+                color: TColors.textPrimary,
               ),
             ),
             SizedBox(height: 4),
             Text(
               'JPG, PNG hasta 5MB',
-              style: TextStyle(fontSize: 12, color: Color(0xFF9CA3AF)),
+              style: TextStyle(fontSize: 12, color: TColors.textSecondary),
             ),
           ],
         ),
@@ -711,7 +719,7 @@ class _NewExtractionBodyState extends State<_NewExtractionBody> {
           height: 200,
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(14),
-            border: Border.all(color: const Color(0xFFBFDBFE)),
+            border: Border.all(color: TColors.border),
           ),
           clipBehavior: Clip.antiAlias,
           child: Image.file(_selectedImage!, fit: BoxFit.cover),
@@ -725,7 +733,7 @@ class _NewExtractionBodyState extends State<_NewExtractionBody> {
               width: 32,
               height: 32,
               decoration: BoxDecoration(
-                color: Colors.black.withValues(alpha: 0.6),
+                color: TColors.textPrimary.withValues(alpha: 0.6),
                 shape: BoxShape.circle,
               ),
               child: const Icon(
@@ -744,7 +752,7 @@ class _NewExtractionBodyState extends State<_NewExtractionBody> {
             child: Container(
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
               decoration: BoxDecoration(
-                color: Colors.black.withValues(alpha: 0.6),
+                color: TColors.textPrimary.withValues(alpha: 0.6),
                 borderRadius: BorderRadius.circular(20),
               ),
               child: const Row(
@@ -777,11 +785,12 @@ class _NewExtractionBodyState extends State<_NewExtractionBody> {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             Text(
-              'Observaciones',
+              'OBSERVACIONES',
               style: TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.w600,
-                color: Color(0xFF374151),
+                fontSize: 11,
+                fontWeight: FontWeight.w700,
+                color: TColors.textSecondary,
+                letterSpacing: 0.4,
               ),
             ),
             Text(
@@ -789,7 +798,7 @@ class _NewExtractionBodyState extends State<_NewExtractionBody> {
               style: TextStyle(
                 fontSize: 12,
                 fontWeight: FontWeight.w400,
-                color: Color(0xFF9CA3AF),
+                color: TColors.textSecondary,
               ),
             ),
           ],
@@ -801,19 +810,19 @@ class _NewExtractionBodyState extends State<_NewExtractionBody> {
           },
           child: Container(
             decoration: BoxDecoration(
-              color: Colors.white,
+              color: TColors.surface,
               borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: const Color(0xFFE5E7EB)),
+              border: Border.all(color: TColors.border),
             ),
             child: TextField(
               controller: _observacionesController,
               maxLines: 4,
-              style: const TextStyle(fontSize: 14, color: Color(0xFF1F2937)),
+              style: const TextStyle(fontSize: 14, color: TColors.textPrimary),
               decoration: const InputDecoration(
                 contentPadding: EdgeInsets.all(14),
                 border: InputBorder.none,
                 hintText: 'Detalles adicionales sobre la extracción...',
-                hintStyle: TextStyle(color: Color(0xFFD1D5DB)),
+                hintStyle: TextStyle(color: TColors.hintColor),
               ),
             ),
           ),
@@ -829,8 +838,8 @@ class _NewExtractionBodyState extends State<_NewExtractionBody> {
       child: ElevatedButton(
         onPressed: (_isFormValid && !isLoading && !_isSubmitting) ? _submit : null,
         style: ElevatedButton.styleFrom(
-          backgroundColor: const Color(0xFF3B82F6),
-          disabledBackgroundColor: const Color(0xFFBFDBFE),
+          backgroundColor: TColors.primary,
+          disabledBackgroundColor: TColors.primary.withValues(alpha: 0.4),
           foregroundColor: Colors.white,
           disabledForegroundColor: Colors.white70,
           elevation: 0,
@@ -838,14 +847,14 @@ class _NewExtractionBodyState extends State<_NewExtractionBody> {
             borderRadius: BorderRadius.circular(14),
           ),
         ),
-        child: Row(
+        child: const Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Icon(Icons.save_rounded, size: 20),
                   SizedBox(width: 8),
                   Text(
                     'Registrar Extracción',
-                    style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600),
+                    style: TextStyle(fontSize: 15, fontWeight: FontWeight.w700),
                   ),
                 ],
               ),

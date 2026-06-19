@@ -3,8 +3,9 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:front_gestion_minera/config/router/app_router.gr.dart';
 import 'package:front_gestion_minera/injector_container.dart';
 import 'package:front_gestion_minera/modules/treasury/presentation/bloc/treasury_bloc.dart';
-import 'package:front_gestion_minera/utils/constants/color.constant.dart';
+import 'package:intl/intl.dart';
 import '../../widgets/widgtes.dart';
+import 'contributes_ui.dart';
 
 @RoutePage()
 class ContributesDetailScreen extends StatefulWidget {
@@ -26,6 +27,7 @@ class ContributesDetailScreen extends StatefulWidget {
 class _ContributesDetailScreenState extends State<ContributesDetailScreen> {
   int _selectedTab = 0;
   late final TreasuryBloc _bloc;
+  final _fmt = NumberFormat('#,##0.##', 'es_PE');
 
   @override
   void initState() {
@@ -44,190 +46,256 @@ class _ContributesDetailScreenState extends State<ContributesDetailScreen> {
           if (!didPop) context.router.back();
         },
         child: Scaffold(
-        backgroundColor: TColors.appBackgroundColor,
-        appBar: AppBar(
-          backgroundColor: TColors.lightContainerAccount,
-          elevation: 0,
-          leading: IconButton(
-            icon: const Icon(
-              Icons.arrow_back,
-              color: TColors.appMainTextColor,
-              size: 22,
-            ),
-            onPressed: () => context.router.back(),
-          ),
-          title: const Text(
-            'Detalle de Aporte',
-            style: TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.w700,
-              color: TColors.appMainTextColor,
-            ),
-          ),
-          actions: [
-            IconButton(
-              icon: const Icon(
-                Icons.history,
-                color: TColors.appMainTextColor,
-                size: 22,
+          backgroundColor: CUi.bg,
+          appBar: contribAppBar(
+            context,
+            title: 'Detalle de Aporte',
+            actions: [
+              IconButton(
+                tooltip: 'Historial de recibos',
+                icon: const Icon(Icons.history_rounded, color: CUi.textPrimary),
+                onPressed: () => context.router.push(
+                  ReceiptsHistoryRoute(contributionId: widget.contributionId),
+                ),
               ),
-              onPressed: () {context.router.push(ReceiptsHistoryRoute(contributionId: widget.contributionId));})
-          ],
-          centerTitle: true,
-        ),
-        body: BlocBuilder<TreasuryBloc, TreasuryState>(
-          buildWhen: (_, state) =>
-              state is ContributionDetailLoading ||
-              state is ContributionDetailLoaded ||
-              state is ContributionDetailError,
-          builder: (context, state) {
-            if (state is ContributionDetailLoading) {
-              return const Center(child: CircularProgressIndicator());
-            }
-            if (state is ContributionDetailError) {
-              return Center(
-                child: Text(
-                  state.message,
-                  style: const TextStyle(color: TColors.appSecondaryTextColor),
-                ),
-              );
-            }
-            if (state is ContributionDetailLoaded) {
-              final pendientes = state.membersList
-                  .where((m) => m.status.toLowerCase() == 'pendiente')
-                  .toList();
-              final pagados = state.membersList
-                  .where((m) => m.status.toLowerCase() != 'pendiente')
-                  .toList();
-              final lista = _selectedTab == 0 ? pendientes : pagados;
-              final cahs = state.cash;
+            ],
+          ),
+          body: BlocBuilder<TreasuryBloc, TreasuryState>(
+            buildWhen: (_, state) =>
+                state is ContributionDetailLoading ||
+                state is ContributionDetailLoaded ||
+                state is ContributionDetailError,
+            builder: (context, state) {
+              if (state is ContributionDetailLoading) {
+                return const Center(
+                  child: CircularProgressIndicator(color: CUi.primary),
+                );
+              }
+              if (state is ContributionDetailError) {
+                return CStateView(
+                  icon: Icons.cloud_off_rounded,
+                  color: CUi.danger,
+                  title: 'No pudimos cargar el detalle',
+                  subtitle: state.message,
+                );
+              }
+              if (state is ContributionDetailLoaded) {
+                final pendientes = state.membersList
+                    .where((m) => m.status.toLowerCase() == 'pendiente')
+                    .toList();
+                final pagados = state.membersList
+                    .where((m) => m.status.toLowerCase() != 'pendiente')
+                    .toList();
+                final lista = _selectedTab == 0 ? pendientes : pagados;
+                final cash = state.cash;
+                final h = state.headerMetrics;
+                final progress = h.totalGoal <= 0
+                    ? 0.0
+                    : (h.actualCollected / h.totalGoal).clamp(0.0, 1.0);
 
-              return SingleChildScrollView(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 16,
-                  vertical: 14,
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Container(
-                      width: double.infinity,
-                      padding: const EdgeInsets.all(16),
-                      decoration: BoxDecoration(
-                        color: TColors.lightContainerAccount,
-                        borderRadius: BorderRadius.circular(14),
-                        border: Border.all(color: TColors.appSurfaceColor),
-                        boxShadow: [
-                          BoxShadow(
-                            color: TColors.appMainColor.withValues(alpha: 0.05),
-                            blurRadius: 8,
-                            offset: const Offset(0, 2),
-                          ),
-                        ],
+                return SingleChildScrollView(
+                  padding: const EdgeInsets.fromLTRB(16, 14, 16, 28),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      _hero(h.reason, h.totalGoal, h.actualCollected,
+                          h.pendingAmount, progress),
+                      const SizedBox(height: 20),
+                      // Tabs
+                      Container(
+                        decoration: BoxDecoration(
+                          color: CUi.fieldBg,
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        padding: const EdgeInsets.all(4),
+                        child: Row(
+                          children: [
+                            TabBtnContribute(
+                              label: 'Pendientes',
+                              count: pendientes.length,
+                              active: _selectedTab == 0,
+                              onTap: () => setState(() => _selectedTab = 0),
+                            ),
+                            TabBtnContribute(
+                              label: 'Pagados',
+                              count: pagados.length,
+                              active: _selectedTab == 1,
+                              onTap: () => setState(() => _selectedTab = 1),
+                            ),
+                          ],
+                        ),
                       ),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          const Text(
-                            'Meta Total',
-                            style: TextStyle(
-                              fontSize: 13,
-                              color: TColors.appSecondaryTextColor,
-                              fontWeight: FontWeight.w500,
-                            ),
+                      const SizedBox(height: 14),
+                      if (lista.isEmpty)
+                        Padding(
+                          padding: const EdgeInsets.only(top: 24),
+                          child: CStateView(
+                            icon: _selectedTab == 0
+                                ? Icons.task_alt_rounded
+                                : Icons.people_outline_rounded,
+                            color: CUi.primary,
+                            title: _selectedTab == 0
+                                ? 'Sin pendientes'
+                                : 'Sin pagos registrados',
+                            subtitle: _selectedTab == 0
+                                ? 'Todos los socios están al día.'
+                                : 'Aún no hay socios que hayan pagado.',
                           ),
-                          const SizedBox(height: 6),
-                          Text(
-                            '${state.headerMetrics.totalGoal.toStringAsFixed(2)} Bs',
-                            style: const TextStyle(
-                              fontSize: 28,
-                              fontWeight: FontWeight.w800,
-                              color: TColors.appMainTextColor,
-                            ),
-                          ),
-                          const SizedBox(height: 4),
-                          Text(
-                            state.headerMetrics.reason,
-                            style: const TextStyle(
-                              fontSize: 12,
-                              color: TColors.appSecondaryTextColor,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    const SizedBox(height: 12),
-                    Row(
-                      children: [
-                        Expanded(
-                          child: ResumenCardContributes(
-                            label: 'RECAUDADO',
-                            amount:
-                                '${state.headerMetrics.actualCollected.toStringAsFixed(2)} Bs',
-                            accentColor: TColors.green,
+                        )
+                      else
+                        ListView.separated(
+                          shrinkWrap: true,
+                          physics: const NeverScrollableScrollPhysics(),
+                          itemCount: lista.length,
+                          separatorBuilder: (_, _) =>
+                              const SizedBox(height: 10),
+                          itemBuilder: (_, i) => SocioCard(
+                            item: lista[i],
+                            isPendiente: _selectedTab == 0,
+                            dateContibution: widget.dateContibution,
+                            titleContibuton: widget.titleContibuton,
+                            cash: cash,
                           ),
                         ),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: ResumenCardContributes(
-                            label: 'PENDIENTE',
-                            amount:
-                                '${state.headerMetrics.pendingAmount.toStringAsFixed(2)} Bs',
-                            accentColor: TColors.pendingYellow,
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 20),
-
-                    Container(
-                      decoration: BoxDecoration(
-                        color: TColors.appSurfaceColor,
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      padding: const EdgeInsets.all(4),
-                      child: Row(
-                        children: [
-                          TabBtnContribute(
-                            label: 'Pendientes',
-                            count: pendientes.length,
-                            active: _selectedTab == 0,
-                            onTap: () => setState(() => _selectedTab = 0),
-                          ),
-                          TabBtnContribute(
-                            label: 'Pagados',
-                            count: pagados.length,
-                            active: _selectedTab == 1,
-                            onTap: () => setState(() => _selectedTab = 1),
-                          ),
-                        ],
-                      ),
-                    ),
-                    const SizedBox(height: 14),
-                    ListView.separated(
-                      shrinkWrap: true,
-                      physics: const NeverScrollableScrollPhysics(),
-                      itemCount: lista.length,
-                      separatorBuilder: (_, _) => const SizedBox(height: 10),
-                      itemBuilder: (_, i) => SocioCard(
-                        item: lista[i],
-                        isPendiente: _selectedTab == 0,
-                        dateContibution: widget.dateContibution,
-                        titleContibuton: widget.titleContibuton,
-                        cash: cahs,
-                      ),
-                    ),
-                    const SizedBox(height: 100),
-                  ],
-                ),
-              );
-            }
-            return const SizedBox.shrink();
-          },
+                    ],
+                  ),
+                );
+              }
+              return const SizedBox.shrink();
+            },
+          ),
         ),
       ),
-    ),
-  );
-}
-}
+    );
+  }
 
+  // Hero con degradado: motivo, meta total, progreso y recaudado/pendiente.
+  Widget _hero(
+    String reason,
+    double goal,
+    double collected,
+    double pending,
+    double progress,
+  ) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(18),
+      decoration: BoxDecoration(
+        gradient: CUi.gradient,
+        borderRadius: BorderRadius.circular(20),
+        boxShadow: [
+          BoxShadow(
+            color: CUi.primary.withValues(alpha: 0.28),
+            blurRadius: 18,
+            offset: const Offset(0, 10),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            reason,
+            style: TextStyle(
+              fontSize: 13,
+              fontWeight: FontWeight.w600,
+              color: Colors.white.withValues(alpha: 0.85),
+            ),
+          ),
+          const SizedBox(height: 10),
+          Text(
+            'META TOTAL',
+            style: TextStyle(
+              fontSize: 10.5,
+              fontWeight: FontWeight.w700,
+              letterSpacing: 0.8,
+              color: Colors.white.withValues(alpha: 0.7),
+            ),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            '${_fmt.format(goal)} Bs',
+            style: const TextStyle(
+              fontSize: 28,
+              fontWeight: FontWeight.w800,
+              color: Colors.white,
+              letterSpacing: -0.5,
+            ),
+          ),
+          const SizedBox(height: 16),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                'Progreso de recaudación',
+                style: TextStyle(
+                  fontSize: 12,
+                  color: Colors.white.withValues(alpha: 0.85),
+                ),
+              ),
+              Text(
+                '${(progress * 100).round()}%',
+                style: const TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w800,
+                  color: Colors.white,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          ClipRRect(
+            borderRadius: BorderRadius.circular(6),
+            child: LinearProgressIndicator(
+              value: progress,
+              minHeight: 8,
+              backgroundColor: Colors.white.withValues(alpha: 0.25),
+              valueColor: const AlwaysStoppedAnimation<Color>(Colors.white),
+            ),
+          ),
+          const SizedBox(height: 16),
+          Row(
+            children: [
+              Expanded(child: _heroMini('Recaudado', collected)),
+              Container(
+                width: 1,
+                height: 38,
+                margin: const EdgeInsets.symmetric(horizontal: 16),
+                color: Colors.white.withValues(alpha: 0.18),
+              ),
+              Expanded(child: _heroMini('Pendiente', pending)),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _heroMini(String label, double value) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          label.toUpperCase(),
+          style: TextStyle(
+            fontSize: 10,
+            fontWeight: FontWeight.w700,
+            letterSpacing: 0.5,
+            color: Colors.white.withValues(alpha: 0.7),
+          ),
+        ),
+        const SizedBox(height: 4),
+        Text(
+          '${_fmt.format(value)} Bs',
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+          style: const TextStyle(
+            fontSize: 16,
+            fontWeight: FontWeight.w800,
+            color: Colors.white,
+          ),
+        ),
+      ],
+    );
+  }
+}

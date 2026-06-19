@@ -12,6 +12,7 @@ class MetricCardWidget extends StatelessWidget {
     required this.icon,
     required this.iconColor,
     this.percentage = 0.0,
+    this.subtitle,
   });
 
   final ColorScheme colors;
@@ -20,6 +21,7 @@ class MetricCardWidget extends StatelessWidget {
   final IconData icon;
   final Color iconColor;
   final double percentage;
+  final String? subtitle;
 
   @override
   Widget build(BuildContext context) {
@@ -61,13 +63,33 @@ class MetricCardWidget extends StatelessWidget {
                 ),
               ),
             ),
-            const SizedBox(height: 8),
-            // Text(
-            //   '${isPositive ? '+' : ''}${percentage != 0 ? percentage.toStringAsFixed(1) : (isPositive ? '12.5' : '-5.2')}%',
-            //   style: AppTextStyles.mainStyle10Bold(context).copyWith(
-            //     color: percentageColor,
-            //   ),
-            // ),
+            if (subtitle != null) ...[
+              const SizedBox(height: 6),
+              Row(
+                children: [
+                  Container(
+                    width: 6,
+                    height: 6,
+                    decoration: BoxDecoration(
+                      color: iconColor,
+                      shape: BoxShape.circle,
+                    ),
+                  ),
+                  const SizedBox(width: 6),
+                  Flexible(
+                    child: Text(
+                      subtitle!,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: AppTextStyles.mainStyle10(context).copyWith(
+                        color: colors.lead.withValues(alpha: 0.85),
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ],
           ],
         ),
       ),

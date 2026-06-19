@@ -148,4 +148,12 @@ class TColors {
   static const greyShade200 = Color(0xFFEEEEEE);
   static const greyShade400 = Color(0xFFBDBDBD);
   static const textGrey = Color(0xFF9E9E9E);
+
+  // Gold Inventory (Premium fintech)
+  static const goldAccent = Color(0xFFD4A017); // dorado de acento (oro)
+  static const goldAccentLight = Color(0xFFFDF6E3); // fondo dorado tenue
+  static const vaultGradientStart = Color(0xFF0C2340); // hero navy oscuro
+  static const vaultGradientEnd = Color(0xFF1A4060); // hero navy claro
+  static const primaryDark = Color(0xFF1342CC); // primario más oscuro (gradiente)
+  static const info = Color(0xFF0EA5E9); // acento informativo / parcial
 }

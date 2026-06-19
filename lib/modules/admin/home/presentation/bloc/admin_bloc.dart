@@ -234,9 +234,11 @@ class AdminBloc extends Bloc<AdminEvent, AdminState> {
         ),
       );
     } on BaseApiException catch (e) {
-      emit(
-        AdminRequestHistoryError(mapErrorMessage(e.key), _currentHistoryStatus),
-      );
+      final status = e.response?.statusCode ?? 0;
+      final msg = status >= 500
+          ? 'No se pudo cargar el historial. El servidor reportó un error, intenta más tarde.'
+          : mapErrorMessage(e.key);
+      emit(AdminRequestHistoryError(msg, _currentHistoryStatus));
     } catch (_) {
       emit(
         AdminRequestHistoryError(

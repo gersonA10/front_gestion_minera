@@ -8,6 +8,21 @@ import 'package:front_gestion_minera/injector_container.dart';
 import 'package:front_gestion_minera/modules/treasury/domain/entity/entity.dart';
 import 'package:front_gestion_minera/modules/treasury/presentation/bloc/treasury_bloc.dart';
 import 'package:front_gestion_minera/utils/constants/color.constant.dart';
+import 'package:intl/intl.dart';
+
+String _formatCurrency(double value) => NumberFormat.currency(
+      locale: 'es_BO',
+      symbol: 'Bs',
+      decimalDigits: 2,
+    ).format(value);
+
+String _formatGrams(double value) {
+  final formatter = NumberFormat.decimalPatternDigits(
+    locale: 'es_BO',
+    decimalDigits: 2,
+  );
+  return '${formatter.format(value)} g';
+}
 
 @RoutePage()
 class SellPreviewScreen extends StatelessWidget {
@@ -149,7 +164,7 @@ class _SellPreviewBody extends StatelessWidget {
                 const SizedBox(height: 32),
 
                 // ── Confirm button ─────────────────────────────────
-                TColorsonfirmButton(
+                _ConfirmButton(
                   isLoading: isLoading,
                   onTap: isLoading ? null : () => _confirm(context),
                 ),
@@ -287,12 +302,12 @@ class _SummaryCard extends StatelessWidget {
           const Divider(color: TColors.border, height: 20),
           _SummaryRow(
             label: 'Gramos a vender',
-            value: '${totalGrams.toStringAsFixed(2)} g',
+            value: _formatGrams(totalGrams),
           ),
           const Divider(color: TColors.border, height: 20),
           _SummaryRow(
             label: 'Precio por gramo',
-            value: 'Bs ${pricePerGram.toStringAsFixed(2)}',
+            value: _formatCurrency(pricePerGram),
           ),
           const Divider(color: TColors.border, height: 20),
           Row(
@@ -307,7 +322,7 @@ class _SummaryCard extends StatelessWidget {
                 ),
               ),
               Text(
-                'Bs ${_formatNum(total)}',
+                _formatCurrency(total),
                 style: const TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.w800,
@@ -319,15 +334,6 @@ class _SummaryCard extends StatelessWidget {
         ],
       ),
     );
-  }
-
-  static String _formatNum(double v) {
-    final parts = v.toStringAsFixed(2).split('.');
-    final int = parts[0].replaceAllMapped(
-      RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'),
-      (m) => '${m[1]},',
-    );
-    return '$int.${parts[1]}';
   }
 }
 
@@ -421,20 +427,20 @@ class _LotCard extends StatelessWidget {
               Expanded(
                 child: _LotStat(
                   label: 'Disponible antes',
-                  value: '${lot.disponibleAntes.toStringAsFixed(2)} g',
+                  value: _formatGrams(lot.disponibleAntes),
                 ),
               ),
               Expanded(
                 child: _LotStat(
                   label: 'A descontar',
-                  value: '${lot.gramosDescontados.toStringAsFixed(2)} g',
+                  value: _formatGrams(lot.gramosDescontados),
                   valueColor: TColors.primary,
                 ),
               ),
               Expanded(
                 child: _LotStat(
                   label: 'Restante',
-                  value: '${lot.restanteDespues.toStringAsFixed(2)} g',
+                  value: _formatGrams(lot.restanteDespues),
                   valueColor: TColors.success,
                 ),
               ),
@@ -485,21 +491,21 @@ class _LotStat extends StatelessWidget {
 }
 
 // ─── Confirm button ───────────────────────────────────────────────────────────
-class TColorsonfirmButton extends StatefulWidget {
+class _ConfirmButton extends StatefulWidget {
   final VoidCallback? onTap;
   final bool isLoading;
-  const TColorsonfirmButton({required this.onTap, required this.isLoading});
+  const _ConfirmButton({required this.onTap, required this.isLoading});
 
   @override
-  State<TColorsonfirmButton> createState() => TColorsonfirmButtonState();
+  State<_ConfirmButton> createState() => _ConfirmButtonState();
 }
 
-class TColorsonfirmButtonState extends State<TColorsonfirmButton> {
+class _ConfirmButtonState extends State<_ConfirmButton> {
   bool _pressing = false;
 
   @override
   Widget build(BuildContext context) {
-    const color = Color(0xFF16A34A);
+    const color = TColors.success;
     return GestureDetector(
       onTapDown: widget.onTap != null
           ? (_) => setState(() => _pressing = true)

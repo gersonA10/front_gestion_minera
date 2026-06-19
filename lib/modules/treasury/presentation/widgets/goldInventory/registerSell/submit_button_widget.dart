@@ -33,13 +33,13 @@ class _SubmitButtonState extends State<SubmitButton> {
           height: 54,
           width: double.infinity,
           decoration: BoxDecoration(
-            color: TColors.appMainColor.withOpacity(
-              widget.isLoading ? 0.6 : 1.0,
+            color: TColors.primary.withValues(
+              alpha: widget.isLoading ? 0.6 : 1.0,
             ),
             borderRadius: BorderRadius.circular(16),
             boxShadow: [
               BoxShadow(
-                color: TColors.appMainColor.withValues(alpha: 0.30),
+                color: TColors.primary.withValues(alpha: 0.30),
                 blurRadius: 16,
                 offset: const Offset(0, 6),
               ),

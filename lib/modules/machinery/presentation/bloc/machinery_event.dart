@@ -67,3 +67,14 @@ class LoadMoreCloseUpOfAMachineEvent extends MachineryEvent {
   final String machineId;
   LoadMoreCloseUpOfAMachineEvent({required this.machineId});
 }
+
+class UpdateMachineryEvent extends MachineryEvent {
+  final UpdateMachineryRequestEntity request;
+  UpdateMachineryEvent({required this.request});
+}
+
+class ChangeMachineryStatusEvent extends MachineryEvent {
+  final String machineId;
+  final String status;
+  ChangeMachineryStatusEvent({required this.machineId, required this.status});
+}

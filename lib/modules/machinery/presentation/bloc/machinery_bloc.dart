@@ -53,6 +53,8 @@ class MachineryBloc extends Bloc<MachineryEvent, MachineryState> {
     on<FetchFailureTypesEvent>(_onFetchFailureTypes);
     on<GetCloseUpOfAMachineEvent>(_onGetCloseUpOfAMachine);
     on<LoadMoreCloseUpOfAMachineEvent>(_onLoadMoreCloseUpOfAMachine);
+    on<UpdateMachineryEvent>(_onUpdateMachinery);
+    on<ChangeMachineryStatusEvent>(_onChangeMachineryStatus);
   }
 
   FutureOr<void> _onFetchMetricMachine(
@@ -389,6 +391,37 @@ class MachineryBloc extends Bloc<MachineryEvent, MachineryState> {
       emit(FailureTypesError('Error inesperado: $e'));
     }
   }
-    
 
+  FutureOr<void> _onUpdateMachinery(
+    UpdateMachineryEvent event,
+    Emitter<MachineryState> emit,
+  ) async {
+    emit(UpdateMachineryLoading());
+    try {
+      await repository.updateMachinery(event.request);
+      emit(UpdateMachinerySuccess());
+    } on BaseApiException catch (error) {
+      emit(UpdateMachineryError(mapErrorMessage(error.key)));
+    } catch (e) {
+      emit(UpdateMachineryError('Error inesperado: $e'));
     }
+  }
+
+  FutureOr<void> _onChangeMachineryStatus(
+    ChangeMachineryStatusEvent event,
+    Emitter<MachineryState> emit,
+  ) async {
+    emit(ChangeMachineryStatusLoading());
+    try {
+      await repository.changeMachineryStatus(
+        machineId: event.machineId,
+        status: event.status,
+      );
+      emit(ChangeMachineryStatusSuccess(event.status));
+    } on BaseApiException catch (error) {
+      emit(ChangeMachineryStatusError(mapErrorMessage(error.key)));
+    } catch (e) {
+      emit(ChangeMachineryStatusError('Error inesperado: $e'));
+    }
+  }
+}

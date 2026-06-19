@@ -1,17 +1,18 @@
-
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:front_gestion_minera/core/widgets/custom_alert_widget.dart';
+import 'package:front_gestion_minera/utils/constants/color.constant.dart';
 
 class ExtractionSuccessContent extends StatelessWidget {
   final String loteId;
   final String pesoGramos;
   final String message;
 
-  const ExtractionSuccessContent({super.key, 
+  const ExtractionSuccessContent({
+    super.key,
     required this.loteId,
     required this.pesoGramos,
-    required this.message
+    required this.message,
   });
 
   @override
@@ -20,11 +21,11 @@ class ExtractionSuccessContent extends StatelessWidget {
       width: double.infinity,
       padding: const EdgeInsets.fromLTRB(24, 28, 24, 24),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: TColors.surface,
         borderRadius: BorderRadius.circular(24),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.12),
+            color: TColors.textPrimary.withValues(alpha: 0.12),
             blurRadius: 24,
             offset: const Offset(0, 8),
           ),
@@ -36,8 +37,8 @@ class ExtractionSuccessContent extends StatelessWidget {
           Container(
             width: 80,
             height: 80,
-            decoration: BoxDecoration(
-              color: const Color(0xFFD1E4F6),
+            decoration: const BoxDecoration(
+              color: TColors.successLight,
               shape: BoxShape.circle,
             ),
             child: Center(
@@ -45,14 +46,14 @@ class ExtractionSuccessContent extends StatelessWidget {
                 width: 48,
                 height: 48,
                 decoration: BoxDecoration(
-                  color: Colors.white,
+                  color: TColors.surface,
                   shape: BoxShape.circle,
-                  border: Border.all(color: const Color(0xFF16A34A), width: 3),
+                  border: Border.all(color: TColors.success, width: 3),
                 ),
                 child: const Icon(
                   Icons.check_rounded,
                   size: 28,
-                  color: Color(0xFF16A34A),
+                  color: TColors.success,
                 ),
               ),
             ),
@@ -63,7 +64,7 @@ class ExtractionSuccessContent extends StatelessWidget {
             style: TextStyle(
               fontSize: 22,
               fontWeight: FontWeight.w800,
-              color: Color(0xFF111827),
+              color: TColors.textPrimary,
             ),
           ),
           const SizedBox(height: 10),
@@ -73,7 +74,7 @@ class ExtractionSuccessContent extends StatelessWidget {
               style: const TextStyle(
                 fontSize: 14,
                 fontWeight: FontWeight.w400,
-                color: Color(0xFF6B7280),
+                color: TColors.textSecondary,
                 height: 1.5,
               ),
               children: [
@@ -82,7 +83,7 @@ class ExtractionSuccessContent extends StatelessWidget {
                   text: '#$loteId',
                   style: const TextStyle(
                     fontWeight: FontWeight.w700,
-                    color: Color(0xFF374151),
+                    color: TColors.textPrimary,
                   ),
                 ),
                 const TextSpan(text: ' con '),
@@ -90,7 +91,7 @@ class ExtractionSuccessContent extends StatelessWidget {
                   text: '$pesoGramos gramos',
                   style: const TextStyle(
                     fontWeight: FontWeight.w700,
-                    color: Color(0xFF374151),
+                    color: TColors.textPrimary,
                   ),
                 ),
                 const TextSpan(text: ' de oro.'),
@@ -102,9 +103,9 @@ class ExtractionSuccessContent extends StatelessWidget {
             width: double.infinity,
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
             decoration: BoxDecoration(
-              color: const Color(0xFFFFFBEB),
+              color: TColors.goldAccentLight,
               borderRadius: BorderRadius.circular(14),
-              border: Border.all(color: const Color(0xFFFEF3C7)),
+              border: Border.all(color: TColors.goldAccent.withValues(alpha: 0.25)),
             ),
             child: Row(
               children: [
@@ -112,13 +113,13 @@ class ExtractionSuccessContent extends StatelessWidget {
                   width: 44,
                   height: 44,
                   decoration: BoxDecoration(
-                    color: const Color(0xFFFEF3C7),
+                    color: TColors.goldAccent.withValues(alpha: 0.15),
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: const Icon(
                     Icons.inventory_2_rounded,
                     size: 22,
-                    color: Color(0xFFD97706),
+                    color: TColors.goldAccent,
                   ),
                 ),
                 const SizedBox(width: 14),
@@ -130,9 +131,9 @@ class ExtractionSuccessContent extends StatelessWidget {
                         'ID DE LOTE',
                         style: TextStyle(
                           fontSize: 11,
-                          fontWeight: FontWeight.w600,
-                          letterSpacing: 0.5,
-                          color: Color(0xFFD97706),
+                          fontWeight: FontWeight.w700,
+                          letterSpacing: 0.4,
+                          color: TColors.goldAccent,
                         ),
                       ),
                       const SizedBox(height: 2),
@@ -141,7 +142,7 @@ class ExtractionSuccessContent extends StatelessWidget {
                         style: const TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.w700,
-                          color: Color(0xFF1F2937),
+                          color: TColors.textPrimary,
                         ),
                       ),
                     ],
@@ -154,18 +155,18 @@ class ExtractionSuccessContent extends StatelessWidget {
                       'PESO',
                       style: TextStyle(
                         fontSize: 11,
-                        fontWeight: FontWeight.w600,
-                        letterSpacing: 0.5,
-                        color: Color(0xFF9CA3AF),
+                        fontWeight: FontWeight.w700,
+                        letterSpacing: 0.4,
+                        color: TColors.textSecondary,
                       ),
                     ),
                     const SizedBox(height: 2),
                     Text(
-                      '${pesoGramos}g',
+                      '$pesoGramos g',
                       style: const TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.w700,
-                        color: Color(0xFF1F2937),
+                        color: TColors.textPrimary,
                       ),
                     ),
                   ],
@@ -180,17 +181,17 @@ class ExtractionSuccessContent extends StatelessWidget {
             child: ElevatedButton(
               onPressed: () {
                 context.router.back();
-                 WidgetsBinding.instance.addPostFrameCallback((_) {
+                WidgetsBinding.instance.addPostFrameCallback((_) {
                   CustomAlert.show(
                     context,
-                    title: 'Error',
+                    title: 'Éxito',
                     message: message,
                     type: AlertType.success,
                   );
                 });
               },
               style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFF3B82F6),
+                backgroundColor: TColors.primary,
                 foregroundColor: Colors.white,
                 elevation: 0,
                 shape: RoundedRectangleBorder(
@@ -204,7 +205,7 @@ class ExtractionSuccessContent extends StatelessWidget {
                   SizedBox(width: 8),
                   Text(
                     'Volver al Inventario',
-                    style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600),
+                    style: TextStyle(fontSize: 15, fontWeight: FontWeight.w700),
                   ),
                 ],
               ),

@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 import 'package:front_gestion_minera/utils/constants/color.constant.dart';
 import 'package:intl/intl.dart';
@@ -7,116 +6,129 @@ import '../../domain/entity/entity.dart';
 
 class MaintenanceCard extends StatelessWidget {
   final MaintenanceHistoryItemEntity item;
+  final VoidCallback? onTap;
 
-  const MaintenanceCard({super.key, required this.item});
+  const MaintenanceCard({super.key, required this.item, this.onTap});
 
   @override
   Widget build(BuildContext context) {
     final status = _GlobalStatus.from(item.globalStatus);
-    final formattedDate = DateFormat('dd MMM yyyy').format(item.requestedAt);
+    final date = DateFormat('dd MMM yyyy', 'es').format(item.requestedAt);
 
-    return Card(
-      elevation: 2,
-      margin: const EdgeInsets.symmetric(vertical: 6),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 14),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
+    return Container(
+      margin: const EdgeInsets.only(bottom: 12),
+      decoration: BoxDecoration(
+        color: TColors.white,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: TColors.border),
+      ),
+      clipBehavior: Clip.antiAlias,
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: onTap,
+          child: Padding(
+            padding: const EdgeInsets.all(14),
+            child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Container(
-                  width: 44,
-                  height: 44,
-                  decoration: BoxDecoration(
-                    color: TColors.appMainColor,
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                  child: Icon(
-                    Icons.build_circle,
-                    color: TColors.white,
-                    size: 22,
-                  ),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        _formatFailureType(item.failureType),
-                        style: const TextStyle(
-                          fontSize: 15,
-                          fontWeight: FontWeight.w700,
-                          color: Color(0xFF111827),
-                          height: 1.3,
-                        ),
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Container(
+                      width: 42,
+                      height: 42,
+                      alignment: Alignment.center,
+                      decoration: BoxDecoration(
+                        color: status.bgColor,
+                        borderRadius: BorderRadius.circular(12),
                       ),
-                      const SizedBox(height: 4),
-                      Text(
-                        '$formattedDate • ${item.machineUniqueCode}',
-                        style: const TextStyle(
-                          fontSize: 12,
-                          color: Color(0xFF9CA3AF),
-                          fontWeight: FontWeight.w400,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                const SizedBox(width: 8),
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 8,
-                    vertical: 4,
-                  ),
-                  decoration: BoxDecoration(
-                    color: status.bgColor,
-                    borderRadius: BorderRadius.circular(6),
-                  ),
-                  child: Text(
-                    status.label,
-                    style: TextStyle(
-                      fontSize: 11,
-                      fontWeight: FontWeight.w700,
-                      color: status.color,
-                      letterSpacing: 0.3,
+                      child: Icon(status.icon, color: status.color, size: 21),
                     ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            _formatFailureType(item.failureType),
+                            style: const TextStyle(
+                              fontSize: 14.5,
+                              fontWeight: FontWeight.w700,
+                              color: TColors.textPrimary,
+                              height: 1.25,
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                          const SizedBox(height: 4),
+                          Row(
+                            children: [
+                              const Icon(Icons.event_rounded,
+                                  size: 12.5, color: TColors.textSecondary),
+                              const SizedBox(width: 4),
+                              Flexible(
+                                child: Text(
+                                  '$date  ·  ${item.machineUniqueCode}',
+                                  style: const TextStyle(
+                                    fontSize: 12,
+                                    color: TColors.textSecondary,
+                                  ),
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    _StatusPill(status: status),
+                  ],
+                ),
+                if (item.description.trim().isNotEmpty) ...[
+                  const SizedBox(height: 12),
+                  Text(
+                    item.description,
+                    style: const TextStyle(
+                      fontSize: 13,
+                      color: TColors.textSecondary,
+                      height: 1.45,
+                    ),
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
                   ),
+                ],
+                const SizedBox(height: 12),
+                const Divider(height: 1, thickness: 1, color: TColors.border),
+                const SizedBox(height: 10),
+                Row(
+                  children: [
+                    const Text(
+                      'Monto estimado',
+                      style: TextStyle(
+                        fontSize: 12.5,
+                        color: TColors.textSecondary,
+                      ),
+                    ),
+                    const Spacer(),
+                    Text(
+                      _money(item.estimatedAmount),
+                      style: const TextStyle(
+                        fontSize: 15,
+                        fontWeight: FontWeight.w800,
+                        color: TColors.textPrimary,
+                      ),
+                    ),
+                    const SizedBox(width: 6),
+                    const Icon(Icons.chevron_right_rounded,
+                        size: 16, color: TColors.iconMuted),
+                  ],
                 ),
               ],
             ),
-            const SizedBox(height: 10),
-            Text(
-              item.description,
-              style: const TextStyle(
-                fontSize: 13,
-                color: Color(0xFF6B7280),
-                height: 1.5,
-              ),
-            ),
-            const SizedBox(height: 12),
-            const Divider(height: 1, thickness: 1, color: Color(0xFFF3F4F6)),
-            const SizedBox(height: 10),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                const Text(
-                  'Monto estimado',
-                  style: TextStyle(fontSize: 13, color: Color(0xFF9CA3AF)),
-                ),
-                Text(
-                  item.estimatedAmount.toStringAsFixed(2),
-                  style: const TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w700,
-                    color: Color(0xFF111827),
-                  ),
-                ),
-              ],
-            ),
-          ],
+          ),
         ),
       ),
     );
@@ -132,7 +144,46 @@ class MaintenanceCard extends StatelessWidget {
         )
         .join(' ');
   }
+}
 
+/// Formatea un monto (double) en bolivianos con separadores de miles.
+String _money(double value) {
+  final fixed = value.toStringAsFixed(2);
+  final parts = fixed.split('.');
+  final neg = parts[0].startsWith('-');
+  final digits = neg ? parts[0].substring(1) : parts[0];
+  final buf = StringBuffer();
+  for (int i = 0; i < digits.length; i++) {
+    if (i > 0 && (digits.length - i) % 3 == 0) buf.write(',');
+    buf.write(digits[i]);
+  }
+  return '${neg ? '-' : ''}$buf.${parts[1]} Bs';
+}
+
+class _StatusPill extends StatelessWidget {
+  final _GlobalStatus status;
+
+  const _StatusPill({required this.status});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 5),
+      decoration: BoxDecoration(
+        color: status.bgColor,
+        borderRadius: BorderRadius.circular(20),
+      ),
+      child: Text(
+        status.label,
+        style: TextStyle(
+          fontSize: 11,
+          fontWeight: FontWeight.w700,
+          color: status.color,
+          letterSpacing: 0.2,
+        ),
+      ),
+    );
+  }
 }
 
 class MaintenanceGlobalStatus {
@@ -140,50 +191,65 @@ class MaintenanceGlobalStatus {
   static const String approved = 'APPROVED';
   static const String completed = 'COMPLETED';
   static const String rejected = 'REJECTED';
+  static const String paid = 'PAID';
 }
 
 class _GlobalStatus {
   final String label;
   final Color color;
   final Color bgColor;
+  final IconData icon;
 
   const _GlobalStatus({
     required this.label,
     required this.color,
     required this.bgColor,
+    required this.icon,
   });
 
   factory _GlobalStatus.from(String raw) {
     switch (raw) {
       case MaintenanceGlobalStatus.inReview:
         return const _GlobalStatus(
-          label: 'EN REVISIÓN',
-          color: Color(0xFFD97706),
-          bgColor: Color(0xFFFEF3C7),
+          label: 'En revisión',
+          color: TColors.warning,
+          bgColor: TColors.warningLight,
+          icon: Icons.schedule_rounded,
         );
       case MaintenanceGlobalStatus.approved:
         return const _GlobalStatus(
-          label: 'APROBADO',
-          color: Color(0xFF16A34A),
-          bgColor: Color(0xFFDCFCE7),
+          label: 'Aprobado',
+          color: TColors.success,
+          bgColor: TColors.successLight,
+          icon: Icons.thumb_up_alt_rounded,
         );
       case MaintenanceGlobalStatus.completed:
         return const _GlobalStatus(
-          label: 'COMPLETADO',
-          color: Color(0xFF2563EB),
-          bgColor: Color(0xFFEFF6FF),
+          label: 'Completado',
+          color: TColors.appMainColor,
+          bgColor: TColors.primaryLight,
+          icon: Icons.check_circle_rounded,
         );
       case MaintenanceGlobalStatus.rejected:
         return const _GlobalStatus(
-          label: 'RECHAZADO',
-          color: Color(0xFFDC2626),
-          bgColor: Color(0xFFFEE2E2),
+          label: 'Rechazado',
+          color: TColors.danger,
+          bgColor: TColors.dangerLight,
+          icon: Icons.cancel_rounded,
+        );
+      case MaintenanceGlobalStatus.paid:
+        return const _GlobalStatus(
+          label: 'Pagado',
+          color: TColors.appMainDarkColor,
+          bgColor: TColors.primaryLight,
+          icon: Icons.payments_rounded,
         );
       default:
         return _GlobalStatus(
           label: raw,
-          color: const Color(0xFF6B7280),
-          bgColor: const Color(0xFFF3F4F6),
+          color: TColors.textSecondary,
+          bgColor: TColors.background,
+          icon: Icons.help_outline_rounded,
         );
     }
   }
