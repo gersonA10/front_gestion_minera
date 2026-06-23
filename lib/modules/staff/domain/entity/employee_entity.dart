@@ -12,6 +12,10 @@ class EmployeeEntity {
   final String hiredDate;
   final int monthsSeniority;
 
+  /// `true` si el trabajador tiene asistencia registrada hoy (viene de la lista
+  /// de empleados; en otros endpoints queda en `false`).
+  final bool workedToday;
+
   const EmployeeEntity({
     required this.employeeId,
     required this.fullName,
@@ -25,5 +29,6 @@ class EmployeeEntity {
     required this.seniorityLevel,
     required this.hiredDate,
     required this.monthsSeniority,
+    this.workedToday = false,
   });
 }

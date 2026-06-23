@@ -33,6 +33,18 @@ abstract class TreasuryRepository {
 
   Future<List<CashRegisterEntity>> getCashRegisters();
 
+  Future<ReconciliationListResponseEntity> getPendingReconciliations({
+    int page = 1,
+    int limit = 10,
+    String? search,
+  });
+
+  Future<ExecuteReconciliationResultEntity> executeReconciliation(
+    String requestId,
+    String cajaOrigenId,
+    String? nota,
+  );
+
   Future<GoldInventoryEntity> getGoldInventory();
   Future<PaginatedGoldBatchesEntity> getGoldBatches({int page = 1, int limit = 10, String? status});
   

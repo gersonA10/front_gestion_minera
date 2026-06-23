@@ -162,71 +162,51 @@ class _AttendanceControlScreenState extends State<AttendanceControlScreen> {
             });
           }
         },
-        child: Scaffold(
-          backgroundColor: TColors.background,
-          appBar: AppBar(
-            title: const Text(
-              'Control de Asistencia',
-              style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
-            ),
-            backgroundColor: TColors.surface,
-            foregroundColor: TColors.profileDarkText,
-            elevation: 1,
-          ),
-          body: Column(
-            children: [
-              _buildTabBar(),
-              Expanded(child: _buildTabContent()),
-            ],
-          ),
+        child: Column(
+          children: [
+            _buildTabBar(),
+            Expanded(child: _buildTabContent()),
+          ],
         ),
       ),
     );
   }
 
   Widget _buildTabBar() {
-    return Container(
-      color: TColors.surface,
-      padding: const EdgeInsets.fromLTRB(16, 0, 16, 14),
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(20, 16, 20, 8),
       child: Container(
-        height: 40,
+        padding: const EdgeInsets.all(4),
         decoration: BoxDecoration(
-          color: TColors.background,
-          borderRadius: BorderRadius.circular(10),
+          color: TColors.surface,
+          borderRadius: BorderRadius.circular(14),
+          border: Border.all(color: TColors.border),
         ),
         child: Row(
           children: _Tab.values.map((tab) {
             final isSelected = _selectedTab == tab;
             return Expanded(
               child: GestureDetector(
+                behavior: HitTestBehavior.opaque,
                 onTap: () => _onTabChanged(tab),
                 child: AnimatedContainer(
-                  duration: const Duration(milliseconds: 200),
-                  margin: const EdgeInsets.all(3),
+                  duration: const Duration(milliseconds: 180),
+                  curve: Curves.easeOut,
+                  height: 38,
                   decoration: BoxDecoration(
-                    color: isSelected ? TColors.surface : Colors.transparent,
-                    borderRadius: BorderRadius.circular(8),
-                    boxShadow: isSelected
-                        ? [
-                            BoxShadow(
-                              color: Colors.black.withValues(alpha: 0.07),
-                              blurRadius: 6,
-                              offset: const Offset(0, 2),
-                            ),
-                          ]
-                        : null,
+                    color: isSelected ? TColors.primary : Colors.transparent,
+                    borderRadius: BorderRadius.circular(11),
                   ),
                   alignment: Alignment.center,
                   child: Text(
                     _tabLabel(tab),
                     style: TextStyle(
                       fontSize: 13,
-                      fontWeight: isSelected
-                          ? FontWeight.w600
-                          : FontWeight.w400,
+                      fontWeight:
+                          isSelected ? FontWeight.w700 : FontWeight.w500,
                       color: isSelected
-                          ? TColors.primary
-                          : TColors.profileMutedLabel,
+                          ? Colors.white
+                          : TColors.textSecondary,
                     ),
                   ),
                 ),
@@ -302,7 +282,7 @@ class _AttendanceControlScreenState extends State<AttendanceControlScreen> {
       entryTime: e.checkInTime,
       exitTime: e.checkOutTime,
       totalTime: _formatMinutes(e.totalWorkedMinutes),
-      totalTimeColor: e.hasIncident ? TColors.warning : TColors.primary,
+      totalTimeColor: TColors.primary,
       status: e.hasIncident
           ? FinalizadoStatus.revision
           : FinalizadoStatus.finalizado,

@@ -1,7 +1,7 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:front_gestion_minera/config/router/app_router.gr.dart';
-import 'package:front_gestion_minera/utils/constants/color.constant.dart';
+import 'package:front_gestion_minera/modules/minutes_memos/presentation/widgets/actas_theme.dart';
 
 class MinutesMemosCardPanelWidget extends StatelessWidget {
   final String tipo;
@@ -27,196 +27,226 @@ class MinutesMemosCardPanelWidget extends StatelessWidget {
     this.actualizado,
   });
 
+  bool get _isMinute => tipo == 'minute';
+  Color get _accent => _isMinute ? AC.acta : AC.memo;
+
+  void _openDetail(BuildContext context) {
+    if (_isMinute) {
+      context.router.push(ActaDetailsRoute(actaId: itemId));
+    } else {
+      context.router.push(InternalMemorandumDetailsRoute(memoId: itemId));
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    final bool isMinute = tipo == 'minute';
-    final Color tagColor = isMinute ? TColors.appMainColor : Colors.red;
+    final isFinalizado = estado.toLowerCase() == 'finalizado';
+    final statusColor = isFinalizado ? AC.green : AC.amber;
+    final statusBg = isFinalizado ? AC.greenBg : AC.amberBg;
 
     return Container(
-      margin: const EdgeInsets.only(bottom: 16),
+      margin: const EdgeInsets.only(bottom: 14),
       decoration: BoxDecoration(
-        color: TColors.white,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: const Color(0xFFE5E7EB)),
+        color: AC.surface,
+        borderRadius: BorderRadius.circular(18),
+        border: Border.all(color: AC.border),
+        boxShadow: const [
+          BoxShadow(color: AC.cardShadow, blurRadius: 14, offset: Offset(0, 4)),
+        ],
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Padding(
+      clipBehavior: Clip.antiAlias,
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: () => _openDetail(context),
+          child: Padding(
             padding: const EdgeInsets.all(16),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 8,
-                        vertical: 4,
-                      ),
+                      width: 42,
+                      height: 42,
                       decoration: BoxDecoration(
-                        color: tagColor.withValues(alpha:  0.1),
-                        borderRadius: BorderRadius.circular(6),
-                      ),
-                      child: Text(
-                        isMinute ? 'ACTA NO. $numero' : 'MEMORANDO N° $numero',
-                        style: TextStyle(
-                          fontSize: 10,
-                          fontWeight: FontWeight.bold,
-                          color: tagColor,
+                        gradient: LinearGradient(
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
+                          colors: [
+                            _accent,
+                            Color.lerp(_accent, Colors.white, 0.3)!,
+                          ],
                         ),
+                        borderRadius: BorderRadius.circular(13),
+                        boxShadow: [
+                          BoxShadow(
+                            color: _accent.withValues(alpha: 0.35),
+                            blurRadius: 8,
+                            offset: const Offset(0, 3),
+                          ),
+                        ],
+                      ),
+                      child: Icon(
+                        _isMinute
+                            ? Icons.article_rounded
+                            : Icons.mail_rounded,
+                        color: Colors.white,
+                        size: 21,
                       ),
                     ),
-                    IconButton(
-                      onPressed: () {},
-                      icon: const Icon(Icons.more_vert, size: 18),
-                      splashRadius: 18,
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            _isMinute
+                                ? 'ACTA N.° $numero'
+                                : 'MEMORANDO N.° $numero',
+                            style: TextStyle(
+                              fontSize: 10.5,
+                              fontWeight: FontWeight.w800,
+                              color: _accent,
+                              letterSpacing: 0.4,
+                            ),
+                          ),
+                          const SizedBox(height: 3),
+                          Text(
+                            titulo,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: const TextStyle(
+                              fontSize: 14.5,
+                              fontWeight: FontWeight.w700,
+                              color: AC.textPrimary,
+                              height: 1.2,
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
                   ],
                 ),
-
-                const SizedBox(height: 10),
-
-                Text(
-                  titulo,
-                  style: const TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.bold,
-                    color: TColors.cardInnerBg,
-                  ),
-                ),
-
-                const SizedBox(height: 6),
-                if (isMinute && descripcion != null) ...[
+                if (_isMinute && descripcion != null && descripcion!.isNotEmpty) ...[
+                  const SizedBox(height: 12),
                   Text(
                     descripcion!,
-                    style: const TextStyle(
-                      fontSize: 12,
-                      color: TColors.appDisabledColor,
-                    ),
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
-                  ),
-                  const SizedBox(height: 10),
-                ],
-
-                Row(
-                  children: [
-                    const Icon(Icons.calendar_today_outlined, size: 12),
-                    const SizedBox(width: 6),
-                    Text(
-                      fecha,
-                      style: const TextStyle(
-                        fontSize: 11,
-                        color: TColors.appDisabledColor,
-                      ),
+                    style: const TextStyle(
+                      fontSize: 12.5,
+                      height: 1.4,
+                      color: AC.textSecondary,
                     ),
-                  ],
-                ),
-                if (!isMinute && destinatario != null) ...[
-                  const SizedBox(height: 10),
+                  ),
+                ],
+                if (!_isMinute &&
+                    destinatario != null &&
+                    destinatario!.isNotEmpty) ...[
+                  const SizedBox(height: 12),
                   Row(
                     children: [
-                      const Icon(Icons.person_outline, size: 12),
+                      const Icon(
+                        Icons.person_outline_rounded,
+                        size: 14,
+                        color: AC.textSecondary,
+                      ),
                       const SizedBox(width: 6),
                       Expanded(
                         child: Text(
                           destinatario!,
-                          style: const TextStyle(
-                            fontSize: 12,
-                            color: TColors.appDisabledColor,
-                          ),
+                          maxLines: 1,
                           overflow: TextOverflow.ellipsis,
+                          style: const TextStyle(
+                            fontSize: 12.5,
+                            color: AC.textSecondary,
+                          ),
                         ),
                       ),
                     ],
                   ),
                 ],
-              ],
-            ),
-          ),
-
-          const Divider(height: 1, thickness: 1, color: Color(0xFFE5E7EB)),
-
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+                const SizedBox(height: 14),
+                const Divider(height: 1, color: AC.border),
+                const SizedBox(height: 12),
+                Row(
                   children: [
-                    Row(
-                      children: [
-                        Icon(
-                          estado.toLowerCase() == 'finalizado'
-                              ? Icons.check_circle_outline
-                              : Icons.access_time,
-                          size: 12,
-                          color: TColors.appDisabledColor,
-                        ),
-                        const SizedBox(width: 4),
-                        Text(
-                          estado,
-                          style: const TextStyle(
-                            fontSize: 11,
-                            fontWeight: FontWeight.w500,
-                            color: TColors.appDisabledColor,
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 9,
+                        vertical: 4,
+                      ),
+                      decoration: BoxDecoration(
+                        color: statusBg,
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(
+                            isFinalizado
+                                ? Icons.check_circle_rounded
+                                : Icons.schedule_rounded,
+                            size: 12,
+                            color: statusColor,
                           ),
-                        ),
-                      ],
+                          const SizedBox(width: 4),
+                          Text(
+                            estado,
+                            style: TextStyle(
+                              fontSize: 11,
+                              fontWeight: FontWeight.w700,
+                              color: statusColor,
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
-                    if (actualizado != null) ...[
-                      const SizedBox(height: 2),
-                      Text(
-                        actualizado!,
+                    const SizedBox(width: 10),
+                    const Icon(
+                      Icons.calendar_today_rounded,
+                      size: 12,
+                      color: AC.textSecondary,
+                    ),
+                    const SizedBox(width: 4),
+                    Flexible(
+                      child: Text(
+                        actualizado ?? fecha,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
                         style: const TextStyle(
-                          fontSize: 10,
-                          color: TColors.appDisabledColor,
+                          fontSize: 11,
+                          color: AC.textSecondary,
                         ),
                       ),
-                    ],
-                  ],
-                ),
-
-           
-                  TextButton(
-                    onPressed: () {
-                      if (isMinute) {
-                        context.router.push(
-                          ActaDetailsRoute(actaId: itemId),
-                        );
-                      } else {
-                        context.router.push(
-                          InternalMemorandumDetailsRoute(memoId: itemId),
-                        );
-                      }
-                    },
-                    style: TextButton.styleFrom(
-                      foregroundColor: TColors.appMainColor,
-                      padding: EdgeInsets.zero,
-                      minimumSize: const Size(0, 0),
-                      tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                     ),
-                    child: const Row(
+                    const Spacer(),
+                    Row(
+                      mainAxisSize: MainAxisSize.min,
                       children: [
                         Text(
-                          'Ver Detalles',
+                          'Ver',
                           style: TextStyle(
                             fontSize: 12,
-                            fontWeight: FontWeight.w600,
+                            fontWeight: FontWeight.w700,
+                            color: _accent,
                           ),
                         ),
-                        SizedBox(width: 4),
-                        Icon(Icons.arrow_forward_ios, size: 12),
+                        const SizedBox(width: 3),
+                        Icon(
+                          Icons.arrow_forward_ios_rounded,
+                          size: 11,
+                          color: _accent,
+                        ),
                       ],
                     ),
-                  ),
+                  ],
+                ),
               ],
             ),
           ),
-        ],
+        ),
       ),
     );
   }

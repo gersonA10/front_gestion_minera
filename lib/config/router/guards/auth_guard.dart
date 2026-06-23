@@ -25,13 +25,19 @@ class AuthGuard extends AutoRouteGuard {
         router.replaceAll([const HomeSurveillanceRoute()]);
       case 'admin':
         router.replaceAll([const AdminHomeRoute()]);
-       case 'jefe_maquinas':
+      case 'jefe_maquinas':
         router.replaceAll([const HomeMachinaryRoute()]);
-      
-    default: 
-       await UserSession.clear();
-       router.replaceAll([AuthRoute()]);
-       return;
+      case 'jefe_campamento':
+        router.replaceAll([const HomeDashboardCampRoute()]);
+      case 'actas':
+        router.replaceAll([const MinutesMemosMainRoute()]);
+      case 'jefe_personal':
+        router.replaceAll([const StaffMainRoute()]);
+
+      default:
+        await UserSession.clear();
+        router.replaceAll([AuthRoute()]);
+        return;
     }
   }
 }

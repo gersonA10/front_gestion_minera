@@ -2,6 +2,7 @@ import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:front_gestion_minera/config/router/app_router.gr.dart';
 import 'package:front_gestion_minera/utils/constants/color.constant.dart';
+import 'package:front_gestion_minera/utils/date_util.dart';
 
 enum FinalizadoStatus { finalizado, revision }
 
@@ -180,7 +181,7 @@ class AttendanceFinalizadosTab extends StatelessWidget {
               ),
               const SizedBox(width: 5),
               Text(
-                _formatDate(selectedDate),
+                formatDate(selectedDate),
                 style: const TextStyle(
                   fontSize: 13,
                   fontWeight: FontWeight.w500,
@@ -246,13 +247,6 @@ class AttendanceFinalizadosTab extends StatelessWidget {
     );
   }
 
-  String _formatDate(DateTime date) {
-    const months = [
-      'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-      'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec',
-    ];
-    return '${months[date.month - 1]} ${date.day}, ${date.year}';
-  }
 }
 
 // ─── Finalizado Worker Card ───────────────────────────────────────────────────
@@ -423,28 +417,45 @@ class _FinalizadoWorkerCard extends StatelessWidget {
     );
   }
 
-  Widget _buildStatusBadge(bool isRevision) {
+  // El registro está completado (tiene salida) → "Finalizado" siempre. Si la
+  // jornada fue corta (< 8h netas), se agrega aparte una etiqueta informativa
+  // neutra "Jornada corta" (es un dato, no una acción pendiente).
+  Widget _buildStatusBadge(bool isShortShift) {
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.end,
+      children: [
+        _pill('Finalizado', TColors.success, TColors.successLight,
+            Icons.check_circle_rounded),
+        if (isShortShift) ...[
+          const SizedBox(height: 4),
+          _pill('Jornada corta', TColors.textSecondary, TColors.statusGreyBg,
+              Icons.info_outline_rounded),
+        ],
+      ],
+    );
+  }
+
+  Widget _pill(String label, Color color, Color bg, IconData icon) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(
-        color: isRevision ? TColors.warningLight : TColors.successLight,
+        color: bg,
         borderRadius: BorderRadius.circular(20),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
           Text(
-            isRevision ? 'Revisión' : 'Finalizado',
+            label,
             style: TextStyle(
               fontSize: 11,
               fontWeight: FontWeight.w600,
-              color: isRevision ? TColors.warning : TColors.success,
+              color: color,
             ),
           ),
-          if (isRevision) ...[
-            const SizedBox(width: 3),
-            Icon(Icons.warning_amber_rounded, size: 12, color: TColors.warning),
-          ],
+          const SizedBox(width: 3),
+          Icon(icon, size: 12, color: color),
         ],
       ),
     );

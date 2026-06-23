@@ -14,6 +14,11 @@ class RequestDetailEntity {
   final String requesterName;
   final DateTime createdAt;
   final DateTime? closedAt;
+
+  /// Estado de conciliación (reposición) cuando la solicitud se cerró con una
+  /// diferencia: 'PENDING' (espera a Hacienda) | 'RECONCILED' | 'NOT_REQUIRED'.
+  final String? reconciliationStatus;
+
   final List<RequestTimelineStepEntity> timeline;
 
   RequestDetailEntity({
@@ -32,6 +37,7 @@ class RequestDetailEntity {
     required this.requesterName,
     required this.createdAt,
     this.closedAt,
+    this.reconciliationStatus,
     required this.timeline,
   });
 }

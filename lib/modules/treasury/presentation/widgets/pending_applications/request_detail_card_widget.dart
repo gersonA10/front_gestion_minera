@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:front_gestion_minera/config/router/app_router.dart';
 import 'package:front_gestion_minera/config/router/app_router.gr.dart';
 import 'package:front_gestion_minera/injector_container.dart';
+import 'package:front_gestion_minera/modules/treasury/presentation/bloc/treasury_bloc.dart';
 import 'package:front_gestion_minera/utils/date_util.dart';
 import 'package:intl/intl.dart';
 
@@ -42,9 +44,24 @@ class RequestDetailCard extends StatelessWidget {
       child: Material(
         color: Colors.transparent,
         child: InkWell(
-          onTap: () => InjectorContainer.getIt<AppRouter>().push(
-            ViewRequestDetailsRoute(id: item.requestId),
-          ),
+          onTap: () async {
+            // Capturamos el bloc ANTES del await: al volver del detalle el
+            // context de la card puede estar desmontado (el ListView recicla
+            // o reconstruye), y entonces el `context.mounted` daba false y el
+            // refresh nunca se disparaba -> la solicitud ya desembolsada o
+            // rechazada seguía apareciendo como pendiente desde la caché.
+            final treasuryBloc = context.read<TreasuryBloc>();
+            await InjectorContainer.getIt<AppRouter>().push(
+              ViewRequestDetailsRoute(id: item.requestId),
+            );
+            // Refrescamos siempre al volver (forzando re-fetch del backend):
+            // si se desembolsó o rechazó, ya no debe seguir como pendiente.
+            if (!treasuryBloc.isClosed) {
+              treasuryBloc.add(
+                ListOfPendingRequestsEvent(isRefresh: true),
+              );
+            }
+          },
           child: Padding(
             padding: const EdgeInsets.all(16),
             child: Column(

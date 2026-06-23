@@ -3,9 +3,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:front_gestion_minera/config/router/app_router.gr.dart';
 import 'package:front_gestion_minera/injector_container.dart';
+import 'package:front_gestion_minera/modules/staff/domain/entity/payroll_history_entity.dart';
 import 'package:front_gestion_minera/modules/staff/presentation/bloc/staff_bloc.dart';
-import 'package:front_gestion_minera/modules/staff/presentation/widgets/previous_cycle_card_widget.dart';
-import 'package:front_gestion_minera/utils/constants/color.constant.dart';
+import 'package:front_gestion_minera/modules/staff/presentation/widgets/staff_ui.dart';
 
 @RoutePage()
 class StaffPaymentHistoryScreen extends StatefulWidget {
@@ -18,7 +18,6 @@ class StaffPaymentHistoryScreen extends StatefulWidget {
 
 class _StaffPaymentHistoryScreenState extends State<StaffPaymentHistoryScreen> {
   late final StaffBloc _bloc;
-  final ScrollController _scrollController = ScrollController();
   late int selectedYear;
   List<int> years = [];
 
@@ -29,15 +28,10 @@ class _StaffPaymentHistoryScreenState extends State<StaffPaymentHistoryScreen> {
     selectedYear = DateTime.now().year;
     years = List.generate(5, (index) => DateTime.now().year - index);
     _bloc.add(GetPayrollHistoryEvent(year: selectedYear));
-    _scrollController.addListener(() {
-      if (_scrollController.position.pixels >=
-          _scrollController.position.maxScrollExtent - 200) {}
-    });
   }
 
   @override
   void dispose() {
-    _scrollController.dispose();
     _bloc.close();
     super.dispose();
   }
@@ -46,451 +40,474 @@ class _StaffPaymentHistoryScreenState extends State<StaffPaymentHistoryScreen> {
     _bloc.add(GetPayrollHistoryEvent(year: year));
   }
 
+  void _openPeriod(String period) {
+    context.router.push(PayrollRoute(payrollPeriod: period));
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: TColors.textFieldBackgroundColor,
-      appBar: AppBar(
-        backgroundColor: TColors.white,
-        surfaceTintColor: Colors.transparent,
-        elevation: 0,
-        title: const Text(
-          'Historial de Pagos',
-          style: TextStyle(
-            fontSize: 18,
-            fontWeight: FontWeight.w700,
-            color: TColors.appMainDarkColor,
-          ),
-        ),
-      ),
+      backgroundColor: StaffUi.background,
+      appBar: staffAppBar(context, title: 'Historial de pagos'),
       body: Column(
         children: [
-          Container(
-            color: TColors.white,
-            height: 48,
-            child: ListView.builder(
-              padding: const EdgeInsets.symmetric(horizontal: 20),
-              scrollDirection: Axis.horizontal,
-              itemCount: years.length,
-              itemBuilder: (context, index) {
-                final year = years[index];
-                final selected = selectedYear == year;
-                return GestureDetector(
-                  onTap: () {
-                    setState(() {
-                      selectedYear = year;
-                    });
-                    _fetchHistory(year: year);
-                  },
-                  child: Container(
-                    margin: const EdgeInsets.only(right: 24),
-                    alignment: Alignment.center,
-                    decoration: BoxDecoration(
-                      border: Border(
-                        bottom: BorderSide(
-                          color: selected
-                              ? TColors.appMainColor
-                              : Colors.transparent,
-                          width: 3,
-                        ),
-                      ),
-                    ),
-                    child: Text(
-                      year.toString(),
-                      style: TextStyle(
-                        fontSize: 13,
-                        fontWeight: FontWeight.w700,
-                        color: selected
-                            ? TColors.appMainColor
-                            : TColors.appDisabledColor,
-                      ),
-                    ),
-                  ),
-                );
-              },
-            ),
+          _YearSelector(
+            years: years,
+            selectedYear: selectedYear,
+            onSelected: (year) {
+              setState(() => selectedYear = year);
+              _fetchHistory(year: year);
+            },
           ),
           Expanded(
             child: BlocBuilder<StaffBloc, StaffState>(
               bloc: _bloc,
               builder: (context, state) {
                 if (state is PayrollHistoryLoading) {
-                  return const Center(child: CircularProgressIndicator());
+                  return const StaffLoader();
                 }
                 if (state is PayrollHistoryError) {
-                  return Center(
-                    child: Padding(
-                      padding: const EdgeInsets.all(24),
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          const Icon(
-                            Icons.error_outline,
-                            size: 50,
-                            color: Colors.red,
-                          ),
-                          const SizedBox(height: 12),
-                          Text(state.message, textAlign: TextAlign.center),
-                          const SizedBox(height: 20),
-                          ElevatedButton(
-                            onPressed: () {
-                              _fetchHistory(year: selectedYear);
-                            },
-                            child: const Text('Reintentar'),
-                          ),
-                        ],
-                      ),
-                    ),
+                  return StaffErrorState(
+                    message: state.message,
+                    onRetry: () => _fetchHistory(year: selectedYear),
                   );
                 }
                 if (state is PayrollHistoryLoaded) {
-                  final latest = state.history.latestPayment;
-                  final previous = state.history.previousCycles;
-                  if (latest.period.isEmpty && previous.isEmpty) {
-                    return RefreshIndicator(
-                      onRefresh: () async {
-                        _fetchHistory(year: selectedYear);
-                      },
-                      child: ListView(
-                        physics: const AlwaysScrollableScrollPhysics(),
-                        children: [
-                          SizedBox(
-                            height: MediaQuery.of(context).size.height * 0.65,
-                            child: Center(
-                              child: Padding(
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 32,
-                                ),
-                                child: Column(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    Container(
-                                      width: 110,
-                                      height: 110,
-                                      decoration: BoxDecoration(
-                                        color: TColors.primaryLight,
-                                        shape: BoxShape.circle,
-                                      ),
-                                      child: Stack(
-                                        alignment: Alignment.center,
-                                        children: [
-                                          const Icon(
-                                            Icons
-                                                .account_balance_wallet_outlined,
-                                            size: 56,
-                                            color: TColors.appMainDarkColor,
-                                          ),
-
-                                          Positioned(
-                                            top: 18,
-                                            right: 18,
-                                            child: Container(
-                                              width: 28,
-                                              height: 28,
-                                              decoration: const BoxDecoration(
-                                                color: TColors.appMainColor,
-                                                shape: BoxShape.circle,
-                                              ),
-                                              child: const Icon(
-                                                Icons.close,
-                                                size: 16,
-                                                color: TColors.white,
-                                              ),
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-
-                                    const SizedBox(height: 24),
-
-                                    const Text(
-                                      'Sin Historial de Pagos',
-                                      textAlign: TextAlign.center,
-                                      style: TextStyle(
-                                        fontSize: 20,
-                                        fontWeight: FontWeight.w700,
-                                        color: TColors.appMainDarkColor,
-                                      ),
-                                    ),
-
-                                    const SizedBox(height: 10),
-
-                                    Text(
-                                      'No existen pagos registrados para el año $selectedYear.',
-                                      textAlign: TextAlign.center,
-                                      style: const TextStyle(
-                                        fontSize: 14,
-                                        color: TColors.appDisabledColor,
-                                        height: 1.5,
-                                      ),
-                                    ),
-
-                                    const SizedBox(height: 24),
-
-                                    SizedBox(
-                                      width: 180,
-                                      height: 44,
-                                      child: OutlinedButton.icon(
-                                        onPressed: () {
-                                          _fetchHistory(year: selectedYear);
-                                        },
-                                        style: OutlinedButton.styleFrom(
-                                          side: const BorderSide(
-                                            color: TColors.appMainColor,
-                                          ),
-                                          shape: RoundedRectangleBorder(
-                                            borderRadius: BorderRadius.circular(
-                                              12,
-                                            ),
-                                          ),
-                                        ),
-                                        icon: const Icon(
-                                          Icons.refresh,
-                                          color: TColors.appMainColor,
-                                        ),
-                                        label: const Text(
-                                          'Actualizar',
-                                          style: TextStyle(
-                                            color: TColors.appMainColor,
-                                            fontWeight: FontWeight.w700,
-                                          ),
-                                        ),
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    );
-                  }
-                  return RefreshIndicator(
-                    onRefresh: () async {
-                      _fetchHistory(year: selectedYear);
-                    },
-                    child: ListView(
-                      controller: _scrollController,
-                      physics: const AlwaysScrollableScrollPhysics(),
-                      padding: const EdgeInsets.all(20),
-                      children: [
-                        const Text(
-                          'ÚLTIMO PAGO',
-                          style: TextStyle(
-                            fontSize: 11,
-                            fontWeight: FontWeight.w700,
-                            color: TColors.appDisabledColor,
-                            letterSpacing: 1,
-                          ),
-                        ),
-                        const SizedBox(height: 12),
-
-                        Container(
-                          padding: const EdgeInsets.all(16),
-                          decoration: BoxDecoration(
-                            color: TColors.appMainColor,
-                            borderRadius: BorderRadius.circular(18),
-                            boxShadow: const [
-                              BoxShadow(
-                                color: TColors.appMainColor,
-                                blurRadius: 12,
-                                offset: Offset(0, 6),
-                              ),
-                            ],
-                          ),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Row(
-                                children: [
-                                  Expanded(
-                                    child: Text(
-                                      latest.period,
-                                      style: const TextStyle(
-                                        color: TColors.white,
-                                        fontSize: 14,
-                                      ),
-                                    ),
-                                  ),
-                                  Container(
-                                    padding: const EdgeInsets.symmetric(
-                                      horizontal: 10,
-                                      vertical: 5,
-                                    ),
-                                    decoration: BoxDecoration(
-                                      color: TColors.white.withAlpha(50),
-                                      borderRadius: BorderRadius.circular(20),
-                                    ),
-                                    child: Row(
-                                      mainAxisSize: MainAxisSize.min,
-                                      children: [
-                                        const Icon(
-                                          Icons.check_circle,
-                                          color: TColors.white,
-                                          size: 12,
-                                        ),
-                                        const SizedBox(width: 4),
-                                        Text(
-                                          latest.status,
-                                          style: const TextStyle(
-                                            fontSize: 10,
-                                            fontWeight: FontWeight.w700,
-                                            color: TColors.white,
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                ],
-                              ),
-                              const SizedBox(height: 12),
-                              Text(
-                                'Bs ${latest.totalAmount.toStringAsFixed(2)}',
-                                style: const TextStyle(
-                                  color: TColors.white,
-                                  fontSize: 34,
-                                  fontWeight: FontWeight.w800,
-                                ),
-                              ),
-                              const SizedBox(height: 10),
-                              Row(
-                                children: [
-                                  const Icon(
-                                    Icons.calendar_today_outlined,
-                                    size: 14,
-                                    color: Colors.white70,
-                                  ),
-                                  const SizedBox(width: 6),
-                                  Text(
-                                    'Pagado el ${latest.paymentDate}',
-                                    style: const TextStyle(
-                                      color: Colors.white70,
-                                      fontSize: 13,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                              const SizedBox(height: 18),
-                              SizedBox(
-                                width: double.infinity,
-                                height: 48,
-                                child: ElevatedButton.icon(
-                                  onPressed: () {
-                                    context.router.push(
-                                      PayrollRoute(
-                                        payrollPeriod: latest.period,
-                                      ),
-                                    );
-                                  },
-                                  style: ElevatedButton.styleFrom(
-                                    backgroundColor: TColors.white,
-                                    foregroundColor: TColors.appMainColor,
-                                    elevation: 0,
-                                    shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(10),
-                                    ),
-                                  ),
-                                  icon: const Icon(Icons.receipt_long_outlined),
-                                  label: const Text(
-                                    'Ver Detalle de Nómina',
-                                    style: TextStyle(
-                                      fontWeight: FontWeight.w700,
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                        const SizedBox(height: 24),
-                        const Text(
-                          'CICLOS ANTERIORES',
-                          style: TextStyle(
-                            fontSize: 11,
-                            fontWeight: FontWeight.w700,
-                            color: TColors.appDisabledColor,
-                            letterSpacing: 1,
-                          ),
-                        ),
-                        const SizedBox(height: 12),
-                        if (previous.isEmpty)
-                          Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 20,
-                              vertical: 32,
-                            ),
-                            decoration: BoxDecoration(
-                              color: TColors.white,
-                              borderRadius: BorderRadius.circular(16),
-                            ),
-                            child: Column(
-                              children: [
-                                Container(
-                                  width: 60,
-                                  height: 60,
-                                  decoration: BoxDecoration(
-                                    color: TColors.primaryLight,
-                                    shape: BoxShape.circle,
-                                  ),
-                                  child: const Icon(
-                                    Icons.history,
-                                    color: TColors.appMainColor,
-                                    size: 30,
-                                  ),
-                                ),
-                                const SizedBox(height: 16),
-                                const Text(
-                                  'Sin ciclos anteriores',
-                                  style: TextStyle(
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.w700,
-                                    color: TColors.appMainDarkColor,
-                                  ),
-                                ),
-                                const SizedBox(height: 8),
-                                Text(
-                                  'Solo existe un pago registrado para el año $selectedYear.',
-                                  textAlign: TextAlign.center,
-                                  style: const TextStyle(
-                                    fontSize: 13,
-                                    color: TColors.appDisabledColor,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          )//hola
-                        else
-                          ListView.separated(
-                            shrinkWrap: true,
-                            physics: const NeverScrollableScrollPhysics(),
-                            itemCount: previous.length,
-                            separatorBuilder: (_, __) =>
-                                const SizedBox(height: 12),
-                            itemBuilder: (context, index) {
-                              final payroll = previous[index];
-                              return PreviousCycleCardWidget(
-                                period: payroll.period,
-                                payrollType: payroll.payrollType,
-                                totalAmount: payroll.totalAmount,
-                                paymentDate: payroll.paymentDate,
-                                status: payroll.status,
-                                onTap: () {
-                                  context.router.push(
-                                    PayrollRoute(payrollPeriod: payroll.period),
-                                  );
-                                },
-                              );
-                            },
-                          ),
-                      ],
-                    ),
-                  );
+                  return _buildLoaded(state);
                 }
                 return const SizedBox.shrink();
               },
             ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildLoaded(PayrollHistoryLoaded state) {
+    final latest = state.history.latestPayment;
+    final previous = state.history.previousCycles;
+    final hasLatest = latest.period.isNotEmpty;
+
+    return RefreshIndicator(
+      color: StaffUi.primary,
+      onRefresh: () async => _fetchHistory(year: selectedYear),
+      child: ListView(
+        physics: const AlwaysScrollableScrollPhysics(
+          parent: BouncingScrollPhysics(),
+        ),
+        padding: const EdgeInsets.fromLTRB(20, 20, 20, 28),
+        children: [
+          if (!hasLatest && previous.isEmpty)
+            SizedBox(
+              height: MediaQuery.of(context).size.height * 0.6,
+              child: StaffEmptyState(
+                icon: Icons.account_balance_wallet_rounded,
+                title: 'Sin historial de pagos',
+                message:
+                    'No existen pagos registrados para el año $selectedYear.',
+              ),
+            )
+          else ...[
+            if (hasLatest) ...[
+              const StaffSectionTitle(
+                'Último pago',
+                icon: Icons.bolt_rounded,
+              ),
+              const SizedBox(height: 12),
+              _LatestPaymentCard(
+                payment: latest,
+                onDetail: () => _openPeriod(latest.period),
+              ),
+              const SizedBox(height: 24),
+            ],
+            StaffSectionTitle(
+              'Ciclos anteriores',
+              icon: Icons.history_rounded,
+              trailing: previous.isEmpty ? null : '${previous.length}',
+            ),
+            const SizedBox(height: 12),
+            if (previous.isEmpty)
+              StaffCard(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 20,
+                  vertical: 28,
+                ),
+                child: Column(
+                  children: [
+                    Container(
+                      width: 56,
+                      height: 56,
+                      decoration: BoxDecoration(
+                        color: StaffUi.primarySoft,
+                        borderRadius: BorderRadius.circular(18),
+                      ),
+                      child: const Icon(
+                        Icons.history_rounded,
+                        color: StaffUi.primary,
+                        size: 28,
+                      ),
+                    ),
+                    const SizedBox(height: 14),
+                    const Text(
+                      'Sin ciclos anteriores',
+                      style: TextStyle(
+                        fontSize: 15,
+                        fontWeight: FontWeight.w700,
+                        color: StaffUi.textPrimary,
+                      ),
+                    ),
+                    const SizedBox(height: 6),
+                    Text(
+                      'Solo existe un pago registrado para el año $selectedYear.',
+                      textAlign: TextAlign.center,
+                      style: const TextStyle(
+                        fontSize: 13,
+                        height: 1.4,
+                        color: StaffUi.textSecondary,
+                      ),
+                    ),
+                  ],
+                ),
+              )
+            else
+              ...previous.map(
+                (payroll) => Padding(
+                  padding: const EdgeInsets.only(bottom: 12),
+                  child: _PreviousCycleCard(
+                    payroll: payroll,
+                    onTap: () => _openPeriod(payroll.period),
+                  ),
+                ),
+              ),
+          ],
+        ],
+      ),
+    );
+  }
+}
+
+/// Selector de año estilo segmented chips (mismo lenguaje que payroll_screen).
+class _YearSelector extends StatelessWidget {
+  final List<int> years;
+  final int selectedYear;
+  final ValueChanged<int> onSelected;
+  const _YearSelector({
+    required this.years,
+    required this.selectedYear,
+    required this.onSelected,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      color: StaffUi.surface,
+      padding: const EdgeInsets.fromLTRB(20, 12, 20, 12),
+      child: SizedBox(
+        height: 34,
+        child: ListView.separated(
+          scrollDirection: Axis.horizontal,
+          itemCount: years.length,
+          separatorBuilder: (_, _) => const SizedBox(width: 8),
+          itemBuilder: (context, index) {
+            final year = years[index];
+            final active = selectedYear == year;
+            return GestureDetector(
+              onTap: () => onSelected(year),
+              child: AnimatedContainer(
+                duration: const Duration(milliseconds: 180),
+                curve: Curves.easeOut,
+                padding: const EdgeInsets.symmetric(horizontal: 18),
+                alignment: Alignment.center,
+                decoration: BoxDecoration(
+                  color: active ? StaffUi.primary : StaffUi.surface,
+                  borderRadius: BorderRadius.circular(11),
+                  border: Border.all(
+                    color: active ? StaffUi.primary : StaffUi.border,
+                  ),
+                ),
+                child: Text(
+                  year.toString(),
+                  style: TextStyle(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w700,
+                    color: active ? Colors.white : StaffUi.textSecondary,
+                  ),
+                ),
+              ),
+            );
+          },
+        ),
+      ),
+    );
+  }
+}
+
+/// Tarjeta destacada del último pago (gradiente premium, como _CajaCard).
+class _LatestPaymentCard extends StatelessWidget {
+  final PayrollHistoryEntity payment;
+  final VoidCallback onDetail;
+  const _LatestPaymentCard({required this.payment, required this.onDetail});
+
+  @override
+  Widget build(BuildContext context) {
+    final style = StaffStatusStyle.of(payment.status);
+    return Container(
+      padding: const EdgeInsets.all(18),
+      decoration: BoxDecoration(
+        gradient: const LinearGradient(
+          colors: [StaffUi.primary, StaffUi.primaryDeep],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        borderRadius: BorderRadius.circular(18),
+        boxShadow: [
+          BoxShadow(
+            color: StaffUi.primary.withValues(alpha: 0.25),
+            blurRadius: 16,
+            offset: const Offset(0, 8),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Expanded(
+                child: Text(
+                  payment.period,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    color: Colors.white.withValues(alpha: 0.9),
+                    fontSize: 14,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
+              Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 10,
+                  vertical: 5,
+                ),
+                decoration: BoxDecoration(
+                  color: Colors.white.withValues(alpha: 0.18),
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Icon(
+                      Icons.check_circle_rounded,
+                      color: Colors.white,
+                      size: 13,
+                    ),
+                    const SizedBox(width: 5),
+                    Text(
+                      style.label,
+                      style: const TextStyle(
+                        fontSize: 10.5,
+                        fontWeight: FontWeight.w700,
+                        color: Colors.white,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 14),
+          Text(
+            StaffUi.money2(payment.totalAmount),
+            style: const TextStyle(
+              color: Colors.white,
+              fontSize: 32,
+              fontWeight: FontWeight.w800,
+              letterSpacing: -0.6,
+            ),
+          ),
+          const SizedBox(height: 10),
+          Row(
+            children: [
+              Icon(
+                Icons.calendar_today_rounded,
+                size: 14,
+                color: Colors.white.withValues(alpha: 0.8),
+              ),
+              const SizedBox(width: 6),
+              Text(
+                'Pagado el ${payment.paymentDate}',
+                style: TextStyle(
+                  color: Colors.white.withValues(alpha: 0.8),
+                  fontSize: 12.5,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 18),
+          SizedBox(
+            width: double.infinity,
+            height: 48,
+            child: ElevatedButton.icon(
+              onPressed: onDetail,
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.white,
+                foregroundColor: StaffUi.primary,
+                elevation: 0,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(14),
+                ),
+              ),
+              icon: const Icon(Icons.receipt_long_rounded, size: 18),
+              label: const Text(
+                'Ver detalle de nómina',
+                style: TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// Tarjeta de un ciclo anterior (superficie clara, tokens del kit).
+class _PreviousCycleCard extends StatelessWidget {
+  final PayrollHistoryEntity payroll;
+  final VoidCallback onTap;
+  const _PreviousCycleCard({required this.payroll, required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    return StaffCard(
+      onTap: onTap,
+      child: Column(
+        children: [
+          Row(
+            children: [
+              Container(
+                width: 38,
+                height: 38,
+                decoration: BoxDecoration(
+                  color: StaffUi.primarySoft,
+                  borderRadius: BorderRadius.circular(11),
+                ),
+                child: const Icon(
+                  Icons.account_balance_wallet_rounded,
+                  size: 19,
+                  color: StaffUi.primary,
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      payroll.period,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(
+                        fontSize: 14.5,
+                        fontWeight: FontWeight.w800,
+                        color: StaffUi.textPrimary,
+                        letterSpacing: -0.2,
+                      ),
+                    ),
+                    if (payroll.payrollType.isNotEmpty) ...[
+                      const SizedBox(height: 1),
+                      Text(
+                        payroll.payrollType,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(
+                          fontSize: 12,
+                          color: StaffUi.textSecondary,
+                        ),
+                      ),
+                    ],
+                  ],
+                ),
+              ),
+              StaffPill.status(payroll.status),
+            ],
+          ),
+          const SizedBox(height: 16),
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      'Monto total',
+                      style: TextStyle(
+                        fontSize: 10.5,
+                        fontWeight: FontWeight.w700,
+                        color: StaffUi.textSecondary,
+                      ),
+                    ),
+                    const SizedBox(height: 3),
+                    Text(
+                      StaffUi.money2(payroll.totalAmount),
+                      style: const TextStyle(
+                        fontSize: 21,
+                        fontWeight: FontWeight.w800,
+                        color: StaffUi.textPrimary,
+                        letterSpacing: -0.4,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  const Text(
+                    'Fecha de pago',
+                    style: TextStyle(
+                      fontSize: 10.5,
+                      fontWeight: FontWeight.w700,
+                      color: StaffUi.textSecondary,
+                    ),
+                  ),
+                  const SizedBox(height: 3),
+                  Text(
+                    payroll.paymentDate,
+                    style: const TextStyle(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w600,
+                      color: StaffUi.textPrimary,
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+          const SizedBox(height: 14),
+          Row(
+            children: [
+              const Text(
+                'Ver detalle',
+                style: TextStyle(
+                  fontSize: 13,
+                  fontWeight: FontWeight.w700,
+                  color: StaffUi.primary,
+                ),
+              ),
+              const SizedBox(width: 4),
+              const Icon(
+                Icons.arrow_forward_rounded,
+                size: 16,
+                color: StaffUi.primary,
+              ),
+            ],
           ),
         ],
       ),

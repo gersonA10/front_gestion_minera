@@ -4,6 +4,18 @@ abstract class StaffState {}
 
 class StaffInitial extends StaffState {}
 
+class AttendanceReportLoading extends StaffState {}
+
+class AttendanceReportLoaded extends StaffState {
+  final AttendanceReportEntity report;
+  AttendanceReportLoaded({required this.report});
+}
+
+class AttendanceReportError extends StaffState {
+  final String message;
+  AttendanceReportError(this.message);
+}
+
 class EmployeesLoading extends StaffState {}
 
 class EmployeesPageLoading extends StaffState {

@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:front_gestion_minera/modules/minutes_memos/domain/entity/entity.dart';
 import 'package:intl/intl.dart';
 
@@ -27,14 +29,20 @@ class CreateActaModel extends CreateActaEntity {
       'description': description,
       'location': place,
       'emission_date': DateFormat('yyyy-MM-dd').format(date),
-      'participants': participants.map(
-        (participant) => {
-          'member_id': participant.memberId,
-          'full_name': participant.fullName,
-          'position': participant.rol,
-          'attendance': participant.attendanceStatus,
-        },
-      ).toList(),
+      // El backend espera `participants` como string JSON dentro del
+      // multipart/form-data (lo hace JSON.parse). Enviar la lista cruda hace
+      // que Dio la serialice con .toString() de Dart y el parse falle.
+      'participants': jsonEncode(
+        participants
+            .map(
+              (participant) => {
+                'member_id': participant.memberId,
+                'position': participant.rol,
+                'attendance': participant.attendanceStatus,
+              },
+            )
+            .toList(),
+      ),
     };
   }
 }

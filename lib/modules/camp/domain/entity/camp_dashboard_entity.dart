@@ -11,6 +11,12 @@ class CampRecentRequestEntity {
   final String description;
   final String globalStatus;
   final String statusLabel;
+
+  /// Estado de conciliación (reposición): 'PENDING' | 'RECONCILED' |
+  /// 'NOT_REQUIRED' | null. Si es 'PENDING' la solicitud no está realmente
+  /// completada: tiene una reposición pendiente de Hacienda.
+  final String? reconciliationStatus;
+
   final DateTime createdAt;
 
   CampRecentRequestEntity({
@@ -19,6 +25,7 @@ class CampRecentRequestEntity {
     required this.description,
     required this.globalStatus,
     required this.statusLabel,
+    this.reconciliationStatus,
     required this.createdAt,
   });
 }

@@ -2,6 +2,7 @@ import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:front_gestion_minera/injector_container.dart';
+import 'package:front_gestion_minera/modules/minutes_memos/presentation/widgets/actas_theme.dart';
 import 'package:front_gestion_minera/utils/constants/color.constant.dart';
 import 'package:intl/intl.dart';
 import '../../domain/entity/entity.dart';
@@ -83,16 +84,15 @@ class _ActaDetailsScreenState extends State<ActaDetailsScreen> {
   Widget _buildScaffold(BuildContext context, ActaDetailEntity acta) {
     return Scaffold(
       backgroundColor: TColors.white,
+      appBar: const AcGradientAppBar(title: 'Detalle de Acta'),
       bottomNavigationBar: _buildDownloadButton(),
       body: SafeArea(
+        top: false,
         child: SingleChildScrollView(
           padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              _buildTopBar(),
-              const Divider(color: Color(0xFFEEEEEE), thickness: 1),
-              const SizedBox(height: 24),
               _buildActaHeader(acta),
               const SizedBox(height: 20),
               _buildInfoCard(
@@ -151,42 +151,12 @@ class _ActaDetailsScreenState extends State<ActaDetailsScreen> {
     );
   }
 
-  Widget _buildTopBar() {
-    return Row(
-      children: [
-        IconButton(
-          onPressed: () => Navigator.of(context).pop(),
-          padding: EdgeInsets.zero,
-          constraints: const BoxConstraints(),
-          style: IconButton.styleFrom(
-            tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-          ),
-          icon: const Icon(
-            Icons.arrow_back,
-            color: TColors.appMainDarkColor,
-            size: 22,
-          ),
-        ),
-        const Spacer(),
-        const Text(
-          'Detalle de Acta',
-          style: TextStyle(
-            color: TColors.appMainDarkColor,
-            fontWeight: FontWeight.w600,
-            fontSize: 15,
-          ),
-        ),
-        const Spacer(),
-      ],
-    );
-  }
-
   Widget _buildActaHeader(ActaDetailEntity acta) {
     return Container(
       padding: const EdgeInsets.only(left: 14),
       decoration: const BoxDecoration(
         border: Border(
-          left: BorderSide(color: TColors.appMainColor, width: 4),
+          left: BorderSide(color: AC.primary, width: 4),
         ),
       ),
       child: Column(
@@ -197,7 +167,7 @@ class _ActaDetailsScreenState extends State<ActaDetailsScreen> {
             style: const TextStyle(
               fontSize: 16,
               fontWeight: FontWeight.bold,
-              color: TColors.appMainDarkColor,
+              color: AC.primary,
               height: 1.1,
             ),
           ),
@@ -207,7 +177,7 @@ class _ActaDetailsScreenState extends State<ActaDetailsScreen> {
             style: const TextStyle(
               fontSize: 16,
               fontWeight: FontWeight.w600,
-              color: TColors.appMainDarkColor,
+              color: AC.primary,
             ),
           ),
         ],
@@ -230,7 +200,7 @@ class _ActaDetailsScreenState extends State<ActaDetailsScreen> {
       ),
       child: Row(
         children: [
-          Icon(icon, size: 20, color: TColors.appMainDarkColor),
+          Icon(icon, size: 20, color: AC.primary),
           const SizedBox(width: 12),
           Expanded(
             child: Column(
@@ -251,7 +221,7 @@ class _ActaDetailsScreenState extends State<ActaDetailsScreen> {
                   style: const TextStyle(
                     fontSize: 14,
                     fontWeight: FontWeight.w600,
-                    color: TColors.appMainDarkColor,
+                    color: AC.primary,
                   ),
                 ),
               ],
@@ -265,14 +235,14 @@ class _ActaDetailsScreenState extends State<ActaDetailsScreen> {
   Widget _buildSectionHeader(IconData icon, String title) {
     return Row(
       children: [
-        Icon(icon, size: 20, color: TColors.appMainColor),
+        Icon(icon, size: 20, color: AC.primary),
         const SizedBox(width: 8),
         Text(
           title,
           style: const TextStyle(
             fontSize: 16,
             fontWeight: FontWeight.w600,
-            color: TColors.appMainColor,
+            color: AC.primary,
           ),
         ),
       ],
@@ -358,7 +328,7 @@ class _ActaDetailsScreenState extends State<ActaDetailsScreen> {
       onPressed: () => _showAllParticipants(context, participants),
       style: OutlinedButton.styleFrom(
         minimumSize: const Size(double.infinity, 44),
-        side: const BorderSide(color: TColors.appMainDarkColor),
+        side: const BorderSide(color: AC.primary),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(10),
         ),
@@ -368,7 +338,7 @@ class _ActaDetailsScreenState extends State<ActaDetailsScreen> {
         style: TextStyle(
           fontSize: 13,
           fontWeight: FontWeight.w600,
-          color: TColors.appMainDarkColor,
+          color: AC.primary,
         ),
       ),
     );
@@ -405,14 +375,14 @@ class _ActaDetailsScreenState extends State<ActaDetailsScreen> {
               child: Row(
                 children: [
                   const Icon(Icons.group_outlined,
-                      size: 20, color: TColors.appMainColor),
+                      size: 20, color: AC.primary),
                   const SizedBox(width: 8),
                   Text(
                     'Participantes (${participants.length})',
                     style: const TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.w700,
-                      color: TColors.appMainDarkColor,
+                      color: AC.primary,
                     ),
                   ),
                 ],
@@ -535,7 +505,7 @@ class _ActaDetailsScreenState extends State<ActaDetailsScreen> {
           style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600),
         ),
         style: ElevatedButton.styleFrom(
-          backgroundColor: TColors.appMainDarkColor,
+          backgroundColor: AC.primary,
           foregroundColor: Colors.white,
           minimumSize: const Size(double.infinity, 50),
           shape: RoundedRectangleBorder(

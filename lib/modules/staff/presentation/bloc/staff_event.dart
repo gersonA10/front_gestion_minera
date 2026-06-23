@@ -31,7 +31,15 @@ class UpdateEmployeeProfileEvent extends StaffEvent {
   final String employeeId;
   final String? status;
   final String? shiftType;
-  UpdateEmployeeProfileEvent(this.employeeId, {this.status, this.shiftType});
+  final String? department;
+  final double? baseMonthlySalary;
+  UpdateEmployeeProfileEvent(
+    this.employeeId, {
+    this.status,
+    this.shiftType,
+    this.department,
+    this.baseMonthlySalary,
+  });
 }
 
 class GetEgresoDetailEvent extends StaffEvent {
@@ -110,6 +118,24 @@ class GetDetailAssistanceEmployeeEvent extends StaffEvent {
   final String employeeId;
 
   GetDetailAssistanceEmployeeEvent({required this.employeeId});
+}
+
+class GetAttendanceReportEvent extends StaffEvent {
+  final String employeeId;
+
+  /// 'weekly' | 'monthly'. Ignorado si se envía [from]/[to].
+  final String period;
+  final String? ref;
+  final String? from;
+  final String? to;
+
+  GetAttendanceReportEvent({
+    required this.employeeId,
+    this.period = 'weekly',
+    this.ref,
+    this.from,
+    this.to,
+  });
 }
 
 class GetPayrollMonthlyListEvent extends StaffEvent {

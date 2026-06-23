@@ -1,13 +1,12 @@
+import 'dart:async';
+
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
-import 'package:front_gestion_minera/config/router/app_router.gr.dart';
-import 'package:front_gestion_minera/core/widgets/logout_button_widget.dart';
-import 'package:front_gestion_minera/modules/staff/presentation/widgets/worker_card_widget.dart';
-import 'package:front_gestion_minera/utils/constants/color.constant.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:front_gestion_minera/injector_container.dart';
 import 'package:front_gestion_minera/modules/staff/presentation/bloc/staff_bloc.dart';
-import 'package:front_gestion_minera/utils/session/user_session.dart';
+import 'package:front_gestion_minera/modules/staff/presentation/widgets/staff_ui.dart';
+import 'package:front_gestion_minera/modules/staff/presentation/widgets/worker_card_widget.dart';
 
 @RoutePage()
 class WorkersScreen extends StatefulWidget {
@@ -18,466 +17,283 @@ class WorkersScreen extends StatefulWidget {
 }
 
 class _WorkersScreenState extends State<WorkersScreen> {
-  String rol = "";
-  int selectedTab = 0;
   late final StaffBloc _bloc;
-  String _search = '';
-  int _totalGeneral = 0;
   final TextEditingController _searchController = TextEditingController();
-
-  Future<void> _loadUserData() async {
-    await UserSession.loadSession();
-    final role = await UserSession.getRole();
-    setState(() {
-      rol = role;
-    });
-  }
+  final ScrollController _scrollController = ScrollController();
+  String _search = '';
+  String? _statusValue; // null = Todos
+  int _totalGeneral = 0;
+  bool _isLoadingMore = false;
+  Timer? _debounce;
 
   @override
   void initState() {
     super.initState();
-    _loadUserData();
     _bloc = InjectorContainer.getIt<StaffBloc>();
     _bloc.add(GetEmployeesEvent());
+    _scrollController.addListener(_onScroll);
   }
 
   @override
   void dispose() {
+    _debounce?.cancel();
+    _scrollController.dispose();
     _searchController.dispose();
     super.dispose();
   }
 
-  void _onTabTap(int index) {
-    if (selectedTab == index) return;
+  void _onScroll() {
+    if (!_scrollController.hasClients || _isLoadingMore) return;
+    final pos = _scrollController.position;
+    if (pos.pixels < pos.maxScrollExtent - 280) return;
 
-    setState(() {
-      selectedTab = index;
+    final st = _bloc.state;
+    final loaded = st is EmployeesPageLoading ? st.previousState : st;
+    if (loaded is EmployeesLoaded && loaded.hasMore) {
+      _isLoadingMore = true;
+      _bloc.add(LoadMoreEmployeesEvent());
+    }
+  }
+
+  void _query() {
+    _isLoadingMore = false;
+    _bloc.add(GetEmployeesEvent(
+      page: 1,
+      search: _search,
+      status: _statusValue,
+    ));
+  }
+
+  void _onStatusTap(String? value) {
+    if (_statusValue == value) return;
+    setState(() => _statusValue = value);
+    _query();
+  }
+
+  void _onSearch(String value) {
+    _search = value.trim();
+    setState(() {}); // refresca el botón de limpiar del buscador
+    _debounce?.cancel();
+    _debounce = Timer(const Duration(milliseconds: 350), () {
+      if (mounted) _query();
     });
+  }
 
-    _bloc.add(
-      GetEmployeesEvent(
-        page: 1,
-        search: _search,
-        status: index == 1 ? 'ACTIVO' : null,
-      ),
-    );
+  void _clearSearch() {
+    _debounce?.cancel();
+    _searchController.clear();
+    _search = '';
+    _query();
   }
 
   @override
   Widget build(BuildContext context) {
     return BlocProvider.value(
       value: _bloc,
-      child: Scaffold(
-        backgroundColor: TColors.appBackgroundColor,
-        floatingActionButton: FloatingActionButton(
-          onPressed: () {
-            context.router.push(RegisterStaffRoute());
-          },
-          backgroundColor: TColors.appMainDarkColor,
-          elevation: 4,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(90),
-          ),
-          child: const Icon(
-            Icons.person_add_alt_1,
-            color: Colors.white,
-            size: 24,
-          ),
-        ),
-
-        body: SafeArea(
-          child: Column(
+      child: BlocConsumer<StaffBloc, StaffState>(
+        listener: (context, state) {
+          if (state is EmployeesLoaded) {
+            _isLoadingMore = false;
+            if (state.currentStatus == null) _totalGeneral = state.total;
+          }
+        },
+        builder: (context, state) {
+          return Column(
             children: [
-              _buildHeader(),
-
-              _buildSearchSection(),
-
-              _buildTabs(),
-
-              Expanded(
-                child: BlocBuilder<StaffBloc, StaffState>(
-                  builder: (context, state) {
-                    final currentState = state is EmployeesPageLoading
-                        ? state.previousState
-                        : state;
-
-                    if (state is EmployeesLoading) {
-                      return const Center(child: CircularProgressIndicator());
-                    }
-
-                    if (state is EmployeesError) {
-                      return Center(
-                        child: Text(
-                          state.message,
-                          style: const TextStyle(color: TColors.disabled),
-                        ),
-                      );
-                    }
-
-                    if (currentState is EmployeesLoaded) {
-                      final employees = currentState.employees;
-
-                      if (state is EmployeesPageLoading) {
-                        return const Center(child: CircularProgressIndicator());
-                      }
-
-                      if (employees.isEmpty) {
-                        return Center(
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: const [
-                              Icon(
-                                Icons.people_outline,
-                                size: 55,
-                                color: TColors.disabled,
-                              ),
-                              SizedBox(height: 12),
-                              Text(
-                                'No se encontraron trabajadores',
-                                style: TextStyle(
-                                  color: TColors.disabled,
-                                  fontSize: 14,
-                                ),
-                              ),
-                            ],
-                          ),
-                        );
-                      }
-
-                      return ListView.builder(
-                        padding: const EdgeInsets.fromLTRB(16, 18, 16, 24),
-                        itemCount: employees.length,
-                        itemBuilder: (_, index) {
-                          final employee = employees[index];
-
-                          return Padding(
-                            padding: const EdgeInsets.only(bottom: 14),
-                            child: WorkerCardWidget(
-                              employeeId: employee.employeeId,
-                              image: employee.profilePhotoUrl,
-                              name: employee.fullName,
-                              position: employee.position,
-                              location: employee.department,
-                              status: employee.status,
-                              actionText: 'Ver Perfil',
-                            ),
-                          );
-                        },
-                      );
-                    }
-
-                    return const SizedBox();
-                  },
+              Padding(
+                padding: const EdgeInsets.fromLTRB(20, 16, 20, 0),
+                child: StaffSearchField(
+                  controller: _searchController,
+                  hint: 'Buscar por nombre, cargo o ID...',
+                  onChanged: _onSearch,
+                  onClear: _clearSearch,
                 ),
               ),
-
-              _buildPagination(),
+              const SizedBox(height: 14),
+              SizedBox(
+                height: 36,
+                child: _StatusChips(
+                  selected: _statusValue,
+                  totalLabel: _totalGeneral > 0 ? '$_totalGeneral' : null,
+                  onTap: _onStatusTap,
+                ),
+              ),
+              const SizedBox(height: 14),
+              Expanded(child: _buildList(state)),
             ],
-          ),
-        ),
+          );
+        },
       ),
     );
   }
 
-  Widget _buildHeader() {
-    return Container(
-      padding: const EdgeInsets.only(left: 16, right: 16, top: 14, bottom: 14),
-      decoration: const BoxDecoration(
-        color: TColors.white,
-        border: Border(bottom: BorderSide(color: Color(0xffEAECF0))),
-      ),
-      child: Row(
-        children: [
-          Container(
-            width: 34,
-            height: 34,
-            decoration: BoxDecoration(
-              color: TColors.appMainDarkColor,
-              borderRadius: BorderRadius.circular(10),
-            ),
-            child: const Icon(Icons.settings, color: TColors.white, size: 18),
-          ),
+  Widget _buildList(StaffState state) {
+    // Carga inicial y recarga por cambio de filtro/búsqueda muestran el loader
+    // (el buscador y los chips siguen visibles arriba). El "load more" del scroll
+    // infinito usa otro evento y no pasa por aquí (no parpadea la lista).
+    if (state is EmployeesLoading || state is EmployeesPageLoading) {
+      return const StaffLoader();
+    }
+    if (state is EmployeesError) {
+      return StaffErrorState(message: state.message, onRetry: _query);
+    }
+    if (state is! EmployeesLoaded) return const SizedBox.shrink();
 
-          const SizedBox(width: 10),
+    final employees = state.employees;
+    final hasMore = state.hasMore;
 
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+    return RefreshIndicator(
+      color: StaffUi.primary,
+      onRefresh: () async => _query(),
+      child: employees.isEmpty
+          ? ListView(
+              physics: const AlwaysScrollableScrollPhysics(),
               children: [
-                Text(
-                  UserSession.userName,
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                    color: TColors.appMainDarkColor,
-                    height: 1,
-                  ),
-                ),
-
-                SizedBox(height: 3),
-
-                Text(
-                  (rol == 'jefe_personal') ? 'Jefe de Personal' : '',
-                  style: TextStyle(
-                    fontSize: 10,
-                    fontWeight: FontWeight.w500,
-                    color: TColors.disabled,
-                    letterSpacing: 0.8,
-                    height: 1,
-                  ),
+                SizedBox(height: MediaQuery.of(context).size.height * 0.12),
+                StaffEmptyState(
+                  icon: Icons.groups_outlined,
+                  title: _search.isEmpty
+                      ? 'Aún no hay trabajadores'
+                      : 'Sin resultados',
+                  message: _search.isEmpty
+                      ? 'Registra a tu primer trabajador con el botón “Registrar”.'
+                      : 'No encontramos trabajadores que coincidan con tu búsqueda.',
                 ),
               ],
-            ),
-          ),
-
-          LogoutButton(),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildSearchSection() {
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 14, 16, 0),
-      child: Container(
-        height: 42,
-        decoration: BoxDecoration(
-          color: TColors.white,
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: const Color(0xffD0D5DD)),
-        ),
-        child: Row(
-          children: [
-            const SizedBox(width: 12),
-
-            const Icon(Icons.search, color: TColors.disabled, size: 22),
-
-            const SizedBox(width: 10),
-
-            Expanded(
-              child: TextField(
-                controller: _searchController,
-                style: const TextStyle(
-                  fontSize: 12,
-                  color: TColors.appMainTextColor,
-                ),
-                onChanged: (value) {
-                  _search = value.trim();
-
-                  _bloc.add(
-                    GetEmployeesEvent(
-                      page: 1,
-                      search: _search,
-                      status: selectedTab == 1 ? 'ACTIVO' : null,
+            )
+          : ListView.separated(
+              controller: _scrollController,
+              physics: const AlwaysScrollableScrollPhysics(),
+              // Padding inferior amplio para que el FAB "Registrar" nunca tape
+              // la última tarjeta.
+              padding: const EdgeInsets.fromLTRB(20, 0, 20, 96),
+              itemCount: employees.length + (hasMore ? 1 : 0),
+              separatorBuilder: (_, _) => const SizedBox(height: 12),
+              itemBuilder: (_, index) {
+                if (index >= employees.length) {
+                  return const Padding(
+                    padding: EdgeInsets.symmetric(vertical: 18),
+                    child: Center(
+                      child: SizedBox(
+                        width: 22,
+                        height: 22,
+                        child: CircularProgressIndicator(
+                            strokeWidth: 2.2, color: StaffUi.primary),
+                      ),
                     ),
                   );
-                },
-                decoration: const InputDecoration(
-                  isCollapsed: true,
-                  border: InputBorder.none,
-                  enabledBorder: InputBorder.none,
-                  focusedBorder: InputBorder.none,
-                  filled: true,
-                  fillColor: Colors.transparent,
-                  hintText: 'Buscar trabajadores por nombre, cargo o ID...',
-                  hintStyle: TextStyle(fontSize: 13, color: TColors.disabled),
-                ),
-              ),
+                }
+                final e = employees[index];
+                return WorkerCardWidget(
+                  employeeId: e.employeeId,
+                  image: e.profilePhotoUrl,
+                  name: e.fullName,
+                  position: e.position,
+                  location: e.department,
+                  status: e.status,
+                  workedToday: e.workedToday,
+                );
+              },
             ),
-          ],
-        ),
-      ),
     );
   }
-
-  Widget _buildTabs() {
-  return BlocBuilder<StaffBloc, StaffState>(
-    builder: (_, state) {
-      final currentState = state is EmployeesPageLoading
-          ? state.previousState
-          : state;
-
-      if (currentState is EmployeesLoaded) {
-        // Solo actualizar el total si estamos en "Todos"
-        if (currentState.currentStatus == null) {
-          _totalGeneral = currentState.total;
-        }
-      }
-
-      return Padding(
-        padding: const EdgeInsets.only(top: 14),
-        child: Column(
-          children: [
-            Row(
-              children: [
-                Expanded(
-                  child: _buildTab(
-                    title: 'Todos',
-                    count: _totalGeneral.toString(),
-                    index: 0,
-                  ),
-                ),
-
-                Expanded(
-                  child: _buildTab(
-                    title: 'Activos',
-                    index: 1,
-                  ),
-                ),
-              ],
-            ),
-
-            const SizedBox(height: 2),
-
-            Container(
-              width: double.infinity,
-              height: 1,
-              color: TColors.white,
-            ),
-          ],
-        ),
-      );
-    },
-  );
 }
 
-  Widget _buildPagination() {
-    return BlocBuilder<StaffBloc, StaffState>(
-      builder: (_, state) {
-        final currentState = state is EmployeesPageLoading
-            ? state.previousState
-            : state;
+/// Un filtro de estado de trabajador (label visible + valor para el backend).
+class _StatusFilter {
+  final String label;
+  final String? value; // null = Todos (sin filtro de estado)
+  const _StatusFilter(this.label, this.value);
+}
 
-        if (currentState is! EmployeesLoaded) {
-          return const SizedBox();
-        }
-        final currentPage = currentState.currentPage;
-        final totalPages = currentState.totalPages;
-        final isFirstPage = currentPage == 1;
-        final isLastPage = currentPage == totalPages;
-        
+const List<_StatusFilter> _kStatusFilters = [
+  _StatusFilter('Todos', null),
+  _StatusFilter('Activos', 'ACTIVO'),
+  _StatusFilter('En descanso', 'DESCANSO'),
+  _StatusFilter('Inactivos', 'INACTIVO'),
+];
 
-        return Container(
-          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              if (!isFirstPage) ...[
-                _paginationButton(
-                  icon: Icons.chevron_left,
-                  onTap: () {
-                    _bloc.add(
-                      GetEmployeesEvent(
-                        page: currentPage - 1,
-                        search: _search,                        
-                        status: selectedTab == 1 ? 'ACTIVO' : null,
-                      ),
-                    );
-                  },
-                ),
+/// Fila de chips para filtrar la lista por estado del trabajador.
+class _StatusChips extends StatelessWidget {
+  final String? selected;
+  final String? totalLabel;
+  final ValueChanged<String?> onTap;
+  const _StatusChips({
+    required this.selected,
+    required this.totalLabel,
+    required this.onTap,
+  });
 
-                const SizedBox(width: 18),
-              ],
-
-              Text(
-                'Página $currentPage de $totalPages',
-                style: const TextStyle(
-                  fontSize: 13,
-                  fontWeight: FontWeight.w600,
-                  color: TColors.appMainTextColor,
-                ),
-              ),
-
-              if (!isLastPage) ...[
-                const SizedBox(width: 18),
-
-                _paginationButton(
-                  icon: Icons.chevron_right,
-                  onTap: () {
-                    _bloc.add(
-                      GetEmployeesEvent(
-                        page: currentPage + 1,
-                        search: _search,
-                        status: selectedTab == 1 ? 'ACTIVO' : null,
-                      ),
-                    );
-                  },
-                ),
-              ],
-            ],
-          ),
+  @override
+  Widget build(BuildContext context) {
+    return ListView.separated(
+      scrollDirection: Axis.horizontal,
+      padding: const EdgeInsets.symmetric(horizontal: 20),
+      itemCount: _kStatusFilters.length,
+      separatorBuilder: (_, _) => const SizedBox(width: 8),
+      itemBuilder: (_, i) {
+        final f = _kStatusFilters[i];
+        return _chip(
+          label: f.label,
+          badge: f.value == null ? totalLabel : null,
+          active: selected == f.value,
+          onTap: () => onTap(f.value),
         );
       },
     );
   }
 
-  Widget _paginationButton({
-    required IconData icon,
+  Widget _chip({
+    required String label,
+    required String? badge,
+    required bool active,
     required VoidCallback onTap,
   }) {
     return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        width: 30,
-        height: 30,
-        decoration: BoxDecoration(
-          color: TColors.white,
-          borderRadius: BorderRadius.circular(8),
-          border: Border.all(color: const Color(0xffD0D5DD)),
-        ),
-        child: Icon(icon, size: 18, color: TColors.appMainTextColor),
-      ),
-    );
-  }
-
-  Widget _buildTab({required String title, required int index, String? count}) {
-    final bool isActive = selectedTab == index;
-
-    return GestureDetector(
       behavior: HitTestBehavior.opaque,
-      onTap: () => _onTabTap(index),
-      child: Column(
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Text(
-                title,
-                style: TextStyle(
-                  fontSize: 13,
-                  fontWeight: isActive ? FontWeight.w700 : FontWeight.w500,
-                  color: isActive ? TColors.appMainDarkColor : TColors.disabled,
-                ),
+      onTap: onTap,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 180),
+        curve: Curves.easeOut,
+        padding: const EdgeInsets.symmetric(horizontal: 16),
+        alignment: Alignment.center,
+        decoration: BoxDecoration(
+          color: active ? StaffUi.primary : StaffUi.surface,
+          borderRadius: BorderRadius.circular(11),
+          border: Border.all(color: active ? StaffUi.primary : StaffUi.border),
+        ),
+        child: Row(
+          children: [
+            Text(
+              label,
+              style: TextStyle(
+                fontSize: 13,
+                fontWeight: FontWeight.w700,
+                color: active ? Colors.white : StaffUi.textSecondary,
               ),
-
-              if (count != null) ...[
-                const SizedBox(width: 4),
-
-                Text(
-                  '($count)',
-                  style: const TextStyle(
-                    fontSize: 11,
-                    fontWeight: FontWeight.w500,
-                    color: TColors.disabled,
+            ),
+            if (badge != null) ...[
+              const SizedBox(width: 6),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
+                decoration: BoxDecoration(
+                  color: active
+                      ? Colors.white.withValues(alpha: 0.22)
+                      : StaffUi.primarySoft,
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                child: Text(
+                  badge,
+                  style: TextStyle(
+                    fontSize: 10.5,
+                    fontWeight: FontWeight.w700,
+                    color: active ? Colors.white : StaffUi.primary,
                   ),
                 ),
-              ],
+              ),
             ],
-          ),
-
-          const SizedBox(height: 10),
-
-          AnimatedContainer(
-            duration: const Duration(milliseconds: 180),
-            curve: Curves.easeInOut,
-            width: isActive ? 92 : 0,
-            height: 2.2,
-            decoration: BoxDecoration(
-              color: TColors.appMainDarkColor,
-              borderRadius: BorderRadius.circular(100),
-            ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

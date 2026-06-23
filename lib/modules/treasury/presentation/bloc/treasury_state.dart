@@ -71,6 +71,37 @@ final class ListOfPendingRequestsSuccess extends TreasuryState {
   });
 }
 
+// Reposiciones (conciliación de Campamento)
+class ReconciliationsLoading extends TreasuryState {}
+
+class ReconciliationsLoaded extends TreasuryState {
+  final List<ReconciliationItemEntity> items;
+  final bool hasReachedMax;
+  final int totalRecords;
+  ReconciliationsLoaded({
+    required this.items,
+    required this.hasReachedMax,
+    required this.totalRecords,
+  });
+}
+
+class ReconciliationsError extends TreasuryState {
+  final String message;
+  ReconciliationsError(this.message);
+}
+
+class ExecuteReconciliationLoading extends TreasuryState {}
+
+class ExecuteReconciliationSuccess extends TreasuryState {
+  final ExecuteReconciliationResultEntity result;
+  ExecuteReconciliationSuccess({required this.result});
+}
+
+class ExecuteReconciliationError extends TreasuryState {
+  final String message;
+  ExecuteReconciliationError(this.message);
+}
+
 //reportes financieros
 class FinancialReportLoading extends TreasuryState {}
 

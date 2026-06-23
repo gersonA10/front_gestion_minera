@@ -70,6 +70,34 @@ class TreasuryRepositoryImpl implements TreasuryRepository {
   }
 
   @override
+  Future<ReconciliationListResponseEntity> getPendingReconciliations({
+    int page = 1,
+    int limit = 10,
+    String? search,
+  }) async {
+    final result = await datasource.getPendingReconciliations(
+      page: page,
+      limit: limit,
+      search: search,
+    );
+    final items = result['items'] as List<ReconciliationItemEntity>;
+    return ReconciliationListResponseEntity(
+      items: items,
+      hasMoreData: result['has_more_data'] as bool,
+      totalRecords: result['total_records'] as int? ?? 0,
+    );
+  }
+
+  @override
+  Future<ExecuteReconciliationResultEntity> executeReconciliation(
+    String requestId,
+    String cajaOrigenId,
+    String? nota,
+  ) async {
+    return await datasource.executeReconciliation(requestId, cajaOrigenId, nota);
+  }
+
+  @override
   Future<IncomeResponseEntity> registerUrgentIncome(
     IncomeRequestEntity request,
   ) async {

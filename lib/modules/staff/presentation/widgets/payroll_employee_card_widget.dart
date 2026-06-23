@@ -1,13 +1,15 @@
 import 'package:flutter/material.dart';
+import 'package:front_gestion_minera/modules/staff/presentation/widgets/staff_ui.dart';
 import 'package:front_gestion_minera/utils/constants/color.constant.dart';
 
 class PayrollEmployeeCardWidget extends StatelessWidget {
   final String name;
   final String position;
   final String employeeId;
+
+  /// Monto ya formateado (incluye símbolo y separadores).
   final String amount;
   final bool paid;
-  final String? imageUrl;
   final VoidCallback? onTap;
 
   const PayrollEmployeeCardWidget({
@@ -17,132 +19,96 @@ class PayrollEmployeeCardWidget extends StatelessWidget {
     required this.employeeId,
     required this.amount,
     required this.paid,
-    this.imageUrl,
     this.onTap,
   });
 
+  String get _initials {
+    final parts =
+        name.trim().split(RegExp(r'\s+')).where((e) => e.isNotEmpty).toList();
+    if (parts.isEmpty) return '?';
+    if (parts.length == 1) return parts.first.characters.first.toUpperCase();
+    return (parts.first.characters.first + parts[1].characters.first)
+        .toUpperCase();
+  }
+
   @override
   Widget build(BuildContext context) {
-    final statusColor = paid ? TColors.green : TColors.amber;
+    final pillColor = paid ? TColors.statusGreen : TColors.statusOrange;
+    final pillBg = paid ? TColors.statusGreenBg : TColors.statusOrangeBg;
 
-    return GestureDetector(
+    return StaffCard(
+      padding: const EdgeInsets.all(14),
       onTap: onTap,
-      child: Container(
-        margin: const EdgeInsets.only(bottom: 12),
-        clipBehavior: Clip.antiAlias,
-        decoration: BoxDecoration(
-          color: TColors.white,
-          borderRadius: BorderRadius.circular(14),
-          border: Border.all(color: TColors.greyShade200),
-        ),
-        child: IntrinsicHeight(
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              if (!paid) Container(width: 4, color: TColors.amber),
-              Expanded(
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 12,
-                    vertical: 12,
-                  ),
-                  child: Row(
-                    children: [
-                      Container(
-                        width: 36,
-                        height: 36,
-                        decoration: BoxDecoration(
-                          color: TColors.greyShade200,
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                        clipBehavior: Clip.antiAlias,
-                        child: imageUrl != null && imageUrl!.trim().isNotEmpty
-                            ? Image.network(
-                                imageUrl!,
-                                fit: BoxFit.cover,
-                                errorBuilder: (_, __, ___) => const Icon(
-                                  Icons.person_outline,
-                                  size: 18,
-                                  color: TColors.appDisabledColor,
-                                ),
-                              )
-                            : const Icon(
-                                Icons.person_outline,
-                                size: 18,
-                                color: TColors.appDisabledColor,
-                              ),
-                      ),
-                      const SizedBox(width: 12),
-
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              name,
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                              style: const TextStyle(
-                                fontSize: 14,
-                                fontWeight: FontWeight.w700,
-                                color: TColors.appMainDarkColor,
-                              ),
-                            ),
-                            const SizedBox(height: 6),
-                            Text(
-                              '$position • ID: #$employeeId',
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                              style: const TextStyle(
-                                fontSize: 11,
-                                color: Color(0xFF9CA3AF),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-
-                      const SizedBox(width: 10),
-
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.end,
-                        children: [
-                          Text(
-                            'Bs $amount',
-                            style: const TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.w800,
-                              color: TColors.appMainDarkColor,
-                            ),
-                          ),
-                          const SizedBox(height: 6),
-                          Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 6,
-                              vertical: 2,
-                            ),
-                            decoration: BoxDecoration(
-                              color: statusColor.withValues(alpha: .12),
-                              borderRadius: BorderRadius.circular(6),
-                            ),
-                            child: Text(
-                              paid ? 'PAGADO' : 'PENDIENTE',
-                              style: TextStyle(
-                                color: statusColor,
-                                fontSize: 9,
-                                fontWeight: FontWeight.w700,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ],
+      child: Row(
+        children: [
+          Container(
+            width: 44,
+            height: 44,
+            alignment: Alignment.center,
+            decoration: BoxDecoration(
+              color: StaffUi.primarySoft,
+              borderRadius: BorderRadius.circular(13),
+            ),
+            child: Text(
+              _initials,
+              style: const TextStyle(
+                fontSize: 15,
+                fontWeight: FontWeight.w800,
+                color: StaffUi.primary,
+              ),
+            ),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  name,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(
+                    fontSize: 14.5,
+                    fontWeight: FontWeight.w800,
+                    color: StaffUi.textPrimary,
+                    letterSpacing: -0.2,
                   ),
                 ),
+                const SizedBox(height: 3),
+                Text(
+                  '$position · #$employeeId',
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(
+                    fontSize: 11.5,
+                    color: StaffUi.textSecondary,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(width: 10),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [
+              Text(
+                amount,
+                style: const TextStyle(
+                  fontSize: 15.5,
+                  fontWeight: FontWeight.w800,
+                  color: StaffUi.textPrimary,
+                  letterSpacing: -0.3,
+                ),
+              ),
+              const SizedBox(height: 6),
+              StaffPill(
+                label: paid ? 'Pagado' : 'Pendiente',
+                color: pillColor,
+                bg: pillBg,
               ),
             ],
           ),
-        ),
+        ],
       ),
     );
   }

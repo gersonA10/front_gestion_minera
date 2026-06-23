@@ -3,6 +3,7 @@ export 'package:front_gestion_minera/modules/treasury/domain/entity/goldInventor
 export 'package:front_gestion_minera/modules/treasury/domain/entity/expense_request_entity.dart';
 export 'package:front_gestion_minera/modules/treasury/domain/entity/expense_response_entity.dart';
 export 'package:front_gestion_minera/modules/treasury/domain/entity/cash_register_entity.dart';
+export 'package:front_gestion_minera/modules/treasury/domain/entity/reconciliation_entity.dart';
 export 'package:front_gestion_minera/modules/treasury/domain/entity/income_response_entity.dart';
 export 'package:front_gestion_minera/modules/treasury/domain/entity/financial_report_entity.dart';
 export 'package:front_gestion_minera/modules/treasury/domain/entity/treasury_metrics_entity.dart';

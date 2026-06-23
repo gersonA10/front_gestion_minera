@@ -7,6 +7,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:front_gestion_minera/config/router/app_route_observer.dart';
 import 'package:front_gestion_minera/config/router/app_router.gr.dart';
 import 'package:front_gestion_minera/core/widgets/logout_button_widget.dart';
+import 'package:front_gestion_minera/core/tutorial/tutorial_prefs.dart';
+import 'package:front_gestion_minera/core/tutorial/tutorial_tts.dart';
 import 'package:front_gestion_minera/injector_container.dart';
 import 'package:front_gestion_minera/modules/machinery/domain/entity/entity.dart';
 import 'package:front_gestion_minera/modules/machinery/presentation/bloc/machinery_bloc.dart';
@@ -14,6 +16,41 @@ import 'package:front_gestion_minera/modules/machinery/presentation/machinery_si
 import 'package:front_gestion_minera/modules/machinery/presentation/widgets/widgets.dart';
 import 'package:front_gestion_minera/utils/constants/color.constant.dart';
 import 'package:front_gestion_minera/utils/session/user_session.dart';
+import 'package:showcaseview/showcaseview.dart';
+
+/// Scope del recorrido guiado (coach marks) del módulo Maquinaria.
+const String _kMachineryScope = 'machinery_maquinaria';
+
+/// Envuelve un widget como objetivo de coach mark con el estilo del módulo.
+Widget _coachMark({
+  required GlobalKey key,
+  required String title,
+  required String description,
+  required Widget child,
+}) {
+  return Showcase(
+    key: key,
+    scope: _kMachineryScope,
+    title: title,
+    description: description,
+    targetBorderRadius: BorderRadius.circular(20),
+    targetPadding: const EdgeInsets.all(8),
+    tooltipBackgroundColor: TColors.white,
+    tooltipBorderRadius: BorderRadius.circular(16),
+    titleTextStyle: const TextStyle(
+      fontSize: 15,
+      fontWeight: FontWeight.w800,
+      color: TColors.textPrimary,
+      letterSpacing: -0.2,
+    ),
+    descTextStyle: const TextStyle(
+      fontSize: 13,
+      height: 1.4,
+      color: TColors.textSecondary,
+    ),
+    child: child,
+  );
+}
 
 @RoutePage()
 class HomeMachinaryScreen extends StatefulWidget {
@@ -31,6 +68,39 @@ class _HomeMachinaryScreenState extends State<HomeMachinaryScreen>
   MetricsMachineryEntity? _cacheMetrics;
   List<MachineryEntity>? _cacheinventory;
 
+  // ─── Tutorial (coach marks) ───────────────────────────────────────────────
+  /// Clave de rol para persistir si Maquinaria ya vio el recorrido guiado.
+  static const String _kTutorialRoleKey = 'maquinaria';
+
+  late final ShowcaseView _showcaseView;
+
+  /// Evita re-evaluar el auto-inicio en cada rebuild del estado cargado.
+  bool _tutorialAutoChecked = false;
+
+  final GlobalKey _healthKey = GlobalKey();
+  final GlobalKey _inventoryKey = GlobalKey();
+  final GlobalKey _registerKey = GlobalKey();
+
+  /// Orden del recorrido (de arriba hacia abajo).
+  List<GlobalKey> get _showcaseKeys =>
+      [_healthKey, _inventoryKey, _registerKey];
+
+  /// Locución de cada paso (mismo orden que [_showcaseKeys]).
+  static const List<String> _speechByStep = [
+    'Estado de la flota. La salud de tu maquinaria de un vistazo: cuántas están '
+        'operativas, en mantenimiento o inactivas. Toca cada estado para ver '
+        'esas máquinas.',
+    'Inventario reciente. Tus últimas máquinas registradas; toca "Ver todos" '
+        'para abrir la lista completa.',
+    'Registrar nueva máquina. Con este botón das de alta una nueva máquina en '
+        'la flota.',
+  ];
+
+  void _speakStep(int? index) {
+    if (index == null || index < 0 || index >= _speechByStep.length) return;
+    TutorialTts.instance.speak(_speechByStep[index]);
+  }
+
   Future<void> _loadUserData() async {
     final role = await UserSession.getRole();
     setState(() {
@@ -47,6 +117,62 @@ class _HomeMachinaryScreenState extends State<HomeMachinaryScreen>
     _machineryBloc = InjectorContainer.getIt<MachineryBloc>()
       ..add(FetchMetricsMachineEvent())
       ..add(ListInventoryMachineryEvent());
+
+    _showcaseView = ShowcaseView.register(
+      scope: _kMachineryScope,
+      enableAutoScroll: true,
+      onStart: (index, _) => _speakStep(index),
+      onFinish: _markTutorialSeen,
+      onDismiss: (_) => _markTutorialSeen(),
+      globalTooltipActionConfig: const TooltipActionConfig(
+        position: TooltipActionPosition.inside,
+        alignment: MainAxisAlignment.spaceBetween,
+      ),
+      globalTooltipActions: [
+        const TooltipActionButton(
+          type: TooltipDefaultActionType.skip,
+          name: 'Saltar',
+          backgroundColor: Colors.transparent,
+          textStyle: TextStyle(
+            color: TColors.textSecondary,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+        const TooltipActionButton(
+          type: TooltipDefaultActionType.next,
+          name: 'Siguiente',
+          backgroundColor: TColors.appMainColor,
+          textStyle: TextStyle(
+            color: Colors.white,
+            fontWeight: FontWeight.w700,
+          ),
+        ),
+      ],
+    );
+  }
+
+  /// Inicia el recorrido la primera vez que métricas e inventario ya cargaron
+  /// (antes los objetivos aún no están en el árbol; hay un skeleton).
+  void _maybeAutoStartTutorial() {
+    if (_tutorialAutoChecked) return;
+    _tutorialAutoChecked = true;
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      final alreadySeen = await TutorialPrefs.hasSeen(_kTutorialRoleKey);
+      if (alreadySeen || !mounted) return;
+      _startTutorial();
+    });
+  }
+
+  void _startTutorial() {
+    _showcaseView.startShowCase(
+      _showcaseKeys,
+      delay: const Duration(milliseconds: 500),
+    );
+  }
+
+  void _markTutorialSeen() {
+    TutorialTts.instance.stop();
+    TutorialPrefs.markSeen(_kTutorialRoleKey);
   }
 
   @override
@@ -69,6 +195,8 @@ class _HomeMachinaryScreenState extends State<HomeMachinaryScreen>
 
   @override
   void dispose() {
+    TutorialTts.instance.stop();
+    _showcaseView.unregister();
     machineryStatusChangedSignal.removeListener(_onStatusSignal);
     appRouteObserver.unsubscribe(this);
     super.dispose();
@@ -157,6 +285,9 @@ class _HomeMachinaryScreenState extends State<HomeMachinaryScreen>
             } else if (state is InventoryMachineryLoaded) {
               _cacheinventory = state.machinery;
             }
+            if (_cacheMetrics != null && _cacheinventory != null) {
+              _maybeAutoStartTutorial();
+            }
           },
           buildWhen: (previous, current) =>
               current is MetricsMachineryLoading ||
@@ -199,14 +330,22 @@ class _HomeMachinaryScreenState extends State<HomeMachinaryScreen>
                       child: _FleetHero(
                         userName: UserSession.userName,
                         rol: rol,
+                        onHelp: _startTutorial,
                       ),
                     ),
                     SliverToBoxAdapter(
                       child: Padding(
                         padding: const EdgeInsets.fromLTRB(20, 18, 20, 0),
-                        child: _FleetHealthCard(
-                          metrics: metrics,
-                          onStatusTap: _goToList,
+                        child: _coachMark(
+                          key: _healthKey,
+                          title: 'Estado de la flota',
+                          description:
+                              'La salud de tu maquinaria de un vistazo. Toca '
+                              'un estado para ver esas máquinas.',
+                          child: _FleetHealthCard(
+                            metrics: metrics,
+                            onStatusTap: _goToList,
+                          ),
                         ),
                       ),
                     ),
@@ -228,10 +367,17 @@ class _HomeMachinaryScreenState extends State<HomeMachinaryScreen>
                     SliverToBoxAdapter(
                       child: Padding(
                         padding: const EdgeInsets.fromLTRB(20, 24, 20, 12),
-                        child: _SectionHeader(
+                        child: _coachMark(
+                          key: _inventoryKey,
                           title: 'Inventario reciente',
-                          count: inventory.length,
-                          onSeeAll: _goToList,
+                          description:
+                              'Tus últimas máquinas registradas; toca "Ver '
+                              'todos" para la lista completa.',
+                          child: _SectionHeader(
+                            title: 'Inventario reciente',
+                            count: inventory.length,
+                            onSeeAll: _goToList,
+                          ),
                         ),
                       ),
                     ),
@@ -254,9 +400,16 @@ class _HomeMachinaryScreenState extends State<HomeMachinaryScreen>
                       child: Padding(
                         padding:
                             EdgeInsets.fromLTRB(20, 14, 20, 28 + bottomInset),
-                        child: _RegisterMachineButton(
-                          onRegistered: () =>
-                              _machineryBloc.add(FetchMetricsMachineEvent()),
+                        child: _coachMark(
+                          key: _registerKey,
+                          title: 'Registrar nueva máquina',
+                          description:
+                              'Da de alta una nueva máquina en la flota desde '
+                              'aquí.',
+                          child: _RegisterMachineButton(
+                            onRegistered: () =>
+                                _machineryBloc.add(FetchMetricsMachineEvent()),
+                          ),
                         ),
                       ),
                     ),
@@ -351,7 +504,10 @@ class _FleetHero extends StatelessWidget {
   final String userName;
   final String rol;
 
-  const _FleetHero({required this.userName, required this.rol});
+  /// Si se provee, muestra el botón de ayuda que reabre el recorrido guiado.
+  final VoidCallback? onHelp;
+
+  const _FleetHero({required this.userName, required this.rol, this.onHelp});
 
   String get _firstName {
     final trimmed = userName.trim();
@@ -427,6 +583,26 @@ class _FleetHero extends StatelessWidget {
                     ],
                   ),
                 ),
+                if (onHelp != null) ...[
+                  GestureDetector(
+                    onTap: onHelp!,
+                    child: Container(
+                      width: 44,
+                      height: 44,
+                      alignment: Alignment.center,
+                      decoration: BoxDecoration(
+                        color: TColors.white.withValues(alpha: 0.16),
+                        borderRadius: BorderRadius.circular(13),
+                      ),
+                      child: const Icon(
+                        Icons.help_outline_rounded,
+                        color: TColors.white,
+                        size: 21,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 10),
+                ],
                 const LogoutButton(),
               ],
             ),

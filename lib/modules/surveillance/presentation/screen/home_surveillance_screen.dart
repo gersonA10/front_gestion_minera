@@ -4,11 +4,54 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:front_gestion_minera/config/router/app_router.gr.dart';
 import 'package:front_gestion_minera/config/theme/extension_theme.dart';
 import 'package:front_gestion_minera/core/widgets/logout_button_widget.dart';
+import 'package:front_gestion_minera/core/tutorial/tutorial_prefs.dart';
+import 'package:front_gestion_minera/core/tutorial/tutorial_tts.dart';
 import 'package:front_gestion_minera/injector_container.dart';
 import 'package:front_gestion_minera/modules/surveillance/presentation/bloc/surveillance_bloc.dart';
 import 'package:front_gestion_minera/modules/surveillance/presentation/widget/request_card_widget.dart';
 import 'package:front_gestion_minera/utils/date_util.dart';
 import 'package:front_gestion_minera/utils/text_util.dart';
+import 'package:showcaseview/showcaseview.dart';
+
+/// Scope del recorrido guiado (coach marks) del módulo Vigilancia.
+const String _kSurveillanceScope = 'surveillance_vigilancia';
+
+/// Paleta del tooltip del recorrido (este módulo usa colores del tema).
+const Color _kSurface = Color(0xFFFFFFFF);
+const Color _kTextPrimary = Color(0xFF0D1B3E);
+const Color _kTextSecondary = Color(0xFF6B7A99);
+const Color _kAccent = Color(0xFF1A56FF);
+
+/// Envuelve un widget como objetivo de coach mark con el estilo del módulo.
+Widget _coachMark({
+  required GlobalKey key,
+  required String title,
+  required String description,
+  required Widget child,
+}) {
+  return Showcase(
+    key: key,
+    scope: _kSurveillanceScope,
+    title: title,
+    description: description,
+    targetBorderRadius: BorderRadius.circular(20),
+    targetPadding: const EdgeInsets.all(8),
+    tooltipBackgroundColor: _kSurface,
+    tooltipBorderRadius: BorderRadius.circular(16),
+    titleTextStyle: const TextStyle(
+      fontSize: 15,
+      fontWeight: FontWeight.w800,
+      color: _kTextPrimary,
+      letterSpacing: -0.2,
+    ),
+    descTextStyle: const TextStyle(
+      fontSize: 13,
+      height: 1.4,
+      color: _kTextSecondary,
+    ),
+    child: child,
+  );
+}
 
 @RoutePage()
 class HomeSurveillanceScreen extends StatefulWidget {
@@ -22,6 +65,36 @@ class _HomeSurveillanceScreenState extends State<HomeSurveillanceScreen> {
   late final SurveillanceBloc _surveillanceBloc;
   late final ScrollController _scrollController;
 
+  // ─── Tutorial (coach marks) ───────────────────────────────────────────────
+  /// Clave de rol para persistir si Vigilancia ya vio el recorrido guiado.
+  static const String _kTutorialRoleKey = 'vigilancia';
+
+  late final ShowcaseView _showcaseView;
+
+  /// Evita re-evaluar el auto-inicio en cada rebuild del estado cargado.
+  bool _tutorialAutoChecked = false;
+
+  final GlobalKey _headerKey = GlobalKey();
+  final GlobalKey _summaryKey = GlobalKey();
+  final GlobalKey _sectionKey = GlobalKey();
+
+  /// Orden del recorrido (de arriba hacia abajo).
+  List<GlobalKey> get _showcaseKeys => [_headerKey, _summaryKey, _sectionKey];
+
+  /// Locución de cada paso (mismo orden que [_showcaseKeys]).
+  static const List<String> _speechByStep = [
+    'Bandeja de vigilancia. Aquí gestionas las solicitudes pendientes; con el '
+        'botón Historial revisas las que ya resolviste.',
+    'Resumen. El total de solicitudes pendientes de revisión en este momento.',
+    'Solicitudes pendientes. Toca una para ver su detalle y aprobarla o '
+        'rechazarla.',
+  ];
+
+  void _speakStep(int? index) {
+    if (index == null || index < 0 || index >= _speechByStep.length) return;
+    TutorialTts.instance.speak(_speechByStep[index]);
+  }
+
   @override
   void initState() {
     super.initState();
@@ -29,6 +102,61 @@ class _HomeSurveillanceScreenState extends State<HomeSurveillanceScreen> {
       ..add(MonitoringTrayEvent());
 
     _scrollController = ScrollController()..addListener(_onScroll);
+
+    _showcaseView = ShowcaseView.register(
+      scope: _kSurveillanceScope,
+      enableAutoScroll: true,
+      onStart: (index, _) => _speakStep(index),
+      onFinish: _markTutorialSeen,
+      onDismiss: (_) => _markTutorialSeen(),
+      globalTooltipActionConfig: const TooltipActionConfig(
+        position: TooltipActionPosition.inside,
+        alignment: MainAxisAlignment.spaceBetween,
+      ),
+      globalTooltipActions: [
+        const TooltipActionButton(
+          type: TooltipDefaultActionType.skip,
+          name: 'Saltar',
+          backgroundColor: Colors.transparent,
+          textStyle: TextStyle(
+            color: _kTextSecondary,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+        const TooltipActionButton(
+          type: TooltipDefaultActionType.next,
+          name: 'Siguiente',
+          backgroundColor: _kAccent,
+          textStyle: TextStyle(
+            color: Colors.white,
+            fontWeight: FontWeight.w700,
+          ),
+        ),
+      ],
+    );
+  }
+
+  /// Inicia el recorrido la primera vez que la bandeja termina de cargar.
+  void _maybeAutoStartTutorial() {
+    if (_tutorialAutoChecked) return;
+    _tutorialAutoChecked = true;
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      final alreadySeen = await TutorialPrefs.hasSeen(_kTutorialRoleKey);
+      if (alreadySeen || !mounted) return;
+      _startTutorial();
+    });
+  }
+
+  void _startTutorial() {
+    _showcaseView.startShowCase(
+      _showcaseKeys,
+      delay: const Duration(milliseconds: 500),
+    );
+  }
+
+  void _markTutorialSeen() {
+    TutorialTts.instance.stop();
+    TutorialPrefs.markSeen(_kTutorialRoleKey);
   }
 
   void _onScroll() {
@@ -48,6 +176,8 @@ class _HomeSurveillanceScreenState extends State<HomeSurveillanceScreen> {
 
   @override
   void dispose() {
+    TutorialTts.instance.stop();
+    _showcaseView.unregister();
     _scrollController.dispose();
     _surveillanceBloc.close();
     super.dispose();
@@ -75,7 +205,9 @@ class _HomeSurveillanceScreenState extends State<HomeSurveillanceScreen> {
     final colors = Theme.of(context).colorScheme;
 
     return BlocConsumer<SurveillanceBloc, SurveillanceState>(
-      listener: (context, state) {},
+      listener: (context, state) {
+        if (state is SurveillanceSuccess) _maybeAutoStartTutorial();
+      },
       builder: (context, state) {
         if (state is SurveillanceLoading) {
           return _buildLoadingState();
@@ -110,13 +242,34 @@ class _HomeSurveillanceScreenState extends State<HomeSurveillanceScreen> {
             physics: const AlwaysScrollableScrollPhysics(),
             padding: const EdgeInsets.fromLTRB(20, 12, 20, 24),
             children: [
-              _buildTopHeader(),
+              _coachMark(
+                key: _headerKey,
+                title: 'Bandeja de vigilancia',
+                description:
+                    'Gestiona las solicitudes pendientes y, con "Historial", '
+                    'revisa las que ya resolviste.',
+                child: _buildTopHeader(showHelp: true),
+              ),
               const SizedBox(height: 20),
-              _buildSummaryCard(total: state.totalRecords),
+              _coachMark(
+                key: _summaryKey,
+                title: 'Resumen',
+                description:
+                    'El total de solicitudes pendientes de revisión en este '
+                    'momento.',
+                child: _buildSummaryCard(total: state.totalRecords),
+              ),
               const SizedBox(height: 20),
-              _buildSectionHeader(
+              _coachMark(
+                key: _sectionKey,
                 title: 'Solicitudes pendientes',
-                subtitle: '${state.totalRecords} por revisar',
+                description:
+                    'Toca una solicitud para ver su detalle y aprobarla o '
+                    'rechazarla.',
+                child: _buildSectionHeader(
+                  title: 'Solicitudes pendientes',
+                  subtitle: '${state.totalRecords} por revisar',
+                ),
               ),
               const SizedBox(height: 14),
               if (items.isEmpty)
@@ -167,7 +320,7 @@ class _HomeSurveillanceScreenState extends State<HomeSurveillanceScreen> {
     );
   }
 
-  Widget _buildTopHeader() {
+  Widget _buildTopHeader({bool showHelp = false}) {
     final colors = Theme.of(context).colorScheme;
 
     return Container(
@@ -219,6 +372,26 @@ class _HomeSurveillanceScreenState extends State<HomeSurveillanceScreen> {
                   ],
                 ),
               ),
+              if (showHelp) ...[
+                GestureDetector(
+                  onTap: _startTutorial,
+                  child: Container(
+                    width: 42,
+                    height: 42,
+                    alignment: Alignment.center,
+                    decoration: BoxDecoration(
+                      color: colors.blue.withValues(alpha: .10),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Icon(
+                      Icons.help_outline_rounded,
+                      color: colors.blue,
+                      size: 20,
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 8),
+              ],
               const LogoutButton(),
             ],
           ),

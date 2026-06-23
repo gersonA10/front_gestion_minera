@@ -17,6 +17,7 @@ class RequestDetailModel extends RequestDetailEntity {
     required super.requesterName,
     required super.createdAt,
     super.closedAt,
+    super.reconciliationStatus,
     required super.timeline,
   });
 
@@ -39,6 +40,7 @@ class RequestDetailModel extends RequestDetailEntity {
       closedAt: json['closed_at'] != null
           ? DateTime.tryParse(json['closed_at'] as String)
           : null,
+      reconciliationStatus: json['reconciliation_status'] as String?,
       timeline: (json['timeline'] as List? ?? [])
           .map((e) => RequestTimelineStepModel.fromJson(e as Map<String, dynamic>))
           .toList(),

@@ -122,6 +122,23 @@ class StaffRepositoryImpl implements StaffRepository {
   }
 
   @override
+  Future<AttendanceReportEntity> getAttendanceReport({
+    required String employeeId,
+    String period = 'weekly',
+    String? ref,
+    String? from,
+    String? to,
+  }) {
+    return datasource.getAttendanceReport(
+      employeeId: employeeId,
+      period: period,
+      ref: ref,
+      from: from,
+      to: to,
+    );
+  }
+
+  @override
   Future<List<PayrollMonthlyEntity>> getPayrollMonthlyList({
     required int month,
     required int year,

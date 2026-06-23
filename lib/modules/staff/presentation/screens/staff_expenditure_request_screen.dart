@@ -8,11 +8,16 @@ import 'package:front_gestion_minera/config/router/app_router.gr.dart';
 import 'package:front_gestion_minera/injector_container.dart';
 import 'package:front_gestion_minera/modules/staff/domain/entity/create_payroll_monthly_entity.dart';
 import 'package:front_gestion_minera/modules/staff/presentation/bloc/staff_bloc.dart';
+import 'package:front_gestion_minera/modules/staff/presentation/widgets/staff_ui.dart';
 import 'package:front_gestion_minera/utils/constants/color.constant.dart';
 import 'package:image_picker/image_picker.dart';
 
 import '../../../../core/widgets/custom_alert_widget.dart';
-import '../../../../core/widgets/excavator_loader.dart';
+
+const List<String> _kMonths = [
+  'enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio',
+  'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre',
+];
 
 @RoutePage()
 class StaffExpenditureRequestScreen extends StatefulWidget {
@@ -35,23 +40,9 @@ class _StaffExpenditureRequestScreenState
   final _justifyController = TextEditingController();
   final _keyform = GlobalKey<FormState>();
 
-  String formatDate(DateTime date) {
-    const months = [
-      'Enero',
-      'Febrero',
-      'Marzo',
-      'Abril',
-      'Mayo',
-      'Junio',
-      'Julio',
-      'Agosto',
-      'Septiembre',
-      'Octubre',
-      'Noviembre',
-      'Diciembre',
-    ];
-
-    return 'Ciclo: ${months[date.month - 1]} ${date.year}';
+  String get _cycleLabel {
+    final now = DateTime.now();
+    return '${_kMonths[now.month - 1]} ${now.year}';
   }
 
   @override
@@ -62,377 +53,150 @@ class _StaffExpenditureRequestScreenState
   }
 
   @override
+  void dispose() {
+    _justifyController.dispose();
+    super.dispose();
+  }
+
+  void _submit() {
+    if (!_keyform.currentState!.validate()) return;
+    if (_pickedImages.isEmpty) {
+      CustomAlert.show(
+        context,
+        title: 'Falta la planilla',
+        message: 'Adjunta una foto de la planilla de egreso para continuar.',
+        type: AlertType.warning,
+      );
+      return;
+    }
+    final payrollEntity = CreatePayrollMonthlyEntity(
+      month: DateTime.now().month,
+      year: DateTime.now().year,
+      justification: _justifyController.text,
+      planillaUrl: _pickedImages.first.path,
+    );
+    _blocPayroll.add(CreatePayrollMonthlyEvent(payroll: payrollEntity));
+  }
+
+  @override
   Widget build(BuildContext context) {
     return BlocProvider.value(
       value: _blocPayroll,
-      child: Scaffold(
-        backgroundColor: TColors.white,
-        appBar: AppBar(
-          title: Column(
+      child: BlocConsumer<StaffBloc, StaffState>(
+        listener: (context, state) {
+          if (state is GenerateEmployeePayrollSuccess) {
+            setState(() {
+              _totalAmount = state.totalAmount;
+              _totalEmployeed = state.totalEmployee;
+            });
+          }
+          if (state is CreatePayrollRequestSuccess) {
+            CustomAlert.show(
+              context,
+              title: 'Solicitud enviada',
+              message:
+                  'Tu solicitud de egreso fue enviada a Hacienda. Espera la respuesta.',
+              type: AlertType.success,
+            );
+            _justifyController.clear();
+            setState(() => _pickedImages.clear());
+          }
+          if (state is CreatePayrollRequestError) {
+            CustomAlert.show(
+              context,
+              title: 'Error',
+              message: state.message,
+              type: AlertType.error,
+            );
+          }
+        },
+        builder: (context, state) {
+          final isLoading = state is CreatePayrollRequestLoading;
+          return ListView(
+            keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
+            padding: const EdgeInsets.fromLTRB(20, 18, 20, 28),
             children: [
-              Text('Hacienda Municipal'),
-              Text(formatDate(DateTime.now()), style: TextStyle(fontSize: 15)),
-            ],
-          ),
-          actions: [
-            IconButton(
-              onPressed: () {
-                context.router.push(HistoricalRecordExpenditureRoute());
-              },
-              splashRadius: 20,
-              padding: EdgeInsets.zero,
-              constraints: const BoxConstraints(),
-              icon: const Column(
-                children: [
-                  Icon(
-                    Icons.description_outlined,
-                    color: TColors.disabled,
-                    size: 22,
-                  ),
-                  Text('Historial', style: TextStyle(fontSize: 8, color: TColors.disabled)),
-                  Text('Solicitudes', style: TextStyle(fontSize: 8, color: TColors.disabled))
-                ],
+              _HistoryAccess(
+                onTap: () =>
+                    context.router.push(HistoricalRecordExpenditureRoute()),
               ),
-            ),
-            const SizedBox(width: 10),
-          ],
-        ),
-        body: BlocConsumer<StaffBloc, StaffState>(
-          listener: (context, state) {
-            if (state is CreatePayrollRequestSuccess) {
-              CustomAlert.show(
-                context,
-                title: 'Exito',
-                message: 'Solicitud de egreso enviada exitosamente, espere respuesta',
-                type: AlertType.success,
-              );
-              _justifyController.clear();
-              setState(() {
-                _pickedImages.clear();
-              });
-            }
-            if (state is CreatePayrollRequestError) {
-              CustomAlert.show(
-                context,
-                title: "Error",
-                message: state.message,
-                type: AlertType.error,
-              );
-            }
-          },
-          builder: (context, state) {
-            final isLoading = state is CreatePayrollRequestLoading;
-            return Stack(
-              children: [
-                Padding(
-                  padding: EdgeInsets.symmetric(horizontal:20),
-                  child: ListView(
-                    keyboardDismissBehavior:
-                        ScrollViewKeyboardDismissBehavior.onDrag,
-                    padding: EdgeInsets.only(
-                      bottom: MediaQuery.of(context).viewInsets.bottom,
+              const SizedBox(height: 18),
+              _AmountCard(
+                cycleLabel: _cycleLabel,
+                amount: _totalAmount,
+                workers: _totalEmployeed,
+              ),
+              const SizedBox(height: 22),
+              const StaffSectionTitle('Justificación de la solicitud'),
+              const SizedBox(height: 10),
+              Form(
+                key: _keyform,
+                child: TextFormField(
+                  controller: _justifyController,
+                  maxLines: 4,
+                  style: const TextStyle(
+                    fontSize: 14,
+                    color: StaffUi.textPrimary,
+                  ),
+                  validator: (value) {
+                    if (value == null || value.trim().isEmpty) {
+                      return 'Este campo es obligatorio';
+                    }
+                    if (value.trim().length < 10) {
+                      return 'Describe el motivo con al menos 10 caracteres';
+                    }
+                    return null;
+                  },
+                  decoration: InputDecoration(
+                    hintText: 'Describe el motivo del egreso de nómina...',
+                    hintStyle: const TextStyle(
+                      color: StaffUi.muted,
+                      fontSize: 14,
                     ),
-                    children: [
-                      const SizedBox(height: 10),
-                      const Text(
-                        'Solicitud de Egreso',
-                        style: TextStyle(
-                          fontSize: 25,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      const Text(
-                        'Módulo de Nómina y tesorería',
-                        style: TextStyle(
-                          fontSize: 15,
-                          color: TColors.appDisabledColor,
-                        ),
-                      ),
-                      const SizedBox(height: 15),
-                      BlocBuilder<StaffBloc, StaffState>(
-                        builder: (context, state) {
-                          if (state is GenerateEmployeePayrollSuccess) {
-                            _totalAmount = state.totalAmount;
-                            _totalEmployeed = state.totalEmployee;
-                          }
-                          final isLoadingDash =
-                              state is GenerateEmployeePayrollLoading;
-                          final totalAmount = _totalAmount;
-                          final totalEmployeed = _totalEmployeed;
-                          return Container(
-                            width: double.infinity,
-                            padding: EdgeInsets.all(30),
-                            decoration: BoxDecoration(
-                              color: TColors.appBackgroundColor,
-                              borderRadius: BorderRadius.circular(15),
-                              border: Border.all(
-                                color: TColors.appDisabledColor.withValues(
-                                  alpha: 0.4,
-                                ),
-                              ),
-                            ),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                const Text(
-                                  'MONTO TOTAL A SOLICITAR',
-                                  style: TextStyle(
-                                    fontSize: 14,
-                                    fontWeight: FontWeight.bold,
-                                    color: TColors.appMainDarkColor,
-                                  ),
-                                ),
-                                isLoadingDash
-                                    ? const CircularProgressIndicator()
-                                    : Text(
-                                        '$totalAmount BS',
-                                        style: TextStyle(
-                                          fontSize: 25,
-                                          fontWeight: FontWeight.bold,
-                                        ),
-                                      ),
-                                const SizedBox(height: 10),
-                                Divider(
-                                  color: TColors.appDisabledColor.withValues(
-                                    alpha: 0.2,
-                                  ),
-                                ),
-                                Row(
-                                  children: [
-                                    const Text('Trabajadores Activos'),
-                                    const Spacer(),
-                                    Text(
-                                      '$totalEmployeed',
-                                      style: TextStyle(
-                                        fontWeight: FontWeight.bold,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ],
-                            ),
-                          );
-                        },
-                      ),
-                      const SizedBox(height: 15),
-                      const Text(
-                        'Justificación de la solicitud',
-                        style: TextStyle(fontWeight: FontWeight.bold),
-                      ),
-                      const SizedBox(height: 20),
-                      Form(
-                        key: _keyform,
-                        child: TextFormField(
-                          validator: (value) {
-                            if (value == null || value.isEmpty) {
-                              return 'Este Campo es Obligatorio';
-                            }
-                            if (value.length < 10) {
-                              return 'Debe de tener minimo 10 caracteres';
-                            }
-                            return null;
-                          },
-                          controller: _justifyController,
-                          maxLines: 4,
-                          decoration: InputDecoration(
-                            hintText:
-                                'Descriva el motivo del egreso de nómina...',
-                            hintStyle: TextStyle(
-                              color: TColors.appSecondaryTextColor,
-                            ),
-                          ),
-                        ),
-                      ),
-                      const SizedBox(height: 20),
-                      const Text(
-                        'Planilla de Egreso',
-                        style: TextStyle(fontWeight: FontWeight.bold),
-                      ),
-                      const SizedBox(height: 15),
-
-                      DottedBorder(
-                        options: RoundedRectDottedBorderOptions(
-                          radius: Radius.circular(15),
-                          color: TColors.appDisabledColor,
-                          dashPattern: [6, 3],
-                          strokeWidth: 1,
-                          padding: EdgeInsets.all(5),
-                        ),
-                        child: _pickedImages.isNotEmpty
-                            ? Stack(
-                                children: [
-                                  ClipRRect(
-                                    borderRadius: BorderRadiusGeometry.circular(
-                                      15,
-                                    ),
-                                    child: Image.file(
-                                      File(_pickedImages.first.path),
-                                      fit: BoxFit.cover,
-                                    ),
-                                  ),
-                                  Positioned(
-                                    right: 8,
-                                    top: 8,
-                                    child: InkWell(
-                                      onTap: () {
-                                        setState(() {
-                                          _pickedImages.clear();
-                                        });
-                                      },
-                                      child: Container(
-                                        padding: const EdgeInsets.all(6),
-                                        decoration: const BoxDecoration(
-                                          color: TColors.red,
-                                          shape: BoxShape.circle,
-                                        ),
-                                        child: const Icon(
-                                          Icons.delete_forever,
-                                          color: TColors.white,
-                                          size: 20,
-                                        ),
-                                      ),
-                                    ),
-                                  ),
-                                ],
-                              )
-                            : InkWell(
-                                onTap: () {
-                                  _showPickerOptions();
-                                },
-                                child: Container(
-                                  height: 70,
-                                  width: double.infinity,
-                                  padding: EdgeInsets.symmetric(horizontal: 20),
-                                  child: Row(
-                                    children: [
-                                      Container(
-                                        padding: EdgeInsets.all(5),
-                                        decoration: BoxDecoration(
-                                          color: TColors.appMainDarkColor
-                                              .withValues(alpha: 0.2),
-                                          borderRadius: BorderRadius.circular(
-                                            7,
-                                          ),
-                                        ),
-                                        child: Icon(
-                                          Icons.image,
-                                          color: TColors.appMainDarkColor,
-                                        ),
-                                      ),
-                                      const SizedBox(width: 5),
-                                      Expanded(
-                                        child: Column(
-                                          crossAxisAlignment:
-                                              CrossAxisAlignment.start,
-                                          mainAxisAlignment:
-                                              MainAxisAlignment.center,
-                                          children: [
-                                            Text(
-                                              'Suba un fota de la Nomina',
-                                              style: TextStyle(
-                                                fontWeight: FontWeight.bold,
-                                              ),
-                                            ),
-                                            Text('Requerido'),
-                                          ],
-                                        ),
-                                      ),
-                                      const Icon(Icons.remove_red_eye_outlined),
-                                    ],
-                                  ),
-                                ),
-                              ),
-                      ),
-                      const SizedBox(height: 15),
-                      Container(
-                        width: double.infinity,
-                        padding: EdgeInsets.all(15),
-                        decoration: BoxDecoration(
-                          color: TColors.amberLight,
-                          borderRadius: BorderRadius.circular(15),
-                        ),
-                        child: const Row(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Icon(Icons.error_outline, color: TColors.amber),
-                            SizedBox(width: 10),
-                            Expanded(
-                              child: Text(
-                                'Esta solicitud sera enviada al departamento de Hacienda para su revisión y aprobación presupuestaria inmediata.',
-                                style: TextStyle(
-                                  color: TColors.amber,
-                                  fontSize: 13,
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                      const SizedBox(height: 20),
-                      InkWell(
-                        onTap: () {
-                          if (!_keyform.currentState!.validate()) {
-                            return;
-                          }
-                          if (_pickedImages.isEmpty) {
-                            return CustomAlert.show(
-                              context,
-                              title: 'Error',
-                              message: 'Seleccione una imagen',
-                              type: AlertType.warning,
-                            );
-                          }
-                          final payrollEntity = CreatePayrollMonthlyEntity(
-                            month: DateTime.now().month,
-                            year: DateTime.now().year,
-                            justification: _justifyController.text,
-                            planillaUrl: _pickedImages.first.path,
-                          );
-                          _blocPayroll.add(
-                            CreatePayrollMonthlyEvent(payroll: payrollEntity),
-                          );
-                        },
-                        child: Container(
-                          height: 60,
-                          width: double.infinity,
-                          margin: EdgeInsets.only(bottom: 20),
-                          decoration: BoxDecoration(
-                            color: TColors.appMainDarkColor,
-                            borderRadius: BorderRadius.circular(20),
-                          ),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Icon(
-                                Icons.send_outlined,
-                                color: TColors.white,
-                                size: 25,
-                              ),
-                              SizedBox(width: 10),
-                              Text(
-                                'Solicitar a Hacienda',
-                                style: TextStyle(
-                                  color: TColors.white,
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 20,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                    ],
+                    filled: true,
+                    fillColor: StaffUi.surface,
+                    contentPadding: const EdgeInsets.all(14),
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(14),
+                      borderSide: const BorderSide(color: StaffUi.border),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(14),
+                      borderSide:
+                          const BorderSide(color: StaffUi.primary, width: 1.4),
+                    ),
+                    errorBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(14),
+                      borderSide: const BorderSide(color: Color(0xFFEF4444)),
+                    ),
+                    focusedErrorBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(14),
+                      borderSide:
+                          const BorderSide(color: Color(0xFFEF4444), width: 1.4),
+                    ),
                   ),
                 ),
-                if (isLoading)
-                  Container(
-                    color: Colors.black.withValues(alpha: 0.5),
-                    child: const Center(child: ExcavatorLoader()),
-                  ),
-              ],
-            );
-          },
-        ),
+              ),
+              const SizedBox(height: 22),
+              const StaffSectionTitle('Planilla de egreso'),
+              const SizedBox(height: 10),
+              _UploadZone(
+                image: _pickedImages.isNotEmpty ? _pickedImages.first : null,
+                onPick: _showPickerOptions,
+                onRemove: () => setState(() => _pickedImages.clear()),
+              ),
+              const SizedBox(height: 16),
+              _InfoBanner(),
+              const SizedBox(height: 24),
+              StaffPrimaryButton(
+                label: 'Solicitar a Hacienda',
+                icon: Icons.send_rounded,
+                loading: isLoading,
+                onPressed: _submit,
+              ),
+            ],
+          );
+        },
       ),
     );
   }
@@ -440,43 +204,58 @@ class _StaffExpenditureRequestScreenState
   void _showPickerOptions() {
     showModalBottomSheet(
       context: context,
+      backgroundColor: StaffUi.surface,
       shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
       builder: (BuildContext context) {
         return SafeArea(
-          child: Wrap(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
             children: <Widget>[
+              const SizedBox(height: 8),
+              Container(
+                width: 40,
+                height: 4,
+                decoration: BoxDecoration(
+                  color: StaffUi.border,
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
               const Padding(
-                padding: EdgeInsets.all(16.0),
-                child: Text(
-                  'Seleccionar evidencia',
-                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                padding: EdgeInsets.fromLTRB(20, 16, 20, 6),
+                child: Align(
+                  alignment: Alignment.centerLeft,
+                  child: Text(
+                    'Adjuntar planilla',
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w800,
+                      color: StaffUi.textPrimary,
+                      letterSpacing: -0.2,
+                    ),
+                  ),
                 ),
               ),
               ListTile(
-                leading: const Icon(
-                  Icons.photo_library,
-                  color: Color(0xFF295AF5),
-                ),
-                title: const Text('Elegir de la Galería'),
+                leading: const Icon(Icons.photo_library_rounded,
+                    color: StaffUi.primary),
+                title: const Text('Elegir de la galería'),
                 onTap: () {
                   Navigator.of(context).pop();
                   _pickImage(ImageSource.gallery);
                 },
               ),
               ListTile(
-                leading: const Icon(
-                  Icons.photo_camera,
-                  color: Color(0xFF295AF5),
-                ),
-                title: const Text('Tomar Foto'),
+                leading: const Icon(Icons.photo_camera_rounded,
+                    color: StaffUi.primary),
+                title: const Text('Tomar foto'),
                 onTap: () {
                   Navigator.of(context).pop();
                   _pickImage(ImageSource.camera);
                 },
               ),
-              const SizedBox(height: 60),
+              const SizedBox(height: 16),
             ],
           ),
         );
@@ -486,18 +265,16 @@ class _StaffExpenditureRequestScreenState
 
   Future<void> _pickImage(ImageSource source) async {
     try {
-      final XFile? photo = await _picker.pickImage(
-        source: source,
-        imageQuality: 80,
-      );
+      final XFile? photo =
+          await _picker.pickImage(source: source, imageQuality: 80);
       if (photo == null) return;
-      int size = await photo.length();
+      final int size = await photo.length();
 
       if (size > _maxFileSize) {
         if (!mounted) return;
         CustomAlert.show(
           context,
-          title: 'Error',
+          title: 'Archivo muy grande',
           message: 'El archivo ${photo.path.split('/').last} supera los 10MB.',
           type: AlertType.error,
         );
@@ -508,7 +285,310 @@ class _StaffExpenditureRequestScreenState
         _pickedImages.add(photo);
       });
     } catch (e) {
-      debugPrint("Error al procesar la imagen: $e");
+      debugPrint('Error al procesar la imagen: $e');
     }
+  }
+}
+
+/// Acceso al historial de solicitudes de egreso.
+class _HistoryAccess extends StatelessWidget {
+  final VoidCallback onTap;
+  const _HistoryAccess({required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    return StaffCard(
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+      onTap: onTap,
+      child: Row(
+        children: [
+          Container(
+            width: 38,
+            height: 38,
+            decoration: BoxDecoration(
+              color: StaffUi.primarySoft,
+              borderRadius: BorderRadius.circular(11),
+            ),
+            child: const Icon(Icons.history_rounded,
+                color: StaffUi.primary, size: 20),
+          ),
+          const SizedBox(width: 12),
+          const Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Historial de solicitudes',
+                  style: TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w800,
+                    color: StaffUi.textPrimary,
+                    letterSpacing: -0.2,
+                  ),
+                ),
+                SizedBox(height: 2),
+                Text(
+                  'Consulta tus egresos solicitados y su estado',
+                  style: TextStyle(fontSize: 12, color: StaffUi.textSecondary),
+                ),
+              ],
+            ),
+          ),
+          const Icon(Icons.arrow_forward_ios_rounded,
+              size: 13, color: StaffUi.textSecondary),
+        ],
+      ),
+    );
+  }
+}
+
+/// Tarjeta destacada con el monto total a solicitar y el ciclo.
+class _AmountCard extends StatelessWidget {
+  final String cycleLabel;
+  final double amount;
+  final int workers;
+  const _AmountCard({
+    required this.cycleLabel,
+    required this.amount,
+    required this.workers,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return BlocBuilder<StaffBloc, StaffState>(
+      builder: (context, state) {
+        final isLoading = state is GenerateEmployeePayrollLoading;
+        // Los valores efectivos los mantiene el State del screen; aquí solo
+        // reaccionamos al loading para el placeholder.
+        return Container(
+          width: double.infinity,
+          padding: const EdgeInsets.all(20),
+          decoration: BoxDecoration(
+            color: StaffUi.surface,
+            borderRadius: BorderRadius.circular(18),
+            border: Border.all(color: StaffUi.border),
+            boxShadow: StaffUi.cardShadow,
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  const Text(
+                    'MONTO TOTAL A SOLICITAR',
+                    style: TextStyle(
+                      fontSize: 11,
+                      fontWeight: FontWeight.w700,
+                      color: StaffUi.textSecondary,
+                      letterSpacing: 0.4,
+                    ),
+                  ),
+                  const Spacer(),
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 9, vertical: 3),
+                    decoration: BoxDecoration(
+                      color: StaffUi.primarySoft,
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                    child: Text(
+                      cycleLabel[0].toUpperCase() + cycleLabel.substring(1),
+                      style: const TextStyle(
+                        fontSize: 10.5,
+                        fontWeight: FontWeight.w700,
+                        color: StaffUi.primary,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 8),
+              isLoading
+                  ? const Padding(
+                      padding: EdgeInsets.symmetric(vertical: 6),
+                      child: SizedBox(
+                        width: 22,
+                        height: 22,
+                        child: CircularProgressIndicator(
+                            strokeWidth: 2.4, color: StaffUi.primary),
+                      ),
+                    )
+                  : Text(
+                      StaffUi.money2(amount),
+                      style: const TextStyle(
+                        fontSize: 28,
+                        fontWeight: FontWeight.w800,
+                        color: StaffUi.textPrimary,
+                        letterSpacing: -0.6,
+                      ),
+                    ),
+              const SizedBox(height: 14),
+              const Divider(height: 1, color: StaffUi.border),
+              const SizedBox(height: 12),
+              Row(
+                children: [
+                  const Icon(Icons.groups_rounded,
+                      size: 18, color: StaffUi.textSecondary),
+                  const SizedBox(width: 8),
+                  const Text(
+                    'Trabajadores activos',
+                    style: TextStyle(
+                      fontSize: 13,
+                      color: StaffUi.textSecondary,
+                    ),
+                  ),
+                  const Spacer(),
+                  Text(
+                    '$workers',
+                    style: const TextStyle(
+                      fontSize: 15,
+                      fontWeight: FontWeight.w800,
+                      color: StaffUi.textPrimary,
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+}
+
+/// Zona de carga de la planilla (con preview y opción de quitar).
+class _UploadZone extends StatelessWidget {
+  final XFile? image;
+  final VoidCallback onPick;
+  final VoidCallback onRemove;
+  const _UploadZone({
+    required this.image,
+    required this.onPick,
+    required this.onRemove,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    if (image != null) {
+      return Stack(
+        children: [
+          ClipRRect(
+            borderRadius: BorderRadius.circular(16),
+            child: Image.file(
+              File(image!.path),
+              width: double.infinity,
+              height: 180,
+              fit: BoxFit.cover,
+            ),
+          ),
+          Positioned(
+            right: 10,
+            top: 10,
+            child: InkWell(
+              onTap: onRemove,
+              child: Container(
+                padding: const EdgeInsets.all(7),
+                decoration: BoxDecoration(
+                  color: Colors.black.withValues(alpha: 0.55),
+                  shape: BoxShape.circle,
+                ),
+                child: const Icon(Icons.delete_outline_rounded,
+                    color: Colors.white, size: 20),
+              ),
+            ),
+          ),
+        ],
+      );
+    }
+
+    return DottedBorder(
+      options: RoundedRectDottedBorderOptions(
+        radius: const Radius.circular(16),
+        color: StaffUi.primary.withValues(alpha: 0.45),
+        dashPattern: const [6, 4],
+        strokeWidth: 1.4,
+        padding: EdgeInsets.zero,
+      ),
+      child: InkWell(
+        onTap: onPick,
+        borderRadius: BorderRadius.circular(16),
+        child: Container(
+          width: double.infinity,
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 18),
+          child: Row(
+            children: [
+              Container(
+                width: 44,
+                height: 44,
+                decoration: BoxDecoration(
+                  color: StaffUi.primarySoft,
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: const Icon(Icons.cloud_upload_rounded,
+                    color: StaffUi.primary, size: 22),
+              ),
+              const SizedBox(width: 12),
+              const Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Sube una foto de la planilla',
+                      style: TextStyle(
+                        fontWeight: FontWeight.w700,
+                        fontSize: 13.5,
+                        color: StaffUi.textPrimary,
+                      ),
+                    ),
+                    SizedBox(height: 2),
+                    Text(
+                      'Requerido · JPG o PNG (máx. 10MB)',
+                      style:
+                          TextStyle(fontSize: 11.5, color: StaffUi.textSecondary),
+                    ),
+                  ],
+                ),
+              ),
+              const Icon(Icons.add_photo_alternate_outlined,
+                  color: StaffUi.primary),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// Aviso informativo sobre el destino de la solicitud.
+class _InfoBanner extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: TColors.warningLight,
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: TColors.warning.withValues(alpha: 0.25)),
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: const [
+          Icon(Icons.info_outline_rounded, color: TColors.warning, size: 20),
+          SizedBox(width: 10),
+          Expanded(
+            child: Text(
+              'Esta solicitud se enviará al departamento de Hacienda para su '
+              'revisión y aprobación presupuestaria.',
+              style: TextStyle(
+                color: TColors.warning,
+                fontSize: 12.5,
+                height: 1.35,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
   }
 }

@@ -45,6 +45,13 @@ abstract class StaffRepository {
   Future<void> registerCheckInEmployee(EmployeeCheckInEntity checkIn);
 
   Future<EmployeeDetailAssistanceModel> getDetailsEmployee(String employeeId);
+  Future<AttendanceReportEntity> getAttendanceReport({
+    required String employeeId,
+    String period,
+    String? ref,
+    String? from,
+    String? to,
+  });
   Future<List<PayrollMonthlyEntity>> getPayrollMonthlyList({
     required int month,
     required int year,

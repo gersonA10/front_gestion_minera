@@ -73,6 +73,49 @@ class TreasuryDatasource {
     };
   }
 
+  Future<Map<String, dynamic>> getPendingReconciliations({
+    int page = 1,
+    int limit = 10,
+    String? search,
+  }) async {
+    final Map<String, dynamic> queryParameters = {'page': page, 'limit': limit};
+    if (search != null && search.trim().isNotEmpty) {
+      queryParameters['search'] = search.trim();
+    }
+
+    final response = await apiClient.get(
+      '/api/treasury/reconciliations/pending',
+      operationName: 'getPendingReconciliations',
+      queryParameters: queryParameters,
+    );
+    final List<dynamic> data = response['data'] ?? [];
+    final Map<String, dynamic> meta = response['meta'] ?? {};
+    return {
+      'items': data
+          .map((item) => ReconciliationItemModel.fromJson(item))
+          .toList(),
+      'has_more_data': meta['has_more_data'] ?? false,
+      'total_records': meta['total_records'] ?? 0,
+    };
+  }
+
+  Future<ExecuteReconciliationResultEntity> executeReconciliation(
+    String requestId,
+    String cajaOrigenId,
+    String? nota,
+  ) async {
+    final Map<String, dynamic> data = {'caja_origen_id': cajaOrigenId};
+    if (nota != null && nota.trim().isNotEmpty) {
+      data['nota'] = nota.trim();
+    }
+    final response = await apiClient.post(
+      '/api/treasury/requests/$requestId/reconcile',
+      operationName: 'executeReconciliation',
+      data: data,
+    );
+    return ExecuteReconciliationResponseModel.fromJson(response);
+  }
+
   Future<FinancialReportModel> getFinancialReport({
     String period = 'month',
     String? exactDate,

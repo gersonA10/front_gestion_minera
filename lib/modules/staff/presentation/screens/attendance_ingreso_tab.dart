@@ -120,11 +120,10 @@ class _AttendanceIngresoTabState extends State<AttendanceIngresoTab> {
         const SizedBox(width: 12),
         Expanded(
           child: AttendanceStatCardWidget(
-            label: 'Turno Mañana',
-            value: '07:00',
-            valueLabel: 'Inicio',
+            label: 'Programados',
+            value: '${widget.workers.length}',
+            valueLabel: 'Total',
             valueLabelColor: TColors.primary,
-            valueFontSize: 24,
           ),
         ),
       ],

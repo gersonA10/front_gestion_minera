@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:front_gestion_minera/injector_container.dart';
 import 'package:front_gestion_minera/modules/minutes_memos/domain/entity/memorandum_detail_entity.dart';
+import 'package:front_gestion_minera/modules/minutes_memos/presentation/widgets/actas_theme.dart';
 import 'package:front_gestion_minera/utils/constants/color.constant.dart';
 import 'package:intl/intl.dart';
 
@@ -85,8 +86,10 @@ class _InternalMemorandumDetailsScreenState
             final memorandum = state.memorandum;
             return Scaffold(
               backgroundColor: TColors.white,
+              appBar: const AcGradientAppBar(title: 'Memorando Interno'),
               bottomNavigationBar: _buildDownloadButton(context),
               body: SafeArea(
+                top: false,
                 child: SingleChildScrollView(
                   padding: const EdgeInsets.symmetric(
                     horizontal: 20.0,
@@ -95,9 +98,6 @@ class _InternalMemorandumDetailsScreenState
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      _buildTopBar(context),
-                      const Divider(color: Color(0xFFEEEEEE), thickness: 1),
-                      const SizedBox(height: 24),
                       _buildMemoHeader(memorandum),
                       const SizedBox(height: 20),
                       _buildInfoCard(memorandum),
@@ -125,36 +125,6 @@ class _InternalMemorandumDetailsScreenState
     );
   }
 
-  Widget _buildTopBar(BuildContext context) {
-    return Row(
-      children: [
-        IconButton(
-          onPressed: () => Navigator.of(context).pop(),
-          padding: EdgeInsets.zero,
-          constraints: const BoxConstraints(),
-          alignment: Alignment.centerLeft,
-          style: IconButton.styleFrom(
-            tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-          ),
-          icon: const Icon(
-            Icons.arrow_back,
-            color: TColors.appMainDarkColor,
-            size: 22,
-          ),
-        ),
-        const Spacer(),
-        const Text(
-          'Memorando Interno',
-          style: TextStyle(
-            color: TColors.appMainDarkColor,
-            fontWeight: FontWeight.w600,
-            fontSize: 15,
-          ),
-        ),
-      ],
-    );
-  }
-
   Widget _buildMemoHeader(MemorandumDetailEntity memorandum) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -164,7 +134,7 @@ class _InternalMemorandumDetailsScreenState
           style: const TextStyle(
             fontSize: 11,
             fontWeight: FontWeight.w700,
-            color: TColors.appMainColor,
+            color: AC.memo,
             letterSpacing: 0.8,
           ),
         ),
@@ -208,7 +178,7 @@ class _InternalMemorandumDetailsScreenState
               const Icon(
                 Icons.calendar_today,
                 size: 14,
-                color: TColors.appMainDarkColor,
+                color: AC.primary,
               ),
               const SizedBox(width: 6),
               Text(
@@ -237,7 +207,7 @@ class _InternalMemorandumDetailsScreenState
               const Icon(
                 Icons.person_outline,
                 size: 14,
-                color: TColors.appMainDarkColor,
+                color: AC.primary,
               ),
               const SizedBox(width: 6),
               Expanded(
@@ -265,14 +235,14 @@ class _InternalMemorandumDetailsScreenState
         Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Container(width: 3, height: 21, color: Colors.red),
+            Container(width: 3, height: 21, color: AC.memo),
             const SizedBox(width: 8),
             const Text(
               'Descripción del Cambio',
               style: TextStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.w600,
-                color: TColors.appMainDarkColor,
+                color: AC.primary,
               ),
             ),
           ],
@@ -304,7 +274,7 @@ class _InternalMemorandumDetailsScreenState
               style: const TextStyle(
                 fontSize: 15,
                 fontWeight: FontWeight.w600,
-                color: TColors.appMainDarkColor,
+                color: AC.primary,
               ),
             ),
           ],
@@ -411,7 +381,7 @@ class _InternalMemorandumDetailsScreenState
               style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
             ),
             style: ElevatedButton.styleFrom(
-              backgroundColor: TColors.appMainDarkColor,
+              backgroundColor: AC.primary,
               foregroundColor: Colors.white,
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(12),

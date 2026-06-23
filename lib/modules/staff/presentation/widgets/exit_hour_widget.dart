@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:front_gestion_minera/utils/constants/color.constant.dart';
+import 'package:front_gestion_minera/modules/staff/presentation/widgets/staff_ui.dart';
 
 class ExitHourWidget extends StatelessWidget {
   final TimeOfDay endTime;
@@ -18,25 +18,22 @@ class ExitHourWidget extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
-          'Hora de Salida',
-          style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600),
+        const StaffSectionTitle(
+          'Hora de salida',
+          icon: Icons.logout_rounded,
         ),
 
-        const SizedBox(height: 10),
+        const SizedBox(height: 12),
 
-        GestureDetector(
+        StaffCard(
+          padding: EdgeInsets.zero,
           onTap: onSelectTime,
-          child: Container(
-            height: 58,
-            padding: const EdgeInsets.symmetric(horizontal: 16),
-            decoration: BoxDecoration(
-              color: TColors.white,
-              borderRadius: BorderRadius.circular(16),
-            ),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
             child: Row(
               children: [
-                const Icon(Icons.access_time, color: TColors.disabled),
+                const Icon(Icons.access_time_rounded,
+                    color: StaffUi.primary),
 
                 const SizedBox(width: 10),
 
@@ -46,12 +43,15 @@ class ExitHourWidget extends StatelessWidget {
                     textAlign: TextAlign.center,
                     style: const TextStyle(
                       fontSize: 28,
-                      fontWeight: FontWeight.w500,
+                      fontWeight: FontWeight.w800,
+                      color: StaffUi.textPrimary,
+                      letterSpacing: -0.5,
                     ),
                   ),
                 ),
 
-                const Icon(Icons.edit_outlined, color: TColors.disabled),
+                const Icon(Icons.edit_rounded,
+                    color: StaffUi.textSecondary, size: 20),
               ],
             ),
           ),
@@ -61,7 +61,7 @@ class ExitHourWidget extends StatelessWidget {
 
         const Text(
           'Se utilizará la hora actual del dispositivo por defecto.',
-          style: TextStyle(fontSize: 12, color: TColors.disabled),
+          style: TextStyle(fontSize: 12, color: StaffUi.textSecondary),
         ),
       ],
     );

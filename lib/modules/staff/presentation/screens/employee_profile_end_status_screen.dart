@@ -1,7 +1,6 @@
 import 'dart:io';
 
 import 'package:auto_route/auto_route.dart';
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:image_picker/image_picker.dart';
@@ -9,11 +8,12 @@ import 'package:front_gestion_minera/injector_container.dart';
 import 'package:front_gestion_minera/modules/staff/domain/entity/employee_entity.dart';
 import 'package:front_gestion_minera/modules/staff/domain/entity/employee_balance_entity.dart';
 import 'package:front_gestion_minera/modules/staff/presentation/bloc/staff_bloc.dart';
+import 'package:front_gestion_minera/modules/staff/presentation/screens/attendance_report_screen.dart';
 import 'package:front_gestion_minera/modules/staff/presentation/widgets/employee_profile_end_status_widgets.dart';
+import 'package:front_gestion_minera/modules/staff/presentation/widgets/staff_ui.dart';
 import 'package:front_gestion_minera/utils/constants/color.constant.dart';
 import 'package:front_gestion_minera/core/widgets/custom_alert_widget.dart';
 import 'package:intl/intl.dart';
-
 
 @RoutePage()
 class WorkerProfileScreen extends StatefulWidget {
@@ -29,6 +29,8 @@ class _WorkerProfileScreenState extends State<WorkerProfileScreen> {
   late final StaffBloc _bloc;
   WorkerStatusWidget _selectedStatus = WorkerStatusWidget.activo;
   String? _shiftType;
+  String? _department;
+  double? _baseSalary;
   bool _saving = false;
   bool _formInit = false;
   EmployeeBalanceEntity? _balance;
@@ -52,6 +54,19 @@ class _WorkerProfileScreenState extends State<WorkerProfileScreen> {
     }
   }
 
+  String _statusLabel(String apiStatus) {
+    switch (apiStatus.toUpperCase()) {
+      case 'ACTIVO':
+        return 'Activo';
+      case 'DESCANSO':
+        return 'En descanso';
+      case 'INACTIVO':
+        return 'Inactivo';
+      default:
+        return apiStatus;
+    }
+  }
+
   Future<void> _editShift() async {
     final controller = TextEditingController(text: _shiftType ?? '');
     final result = await showDialog<String>(
@@ -62,9 +77,7 @@ class _WorkerProfileScreenState extends State<WorkerProfileScreen> {
           controller: controller,
           autofocus: true,
           textCapitalization: TextCapitalization.words,
-          decoration: const InputDecoration(
-            hintText: 'Ej: 7x7 Rotativo',
-          ),
+          decoration: const InputDecoration(hintText: 'Ej: 7x7 Rotativo'),
           onSubmitted: (v) => Navigator.pop(ctx, v.trim()),
         ),
         actions: [
@@ -84,13 +97,207 @@ class _WorkerProfileScreenState extends State<WorkerProfileScreen> {
     }
   }
 
-  void _save(EmployeeEntity e) {
+  Future<void> _editDepartment() async {
+    final controller = TextEditingController(text: _department ?? '');
+    final result = await showDialog<String>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Editar departamento'),
+        content: TextField(
+          controller: controller,
+          autofocus: true,
+          textCapitalization: TextCapitalization.words,
+          decoration: const InputDecoration(hintText: 'Ej: Operaciones'),
+          onSubmitted: (v) => Navigator.pop(ctx, v.trim()),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text('Cancelar'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, controller.text.trim()),
+            child: const Text('Aceptar'),
+          ),
+        ],
+      ),
+    );
+    if (result != null && result.isNotEmpty) {
+      setState(() => _department = result);
+    }
+  }
+
+  Future<void> _editSalary() async {
+    final current = _baseSalary ?? 0;
+    final controller = TextEditingController(
+      text: current == 0 ? '' : current.toStringAsFixed(0),
+    );
+    final result = await showDialog<double>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Editar sueldo base'),
+        content: TextField(
+          controller: controller,
+          autofocus: true,
+          keyboardType: const TextInputType.numberWithOptions(decimal: true),
+          decoration: const InputDecoration(
+            prefixText: 'Bs ',
+            hintText: 'Mayor a 0',
+          ),
+          onSubmitted: (v) => Navigator.pop(ctx, double.tryParse(v.trim())),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text('Cancelar'),
+          ),
+          TextButton(
+            onPressed: () =>
+                Navigator.pop(ctx, double.tryParse(controller.text.trim())),
+            child: const Text('Aceptar'),
+          ),
+        ],
+      ),
+    );
+    if (result != null && result > 0) {
+      setState(() => _baseSalary = result);
+    }
+  }
+
+  Future<void> _save(EmployeeEntity e) async {
+    final newStatus = _statusToApi(_selectedStatus);
+    final newShift = (_shiftType ?? e.shiftType).trim();
+    final newDept = (_department ?? e.department).trim();
+    final newSalary = _baseSalary ?? e.baseMonthlySalary;
+
+    final statusChanged = newStatus != e.status.toUpperCase();
+    final shiftChanged = newShift != e.shiftType.trim();
+    final deptChanged = newDept != e.department.trim();
+    final salaryChanged = newSalary != e.baseMonthlySalary;
+
+    final changes = <String>[
+      if (statusChanged) 'Estado: ${_statusLabel(newStatus)}',
+      if (shiftChanged) 'Turno: $newShift',
+      if (deptChanged) 'Departamento: $newDept',
+      if (salaryChanged) 'Sueldo base: ${StaffUi.money(newSalary)}',
+    ];
+    if (changes.isEmpty) return;
+
+    final confirmed = await _confirmChanges(changes, salaryChanged);
+    if (confirmed != true || !mounted) return;
+
+    // Solo se envían los campos que realmente cambiaron (el backend valida con
+    // schema estricto y exige sueldo > 0; mandar todo siempre rompía el guardado).
     setState(() => _saving = true);
     _bloc.add(
       UpdateEmployeeProfileEvent(
         e.employeeId,
-        status: _statusToApi(_selectedStatus),
-        shiftType: _shiftType ?? e.shiftType,
+        status: statusChanged ? newStatus : null,
+        shiftType: shiftChanged ? newShift : null,
+        department: deptChanged ? newDept : null,
+        baseMonthlySalary: salaryChanged ? newSalary : null,
+      ),
+    );
+  }
+
+  /// Diálogo de confirmación con el detalle de los cambios. Si cambia el sueldo,
+  /// avisa que impacta el cálculo de nómina y las solicitudes de egreso a Hacienda.
+  Future<bool?> _confirmChanges(List<String> changes, bool salaryChanged) {
+    return showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
+        title: const Text('Confirmar cambios'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text(
+              'Vas a actualizar los datos del trabajador:',
+              style: TextStyle(fontSize: 13.5, color: StaffUi.textSecondary),
+            ),
+            const SizedBox(height: 10),
+            for (final c in changes)
+              Padding(
+                padding: const EdgeInsets.only(bottom: 6),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Icon(
+                      Icons.check_circle_rounded,
+                      size: 16,
+                      color: StaffUi.primary,
+                    ),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        c,
+                        style: const TextStyle(
+                          fontSize: 13.5,
+                          fontWeight: FontWeight.w700,
+                          color: StaffUi.textPrimary,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            if (salaryChanged) ...[
+              const SizedBox(height: 6),
+              Container(
+                padding: const EdgeInsets.all(11),
+                decoration: BoxDecoration(
+                  color: TColors.statusOrangeBg,
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(
+                    color: TColors.statusOrange.withValues(alpha: 0.3),
+                  ),
+                ),
+                child: const Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Icon(
+                      Icons.warning_amber_rounded,
+                      size: 18,
+                      color: TColors.statusOrange,
+                    ),
+                    SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        'Cambiar el sueldo base afecta el cálculo de nómina y '
+                        'las solicitudes de egreso a Hacienda.',
+                        style: TextStyle(
+                          fontSize: 12,
+                          height: 1.3,
+                          fontWeight: FontWeight.w600,
+                          color: TColors.statusOrange,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: const Text('Cancelar'),
+          ),
+          ElevatedButton(
+            onPressed: () => Navigator.pop(ctx, true),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: StaffUi.primary,
+              foregroundColor: Colors.white,
+              elevation: 0,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10),
+              ),
+            ),
+            child: const Text('Confirmar'),
+          ),
+        ],
       ),
     );
   }
@@ -106,13 +313,7 @@ class _WorkerProfileScreenState extends State<WorkerProfileScreen> {
     }
   }
 
-  String _formatSalary(double amount) {
-    return NumberFormat.currency(
-      locale: 'es_CL',
-      symbol: '\$',
-      decimalDigits: 0,
-    ).format(amount);
-  }
+  String _formatSalary(double amount) => StaffUi.money(amount);
 
   String _formatSeniority(int months) {
     final years = months ~/ 12;
@@ -132,25 +333,24 @@ class _WorkerProfileScreenState extends State<WorkerProfileScreen> {
     }
   }
 
+  String _initials(String fullName) {
+    final parts = fullName
+        .trim()
+        .split(RegExp(r'\s+'))
+        .where((e) => e.isNotEmpty)
+        .toList();
+    if (parts.isEmpty) return '?';
+    if (parts.length == 1) return parts.first.characters.first.toUpperCase();
+    return (parts.first.characters.first + parts[1].characters.first)
+        .toUpperCase();
+  }
+
   @override
   Widget build(BuildContext context) {
     return BlocProvider.value(
       value: _bloc,
       child: Scaffold(
-        backgroundColor: TColors.appBackgroundColor,
-        appBar: AppBar(
-          elevation: 0,
-          title: const Text(
-            'PERFIL DEL TRABAJADOR',
-            style: TextStyle(
-              fontSize: 12,
-              fontWeight: FontWeight.w700,
-              color: TColors.profileTitleText,
-              letterSpacing: 1.4,
-            ),
-          ),
-          centerTitle: true,
-        ),
+        backgroundColor: StaffUi.background,
         body: BlocConsumer<StaffBloc, StaffState>(
           listenWhen: (_, s) =>
               s is EmployeeProfileUpdateSuccess ||
@@ -188,28 +388,14 @@ class _WorkerProfileScreenState extends State<WorkerProfileScreen> {
               s is EmployeeProfileError,
           builder: (context, state) {
             if (state is EmployeeProfileLoading) {
-              return const Center(child: CircularProgressIndicator());
+              return _withBackBar(const StaffLoader());
             }
             if (state is EmployeeProfileError) {
-              return Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    const Icon(Icons.error_outline,
-                        size: 48, color: TColors.disabled),
-                    const SizedBox(height: 12),
-                    Text(
-                      state.message,
-                      style: const TextStyle(color: TColors.disabled),
-                      textAlign: TextAlign.center,
-                    ),
-                    const SizedBox(height: 16),
-                    TextButton(
-                      onPressed: () => _bloc
-                          .add(GetEmployeeProfileEvent(widget.employeeId)),
-                      child: const Text('Reintentar'),
-                    ),
-                  ],
+              return _withBackBar(
+                StaffErrorState(
+                  message: state.message,
+                  onRetry: () =>
+                      _bloc.add(GetEmployeeProfileEvent(widget.employeeId)),
                 ),
               );
             }
@@ -219,6 +405,8 @@ class _WorkerProfileScreenState extends State<WorkerProfileScreen> {
               if (!_formInit) {
                 _selectedStatus = _mapStatus(e.status);
                 _shiftType = e.shiftType;
+                _department = e.department;
+                _baseSalary = e.baseMonthlySalary;
                 _formInit = true;
               }
               return _buildContent(e);
@@ -233,23 +421,57 @@ class _WorkerProfileScreenState extends State<WorkerProfileScreen> {
 
   Widget _buildContent(EmployeeEntity e) {
     return SingleChildScrollView(
-      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
       child: Column(
         children: [
-          const SizedBox(height: 8),
           _buildAvatarSection(e),
-          const SizedBox(height: 28),
-          _buildStatusCard(),
-          const SizedBox(height: 16),
-          _buildPayrollCard(e),
-          const SizedBox(height: 16),
-          _buildSeniorityCard(e),
-          const SizedBox(height: 20),
-          _buildSaveButton(e),
-          const SizedBox(height: 12),
-          _buildRequestPaymentButton(e),
-          const SizedBox(height: 24),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(20, 20, 20, 24),
+            child: Column(
+              children: [
+                _buildStatusCard(),
+                const SizedBox(height: 16),
+                _buildPayrollCard(e),
+                const SizedBox(height: 16),
+                _buildSeniorityCard(e),
+                const SizedBox(height: 20),
+                _buildSaveButton(e),
+                const SizedBox(height: 12),
+                _buildAttendanceReportButton(e),
+                const SizedBox(height: 12),
+                _buildRequestPaymentButton(e),
+              ],
+            ),
+          ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildAttendanceReportButton(EmployeeEntity e) {
+    return SizedBox(
+      width: double.infinity,
+      height: 52,
+      child: OutlinedButton.icon(
+        onPressed: () => Navigator.of(context).push(
+          MaterialPageRoute(
+            builder: (_) => AttendanceReportScreen(
+              employeeId: e.employeeId,
+              employeeName: e.fullName,
+            ),
+          ),
+        ),
+        icon: const Icon(Icons.event_note_rounded, size: 18),
+        label: const Text(
+          'Reporte de asistencia',
+          style: TextStyle(fontSize: 15, fontWeight: FontWeight.w700),
+        ),
+        style: OutlinedButton.styleFrom(
+          foregroundColor: StaffUi.primary,
+          side: const BorderSide(color: StaffUi.primary),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(14),
+          ),
+        ),
       ),
     );
   }
@@ -257,16 +479,19 @@ class _WorkerProfileScreenState extends State<WorkerProfileScreen> {
   Widget _buildRequestPaymentButton(EmployeeEntity e) {
     return SizedBox(
       width: double.infinity,
-      height: 50,
+      height: 52,
       child: OutlinedButton.icon(
         onPressed: () => _openPaymentRequestSheet(e),
         icon: const Icon(Icons.account_balance_rounded, size: 18),
-        label: const Text('Solicitar pago a Hacienda'),
+        label: const Text(
+          'Solicitar pago a Hacienda',
+          style: TextStyle(fontSize: 15, fontWeight: FontWeight.w700),
+        ),
         style: OutlinedButton.styleFrom(
-          foregroundColor: TColors.profileBlue,
-          side: const BorderSide(color: TColors.profileBlue),
+          foregroundColor: StaffUi.primary,
+          side: const BorderSide(color: StaffUi.primary),
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
+            borderRadius: BorderRadius.circular(14),
           ),
         ),
       ),
@@ -297,156 +522,254 @@ class _WorkerProfileScreenState extends State<WorkerProfileScreen> {
   }
 
   bool _hasChanges(EmployeeEntity e) {
-    final statusChanged = _statusToApi(_selectedStatus) != e.status.toUpperCase();
+    final statusChanged =
+        _statusToApi(_selectedStatus) != e.status.toUpperCase();
     final shiftChanged =
         (_shiftType ?? e.shiftType).trim() != e.shiftType.trim();
-    return statusChanged || shiftChanged;
+    final departmentChanged =
+        (_department ?? e.department).trim() != e.department.trim();
+    final salaryChanged =
+        (_baseSalary ?? e.baseMonthlySalary) != e.baseMonthlySalary;
+    return statusChanged || shiftChanged || departmentChanged || salaryChanged;
   }
 
   Widget _buildSaveButton(EmployeeEntity e) {
     final hasChanges = _hasChanges(e);
     final enabled = hasChanges && !_saving;
 
-    return SizedBox(
-      width: double.infinity,
-      height: 50,
-      child: ElevatedButton.icon(
-        onPressed: enabled ? () => _save(e) : null,
-        icon: _saving
-            ? const SizedBox(
-                width: 18,
-                height: 18,
-                child: CircularProgressIndicator(
-                  strokeWidth: 2.2,
-                  color: TColors.white,
-                ),
-              )
-            : const Icon(Icons.save_rounded, size: 18),
-        label: Text(_saving ? 'Guardando...' : 'Guardar cambios'),
-        style: ElevatedButton.styleFrom(
-          backgroundColor: TColors.profileBlue,
-          foregroundColor: TColors.white,
-          // Mientras guarda mantiene el azul (con spinner); si no hay cambios, gris.
-          disabledBackgroundColor: _saving ? TColors.profileBlue : TColors.disabled,
-          disabledForegroundColor: TColors.white,
-          elevation: 0,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
-          ),
-        ),
-      ),
+    return StaffPrimaryButton(
+      label: _saving ? 'Guardando...' : 'Guardar cambios',
+      icon: _saving ? null : Icons.save_rounded,
+      loading: _saving,
+      onPressed: enabled ? () => _save(e) : null,
     );
   }
 
-  Widget _buildAvatarSection(EmployeeEntity e) {
+  /// Barra superior con botón atrás para los estados sin hero (carga/error).
+  Widget _withBackBar(Widget child) {
     return Column(
       children: [
-        Stack(
-          children: [
-            Container(
-              width: 90,
-              height: 90,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                border: Border.all(color: TColors.border, width: 3),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.08),
-                    blurRadius: 12,
-                    offset: const Offset(0, 4),
+        SafeArea(
+          bottom: false,
+          child: SizedBox(
+            height: 52,
+            child: Row(
+              children: [
+                BackButton(onPressed: () => Navigator.of(context).maybePop()),
+                const Text(
+                  'Perfil',
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w700,
+                    color: StaffUi.textPrimary,
                   ),
-                ],
-              ),
-              child: ClipOval(
-                child: e.profilePhotoUrl.isNotEmpty
-                    ? CachedNetworkImage(
-                        imageUrl: e.profilePhotoUrl,
-                        fit: BoxFit.cover,
-                        placeholder: (_, _) => Container(
-                          color: TColors.avatarBackground,
-                          child: const Icon(Icons.person_rounded,
-                              size: 52, color: TColors.avatarIconColor),
-                        ),
-                        errorWidget: (_, _, _) => Container(
-                          color: TColors.avatarBackground,
-                          child: const Icon(Icons.person_rounded,
-                              size: 52, color: TColors.avatarIconColor),
-                        ),
-                      )
-                    : Container(
-                        color: TColors.avatarBackground,
-                        child: const Icon(Icons.person_rounded,
-                            size: 52, color: TColors.avatarIconColor),
-                      ),
-              ),
-            ),
-            Positioned(
-              bottom: 4,
-              right: 4,
-              child: Container(
-                width: 14,
-                height: 14,
-                decoration: BoxDecoration(
-                  color: _mapStatus(e.status).dotColor,
-                  shape: BoxShape.circle,
-                  border: Border.all(color: TColors.white, width: 2),
                 ),
-              ),
+              ],
             ),
-          ],
-        ),
-        const SizedBox(height: 14),
-        Text(
-          e.fullName,
-          style: const TextStyle(
-            fontSize: 20,
-            fontWeight: FontWeight.w700,
-            color: TColors.profileDarkText,
-            letterSpacing: -0.3,
           ),
         ),
-        const SizedBox(height: 4),
-        Text(
-          e.position.toUpperCase(),
-          style: const TextStyle(
-            fontSize: 11,
-            fontWeight: FontWeight.w700,
-            color: TColors.profileBlue,
-            letterSpacing: 1.2,
-          ),
-        ),
-        const SizedBox(height: 4),
-        Text(
-          e.nationalId,
-          style: const TextStyle(
-            fontSize: 11,
-            color: TColors.profileMutedLabel,
-            letterSpacing: 0.5,
-          ),
-        ),
+        Expanded(child: child),
       ],
     );
   }
 
+  Widget _circle(double size, Color color) => Container(
+    width: size,
+    height: size,
+    decoration: BoxDecoration(shape: BoxShape.circle, color: color),
+  );
+
+  Widget _buildAvatarSection(EmployeeEntity e) {
+    final dotColor = _mapStatus(e.status).dotColor;
+    return Container(
+      width: double.infinity,
+      decoration: const BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [StaffUi.primary, StaffUi.primaryDeep],
+        ),
+        borderRadius: BorderRadius.vertical(bottom: Radius.circular(28)),
+      ),
+      clipBehavior: Clip.antiAlias,
+      child: Stack(
+        children: [
+          Positioned(
+            top: -36,
+            right: -28,
+            child: _circle(140, Colors.white.withValues(alpha: 0.08)),
+          ),
+          Positioned(
+            top: 28,
+            right: 48,
+            child: _circle(64, Colors.white.withValues(alpha: 0.10)),
+          ),
+          SafeArea(
+            bottom: false,
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(20, 10, 20, 26),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Row(
+                    children: [
+                      StaffGlassButton(
+                        icon: Icons.arrow_back_ios_new_rounded,
+                        onTap: () => Navigator.of(context).maybePop(),
+                      ),
+                      const SizedBox(width: 12),
+                      const Text(
+                        'Perfil',
+                        style: TextStyle(
+                          fontSize: 17,
+                          fontWeight: FontWeight.w700,
+                          color: Colors.white,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 18),
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      Stack(
+                        clipBehavior: Clip.none,
+                        children: [
+                          Container(
+                            width: 76,
+                            height: 76,
+                            alignment: Alignment.center,
+                            decoration: BoxDecoration(
+                              color: Colors.white.withValues(alpha: 0.16),
+                              shape: BoxShape.circle,
+                              border: Border.all(
+                                color: Colors.white.withValues(alpha: 0.28),
+                                width: 2,
+                              ),
+                            ),
+                            child: Text(
+                              _initials(e.fullName),
+                              style: const TextStyle(
+                                fontSize: 26,
+                                fontWeight: FontWeight.w800,
+                                color: Colors.white,
+                                letterSpacing: -0.5,
+                              ),
+                            ),
+                          ),
+                          Positioned(
+                            bottom: 0,
+                            right: 0,
+                            child: Container(
+                              width: 17,
+                              height: 17,
+                              decoration: BoxDecoration(
+                                color: dotColor,
+                                shape: BoxShape.circle,
+                                border: Border.all(
+                                  color: Colors.white,
+                                  width: 3,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(width: 16),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Text(
+                              e.fullName,
+                              maxLines: 2,
+                              overflow: TextOverflow.ellipsis,
+                              style: const TextStyle(
+                                fontSize: 20,
+                                fontWeight: FontWeight.w800,
+                                color: Colors.white,
+                                letterSpacing: -0.4,
+                                height: 1.15,
+                              ),
+                            ),
+                            const SizedBox(height: 8),
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 10,
+                                vertical: 5,
+                              ),
+                              decoration: BoxDecoration(
+                                color: Colors.white.withValues(alpha: 0.16),
+                                borderRadius: BorderRadius.circular(20),
+                                border: Border.all(
+                                  color: Colors.white.withValues(alpha: 0.22),
+                                ),
+                              ),
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Container(
+                                    width: 8,
+                                    height: 8,
+                                    decoration: BoxDecoration(
+                                      color: dotColor,
+                                      shape: BoxShape.circle,
+                                    ),
+                                  ),
+                                  const SizedBox(width: 6),
+                                  Text(
+                                    _statusLabel(e.status),
+                                    style: const TextStyle(
+                                      fontSize: 11.5,
+                                      fontWeight: FontWeight.w700,
+                                      color: Colors.white,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            if (e.position.isNotEmpty ||
+                                e.nationalId.isNotEmpty) ...[
+                              const SizedBox(height: 8),
+                              Text(
+                                [
+                                  if (e.position.isNotEmpty) e.position,
+                                  if (e.nationalId.isNotEmpty)
+                                    'CI ${e.nationalId}',
+                                ].join('  ·  '),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w500,
+                                  color: Colors.white.withValues(alpha: 0.8),
+                                ),
+                              ),
+                            ],
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   Widget _buildStatusCard() {
-    return CardWidget(
+    return StaffCard(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Row(
-            children: [
-              Icon(Icons.tune_rounded, size: 15, color: TColors.profileMutedLabel),
-              SizedBox(width: 6),
-              Text(
-                'ESTADO DEL TRABAJADOR',
-                style: TextStyle(
-                  fontSize: 11,
-                  fontWeight: FontWeight.w700,
-                  color: TColors.profileMutedLabel,
-                  letterSpacing: 1.1,
-                ),
-              ),
-            ],
+          const StaffSectionTitle(
+            'Estado del trabajador',
+            icon: Icons.tune_rounded,
           ),
           const SizedBox(height: 16),
           Row(
@@ -468,52 +791,27 @@ class _WorkerProfileScreenState extends State<WorkerProfileScreen> {
   }
 
   Widget _buildPayrollCard(EmployeeEntity e) {
-    return CardWidget(
+    return StaffCard(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              const Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'ACCIONES DE NÓMINA',
-                    style: TextStyle(
-                      fontSize: 11,
-                      fontWeight: FontWeight.w700,
-                      color: TColors.profileMutedLabel,
-                      letterSpacing: 1.1,
-                    ),
-                  ),
-                ],
-              ),
-              Container(
-                padding: const EdgeInsets.all(7),
-                decoration: BoxDecoration(
-                  color: TColors.profileIconBg,
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: const Icon(
-                  Icons.account_balance_wallet_outlined,
-                  size: 16,
-                  color: TColors.profileBlue,
-                ),
-              ),
-            ],
+          const StaffSectionTitle(
+            'Acciones de nómina',
+            icon: Icons.account_balance_wallet_rounded,
           ),
           const SizedBox(height: 14),
           _buildInfoRow(
             icon: Icons.credit_card_rounded,
             label: 'Sueldo Base',
-            value: _formatSalary(e.baseMonthlySalary),
+            value: _formatSalary(_baseSalary ?? e.baseMonthlySalary),
+            onEdit: _editSalary,
           ),
           const SizedBox(height: 10),
           _buildInfoRow(
             icon: Icons.business_rounded,
             label: 'Departamento',
-            value: e.department,
+            value: _department ?? e.department,
+            onEdit: _editDepartment,
           ),
           const SizedBox(height: 10),
           _buildInfoRow(
@@ -524,14 +822,7 @@ class _WorkerProfileScreenState extends State<WorkerProfileScreen> {
           ),
           if (_balance != null && _balance!.totalPendingAmount > 0) ...[
             const SizedBox(height: 10),
-            _buildInfoRow(
-              icon: Icons.account_balance_wallet_outlined,
-              label: 'Saldo pendiente',
-              value:
-                  '${_balance!.totalPendingAmount.toStringAsFixed(2)} Bs '
-                  '(${_balance!.totalPendingMonths}m'
-                  '${_balance!.overdueMonths > 0 ? ", ${_balance!.overdueMonths} atras." : ""})',
-            ),
+            _buildBalanceRow(_balance!),
           ],
         ],
       ),
@@ -547,19 +838,19 @@ class _WorkerProfileScreenState extends State<WorkerProfileScreen> {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 13),
       decoration: BoxDecoration(
-        color: TColors.profileCardInnerBg,
-        borderRadius: BorderRadius.circular(10),
-        border: Border.all(color: TColors.border),
+        color: StaffUi.background,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: StaffUi.border),
       ),
       child: Row(
         children: [
           Container(
             padding: const EdgeInsets.all(6),
             decoration: BoxDecoration(
-              color: TColors.profileIconBg,
-              borderRadius: BorderRadius.circular(7),
+              color: StaffUi.primarySoft,
+              borderRadius: BorderRadius.circular(8),
             ),
-            child: Icon(icon, size: 15, color: TColors.profileBlue),
+            child: Icon(icon, size: 15, color: StaffUi.primary),
           ),
           const SizedBox(width: 10),
           Expanded(
@@ -568,7 +859,7 @@ class _WorkerProfileScreenState extends State<WorkerProfileScreen> {
               style: const TextStyle(
                 fontSize: 13,
                 fontWeight: FontWeight.w500,
-                color: TColors.profileBodyText,
+                color: StaffUi.textSecondary,
               ),
             ),
           ),
@@ -579,8 +870,8 @@ class _WorkerProfileScreenState extends State<WorkerProfileScreen> {
               overflow: TextOverflow.ellipsis,
               style: const TextStyle(
                 fontSize: 14,
-                fontWeight: FontWeight.w700,
-                color: TColors.profileDarkText,
+                fontWeight: FontWeight.w800,
+                color: StaffUi.textPrimary,
                 letterSpacing: -0.3,
               ),
             ),
@@ -590,8 +881,11 @@ class _WorkerProfileScreenState extends State<WorkerProfileScreen> {
               onTap: onEdit,
               child: const Padding(
                 padding: EdgeInsets.only(left: 8),
-                child: Icon(Icons.edit_rounded,
-                    size: 16, color: TColors.profileBlue),
+                child: Icon(
+                  Icons.edit_rounded,
+                  size: 16,
+                  color: StaffUi.primary,
+                ),
               ),
             ),
         ],
@@ -599,9 +893,86 @@ class _WorkerProfileScreenState extends State<WorkerProfileScreen> {
     );
   }
 
+  /// Fila de saldo pendiente en 2 líneas (la etiqueta arriba y los montos
+  /// abajo a todo el ancho, para que no se corte el texto entre paréntesis).
+  Widget _buildBalanceRow(EmployeeBalanceEntity b) {
+    final meses = b.totalPendingMonths == 1 ? 'mes' : 'meses';
+    final pendiente =
+        '${StaffUi.money2(b.totalPendingAmount)} · ${b.totalPendingMonths} $meses pendientes';
+    final mesesA = b.overdueMonths == 1 ? 'mes' : 'meses';
+    final atrasado = b.overdueMonths > 0
+        ? 'Atrasado: ${StaffUi.money2(b.overdueAmount)} · ${b.overdueMonths} $mesesA'
+        : null;
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 13),
+      decoration: BoxDecoration(
+        color: StaffUi.background,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: StaffUi.border),
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(
+            padding: const EdgeInsets.all(6),
+            decoration: BoxDecoration(
+              color: StaffUi.primarySoft,
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: const Icon(
+              Icons.account_balance_wallet_outlined,
+              size: 15,
+              color: StaffUi.primary,
+            ),
+          ),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text(
+                  'Saldo pendiente',
+                  style: TextStyle(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w500,
+                    color: StaffUi.textSecondary,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  pendiente,
+                  maxLines: 2,
+                  style: const TextStyle(
+                    fontSize: 13.5,
+                    fontWeight: FontWeight.w800,
+                    color: StaffUi.textPrimary,
+                    letterSpacing: -0.2,
+                    height: 1.3,
+                  ),
+                ),
+                if (atrasado != null) ...[
+                  const SizedBox(height: 3),
+                  Text(
+                    atrasado,
+                    style: const TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w700,
+                      color: TColors.statusOrange,
+                    ),
+                  ),
+                ],
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   Widget _buildSeniorityCard(EmployeeEntity e) {
-    return CardWidget(
-      backgroundColor: TColors.seniorityCardBg,
+    return StaffCard(
+      borderColor: TColors.seniorityIconBg,
       child: Column(
         children: [
           Row(
@@ -636,8 +1007,8 @@ class _WorkerProfileScreenState extends State<WorkerProfileScreen> {
                     _formatSeniority(e.monthsSeniority),
                     style: const TextStyle(
                       fontSize: 15,
-                      fontWeight: FontWeight.w700,
-                      color: TColors.profileDarkText,
+                      fontWeight: FontWeight.w800,
+                      color: StaffUi.textPrimary,
                       letterSpacing: -0.2,
                     ),
                   ),
@@ -647,7 +1018,7 @@ class _WorkerProfileScreenState extends State<WorkerProfileScreen> {
           ),
           if (e.hiredDate.isNotEmpty || e.seniorityLevel.isNotEmpty) ...[
             const SizedBox(height: 14),
-            const Divider(height: 1, color: TColors.seniorityIconBg),
+            const Divider(height: 1, color: StaffUi.border),
             const SizedBox(height: 14),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -656,10 +1027,7 @@ class _WorkerProfileScreenState extends State<WorkerProfileScreen> {
                   label: 'Desde',
                   value: _formatDate(e.hiredDate),
                 ),
-                _seniorityDetail(
-                  label: 'Nivel',
-                  value: e.seniorityLevel,
-                ),
+                _seniorityDetail(label: 'Nivel', value: e.seniorityLevel),
               ],
             ),
           ],
@@ -686,8 +1054,8 @@ class _WorkerProfileScreenState extends State<WorkerProfileScreen> {
           value,
           style: const TextStyle(
             fontSize: 13,
-            fontWeight: FontWeight.w600,
-            color: TColors.profileDarkText,
+            fontWeight: FontWeight.w700,
+            color: StaffUi.textPrimary,
           ),
         ),
       ],
@@ -747,10 +1115,12 @@ class _PaymentRequestSheetState extends State<PaymentRequestSheet> {
     if (photo == null) return;
     if (await photo.length() > 10 * 1024 * 1024) {
       if (!mounted) return;
-      CustomAlert.show(context,
-          title: 'Error',
-          message: 'La imagen supera los 10MB.',
-          type: AlertType.error);
+      CustomAlert.show(
+        context,
+        title: 'Error',
+        message: 'La imagen supera los 10MB.',
+        type: AlertType.error,
+      );
       return;
     }
     setState(() => _image = photo);
@@ -759,10 +1129,12 @@ class _PaymentRequestSheetState extends State<PaymentRequestSheet> {
   void _submit() {
     if (!_formKey.currentState!.validate()) return;
     if (_image == null) {
-      CustomAlert.show(context,
-          title: 'Falta evidencia',
-          message: 'Adjunta una imagen de respaldo.',
-          type: AlertType.warning);
+      CustomAlert.show(
+        context,
+        title: 'Falta evidencia',
+        message: 'Adjunta una imagen de respaldo.',
+        type: AlertType.warning,
+      );
       return;
     }
     setState(() => _submitting = true);
@@ -788,14 +1160,20 @@ class _PaymentRequestSheetState extends State<PaymentRequestSheet> {
       listener: (ctx, state) {
         if (state is EmployeePaymentRequestSuccess) {
           Navigator.of(context).pop();
-          CustomAlert.show(ctx,
-              title: 'Listo',
-              message: 'Solicitud enviada a Hacienda. Espera la aprobación.',
-              type: AlertType.success);
+          CustomAlert.show(
+            ctx,
+            title: 'Listo',
+            message: 'Solicitud enviada a Hacienda. Espera la aprobación.',
+            type: AlertType.success,
+          );
         } else if (state is EmployeePaymentRequestError) {
           setState(() => _submitting = false);
-          CustomAlert.show(ctx,
-              title: 'Error', message: state.message, type: AlertType.error);
+          CustomAlert.show(
+            ctx,
+            title: 'Error',
+            message: state.message,
+            type: AlertType.error,
+          );
         }
       },
       child: Padding(
@@ -825,34 +1203,41 @@ class _PaymentRequestSheetState extends State<PaymentRequestSheet> {
                 const SizedBox(height: 16),
                 const Text(
                   'Solicitar pago a Hacienda',
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700),
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.w800,
+                    color: StaffUi.textPrimary,
+                    letterSpacing: -0.3,
+                  ),
                 ),
                 const SizedBox(height: 2),
                 Text(
                   widget.employeeName,
                   style: const TextStyle(
                     fontSize: 13,
-                    color: TColors.profileMutedLabel,
+                    color: StaffUi.textSecondary,
                   ),
                 ),
                 const SizedBox(height: 12),
                 if (widget.balance != null)
                   Container(
                     width: double.infinity,
-                    padding: const EdgeInsets.all(10),
+                    padding: const EdgeInsets.all(12),
                     margin: const EdgeInsets.only(bottom: 12),
                     decoration: BoxDecoration(
-                      color: TColors.appBackgroundColor,
-                      borderRadius: BorderRadius.circular(10),
+                      color: StaffUi.background,
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(color: StaffUi.border),
                     ),
                     child: Text(
-                      'Saldo pendiente: ${widget.balance!.totalPendingAmount.toStringAsFixed(2)} Bs '
+                      'Saldo pendiente: ${StaffUi.money2(widget.balance!.totalPendingAmount)} '
                       '(${widget.balance!.totalPendingMonths} meses) · '
-                      'Atrasado: ${widget.balance!.overdueAmount.toStringAsFixed(2)} Bs '
+                      'Atrasado: ${StaffUi.money2(widget.balance!.overdueAmount)} '
                       '(${widget.balance!.overdueMonths} meses)',
                       style: const TextStyle(
                         fontSize: 12,
-                        color: TColors.profileBodyText,
+                        height: 1.35,
+                        color: StaffUi.textSecondary,
                       ),
                     ),
                   ),
@@ -875,12 +1260,14 @@ class _PaymentRequestSheetState extends State<PaymentRequestSheet> {
                         selected: _type == 'SALDO',
                         onSelected: _hasOverdue
                             ? (_) => setState(() {
-                                  _type = 'SALDO';
-                                  if (_amountCtrl.text.trim().isEmpty) {
-                                    _amountCtrl.text = widget.balance!.overdueAmount
-                                        .toStringAsFixed(2);
-                                  }
-                                })
+                                _type = 'SALDO';
+                                if (_amountCtrl.text.trim().isEmpty) {
+                                  _amountCtrl.text = widget
+                                      .balance!
+                                      .overdueAmount
+                                      .toStringAsFixed(2);
+                                }
+                              })
                             : null,
                       ),
                     ),
@@ -894,7 +1281,7 @@ class _PaymentRequestSheetState extends State<PaymentRequestSheet> {
                         : 'El pago de saldo solo está disponible si el trabajador tiene meses atrasados.',
                     style: const TextStyle(
                       fontSize: 11,
-                      color: TColors.profileMutedLabel,
+                      color: StaffUi.textSecondary,
                     ),
                   ),
                 ),
@@ -902,14 +1289,17 @@ class _PaymentRequestSheetState extends State<PaymentRequestSheet> {
                 // Monto
                 TextFormField(
                   controller: _amountCtrl,
-                  keyboardType:
-                      const TextInputType.numberWithOptions(decimal: true),
+                  keyboardType: const TextInputType.numberWithOptions(
+                    decimal: true,
+                  ),
                   decoration: const InputDecoration(
                     labelText: 'Monto (Bs)',
                     prefixIcon: Icon(Icons.attach_money_rounded),
                   ),
                   validator: (v) {
-                    final value = double.tryParse((v ?? '').replaceAll(',', '.'));
+                    final value = double.tryParse(
+                      (v ?? '').replaceAll(',', '.'),
+                    );
                     if (value == null) return 'Ingresa un monto válido';
                     if (value <= 0) return 'El monto debe ser mayor a 0';
                     return null;
@@ -957,8 +1347,11 @@ class _PaymentRequestSheetState extends State<PaymentRequestSheet> {
                               color: TColors.red,
                               shape: BoxShape.circle,
                             ),
-                            child: const Icon(Icons.close,
-                                color: TColors.white, size: 18),
+                            child: const Icon(
+                              Icons.close,
+                              color: TColors.white,
+                              size: 18,
+                            ),
                           ),
                         ),
                       ),
@@ -970,7 +1363,10 @@ class _PaymentRequestSheetState extends State<PaymentRequestSheet> {
                       Expanded(
                         child: OutlinedButton.icon(
                           onPressed: () => _pick(ImageSource.gallery),
-                          icon: const Icon(Icons.photo_library_outlined, size: 18),
+                          icon: const Icon(
+                            Icons.photo_library_outlined,
+                            size: 18,
+                          ),
                           label: const Text('Galería'),
                         ),
                       ),
@@ -978,40 +1374,21 @@ class _PaymentRequestSheetState extends State<PaymentRequestSheet> {
                       Expanded(
                         child: OutlinedButton.icon(
                           onPressed: () => _pick(ImageSource.camera),
-                          icon: const Icon(Icons.photo_camera_outlined, size: 18),
+                          icon: const Icon(
+                            Icons.photo_camera_outlined,
+                            size: 18,
+                          ),
                           label: const Text('Cámara'),
                         ),
                       ),
                     ],
                   ),
                 const SizedBox(height: 20),
-                SizedBox(
-                  width: double.infinity,
-                  height: 50,
-                  child: ElevatedButton.icon(
-                    onPressed: _submitting ? null : _submit,
-                    icon: _submitting
-                        ? const SizedBox(
-                            width: 18,
-                            height: 18,
-                            child: CircularProgressIndicator(
-                              strokeWidth: 2.2,
-                              color: TColors.white,
-                            ),
-                          )
-                        : const Icon(Icons.send_rounded, size: 18),
-                    label: Text(_submitting ? 'Enviando...' : 'Enviar a Hacienda'),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: TColors.profileBlue,
-                      foregroundColor: TColors.white,
-                      disabledBackgroundColor: TColors.profileBlue,
-                      disabledForegroundColor: TColors.white,
-                      elevation: 0,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                    ),
-                  ),
+                StaffPrimaryButton(
+                  label: _submitting ? 'Enviando...' : 'Enviar a Hacienda',
+                  icon: _submitting ? null : Icons.send_rounded,
+                  loading: _submitting,
+                  onPressed: _submit,
                 ),
               ],
             ),
@@ -1021,4 +1398,3 @@ class _PaymentRequestSheetState extends State<PaymentRequestSheet> {
     );
   }
 }
-

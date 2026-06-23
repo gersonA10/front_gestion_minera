@@ -14,6 +14,7 @@ class EmployeeModel extends EmployeeEntity {
     required super.seniorityLevel,
     required super.hiredDate,
     required super.monthsSeniority,
+    super.workedToday,
   });
 
   factory EmployeeModel.fromJson(Map<String, dynamic> json) {
@@ -30,6 +31,7 @@ class EmployeeModel extends EmployeeEntity {
       seniorityLevel: json['seniority_level'] ?? '',
       hiredDate: json['hired_date'] ?? '',
       monthsSeniority: json['months_seniority'] ?? 0,
+      workedToday: json['worked_today'] == true,
     );
   }
 }

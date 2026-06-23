@@ -4,6 +4,7 @@ import 'package:flutter/services.dart';
 import 'package:front_gestion_minera/config/router/app_router.dart';
 import 'package:front_gestion_minera/config/router/app_router.gr.dart';
 import 'package:front_gestion_minera/core/tutorial/tutorial_prefs.dart';
+import 'package:front_gestion_minera/core/tutorial/tutorial_tts.dart';
 import 'package:front_gestion_minera/injector_container.dart';
 import 'package:front_gestion_minera/utils/greeting_util.dart';
 import 'package:front_gestion_minera/utils/session/session_actions.dart';
@@ -86,6 +87,32 @@ class _PartnersScreenState extends State<PartnersScreen>
   final List<GlobalKey> _showcaseKeys =
       List.generate(_kMenuCount, (_) => GlobalKey());
 
+  /// Locución de cada paso (mismo orden que [_buildMenuItems]); la lee
+  /// flutter_tts al aparecer cada coach mark.
+  static const List<String> _speechByStep = [
+    'Registrar Préstamo. Crea aquí una nueva solicitud de préstamo: defines el '
+        'monto y las condiciones para pedir dinero al fondo de socios.',
+    'Historial de Préstamos. Consulta tus préstamos activos y pagados, y haz '
+        'seguimiento al estado de cada cuota.',
+    'Ingresos. Revisa las entradas de capital y los ingresos registrados a tu '
+        'favor dentro del fondo.',
+    'Solicitar Dinero. Pide un egreso o retiro de dinero. Tu solicitud queda '
+        'registrada para su revisión y aprobación.',
+    'Historial de Aportes. Mira el total de tus contribuciones al fondo y el '
+        'detalle de cada aporte que has realizado.',
+    'Historial de Solicitudes. Sigue el estado de todas tus solicitudes: '
+        'pendientes, aprobadas o rechazadas.',
+    'Bandeja de Socios. Aquí llegan tus reuniones y memorandos. Mantente al día '
+        'con la asistencia y las actividades de los socios.',
+    'Reportes. Genera y consulta reportes de tus actividades financieras como '
+        'socio.',
+  ];
+
+  void _speakStep(int? index) {
+    if (index == null || index < 0 || index >= _speechByStep.length) return;
+    TutorialTts.instance.speak(_speechByStep[index]);
+  }
+
   @override
   void initState() {
     super.initState();
@@ -98,6 +125,7 @@ class _PartnersScreenState extends State<PartnersScreen>
     _showcaseView = ShowcaseView.register(
       scope: _kShowcaseScope,
       enableAutoScroll: true,
+      onStart: (index, _) => _speakStep(index),
       onFinish: _markTutorialSeen,
       onDismiss: (_) => _markTutorialSeen(),
       globalTooltipActionConfig: const TooltipActionConfig(
@@ -145,11 +173,13 @@ class _PartnersScreenState extends State<PartnersScreen>
   }
 
   void _markTutorialSeen() {
+    TutorialTts.instance.stop();
     TutorialPrefs.markSeen(_kTutorialRoleKey);
   }
 
   @override
   void dispose() {
+    TutorialTts.instance.stop();
     _showcaseView.unregister();
     _controller.dispose();
     super.dispose();

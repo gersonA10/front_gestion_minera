@@ -13,6 +13,10 @@ class TransactionHistoryEntity {
   final DateTime? closedAt;
   final String? rejectReason;
 
+  /// Estado de conciliación (reposición): 'PENDING' | 'RECONCILED' |
+  /// 'NOT_REQUIRED' | null.
+  final String? reconciliationStatus;
+
   TransactionHistoryEntity({
     required this.requestId,
     required this.requestCode,
@@ -27,6 +31,7 @@ class TransactionHistoryEntity {
     required this.createdAt,
     this.closedAt,
     this.rejectReason,
+    this.reconciliationStatus,
   });
 }
 

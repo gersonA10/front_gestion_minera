@@ -9,6 +9,7 @@ import 'package:front_gestion_minera/core/widgets/excavator_loader.dart';
 import 'package:front_gestion_minera/injector_container.dart';
 import 'package:front_gestion_minera/modules/minutes_memos/domain/entity/entity.dart';
 import 'package:front_gestion_minera/modules/minutes_memos/presentation/bloc/minutes_memos_bloc.dart';
+import 'package:front_gestion_minera/modules/minutes_memos/presentation/widgets/actas_theme.dart';
 import 'package:front_gestion_minera/modules/minutes_memos/presentation/widgets/participants_dialogo_wisget.dart';
 import 'package:front_gestion_minera/utils/constants/color.constant.dart';
 import 'package:image_picker/image_picker.dart';
@@ -50,7 +51,7 @@ class _RegisterMinutesMemosScreenState
   List<String> typeRegister = ['Acta', 'Memorando'];
 
   final List<File> _selectedFiles = [];
-  final int _maxFiles = 5;
+  final int _maxFiles = 1;
   final int _maxFileSize = 10 * 1024 * 1024;
   final ImagePicker _picker = ImagePicker();
 
@@ -98,10 +99,10 @@ class _RegisterMinutesMemosScreenState
     return BlocProvider.value(
       value: _blocRegister,
       child: Scaffold(
-        backgroundColor: TColors.appBackgroundColor,
-        appBar: AppBar(
-          backgroundColor: TColors.white,
-          title: TextTitleCardWidget(title: 'Registrar Documento'),
+        backgroundColor: AC.background,
+        appBar: AcGradientAppBar(
+          title: 'Registrar Documento',
+          subtitle: 'Acta o memorando interno',
         ),
         body: BlocConsumer<MinutesMemosBloc, MinutesMemosState>(
           listener: (context, state) {
@@ -200,7 +201,7 @@ class _RegisterMinutesMemosScreenState
                                             ),
                                             decoration: BoxDecoration(
                                               border: Border.all(
-                                                color: TColors.appMainDarkColor,
+                                                color: AC.primary,
                                               ),
                                               borderRadius:
                                                   BorderRadius.circular(10),
@@ -230,7 +231,7 @@ class _RegisterMinutesMemosScreenState
                                                 Icon(
                                                   Icons.people_alt_outlined,
                                                   color:
-                                                      TColors.appMainDarkColor,
+                                                      AC.primary,
                                                 ),
                                               ],
                                             ),
@@ -278,7 +279,7 @@ class _RegisterMinutesMemosScreenState
                                           ),
                                           decoration: BoxDecoration(
                                             border: Border.all(
-                                              color: TColors.appMainDarkColor,
+                                              color: AC.primary,
                                             ),
                                             borderRadius: BorderRadius.circular(
                                               10,
@@ -294,12 +295,12 @@ class _RegisterMinutesMemosScreenState
                                                     : '${_listParticipants.length} participante(s) seleccionado(s)',
                                                 style: TextStyle(
                                                   color:
-                                                      TColors.appMainDarkColor,
+                                                      AC.primary,
                                                 ),
                                               ),
                                               Icon(
                                                 Icons.people_alt_outlined,
-                                                color: TColors.appMainDarkColor,
+                                                color: AC.primary,
                                               ),
                                             ],
                                           ),
@@ -377,45 +378,46 @@ class _RegisterMinutesMemosScreenState
                         ],
                       ),
                       const SizedBox(height: 20),
-                      DottedBorder(
-                        options: RoundedRectDottedBorderOptions(
-                          radius: Radius.circular(15),
-                          color: TColors.appDisabledColor,
-                          dashPattern: [6, 3],
-                          strokeWidth: 1,
-                          padding: EdgeInsets.zero,
-                        ),
-                        child: GestureDetector(
-                          onTap: () {
-                            _showPickerOptions();
-                          },
-                          child: Container(
-                            width: double.infinity,
-                            height: 60,
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(15),
-                            ),
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Icon(
-                                  Icons.add_a_photo_outlined,
-                                  color: TColors.appMainDarkColor,
-                                ),
-                                const SizedBox(width: 10),
-                                Text(
-                                  'Subir Foto / PDF',
-                                  style: TextStyle(
-                                    color: TColors.appMainDarkColor,
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: 16,
+                      if (_selectedFiles.isEmpty)
+                        DottedBorder(
+                          options: RoundedRectDottedBorderOptions(
+                            radius: Radius.circular(15),
+                            color: TColors.appDisabledColor,
+                            dashPattern: [6, 3],
+                            strokeWidth: 1,
+                            padding: EdgeInsets.zero,
+                          ),
+                          child: GestureDetector(
+                            onTap: () {
+                              _showPickerOptions();
+                            },
+                            child: Container(
+                              width: double.infinity,
+                              height: 60,
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(15),
+                              ),
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Icon(
+                                    Icons.add_a_photo_outlined,
+                                    color: AC.primary,
                                   ),
-                                ),
-                              ],
+                                  const SizedBox(width: 10),
+                                  Text(
+                                    'Subir Foto o PDF',
+                                    style: TextStyle(
+                                      color: AC.primary,
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 16,
+                                    ),
+                                  ),
+                                ],
+                              ),
                             ),
                           ),
                         ),
-                      ),
                       const SizedBox(height: 10),
                       _selectedFiles.isNotEmpty
                           ? _buildFilePreview()
@@ -429,7 +431,7 @@ class _RegisterMinutesMemosScreenState
                           height: 60,
                           width: double.infinity,
                           decoration: BoxDecoration(
-                            color: TColors.appMainDarkColor,
+                            color: AC.primary,
                             borderRadius: BorderRadius.circular(20),
                           ),
                           child: Row(
@@ -497,8 +499,7 @@ class _RegisterMinutesMemosScreenState
         return Container(
           padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
           decoration: BoxDecoration(
-            color: Colors.blue,
-
+            color: AC.primary,
             borderRadius: BorderRadius.circular(20),
           ),
           child: Row(
@@ -623,41 +624,30 @@ class _RegisterMinutesMemosScreenState
 
   Future<void> _pickImage(ImageSource source) async {
     try {
-      if (source == ImageSource.camera) {
-        final XFile? singleFile = await _picker.pickImage(
-          source: source,
-          imageQuality: 80,
-        );
-        if (singleFile != null) {
-          _handleFilesSelection([File(singleFile.path)]);
-        }
-      } else {
-        final List<XFile> pickedFiles = await _picker.pickMultiImage(
-          limit: 5,
-          imageQuality: 80,
-        );
-
-        if (pickedFiles.isNotEmpty) {
-          _handleFilesSelection(
-            pickedFiles.map((xfile) => File(xfile.path)).toList(),
-          );
-        }
+      // Solo se admite un archivo por documento (el backend lo recibe con
+      // multer .single), por eso siempre se elige una sola imagen.
+      final XFile? singleFile = await _picker.pickImage(
+        source: source,
+        imageQuality: 80,
+      );
+      if (singleFile != null) {
+        _handleFilesSelection([File(singleFile.path)]);
       }
     } catch (e) {
       debugPrint("Error al seleccionar imagen: $e");
-       CustomAlert.show(
-      context,
-      title: 'Error',
-      message: 'No se Pudo Accede a la Camara o Galeria',
-      type: AlertType.error,
-    );
+      if (!mounted) return;
+      CustomAlert.show(
+        context,
+        title: 'Error',
+        message: 'No se Pudo Accede a la Camara o Galeria',
+        type: AlertType.error,
+      );
     }
   }
 
   Future<void> _pickPDF() async {
     try {
       final result = await FilePicker.pickFiles(
-        allowMultiple: true,
         type: FileType.custom,
         allowedExtensions: ['jpg', 'jpeg', 'png', 'pdf'],
       );
@@ -954,7 +944,7 @@ class _RegisterMinutesMemosScreenState
                         margin: const EdgeInsets.all(2),
                         decoration: BoxDecoration(
                           color: isSelected
-                              ? const Color(0xFF3B82F6)
+                              ? AC.primary
                               : Colors.transparent,
                           shape: BoxShape.circle,
                         ),
@@ -1006,12 +996,12 @@ class _RegisterMinutesMemosScreenState
               child: AnimatedContainer(
                 duration: const Duration(milliseconds: 200),
                 decoration: BoxDecoration(
-                  color: isActive ? TColors.appMainDarkColor : Colors.transparent,
+                  color: isActive ? AC.primary : Colors.transparent,
                   borderRadius: BorderRadius.circular(9),
                   boxShadow: isActive
                       ? [
                           BoxShadow(
-                            color: TColors.appMainDarkColor.withValues(alpha: 0.25),
+                            color: AC.primary.withValues(alpha: 0.25),
                             blurRadius: 6,
                             offset: const Offset(0, 2),
                           ),

@@ -91,7 +91,7 @@ Future<ActasCountEntity> getActasCount({
         {
           'name': 'archivo_acta',
           'path': model.attachmentIds.first,
-          'namefile': model.attachmentIds.first.split('/').last,
+          'filename': model.attachmentIds.first.split('/').last,
         },
       ],
     );
@@ -107,7 +107,7 @@ Future<ActasCountEntity> getActasCount({
         {
           'name': 'archivo_memo',
           'path': model.attachmentIds.first,
-          'namefile': model.attachmentIds.first.split('/').last,
+          'filename': model.attachmentIds.first.split('/').last,
         },
       ],
     );

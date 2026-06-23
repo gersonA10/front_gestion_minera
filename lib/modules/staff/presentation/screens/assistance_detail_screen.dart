@@ -4,6 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:front_gestion_minera/injector_container.dart';
 import 'package:front_gestion_minera/modules/staff/data/models/models.dart';
+import 'package:front_gestion_minera/modules/staff/domain/entity/employee_detail_assistance_entity.dart';
+import 'package:front_gestion_minera/modules/staff/presentation/widgets/staff_ui.dart';
 import 'package:front_gestion_minera/utils/constants/color.constant.dart';
 import 'package:intl/intl.dart';
 import 'package:share_plus/share_plus.dart';
@@ -23,8 +25,32 @@ class AssistanceDetailScreen extends StatefulWidget {
   State<AssistanceDetailScreen> createState() => _AssistanceDetailScreenState();
 }
 
+/// Estilo de pill para el estado de una asistencia (contexto turno), derivado
+/// del estado REAL del backend (`attendanceStatus`) con respaldo en la
+/// validación automática. Reusa los tokens del kit del módulo.
+class _AttendanceStatusStyle {
+  final String label;
+  final Color color;
+  final Color bg;
+  const _AttendanceStatusStyle(this.label, this.color, this.bg);
+
+  static _AttendanceStatusStyle of(String? raw) {
+    final s = (raw ?? '').toUpperCase().trim();
+    if (s == 'REJECTED' ||
+        s == 'RECHAZADO' ||
+        s == 'INCIDENT' ||
+        s == 'INCIDENCIA') {
+      return const _AttendanceStatusStyle(
+          'Con incidencia', Color(0xFFEF4444), Color(0xFFFEF2F2));
+    }
+    // FINALIZADO y REVISION (jornada corta) son ambos turnos COMPLETADOS:
+    // siempre "Finalizado". La jornada corta se indica aparte como dato neutro.
+    return const _AttendanceStatusStyle(
+        'Finalizado', TColors.statusGreen, TColors.statusGreenBg);
+  }
+}
+
 class _AssistanceDetailScreenState extends State<AssistanceDetailScreen> {
-  final isimage = false;
   late final StaffBloc _staffBloc;
   EmployeeDetailAssistanceModel? _employeeCache;
 
@@ -47,6 +73,13 @@ class _AssistanceDetailScreenState extends State<AssistanceDetailScreen> {
     return '${date.day} ${months[date.month - 1]}, ${date.year}';
   }
 
+  /// Toma los primeros 5 caracteres ("HH:mm") de forma defensiva: si el
+  /// backend manda otro formato no revienta, solo recorta lo que haya.
+  String _hhmm(String? raw, {String fallback = '00:00'}) {
+    if (raw == null || raw.isEmpty) return fallback;
+    return raw.length >= 5 ? raw.substring(0, 5) : raw;
+  }
+
   @override
   void initState() {
     super.initState();
@@ -63,11 +96,9 @@ class _AssistanceDetailScreenState extends State<AssistanceDetailScreen> {
           final isLoading = state is DetailAssistanceEmployeeLoading;
           if (isLoading && _employeeCache == null) {
             return Scaffold(
-              appBar: AppBar(
-                backgroundColor: TColors.white,
-                title: Text('Detalles de Asistencia'),
-              ),
-              body: Center(child: CircularProgressIndicator()),
+              backgroundColor: StaffUi.background,
+              appBar: staffAppBar(context, title: 'Detalle de asistencia'),
+              body: const StaffLoader(),
             );
           }
           if (state is DetailAssistanceEmployeeLoaded) {
@@ -75,25 +106,45 @@ class _AssistanceDetailScreenState extends State<AssistanceDetailScreen> {
           }
           if (_employeeCache == null) {
             if (isLoading) {
-              return Center(child: CircularProgressIndicator());
+              return Scaffold(
+                backgroundColor: StaffUi.background,
+                appBar: staffAppBar(context, title: 'Detalle de asistencia'),
+                body: const StaffLoader(),
+              );
             }
             if (state is DetailAssistanceEmployeeError) {
-              return Center(child: Text(state.message));
+              return Scaffold(
+                backgroundColor: StaffUi.background,
+                appBar: staffAppBar(context, title: 'Detalle de asistencia'),
+                body: StaffErrorState(
+                  message: state.message,
+                  onRetry: () => _staffBloc.add(
+                    GetDetailAssistanceEmployeeEvent(
+                      employeeId: widget.attendanceId,
+                    ),
+                  ),
+                ),
+              );
             }
 
-            return const SizedBox();
+            return Scaffold(
+              backgroundColor: StaffUi.background,
+              appBar: staffAppBar(context, title: 'Detalle de asistencia'),
+              body: const SizedBox(),
+            );
           }
           final employeeDetail = _employeeCache!;
           final employeeDate = employeeDetail.employee;
           final chronology = employeeDetail.chronology;
           final validation = employeeDetail.validation;
           return Scaffold(
-            backgroundColor: TColors.appBackgroundColor,
-            appBar: AppBar(
-              backgroundColor: TColors.white,
-              title: Text('Detalles de Asistencia'),
+            backgroundColor: StaffUi.background,
+            appBar: staffAppBar(
+              context,
+              title: 'Detalle de asistencia',
               actions: [
                 IconButton(
+                  tooltip: 'Compartir',
                   onPressed: () async {
                     try {
                       final pw.Document myPdf = await _generarPdf(
@@ -119,479 +170,441 @@ class _AssistanceDetailScreenState extends State<AssistanceDetailScreen> {
                       );
                     } catch (_) {}
                   },
-                  icon: Icon(
-                    Icons.share_outlined,
-                    color: TColors.appBackgroundDarkColor,
+                  icon: const Icon(
+                    Icons.ios_share_rounded,
+                    color: StaffUi.textPrimary,
+                    size: 21,
                   ),
                 ),
-                SizedBox(width: 10),
+                const SizedBox(width: 6),
               ],
             ),
-            body: Padding(
-              padding: EdgeInsetsGeometry.symmetric(horizontal: 15),
-              child: ListView(
-                children: [
-                  Container(
-                    padding: EdgeInsets.all(20),
-                    margin: EdgeInsets.only(top: 15),
-                    decoration: BoxDecoration(
-                      color: TColors.white,
-                      borderRadius: BorderRadius.circular(15),
-                    ),
-                    child: Stack(
-                      children: [
-                        Center(
-                          child: Column(
-                            children: [
-                              ClipRRect(
-                                borderRadius: BorderRadiusGeometry.circular(40),
-                                child: Container(
-                                  width: 70,
-                                  height: 70,
-                                  color: TColors.appBackgroundColor,
-                                  child: FadeInImage.assetNetwork(
-                                    placeholder: AssetImageApp.getIconLoading,
-                                    image:
-                                        employeeDetail.employee.photoUrl ?? '',
-                                    fit: BoxFit.cover,
-                                    imageErrorBuilder: (_, _, _) {
-                                      return Center(
-                                        child: const Icon(
-                                          Icons.person,
-                                          size: 30,
-                                        ),
-                                      );
-                                    },
-                                  ),
-                                ),
-                              ),
-                              const SizedBox(height: 15),
-                              Text(
-                                employeeDate.fullName,
-                                style: TextStyle(
-                                  fontSize: 20,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                              Text(
-                                employeeDate.position,
-                                style: TextStyle(
-                                  color: TColors.appDisabledDarkColor,
-                                ),
-                              ),
-                              const SizedBox(height: 5),
-                              Container(
-                                padding: EdgeInsets.symmetric(horizontal: 10),
-                                margin: EdgeInsets.only(bottom: 10),
-                                decoration: BoxDecoration(
-                                  color: TColors.uploadBlue.withValues(
-                                    alpha: 0.5,
-                                  ),
-                                  borderRadius: BorderRadius.circular(15),
-                                ),
-                                child: Text(
-                                  'NID: ${employeeDate.nationalId}',
-                                  style: TextStyle(
-                                    fontSize: 12,
-                                    color: TColors.appNewDarkMainColor,
-                                  ),
-                                ),
-                              ),
-                              Divider(
-                                color: TColors.disabled.withValues(alpha: 0.3),
-                              ),
-                              Row(
-                                children: [
-                                  CardDateTurnWidget(
-                                    isDate: true,
-                                    date: formatDate(
-                                      DateFormat(
-                                        'yyyy-MM-dd',
-                                      ).parse(employeeDetail.date),
-                                    ),
-                                  ),
-                                  SizedBox(
-                                    height: 40,
-                                    child: VerticalDivider(
-                                      color: TColors.disabled.withValues(
-                                        alpha: 0.3,
-                                      ),
-                                    ),
-                                  ),
-                                  CardDateTurnWidget(
-                                    isDate: false,
-                                    turn: employeeDetail.assignedShift,
-                                  ),
-                                ],
-                              ),
-                            ],
-                          ),
-                        ),
-                        Positioned(
-                          top: 0,
-                          right: 0,
-                          child: Container(
-                            padding: EdgeInsets.symmetric(horizontal: 10),
-                            decoration: BoxDecoration(
-                              color: TColors.green.withValues(alpha: 0.5),
-                              borderRadius: BorderRadius.circular(15),
-                              border: Border.all(color: TColors.green),
-                            ),
-                            child: Row(
-                              children: [
-                                Icon(
-                                  Icons.circle,
-                                  size: 8,
-                                  color: TColors.green,
-                                ),
-                                const SizedBox(width: 5),
-                                Text(
-                                  'Finalizado',
-                                  style: TextStyle(
-                                    fontSize: 12,
-                                    color: TColors.appNewDarkMainColor,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  Container(
-                    margin: EdgeInsets.only(top: 15),
-                    padding: EdgeInsets.all(20),
-                    decoration: BoxDecoration(
-                      color: TColors.white,
-                      borderRadius: BorderRadius.circular(15),
-                    ),
-                    child: Column(
-                      children: [
-                        const Row(
-                          children: [
-                            Icon(
-                              Icons.access_time,
-                              color: TColors.uploadBlue,
-                              size: 19,
-                            ),
-                            SizedBox(width: 5),
-                            Text(
-                              'Cronologia del Turno',
-                              style: TextStyle(
-                                fontWeight: FontWeight.bold,
-                                fontSize: 16,
-                              ),
-                            ),
-                          ],
-                        ),
-                        TimelineCustomWidget(
-                          isFirst: true,
-                          pointColor: TColors.uploadBlue,
-                          child: _CardTimeLineInOutWidget(
-                            isIN: true,
-                            hour: chronology.checkIn.time!.substring(0, 5),
-                            place: (chronology.checkOut.location != null)
-                                ? chronology.checkOut.location!
-                                : 'Lugar no registrado',
-                            isNotRegistered: chronology.checkIn.time == null,
-                          ),
-                        ),
-                        TimelineCustomWidget(
-                          pointColor: TColors.grayText,
-                          size: 10,
-                          child: Container(
-                            padding: EdgeInsets.only(left: 18, right: 10),
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                Text('Refrigerio'),
-                                Container(
-                                  padding: EdgeInsets.all(5),
-                                  decoration: BoxDecoration(
-                                    color: TColors.appBackgroundColor,
-                                    borderRadius: BorderRadius.circular(20),
-                                  ),
-                                  child: Row(
-                                    children: [
-                                      Icon(Icons.restaurant, size: 15),
-                                      SizedBox(width: 4),
-                                      (chronology.breakMinutes == 0)
-                                          ? Text('Sin Refrigerio')
-                                          : Text(
-                                              '${chronology.breakMinutes} min',
-                                              style: TextStyle(
-                                                fontSize: 13,
-                                                fontWeight: FontWeight.bold,
-                                              ),
-                                            ),
-                                    ],
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-                        TimelineCustomWidget(
-                          isLast: true,
-                          pointColor: TColors.bgColor,
-                          child: _CardTimeLineInOutWidget(
-                            isIN: false,
-                            hour: (chronology.checkOut.time == null)
-                                ? '00:00'
-                                : chronology.checkOut.time!.substring(0, 5),
-                            place:
-                                (chronology.checkOut.location != null &&
-                                    chronology.checkOut.location!.isNotEmpty)
-                                ? chronology.checkOut.location!
-                                : 'Lugar no registrado',
-                            isNotRegistered: chronology.checkOut.time == null,
-                          ),
-                        ),
-                        Divider(color: TColors.appBackgroundColor),
-                        Row(
-                          children: [
-                            const Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  'HORAS EFECTIVAS',
-                                  style: TextStyle(
-                                    fontSize: 12,
-                                    color: TColors.disabled,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
-                                Text(
-                                  'Excluyendo refrigerio',
-                                  style: TextStyle(
-                                    fontSize: 10,
-                                    color: TColors.disabled,
-                                  ),
-                                ),
-                              ],
-                            ),
-                            const Spacer(),
-                            Row(
-                              children: [
-                                (chronology.netHoursWorked == 0)
-                                    ? Text('No registrado')
-                                    : Text(
-                                        chronology.netHoursWorked.toString(),
-                                        style: TextStyle(
-                                          fontSize: 30,
-                                          color: TColors.uploadBlue,
-                                          fontWeight: FontWeight.bold,
-                                        ),
-                                      ),
-                                const SizedBox(width: 5),
-                                Text(
-                                  (chronology.netHoursWorked == 0) ? '' : 'hrs',
-                                  style: TextStyle(
-                                    fontSize: 15,
-                                    color: TColors.disabled,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
-                  ),
-                  Container(
-                    margin: const EdgeInsets.only(top: 15, bottom: 20),
-                    padding: const EdgeInsets.all(20),
-                    decoration: BoxDecoration(
-                      color: TColors.white,
-                      borderRadius: BorderRadius.circular(15),
-                    ),
-                    child: Column(
-                      children: [
-                        const Row(
-                          children: [
-                            Icon(
-                              Icons.verified_outlined,
-                              color: TColors.uploadBlue,
-                            ),
-                            SizedBox(width: 5),
-                            Text(
-                              'Validación',
-                              style: TextStyle(
-                                fontWeight: FontWeight.bold,
-                                fontSize: 17,
-                              ),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 10),
-                        Row(
-                          children: [
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.center,
-                                children: [
-                                  Container(
-                                    width: 100,
-                                    height: 70,
-                                    color: TColors.appBackgroundColor,
-                                    child: FadeInImage.assetNetwork(
-                                      placeholder: AssetImageApp.getIconLoading,
-                                      image:
-                                          validation.supervisorSignatureUrl ??
-                                          '',
-                                      fit: BoxFit.cover,
-                                      imageErrorBuilder: (_, _, _) {
-                                        return Center(
-                                          child: const Icon(
-                                            Icons.image_not_supported_outlined,
-                                            size: 30,
-                                          ),
-                                        );
-                                      },
-                                    ),
-                                  ),
-                                  const SizedBox(height: 5),
-                                  Text(
-                                    'Firma Supervisor',
-                                    style: TextStyle(
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                            SizedBox(height: 50, child: VerticalDivider()),
-                            Expanded(
-                              child: SizedBox(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.center,
-                                  children: [
-                                    Container(
-                                      padding: const EdgeInsets.all(5),
-                                      decoration: BoxDecoration(
-                                        color: TColors.uploadBlue.withValues(
-                                          alpha: 0.2,
-                                        ),
-                                        borderRadius: BorderRadius.circular(50),
-                                      ),
-                                      child: const Icon(
-                                        Icons.location_on_outlined,
-                                        color: TColors.uploadBlue,
-                                        size: 25,
-                                      ),
-                                    ),
-                                    const SizedBox(height: 5),
-                                    Text(
-                                      (chronology.checkOut.location == null ||
-                                              chronology
-                                                  .checkOut
-                                                  .location!
-                                                  .isEmpty)
-                                          ? 'Lugar no registrado'
-                                          : chronology.checkOut.location!,
-                                      style: TextStyle(
-                                        fontWeight: FontWeight.bold,
-                                      ),
-                                      textAlign: TextAlign.center,
-                                    ),
-                                    Text(
-                                      'Lat: ${validation.geolocation.checkOut.latitude}, Lon: ${validation.geolocation.checkOut.longitude}',
-                                      style: TextStyle(fontSize: 11),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
-                  ),
-                  Container(
-                    margin: EdgeInsets.only(bottom: 30),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Ink(
-                          decoration: BoxDecoration(
-                            color: TColors.white,
-                            borderRadius: BorderRadius.circular(15),
-                          ),
-                          child: InkWell(
-                            onTap: () {
-                              _generarPdf(context, employeeDetail, false);
-                            },
-                            splashColor: TColors.disabled,
-                            borderRadius: BorderRadius.circular(15),
-                            child: const Padding(
-                              padding: EdgeInsets.symmetric(
-                                horizontal: 20,
-                                vertical: 10,
-                              ),
-                              child: Row(
-                                children: [
-                                  Icon(
-                                    Icons.print_outlined,
-                                    color: TColors.appBackgroundDarkColor,
-                                  ),
-                                  SizedBox(width: 5),
-                                  Text(
-                                    'Reporte',
-                                    style: TextStyle(
-                                      color: TColors.appMainTextColor,
-                                      fontSize: 18,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ),
-                        ),
-                        // const SizedBox(width: 20),
-                        // Ink(
-                        //   decoration: BoxDecoration(
-                        //     color: TColors.timelineBlue,
-                        //     borderRadius: BorderRadius.circular(15),
-                        //   ),
-                        //   child: InkWell(
-                        //     onTap: () {
+            body: ListView(
+              padding: const EdgeInsets.fromLTRB(16, 16, 16, 28),
+              children: [
+                _buildHeaderCard(employeeDetail, employeeDate, validation),
+                const SizedBox(height: 14),
+                _buildChronologyCard(chronology),
+                const SizedBox(height: 14),
+                _buildValidationCard(chronology, validation),
+                const SizedBox(height: 18),
+                _buildReportButton(context, employeeDetail),
+              ],
+            ),
+          );
+        },
+      ),
+    );
+  }
 
-                        //     },
-                        //     borderRadius: BorderRadius.circular(15),
-                        //     child: const Padding(
-                        //       padding: EdgeInsets.symmetric(
-                        //         horizontal: 20,
-                        //         vertical: 10,
-                        //       ),
-                        //       child: Row(
-                        //         children: [
-                        //           Icon(
-                        //             Icons.edit_outlined,
-                        //             color: TColors.white,
-                        //           ),
-                        //           SizedBox(width: 5),
-                        //           Text(
-                        //             'Corrección',
-                        //             style: TextStyle(
-                        //               color: TColors.white,
-                        //               fontSize: 18,
-                        //             ),
-                        //           ),
-                        //         ],
-                        //       ),
-                        //     ),
-                        //   ),
-                        // ),
+  // ── Card 1: identidad + fecha/turno + estado real ──
+  Widget _buildHeaderCard(
+    EmployeeDetailAssistanceModel employeeDetail,
+    Employee employeeDate,
+    Validation validation,
+  ) {
+    final status = _AttendanceStatusStyle.of(employeeDetail.attendanceStatus);
+    final isShortShift =
+        employeeDetail.attendanceStatus.toUpperCase() == 'REVISION';
+    return StaffCard(
+      padding: const EdgeInsets.all(20),
+      child: Stack(
+        children: [
+          Center(
+            child: Column(
+              children: [
+                Container(
+                  width: 76,
+                  height: 76,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: StaffUi.primarySoft,
+                    border: Border.all(color: StaffUi.border),
+                  ),
+                  clipBehavior: Clip.antiAlias,
+                  child: FadeInImage.assetNetwork(
+                    placeholder: AssetImageApp.getIconLoading,
+                    image: employeeDetail.employee.photoUrl ?? '',
+                    fit: BoxFit.cover,
+                    imageErrorBuilder: (_, _, _) {
+                      return const Center(
+                        child: Icon(
+                          Icons.person_rounded,
+                          size: 32,
+                          color: StaffUi.primary,
+                        ),
+                      );
+                    },
+                  ),
+                ),
+                const SizedBox(height: 14),
+                Text(
+                  employeeDate.fullName,
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(
+                    fontSize: 19,
+                    fontWeight: FontWeight.w800,
+                    color: StaffUi.textPrimary,
+                    letterSpacing: -0.3,
+                  ),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  employeeDate.position,
+                  style: const TextStyle(
+                    fontSize: 13,
+                    color: StaffUi.textSecondary,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 11,
+                    vertical: 4,
+                  ),
+                  decoration: BoxDecoration(
+                    color: StaffUi.primarySoft,
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  child: Text(
+                    'NID: ${employeeDate.nationalId}',
+                    style: const TextStyle(
+                      fontSize: 11.5,
+                      fontWeight: FontWeight.w700,
+                      color: StaffUi.primary,
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 14),
+                Divider(color: StaffUi.border, height: 1),
+                const SizedBox(height: 10),
+                Row(
+                  children: [
+                    CardDateTurnWidget(
+                      isDate: true,
+                      date: formatDate(
+                        DateFormat('yyyy-MM-dd').parse(employeeDetail.date),
+                      ),
+                    ),
+                    Container(width: 1, height: 40, color: StaffUi.border),
+                    CardDateTurnWidget(
+                      isDate: false,
+                      turn: employeeDetail.assignedShift,
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+          Positioned(
+            top: 0,
+            right: 0,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: [
+                StaffPill(
+                  label: status.label,
+                  color: status.color,
+                  bg: status.bg,
+                  icon: Icons.check_circle_rounded,
+                ),
+                if (isShortShift) ...[
+                  const SizedBox(height: 6),
+                  const StaffPill(
+                    label: 'Jornada corta',
+                    color: StaffUi.textSecondary,
+                    bg: TColors.statusGreyBg,
+                    icon: Icons.info_outline_rounded,
+                  ),
+                ],
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // ── Card 2: cronología del turno + horas efectivas ──
+  Widget _buildChronologyCard(Chronology chronology) {
+    return StaffCard(
+      padding: const EdgeInsets.all(20),
+      child: Column(
+        children: [
+          const StaffSectionTitle(
+            'Cronología del turno',
+            icon: Icons.access_time_rounded,
+          ),
+          const SizedBox(height: 4),
+          TimelineCustomWidget(
+            isFirst: true,
+            pointColor: StaffUi.primary,
+            child: _CardTimeLineInOutWidget(
+              isIN: true,
+              hour: _hhmm(chronology.checkIn.time),
+              place: (chronology.checkOut.location != null)
+                  ? chronology.checkOut.location!
+                  : 'Lugar no registrado',
+              isNotRegistered: chronology.checkIn.time == null,
+            ),
+          ),
+          TimelineCustomWidget(
+            pointColor: StaffUi.muted,
+            size: 10,
+            child: Container(
+              padding: const EdgeInsets.only(left: 18, right: 10),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  const Text(
+                    'Refrigerio',
+                    style: TextStyle(
+                      fontSize: 13.5,
+                      fontWeight: FontWeight.w600,
+                      color: StaffUi.textPrimary,
+                    ),
+                  ),
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 10,
+                      vertical: 6,
+                    ),
+                    decoration: BoxDecoration(
+                      color: StaffUi.background,
+                      borderRadius: BorderRadius.circular(20),
+                      border: Border.all(color: StaffUi.border),
+                    ),
+                    child: Row(
+                      children: [
+                        const Icon(
+                          Icons.restaurant_rounded,
+                          size: 14,
+                          color: StaffUi.textSecondary,
+                        ),
+                        const SizedBox(width: 5),
+                        (chronology.breakMinutes == 0)
+                            ? const Text(
+                                'Sin refrigerio',
+                                style: TextStyle(
+                                  fontSize: 12.5,
+                                  color: StaffUi.textSecondary,
+                                ),
+                              )
+                            : Text(
+                                '${chronology.breakMinutes} min',
+                                style: const TextStyle(
+                                  fontSize: 13,
+                                  fontWeight: FontWeight.w700,
+                                  color: StaffUi.textPrimary,
+                                ),
+                              ),
                       ],
                     ),
                   ),
                 ],
               ),
             ),
-          );
-        },
+          ),
+          TimelineCustomWidget(
+            isLast: true,
+            pointColor: StaffUi.primary,
+            child: _CardTimeLineInOutWidget(
+              isIN: false,
+              hour: (chronology.checkOut.time == null)
+                  ? '00:00'
+                  : _hhmm(chronology.checkOut.time),
+              place:
+                  (chronology.checkOut.location != null &&
+                      chronology.checkOut.location!.isNotEmpty)
+                  ? chronology.checkOut.location!
+                  : 'Lugar no registrado',
+              isNotRegistered: chronology.checkOut.time == null,
+            ),
+          ),
+          Divider(color: StaffUi.border, height: 24),
+          Row(
+            children: [
+              const Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'HORAS EFECTIVAS',
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: StaffUi.textSecondary,
+                      fontWeight: FontWeight.w800,
+                      letterSpacing: 0.2,
+                    ),
+                  ),
+                  SizedBox(height: 2),
+                  Text(
+                    'Excluyendo refrigerio',
+                    style: TextStyle(
+                      fontSize: 10.5,
+                      color: StaffUi.muted,
+                    ),
+                  ),
+                ],
+              ),
+              const Spacer(),
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.baseline,
+                textBaseline: TextBaseline.alphabetic,
+                children: [
+                  (chronology.netHoursWorked == 0)
+                      ? const Text(
+                          'No registrado',
+                          style: TextStyle(
+                            fontSize: 14,
+                            color: StaffUi.textSecondary,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        )
+                      : Text(
+                          chronology.netHoursWorked.toString(),
+                          style: const TextStyle(
+                            fontSize: 30,
+                            color: StaffUi.primary,
+                            fontWeight: FontWeight.w800,
+                            letterSpacing: -0.5,
+                          ),
+                        ),
+                  const SizedBox(width: 5),
+                  Text(
+                    (chronology.netHoursWorked == 0) ? '' : 'hrs',
+                    style: const TextStyle(
+                      fontSize: 15,
+                      color: StaffUi.textSecondary,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ],
       ),
+    );
+  }
+
+  // ── Card 3: validación (firma + geo) ──
+  Widget _buildValidationCard(
+    Chronology chronology,
+    Validation validation,
+  ) {
+    return StaffCard(
+      padding: const EdgeInsets.all(20),
+      child: Column(
+        children: [
+          const StaffSectionTitle(
+            'Validación',
+            icon: Icons.verified_outlined,
+          ),
+          const SizedBox(height: 16),
+          Row(
+            children: [
+              Expanded(
+                child: Column(
+                  children: [
+                    Container(
+                      width: 110,
+                      height: 72,
+                      decoration: BoxDecoration(
+                        color: StaffUi.background,
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(color: StaffUi.border),
+                      ),
+                      clipBehavior: Clip.antiAlias,
+                      child: FadeInImage.assetNetwork(
+                        placeholder: AssetImageApp.getIconLoading,
+                        image: validation.supervisorSignatureUrl ?? '',
+                        fit: BoxFit.cover,
+                        imageErrorBuilder: (_, _, _) {
+                          return const Center(
+                            child: Icon(
+                              Icons.draw_outlined,
+                              size: 28,
+                              color: StaffUi.muted,
+                            ),
+                          );
+                        },
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    const Text(
+                      'Firma supervisor',
+                      style: TextStyle(
+                        fontSize: 12.5,
+                        fontWeight: FontWeight.w700,
+                        color: StaffUi.textPrimary,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              Container(
+                width: 1,
+                height: 64,
+                color: StaffUi.border,
+                margin: const EdgeInsets.symmetric(horizontal: 8),
+              ),
+              Expanded(
+                child: Column(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(8),
+                      decoration: BoxDecoration(
+                        color: StaffUi.primarySoft,
+                        borderRadius: BorderRadius.circular(50),
+                      ),
+                      child: const Icon(
+                        Icons.location_on_rounded,
+                        color: StaffUi.primary,
+                        size: 24,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      (chronology.checkOut.location == null ||
+                              chronology.checkOut.location!.isEmpty)
+                          ? 'Lugar no registrado'
+                          : chronology.checkOut.location!,
+                      textAlign: TextAlign.center,
+                      style: const TextStyle(
+                        fontSize: 12.5,
+                        fontWeight: FontWeight.w700,
+                        color: StaffUi.textPrimary,
+                      ),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      'Lat: ${validation.geolocation.checkOut.latitude}, Lon: ${validation.geolocation.checkOut.longitude}',
+                      textAlign: TextAlign.center,
+                      style: const TextStyle(
+                        fontSize: 10.5,
+                        color: StaffUi.textSecondary,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  // ── Acción: generar reporte PDF (imprimir / previsualizar) ──
+  Widget _buildReportButton(
+    BuildContext context,
+    EmployeeDetailAssistanceModel employeeDetail,
+  ) {
+    return StaffPrimaryButton(
+      label: 'Generar reporte',
+      icon: Icons.print_rounded,
+      onPressed: () => _generarPdf(context, employeeDetail, false),
     );
   }
 
@@ -895,73 +908,99 @@ class _CardTimeLineInOutWidget extends StatelessWidget {
   final String place;
   final bool isNotRegistered;
   const _CardTimeLineInOutWidget({
-    super.key,
     required this.isIN,
     required this.hour,
     required this.place,
     required this.isNotRegistered,
   });
 
+  /// AM/PM defensivo: si la hora no trae "HH" parseable, no revienta.
+  String get _meridiem {
+    if (hour.length < 2) return 'AM';
+    final h = int.tryParse(hour.substring(0, 2));
+    if (h == null) return 'AM';
+    return h > 11 ? 'PM' : 'AM';
+  }
+
   @override
   Widget build(BuildContext context) {
-    return isNotRegistered
-        ? Container(
-            margin: const EdgeInsets.only(top: 10, bottom: 10, left: 5),
-            padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 10),
-            decoration: BoxDecoration(
-              color: isIN
-                  ? TColors.uploadBlue.withValues(alpha: 0.1)
-                  : TColors.appBackgroundColor,
-              borderRadius: BorderRadius.circular(15),
-            ),
-            child: Text('No Registrado', textAlign: TextAlign.center),
-          )
-        : Container(
-            margin: const EdgeInsets.only(top: 10, bottom: 10, left: 5),
-            padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 10),
-            decoration: BoxDecoration(
-              color: isIN
-                  ? TColors.uploadBlue.withValues(alpha: 0.1)
-                  : TColors.appBackgroundColor,
-              borderRadius: BorderRadius.circular(15),
-            ),
-            child: Row(
+    final bg = isIN ? StaffUi.primarySoft : StaffUi.background;
+    return Container(
+      margin: const EdgeInsets.only(top: 10, bottom: 10, left: 5),
+      padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 14),
+      decoration: BoxDecoration(
+        color: bg,
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: StaffUi.border),
+      ),
+      child: isNotRegistered
+          ? const Text(
+              'No registrado',
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontSize: 13,
+                fontWeight: FontWeight.w600,
+                color: StaffUi.textSecondary,
+              ),
+            )
+          : Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      isIN ? 'Entrada Registrada' : 'Salida Registrada',
-                      style: TextStyle(
-                        color: isIN
-                            ? TColors.uploadBlue
-                            : TColors.appMainTextColor,
-                        fontWeight: FontWeight.bold,
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        isIN ? 'Entrada registrada' : 'Salida registrada',
+                        style: TextStyle(
+                          color: isIN
+                              ? StaffUi.primary
+                              : StaffUi.textPrimary,
+                          fontWeight: FontWeight.w800,
+                          fontSize: 13.5,
+                        ),
                       ),
-                    ),
-                    Text(
-                      place,
-                      style: TextStyle(fontSize: 12, color: TColors.disabled),
-                    ),
-                  ],
+                      const SizedBox(height: 2),
+                      Text(
+                        place,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(
+                          fontSize: 12,
+                          color: StaffUi.textSecondary,
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
+                const SizedBox(width: 8),
                 Row(
+                  crossAxisAlignment: CrossAxisAlignment.baseline,
+                  textBaseline: TextBaseline.alphabetic,
                   children: [
                     Text(
                       hour,
-                      style: TextStyle(
-                        fontWeight: FontWeight.bold,
+                      style: const TextStyle(
+                        fontWeight: FontWeight.w800,
                         fontSize: 25,
+                        color: StaffUi.textPrimary,
+                        letterSpacing: -0.5,
                       ),
                     ),
-                    SizedBox(width: 4),
-                    Text((int.parse(hour.substring(0, 2)) > 11) ? 'PM' : 'AM'),
+                    const SizedBox(width: 4),
+                    Text(
+                      _meridiem,
+                      style: const TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w600,
+                        color: StaffUi.textSecondary,
+                      ),
+                    ),
                   ],
                 ),
               ],
             ),
-          );
+    );
   }
 }
 
@@ -988,8 +1027,8 @@ class TimelineCustomWidget extends StatelessWidget {
       alignment: TimelineAlign.manual,
       lineXY: 0.1,
       indicatorStyle: IndicatorStyle(width: size, color: pointColor),
-      beforeLineStyle: const LineStyle(color: TColors.grayText, thickness: 2),
-      afterLineStyle: const LineStyle(color: TColors.grayText, thickness: 2),
+      beforeLineStyle: const LineStyle(color: StaffUi.border, thickness: 2),
+      afterLineStyle: const LineStyle(color: StaffUi.border, thickness: 2),
       endChild: child,
     );
   }
@@ -1009,19 +1048,28 @@ class CardDateTurnWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Expanded(
-      child: SizedBox(
-        child: Column(
-          children: [
-            Text(
-              isDate ? 'Fecha' : 'Turno',
-              style: TextStyle(color: TColors.disabled, fontSize: 15),
+      child: Column(
+        children: [
+          Text(
+            isDate ? 'Fecha' : 'Turno',
+            style: const TextStyle(
+              color: StaffUi.textSecondary,
+              fontSize: 12,
+              fontWeight: FontWeight.w600,
             ),
-            Text(
-              isDate ? date : turn,
-              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 17),
+          ),
+          const SizedBox(height: 2),
+          Text(
+            isDate ? date : turn,
+            textAlign: TextAlign.center,
+            style: const TextStyle(
+              fontWeight: FontWeight.w800,
+              fontSize: 16,
+              color: StaffUi.textPrimary,
+              letterSpacing: -0.2,
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }

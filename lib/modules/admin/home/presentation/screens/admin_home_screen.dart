@@ -1,11 +1,14 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:front_gestion_minera/core/tutorial/tutorial_prefs.dart';
+import 'package:front_gestion_minera/core/tutorial/tutorial_tts.dart';
 import 'package:front_gestion_minera/injector_container.dart';
 import 'package:front_gestion_minera/modules/admin/home/presentation/widgets/bottom_nav_widget.dart';
 import 'package:front_gestion_minera/modules/admin/home/presentation/bloc/admin_bloc.dart';
 import 'package:front_gestion_minera/modules/admin/users/presentation/bloc/admin_users_bloc.dart';
 import 'package:front_gestion_minera/utils/constants/color.constant.dart';
+import 'package:showcaseview/showcaseview.dart';
 
 import '../../../../../core/widgets/logout_button_widget.dart';
 import '../../domain/entity/entity.dart';
@@ -26,17 +29,111 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
   late final List<Widget> _pages;
   late final AdminBloc _adminBloc;
 
+  // ─── Tutorial (coach marks) ───────────────────────────────────────────────
+  /// Clave de rol para persistir si el admin ya vio el recorrido guiado.
+  static const String _kTutorialRoleKey = 'admin';
+
+  /// Scope propio del recorrido de esta pantalla (evita choques con otros).
+  static const String _kShowcaseScope = 'admin_panel';
+
+  /// Cantidad de pestañas del bottom nav (debe coincidir con [BottomNavWidget]).
+  static const int _kNavCount = 4;
+
+  late final ShowcaseView _showcaseView;
+
+  /// Una key por pestaña del bottom nav. En showcaseview 5.x estas keys son
+  /// identificadores de registro (no se adjuntan al widget), por eso viven aquí.
+  final List<GlobalKey> _showcaseKeys =
+      List.generate(_kNavCount, (_) => GlobalKey());
+
+  /// Locución de cada pestaña (mismo orden que el BottomNavWidget); la lee
+  /// flutter_tts al aparecer cada coach mark.
+  static const List<String> _speechByStep = [
+    'Bandeja de Solicitudes. Aquí llegan las solicitudes de préstamos y retiros '
+        'de los socios. Revísalas para aprobarlas o rechazarlas.',
+    'Historial. Consulta todas las solicitudes ya procesadas y el resultado de '
+        'cada una.',
+    'Aportes. Registra y administra los aportes que hacen los socios al fondo.',
+    'Usuarios. Gestiona los usuarios del sistema: crea, edita y administra sus '
+        'accesos.',
+  ];
+
+  void _speakStep(int? index) {
+    if (index == null || index < 0 || index >= _speechByStep.length) return;
+    TutorialTts.instance.speak(_speechByStep[index]);
+  }
+
   @override
   void initState() {
     super.initState();
     _adminBloc = InjectorContainer.getIt<AdminBloc>();
 
     _pages = [
-      const _SolicitudesPendientesPage(),
+      _SolicitudesPendientesPage(onHelp: _startTutorial),
       const HistorialRequestsScreen(),
       const ContributionAdminScreen(),
       const UsersManagementScreen(),
     ];
+
+    _showcaseView = ShowcaseView.register(
+      scope: _kShowcaseScope,
+      enableAutoScroll: true,
+      onStart: (index, _) => _speakStep(index),
+      onFinish: _markTutorialSeen,
+      onDismiss: (_) => _markTutorialSeen(),
+      globalTooltipActionConfig: const TooltipActionConfig(
+        position: TooltipActionPosition.inside,
+        alignment: MainAxisAlignment.spaceBetween,
+      ),
+      globalTooltipActions: [
+        const TooltipActionButton(
+          type: TooltipDefaultActionType.skip,
+          name: 'Saltar',
+          backgroundColor: Colors.transparent,
+          textStyle: TextStyle(
+            color: Color(0xFF64748B),
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+        const TooltipActionButton(
+          type: TooltipDefaultActionType.next,
+          name: 'Siguiente',
+          backgroundColor: Color(0xFF1A3557),
+          textStyle: TextStyle(
+            color: Colors.white,
+            fontWeight: FontWeight.w700,
+          ),
+        ),
+      ],
+    );
+
+    // Lanza el recorrido la primera vez, tras pintar la pantalla.
+    WidgetsBinding.instance.addPostFrameCallback((_) => _maybeStartTutorial());
+  }
+
+  Future<void> _maybeStartTutorial() async {
+    final alreadySeen = await TutorialPrefs.hasSeen(_kTutorialRoleKey);
+    if (alreadySeen || !mounted) return;
+    _startTutorial();
+  }
+
+  void _startTutorial() {
+    _showcaseView.startShowCase(
+      _showcaseKeys,
+      delay: const Duration(milliseconds: 400),
+    );
+  }
+
+  void _markTutorialSeen() {
+    TutorialTts.instance.stop();
+    TutorialPrefs.markSeen(_kTutorialRoleKey);
+  }
+
+  @override
+  void dispose() {
+    TutorialTts.instance.stop();
+    _showcaseView.unregister();
+    super.dispose();
   }
 
   @override
@@ -52,6 +149,8 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
         bottomNavigationBar: BottomNavWidget(
           currentIndex: _currentIndex,
           onTap: (i) => setState(() => _currentIndex = i),
+          showcaseKeys: _showcaseKeys,
+          showcaseScope: _kShowcaseScope,
         ),
       ),
     );
@@ -59,7 +158,10 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
 }
 
 class _SolicitudesPendientesPage extends StatefulWidget {
-  const _SolicitudesPendientesPage();
+  const _SolicitudesPendientesPage({required this.onHelp});
+
+  /// Reabre el tutorial (coach marks) cuando el admin toca el botón de ayuda.
+  final VoidCallback onHelp;
 
   @override
   State<_SolicitudesPendientesPage> createState() =>
@@ -230,7 +332,27 @@ class _SolicitudesPendientesPageState
               color: Color(0xFF1A3557),
             ),
           ),
-          Spacer(),
+          const Spacer(),
+          GestureDetector(
+            onTap: widget.onHelp,
+            child: Tooltip(
+              message: 'Ver tutorial',
+              child: Container(
+                width: 42,
+                height: 42,
+                decoration: BoxDecoration(
+                  color: const Color(0xFFEFF6FF),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: const Icon(
+                  Icons.help_outline_rounded,
+                  color: Color(0xFF1A3557),
+                  size: 22,
+                ),
+              ),
+            ),
+          ),
+          const SizedBox(width: 10),
           LogoutButton(),
         ],
       ),

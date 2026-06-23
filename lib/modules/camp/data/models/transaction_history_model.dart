@@ -15,6 +15,7 @@ class TransactionHistoryModel extends TransactionHistoryEntity {
     required super.createdAt,
     super.closedAt,
     super.rejectReason,
+    super.reconciliationStatus,
   });
 
   factory TransactionHistoryModel.fromJson(Map<String, dynamic> json) {
@@ -36,6 +37,7 @@ class TransactionHistoryModel extends TransactionHistoryEntity {
           ? DateTime.tryParse(json['closed_at'] as String)
           : null,
       rejectReason: json['reject_reason'] as String?,
+      reconciliationStatus: json['reconciliation_status'] as String?,
     );
   }
 }

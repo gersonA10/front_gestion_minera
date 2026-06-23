@@ -19,6 +19,14 @@ class TreasuryBloc extends Bloc<TreasuryEvent, TreasuryState> {
 
   List<CashRegisterEntity> cashRegisters = [];
 
+  // Reposiciones (conciliación de Campamento)
+  int _reconPage = 1;
+  bool _reconReachedMax = false;
+  int _reconTotalRecords = 0;
+  List<ReconciliationItemEntity> _reconItems = [];
+  bool _isLoadingMoreRecon = false;
+  String? _currentReconSearch;
+
   //onventario
   int _currentBatchPage = 1;
   bool _hasReachedBatchMax = false;
@@ -109,6 +117,9 @@ class TreasuryBloc extends Bloc<TreasuryEvent, TreasuryState> {
     on<GetFinancialReportEvent>(_onGetFinancialReportEvent);
     on<RegisterUrgentIncomeEvent>(_onRegisterUrgentIncome);
     on<GetCashRegistersEvent>(_onGetCashRegisters);
+    on<GetReconciliationsEvent>(_onGetReconciliations);
+    on<LoadMoreReconciliationsEvent>(_onLoadMoreReconciliations);
+    on<ExecuteReconciliationEvent>(_onExecuteReconciliation);
     on<ConfirmPaymentEvent>(_onConfirmPayment);
     on<RejectAnApplicationEvent>(_rejectAnApplication);
     on<RegisterUrgentExpenseEvent>(_onRegisterUrgentExpense);
@@ -392,6 +403,97 @@ class TreasuryBloc extends Bloc<TreasuryEvent, TreasuryState> {
       emit(CashRegistersError(mapErrorMessage(error.key)));
     } catch (e) {
       emit(CashRegistersError('Error inesperado: $e'));
+    }
+  }
+
+  Future<void> _onGetReconciliations(
+    GetReconciliationsEvent event,
+    Emitter<TreasuryState> emit,
+  ) async {
+    if (event.isRefresh) {
+      _reconPage = 1;
+      _reconReachedMax = false;
+      _reconItems.clear();
+      _currentReconSearch = event.search;
+      emit(ReconciliationsLoading());
+    }
+
+    try {
+      final response = await repository.getPendingReconciliations(
+        page: _reconPage,
+        search: _currentReconSearch,
+      );
+      _reconItems = response.items;
+      _reconReachedMax = !response.hasMoreData;
+      _reconTotalRecords = response.totalRecords;
+      emit(
+        ReconciliationsLoaded(
+          items: List.from(_reconItems),
+          hasReachedMax: _reconReachedMax,
+          totalRecords: _reconTotalRecords,
+        ),
+      );
+    } on BaseApiException catch (error) {
+      if (error.key == DioExceptionKey.unauthorised) return;
+      emit(ReconciliationsError(mapErrorMessage(error.key)));
+    } catch (e) {
+      emit(ReconciliationsError('Error inesperado: $e'));
+    }
+  }
+
+  Future<void> _onLoadMoreReconciliations(
+    LoadMoreReconciliationsEvent event,
+    Emitter<TreasuryState> emit,
+  ) async {
+    if (_reconReachedMax || _isLoadingMoreRecon) return;
+    _isLoadingMoreRecon = true;
+    _reconPage++;
+    try {
+      final response = await repository.getPendingReconciliations(
+        page: _reconPage,
+        search: _currentReconSearch,
+      );
+      _reconItems.addAll(response.items);
+      _reconReachedMax = !response.hasMoreData;
+      emit(
+        ReconciliationsLoaded(
+          items: List.from(_reconItems),
+          hasReachedMax: _reconReachedMax,
+          totalRecords: _reconTotalRecords,
+        ),
+      );
+    } on BaseApiException catch (error) {
+      _reconPage--;
+      if (error.key == DioExceptionKey.unauthorised) return;
+      emit(ReconciliationsError(mapErrorMessage(error.key)));
+    } catch (e) {
+      _reconPage--;
+      emit(ReconciliationsError('Error inesperado: $e'));
+    } finally {
+      _isLoadingMoreRecon = false;
+    }
+  }
+
+  Future<void> _onExecuteReconciliation(
+    ExecuteReconciliationEvent event,
+    Emitter<TreasuryState> emit,
+  ) async {
+    emit(ExecuteReconciliationLoading());
+    try {
+      final result = await repository.executeReconciliation(
+        event.requestId,
+        event.cajaOrigenId,
+        event.nota,
+      );
+      // Quita la solicitud conciliada de la lista en memoria.
+      _reconItems.removeWhere((item) => item.requestId == event.requestId);
+      if (_reconTotalRecords > 0) _reconTotalRecords--;
+      emit(ExecuteReconciliationSuccess(result: result));
+    } on BaseApiException catch (error) {
+      if (error.key == DioExceptionKey.unauthorised) return;
+      emit(ExecuteReconciliationError(error.message));
+    } catch (e) {
+      emit(ExecuteReconciliationError('Error inesperado: $e'));
     }
   }
 

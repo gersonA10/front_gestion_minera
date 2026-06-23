@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import 'actas_theme.dart';
 import '../../../../utils/constants/color.constant.dart';
 
 class FormEditMinutesMemosWidget extends StatelessWidget {
@@ -47,8 +48,16 @@ class FormEditMinutesMemosWidget extends StatelessWidget {
 
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(15),
-          borderSide: BorderSide(
-            color: TColors.textFieldDisabledColor,
+          borderSide: const BorderSide(
+            color: AC.border,
+          ),
+        ),
+
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(15),
+          borderSide: const BorderSide(
+            color: AC.primary,
+            width: 1.5,
           ),
         ),
 

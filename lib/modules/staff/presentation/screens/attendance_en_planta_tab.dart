@@ -86,27 +86,11 @@ class _AttendanceEnPlantaTabState extends State<AttendanceEnPlantaTab> {
   }
 
   Widget _buildStatsRow() {
-    return Row(
-      children: [
-        Expanded(
-          child: AttendanceStatCardWidget(
-            label: 'Personal en Planta',
-            value: '${widget.workers.length}',
-            valueLabel: 'Activos',
-            valueLabelColor: TColors.primary,
-          ),
-        ),
-        const SizedBox(width: 12),
-        Expanded(
-          child: AttendanceStatCardWidget(
-            label: 'Turno Mañana',
-            value: '07:00',
-            valueLabel: 'Inicio',
-            valueLabelColor: TColors.primary,
-            valueFontSize: 24,
-          ),
-        ),
-      ],
+    return AttendanceStatCardWidget(
+      label: 'Personal en Planta',
+      value: '${widget.workers.length}',
+      valueLabel: 'Activos',
+      valueLabelColor: TColors.primary,
     );
   }
 
@@ -148,23 +132,6 @@ class _AttendanceEnPlantaTabState extends State<AttendanceEnPlantaTab> {
           ),
         ),
         const Spacer(),
-        GestureDetector(
-          onTap: () {},
-          child: Row(
-            children: const [
-              Text(
-                'Filtrar',
-                style: TextStyle(
-                  fontSize: 13,
-                  fontWeight: FontWeight.w500,
-                  color: TColors.primary,
-                ),
-              ),
-              SizedBox(width: 4),
-              Icon(Icons.tune_rounded, size: 16, color: TColors.primary),
-            ],
-          ),
-        ),
       ],
     );
   }

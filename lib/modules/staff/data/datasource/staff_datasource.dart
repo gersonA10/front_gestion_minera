@@ -265,6 +265,32 @@ class StaffDatasource {
     return EmployeeDetailAssistanceModel.fromJson(response['data']);
   }
 
+  /// Reporte de asistencia de un trabajador por período (semanal/mensual) o por
+  /// rango explícito [from]/[to].
+  Future<AttendanceReportModel> getAttendanceReport({
+    required String employeeId,
+    String period = 'weekly',
+    String? ref,
+    String? from,
+    String? to,
+  }) async {
+    final Map<String, dynamic> queryParameters = {};
+    if (from != null && to != null) {
+      queryParameters['from'] = from;
+      queryParameters['to'] = to;
+    } else {
+      queryParameters['period'] = period;
+      if (ref != null) queryParameters['ref'] = ref;
+    }
+
+    final response = await apiClient.get(
+      '/api/hr/employees/$employeeId/attendances/report',
+      operationName: 'getAttendanceReport',
+      queryParameters: queryParameters,
+    );
+    return AttendanceReportModel.fromJson(response['data']);
+  }
+
   Future<List<PayrollMonthlyModel>> getPayrollMonthlyList({
     required int month,
     required int year,

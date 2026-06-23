@@ -3,7 +3,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:front_gestion_minera/config/router/app_router.gr.dart';
 import 'package:front_gestion_minera/core/widgets/excavator_loader.dart';
+import 'package:front_gestion_minera/core/tutorial/tutorial_prefs.dart';
+import 'package:front_gestion_minera/core/tutorial/tutorial_tts.dart';
 import 'package:front_gestion_minera/injector_container.dart';
+import 'package:showcaseview/showcaseview.dart';
 
 import '../../domain/entity/member_loan_list_entity.dart';
 import '../bloc/member_loans_list_bloc.dart';
@@ -30,6 +33,40 @@ class _FilterDef {
   const _FilterDef(this.label, this.value);
 }
 
+/// Scope del recorrido guiado (coach marks) del módulo Préstamos de Socios.
+const String _kMemberLoansScope = 'member_loans';
+
+/// Envuelve un widget como objetivo de coach mark con el estilo del módulo.
+Widget _coachMark({
+  required GlobalKey key,
+  required String title,
+  required String description,
+  required Widget child,
+}) {
+  return Showcase(
+    key: key,
+    scope: _kMemberLoansScope,
+    title: title,
+    description: description,
+    targetBorderRadius: BorderRadius.circular(14),
+    targetPadding: const EdgeInsets.all(6),
+    tooltipBackgroundColor: MlColors.surface,
+    tooltipBorderRadius: BorderRadius.circular(16),
+    titleTextStyle: const TextStyle(
+      fontSize: 15,
+      fontWeight: FontWeight.w800,
+      color: MlColors.textPrimary,
+      letterSpacing: -0.2,
+    ),
+    descTextStyle: const TextStyle(
+      fontSize: 13,
+      height: 1.4,
+      color: MlColors.textSecondary,
+    ),
+    child: child,
+  );
+}
+
 @RoutePage()
 class MemberLoansHomeScreen extends StatefulWidget {
   const MemberLoansHomeScreen({super.key});
@@ -48,16 +85,97 @@ class _MemberLoansHomeScreenState extends State<MemberLoansHomeScreen> {
   String _type = 'Todos';
   bool _reachedMax = false;
 
+  // ─── Tutorial (coach marks) ───────────────────────────────────────────────
+  /// Clave de rol para persistir si Préstamos de Socios ya vio el recorrido.
+  static const String _kTutorialRoleKey = 'prestamos_socios';
+
+  late final ShowcaseView _showcaseView;
+
+  final GlobalKey _reportKey = GlobalKey();
+  final GlobalKey _searchKey = GlobalKey();
+  final GlobalKey _filtersKey = GlobalKey();
+
+  /// Orden del recorrido (de arriba hacia abajo).
+  List<GlobalKey> get _showcaseKeys => [_reportKey, _searchKey, _filtersKey];
+
+  /// Locución de cada paso (mismo orden que [_showcaseKeys]).
+  static const List<String> _speechByStep = [
+    'Reporte. Abre el reporte consolidado de los préstamos de socios para '
+        'revisar totales y exportarlos.',
+    'Buscar. Encuentra rápidamente un préstamo escribiendo el nombre del socio.',
+    'Filtros. Filtra la bandeja por estado: pendientes, vigentes, pagados, '
+        'rechazados o cancelados.',
+  ];
+
+  void _speakStep(int? index) {
+    if (index == null || index < 0 || index >= _speechByStep.length) return;
+    TutorialTts.instance.speak(_speechByStep[index]);
+  }
+
   @override
   void initState() {
     super.initState();
     _bloc = InjectorContainer.getIt<MemberLoansListBloc>()
       ..add(MemberLoansFetch());
     _scrollController.addListener(_onScroll);
+
+    _showcaseView = ShowcaseView.register(
+      scope: _kMemberLoansScope,
+      enableAutoScroll: true,
+      onStart: (index, _) => _speakStep(index),
+      onFinish: _markTutorialSeen,
+      onDismiss: (_) => _markTutorialSeen(),
+      globalTooltipActionConfig: const TooltipActionConfig(
+        position: TooltipActionPosition.inside,
+        alignment: MainAxisAlignment.spaceBetween,
+      ),
+      globalTooltipActions: [
+        const TooltipActionButton(
+          type: TooltipDefaultActionType.skip,
+          name: 'Saltar',
+          backgroundColor: Colors.transparent,
+          textStyle: TextStyle(
+            color: MlColors.textSecondary,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+        const TooltipActionButton(
+          type: TooltipDefaultActionType.next,
+          name: 'Siguiente',
+          backgroundColor: MlColors.primary,
+          textStyle: TextStyle(
+            color: Colors.white,
+            fontWeight: FontWeight.w700,
+          ),
+        ),
+      ],
+    );
+
+    WidgetsBinding.instance.addPostFrameCallback((_) => _maybeStartTutorial());
+  }
+
+  Future<void> _maybeStartTutorial() async {
+    final alreadySeen = await TutorialPrefs.hasSeen(_kTutorialRoleKey);
+    if (alreadySeen || !mounted) return;
+    _startTutorial();
+  }
+
+  void _startTutorial() {
+    _showcaseView.startShowCase(
+      _showcaseKeys,
+      delay: const Duration(milliseconds: 500),
+    );
+  }
+
+  void _markTutorialSeen() {
+    TutorialTts.instance.stop();
+    TutorialPrefs.markSeen(_kTutorialRoleKey);
   }
 
   @override
   void dispose() {
+    TutorialTts.instance.stop();
+    _showcaseView.unregister();
     _searchController.dispose();
     _searchFocus.dispose();
     _scrollController.dispose();
@@ -98,14 +216,40 @@ class _MemberLoansHomeScreenState extends State<MemberLoansHomeScreen> {
             onBack: () => Navigator.of(context).maybePop(),
             actions: [
               MlGlassButton(
-                icon: Icons.assessment_rounded,
-                onTap: () =>
-                    context.router.push(const MemberLoansReportRoute()),
+                icon: Icons.help_outline_rounded,
+                onTap: _startTutorial,
+              ),
+              const SizedBox(width: 8),
+              _coachMark(
+                key: _reportKey,
+                title: 'Reporte',
+                description:
+                    'Abre el reporte consolidado de los préstamos de socios '
+                    'para revisar totales y exportarlos.',
+                child: MlGlassButton(
+                  icon: Icons.assessment_rounded,
+                  onTap: () =>
+                      context.router.push(const MemberLoansReportRoute()),
+                ),
               ),
             ],
           ),
-          _search(),
-          _statusBar(),
+          _coachMark(
+            key: _searchKey,
+            title: 'Buscar',
+            description:
+                'Encuentra rápidamente un préstamo escribiendo el nombre del '
+                'socio.',
+            child: _search(),
+          ),
+          _coachMark(
+            key: _filtersKey,
+            title: 'Filtros',
+            description:
+                'Filtra la bandeja por estado para enfocarte en lo que '
+                'necesitas revisar.',
+            child: _statusBar(),
+          ),
           const SizedBox(height: 8),
           _typeBar(),
           const SizedBox(height: 4),

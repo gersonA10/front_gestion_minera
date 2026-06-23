@@ -185,6 +185,13 @@ class _FinancialReportsScreenState extends State<FinancialReportsScreen> {
                         ),
                         SizedBox(height: smallSpacing * 2),
 
+                        _buildReconciliationSection(
+                          context,
+                          colors,
+                          _cachedReport!.conciliacion,
+                        ),
+                        SizedBox(height: smallSpacing * 2),
+
                         _buildExportButton(
                           context,
                           colors,
@@ -385,6 +392,88 @@ class _FinancialReportsScreenState extends State<FinancialReportsScreen> {
           iconColor: const Color(0xFFEF4444),
           subtitle: '${egresoShare.toStringAsFixed(0)}% del flujo',
         ),
+      ],
+    );
+  }
+
+  // ---------- Conciliación (reposiciones de Campamento) ----------
+  Widget _buildReconciliationSection(
+    BuildContext context,
+    ColorScheme colors,
+    ReconciliationSummaryEntity c,
+  ) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        _buildSectionLabel(context, 'CONCILIACIÓN DE CAMPAMENTO'),
+        const SizedBox(height: 10),
+        Row(
+          children: [
+            MetricCardWidget(
+              colors: colors,
+              title: 'DEVOLUCIONES',
+              amount: c.totalDevoluciones,
+              icon: Icons.south_west_rounded,
+              iconColor: const Color(0xFF10B981),
+              subtitle:
+                  '${c.countDevoluciones} ${c.countDevoluciones == 1 ? 'sobrante' : 'sobrantes'}',
+            ),
+            const SizedBox(width: 12),
+            MetricCardWidget(
+              colors: colors,
+              title: 'COMPENSACIONES',
+              amount: c.totalCompensaciones,
+              icon: Icons.north_east_rounded,
+              iconColor: const Color(0xFFF59E0B),
+              subtitle:
+                  '${c.countCompensaciones} ${c.countCompensaciones == 1 ? 'reintegro' : 'reintegros'}',
+            ),
+          ],
+        ),
+        if (c.hasActivity) ...[
+          const SizedBox(height: 10),
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+            decoration: BoxDecoration(
+              color: const Color(0xFF1A56FF).withValues(alpha: 0.06),
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(
+                color: const Color(0xFF1A56FF).withValues(alpha: 0.12),
+              ),
+            ),
+            child: Row(
+              children: [
+                const Icon(
+                  Icons.sync_alt_rounded,
+                  size: 16,
+                  color: Color(0xFF1A56FF),
+                ),
+                const SizedBox(width: 8),
+                const Expanded(
+                  child: Text(
+                    'Neto recuperado por conciliación',
+                    style: TextStyle(
+                      fontSize: 12.5,
+                      fontWeight: FontWeight.w600,
+                      color: Color(0xFF6B7A99),
+                    ),
+                  ),
+                ),
+                Text(
+                  _money(c.neto),
+                  style: TextStyle(
+                    fontSize: 13.5,
+                    fontWeight: FontWeight.w800,
+                    color: c.neto >= 0
+                        ? const Color(0xFF10B981)
+                        : const Color(0xFFEF4444),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
       ],
     );
   }

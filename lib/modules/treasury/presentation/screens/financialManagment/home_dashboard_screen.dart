@@ -192,6 +192,15 @@ class HomeBody extends StatelessWidget {
                   mayor: b.cajaMayor,
                   chica: b.cajaChica,
                 ),
+                const SizedBox(height: 16),
+                _ReposicionesEntry(
+                  onTap: () async {
+                    await context.router.push(const ReconciliationsRoute());
+                    if (context.mounted) {
+                      context.read<TreasuryBloc>().add(DashboardDataEvent());
+                    }
+                  },
+                ),
                 const SizedBox(height: 24),
                 const _SectionTitle('Situación financiera',
                     helper: 'Compromisos y posición'),
@@ -258,6 +267,78 @@ class HomeBody extends StatelessWidget {
               ],
             );
           },
+        ),
+      ),
+    );
+  }
+}
+
+// ─── Acceso a reposiciones de campamento ─────────────────────────────────────
+
+class _ReposicionesEntry extends StatelessWidget {
+  final VoidCallback onTap;
+  const _ReposicionesEntry({required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: _C.surface,
+          borderRadius: BorderRadius.circular(18),
+          border: Border.all(color: _C.border),
+          boxShadow: [
+            BoxShadow(
+              color: const Color(0xFF0D1B3E).withValues(alpha: 0.03),
+              blurRadius: 10,
+              offset: const Offset(0, 4),
+            ),
+          ],
+        ),
+        child: Row(
+          children: [
+            Container(
+              width: 44,
+              height: 44,
+              decoration: BoxDecoration(
+                color: const Color(0xFFC47A00).withValues(alpha: 0.12),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: const Icon(
+                Icons.sync_alt_rounded,
+                color: Color(0xFFC47A00),
+                size: 22,
+              ),
+            ),
+            const SizedBox(width: 14),
+            const Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Reposiciones de campamento',
+                    style: TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w800,
+                      color: _C.textPrimary,
+                    ),
+                  ),
+                  SizedBox(height: 2),
+                  Text(
+                    'Concilia devoluciones y compensaciones',
+                    style: TextStyle(fontSize: 11.5, color: _C.textSecondary),
+                  ),
+                ],
+              ),
+            ),
+            const Icon(
+              Icons.arrow_forward_ios_rounded,
+              size: 13,
+              color: _C.textSecondary,
+            ),
+          ],
         ),
       ),
     );

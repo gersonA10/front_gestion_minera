@@ -1,15 +1,38 @@
 class FinancialReportEntity {
   final GeneralSummaryEntity resumenGeneral;
+  final ReconciliationSummaryEntity conciliacion;
   final List<ChartDataEntity> datosGrafica;
   final List<ExpenseByResponsibleEntity> gastosPorResponsable;
   final List<AbsoluteDetailEntity> detalleAbsolutoPdf;
 
   FinancialReportEntity({
     required this.resumenGeneral,
+    required this.conciliacion,
     required this.datosGrafica,
     required this.gastosPorResponsable,
     required this.detalleAbsolutoPdf,
   });
+}
+
+/// Resumen de reposiciones de Campamento en el periodo:
+///  - devoluciones: el campamento gastó menos y el sobrante volvió a caja.
+///  - compensaciones: gastó de más y se le reintegró la diferencia.
+class ReconciliationSummaryEntity {
+  final double totalDevoluciones;
+  final double totalCompensaciones;
+  final int countDevoluciones;
+  final int countCompensaciones;
+  final double neto;
+
+  ReconciliationSummaryEntity({
+    required this.totalDevoluciones,
+    required this.totalCompensaciones,
+    required this.countDevoluciones,
+    required this.countCompensaciones,
+    required this.neto,
+  });
+
+  bool get hasActivity => countDevoluciones > 0 || countCompensaciones > 0;
 }
 
 class GeneralSummaryEntity {

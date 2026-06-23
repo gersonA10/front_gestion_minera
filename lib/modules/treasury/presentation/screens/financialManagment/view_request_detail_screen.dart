@@ -164,7 +164,7 @@ class _ViewRequestDetailsScreenState extends State<ViewRequestDetailsScreen> {
                       const SizedBox(height: 16),
                       _InfoCard(
                         descripcion: data.descripcion,
-                        fecha: formatDate(data.createdAt),
+                        fecha: formatDate(data.createdAt.toLocal()),
                       ),
                       if (evidencia.isNotEmpty) ...[
                         const SizedBox(height: 14),
@@ -425,8 +425,9 @@ class _ViewRequestDetailsScreenState extends State<ViewRequestDetailsScreen> {
               }
 
               if (state is ConfirmPaymentError) {
-                Navigator.of(dialogContext).pop(); // cerrar diálogo
-                parentContext.router.back(); // volver de la pantalla detalle
+                // Cerramos solo el diálogo y nos quedamos en el detalle para
+                // que Hacienda pueda corregir y reintentar (p. ej. fondos).
+                Navigator.of(dialogContext).pop();
 
                 WidgetsBinding.instance.addPostFrameCallback((_) {
                   CustomAlert.show(
@@ -484,47 +485,64 @@ class _ViewRequestDetailsScreenState extends State<ViewRequestDetailsScreen> {
                             const Divider(height: 1, color: Color(0xFFE8EDF5)),
                             const SizedBox(height: 20),
                             Container(
-                              width: 56,
-                              height: 56,
+                              width: double.infinity,
+                              margin: const EdgeInsets.symmetric(horizontal: 20),
+                              padding: const EdgeInsets.symmetric(
+                                vertical: 20,
+                                horizontal: 16,
+                              ),
                               decoration: BoxDecoration(
-                                color: const Color(0xFF1A56FF)
-                                    .withValues(alpha: 0.10),
-                                shape: BoxShape.circle,
-                              ),
-                              child: const Icon(
-                                Icons.payments_rounded,
-                                color: Color(0xFF1A56FF),
-                                size: 28,
-                              ),
-                            ),
-                            const SizedBox(height: 14),
-                            const Text(
-                              'Vas a desembolsar',
-                              style: TextStyle(
-                                color: Color(0xFF6B7A99),
-                                fontSize: 12.5,
-                              ),
-                            ),
-                            const SizedBox(height: 4),
-                            Text(
-                              _moneyStr(monto),
-                              style: const TextStyle(
-                                fontWeight: FontWeight.w800,
-                                fontSize: 26,
-                                color: Color(0xFF0D1B3E),
-                                letterSpacing: -0.5,
-                              ),
-                            ),
-                            const SizedBox(height: 6),
-                            const Padding(
-                              padding: EdgeInsets.symmetric(horizontal: 40),
-                              child: Text(
-                                'Revisa los datos antes de confirmar.',
-                                textAlign: TextAlign.center,
-                                style: TextStyle(
-                                  color: Color(0xFF6B7A99),
-                                  fontSize: 12,
+                                gradient: const LinearGradient(
+                                  begin: Alignment.topLeft,
+                                  end: Alignment.bottomRight,
+                                  colors: [Color(0xFF1A56FF), Color(0xFF0B33B8)],
                                 ),
+                                borderRadius: BorderRadius.circular(18),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: const Color(0xFF1A56FF)
+                                        .withValues(alpha: 0.28),
+                                    blurRadius: 18,
+                                    offset: const Offset(0, 8),
+                                  ),
+                                ],
+                              ),
+                              child: Column(
+                                children: [
+                                  Container(
+                                    width: 44,
+                                    height: 44,
+                                    decoration: BoxDecoration(
+                                      color:
+                                          Colors.white.withValues(alpha: 0.18),
+                                      shape: BoxShape.circle,
+                                    ),
+                                    child: const Icon(
+                                      Icons.payments_rounded,
+                                      color: Colors.white,
+                                      size: 22,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 12),
+                                  Text(
+                                    'Vas a desembolsar',
+                                    style: TextStyle(
+                                      color:
+                                          Colors.white.withValues(alpha: 0.85),
+                                      fontSize: 12.5,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 4),
+                                  Text(
+                                    _moneyStr(monto),
+                                    style: const TextStyle(
+                                      fontWeight: FontWeight.w800,
+                                      fontSize: 30,
+                                      color: Colors.white,
+                                      letterSpacing: -0.6,
+                                    ),
+                                  ),
+                                ],
                               ),
                             ),
                             const SizedBox(height: 24),
@@ -575,29 +593,35 @@ class _ViewRequestDetailsScreenState extends State<ViewRequestDetailsScreen> {
                             ),
                             const SizedBox(height: 20),
                             Container(
-                              margin: const EdgeInsets.symmetric(
-                                horizontal: 20,
+                              margin: const EdgeInsets.symmetric(horizontal: 20),
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 12,
+                                vertical: 10,
                               ),
-                              padding: const EdgeInsets.symmetric(vertical: 10),
                               decoration: BoxDecoration(
-                                color: const Color(0xFFFFFBEB),
-                                borderRadius: BorderRadius.circular(8),
+                                color: const Color(0xFFFFF7E6),
+                                borderRadius: BorderRadius.circular(12),
+                                border: Border.all(
+                                  color: const Color(0xFFC47A00)
+                                      .withValues(alpha: 0.25),
+                                ),
                               ),
-                              child: Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: const [
+                              child: const Row(
+                                children: [
                                   Icon(
-                                    Icons.warning_amber_rounded,
-                                    color: Colors.orange,
-                                    size: 18,
+                                    Icons.info_outline_rounded,
+                                    color: Color(0xFFC47A00),
+                                    size: 16,
                                   ),
                                   SizedBox(width: 8),
-                                  Text(
-                                    'ESTA ACCIÓN NO SE PUEDE DESHACER',
-                                    style: TextStyle(
-                                      color: Colors.orange,
-                                      fontWeight: FontWeight.bold,
-                                      fontSize: 10,
+                                  Expanded(
+                                    child: Text(
+                                      'Esta acción no se puede deshacer.',
+                                      style: TextStyle(
+                                        color: Color(0xFFC47A00),
+                                        fontWeight: FontWeight.w700,
+                                        fontSize: 11.5,
+                                      ),
                                     ),
                                   ),
                                 ],
@@ -1383,7 +1407,7 @@ class _ApprovalsCard extends StatelessWidget {
                         fontSize: 12.5,
                         color: _kTextPrimary)),
                 const SizedBox(height: 1),
-                Text('${res.aprobador} · ${formatDate(res.fecha)}',
+                Text('${res.aprobador} · ${formatDate(res.fecha.toLocal())}',
                     style: const TextStyle(
                         color: _kTextSecondary, fontSize: 11)),
               ],

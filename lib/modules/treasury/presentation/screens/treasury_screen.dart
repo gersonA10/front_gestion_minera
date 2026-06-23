@@ -7,6 +7,9 @@ import 'package:front_gestion_minera/injector_container.dart';
 import 'package:front_gestion_minera/utils/greeting_util.dart';
 import 'package:front_gestion_minera/utils/session/session_actions.dart';
 import 'package:front_gestion_minera/utils/session/user_session.dart';
+import 'package:front_gestion_minera/core/tutorial/tutorial_prefs.dart';
+import 'package:front_gestion_minera/core/tutorial/tutorial_tts.dart';
+import 'package:showcaseview/showcaseview.dart';
 import '../bloc/treasury_bloc.dart';
 
 class _C {
@@ -24,18 +27,61 @@ class _C {
   static const purple = Color(0xFF7C5CBF);
 }
 
+/// Scope del recorrido guiado (coach marks) del módulo Hacienda.
+const String _kTreasuryScope = 'treasury_hacienda';
+
+/// Envuelve un widget como objetivo de coach mark con el estilo de Hacienda.
+Widget _coachMark({
+  required GlobalKey key,
+  required String title,
+  required String description,
+  required Widget child,
+}) {
+  return Showcase(
+    key: key,
+    scope: _kTreasuryScope,
+    title: title,
+    description: description,
+    targetBorderRadius: BorderRadius.circular(20),
+    targetPadding: const EdgeInsets.all(8),
+    tooltipBackgroundColor: _C.surface,
+    tooltipBorderRadius: BorderRadius.circular(16),
+    titleTextStyle: const TextStyle(
+      fontSize: 15,
+      fontWeight: FontWeight.w800,
+      color: _C.textPrimary,
+      letterSpacing: -0.2,
+    ),
+    descTextStyle: const TextStyle(
+      fontSize: 13,
+      height: 1.4,
+      color: _C.textSecondary,
+    ),
+    child: child,
+  );
+}
+
 class _Module {
   final String title;
   final String subtitle;
   final IconData icon;
   final Color accent;
   final VoidCallback onTap;
+
+  /// Key del coach mark de esta tarjeta (null = sin tutorial).
+  final GlobalKey? showcaseKey;
+  final String? tutorialTitle;
+  final String? tutorialDescription;
+
   const _Module({
     required this.title,
     required this.subtitle,
     required this.icon,
     required this.accent,
     required this.onTap,
+    this.showcaseKey,
+    this.tutorialTitle,
+    this.tutorialDescription,
   });
 }
 
@@ -56,15 +102,125 @@ class TreasuryScreen extends StatefulWidget {
 class _TreasuryScreenState extends State<TreasuryScreen> {
   late final TreasuryBloc _treasuryBloc;
 
+  // ─── Tutorial (coach marks) ───────────────────────────────────────────────
+  /// Clave de rol para persistir si Hacienda ya vio el recorrido guiado.
+  static const String _kTutorialRoleKey = 'hacienda';
+
+  late final ShowcaseView _showcaseView;
+
+  // Una key por objetivo (resumen + 6 módulos + reportes). Viven en el State
+  // porque en showcaseview 5.x son identificadores de registro.
+  final GlobalKey _metricsKey = GlobalKey();
+  final GlobalKey _kGestion = GlobalKey();
+  final GlobalKey _kPrestamos = GlobalKey();
+  final GlobalKey _kPrestamosSocios = GlobalKey();
+  final GlobalKey _kAportes = GlobalKey();
+  final GlobalKey _kDividendos = GlobalKey();
+  final GlobalKey _kOro = GlobalKey();
+  final GlobalKey _reportKey = GlobalKey();
+
+  /// Orden del recorrido (de arriba hacia abajo, para que el auto-scroll fluya).
+  List<GlobalKey> get _showcaseKeys => [
+        _metricsKey,
+        _kGestion,
+        _kPrestamos,
+        _kPrestamosSocios,
+        _kAportes,
+        _kDividendos,
+        _kOro,
+        _reportKey,
+      ];
+
+  /// Locución de cada paso (mismo orden que [_showcaseKeys]). La lee flutter_tts
+  /// cuando aparece cada coach mark.
+  static const List<String> _speechByStep = [
+    'Resumen del día. Aquí ves de un vistazo cuántas solicitudes están '
+        'pendientes de tu decisión y cuántos préstamos están activos.',
+    'Gestión Financiera. Es el corazón de Hacienda: revisa y desembolsa las '
+        'solicitudes aprobadas, administra tus cajas y registra ingresos, '
+        'egresos y transferencias.',
+    'Préstamos. Son los préstamos que la empresa otorga a terceros: simula '
+        'condiciones, regístralos y haz seguimiento del pago de cada cuota.',
+    'Préstamos de socios. Son los préstamos que los socios le dan a la empresa: '
+        'revísalos, apruébalos y controla su devolución.',
+    'Aportes. Aportaciones de capital de los socios: registra los pagos y '
+        'consulta el detalle y los recibos por socio.',
+    'Dividendos. Distribución de utilidades a los socios: arma la repartición, '
+        'simúlala y paga los dividendos con su comprobante.',
+    'Inventario de oro. Control del oro físico: registra extracciones y ventas, '
+        'y consulta la valoración del inventario por lotes.',
+    'Reportes financieros. Consulta el estado financiero por periodo: ingresos, '
+        'egresos, conciliación de reposiciones, y exporta a PDF o CSV.',
+  ];
+
+  void _speakStep(int? index) {
+    if (index == null || index < 0 || index >= _speechByStep.length) return;
+    TutorialTts.instance.speak(_speechByStep[index]);
+  }
+
   @override
   void initState() {
     super.initState();
     _treasuryBloc = InjectorContainer.getIt<TreasuryBloc>()
       ..add(FetchTreasuryMetricsEvent());
+
+    _showcaseView = ShowcaseView.register(
+      scope: _kTreasuryScope,
+      enableAutoScroll: true,
+      onStart: (index, _) => _speakStep(index),
+      onFinish: _markTutorialSeen,
+      onDismiss: (_) => _markTutorialSeen(),
+      globalTooltipActionConfig: const TooltipActionConfig(
+        position: TooltipActionPosition.inside,
+        alignment: MainAxisAlignment.spaceBetween,
+      ),
+      globalTooltipActions: [
+        const TooltipActionButton(
+          type: TooltipDefaultActionType.skip,
+          name: 'Saltar',
+          backgroundColor: Colors.transparent,
+          textStyle: TextStyle(
+            color: _C.textSecondary,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+        const TooltipActionButton(
+          type: TooltipDefaultActionType.next,
+          name: 'Siguiente',
+          backgroundColor: _C.primary,
+          textStyle: TextStyle(
+            color: Colors.white,
+            fontWeight: FontWeight.w700,
+          ),
+        ),
+      ],
+    );
+
+    WidgetsBinding.instance.addPostFrameCallback((_) => _maybeStartTutorial());
+  }
+
+  Future<void> _maybeStartTutorial() async {
+    final alreadySeen = await TutorialPrefs.hasSeen(_kTutorialRoleKey);
+    if (alreadySeen || !mounted) return;
+    _startTutorial();
+  }
+
+  void _startTutorial() {
+    _showcaseView.startShowCase(
+      _showcaseKeys,
+      delay: const Duration(milliseconds: 500),
+    );
+  }
+
+  void _markTutorialSeen() {
+    TutorialTts.instance.stop();
+    TutorialPrefs.markSeen(_kTutorialRoleKey);
   }
 
   @override
   void dispose() {
+    TutorialTts.instance.stop();
+    _showcaseView.unregister();
     _treasuryBloc.close();
     super.dispose();
   }
@@ -80,6 +236,12 @@ class _TreasuryScreenState extends State<TreasuryScreen> {
           accent: _C.primary,
           onTap: () =>
               InjectorContainer.getIt<AppRouter>().push(HomeDashboardRoute()),
+          showcaseKey: _kGestion,
+          tutorialTitle: 'Gestión Financiera',
+          tutorialDescription:
+              'El corazón de Hacienda: revisa y desembolsa las solicitudes '
+              'aprobadas, administra tus cajas (mayor y chica) y registra '
+              'ingresos, egresos y transferencias del día a día.',
         ),
       ]),
       _Section('Préstamos', [
@@ -89,6 +251,11 @@ class _TreasuryScreenState extends State<TreasuryScreen> {
           icon: Icons.fact_check_rounded,
           accent: const Color(0xFF00B4D8),
           onTap: () => router.push(LoansHomeRoute()),
+          showcaseKey: _kPrestamos,
+          tutorialTitle: 'Préstamos',
+          tutorialDescription:
+              'Préstamos que la empresa otorga a terceros: simula condiciones, '
+              'regístralos y haz seguimiento del pago de cada cuota.',
         ),
         _Module(
           title: 'Préstamos de Socios',
@@ -96,6 +263,11 @@ class _TreasuryScreenState extends State<TreasuryScreen> {
           icon: Icons.handshake_rounded,
           accent: _C.goldDeep,
           onTap: () => router.push(const MemberLoansHomeRoute()),
+          showcaseKey: _kPrestamosSocios,
+          tutorialTitle: 'Préstamos de Socios',
+          tutorialDescription:
+              'Préstamos que los socios le dan a la empresa: revísalos, '
+              'apruébalos y controla su devolución.',
         ),
       ]),
       _Section('Capital y activos', [
@@ -105,6 +277,11 @@ class _TreasuryScreenState extends State<TreasuryScreen> {
           icon: Icons.savings_rounded,
           accent: _C.green,
           onTap: () => router.push(ContributesHomeRoute()),
+          showcaseKey: _kAportes,
+          tutorialTitle: 'Aportes',
+          tutorialDescription:
+              'Aportaciones de capital de los socios: registra los pagos y '
+              'consulta el detalle y los recibos por socio.',
         ),
         _Module(
           title: 'Dividendos',
@@ -112,6 +289,11 @@ class _TreasuryScreenState extends State<TreasuryScreen> {
           icon: Icons.payments_rounded,
           accent: _C.purple,
           onTap: () => router.push(DistributeHomeRoute()),
+          showcaseKey: _kDividendos,
+          tutorialTitle: 'Dividendos',
+          tutorialDescription:
+              'Distribución de utilidades a los socios: arma la repartición, '
+              'simúlala y paga los dividendos con su comprobante.',
         ),
         _Module(
           title: 'Inventario de Oro',
@@ -119,6 +301,11 @@ class _TreasuryScreenState extends State<TreasuryScreen> {
           icon: Icons.diamond_rounded,
           accent: const Color(0xFFD97706),
           onTap: () => router.push(GoldDashboardRoute()),
+          showcaseKey: _kOro,
+          tutorialTitle: 'Inventario de Oro',
+          tutorialDescription:
+              'Control del oro físico: registra extracciones y ventas, y '
+              'consulta la valoración del inventario por lotes.',
         ),
       ]),
     ];
@@ -142,6 +329,7 @@ class _TreasuryScreenState extends State<TreasuryScreen> {
                 child: _Header(
                   onRefresh: () =>
                       _treasuryBloc.add(FetchTreasuryMetricsEvent()),
+                  onHelp: _startTutorial,
                 ),
               ),
               SliverPadding(
@@ -150,7 +338,14 @@ class _TreasuryScreenState extends State<TreasuryScreen> {
                   delegate: SliverChildListDelegate([
                     const _SectionLabel('Resumen', helper: 'Estado de hoy'),
                     const SizedBox(height: 12),
-                    const _MetricsRow(),
+                    _coachMark(
+                      key: _metricsKey,
+                      title: 'Resumen del día',
+                      description:
+                          'Tu vistazo rápido: solicitudes pendientes de tu '
+                          'decisión y préstamos activos en curso.',
+                      child: const _MetricsRow(),
+                    ),
                     const SizedBox(height: 26),
                     for (final s in sections) ...[
                       _SectionLabel(s.label),
@@ -158,8 +353,16 @@ class _TreasuryScreenState extends State<TreasuryScreen> {
                       for (final m in s.items) _ModuleCard(module: m),
                       const SizedBox(height: 22),
                     ],
-                    _ReportCard(
-                      onTap: () => context.router.push(FinancialReportsRoute()),
+                    _coachMark(
+                      key: _reportKey,
+                      title: 'Reportes financieros',
+                      description:
+                          'Estado financiero por periodo: ingresos, egresos, '
+                          'conciliación de reposiciones y exportación a PDF/CSV.',
+                      child: _ReportCard(
+                        onTap: () =>
+                            context.router.push(FinancialReportsRoute()),
+                      ),
                     ),
                     const SizedBox(height: 14),
                     _LogoutButton(onTap: () => SessionActions.logout()),
@@ -179,7 +382,8 @@ class _TreasuryScreenState extends State<TreasuryScreen> {
 
 class _Header extends StatelessWidget {
   final VoidCallback onRefresh;
-  const _Header({required this.onRefresh});
+  final VoidCallback onHelp;
+  const _Header({required this.onRefresh, required this.onHelp});
 
   Widget _circle(double size, Color color) => Container(
         width: size,
@@ -248,6 +452,11 @@ class _Header extends StatelessWidget {
                           ],
                         ),
                       ),
+                      _GlassBtn(
+                        icon: Icons.help_outline_rounded,
+                        onTap: onHelp,
+                      ),
+                      const SizedBox(width: 8),
                       _GlassBtn(icon: Icons.refresh_rounded, onTap: onRefresh),
                       const SizedBox(width: 8),
                       _GlassBtn(
@@ -497,7 +706,7 @@ class _ModuleCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
+    final card = Container(
       margin: const EdgeInsets.only(bottom: 12),
       decoration: BoxDecoration(
         color: _C.surface,
@@ -571,6 +780,14 @@ class _ModuleCard extends StatelessWidget {
           ),
         ),
       ),
+    );
+
+    if (module.showcaseKey == null) return card;
+    return _coachMark(
+      key: module.showcaseKey!,
+      title: module.tutorialTitle ?? module.title,
+      description: module.tutorialDescription ?? module.subtitle,
+      child: card,
     );
   }
 }

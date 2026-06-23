@@ -26,6 +26,26 @@ class LoadMorePendingEvent extends TreasuryEvent {
   LoadMorePendingEvent({this.isRefresh = true});
 }
 
+// Reposiciones (conciliación de Campamento)
+class GetReconciliationsEvent extends TreasuryEvent {
+  final bool isRefresh;
+  final String? search;
+  GetReconciliationsEvent({this.isRefresh = true, this.search});
+}
+
+class LoadMoreReconciliationsEvent extends TreasuryEvent {}
+
+class ExecuteReconciliationEvent extends TreasuryEvent {
+  final String requestId;
+  final String cajaOrigenId;
+  final String? nota;
+  ExecuteReconciliationEvent({
+    required this.requestId,
+    required this.cajaOrigenId,
+    this.nota,
+  });
+}
+
 class GetFinancialReportEvent extends TreasuryEvent {
   final String period;
   final String? exactDate;

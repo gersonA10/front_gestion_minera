@@ -1,16 +1,16 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:front_gestion_minera/core/widgets/custom_alert_widget.dart';
-import 'package:front_gestion_minera/modules/staff/domain/entity/payroll_monthly_entity.dart';
-import 'package:intl/intl.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:uuid/uuid.dart';
 
+import 'package:front_gestion_minera/core/widgets/custom_alert_widget.dart';
+import 'package:front_gestion_minera/modules/staff/domain/entity/payroll_monthly_entity.dart';
+import 'package:front_gestion_minera/modules/staff/presentation/widgets/staff_ui.dart';
+import 'package:front_gestion_minera/utils/constants/color.constant.dart';
+
 import '../../../../injector_container.dart';
 import '../bloc/staff_bloc.dart';
-
-import '../../../../utils/constants/color.constant.dart';
 
 @RoutePage()
 class ProcessPaymentScreen extends StatefulWidget {
@@ -27,11 +27,10 @@ class ProcessPaymentScreen extends StatefulWidget {
 }
 
 class _ProcessPaymentScreenState extends State<ProcessPaymentScreen> {
-  final formatter = NumberFormat('#,##0.00', 'en_US');
   late final StaffBloc _bloc;
   final Uuid _uuid = const Uuid();
   final TextEditingController _amountCtrl = TextEditingController();
-  String get imageUrl => '';
+
   PayrollMonthlyEntity get payroll => widget.payroll;
 
   @override
@@ -58,9 +57,10 @@ class _ProcessPaymentScreenState extends State<ProcessPaymentScreen> {
         type: AlertType.success,
       );
 
+      final router = context.router;
       Future.delayed(const Duration(milliseconds: 500), () {
         if (!mounted) return;
-        context.router.pop(true);
+        router.pop(true);
       });
     }
 
@@ -72,6 +72,16 @@ class _ProcessPaymentScreenState extends State<ProcessPaymentScreen> {
         type: AlertType.error,
       );
     }
+  }
+
+  /// Rellena el campo con un monto sugerido (todo lo que falta / la mitad).
+  void _setAmount(double value) {
+    HapticFeedback.selectionClick();
+    _amountCtrl.text = value.toStringAsFixed(2);
+    _amountCtrl.selection = TextSelection.fromPosition(
+      TextPosition(offset: _amountCtrl.text.length),
+    );
+    setState(() {});
   }
 
   Future<void> _showConfirmDialog() async {
@@ -91,7 +101,7 @@ class _ProcessPaymentScreenState extends State<ProcessPaymentScreen> {
         context,
         title: 'Monto excede',
         message:
-            'El monto supera lo que falta por pagar (${payroll.currency} ${formatter.format(payroll.remaining)}).',
+            'El monto supera lo que falta por pagar (${StaffUi.money2(payroll.remaining)}).',
         type: AlertType.warning,
       );
       return;
@@ -101,24 +111,52 @@ class _ProcessPaymentScreenState extends State<ProcessPaymentScreen> {
       context: context,
       builder: (dialogContext) {
         return AlertDialog(
-          title: const Text('Confirmar Pago'),
+          backgroundColor: StaffUi.surface,
+          surfaceTintColor: StaffUi.surface,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20),
+          ),
+          title: const Text(
+            'Confirmar pago',
+            style: TextStyle(
+              fontSize: 17,
+              fontWeight: FontWeight.w800,
+              color: StaffUi.textPrimary,
+            ),
+          ),
           content: Text(
-            '¿Confirmar pago de '
-            '${payroll.currency} ${formatter.format(amount)} '
-            'a ${payroll.fullName}?',
+            '¿Confirmar pago de ${StaffUi.money2(amount)} a ${payroll.fullName}?',
+            style: const TextStyle(
+              fontSize: 14,
+              height: 1.4,
+              color: StaffUi.textSecondary,
+            ),
           ),
           actions: [
             TextButton(
-              onPressed: () {
-                Navigator.pop(dialogContext, false);
-              },
-              child: const Text('Cancelar'),
+              onPressed: () => Navigator.pop(dialogContext, false),
+              child: const Text(
+                'Cancelar',
+                style: TextStyle(
+                  fontWeight: FontWeight.w700,
+                  color: StaffUi.textSecondary,
+                ),
+              ),
             ),
             ElevatedButton(
-              onPressed: () {
-                Navigator.pop(dialogContext, true);
-              },
-              child: const Text('Confirmar'),
+              onPressed: () => Navigator.pop(dialogContext, true),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: StaffUi.primary,
+                foregroundColor: Colors.white,
+                elevation: 0,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+              ),
+              child: const Text(
+                'Confirmar',
+                style: TextStyle(fontWeight: FontWeight.w700),
+              ),
             ),
           ],
         );
@@ -134,46 +172,11 @@ class _ProcessPaymentScreenState extends State<ProcessPaymentScreen> {
     );
   }
 
-  Widget _miniStat(String label, String value, Color color) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(label,
-            style: const TextStyle(fontSize: 11, color: TColors.grayText)),
-        const SizedBox(height: 2),
-        Text(value,
-            style: TextStyle(
-                fontSize: 14, fontWeight: FontWeight.w800, color: color)),
-      ],
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: TColors.surface,
-      appBar: AppBar(
-        elevation: 0,
-        backgroundColor: TColors.white,
-        surfaceTintColor: TColors.white,
-        centerTitle: true,
-        title: const Text(
-          'Procesar Pago',
-          style: TextStyle(
-            fontSize: 18,
-            fontWeight: FontWeight.w700,
-            color: TColors.appMainDarkColor,
-          ),
-        ),
-        leading: IconButton(
-          onPressed: () => context.router.pop(),
-          icon: const Icon(
-            Icons.arrow_back_ios_new_rounded,
-            size: 20,
-            color: TColors.appMainDarkColor,
-          ),
-        ),
-      ),
+      backgroundColor: StaffUi.background,
+      appBar: staffAppBar(context, title: 'Procesar pago'),
       body: BlocConsumer<StaffBloc, StaffState>(
         bloc: _bloc,
         listener: _listener,
@@ -190,336 +193,54 @@ class _ProcessPaymentScreenState extends State<ProcessPaymentScreen> {
                     ),
                     child: IntrinsicHeight(
                       child: Padding(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 16,
-                          vertical: 14,
-                        ),
+                        padding: const EdgeInsets.fromLTRB(20, 16, 20, 20),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Container(
-                              width: double.infinity,
-                              padding: const EdgeInsets.all(14),
-                              decoration: BoxDecoration(
-                                color: TColors.textFieldBackgroundColor,
-                                borderRadius: BorderRadius.circular(16),
-                                border: Border.all(color: TColors.border),
-                              ),
-                              child: Row(
-                                children: [
-                                  imageUrl.isNotEmpty
-                                      ? CircleAvatar(
-                                          radius: 24,
-                                          backgroundImage: NetworkImage(
-                                            imageUrl,
-                                          ),
-                                        )
-                                      : CircleAvatar(
-                                          radius: 24,
-                                          backgroundColor:
-                                              TColors.avatarBackground,
-                                          child: const Icon(
-                                            Icons.person,
-                                            color: TColors.avatarIconColor,
-                                          ),
-                                        ),
-                                  const SizedBox(width: 12),
-                                  Expanded(
-                                    child: Column(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      children: [
-                                        Text(
-                                          payroll.fullName,
-                                          style: const TextStyle(
-                                            fontSize: 15,
-                                            fontWeight: FontWeight.w700,
-                                            color: TColors.appMainDarkColor,
-                                          ),
-                                        ),
-                                        const SizedBox(height: 2),
-                                        Text(
-                                          payroll.position,
-                                          style: const TextStyle(
-                                            fontSize: 12,
-                                            color: TColors.grayText,
-                                          ),
-                                        ),
-                                        const SizedBox(height: 4),
-                                        Text(
-                                          'ID: #${payroll.employeeId}',
-                                          style: const TextStyle(
-                                            fontSize: 11,
-                                            color: TColors.appDisabledColor,
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                            const SizedBox(height: 18),
-                            const Text(
-                              'PERIODO DE PAGO',
-                              style: TextStyle(
-                                fontSize: 10,
-                                letterSpacing: 1,
-                                color: TColors.grayText,
-                                fontWeight: FontWeight.w700,
-                              ),
-                            ),
-                            const SizedBox(height: 8),
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                Text(
-                                  widget.payrollPeriod,
-                                  style: const TextStyle(
-                                    fontSize: 15,
-                                    fontWeight: FontWeight.w700,
-                                    color: TColors.profileBlue,
-                                  ),
-                                ),
-                                Container(
-                                  padding: const EdgeInsets.symmetric(
-                                    horizontal: 10,
-                                    vertical: 5,
-                                  ),
-                                  decoration: BoxDecoration(
-                                    color: TColors.textFieldBackgroundColor,
-                                    borderRadius: BorderRadius.circular(20),
-                                    border: Border.all(color: TColors.border),
-                                  ),
-                                  child: const Text(
-                                    'Nómina Mensual',
-                                    style: TextStyle(
-                                      fontSize: 10,
-                                      fontWeight: FontWeight.w600,
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
-                            const SizedBox(height: 24),
-                            Row(
-                              children: const [
-                                Icon(
-                                  Icons.receipt_long_outlined,
-                                  size: 15,
-                                  color: TColors.grayText,
-                                ),
-                                SizedBox(width: 6),
-                                Text(
-                                  'Percepciones',
-                                  style: TextStyle(
-                                    color: TColors.grayText,
-                                    fontSize: 13,
-                                    fontWeight: FontWeight.w600,
-                                  ),
-                                ),
-                              ],
+                            _EmployeeHeaderCard(payroll: payroll),
+                            const SizedBox(height: 16),
+                            _PeriodCard(period: widget.payrollPeriod),
+                            const SizedBox(height: 22),
+                            const StaffSectionTitle(
+                              'Detalle de la nómina',
+                              icon: Icons.receipt_long_rounded,
                             ),
                             const SizedBox(height: 12),
-                            Container(
-                              width: double.infinity,
-                              padding: const EdgeInsets.all(16),
-                              decoration: BoxDecoration(
-                                color: TColors.surface,
-                                borderRadius: BorderRadius.circular(14),
-                                border: Border.all(color: TColors.border),
-                              ),
-                              child: Row(
-                                children: [
-                                  const Expanded(
-                                    child: Text(
-                                      'Salario Base',
-                                      style: TextStyle(fontSize: 14),
-                                    ),
-                                  ),
-                                  Text(
-                                    '${payroll.currency} ${formatter.format(payroll.baseSalary)}',
-                                    style: const TextStyle(
-                                      fontWeight: FontWeight.w700,
-                                    ),
-                                  ),
-                                ],
-                              ),
+                            _BreakdownCard(payroll: payroll),
+                            const SizedBox(height: 20),
+                            _NetCard(payroll: payroll),
+                            const SizedBox(height: 22),
+                            const StaffSectionTitle(
+                              '¿Cuánto cancelar ahora?',
+                              icon: Icons.payments_rounded,
                             ),
-                            if (payroll.totalDeductions > 0) ...[
-                              const SizedBox(height: 10),
-                              Container(
-                                width: double.infinity,
-                                padding: const EdgeInsets.all(16),
-                                decoration: BoxDecoration(
-                                  color: TColors.surface,
-                                  borderRadius: BorderRadius.circular(14),
-                                  border: Border.all(color: TColors.border),
-                                ),
-                                child: Row(
-                                  children: [
-                                    const Expanded(
-                                      child: Text(
-                                        'Adelantos / Deducciones',
-                                        style: TextStyle(fontSize: 14),
-                                      ),
-                                    ),
-                                    Text(
-                                      '- ${payroll.currency} ${formatter.format(payroll.totalDeductions)}',
-                                      style: const TextStyle(
-                                        fontWeight: FontWeight.w700,
-                                        color: TColors.red,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ],
-                            const SizedBox(height: 28),
-                            Container(
-                              width: double.infinity,
-                              padding: const EdgeInsets.all(20),
-                              decoration: BoxDecoration(
-                                color: TColors.textFieldBackgroundColor,
-                                borderRadius: BorderRadius.circular(18),
-                                border: Border.all(
-                                  color: TColors.textFieldFocusedBorderColor,
-                                ),
-                              ),
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  const Text(
-                                    'Neto a Recibir',
-                                    style: TextStyle(
-                                      fontSize: 13,
-                                      fontWeight: FontWeight.w600,
-                                      color: TColors.grayText,
-                                    ),
-                                  ),
-                                  const SizedBox(height: 6),
-                                  Text(
-                                    '${payroll.currency} ${formatter.format(payroll.netToReceive)}',
-                                    style: const TextStyle(
-                                      fontSize: 28,
-                                      fontWeight: FontWeight.w800,
-                                      color: TColors.appMainDarkColor,
-                                      height: 1,
-                                    ),
-                                  ),
-                                  const SizedBox(height: 12),
-                                  Row(
-                                    children: [
-                                      Expanded(
-                                        child: _miniStat(
-                                          'Ya pagado',
-                                          '${payroll.currency} ${formatter.format(payroll.paidAmount)}',
-                                          TColors.green,
-                                        ),
-                                      ),
-                                      Expanded(
-                                        child: _miniStat(
-                                          'Falta por pagar',
-                                          '${payroll.currency} ${formatter.format(payroll.remaining)}',
-                                          TColors.amber,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ],
-                              ),
-                            ),
-                            const SizedBox(height: 16),
-                            const Text(
-                              '¿Cuánto le cancelas ahora?',
-                              style: TextStyle(
-                                fontSize: 13,
-                                fontWeight: FontWeight.w700,
-                                color: TColors.grayText,
-                              ),
-                            ),
-                            const SizedBox(height: 8),
-                            TextField(
+                            const SizedBox(height: 12),
+                            _AmountField(
                               controller: _amountCtrl,
-                              keyboardType: const TextInputType.numberWithOptions(
-                                decimal: true,
-                              ),
-                              decoration: InputDecoration(
-                                prefixText: '${payroll.currency} ',
-                                filled: true,
-                                fillColor: TColors.white,
-                                border: OutlineInputBorder(
-                                  borderRadius: BorderRadius.circular(12),
-                                  borderSide:
-                                      const BorderSide(color: TColors.border),
-                                ),
-                                enabledBorder: OutlineInputBorder(
-                                  borderRadius: BorderRadius.circular(12),
-                                  borderSide:
-                                      const BorderSide(color: TColors.border),
-                                ),
-                              ),
+                              enabled: !isLoading,
+                              onChanged: (_) => setState(() {}),
+                            ),
+                            const SizedBox(height: 10),
+                            _QuickAmounts(
+                              enabled: !isLoading,
+                              onFull: () => _setAmount(payroll.remaining),
+                              onHalf: () => _setAmount(payroll.remaining / 2),
                             ),
                             const Spacer(),
-                            const SizedBox(height: 30),
-                            SizedBox(
-                              width: double.infinity,
-                              height: 56,
-                              child: ElevatedButton.icon(
-                                onPressed: isLoading
-                                    ? null
-                                    : () async {
-                                        HapticFeedback.lightImpact();
-                                        await _showConfirmDialog();
-                                      },
-                                icon: isLoading
-                                    ? const SizedBox(
-                                        width: 18,
-                                        height: 18,
-                                        child: CircularProgressIndicator(
-                                          strokeWidth: 2,
-                                          color: TColors.white,
-                                        ),
-                                      )
-                                    : const Icon(
-                                        Icons.check_circle_outline,
-                                        size: 20,
-                                      ),
-                                label: Text(
-                                  isLoading
-                                      ? 'Procesando Pago...'
-                                      : 'Confirmar y Pagar',
-                                  style: const TextStyle(
-                                    fontWeight: FontWeight.w700,
-                                    fontSize: 15,
-                                  ),
-                                ),
-                                style: ElevatedButton.styleFrom(
-                                  elevation: 0,
-                                  backgroundColor: TColors.amber,
-                                  foregroundColor: TColors.white,
-                                  disabledBackgroundColor:
-                                      TColors.appDisabledColor,
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(16),
-                                  ),
-                                ),
-                              ),
-                            ),
-                            const SizedBox(height: 14),
-                            const Padding(
-                              padding: EdgeInsets.symmetric(horizontal: 8),
-                              child: Text(
-                                'Al confirmar, el pago será procesado y se enviará automáticamente un comprobante digital al correo electrónico del trabajador.',
-                                textAlign: TextAlign.center,
-                                style: TextStyle(
-                                  fontSize: 11,
-                                  height: 1.5,
-                                  color: TColors.grayText,
-                                ),
-                              ),
+                            const SizedBox(height: 24),
+                            StaffPrimaryButton(
+                              label: isLoading
+                                  ? 'Procesando pago...'
+                                  : 'Confirmar y pagar',
+                              icon: Icons.check_circle_rounded,
+                              loading: isLoading,
+                              onPressed: () async {
+                                HapticFeedback.lightImpact();
+                                await _showConfirmDialog();
+                              },
                             ),
                             const SizedBox(height: 12),
+                            const _LegalNote(),
                           ],
                         ),
                       ),
@@ -530,6 +251,556 @@ class _ProcessPaymentScreenState extends State<ProcessPaymentScreen> {
             ),
           );
         },
+      ),
+    );
+  }
+}
+
+/// Avatar con iniciales del nombre (sin foto de red), estilo módulo staff.
+class _Avatar extends StatelessWidget {
+  final String name;
+  const _Avatar({required this.name});
+
+  String get _initials {
+    final parts =
+        name.trim().split(RegExp(r'\s+')).where((e) => e.isNotEmpty).toList();
+    if (parts.isEmpty) return '?';
+    if (parts.length == 1) return parts.first.characters.first.toUpperCase();
+    return (parts.first.characters.first + parts[1].characters.first)
+        .toUpperCase();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: 52,
+      height: 52,
+      alignment: Alignment.center,
+      decoration: BoxDecoration(
+        color: StaffUi.primarySoft,
+        borderRadius: BorderRadius.circular(15),
+      ),
+      child: Text(
+        _initials,
+        style: const TextStyle(
+          fontSize: 18,
+          fontWeight: FontWeight.w800,
+          color: StaffUi.primary,
+        ),
+      ),
+    );
+  }
+}
+
+/// Tarjeta de cabecera del empleado: avatar con iniciales + nombre / cargo / ID.
+class _EmployeeHeaderCard extends StatelessWidget {
+  final PayrollMonthlyEntity payroll;
+  const _EmployeeHeaderCard({required this.payroll});
+
+  @override
+  Widget build(BuildContext context) {
+    return StaffCard(
+      child: Row(
+        children: [
+          _Avatar(name: payroll.fullName),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  payroll.fullName,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(
+                    fontSize: 15.5,
+                    fontWeight: FontWeight.w800,
+                    color: StaffUi.textPrimary,
+                    letterSpacing: -0.2,
+                  ),
+                ),
+                const SizedBox(height: 3),
+                Text(
+                  payroll.position,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(
+                    fontSize: 12.5,
+                    fontWeight: FontWeight.w500,
+                    color: StaffUi.textSecondary,
+                  ),
+                ),
+                const SizedBox(height: 6),
+                Row(
+                  children: [
+                    const Icon(Icons.badge_rounded,
+                        size: 13, color: StaffUi.muted),
+                    const SizedBox(width: 4),
+                    Text(
+                      'ID #${payroll.employeeId}',
+                      style: const TextStyle(
+                        fontSize: 11.5,
+                        fontWeight: FontWeight.w600,
+                        color: StaffUi.muted,
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// Tarjeta del periodo de nómina con pill "Mensual".
+class _PeriodCard extends StatelessWidget {
+  final String period;
+  const _PeriodCard({required this.period});
+
+  @override
+  Widget build(BuildContext context) {
+    return StaffCard(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+      child: Row(
+        children: [
+          Container(
+            width: 38,
+            height: 38,
+            decoration: BoxDecoration(
+              color: StaffUi.primarySoft,
+              borderRadius: BorderRadius.circular(11),
+            ),
+            child: const Icon(Icons.event_rounded,
+                size: 19, color: StaffUi.primary),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text(
+                  'Periodo de pago',
+                  style: TextStyle(
+                    fontSize: 10.5,
+                    fontWeight: FontWeight.w600,
+                    color: StaffUi.textSecondary,
+                  ),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  period,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(
+                    fontSize: 14.5,
+                    fontWeight: FontWeight.w800,
+                    color: StaffUi.textPrimary,
+                    letterSpacing: -0.2,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const StaffPill(
+            label: 'Mensual',
+            color: StaffUi.primary,
+            bg: StaffUi.primarySoft,
+            icon: Icons.calendar_month_rounded,
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// Desglose de percepciones y deducciones dentro de una sola tarjeta.
+class _BreakdownCard extends StatelessWidget {
+  final PayrollMonthlyEntity payroll;
+  const _BreakdownCard({required this.payroll});
+
+  @override
+  Widget build(BuildContext context) {
+    final hasDeductions = payroll.totalDeductions > 0;
+    return StaffCard(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+      child: Column(
+        children: [
+          _BreakdownRow(
+            icon: Icons.add_circle_rounded,
+            iconColor: StaffUi.primary,
+            label: 'Salario base',
+            value: StaffUi.money2(payroll.baseSalary),
+            valueColor: StaffUi.textPrimary,
+          ),
+          if (hasDeductions) ...[
+            const Divider(height: 1, color: StaffUi.border),
+            _BreakdownRow(
+              icon: Icons.remove_circle_rounded,
+              iconColor: TColors.statusOrange,
+              label: 'Adelantos / deducciones',
+              value: '- ${StaffUi.money2(payroll.totalDeductions)}',
+              valueColor: TColors.statusOrange,
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+}
+
+class _BreakdownRow extends StatelessWidget {
+  final IconData icon;
+  final Color iconColor;
+  final String label;
+  final String value;
+  final Color valueColor;
+  const _BreakdownRow({
+    required this.icon,
+    required this.iconColor,
+    required this.label,
+    required this.value,
+    required this.valueColor,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 14),
+      child: Row(
+        children: [
+          Icon(icon, size: 18, color: iconColor),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Text(
+              label,
+              style: const TextStyle(
+                fontSize: 13.5,
+                fontWeight: FontWeight.w500,
+                color: StaffUi.textSecondary,
+              ),
+            ),
+          ),
+          Text(
+            value,
+            style: TextStyle(
+              fontSize: 14.5,
+              fontWeight: FontWeight.w800,
+              color: valueColor,
+              letterSpacing: -0.2,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// Tarjeta destacada del NETO con gradiente premium (estilo _CajaCard).
+class _NetCard extends StatelessWidget {
+  final PayrollMonthlyEntity payroll;
+  const _NetCard({required this.payroll});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        gradient: const LinearGradient(
+          colors: [StaffUi.primary, StaffUi.primaryDeep],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        borderRadius: BorderRadius.circular(20),
+        boxShadow: [
+          BoxShadow(
+            color: StaffUi.primary.withValues(alpha: 0.25),
+            blurRadius: 16,
+            offset: const Offset(0, 8),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                width: 38,
+                height: 38,
+                decoration: BoxDecoration(
+                  color: Colors.white.withValues(alpha: 0.16),
+                  borderRadius: BorderRadius.circular(11),
+                ),
+                child: const Icon(Icons.account_balance_wallet_rounded,
+                    color: Colors.white, size: 20),
+              ),
+              const SizedBox(width: 12),
+              Text(
+                'Neto a recibir',
+                style: TextStyle(
+                  fontSize: 12.5,
+                  fontWeight: FontWeight.w600,
+                  color: Colors.white.withValues(alpha: 0.85),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 14),
+          Text(
+            StaffUi.money2(payroll.netToReceive),
+            style: const TextStyle(
+              fontSize: 30,
+              fontWeight: FontWeight.w800,
+              color: Colors.white,
+              height: 1,
+              letterSpacing: -0.6,
+            ),
+          ),
+          const SizedBox(height: 18),
+          Container(
+            padding: const EdgeInsets.all(14),
+            decoration: BoxDecoration(
+              color: Colors.white.withValues(alpha: 0.12),
+              borderRadius: BorderRadius.circular(14),
+            ),
+            child: Row(
+              children: [
+                Expanded(
+                  child: _NetStat(
+                    label: 'Ya pagado',
+                    value: StaffUi.money2(payroll.paidAmount),
+                  ),
+                ),
+                Container(
+                  width: 1,
+                  height: 30,
+                  color: Colors.white.withValues(alpha: 0.18),
+                ),
+                Expanded(
+                  child: _NetStat(
+                    label: 'Falta por pagar',
+                    value: StaffUi.money2(payroll.remaining),
+                    alignEnd: true,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _NetStat extends StatelessWidget {
+  final String label;
+  final String value;
+  final bool alignEnd;
+  const _NetStat({
+    required this.label,
+    required this.value,
+    this.alignEnd = false,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment:
+          alignEnd ? CrossAxisAlignment.end : CrossAxisAlignment.start,
+      children: [
+        Text(
+          label,
+          style: TextStyle(
+            fontSize: 11,
+            fontWeight: FontWeight.w500,
+            color: Colors.white.withValues(alpha: 0.75),
+          ),
+        ),
+        const SizedBox(height: 3),
+        Text(
+          value,
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+          style: const TextStyle(
+            fontSize: 14.5,
+            fontWeight: FontWeight.w800,
+            color: Colors.white,
+            letterSpacing: -0.2,
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+/// Campo de monto a cancelar (prefijo Bs).
+class _AmountField extends StatelessWidget {
+  final TextEditingController controller;
+  final bool enabled;
+  final ValueChanged<String>? onChanged;
+  const _AmountField({
+    required this.controller,
+    required this.enabled,
+    this.onChanged,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return TextField(
+      controller: controller,
+      enabled: enabled,
+      onChanged: onChanged,
+      keyboardType: const TextInputType.numberWithOptions(decimal: true),
+      style: const TextStyle(
+        fontSize: 18,
+        fontWeight: FontWeight.w800,
+        color: StaffUi.textPrimary,
+        letterSpacing: -0.3,
+      ),
+      decoration: InputDecoration(
+        prefixIcon: const Padding(
+          padding: EdgeInsets.only(left: 14, right: 8),
+          child: Text(
+            'Bs',
+            style: TextStyle(
+              fontSize: 15,
+              fontWeight: FontWeight.w700,
+              color: StaffUi.textSecondary,
+            ),
+          ),
+        ),
+        prefixIconConstraints: const BoxConstraints(minWidth: 0, minHeight: 0),
+        filled: true,
+        fillColor: StaffUi.surface,
+        contentPadding:
+            const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(14),
+          borderSide: const BorderSide(color: StaffUi.border),
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(14),
+          borderSide: const BorderSide(color: StaffUi.border),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(14),
+          borderSide: const BorderSide(color: StaffUi.primary, width: 1.6),
+        ),
+        disabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(14),
+          borderSide: const BorderSide(color: StaffUi.border),
+        ),
+      ),
+    );
+  }
+}
+
+/// Sugerencias rápidas de monto (todo / mitad).
+class _QuickAmounts extends StatelessWidget {
+  final bool enabled;
+  final VoidCallback onFull;
+  final VoidCallback onHalf;
+  const _QuickAmounts({
+    required this.enabled,
+    required this.onFull,
+    required this.onHalf,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        Expanded(
+          child: _QuickChip(
+            label: 'Pago total',
+            icon: Icons.done_all_rounded,
+            onTap: enabled ? onFull : null,
+          ),
+        ),
+        const SizedBox(width: 10),
+        Expanded(
+          child: _QuickChip(
+            label: 'Pago parcial (50%)',
+            icon: Icons.pie_chart_rounded,
+            onTap: enabled ? onHalf : null,
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _QuickChip extends StatelessWidget {
+  final String label;
+  final IconData icon;
+  final VoidCallback? onTap;
+  const _QuickChip({required this.label, required this.icon, this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        height: 40,
+        alignment: Alignment.center,
+        decoration: BoxDecoration(
+          color: StaffUi.surface,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: StaffUi.border),
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(icon, size: 15, color: StaffUi.primary),
+            const SizedBox(width: 6),
+            Flexible(
+              child: Text(
+                label,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: const TextStyle(
+                  fontSize: 12.5,
+                  fontWeight: FontWeight.w700,
+                  color: StaffUi.textPrimary,
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// Nota legal bajo el CTA.
+class _LegalNote extends StatelessWidget {
+  const _LegalNote();
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 8),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Icon(Icons.lock_rounded, size: 13, color: StaffUi.muted),
+          const SizedBox(width: 6),
+          Expanded(
+            child: Text(
+              'Al confirmar, el pago se procesa y se envía automáticamente un '
+              'comprobante digital al correo del trabajador.',
+              style: const TextStyle(
+                fontSize: 11,
+                height: 1.45,
+                color: StaffUi.muted,
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }

@@ -3,6 +3,7 @@ import '../../domain/entity/financial_report_entity.dart';
 class FinancialReportModel extends FinancialReportEntity {
   FinancialReportModel({
     required super.resumenGeneral,
+    required super.conciliacion,
     required super.datosGrafica,
     required super.gastosPorResponsable,
     required super.detalleAbsolutoPdf,
@@ -11,6 +12,7 @@ class FinancialReportModel extends FinancialReportEntity {
   factory FinancialReportModel.fromJson(Map<String, dynamic> json) {
     return FinancialReportModel(
       resumenGeneral: GeneralSummaryModel.fromJson(json['resumen_general'] ?? {}),
+      conciliacion: ReconciliationSummaryModel.fromJson(json['conciliacion'] ?? {}),
       datosGrafica: (json['datos_grafica'] as List?)
               ?.map((e) => ChartDataModel.fromJson(e))
               .toList() ??
@@ -41,6 +43,26 @@ class GeneralSummaryModel extends GeneralSummaryEntity {
       egresosTotales: (json['egresos_totales'] ?? 0).toDouble(),
       balanceNeto: (json['balance_neto'] ?? 0).toDouble(),
       estadoSalud: json['estado_salud'] ?? 'DESCONOCIDO',
+    );
+  }
+}
+
+class ReconciliationSummaryModel extends ReconciliationSummaryEntity {
+  ReconciliationSummaryModel({
+    required super.totalDevoluciones,
+    required super.totalCompensaciones,
+    required super.countDevoluciones,
+    required super.countCompensaciones,
+    required super.neto,
+  });
+
+  factory ReconciliationSummaryModel.fromJson(Map<String, dynamic> json) {
+    return ReconciliationSummaryModel(
+      totalDevoluciones: (json['total_devoluciones'] ?? 0).toDouble(),
+      totalCompensaciones: (json['total_compensaciones'] ?? 0).toDouble(),
+      countDevoluciones: (json['count_devoluciones'] ?? 0) as int,
+      countCompensaciones: (json['count_compensaciones'] ?? 0) as int,
+      neto: (json['neto'] ?? 0).toDouble(),
     );
   }
 }

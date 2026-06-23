@@ -1,15 +1,20 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:front_gestion_minera/core/widgets/excavator_loader.dart';
 import 'package:front_gestion_minera/injector_container.dart';
 import 'package:front_gestion_minera/modules/staff/domain/entity/entity.dart';
 import 'package:front_gestion_minera/modules/staff/presentation/bloc/staff_bloc.dart';
 import 'package:intl/intl.dart';
 
 import '../../../../core/widgets/custom_alert_widget.dart';
-import '../../../../utils/constants/color.constant.dart';
 import '../widgets/widgets.dart';
+
+/// Opción de cargo: [value] viaja al backend tal cual; [label] se muestra en UI.
+class _RoleOption {
+  final String value;
+  final String label;
+  const _RoleOption(this.value, this.label);
+}
 
 @RoutePage()
 class RegisterStaffScreen extends StatefulWidget {
@@ -20,8 +25,15 @@ class RegisterStaffScreen extends StatefulWidget {
 }
 
 class _RegisterStaffScreenState extends State<RegisterStaffScreen> {
-  String? _opcionseleccionada = 'Seleccione un Rol';
-  final _roles = ['usuario', 'jefe campamento', 'jefe maquinaria'];
+  // El [value] se envía intacto al backend (contrato), el [label] es legible.
+  static const _roles = <_RoleOption>[
+    _RoleOption('usuario', 'Usuario'),
+    _RoleOption('jefe campamento', 'Jefe de campamento'),
+    _RoleOption('jefe maquinaria', 'Jefe de maquinaria'),
+  ];
+
+  String? _selectedRole;
+
   final _fullNameController = TextEditingController();
   final _dniController = TextEditingController();
   final _dateController = TextEditingController();
@@ -31,8 +43,25 @@ class _RegisterStaffScreenState extends State<RegisterStaffScreen> {
   final _keyRegisterUser = GlobalKey<FormState>();
   late final StaffBloc _staffBloc;
 
+  @override
+  void initState() {
+    super.initState();
+    _staffBloc = InjectorContainer.getIt<StaffBloc>();
+  }
+
+  @override
+  void dispose() {
+    _fullNameController.dispose();
+    _dniController.dispose();
+    _dateController.dispose();
+    _paymentController.dispose();
+    _departmentController.dispose();
+    _shiftController.dispose();
+    super.dispose();
+  }
+
   Future<void> _selectDate(BuildContext context) async {
-    DateTime? picked = await showDatePicker(
+    final DateTime? picked = await showDatePicker(
       context: context,
       initialDate: DateTime.now(),
       firstDate: DateTime(DateTime.now().year - 1),
@@ -42,16 +71,29 @@ class _RegisterStaffScreenState extends State<RegisterStaffScreen> {
 
     if (picked != null) {
       setState(() {
-        final fecha = DateFormat('MM/dd/yyyy').format(picked);
-        _dateController.text = fecha;
+        _dateController.text = DateFormat('MM/dd/yyyy').format(picked);
       });
     }
   }
 
-  @override
-  void initState() {
-    super.initState();
-    _staffBloc = InjectorContainer.getIt<StaffBloc>();
+  void _submit() {
+    FocusScope.of(context).unfocus();
+    if (!_keyRegisterUser.currentState!.validate()) return;
+    if (_selectedRole == null) return;
+
+    final employee = RegisterEmployeesEntity(
+      fullName: _fullNameController.text.trim(),
+      nationalId: _dniController.text.trim(),
+      position: _selectedRole!,
+      department: _departmentController.text.trim(),
+      baseMonthlySalary: double.tryParse(_paymentController.text) ?? 0.0,
+      shiftType: _shiftController.text.trim(),
+      hiredDate: DateFormat('yyyy-MM-dd')
+          .format(DateFormat('MM/dd/yyyy').parse(_dateController.text)),
+      seniorityLevel: 'Junior',
+      profilePhotoUrl: null,
+    );
+    _staffBloc.add(RegisterEmployeesEvent(employeed: employee));
   }
 
   @override
@@ -59,18 +101,17 @@ class _RegisterStaffScreenState extends State<RegisterStaffScreen> {
     return BlocProvider.value(
       value: _staffBloc,
       child: Scaffold(
-        appBar: AppBar(
-          automaticallyImplyLeading: false,
-          toolbarHeight: 45,
-          title: Text('Registro de Personal'),
-        ),
+        backgroundColor: StaffUi.background,
+        appBar: staffAppBar(context, title: 'Registrar trabajador'),
         body: BlocConsumer<StaffBloc, StaffState>(
+          listenWhen: (_, s) =>
+              s is RegisterEmployeesSuccess || s is RegisterEmployeesError,
           listener: (context, state) {
             if (state is RegisterEmployeesSuccess) {
               CustomAlert.show(
                 context,
-                title: 'Exito',
-                message: 'El Empleado a sido Registrado Exitosamente',
+                title: 'Listo',
+                message: 'El empleado fue registrado exitosamente',
                 type: AlertType.success,
               );
               context.router.popUntil((route) => route.isFirst);
@@ -78,7 +119,7 @@ class _RegisterStaffScreenState extends State<RegisterStaffScreen> {
             if (state is RegisterEmployeesError) {
               CustomAlert.show(
                 context,
-                title: "Error",
+                title: 'Error',
                 message: state.message,
                 type: AlertType.error,
               );
@@ -86,324 +127,252 @@ class _RegisterStaffScreenState extends State<RegisterStaffScreen> {
           },
           builder: (context, state) {
             final isLoading = state is RegisterEmployeesLoading;
-            return Stack(
-              children: [
-                Padding(
-                  padding: EdgeInsetsGeometry.all(15),
-                  child: ListView(
-                    children: [
-                      Container(
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(18),
-                          border: Border(
-                            bottom: BorderSide(color: TColors.red, width: 5),
-                          ),
-                        ),
-                        child: Stack(
-                          children: [
-                            ClipRRect(
-                              borderRadius: BorderRadius.circular(16),
-                              child: Container(
-                                width: double.infinity,
-                                height: 150,
-                                color: TColors.appSurfaceColor,
-                                child: const Center(
-                                  child: Icon(
-                                    Icons.image_not_supported,
-                                    size: 48,
-                                    color: TColors.appDisabledColor,
-                                  ),
-                                ),
-                              ),
-                            ),
-                            Positioned(
-                              bottom: 20,
-                              left: 20,
-                              right: 10,
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  Text(
-                                    'Nuevo Trabajador',
-                                    style: TextStyle(
-                                      fontSize: 20,
-                                      fontWeight: FontWeight.bold,
-                                      color: TColors.white,
-                                    ),
-                                  ),
-                                  Text(
-                                    'Complete la informacion para dar de alta en el sistema operativo',
-                                    softWrap: true,
-                                    style: TextStyle(color: TColors.white),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                      const SizedBox(height: 15),
-                      Container(
-                        decoration: BoxDecoration(
-                          color: TColors.white,
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                        child: Form(
-                          key: _keyRegisterUser,
-                          child: Column(
-                            children: [
-                              Padding(
-                                padding: const EdgeInsets.only(
-                                  left: 20,
-                                  right: 20,
-                                  top: 15,
-                                  bottom: 10,
-                                ),
-                                child: Row(
-                                  children: [
-                                    Icon(
-                                      Icons.person_add_alt,
-                                      color: TColors.appMainDarkColor,
-                                    ),
-                                    const SizedBox(width: 10),
-                                    Text(
-                                      'Datos Generales',
-                                      style: TextStyle(
-                                        fontWeight: FontWeight.bold,
-                                        color: TColors.appMainDarkColor,
-                                        fontSize: 17,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                              Divider(
-                                color: TColors.appDisabledColor.withValues(
-                                  alpha: 0.2,
-                                ),
-                              ),
-                              Padding(
-                                padding: EdgeInsetsGeometry.all(20),
-                                child: Column(
-                                  children: [
-                                    CustomFormStaffWidget(
-                                      icon: Icons.badge_outlined,
-                                      titleform: 'Nombre Completo',
-                                      hint: 'Ej: Juan Alberto Perez Garcia',
-                                      controller: _fullNameController,
-                                    ),
-
-                                    const SizedBox(height: 15),
-                                    CustomFormStaffWidget(
-                                      icon: Icons.contact_emergency_outlined,
-                                      titleform: 'DNI / Documento de Identidad',
-                                      hint: 'Ingrese su documento',
-                                      controller: _dniController,
-                                    ),
-                                    const SizedBox(height: 15),
-                                    CustomFormStaffWidget(
-                                      icon: Icons.date_range_outlined,
-                                      titleform: 'Fecha Ingreso',
-                                      hint: 'mm/dd/yyyy',
-                                      controller: _dateController,
-                                      isOnlyRead: true,
-                                      onTap: () => _selectDate(context),
-                                    ),
-                                    const SizedBox(height: 15),
-                                    CustomFormStaffWidget(
-                                      icon: Icons.settings,
-                                      titleform: 'Area',
-                                      hint: 'Ingrese el Area',
-                                      controller: _departmentController,
-                                    ),
-                                    const SizedBox(height: 15),
-                                    CustomFormStaffWidget(
-                                      icon: Icons.access_time,
-                                      titleform: 'Turno',
-                                      hint:
-                                          'Ingrese turno - Ej: "7x7 Rotativo"',
-                                      controller: _shiftController,
-                                    ),
-                                    const SizedBox(height: 15),
-                                    const Row(
-                                      children: [
-                                        Icon(Icons.person_4_outlined),
-                                        Text(
-                                          'Cargo / Puesto',
-                                          style: TextStyle(
-                                            color: TColors.appMainDarkColor,
-                                            fontWeight: FontWeight.bold,
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                    DropdownButtonFormField<String>(
-                                      initialValue: _opcionseleccionada,
-                                      decoration: InputDecoration(
-                                        border: OutlineInputBorder(
-                                          borderRadius: BorderRadius.circular(
-                                            10,
-                                          ),
-                                        ),
-                                      ),
-                                      onChanged: (String? newvalue) {
-                                        setState(() {
-                                          _opcionseleccionada = newvalue;
-                                        });
-                                      },
-                                      validator: (value) {
-                                        if (value == null ||
-                                            value == 'Seleccione un Rol') {
-                                          return 'Seleccione un Rol Valido';
-                                        }
-                                        return null;
-                                      },
-                                      items: [
-                                        const DropdownMenuItem<String>(
-                                          value: 'Seleccione un Rol',
-                                          enabled: false,
-                                          child: Text('Seleccione un Rol'),
-                                        ),
-                                        ..._roles.map<DropdownMenuItem<String>>(
-                                          (String value) {
-                                            return DropdownMenuItem<String>(
-                                              value: value,
-                                              child: Text(value),
-                                            );
-                                          },
-                                        ),
-                                      ],
-                                    ),
-                                    const SizedBox(height: 15),
-                                    CustomFormStaffWidget(
-                                      icon: Icons.payments_outlined,
-                                      titleform: 'Salario base (Mensual)',
-                                      hint: '0.00 Bs',
-                                      extraText: 'Bs',
-                                      controller: _paymentController,
-                                      keyboradtype: TextInputType.number,
-                                    ),
-                                  ],
-                                ),
-                              ),
-                              Padding(
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 20.0,
-                                  vertical: 10,
-                                ),
-                                child: Column(
-                                  children: [
-                                    _submitUserButtom(),
-                                    const SizedBox(height: 15),
-                                    InkWell(
-                                      onTap: () {
-                                        context.router.popUntil(
-                                          (route) => route.isFirst,
-                                        );
-                                      },
-                                      child: Container(
-                                        width: double.infinity,
-                                        height: 50,
-                                        margin: EdgeInsets.symmetric(
-                                          horizontal: 20,
-                                        ),
-                                        decoration: BoxDecoration(
-                                          color: TColors.white,
-                                          borderRadius: BorderRadius.circular(
-                                            20,
-                                          ),
-                                          border: Border.all(
-                                            color: TColors.appMainDarkColor,
-                                          ),
-                                        ),
-                                        child: Center(
-                                          child: const Text(
-                                            'Cancelar',
-                                            style: TextStyle(
-                                              color: TColors.appMainDarkColor,
-                                              fontWeight: FontWeight.bold,
-                                              fontSize: 17,
-                                            ),
-                                          ),
-                                        ),
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                    ],
+            return Form(
+              key: _keyRegisterUser,
+              child: ListView(
+                keyboardDismissBehavior:
+                    ScrollViewKeyboardDismissBehavior.onDrag,
+                padding: const EdgeInsets.fromLTRB(20, 18, 20, 28),
+                children: [
+                  const _RegisterHeaderCard(),
+                  const SizedBox(height: 22),
+                  const StaffSectionTitle(
+                    'Datos generales',
+                    icon: Icons.person_add_alt_1_rounded,
                   ),
-                ),
-                if (isLoading)
-                  Container(
-                    color: Colors.black.withValues(alpha: 0.5),
-                    child: const Center(child: ExcavatorLoader()),
+                  const SizedBox(height: 14),
+                  CustomFormStaffWidget(
+                    icon: Icons.badge_rounded,
+                    titleform: 'Nombre completo',
+                    hint: 'Ej: Juan Alberto Pérez García',
+                    controller: _fullNameController,
                   ),
-              ],
+                  const SizedBox(height: 16),
+                  CustomFormStaffWidget(
+                    icon: Icons.contact_emergency_rounded,
+                    titleform: 'DNI / Documento de identidad',
+                    hint: 'Ingresa el documento',
+                    controller: _dniController,
+                  ),
+                  const SizedBox(height: 16),
+                  CustomFormStaffWidget(
+                    icon: Icons.event_rounded,
+                    titleform: 'Fecha de ingreso',
+                    hint: 'mm/dd/yyyy',
+                    controller: _dateController,
+                    isOnlyRead: true,
+                    onTap: () => _selectDate(context),
+                  ),
+                  const SizedBox(height: 16),
+                  CustomFormStaffWidget(
+                    icon: Icons.settings_rounded,
+                    titleform: 'Área',
+                    hint: 'Ingresa el área',
+                    controller: _departmentController,
+                  ),
+                  const SizedBox(height: 16),
+                  CustomFormStaffWidget(
+                    icon: Icons.access_time_rounded,
+                    titleform: 'Turno',
+                    hint: 'Ej: 7x7 Rotativo',
+                    controller: _shiftController,
+                  ),
+                  const SizedBox(height: 16),
+                  _RoleDropdown(
+                    selected: _selectedRole,
+                    roles: _roles,
+                    onChanged: (value) =>
+                        setState(() => _selectedRole = value),
+                  ),
+                  const SizedBox(height: 16),
+                  CustomFormStaffWidget(
+                    icon: Icons.payments_rounded,
+                    titleform: 'Salario base (mensual)',
+                    hint: '0.00',
+                    extraText: 'Bs',
+                    controller: _paymentController,
+                    keyboradtype: const TextInputType.numberWithOptions(
+                      decimal: true,
+                    ),
+                  ),
+                  const SizedBox(height: 28),
+                  StaffPrimaryButton(
+                    label: 'Guardar trabajador',
+                    icon: Icons.save_rounded,
+                    loading: isLoading,
+                    onPressed: _submit,
+                  ),
+                  const SizedBox(height: 12),
+                  _CancelButton(
+                    onPressed: isLoading
+                        ? null
+                        : () => context.router
+                            .popUntil((route) => route.isFirst),
+                  ),
+                ],
+              ),
             );
           },
         ),
       ),
     );
   }
+}
 
-  InkWell _submitUserButtom() {
-    return InkWell(
-      onTap: () {
-        FocusScope.of(context).unfocus();
-        if (!_keyRegisterUser.currentState!.validate()) {
-          return;
-        }
-        final employeed = RegisterEmployeesEntity(
-          fullName: _fullNameController.text,
-          nationalId: _dniController.text,
-          position: _opcionseleccionada.toString(),
-          department: _departmentController.text,
-          baseMonthlySalary: double.tryParse(_paymentController.text) ?? 0.0,
-          shiftType: _shiftController.text,
-          hiredDate: DateFormat(
-            'yyyy-MM-dd',
-          ).format(DateFormat('MM/dd/yyyy').parse(_dateController.text)),
-          seniorityLevel: 'Junior',
-          profilePhotoUrl: null,
+/// Encabezado limpio del alta: chip de icono + título + subtítulo.
+class _RegisterHeaderCard extends StatelessWidget {
+  const _RegisterHeaderCard();
+
+  @override
+  Widget build(BuildContext context) {
+    return StaffCard(
+      child: Row(
+        children: [
+          Container(
+            width: 48,
+            height: 48,
+            decoration: BoxDecoration(
+              color: StaffUi.primarySoft,
+              borderRadius: BorderRadius.circular(14),
+            ),
+            child: const Icon(Icons.person_add_alt_1_rounded,
+                color: StaffUi.primary, size: 24),
+          ),
+          const SizedBox(width: 14),
+          const Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Nuevo trabajador',
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w800,
+                    color: StaffUi.textPrimary,
+                    letterSpacing: -0.3,
+                  ),
+                ),
+                SizedBox(height: 3),
+                Text(
+                  'Completa la información para dar de alta al trabajador.',
+                  style: TextStyle(
+                    fontSize: 12.5,
+                    height: 1.35,
+                    color: StaffUi.textSecondary,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// Selector de cargo alineado a los tokens del módulo. Muestra etiquetas
+/// legibles, pero entrega el valor crudo del backend en [onChanged].
+class _RoleDropdown extends StatelessWidget {
+  final String? selected;
+  final List<_RoleOption> roles;
+  final ValueChanged<String?> onChanged;
+  const _RoleDropdown({
+    required this.selected,
+    required this.roles,
+    required this.onChanged,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    OutlineInputBorder border(Color color, [double width = 1]) =>
+        OutlineInputBorder(
+          borderRadius: BorderRadius.circular(14),
+          borderSide: BorderSide(color: color, width: width),
         );
-        _staffBloc.add(RegisterEmployeesEvent(employeed: employeed));
 
-        _fullNameController.clear();
-        _dniController.clear();
-        _dateController.clear();
-        _paymentController.clear();
-        _departmentController.clear();
-        _shiftController.clear();
-        _opcionseleccionada = 'Seleccione un Rol';
-      },
-      child: Container(
-        width: double.infinity,
-        height: 50,
-        margin: EdgeInsets.symmetric(horizontal: 20),
-        decoration: BoxDecoration(
-          color: TColors.appMainDarkColor,
-          borderRadius: BorderRadius.circular(20),
-        ),
-        child: const Row(
-          mainAxisAlignment: MainAxisAlignment.center,
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Row(
           children: [
-            Icon(Icons.save_outlined, color: TColors.white),
-            SizedBox(width: 20),
+            Icon(Icons.work_rounded, size: 20, color: StaffUi.textSecondary),
+            SizedBox(width: 7),
             Text(
-              'Guardar Trabajador',
+              'Cargo / Puesto',
               style: TextStyle(
-                color: TColors.white,
+                color: StaffUi.textPrimary,
                 fontWeight: FontWeight.bold,
-                fontSize: 17,
               ),
             ),
           ],
+        ),
+        const SizedBox(height: 8),
+        DropdownButtonFormField<String>(
+          initialValue: selected,
+          isExpanded: true,
+          icon: const Icon(Icons.keyboard_arrow_down_rounded,
+              color: StaffUi.textSecondary),
+          style: const TextStyle(
+            fontSize: 14,
+            color: StaffUi.textPrimary,
+            fontWeight: FontWeight.w500,
+          ),
+          hint: const Text(
+            'Selecciona un cargo',
+            style: TextStyle(color: StaffUi.muted, fontSize: 14),
+          ),
+          decoration: InputDecoration(
+            filled: true,
+            fillColor: StaffUi.surface,
+            contentPadding:
+                const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
+            enabledBorder: border(StaffUi.border),
+            focusedBorder: border(StaffUi.primary, 1.4),
+            errorBorder: border(const Color(0xFFEF4444)),
+            focusedErrorBorder: border(const Color(0xFFEF4444), 1.4),
+          ),
+          validator: (value) =>
+              (value == null || value.isEmpty) ? 'Selecciona un cargo' : null,
+          onChanged: onChanged,
+          items: roles
+              .map(
+                (role) => DropdownMenuItem<String>(
+                  value: role.value,
+                  child: Text(role.label),
+                ),
+              )
+              .toList(),
+        ),
+      ],
+    );
+  }
+}
+
+/// Botón secundario "Cancelar" consistente con el sistema de diseño.
+class _CancelButton extends StatelessWidget {
+  final VoidCallback? onPressed;
+  const _CancelButton({required this.onPressed});
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      width: double.infinity,
+      height: 52,
+      child: OutlinedButton(
+        onPressed: onPressed,
+        style: OutlinedButton.styleFrom(
+          foregroundColor: StaffUi.textSecondary,
+          side: const BorderSide(color: StaffUi.border),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(14),
+          ),
+        ),
+        child: const Text(
+          'Cancelar',
+          style: TextStyle(
+            fontSize: 15,
+            fontWeight: FontWeight.w700,
+          ),
         ),
       ),
     );

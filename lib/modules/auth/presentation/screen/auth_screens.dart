@@ -880,6 +880,7 @@ class _AnimatedFieldState extends State<_AnimatedField> {
             focusNode: _node,
             keyboardType: widget.keyboardType,
             obscureText: widget.obscure,
+            textCapitalization: TextCapitalization.none,
             onFieldSubmitted: widget.onSubmitted,
             cursorColor: accent,
             decoration: InputDecoration(

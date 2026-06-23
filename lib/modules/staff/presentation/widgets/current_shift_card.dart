@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:front_gestion_minera/modules/staff/presentation/widgets/staff_ui.dart';
 import 'package:front_gestion_minera/utils/constants/color.constant.dart';
 
 class CurrentShiftCard extends StatelessWidget {
@@ -15,25 +16,18 @@ class CurrentShiftCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: TColors.white,
-        borderRadius: BorderRadius.circular(18),
-        boxShadow: const [
-          BoxShadow(blurRadius: 10, color: Color.fromRGBO(0, 0, 0, .04)),
-        ],
-      ),
+    return StaffCard(
       child: Row(
         children: [
           CircleAvatar(
             radius: 28,
-            backgroundColor: Colors.grey.shade200,
+            backgroundColor: StaffUi.primarySoft,
             backgroundImage: workerPhoto != null && workerPhoto!.isNotEmpty
                 ? NetworkImage(workerPhoto!)
                 : null,
             child: workerPhoto == null || workerPhoto!.isEmpty
-                ? const Icon(Icons.person_outline, size: 30, color: Colors.grey)
+                ? const Icon(Icons.person_outline_rounded,
+                    size: 30, color: StaffUi.primary)
                 : null,
           ),
 
@@ -48,7 +42,8 @@ class CurrentShiftCard extends StatelessWidget {
                   style: TextStyle(
                     fontSize: 11,
                     fontWeight: FontWeight.w700,
-                    color: TColors.disabled,
+                    color: StaffUi.textSecondary,
+                    letterSpacing: 0.4,
                   ),
                 ),
 
@@ -59,12 +54,15 @@ class CurrentShiftCard extends StatelessWidget {
                     children: [
                       const TextSpan(
                         text: 'Entrada: ',
-                        style: TextStyle(color: TColors.appMainTextColor),
+                        style: TextStyle(color: StaffUi.textSecondary),
                       ),
 
                       TextSpan(
                         text: formatearHora(startTime),
-                        style: const TextStyle(fontWeight: FontWeight.bold),
+                        style: const TextStyle(
+                          fontWeight: FontWeight.w800,
+                          color: StaffUi.textPrimary,
+                        ),
                       ),
                     ],
                   ),
@@ -74,13 +72,14 @@ class CurrentShiftCard extends StatelessWidget {
 
                 const Row(
                   children: [
-                    Icon(Icons.check_circle, color: Colors.green, size: 16),
+                    Icon(Icons.check_circle_rounded,
+                        color: TColors.statusGreen, size: 16),
 
                     SizedBox(width: 4),
 
                     Text(
                       'En planta - Sector Norte',
-                      style: TextStyle(color: Colors.green, fontSize: 13),
+                      style: TextStyle(color: TColors.statusGreen, fontSize: 13),
                     ),
                   ],
                 ),

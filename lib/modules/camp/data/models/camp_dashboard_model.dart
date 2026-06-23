@@ -18,6 +18,7 @@ class CampRecentRequestModel extends CampRecentRequestEntity {
     required super.description,
     required super.globalStatus,
     required super.statusLabel,
+    super.reconciliationStatus,
     required super.createdAt,
   });
 
@@ -28,6 +29,7 @@ class CampRecentRequestModel extends CampRecentRequestEntity {
       description: json['description'] as String? ?? '',
       globalStatus: json['global_status'] as String? ?? '',
       statusLabel: json['status_label'] as String? ?? '',
+      reconciliationStatus: json['reconciliation_status'] as String?,
       createdAt: DateTime.tryParse(json['created_at'] as String? ?? '') ?? DateTime.now(),
     );
   }

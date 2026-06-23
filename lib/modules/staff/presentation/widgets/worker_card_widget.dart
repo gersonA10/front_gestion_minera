@@ -1,8 +1,11 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:front_gestion_minera/config/router/app_router.gr.dart';
+import 'package:front_gestion_minera/modules/staff/presentation/widgets/staff_ui.dart';
 import 'package:front_gestion_minera/utils/constants/color.constant.dart';
 
+/// Tarjeta de trabajador en la lista de personal. Toda la tarjeta es táctil y
+/// navega al perfil del empleado.
 class WorkerCardWidget extends StatelessWidget {
   final String employeeId;
   final String image;
@@ -12,6 +15,9 @@ class WorkerCardWidget extends StatelessWidget {
   final String status;
   final String actionText;
 
+  /// `true` si el trabajador registró asistencia hoy → muestra el sello "Hoy".
+  final bool workedToday;
+
   const WorkerCardWidget({
     super.key,
     required this.employeeId,
@@ -20,242 +26,254 @@ class WorkerCardWidget extends StatelessWidget {
     required this.position,
     required this.location,
     required this.status,
-    required this.actionText,
+    this.actionText = 'Ver perfil',
+    this.workedToday = false,
   });
 
-  static const String _fallbackImage =
-      'https://siu.edu.bd/storage/uploaded/authority/male_1723030204.jpeg';
+  String get _initials {
+    final parts =
+        name.trim().split(RegExp(r'\s+')).where((e) => e.isNotEmpty).toList();
+    if (parts.isEmpty) return '?';
+    if (parts.length == 1) return parts.first.characters.first.toUpperCase();
+    return (parts.first.characters.first + parts[1].characters.first)
+        .toUpperCase();
+  }
 
   @override
   Widget build(BuildContext context) {
-    final style = _statusStyle(status);
+    final style = _WorkerStatusStyle.of(status);
+    final isInactive = status.toLowerCase() == 'inactivo';
 
-    return Container(
-      decoration: BoxDecoration(
-        color: TColors.white,
-        borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: const Color(0xffE7EAF0)),
-        boxShadow: const [
-          BoxShadow(
-            color: Color(0x05000000),
-            blurRadius: 10,
-            offset: Offset(0, 2),
-          ),
-        ],
-      ),
-      child: Column(
+    return StaffCard(
+      padding: const EdgeInsets.all(14),
+      onTap: () =>
+          context.router.push(WorkerProfileRoute(employeeId: employeeId)),
+      child: Row(
         children: [
-          Padding(
-            padding: const EdgeInsets.fromLTRB(14, 14, 14, 12),
-            child: Row(
+          _Avatar(image: image, initials: _initials, dotColor: style.dot),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Stack(
-                  clipBehavior: Clip.none,
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    ClipRRect(
-                      borderRadius: BorderRadius.circular(8),
-                      child: Image.network(
-                        image.isNotEmpty ? image : _fallbackImage,
-                        width: 58,
-                        height: 58,
-                        fit: BoxFit.cover,
-                        errorBuilder: (_, _, _) {
-                          return Image.network(
-                            _fallbackImage,
-                            width: 58,
-                            height: 58,
-                            fit: BoxFit.cover,
-                          );
-                        },
-                      ),
-                    ),
-
-                    Positioned(
-                      right: -2,
-                      bottom: -2,
-                      child: Container(
-                        width: 13,
-                        height: 13,
-                        decoration: BoxDecoration(
-                          color: style.dotColor,
-                          shape: BoxShape.circle,
-                          border: Border.all(color: Colors.white, width: 2),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-
-                const SizedBox(width: 12),
-
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Expanded(
-                            child: Text(
-                              name,
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                              style: const TextStyle(
-                                fontSize: 17,
-                                fontWeight: FontWeight.w700,
-                                color: TColors.appMainDarkColor,
-                                height: 1.1,
-                              ),
-                            ),
-                          ),
-
-                          const SizedBox(width: 8),
-
-                          Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 9,
-                              vertical: 4,
-                            ),
-                            decoration: BoxDecoration(
-                              color: style.backgroundColor,
-                              borderRadius: BorderRadius.circular(6),
-                            ),
-                            child: Text(
-                              style.label,
-                              style: TextStyle(
-                                fontSize: 10,
-                                fontWeight: FontWeight.w700,
-                                color: style.textColor,
-                                letterSpacing: 0.3,
-                                height: 1,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-
-                      const SizedBox(height: 4),
-
-                      Text(
-                        position,
+                    Expanded(
+                      child: Text(
+                        name,
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                         style: const TextStyle(
-                          fontSize: 13,
+                          fontSize: 15.5,
+                          fontWeight: FontWeight.w800,
+                          color: StaffUi.textPrimary,
+                          letterSpacing: -0.2,
+                          height: 1.1,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    StaffPill(
+                      label: style.label,
+                      color: style.text,
+                      bg: style.bg,
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  position,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(
+                    fontSize: 12.5,
+                    fontWeight: FontWeight.w500,
+                    color: StaffUi.textSecondary,
+                    height: 1.2,
+                  ),
+                ),
+                const SizedBox(height: 7),
+                Row(
+                  children: [
+                    Icon(
+                      isInactive
+                          ? Icons.schedule_rounded
+                          : Icons.place_outlined,
+                      size: 13,
+                      color: StaffUi.muted,
+                    ),
+                    const SizedBox(width: 4),
+                    Flexible(
+                      child: Text(
+                        location.isEmpty ? 'Sin asignar' : location,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(
+                          fontSize: 12,
                           fontWeight: FontWeight.w500,
-                          color: TColors.appSecondaryTextColor,
+                          color: StaffUi.muted,
                           height: 1.2,
                         ),
                       ),
-
-                      const SizedBox(height: 7),
-
-                      Row(
-                        children: [
-                          Icon(
-                            status.toLowerCase() == 'inactivo'
-                                ? Icons.access_time
-                                : Icons.location_on_outlined,
-                            size: 13,
-                            color: const Color(0xff98A2B3),
-                          ),
-
-                          const SizedBox(width: 4),
-
-                          Expanded(
-                            child: Text(
-                              location,
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                              style: const TextStyle(
-                                fontSize: 12,
-                                fontWeight: FontWeight.w500,
-                                color: Color(0xff98A2B3),
-                                height: 1.2,
+                    ),
+                    if (workedToday) ...[
+                      const SizedBox(width: 8),
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 7, vertical: 2),
+                        decoration: BoxDecoration(
+                          color: TColors.statusGreenBg,
+                          borderRadius: BorderRadius.circular(20),
+                        ),
+                        child: const Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(Icons.check_circle_rounded,
+                                size: 11, color: TColors.statusGreen),
+                            SizedBox(width: 3),
+                            Text(
+                              'Hoy',
+                              style: TextStyle(
+                                fontSize: 10,
+                                fontWeight: FontWeight.w700,
+                                color: TColors.statusGreen,
                               ),
                             ),
-                          ),
-                        ],
+                          ],
+                        ),
                       ),
                     ],
-                  ),
+                  ],
                 ),
               ],
             ),
           ),
-
+          const SizedBox(width: 8),
           Container(
-            width: double.infinity,
-            height: 1,
-            color: const Color(0xffEEF1F4),
-          ),
-          TextButton(
-            onPressed: () {
-              context.router.push(WorkerProfileRoute(employeeId: employeeId));
-            },
-            child: Text(
-              actionText.toUpperCase(),
-              style: const TextStyle(
-                fontSize: 11,
-                fontWeight: FontWeight.w700,
-                color: TColors.appMainDarkColor,
-                letterSpacing: 0.3,
-              ),
+            width: 28,
+            height: 28,
+            decoration: BoxDecoration(
+              color: StaffUi.primarySoft,
+              shape: BoxShape.circle,
             ),
+            child: const Icon(Icons.arrow_forward_ios_rounded,
+                color: StaffUi.primary, size: 12),
           ),
         ],
       ),
     );
   }
+}
 
-  _WorkerStatusStyle _statusStyle(String status) {
-    switch (status.toLowerCase()) {
-      case 'activo':
-        return const _WorkerStatusStyle(
-          label: 'ACTIVO',
-          backgroundColor: Color(0xffECFDF3),
-          textColor: Color(0xff16A34A),
-          dotColor: Color(0xff22C55E),
-        );
+/// Avatar con foto de red (si existe) o iniciales como respaldo, con un punto
+/// de estado superpuesto.
+class _Avatar extends StatelessWidget {
+  final String image;
+  final String initials;
+  final Color dotColor;
+  const _Avatar({
+    required this.image,
+    required this.initials,
+    required this.dotColor,
+  });
 
-      case 'descanso':
-        return const _WorkerStatusStyle(
-          label: 'DESCANSO',
-          backgroundColor: Color(0xffFFF1E8),
-          textColor: Color(0xffF97316),
-          dotColor: Color(0xffF97316),
-        );
+  @override
+  Widget build(BuildContext context) {
+    final fallback = Container(
+      width: 54,
+      height: 54,
+      alignment: Alignment.center,
+      decoration: BoxDecoration(
+        color: StaffUi.primarySoft,
+        borderRadius: BorderRadius.circular(15),
+      ),
+      child: Text(
+        initials,
+        style: const TextStyle(
+          fontSize: 18,
+          fontWeight: FontWeight.w800,
+          color: StaffUi.primary,
+        ),
+      ),
+    );
 
-      case 'inactivo':
-        return const _WorkerStatusStyle(
-          label: 'INACTIVO',
-          backgroundColor: Color(0xffF2F4F7),
-          textColor: Color(0xff98A2B3),
-          dotColor: Color(0xff98A2B3),
-        );
-
-      default:
-        return const _WorkerStatusStyle(
-          label: 'DESCONOCIDO',
-          backgroundColor: Color(0xffF2F4F7),
-          textColor: Color(0xff98A2B3),
-          dotColor: Color(0xff98A2B3),
-        );
-    }
+    return Stack(
+      clipBehavior: Clip.none,
+      children: [
+        if (image.isEmpty)
+          fallback
+        else
+          ClipRRect(
+            borderRadius: BorderRadius.circular(15),
+            child: Image.network(
+              image,
+              width: 54,
+              height: 54,
+              fit: BoxFit.cover,
+              errorBuilder: (_, _, _) => fallback,
+            ),
+          ),
+        Positioned(
+          right: -2,
+          bottom: -2,
+          child: Container(
+            width: 14,
+            height: 14,
+            decoration: BoxDecoration(
+              color: dotColor,
+              shape: BoxShape.circle,
+              border: Border.all(color: Colors.white, width: 2.5),
+            ),
+          ),
+        ),
+      ],
+    );
   }
 }
 
 class _WorkerStatusStyle {
   final String label;
-  final Color backgroundColor;
-  final Color textColor;
-  final Color dotColor;
-
+  final Color bg;
+  final Color text;
+  final Color dot;
   const _WorkerStatusStyle({
     required this.label,
-    required this.backgroundColor,
-    required this.textColor,
-    required this.dotColor,
+    required this.bg,
+    required this.text,
+    required this.dot,
   });
+
+  static _WorkerStatusStyle of(String status) {
+    switch (status.toLowerCase()) {
+      case 'activo':
+        return const _WorkerStatusStyle(
+          label: 'Activo',
+          bg: TColors.statusActiveBg,
+          text: TColors.success,
+          dot: TColors.statusActiveDot,
+        );
+      case 'descanso':
+        return const _WorkerStatusStyle(
+          label: 'Descanso',
+          bg: TColors.statusRestBg,
+          text: TColors.statusOrange,
+          dot: TColors.statusRestDot,
+        );
+      case 'inactivo':
+        return const _WorkerStatusStyle(
+          label: 'Inactivo',
+          bg: TColors.statusInactiveBg,
+          text: TColors.textSecondary,
+          dot: TColors.statusInactiveDot,
+        );
+      default:
+        return const _WorkerStatusStyle(
+          label: 'Sin estado',
+          bg: TColors.statusGreyBg,
+          text: TColors.textSecondary,
+          dot: TColors.statusInactiveDot,
+        );
+    }
+  }
 }
