@@ -17,6 +17,8 @@ abstract class TreasuryRepository {
   Future<FinancialReportEntity> getFinancialReport({
     String period = 'month',
     String? exactDate,
+    String? startDate,
+    String? endDate,
   });
 
   Future<IncomeResponseEntity> registerUrgentIncome(

@@ -49,8 +49,15 @@ class ExecuteReconciliationEvent extends TreasuryEvent {
 class GetFinancialReportEvent extends TreasuryEvent {
   final String period;
   final String? exactDate;
+  final String? startDate;
+  final String? endDate;
 
-  GetFinancialReportEvent({required this.period, this.exactDate});
+  GetFinancialReportEvent({
+    required this.period,
+    this.exactDate,
+    this.startDate,
+    this.endDate,
+  });
 }
 
 class RegisterUrgentIncomeEvent extends TreasuryEvent {
