@@ -26,6 +26,10 @@ class _MaintenanceRequestHistoryScreenState
   late TabController _tabController;
   late MachineryBloc _machineryBloc;
 
+  // Caché local para que un "cargar más" fallido no borre la lista ya cargada.
+  List<MaintenanceHistoryItemEntity>? _cacheItems;
+  bool _cacheHasReachedMax = false;
+
   @override
   void initState() {
     super.initState();
@@ -37,11 +41,24 @@ class _MaintenanceRequestHistoryScreenState
   @override
   void dispose() {
     _tabController.dispose();
+    // El bloc viene de un `registerFactory` y se inyecta con `BlocProvider.value`,
+    // que no lo cierra; lo cerramos aquí para no fugar la instancia.
+    _machineryBloc.close();
     super.dispose();
   }
 
   void _reload() => _machineryBloc
       .add(FetchMaintenanceHistoryEvent(machineId: widget.machineId));
+
+  void _snack(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message),
+        backgroundColor: TColors.danger,
+        behavior: SnackBarBehavior.floating,
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -94,20 +111,36 @@ class _MaintenanceRequestHistoryScreenState
             ],
           ),
         ),
-        body: BlocBuilder<MachineryBloc, MachineryState>(
-          builder: (context, state) {
-            if (state is MaintenanceHistoryLoading) {
-              return const _HistorySkeleton();
+        body: BlocConsumer<MachineryBloc, MachineryState>(
+          listenWhen: (_, c) => c is MaintenanceHistoryError,
+          listener: (context, state) {
+            // Falló una recarga/paginación pero ya hay datos en pantalla:
+            // avisamos sin tumbar la lista a estado de error.
+            if (state is MaintenanceHistoryError && _cacheItems != null) {
+              _snack(state.message);
             }
-            if (state is MaintenanceHistoryError) {
-              return _HistoryError(message: state.message, onRetry: _reload);
+          },
+          buildWhen: (_, c) =>
+              c is MaintenanceHistoryLoading ||
+              c is MaintenanceHistoryLoaded ||
+              c is MaintenanceHistoryError,
+          builder: (context, state) {
+            if (state is MaintenanceHistoryLoaded) {
+              _cacheItems = state.items;
+              _cacheHasReachedMax = state.hasReachedMax;
             }
 
-            final items = state is MaintenanceHistoryLoaded
-                ? state.items
-                : <MaintenanceHistoryItemEntity>[];
-            final hasReachedMax =
-                state is MaintenanceHistoryLoaded ? state.hasReachedMax : true;
+            // Sin datos en caché todavía: skeleton mientras carga, error solo
+            // si falló la primera carga.
+            if (_cacheItems == null) {
+              if (state is MaintenanceHistoryError) {
+                return _HistoryError(message: state.message, onRetry: _reload);
+              }
+              return const _HistorySkeleton();
+            }
+
+            final items = _cacheItems!;
+            final hasReachedMax = _cacheHasReachedMax;
 
             final pending = items
                 .where((e) => e.globalStatus == MaintenanceGlobalStatus.inReview)

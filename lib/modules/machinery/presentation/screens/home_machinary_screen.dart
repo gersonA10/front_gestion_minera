@@ -188,9 +188,7 @@ class _HomeMachinaryScreenState extends State<HomeMachinaryScreen>
   void didPopNext() {
     // Confirmación en segundo plano al volver (la UI ya se actualizó de forma
     // optimista vía la señal si hubo un cambio de estado).
-    _machineryBloc
-      ..add(FetchMetricsMachineEvent())
-      ..add(ListInventoryMachineryEvent());
+    _loadData();
   }
 
   @override
@@ -199,21 +197,37 @@ class _HomeMachinaryScreenState extends State<HomeMachinaryScreen>
     _showcaseView.unregister();
     machineryStatusChangedSignal.removeListener(_onStatusSignal);
     appRouteObserver.unsubscribe(this);
+    // El bloc viene de un `registerFactory` y se inyecta con `BlocProvider.value`,
+    // que no lo cierra; lo cerramos aquí para no fugar la instancia.
+    _machineryBloc.close();
     super.dispose();
   }
 
-  /// Recarga métricas + inventario (en paralelo) y espera a que el bloc emita
-  /// un estado terminal para cerrar el indicador de refresco.
-  Future<void> _onRefresh() async {
+  /// Dispara la carga de métricas + inventario en paralelo.
+  void _loadData() {
     _machineryBloc
       ..add(FetchMetricsMachineEvent())
       ..add(ListInventoryMachineryEvent());
-    await _machineryBloc.stream.firstWhere(
-      (state) =>
-          state is InventoryMachineryLoaded ||
-          state is MetricsMachineryError ||
-          state is InventoryMachineryError,
-    );
+  }
+
+  /// Recarga métricas + inventario (en paralelo) y espera a que el bloc emita
+  /// un estado terminal para cerrar el indicador de refresco. Se acota con un
+  /// timeout para que el spinner no quede girando si el bloc no emite (p. ej.
+  /// sesión expirada, que termina sin emitir estado).
+  Future<void> _onRefresh() async {
+    _loadData();
+    try {
+      await _machineryBloc.stream
+          .firstWhere(
+            (state) =>
+                state is InventoryMachineryLoaded ||
+                state is MetricsMachineryError ||
+                state is InventoryMachineryError,
+          )
+          .timeout(const Duration(seconds: 15));
+    } catch (_) {
+      // Timeout o cierre del stream: cerramos el indicador igualmente.
+    }
   }
 
   /// Aplica de inmediato un cambio de estado recibido por la señal global:
@@ -407,8 +421,9 @@ class _HomeMachinaryScreenState extends State<HomeMachinaryScreen>
                               'Da de alta una nueva máquina en la flota desde '
                               'aquí.',
                           child: _RegisterMachineButton(
-                            onRegistered: () =>
-                                _machineryBloc.add(FetchMetricsMachineEvent()),
+                            // Tras registrar, refrescamos métricas e inventario
+                            // para que la nueva máquina aparezca de inmediato.
+                            onRegistered: _loadData,
                           ),
                         ),
                       ),
@@ -474,8 +489,7 @@ class _HomeMachinaryScreenState extends State<HomeMachinaryScreen>
               SizedBox(
                 width: double.infinity,
                 child: FilledButton.icon(
-                  onPressed: () =>
-                      _machineryBloc.add(FetchMetricsMachineEvent()),
+                  onPressed: _loadData,
                   style: FilledButton.styleFrom(
                     backgroundColor: TColors.appMainColor,
                     padding: const EdgeInsets.symmetric(vertical: 14),
