@@ -315,6 +315,8 @@ class TreasuryBloc extends Bloc<TreasuryEvent, TreasuryState> {
       final report = await repository.getFinancialReport(
         period: event.period,
         exactDate: event.exactDate,
+        startDate: event.startDate,
+        endDate: event.endDate,
       );
 
       emit(FinancialReportLoaded(report: report));

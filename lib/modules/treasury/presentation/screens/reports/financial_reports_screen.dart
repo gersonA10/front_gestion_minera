@@ -38,6 +38,10 @@ class _FinancialReportsScreenState extends State<FinancialReportsScreen> {
   late DateTime _selectedDate;
   final DateTime _currentDate = DateTime.now();
 
+  // Rango personalizado (period == 'custom')
+  DateTime? _rangeStart;
+  DateTime? _rangeEnd;
+
   FinancialReportEntity? _cachedReport;
 
   @override
@@ -50,10 +54,60 @@ class _FinancialReportsScreenState extends State<FinancialReportsScreen> {
   }
 
   void _fetchReport() {
+    if (_currentPeriod == 'custom') {
+      if (_rangeStart == null || _rangeEnd == null) return;
+      final fmt = DateFormat('yyyy-MM-dd');
+      _bloc.add(
+        GetFinancialReportEvent(
+          period: 'custom',
+          startDate: fmt.format(_rangeStart!),
+          endDate: fmt.format(_rangeEnd!),
+        ),
+      );
+      return;
+    }
+
     final formattedDate = DateFormat('yyyy-MM-dd').format(_selectedDate);
     _bloc.add(
       GetFinancialReportEvent(period: _currentPeriod, exactDate: formattedDate),
     );
+  }
+
+  Future<void> _pickDateRange() async {
+    final initialRange = (_rangeStart != null && _rangeEnd != null)
+        ? DateTimeRange(start: _rangeStart!, end: _rangeEnd!)
+        : DateTimeRange(
+            start: DateTime(_currentDate.year, _currentDate.month, 1),
+            end: _currentDate,
+          );
+
+    final picked = await showDateRangePicker(
+      context: context,
+      firstDate: DateTime(2020),
+      lastDate: _currentDate,
+      initialDateRange: initialRange,
+      locale: const Locale('es'),
+      helpText: 'Selecciona el rango de fechas',
+      saveText: 'Aplicar',
+      builder: (context, child) {
+        return Theme(
+          data: Theme.of(context).copyWith(
+            colorScheme: Theme.of(
+              context,
+            ).colorScheme.copyWith(primary: const Color(0xFF1D54F3)),
+          ),
+          child: child!,
+        );
+      },
+    );
+
+    if (picked != null) {
+      setState(() {
+        _rangeStart = picked.start;
+        _rangeEnd = picked.end;
+      });
+      _fetchReport();
+    }
   }
 
   void _changeDate(int offset) {
@@ -85,12 +139,21 @@ class _FinancialReportsScreenState extends State<FinancialReportsScreen> {
   }
 
   String _getFormattedDateLabel() {
+    if (_currentPeriod == 'custom') {
+      if (_rangeStart == null || _rangeEnd == null) return 'Rango personalizado';
+      final f = DateFormat('dd/MM/yyyy');
+      return '${f.format(_rangeStart!)} - ${f.format(_rangeEnd!)}';
+    }
     if (_currentPeriod == 'month') {
       final dateStr = DateFormat.yMMMM('es').format(_selectedDate);
       return '${dateStr[0].toUpperCase()}${dateStr.substring(1)}';
     }
     return DateFormat.y().format(_selectedDate);
   }
+
+  /// Etiqueta apta para nombre de archivo (sin espacios ni '/').
+  String _safeFileLabel() =>
+      _getFormattedDateLabel().replaceAll(' ', '_').replaceAll('/', '-');
 
   @override
   void dispose() {
@@ -158,7 +221,9 @@ class _FinancialReportsScreenState extends State<FinancialReportsScreen> {
                         _buildTabSelector(context, colors),
                         SizedBox(height: smallSpacing),
 
-                        _buildDateSelector(context, colors),
+                        _currentPeriod == 'custom'
+                            ? _buildRangeSelector(context, colors)
+                            : _buildDateSelector(context, colors),
                         SizedBox(height: smallSpacing * 1.5),
 
                         _buildHeroBalance(context, colors, _cachedReport!),
@@ -276,6 +341,7 @@ class _FinancialReportsScreenState extends State<FinancialReportsScreen> {
         children: [
           _buildTabItem(context, colors, 'Mensual', 'month'),
           _buildTabItem(context, colors, 'Anual', 'year'),
+          _buildTabItem(context, colors, 'Personalizado', 'custom'),
         ],
       ),
     );
@@ -292,7 +358,19 @@ class _FinancialReportsScreenState extends State<FinancialReportsScreen> {
       child: GestureDetector(
         onTap: () {
           if (!isSelected) {
-            setState(() => _currentPeriod = periodValue);
+            setState(() {
+              _currentPeriod = periodValue;
+              // Al entrar por primera vez al rango, precargamos el mes actual.
+              if (periodValue == 'custom' &&
+                  (_rangeStart == null || _rangeEnd == null)) {
+                _rangeStart = DateTime(
+                  _currentDate.year,
+                  _currentDate.month,
+                  1,
+                );
+                _rangeEnd = _currentDate;
+              }
+            });
             _fetchReport();
           }
         },
@@ -311,15 +389,19 @@ class _FinancialReportsScreenState extends State<FinancialReportsScreen> {
                   ]
                 : [],
           ),
-          child: Text(
-            title,
-            style: isSelected
-                ? AppTextStyles.mainStyle12Bold(
-                    context,
-                  ).copyWith(color: colors.black)
-                : AppTextStyles.mainStyle12(
-                    context,
-                  ).copyWith(color: colors.lead.withValues(alpha: 0.8)),
+          child: FittedBox(
+            fit: BoxFit.scaleDown,
+            child: Text(
+              title,
+              maxLines: 1,
+              style: isSelected
+                  ? AppTextStyles.mainStyle12Bold(
+                      context,
+                    ).copyWith(color: colors.black)
+                  : AppTextStyles.mainStyle12(
+                      context,
+                    ).copyWith(color: colors.lead.withValues(alpha: 0.8)),
+            ),
           ),
         ),
       ),
@@ -358,6 +440,45 @@ class _FinancialReportsScreenState extends State<FinancialReportsScreen> {
             onPressed: canGoForward ? () => _changeDate(1) : null,
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildRangeSelector(BuildContext context, ColorScheme colors) {
+    final hasRange = _rangeStart != null && _rangeEnd != null;
+    return InkWell(
+      onTap: _pickDateRange,
+      borderRadius: BorderRadius.circular(12),
+      child: Container(
+        height: 50,
+        padding: const EdgeInsets.symmetric(horizontal: 16),
+        decoration: BoxDecoration(
+          color: colors.white,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: colors.lead.withValues(alpha: 0.15)),
+        ),
+        child: Row(
+          children: [
+            Icon(Icons.date_range_rounded, color: colors.lead, size: 20),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Text(
+                hasRange ? _getFormattedDateLabel() : 'Seleccionar rango',
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: AppTextStyles.mainStyle14Bold(
+                  context,
+                ).copyWith(color: colors.black),
+              ),
+            ),
+            const SizedBox(width: 8),
+            const Icon(
+              Icons.edit_calendar_outlined,
+              color: Color(0xFF1D54F3),
+              size: 18,
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -954,7 +1075,11 @@ class _FinancialReportsScreenState extends State<FinancialReportsScreen> {
     ColorScheme colors,
     FinancialReportEntity report,
   ) {
-    final String exportPeriod = _currentPeriod == 'month' ? 'Mensual' : 'Anual';
+    final String exportPeriod = _currentPeriod == 'month'
+        ? 'Mensual'
+        : _currentPeriod == 'year'
+        ? 'Anual'
+        : 'Personalizado';
 
     return InkWell(
       onTap: () => _showExportModal(context, report),
@@ -1274,8 +1399,7 @@ Future<void> _generateAndSharePDF(FinancialReportEntity report) async {
       ),
     );
 
-    final fileName =
-        'Reporte_${_currentPeriod}_${_getFormattedDateLabel().replaceAll(" ", "_")}.pdf';
+    final fileName = 'Reporte_${_currentPeriod}_${_safeFileLabel()}.pdf';
     await Printing.layoutPdf(
       onLayout: (PdfPageFormat format) async => pdf.save(),
       name: fileName,
@@ -1305,7 +1429,7 @@ Future<void> _generateAndSharePDF(FinancialReportEntity report) async {
     }
 
     final directory = await getApplicationDocumentsDirectory();
-    final fileName = 'Reporte_${_currentPeriod}_${_getFormattedDateLabel().replaceAll(" ", "_")}.csv';
+    final fileName = 'Reporte_${_currentPeriod}_${_safeFileLabel()}.csv';
     final file = File('${directory.path}/$fileName');
     
     await file.writeAsBytes([239, 187, 191, ...utf8.encode(csvBuffer.toString())]);

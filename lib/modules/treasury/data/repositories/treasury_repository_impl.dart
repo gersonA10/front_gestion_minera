@@ -57,10 +57,14 @@ class TreasuryRepositoryImpl implements TreasuryRepository {
   Future<FinancialReportEntity> getFinancialReport({
     String period = 'month',
     String? exactDate,
+    String? startDate,
+    String? endDate,
   }) async {
     return await datasource.getFinancialReport(
       period: period,
       exactDate: exactDate,
+      startDate: startDate,
+      endDate: endDate,
     );
   }
 

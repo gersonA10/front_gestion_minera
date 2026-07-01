@@ -119,10 +119,18 @@ class TreasuryDatasource {
   Future<FinancialReportModel> getFinancialReport({
     String period = 'month',
     String? exactDate,
+    String? startDate,
+    String? endDate,
   }) async {
     final queryParams = <String, dynamic>{'period': period};
     if (exactDate != null && exactDate.isNotEmpty) {
       queryParams['exact_date'] = exactDate;
+    }
+    if (startDate != null && startDate.isNotEmpty) {
+      queryParams['start_date'] = startDate;
+    }
+    if (endDate != null && endDate.isNotEmpty) {
+      queryParams['end_date'] = endDate;
     }
 
     final response = await apiClient.get(

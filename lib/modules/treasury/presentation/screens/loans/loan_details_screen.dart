@@ -43,11 +43,22 @@ class LoanDetailsScreen extends StatelessWidget {
             if (state is LoanDetailsLoaded) {
               final cabecera = state.loanDetails.data.cabecera;
               final cronograma = state.loanDetails.data.cronograma;
-              return SingleChildScrollView(
-                padding: const EdgeInsets.fromLTRB(16, 12, 16, 28),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
+              return RefreshIndicator(
+                color: LoanUi.primary,
+                onRefresh: () async {
+                  final bloc = context.read<TreasuryBloc>();
+                  bloc.add(LoanDetailsEvent(idLoan: idLoan));
+                  // Esperamos a que termine la recarga para cerrar el spinner.
+                  await bloc.stream.firstWhere(
+                    (s) => s is LoanDetailsLoaded || s is LoanDetailsError,
+                  );
+                },
+                child: SingleChildScrollView(
+                  physics: const AlwaysScrollableScrollPhysics(),
+                  padding: const EdgeInsets.fromLTRB(16, 12, 16, 28),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
                     LoanInfoCard(cabecera: cabecera),
                     const SizedBox(height: 24),
                     LoanSectionTitle(
@@ -91,7 +102,8 @@ class LoanDetailsScreen extends StatelessWidget {
                         );
                       },
                     ),
-                  ],
+                    ],
+                  ),
                 ),
               );
             }
