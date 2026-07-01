@@ -449,7 +449,7 @@ class _AuthScreenState extends State<AuthScreen>
                                   child: _PrimaryButton(
                                     label: 'Iniciar Sesión',
                                     loading: isLoading,
-                                    onPressed: isLoading ? null : _submitForm,
+                                    onPressed:  _submitForm,
                                   ),
                                 ),
 
@@ -966,16 +966,7 @@ class _PrimaryButtonState extends State<_PrimaryButton> {
             ],
           ),
           alignment: Alignment.center,
-          child: widget.loading
-              ? const SizedBox(
-                  width: 24,
-                  height: 24,
-                  child: CircularProgressIndicator(
-                    strokeWidth: 2.6,
-                    color: Colors.white,
-                  ),
-                )
-              : Text(
+          child:  Text(
                   widget.label,
                   style: AppTextStyles.mainStyleWhite14Bold(context),
                 ),

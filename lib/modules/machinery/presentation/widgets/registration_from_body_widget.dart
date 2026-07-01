@@ -30,6 +30,12 @@ class _RegistrationFormBodyState extends State<RegistrationFormBody> {
   AutovalidateMode _autoValidate = AutovalidateMode.disabled;
   bool _typeError = false;
   bool _photoError = false;
+  bool _typesLoadFailed = false;
+
+  void _loadTypes() {
+    setState(() => _typesLoadFailed = false);
+    context.read<MachineryBloc>().add(ListTypeMachinery());
+  }
 
   @override
   void dispose() {
@@ -93,12 +99,17 @@ class _RegistrationFormBodyState extends State<RegistrationFormBody> {
       listenWhen: (_, current) =>
           current is RegisterMachinerySuccess ||
           current is RegisterMachineryError ||
-          current is TypeMachineryLoaded,
+          current is TypeMachineryLoaded ||
+          current is TypeMachineryError,
       listener: (context, state) {
         if (state is TypeMachineryLoaded) {
           setState(() {
             _types = state.types.where((t) => t.id != 'todos').toList();
+            _typesLoadFailed = false;
           });
+        }
+        if (state is TypeMachineryError) {
+          setState(() => _typesLoadFailed = true);
         }
         if (state is RegisterMachinerySuccess) {
           CustomAlert.show(
@@ -124,7 +135,8 @@ class _RegistrationFormBodyState extends State<RegistrationFormBody> {
           current is RegisterMachinerySuccess ||
           current is RegisterMachineryError ||
           current is TypeMachineryLoading ||
-          current is TypeMachineryLoaded,
+          current is TypeMachineryLoaded ||
+          current is TypeMachineryError,
       builder: (context, state) {
         final submitting = state is RegisterMachineryLoading;
         final loadingTypes = state is TypeMachineryLoading;
@@ -176,12 +188,14 @@ class _RegistrationFormBodyState extends State<RegistrationFormBody> {
                       enabled: !submitting,
                       loading: loadingTypes,
                       hasError: _typeError,
+                      loadFailed: _typesLoadFailed,
+                      onRetry: submitting ? null : _loadTypes,
                       onChanged: (t) => setState(() {
                         _selectedType = t;
                         _typeError = false;
                       }),
                     ),
-                    if (_typeError)
+                    if (_typeError && !_typesLoadFailed)
                       _errorText('Selecciona un tipo de maquinaria'),
                     const SizedBox(height: 24),
 
@@ -271,7 +285,9 @@ class _RegistrationFormBodyState extends State<RegistrationFormBody> {
               ),
             ),
             if (submitting)
-              const Positioned.fill(child: _SubmittingOverlay()),
+              const Positioned.fill(
+                child: SubmittingOverlay(title: 'Registrando maquinaria...'),
+              ),
           ],
         );
       },
@@ -486,47 +502,6 @@ class _ImageSourceSheet extends StatelessWidget {
             const Spacer(),
             const Icon(Icons.chevron_right_rounded, color: TColors.iconMuted),
           ],
-        ),
-      ),
-    );
-  }
-}
-
-/// Overlay mostrado mientras se registra la maquinaria.
-class _SubmittingOverlay extends StatelessWidget {
-  const _SubmittingOverlay();
-
-  @override
-  Widget build(BuildContext context) {
-    return ColoredBox(
-      color: Colors.black.withValues(alpha: 0.35),
-      child: Center(
-        child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 26),
-          decoration: BoxDecoration(
-            color: TColors.white,
-            borderRadius: BorderRadius.circular(22),
-          ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: const [
-              ExcavatorLoader(width: 120, height: 120),
-              SizedBox(height: 8),
-              Text(
-                'Registrando maquinaria...',
-                style: TextStyle(
-                  color: TColors.textPrimary,
-                  fontSize: 15,
-                  fontWeight: FontWeight.w700,
-                ),
-              ),
-              SizedBox(height: 4),
-              Text(
-                'Espera un momento',
-                style: TextStyle(color: TColors.textSecondary, fontSize: 12.5),
-              ),
-            ],
-          ),
         ),
       ),
     );

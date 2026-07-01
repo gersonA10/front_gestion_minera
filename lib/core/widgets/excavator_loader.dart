@@ -1,64 +1,82 @@
 import 'package:flutter/material.dart';
+import 'package:front_gestion_minera/utils/constants/color.constant.dart';
 
-class ExcavatorLoader extends StatefulWidget {
+class ExcavatorLoader extends StatelessWidget {
   final double width;
   final double height;
   final String assetPath;
-  final Duration duration;
+  final double opacity;
 
   const ExcavatorLoader({
     super.key,
     this.width = 170,
     this.height = 170,
     this.assetPath = 'assets/img/excavadora.png',
-    this.duration = const Duration(seconds: 3),
+    this.opacity = 1.0,
   });
 
   @override
-  State<ExcavatorLoader> createState() => _ExcavatorLoaderState();
-}
-
-class _ExcavatorLoaderState extends State<ExcavatorLoader>
-    with SingleTickerProviderStateMixin {
-  late final AnimationController _controller;
-  late final Animation<double> _animation;
-
-  @override
-  void initState() {
-    super.initState();
-
-    _controller =
-        AnimationController(vsync: this, duration: widget.duration)..repeat();
-
-    _animation = Tween<double>(
-      begin: 1.8,
-      end: -1.8,
-    ).animate(
-      CurvedAnimation(parent: _controller, curve: Curves.easeInOut),
+  Widget build(BuildContext context) {
+    return Opacity(
+      opacity: opacity,
+      child: Image.asset(
+        assetPath,
+        width: width,
+        height: height,
+        fit: BoxFit.contain,
+      ),
     );
   }
+}
 
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
+
+class SubmittingOverlay extends StatelessWidget {
+  final String title;
+  final String subtitle;
+
+  const SubmittingOverlay({
+    super.key,
+    this.title = 'Cargando...',
+    this.subtitle = 'Espera un momento',
+  });
 
   @override
   Widget build(BuildContext context) {
-    return AnimatedBuilder(
-      animation: _animation,
-      builder: (context, child) {
-        return FractionalTranslation(
-          translation: Offset(_animation.value, 0),
-          child: child,
-        );
-      },
-      child: Image.asset(
-        widget.assetPath,
-        width: widget.width,
-        height: widget.height,
-        fit: BoxFit.contain,
+    return ColoredBox(
+      color: Colors.black.withValues(alpha: 0.35),
+      child: Center(
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 26),
+          decoration: BoxDecoration(
+            color: TColors.white,
+            borderRadius: BorderRadius.circular(22),
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const ExcavatorLoader(width: 120, height: 120),
+              const SizedBox(height: 8),
+              Text(
+                title,
+                textAlign: TextAlign.center,
+                style: const TextStyle(
+                  color: TColors.textPrimary,
+                  fontSize: 15,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+              const SizedBox(height: 4),
+              Text(
+                subtitle,
+                textAlign: TextAlign.center,
+                style: const TextStyle(
+                  color: TColors.textSecondary,
+                  fontSize: 12.5,
+                ),
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }

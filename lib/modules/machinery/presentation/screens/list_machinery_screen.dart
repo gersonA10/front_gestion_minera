@@ -66,8 +66,17 @@ class _ListMachineryScreenState extends State<ListMachineryScreen>
       }
     }
 
+    // Inventario + tipos de máquina en paralelo. Los tipos se piden una sola
+    // vez aquí (antes se re-disparaban en cada carga de inventario).
     _machineryBloc = InjectorContainer.getIt<MachineryBloc>()
-      ..add(ListInventoryMachineryEvent(status: filterState));
+      ..add(ListInventoryMachineryEvent(status: filterState))
+      ..add(ListTypeMachinery());
+  }
+
+  /// Reintento de la carga inicial: inventario (con el filtro actual) + tipos.
+  void _retryInitial() {
+    _dispatchFilter();
+    _machineryBloc.add(ListTypeMachinery());
   }
 
   @override
@@ -174,8 +183,6 @@ class _ListMachineryScreenState extends State<ListMachineryScreen>
 
                       _isLoadingMore = false;
 
-                      _machineryBloc.add(ListTypeMachinery());
-
                       WidgetsBinding.instance.addPostFrameCallback((_) {
                         if (!mounted) return;
                         if (!_scrollController.hasClients) return;
@@ -201,20 +208,29 @@ class _ListMachineryScreenState extends State<ListMachineryScreen>
                       _cacheTypeMachine = state.types;
                     }
 
+                    // Un "cargar más" fallido también debe liberar el flag,
+                    // si no la paginación queda bloqueada y el footer girando.
+                    if (state is InventoryMachineryError) {
+                      _isLoadingMore = false;
+                    }
+
                     final bool isLoading = state is InventoryMachineryLoading;
 
                     // Carga inicial: sin datos en caché todavía.
                     if (_cacheinventory == null || _cacheTypeMachine == null) {
-                      if ((state is InventoryMachineryError ||
-                              state is TypeMachineryError) &&
-                          _cacheinventory == null) {
+                      // Mostramos error si falló justo lo que aún no tenemos
+                      // en caché (inventario o tipos).
+                      final invFailed = _cacheinventory == null &&
+                          state is InventoryMachineryError;
+                      final typesFailed = _cacheTypeMachine == null &&
+                          state is TypeMachineryError;
+                      if (invFailed || typesFailed) {
                         final message = state is InventoryMachineryError
                             ? state.message
                             : (state as TypeMachineryError).message;
                         return _ListErrorState(
                           message: message,
-                          onRetry: () => _machineryBloc
-                              .add(ListInventoryMachineryEvent()),
+                          onRetry: _retryInitial,
                         );
                       }
                       return const _MachineryListSkeleton();
@@ -236,9 +252,18 @@ class _ListMachineryScreenState extends State<ListMachineryScreen>
                               RefreshIndicator(
                                 onRefresh: () async {
                                   _dispatchFilter();
-                                  await _machineryBloc.stream.firstWhere(
-                                    (s) => s is! InventoryMachineryLoading,
-                                  );
+                                  try {
+                                    await _machineryBloc.stream
+                                        .firstWhere(
+                                          (s) =>
+                                              s is InventoryMachineryLoaded ||
+                                              s is InventoryMachineryError,
+                                        )
+                                        .timeout(const Duration(seconds: 15));
+                                  } catch (_) {
+                                    // Timeout / sin estado terminal: cerramos
+                                    // el indicador igualmente.
+                                  }
                                 },
                                 color: TColors.appMainColor,
                                 backgroundColor: TColors.white,

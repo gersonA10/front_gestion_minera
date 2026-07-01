@@ -233,7 +233,9 @@ class _RequestMaintenanceScreenState extends State<RequestMaintenanceScreen> {
                 ),
               ),
               if (isSubmitting)
-                const Positioned.fill(child: _SubmittingOverlay()),
+                const Positioned.fill(
+                  child: SubmittingOverlay(title: 'Enviando solicitud...'),
+                ),
             ],
           );
         },
@@ -638,47 +640,6 @@ class _EvidenceSourceSheet extends StatelessWidget {
             const Spacer(),
             const Icon(Icons.chevron_right_rounded, color: TColors.iconMuted),
           ],
-        ),
-      ),
-    );
-  }
-}
-
-/// Overlay mostrado mientras se envía la solicitud.
-class _SubmittingOverlay extends StatelessWidget {
-  const _SubmittingOverlay();
-
-  @override
-  Widget build(BuildContext context) {
-    return ColoredBox(
-      color: Colors.black.withValues(alpha: 0.35),
-      child: Center(
-        child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 26),
-          decoration: BoxDecoration(
-            color: TColors.white,
-            borderRadius: BorderRadius.circular(22),
-          ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: const [
-              ExcavatorLoader(width: 120, height: 120),
-              SizedBox(height: 8),
-              Text(
-                'Enviando solicitud...',
-                style: TextStyle(
-                  color: TColors.textPrimary,
-                  fontSize: 15,
-                  fontWeight: FontWeight.w700,
-                ),
-              ),
-              SizedBox(height: 4),
-              Text(
-                'Espera un momento',
-                style: TextStyle(color: TColors.textSecondary, fontSize: 12.5),
-              ),
-            ],
-          ),
         ),
       ),
     );

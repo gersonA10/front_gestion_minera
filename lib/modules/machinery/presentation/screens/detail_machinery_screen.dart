@@ -4,6 +4,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:front_gestion_minera/config/router/app_router.gr.dart';
 import 'package:front_gestion_minera/core/widgets/app_network_image.dart';
+import 'package:front_gestion_minera/core/widgets/excavator_loader.dart';
 import 'package:front_gestion_minera/injector_container.dart';
 import 'package:front_gestion_minera/modules/machinery/domain/entity/entity.dart';
 import 'package:front_gestion_minera/modules/machinery/presentation/bloc/machinery_bloc.dart';
@@ -39,6 +40,12 @@ class _DetailMachineryScreenState extends State<DetailMachineryScreen> {
     _loadRole();
     _machineryBloc = InjectorContainer.getIt<MachineryBloc>()
       ..add(GetCloseUpOfAMachineEvent(machineId: widget.machineId));
+  }
+
+  @override
+  void dispose() {
+    _machineryBloc.close();
+    super.dispose();
   }
 
   Future<void> _loadRole() async {
@@ -147,7 +154,8 @@ class _DetailMachineryScreenState extends State<DetailMachineryScreen> {
         body: BlocConsumer<MachineryBloc, MachineryState>(
           listenWhen: (_, c) =>
               c is ChangeMachineryStatusSuccess ||
-              c is ChangeMachineryStatusError,
+              c is ChangeMachineryStatusError ||
+              c is GetCloseUpOfAMachineError,
           listener: (context, state) {
             if (state is ChangeMachineryStatusSuccess) {
               // Actualización optimista global: el home/listado se reflejan al
@@ -161,8 +169,20 @@ class _DetailMachineryScreenState extends State<DetailMachineryScreen> {
                   TColors.success);
             } else if (state is ChangeMachineryStatusError) {
               _snack(context, state.message, TColors.danger);
+            } else if (state is GetCloseUpOfAMachineError &&
+                _cacheHeader != null) {
+              // Falló una recarga, pero ya hay datos visibles: avisamos sin
+              // tumbar la pantalla a estado de error.
+              _snack(context, state.message, TColors.danger);
             }
           },
+          buildWhen: (_, c) =>
+              c is GetCloseUpOfAMachineLoading ||
+              c is GetCloseUpOfAMachineLoaded ||
+              c is GetCloseUpOfAMachineError ||
+              c is ChangeMachineryStatusLoading ||
+              c is ChangeMachineryStatusSuccess ||
+              c is ChangeMachineryStatusError,
           builder: (context, state) {
             if (state is GetCloseUpOfAMachineLoaded) {
               _cacheHeader = state.headerMetrics;
@@ -170,6 +190,8 @@ class _DetailMachineryScreenState extends State<DetailMachineryScreen> {
               _cacheTotal = state.totalRecords;
             }
 
+            // Aún sin datos: skeleton mientras carga, error solo si falló la
+            // primera carga (no hay nada en caché que mostrar).
             if (_cacheHeader == null) {
               if (state is GetCloseUpOfAMachineError) {
                 return _DetailError(message: state.message, onRetry: _reload);
@@ -184,7 +206,9 @@ class _DetailMachineryScreenState extends State<DetailMachineryScreen> {
                 _buildContent(
                     context, _cacheHeader!, _cacheItems, _cacheTotal),
                 if (changing)
-                  const Positioned.fill(child: _StatusChangingOverlay()),
+                  const Positioned.fill(
+                    child: SubmittingOverlay(title: 'Actualizando estado...'),
+                  ),
               ],
             );
           },
@@ -417,48 +441,6 @@ class _StatusSheet extends StatelessWidget {
   }
 }
 
-/// Overlay mientras se actualiza el estado.
-class _StatusChangingOverlay extends StatelessWidget {
-  const _StatusChangingOverlay();
-
-  @override
-  Widget build(BuildContext context) {
-    return ColoredBox(
-      color: Colors.black.withValues(alpha: 0.25),
-      child: Center(
-        child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
-          decoration: BoxDecoration(
-            color: TColors.white,
-            borderRadius: BorderRadius.circular(18),
-          ),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: const [
-              SizedBox(
-                width: 22,
-                height: 22,
-                child: CircularProgressIndicator(
-                  strokeWidth: 2.4,
-                  color: TColors.appMainColor,
-                ),
-              ),
-              SizedBox(width: 14),
-              Text(
-                'Actualizando estado...',
-                style: TextStyle(
-                  color: TColors.textPrimary,
-                  fontWeight: FontWeight.w600,
-                  fontSize: 14,
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}
 
 /// Formatea un entero como monto en bolivianos con separadores de miles.
 String _money(int value) {

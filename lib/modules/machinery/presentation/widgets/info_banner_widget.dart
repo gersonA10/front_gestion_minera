@@ -48,6 +48,10 @@ class TypeDropdown extends StatelessWidget {
   final bool enabled;
   final bool loading;
   final bool hasError;
+
+  /// Indica que falló la carga de tipos; muestra un reintento inline.
+  final bool loadFailed;
+  final VoidCallback? onRetry;
   final ValueChanged<TypeMachineryEntity?> onChanged;
 
   const TypeDropdown({
@@ -58,11 +62,15 @@ class TypeDropdown extends StatelessWidget {
     this.enabled = true,
     this.loading = false,
     this.hasError = false,
+    this.loadFailed = false,
+    this.onRetry,
   });
 
   @override
   Widget build(BuildContext context) {
-    final borderColor = hasError ? TColors.danger : TColors.border;
+    final showFailed = loadFailed && !loading;
+    final borderColor =
+        (hasError || showFailed) ? TColors.danger : TColors.border;
 
     return Container(
       constraints: const BoxConstraints(minHeight: 54),
@@ -74,11 +82,51 @@ class TypeDropdown extends StatelessWidget {
       ),
       child: Row(
         children: [
-          const Icon(Icons.category_outlined,
-              color: TColors.iconMuted, size: 20),
+          Icon(
+            showFailed ? Icons.error_outline_rounded : Icons.category_outlined,
+            color: showFailed ? TColors.danger : TColors.iconMuted,
+            size: 20,
+          ),
           const SizedBox(width: 10),
           Expanded(
-            child: loading
+            child: showFailed
+                ? Row(
+                    children: [
+                      const Expanded(
+                        child: Text(
+                          'No se pudieron cargar los tipos',
+                          style: TextStyle(
+                            color: TColors.danger,
+                            fontSize: 13.5,
+                          ),
+                        ),
+                      ),
+                      GestureDetector(
+                        onTap: onRetry,
+                        behavior: HitTestBehavior.opaque,
+                        child: const Padding(
+                          padding: EdgeInsets.symmetric(vertical: 6),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(Icons.refresh_rounded,
+                                  color: TColors.appMainColor, size: 17),
+                              SizedBox(width: 4),
+                              Text(
+                                'Reintentar',
+                                style: TextStyle(
+                                  color: TColors.appMainColor,
+                                  fontSize: 13.5,
+                                  fontWeight: FontWeight.w700,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ],
+                  )
+                : loading
                 ? Row(
                     children: const [
                       Text(
