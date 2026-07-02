@@ -1,4 +1,5 @@
 import 'package:auto_route/auto_route.dart';
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:front_gestion_minera/injector_container.dart';
@@ -6,6 +7,8 @@ import 'package:front_gestion_minera/modules/minutes_memos/domain/entity/memoran
 import 'package:front_gestion_minera/modules/minutes_memos/presentation/widgets/actas_theme.dart';
 import 'package:front_gestion_minera/utils/constants/color.constant.dart';
 import 'package:intl/intl.dart';
+import 'package:open_filex/open_filex.dart';
+import 'package:path_provider/path_provider.dart';
 
 import '../bloc/minutes_memos_bloc.dart';
 
@@ -26,6 +29,7 @@ class InternalMemorandumDetailsScreen extends StatefulWidget {
 class _InternalMemorandumDetailsScreenState
     extends State<InternalMemorandumDetailsScreen> {
   late MinutesMemosBloc _minutesMemosBloc;
+  bool _isDownloading = false;
 
   @override
   void initState() {
@@ -87,7 +91,7 @@ class _InternalMemorandumDetailsScreenState
             return Scaffold(
               backgroundColor: TColors.white,
               appBar: const AcGradientAppBar(title: 'Memorando Interno'),
-              bottomNavigationBar: _buildDownloadButton(context),
+              bottomNavigationBar: _buildDownloadButton(context, memorandum),
               body: SafeArea(
                 top: false,
                 child: SingleChildScrollView(
@@ -366,7 +370,10 @@ class _InternalMemorandumDetailsScreenState
     );
   }
 
-  Widget _buildDownloadButton(BuildContext context) {
+  Widget _buildDownloadButton(
+    BuildContext context,
+    MemorandumDetailEntity memorandum,
+  ) {
     return SafeArea(
       child: Padding(
         padding: const EdgeInsets.fromLTRB(20, 8, 20, 16),
@@ -374,11 +381,22 @@ class _InternalMemorandumDetailsScreenState
           width: double.infinity,
           height: 48,
           child: ElevatedButton.icon(
-            onPressed: () {},
-            icon: const Icon(Icons.download_outlined, size: 18),
-            label: const Text(
-              'Descargar PDF',
-              style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
+            onPressed: _isDownloading
+                ? null
+                : () => _downloadDocument(memorandum.attachments),
+            icon: _isDownloading
+                ? const SizedBox(
+                    width: 18,
+                    height: 18,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2,
+                      color: Colors.white,
+                    ),
+                  )
+                : const Icon(Icons.download_outlined, size: 18),
+            label: Text(
+              _isDownloading ? 'Descargando...' : 'Descargar PDF',
+              style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
             ),
             style: ElevatedButton.styleFrom(
               backgroundColor: AC.primary,
@@ -391,6 +409,55 @@ class _InternalMemorandumDetailsScreenState
         ),
       ),
     );
+  }
+
+  /// Descarga el documento adjunto del memorando (PDF o imagen) y lo abre con
+  /// el visor nativo del dispositivo.
+  Future<void> _downloadDocument(
+    List<MemorandumAttachmentEntity> attachments,
+  ) async {
+    if (attachments.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Este memorando no tiene documento adjunto.'),
+        ),
+      );
+      return;
+    }
+
+    // Preferimos el PDF; si no hay, usamos el primer adjunto disponible.
+    final attachment = attachments.firstWhere(
+      (a) => a.tipoArchivo.toLowerCase() == 'pdf',
+      orElse: () => attachments.first,
+    );
+
+    setState(() => _isDownloading = true);
+    try {
+      final dir = await getTemporaryDirectory();
+      final safeName = attachment.nombreArchivo.trim().isEmpty
+          ? 'memorando_${DateTime.now().millisecondsSinceEpoch}'
+          : attachment.nombreArchivo.replaceAll(RegExp(r'[\\/:*?"<>|]'), '_');
+      final savePath = '${dir.path}/$safeName';
+
+      await Dio().download(attachment.url, savePath);
+
+      final result = await OpenFilex.open(savePath);
+      if (result.type != ResultType.done && mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('No se pudo abrir el documento: ${result.message}'),
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error al descargar el documento: $e')),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _isDownloading = false);
+    }
   }
 }
 
