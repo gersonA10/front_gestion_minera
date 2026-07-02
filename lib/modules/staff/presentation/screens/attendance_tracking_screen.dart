@@ -83,6 +83,9 @@ class _AttendanceControlScreenState extends State<AttendanceControlScreen> {
 
   void _onRegisterEntry(String name) {
     setState(() => _registeredIngreso.add(name));
+    // El trabajador acaba de fichar entrada: refrescamos "En Planta" para que
+    // aparezca de inmediato (sin esperar un pull-to-refresh manual).
+    _bloc.add(GetAttendanceEnPlantaEvent());
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(

@@ -70,6 +70,7 @@ abstract class StaffRepository {
   Future<ProcessPayrollPaymentEntity> processPayrollPayment({
   required String payrollId,
   required String idempotencyKey,
+  required String comprobantePath,
   double? amount,
 });
 }

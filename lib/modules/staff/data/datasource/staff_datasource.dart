@@ -348,12 +348,20 @@ class StaffDatasource {
   Future<ProcessPayrollPaymentModel> processPayrollPayment({
     required String payrollId,
     required String idempotencyKey,
+    required String comprobantePath,
     double? amount,
   }) async {
-    final response = await apiClient.patch(
+    final response = await apiClient.patchFormData(
       '/api/hr/payrolls/$payrollId/pay',
       operationName: 'processPayrollPayment',
-      data: amount == null ? {} : {'amount': amount},
+      data: amount == null ? {} : {'amount': amount.toString()},
+      files: [
+        {
+          'name': 'comprobante',
+          'path': comprobantePath,
+          'filename': comprobantePath.split('/').last,
+        },
+      ],
       options: Options(headers: {'X-Idempotency-Key': idempotencyKey}),
     );
 

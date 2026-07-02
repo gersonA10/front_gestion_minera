@@ -153,62 +153,69 @@ class _EmployeeCheckOutLogScreenState extends State<EmployeeCheckOutLogScreen> {
       child: Scaffold(
         backgroundColor: StaffUi.background,
         appBar: staffAppBar(context, title: 'Registrar salida'),
-        bottomNavigationBar: _BottomButton(
-          attendanceId: worker.attendanceId,
-          startTime: startTime,
-          endTime: endTime,
-          breakMinutes: breakMinutes,
-          requiresRemark: requiresRemark,
-          remarkController: remarkController,
-          onFormatTime: _formatTime24Hour,
-        ),
-        body: SafeArea(
-          top: false,
-          child: SingleChildScrollView(
-            padding: const EdgeInsets.fromLTRB(16, 16, 16, 16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                _WorkerIdentity(
-                  name: worker.name,
-                  department: worker.department,
+        // El botón va dentro del body (como último hijo del Column, con el
+        // scroll en un Expanded) para que se reubique sobre el teclado. En
+        // bottomNavigationBar quedaba tapado por el teclado (la app está
+        // envuelta en un SafeArea raíz que impide que ese bar se eleve).
+        body: Column(
+          children: [
+            Expanded(
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.fromLTRB(16, 16, 16, 16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    _WorkerIdentity(
+                      name: worker.name,
+                      department: worker.department,
+                    ),
+                    const SizedBox(height: 20),
+                    CurrentShiftCard(
+                      workerPhoto: worker.avatarUrl,
+                      startTime: startTime,
+                      formatearHora: _formatTime24Hour,
+                    ),
+                    const SizedBox(height: 20),
+                    ExitHourWidget(
+                      endTime: endTime,
+                      formatearHora: _formatTime24Hour,
+                      onSelectTime: _selectTime,
+                    ),
+                    const SizedBox(height: 20),
+                    _BreakTimeCard(
+                      breakMinutes: breakMinutes,
+                      controller: breakController,
+                      onUpdate: _setBreak,
+                      onTyped: _onBreakTyped,
+                      onEditingComplete: _normalizeBreakField,
+                      hoursWorked: hoursWorked,
+                    ),
+                    const SizedBox(height: 20),
+                    _SummaryCard(
+                      hoursWorked: hoursWorked,
+                      breakMinutes: breakMinutes,
+                      netTotal: netTotal,
+                      formatDuration: _formatDuration,
+                    ),
+                    const SizedBox(height: 20),
+                    _ObservationsCard(
+                      controller: remarkController,
+                      requiresRemark: requiresRemark,
+                    ),
+                  ],
                 ),
-                const SizedBox(height: 20),
-                CurrentShiftCard(
-                  workerPhoto: worker.avatarUrl,
-                  startTime: startTime,
-                  formatearHora: _formatTime24Hour,
-                ),
-                const SizedBox(height: 20),
-                ExitHourWidget(
-                  endTime: endTime,
-                  formatearHora: _formatTime24Hour,
-                  onSelectTime: _selectTime,
-                ),
-                const SizedBox(height: 20),
-                _BreakTimeCard(
-                  breakMinutes: breakMinutes,
-                  controller: breakController,
-                  onUpdate: _setBreak,
-                  onTyped: _onBreakTyped,
-                  onEditingComplete: _normalizeBreakField,
-                  hoursWorked: hoursWorked,
-                ),
-                const SizedBox(height: 20),
-                _SummaryCard(
-                  hoursWorked: hoursWorked,
-                  breakMinutes: breakMinutes,
-                  netTotal: netTotal,
-                  formatDuration: _formatDuration,
-                ),
-                const SizedBox(height: 20),
-                _ObservationsCard(
-                  controller: remarkController,
-                  requiresRemark: requiresRemark,
-                ),
-              ],
+              ),
             ),
-          ),
+            _BottomButton(
+              attendanceId: worker.attendanceId,
+              startTime: startTime,
+              endTime: endTime,
+              breakMinutes: breakMinutes,
+              requiresRemark: requiresRemark,
+              remarkController: remarkController,
+              onFormatTime: _formatTime24Hour,
+            ),
+          ],
         ),
       ),
     );
@@ -393,16 +400,16 @@ class _BreakTimeCard extends StatelessWidget {
                 children: [
                   _stepperButton(
                     icon: Icons.remove_rounded,
-                    onTap: canDecrease ? () => onUpdate(breakMinutes - 5) : null,
+                    onTap: canDecrease
+                        ? () => onUpdate(breakMinutes - 5)
+                        : null,
                   ),
                   Expanded(
                     child: TextField(
                       controller: controller,
                       keyboardType: TextInputType.number,
                       textAlign: TextAlign.center,
-                      inputFormatters: [
-                        FilteringTextInputFormatter.digitsOnly,
-                      ],
+                      inputFormatters: [FilteringTextInputFormatter.digitsOnly],
                       style: const TextStyle(
                         fontSize: 30,
                         fontWeight: FontWeight.w800,
@@ -430,7 +437,9 @@ class _BreakTimeCard extends StatelessWidget {
                   ),
                   _stepperButton(
                     icon: Icons.add_rounded,
-                    onTap: canIncrease ? () => onUpdate(breakMinutes + 5) : null,
+                    onTap: canIncrease
+                        ? () => onUpdate(breakMinutes + 5)
+                        : null,
                   ),
                 ],
               ),
@@ -448,8 +457,11 @@ class _BreakTimeCard extends StatelessWidget {
                 const SizedBox(height: 14),
                 Row(
                   children: [
-                    const Icon(Icons.info_outline_rounded,
-                        size: 16, color: TColors.statusOrange),
+                    const Icon(
+                      Icons.info_outline_rounded,
+                      size: 16,
+                      color: TColors.statusOrange,
+                    ),
                     const SizedBox(width: 8),
                     Expanded(
                       child: Text(
@@ -583,18 +595,16 @@ class _ObservationsCard extends StatelessWidget {
         ),
         const SizedBox(height: 12),
         StaffCard(
-          borderColor:
-              requiresRemark ? TColors.statusOrange.withValues(alpha: 0.5) : null,
+          borderColor: requiresRemark
+              ? TColors.statusOrange.withValues(alpha: 0.5)
+              : null,
           child: TextField(
             controller: controller,
             maxLines: 5,
             minLines: 4,
             maxLength: 500,
             inputFormatters: [LengthLimitingTextInputFormatter(500)],
-            style: const TextStyle(
-              fontSize: 14,
-              color: StaffUi.textPrimary,
-            ),
+            style: const TextStyle(fontSize: 14, color: StaffUi.textPrimary),
             decoration: const InputDecoration(
               border: InputBorder.none,
               isCollapsed: true,
@@ -618,8 +628,11 @@ class _ObservationsCard extends StatelessWidget {
             ),
             child: const Row(
               children: [
-                Icon(Icons.warning_amber_rounded,
-                    color: TColors.statusOrange, size: 20),
+                Icon(
+                  Icons.warning_amber_rounded,
+                  color: TColors.statusOrange,
+                  size: 20,
+                ),
                 SizedBox(width: 8),
                 Expanded(
                   child: Text(
@@ -686,15 +699,15 @@ class _BottomButton extends StatelessWidget {
     }
 
     context.read<StaffBloc>().add(
-          CheckOutEmployeeEvent(
-            attendanceId: attendanceId,
-            request: EmployeeCheckOutRequestEntity(
-              checkOutTime: onFormatTime(endTime),
-              breakMinutes: breakMinutes,
-              observations: remarkController.text.trim(),
-            ),
-          ),
-        );
+      CheckOutEmployeeEvent(
+        attendanceId: attendanceId,
+        request: EmployeeCheckOutRequestEntity(
+          checkOutTime: onFormatTime(endTime),
+          breakMinutes: breakMinutes,
+          observations: remarkController.text.trim(),
+        ),
+      ),
+    );
   }
 
   @override

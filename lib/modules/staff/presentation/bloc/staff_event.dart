@@ -170,11 +170,13 @@ class GetPayrollHistoryEvent extends StaffEvent {
 class ProcessPayrollPaymentEvent extends StaffEvent {
   final String payrollId;
   final String idempotencyKey;
+  final String comprobantePath;
   final double? amount;
 
   ProcessPayrollPaymentEvent({
     required this.payrollId,
     required this.idempotencyKey,
+    required this.comprobantePath,
     this.amount,
   });
 }
