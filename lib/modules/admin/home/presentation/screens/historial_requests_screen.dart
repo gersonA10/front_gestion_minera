@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:front_gestion_minera/config/router/app_router.gr.dart';
 import 'package:front_gestion_minera/utils/constants/color.constant.dart';
+import 'package:front_gestion_minera/core/widgets/custom_date_selector.dart';
 import '../../domain/entity/request_history_entity.dart';
 import '../bloc/admin_bloc.dart';
 import '../widgets/widgets.dart';
@@ -18,6 +19,9 @@ class _HistorialRequestsScreenState extends State<HistorialRequestsScreen> {
   final ScrollController _scrollController = ScrollController();
 
   String _activeFilter = 'todos';
+  String? _activePeriod;
+  String? _activeDateString;
+  String? _activeDateLabel;
   List<RequestHistoryEntity> _cachedItems = [];
   bool _hasMax = false;
 
@@ -30,7 +34,11 @@ class _HistorialRequestsScreenState extends State<HistorialRequestsScreen> {
       final state = context.read<AdminBloc>().state;
       if (state is AdminInitial || state is AdminPendingRequestsLoaded) {
          context.read<AdminBloc>().add(
-          GetRequestHistoryEvent(status: _activeFilter),
+          GetRequestHistoryEvent(
+            status: _activeFilter,
+            period: _activePeriod,
+            exactDate: _activeDateString,
+          ),
         );
       }
     });
@@ -54,7 +62,12 @@ class _HistorialRequestsScreenState extends State<HistorialRequestsScreen> {
 
   Future<void> _onRefresh() async {
     context.read<AdminBloc>().add(
-      GetRequestHistoryEvent(isRefresh: true, status: _activeFilter),
+      GetRequestHistoryEvent(
+        isRefresh: true,
+        status: _activeFilter,
+        period: _activePeriod,
+        exactDate: _activeDateString,
+      ),
     );
   }
 
@@ -62,7 +75,48 @@ class _HistorialRequestsScreenState extends State<HistorialRequestsScreen> {
     if (_activeFilter == filter) return;
     setState(() => _activeFilter = filter);
     context.read<AdminBloc>().add(
-      GetRequestHistoryEvent(isRefresh: true, status: filter),
+      GetRequestHistoryEvent(
+        isRefresh: true,
+        status: filter,
+        period: _activePeriod,
+        exactDate: _activeDateString,
+      ),
+    );
+  }
+
+  Future<void> _openDateSelector() async {
+    final DateFilterResult? result = await CustomDateSelector.show(context);
+    if (result == null) return;
+
+    setState(() {
+      _activePeriod = result.period;
+      _activeDateString = result.exactDate;
+      _activeDateLabel = result.displayTitle;
+    });
+    if (!mounted) return;
+    context.read<AdminBloc>().add(
+      GetRequestHistoryEvent(
+        isRefresh: true,
+        status: _activeFilter,
+        period: _activePeriod,
+        exactDate: _activeDateString,
+      ),
+    );
+  }
+
+  void _clearDateFilter() {
+    setState(() {
+      _activePeriod = null;
+      _activeDateString = null;
+      _activeDateLabel = null;
+    });
+    context.read<AdminBloc>().add(
+      GetRequestHistoryEvent(
+        isRefresh: true,
+        status: _activeFilter,
+        period: null,
+        exactDate: null,
+      ),
     );
   }
 
@@ -103,6 +157,84 @@ class _HistorialRequestsScreenState extends State<HistorialRequestsScreen> {
                         child: _HistorialFilterTabs(
                           activeFilter: _activeFilter,
                           onFilterChanged: _changeFilter,
+                        ),
+                      ),
+                      const SliverToBoxAdapter(child: SizedBox(height: 12)),
+
+                      SliverToBoxAdapter(
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 20),
+                          child: Row(
+                            children: [
+                              Expanded(
+                                child: GestureDetector(
+                                  onTap: _openDateSelector,
+                                  child: Container(
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 16,
+                                      vertical: 14,
+                                    ),
+                                    decoration: BoxDecoration(
+                                      color: Colors.white,
+                                      borderRadius: BorderRadius.circular(14),
+                                      border: Border.all(
+                                        color: const Color(0xFFE7EAF0),
+                                      ),
+                                    ),
+                                    child: Row(
+                                      children: [
+                                        const Icon(
+                                          Icons.calendar_month_outlined,
+                                          color: TColors.appMainDarkColor,
+                                          size: 22,
+                                        ),
+                                        const SizedBox(width: 12),
+                                        Text(
+                                          _activeDateLabel ??
+                                              'Filtrar por fecha',
+                                          style: TextStyle(
+                                            fontFamily: 'Poppins',
+                                            fontSize: 14,
+                                            fontWeight: _activeDateLabel != null
+                                                ? FontWeight.w600
+                                                : FontWeight.w400,
+                                            color: _activeDateLabel != null
+                                                ? TColors.appMainDarkColor
+                                                : const Color(0xFF7A8191),
+                                          ),
+                                        ),
+                                        const Spacer(),
+                                        const Icon(
+                                          Icons.keyboard_arrow_down_rounded,
+                                          color: Color(0xFF7A8191),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                              ),
+                              if (_activeDateString != null)
+                                Padding(
+                                  padding: const EdgeInsets.only(left: 10),
+                                  child: InkWell(
+                                    onTap: _clearDateFilter,
+                                    borderRadius: BorderRadius.circular(12),
+                                    child: Container(
+                                      padding: const EdgeInsets.all(12),
+                                      decoration: BoxDecoration(
+                                        color: const Color(0xFFFFE1E1),
+                                        borderRadius: BorderRadius.circular(12),
+                                      ),
+                                      child: const Icon(
+                                        Icons.close_rounded,
+                                        color: Color(0xFFD61F1F),
+                                        size: 22,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                            ],
+                          ),
                         ),
                       ),
                       const SliverToBoxAdapter(child: SizedBox(height: 20)),

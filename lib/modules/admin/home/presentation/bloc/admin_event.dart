@@ -14,8 +14,15 @@ class LoadMorePendingRequestsEvent extends AdminEvent {}
 class GetRequestHistoryEvent extends AdminEvent {
   final bool isRefresh;
   final String status; // 'todos', 'aprobado', 'rechazado'
-  
-  GetRequestHistoryEvent({this.isRefresh = true, required this.status});
+  final String? period; // 'day', 'month', 'year' (null = sin filtro de fecha)
+  final String? exactDate; // Formato YYYY-MM-DD
+
+  GetRequestHistoryEvent({
+    this.isRefresh = true,
+    required this.status,
+    this.period,
+    this.exactDate,
+  });
 }
 
 class LoadMoreRequestHistoryEvent extends AdminEvent {}

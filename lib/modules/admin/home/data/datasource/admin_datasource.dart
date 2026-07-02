@@ -31,10 +31,18 @@ class AdminDatasource {
     int page = 1,
     int limit = 10,
     String? status,
+    String? period,
+    String? exactDate,
   }) async {
     final queryParams = <String, dynamic>{'page': page, 'limit': limit};
     if (status != null && status != 'todos') {
       queryParams['status'] = status;
+    }
+    // El endpoint acepta 'period' (day|month|year) + 'exact_date' (YYYY-MM-DD).
+    // OJO: la API tiene lista blanca estricta de parámetros; usar estos nombres.
+    if (period != null && exactDate != null && exactDate.isNotEmpty) {
+      queryParams['period'] = period;
+      queryParams['exact_date'] = exactDate;
     }
 
     final response = await apiClient.get(

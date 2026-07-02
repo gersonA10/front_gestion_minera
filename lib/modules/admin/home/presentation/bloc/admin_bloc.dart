@@ -24,6 +24,8 @@ class AdminBloc extends Bloc<AdminEvent, AdminState> {
   bool _hasReachedMaxHistory = false;
   int _totalHistoryRecords = 0;
   String _currentHistoryStatus = 'todos';
+  String? _currentHistoryPeriod;
+  String? _currentHistoryExactDate;
   List<RequestHistoryEntity> _historyItems = [];
 
   //variables historial aportes
@@ -195,7 +197,10 @@ class AdminBloc extends Bloc<AdminEvent, AdminState> {
     GetRequestHistoryEvent event,
     Emitter<AdminState> emit,
   ) async {
-    bool isChangingTabOrRefresh =  event.isRefresh || _currentHistoryStatus != event.status;
+    bool isChangingTabOrRefresh = event.isRefresh ||
+        _currentHistoryStatus != event.status ||
+        _currentHistoryPeriod != event.period ||
+        _currentHistoryExactDate != event.exactDate;
 
     if (!isChangingTabOrRefresh && _historyItems.isNotEmpty) {
       emit(
@@ -206,19 +211,23 @@ class AdminBloc extends Bloc<AdminEvent, AdminState> {
           currentFilter: _currentHistoryStatus,
         ),
       );
-      return; 
+      return;
     }
 
     _currentHistoryPage = 1;
     _hasReachedMaxHistory = false;
     _historyItems.clear();
     _currentHistoryStatus = event.status;
+    _currentHistoryPeriod = event.period;
+    _currentHistoryExactDate = event.exactDate;
     emit(AdminRequestHistoryLoading(_currentHistoryStatus));
 
     try {
       final result = await repository.getRequestHistory(
         page: _currentHistoryPage,
         status: _currentHistoryStatus,
+        period: _currentHistoryPeriod,
+        exactDate: _currentHistoryExactDate,
       );
 
       _historyItems = result.items;
@@ -262,6 +271,8 @@ class AdminBloc extends Bloc<AdminEvent, AdminState> {
       final result = await repository.getRequestHistory(
         page: _currentHistoryPage,
         status: _currentHistoryStatus,
+        period: _currentHistoryPeriod,
+        exactDate: _currentHistoryExactDate,
       );
 
       // SUMAMOS los nuevos n ítems a los m que ya teníamos

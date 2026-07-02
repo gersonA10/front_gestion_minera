@@ -32,11 +32,15 @@ class AdminRepositoryImpl implements AdminRepository {
     int page = 1,
     int limit = 10,
     String? status,
+    String? period,
+    String? exactDate,
   }) async {
     final result = await datasource.getRequestHistory(
       page: page,
       limit: limit,
       status: status,
+      period: period,
+      exactDate: exactDate,
     );
     final models = result['items'] as List<RequestHistoryModelAdmin>;
     return PaginatedRequestHistoryEntity(
