@@ -9,6 +9,7 @@ import 'package:front_gestion_minera/utils/session/session_actions.dart';
 import 'package:front_gestion_minera/utils/session/user_session.dart';
 import 'package:front_gestion_minera/core/tutorial/tutorial_prefs.dart';
 import 'package:front_gestion_minera/core/tutorial/tutorial_tts.dart';
+import 'package:front_gestion_minera/modules/staff/presentation/widgets/staff_ui.dart';
 import 'package:showcaseview/showcaseview.dart';
 import '../../domain/entity/entity.dart';
 import '../bloc/camp_bloc.dart';
@@ -258,9 +259,7 @@ class _HomeDashboardCampScreenState extends State<HomeDashboardCampScreen> {
               children: const [
                 _Header(),
                 Expanded(
-                  child: Center(
-                    child: CircularProgressIndicator(color: _C.primary),
-                  ),
+                  child: StaffLoader(),
                 ),
               ],
             );

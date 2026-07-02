@@ -4,6 +4,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:front_gestion_minera/config/router/app_router.gr.dart';
 import 'package:front_gestion_minera/injector_container.dart';
+import 'package:front_gestion_minera/modules/staff/presentation/widgets/staff_ui.dart';
 import 'package:intl/intl.dart';
 
 import '../../domain/entity/entity.dart';
@@ -85,9 +86,7 @@ class _RequestProgressDetailsScreenState
               children: const [
                 _Hero.placeholder(),
                 Expanded(
-                  child: Center(
-                    child: CircularProgressIndicator(color: _C.primary),
-                  ),
+                  child: StaffLoader(),
                 ),
               ],
             );
