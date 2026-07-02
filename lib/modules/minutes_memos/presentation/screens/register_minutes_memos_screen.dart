@@ -230,8 +230,7 @@ class _RegisterMinutesMemosScreenState
                                                 const SizedBox(width: 8),
                                                 Icon(
                                                   Icons.people_alt_outlined,
-                                                  color:
-                                                      AC.primary,
+                                                  color: AC.primary,
                                                 ),
                                               ],
                                             ),
@@ -294,8 +293,7 @@ class _RegisterMinutesMemosScreenState
                                                     ? 'Seleccionar participantes'
                                                     : '${_listParticipants.length} participante(s) seleccionado(s)',
                                                 style: TextStyle(
-                                                  color:
-                                                      AC.primary,
+                                                  color: AC.primary,
                                                 ),
                                               ),
                                               Icon(
@@ -567,16 +565,15 @@ class _RegisterMinutesMemosScreenState
       message: msg,
       type: AlertType.error,
     );
-    context.router.back();
   }
-   void _showError1(String msg) {
+
+  void _showError1(String msg) {
     CustomAlert.show(
       context,
       title: 'Error',
       message: msg,
       type: AlertType.error,
     );
-    context.router.back();
   }
 
   Widget _buildFilePreview() {
@@ -724,8 +721,8 @@ class _RegisterMinutesMemosScreenState
   }
 
   Future<void> _onSaveAndSendMemorandum() async {
+    FocusScope.of(context).unfocus();
     if (!_formTitleKey.currentState!.validate()) {
-      
       _showError1("El titulo es obligatorio.");
       return;
     }
@@ -742,9 +739,7 @@ class _RegisterMinutesMemosScreenState
       _showError1("Por favor, selecciona al menos un archivo.");
       return;
     }
-
     setState(() => _isUploading = true);
-
     final memorandum = CreateMemorandumEntity(
       title: titleController.text,
       contenido: descriptionController.text,
@@ -759,6 +754,7 @@ class _RegisterMinutesMemosScreenState
   }
 
   Future<void> _onSaveAndSendActa() async {
+    FocusScope.of(context).unfocus();
     if (!_formTitleKey.currentState!.validate()) {
       _showError1("El titulo es obligatorio.");
       return;
@@ -943,9 +939,7 @@ class _RegisterMinutesMemosScreenState
                         height: 40,
                         margin: const EdgeInsets.all(2),
                         decoration: BoxDecoration(
-                          color: isSelected
-                              ? AC.primary
-                              : Colors.transparent,
+                          color: isSelected ? AC.primary : Colors.transparent,
                           shape: BoxShape.circle,
                         ),
                         child: Center(
@@ -1015,14 +1009,20 @@ class _RegisterMinutesMemosScreenState
                       Icon(
                         icons[index],
                         size: 16,
-                        color: isActive ? Colors.white : const Color(0xFF9CA3AF),
+                        color: isActive
+                            ? Colors.white
+                            : const Color(0xFF9CA3AF),
                       ),
                       const SizedBox(width: 6),
                       Text(
                         typeRegister[index],
                         style: TextStyle(
-                          color: isActive ? Colors.white : const Color(0xFF9CA3AF),
-                          fontWeight: isActive ? FontWeight.w600 : FontWeight.w500,
+                          color: isActive
+                              ? Colors.white
+                              : const Color(0xFF9CA3AF),
+                          fontWeight: isActive
+                              ? FontWeight.w600
+                              : FontWeight.w500,
                           fontSize: 14,
                         ),
                       ),
