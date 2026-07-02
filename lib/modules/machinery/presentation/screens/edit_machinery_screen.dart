@@ -292,7 +292,7 @@ class _EditMachineryScreenState extends State<EditMachineryScreen> {
                     ),
                   ),
                 ),
-                if (submitting)  StaffLoader(),
+                if (submitting) const StaffSubmitOverlay(label: 'Guardando'),
               ],
             );
           },

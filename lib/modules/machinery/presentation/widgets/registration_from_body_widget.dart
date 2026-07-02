@@ -285,7 +285,7 @@ class _RegistrationFormBodyState extends State<RegistrationFormBody> {
               ),
             ),
             if (submitting)
-              StaffLoader(),
+              const StaffSubmitOverlay(label: 'Registrando maquinaria'),
           ],
         );
       },

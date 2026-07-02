@@ -984,3 +984,72 @@ Widget staffCoachMark({
     child: child,
   );
 }
+
+/// Overlay de envío/proceso con el [StaffLoader] en un card blanco sobre un
+/// velo oscuro. Pensado para usarse como hijo directo de un [Stack]
+/// (usa [Positioned.fill] para cubrir toda la pantalla).
+class StaffSubmitOverlay extends StatelessWidget {
+  final String label;
+  final String? subtitle;
+
+  const StaffSubmitOverlay({
+    super.key,
+    this.label = 'Cargando',
+    this.subtitle,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Positioned.fill(
+      child: ColoredBox(
+        color: Colors.black.withValues(alpha: 0.35),
+        child: Center(
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 300),
+            child: Container(
+              margin: const EdgeInsets.symmetric(horizontal: 32),
+              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 22),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(22),
+              ),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const SizedBox(
+                    width: 160,
+                    height: 148,
+                    child: StaffLoader(label: null),
+                  ),
+                  const SizedBox(height: 10),
+                  Text(
+                    label,
+                    textAlign: TextAlign.center,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(
+                      color: StaffUi.textPrimary,
+                      fontSize: 15,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                  if (subtitle != null && subtitle!.isNotEmpty) ...[
+                    const SizedBox(height: 4),
+                    Text(
+                      subtitle!,
+                      textAlign: TextAlign.center,
+                      style: const TextStyle(
+                        color: StaffUi.textSecondary,
+                        fontSize: 12.5,
+                      ),
+                    ),
+                  ],
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}

@@ -290,14 +290,7 @@ class _MemberLoansHomeScreenState extends State<MemberLoansHomeScreen> {
                         if (index >= state.items.length) {
                           return const Padding(
                             padding: EdgeInsets.symmetric(vertical: 16),
-                            child: Center(
-                              child: SizedBox(
-                                width: 22,
-                                height: 22,
-                                child: CircularProgressIndicator(
-                                    strokeWidth: 2.4, color: MlColors.primary),
-                              ),
-                            ),
+                            child: StaffLoader(),
                           );
                         }
                         final item = state.items[index];

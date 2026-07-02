@@ -206,7 +206,8 @@ class _DetailMachineryScreenState extends State<DetailMachineryScreen> {
                 _buildContent(
                     context, _cacheHeader!, _cacheItems, _cacheTotal),
                 if (changing)
-                   StaffLoader(),]
+                  const StaffSubmitOverlay(label: 'Actualizando estado'),
+              ],
             );
           },
         ),

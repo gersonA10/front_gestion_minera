@@ -232,8 +232,8 @@ class _RequestMaintenanceScreenState extends State<RequestMaintenanceScreen> {
                   ),
                 ),
               ),
-              if (isSubmitting) StaffLoader(),
-                
+              if (isSubmitting)
+                const StaffSubmitOverlay(label: 'Enviando solicitud'),
             ],
           );
         },

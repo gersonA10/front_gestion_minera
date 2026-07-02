@@ -9,6 +9,7 @@ import 'package:front_gestion_minera/injector_container.dart';
 import 'package:front_gestion_minera/modules/machinery/domain/entity/entity.dart';
 import 'package:front_gestion_minera/modules/machinery/presentation/bloc/machinery_bloc.dart';
 import 'package:front_gestion_minera/modules/machinery/presentation/widgets/card_machinery_widget.dart';
+import 'package:front_gestion_minera/modules/staff/presentation/widgets/staff_ui.dart';
 import 'package:front_gestion_minera/utils/constants/color.constant.dart';
 
 @RoutePage()
@@ -393,16 +394,7 @@ class _ListMachineryScreenState extends State<ListMachineryScreen>
     if (_isLoadingMore && !_cachedHasReachedMax) {
       return const Padding(
         padding: EdgeInsets.symmetric(vertical: 18),
-        child: Center(
-          child: SizedBox(
-            width: 22,
-            height: 22,
-            child: CircularProgressIndicator(
-              strokeWidth: 2.4,
-              color: TColors.appMainColor,
-            ),
-          ),
-        ),
+        child: StaffLoader(),
       );
     }
     if (_cachedHasReachedMax && count > 0) {
