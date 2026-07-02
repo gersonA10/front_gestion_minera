@@ -7,6 +7,7 @@ import 'package:front_gestion_minera/core/widgets/custom_alert_widget.dart';
 import 'package:front_gestion_minera/config/router/app_router.gr.dart';
 import 'package:front_gestion_minera/modules/admin/users/domain/entity/user_entity.dart';
 import 'package:front_gestion_minera/modules/admin/users/presentation/bloc/admin_users_bloc.dart';
+import 'package:front_gestion_minera/modules/staff/presentation/widgets/staff_ui.dart';
 import 'package:front_gestion_minera/utils/constants/color.constant.dart';
 
 @RoutePage()
@@ -158,16 +159,7 @@ class _UsersManagementScreenState extends State<UsersManagementScreen> {
                     if (i >= state.users.length) {
                       return const Padding(
                         padding: EdgeInsets.symmetric(vertical: 16),
-                        child: Center(
-                          child: SizedBox(
-                            width: 22,
-                            height: 22,
-                            child: CircularProgressIndicator(
-                              strokeWidth: 2.2,
-                              color: TColors.appMainDarkColor,
-                            ),
-                          ),
-                        ),
+                        child: StaffLoader(),
                       );
                     }
                     return _UserCard(

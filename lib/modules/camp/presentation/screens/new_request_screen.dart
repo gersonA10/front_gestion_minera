@@ -2,8 +2,8 @@ import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:front_gestion_minera/core/widgets/custom_alert_widget.dart';
-import 'package:front_gestion_minera/core/widgets/excavator_loader.dart';
 import 'package:front_gestion_minera/injector_container.dart';
+import 'package:front_gestion_minera/modules/staff/presentation/widgets/staff_ui.dart';
 import 'package:intl/intl.dart';
 import '../../domain/entity/entity.dart';
 import '../bloc/camp_bloc.dart';
@@ -228,7 +228,7 @@ class _NewRequestScreenState extends State<NewRequestScreen> {
                 if (isLoading)
                   Container(
                     color: Colors.black.withValues(alpha: 0.5),
-                    child: const Center(child: ExcavatorLoader()),
+                    child: const Center(child: StaffLoader()),
                   ),
               ],
             );

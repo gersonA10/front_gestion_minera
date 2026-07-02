@@ -2,7 +2,7 @@ import 'dart:io';
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:front_gestion_minera/core/widgets/excavator_loader.dart';
+import 'package:front_gestion_minera/modules/staff/presentation/widgets/staff_ui.dart';
 import 'package:front_gestion_minera/modules/treasury/domain/entity/distribute/receipt_entity.dart';
 import 'package:front_gestion_minera/modules/treasury/presentation/bloc/treasury_bloc.dart';
 import 'package:front_gestion_minera/utils/constants/color.constant.dart';
@@ -434,7 +434,7 @@ class _PaymentSuccessDistributionScreenState
                 );
               }
               return const Center(
-                child: ExcavatorLoader()
+                child: StaffLoader(),
               );
             },
           ),

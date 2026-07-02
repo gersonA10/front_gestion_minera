@@ -2,8 +2,8 @@ import 'dart:async';
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:front_gestion_minera/core/widgets/excavator_loader.dart';
 import 'package:front_gestion_minera/injector_container.dart';
+import 'package:front_gestion_minera/modules/staff/presentation/widgets/staff_ui.dart';
 import 'package:front_gestion_minera/utils/constants/color.constant.dart';
 import 'package:intl/intl.dart';
 
@@ -189,8 +189,27 @@ class _CreateContributionScreenState extends State<CreateContributionScreen> {
             ),
             body: AppLoadingOverlay(
               isLoading: isLoading,
-              message: 'Creando aporte...',
-              loader:  ExcavatorLoader(),
+              message: '',
+              loader: Container(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(20),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withValues(alpha: 0.1),
+                      blurRadius: 20,
+                      offset: const Offset(0, 4),
+                    ),
+                  ],
+                ),
+                child: const SizedBox(
+                  width: 168,
+                  height: 172,
+                  child: StaffLoader(label: 'Creando aporte'),
+                ),
+              ),
               child: SingleChildScrollView(
                 padding: const EdgeInsets.all(20.0),
                 child: Form(
@@ -320,11 +339,9 @@ class _CreateContributionScreenState extends State<CreateContributionScreen> {
 
   Widget _buildPreviewBox() {
     if (_isSimulating) {
-      return const Center(
-        child: Padding(
-          padding: EdgeInsets.all(20.0),
-          child: CircularProgressIndicator(color: Color(0xFF1A3557)),
-        ),
+      return const Padding(
+        padding: EdgeInsets.all(20.0),
+        child: StaffLoader(),
       );
     }
 

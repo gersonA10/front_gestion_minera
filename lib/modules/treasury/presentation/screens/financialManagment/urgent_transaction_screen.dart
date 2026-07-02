@@ -1,7 +1,7 @@
 import 'package:auto_route/annotations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:front_gestion_minera/core/widgets/excavator_loader.dart';
+import 'package:front_gestion_minera/modules/staff/presentation/widgets/staff_ui.dart';
 
 import '../../../../../core/widgets/app_loading_overlay.dart';
 import '../../../../../injector_container.dart';
@@ -40,7 +40,7 @@ class UrgentTransactionScreen extends StatelessWidget {
             body: AppLoadingOverlay(
               isLoading: isLoading,
               message: 'Cargando...',
-              loader: const ExcavatorLoader(),
+              loader: const StaffLoader(),
               child: SafeArea(
                 child: SingleChildScrollView(
                   padding: const EdgeInsets.all(24.0),

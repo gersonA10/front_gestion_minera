@@ -4,8 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:front_gestion_minera/config/router/app_router.gr.dart';
 import 'package:front_gestion_minera/core/widgets/custom_alert_widget.dart';
-import 'package:front_gestion_minera/core/widgets/excavator_loader.dart';
 import 'package:front_gestion_minera/injector_container.dart';
+import 'package:front_gestion_minera/modules/staff/presentation/widgets/staff_ui.dart';
 import 'package:front_gestion_minera/modules/treasury/presentation/bloc/treasury_bloc.dart';
 import 'package:front_gestion_minera/utils/date_util.dart';
 import 'package:image_picker/image_picker.dart';
@@ -616,7 +616,7 @@ class _RecordContributionPaymentScreenState
                       if (isLoading)
                         const Padding(
                           padding: EdgeInsets.symmetric(vertical: 6),
-                          child: ExcavatorLoader(width: 90, height: 90),
+                          child: StaffLoader(),
                         )
                       else ...[
                         CPrimaryButton(

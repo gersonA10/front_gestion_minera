@@ -2,8 +2,8 @@ import 'dart:io';
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:front_gestion_minera/core/widgets/excavator_loader.dart';
 import 'package:front_gestion_minera/injector_container.dart';
+import 'package:front_gestion_minera/modules/staff/presentation/widgets/staff_ui.dart';
 import 'package:image_picker/image_picker.dart';
 
 import '../../domain/entity/cash_register_entity.dart';
@@ -68,7 +68,7 @@ class _MemberLoanManageScreenState extends State<MemberLoanManageScreen> {
               },
               builder: (context, state) {
                 if (state is MemberLoanDetailLoading) {
-                  return const Center(child: ExcavatorLoader());
+                  return const Center(child: StaffLoader(),);
                 }
                 if (state is MemberLoanDetailError) {
                   return MlStateView(
@@ -112,7 +112,7 @@ class _MemberLoanManageScreenState extends State<MemberLoanManageScreen> {
                       Positioned.fill(
                         child: Container(
                           color: Colors.black.withValues(alpha: 0.25),
-                          child: const Center(child: ExcavatorLoader()),
+                          child: const Center(child: StaffLoader(),),
                         ),
                       ),
                   ],

@@ -1,10 +1,10 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:front_gestion_minera/core/widgets/excavator_loader.dart';
 import 'package:front_gestion_minera/injector_container.dart';
 import 'package:front_gestion_minera/modules/partners/domain/entity/loan_detail_entity.dart';
 import 'package:front_gestion_minera/modules/partners/presentation/bloc/partners_bloc.dart';
+import 'package:front_gestion_minera/modules/staff/presentation/widgets/staff_ui.dart';
 
 class _LoanColors {
   static const primary = Color(0xFF1A56FF);
@@ -70,7 +70,7 @@ class _MemberLoanDetailScreenState extends State<MemberLoanDetailScreen> {
               bloc: _bloc,
               builder: (context, state) {
                 if (state is LoanDetailLoading) {
-                  return const Center(child: ExcavatorLoader());
+                  return const Center(child: StaffLoader(),);
                 }
                 if (state is LoanDetailError) {
                   return _ErrorState(message: state.message);
