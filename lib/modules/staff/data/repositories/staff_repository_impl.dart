@@ -172,11 +172,13 @@ class StaffRepositoryImpl implements StaffRepository {
   Future<ProcessPayrollPaymentEntity> processPayrollPayment({
     required String payrollId,
     required String idempotencyKey,
+    required String comprobantePath,
     double? amount,
   }) async {
     return await datasource.processPayrollPayment(
       payrollId: payrollId,
       idempotencyKey: idempotencyKey,
+      comprobantePath: comprobantePath,
       amount: amount,
     );
   }

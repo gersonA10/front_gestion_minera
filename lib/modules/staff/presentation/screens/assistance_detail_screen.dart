@@ -186,7 +186,7 @@ class _AssistanceDetailScreenState extends State<AssistanceDetailScreen> {
                 const SizedBox(height: 14),
                 _buildChronologyCard(chronology),
                 const SizedBox(height: 14),
-                _buildValidationCard(chronology, validation),
+            //_buildValidationCard(chronology, validation),
                 const SizedBox(height: 18),
                 _buildReportButton(context, employeeDetail),
               ],
@@ -489,112 +489,112 @@ class _AssistanceDetailScreenState extends State<AssistanceDetailScreen> {
   }
 
   // ── Card 3: validación (firma + geo) ──
-  Widget _buildValidationCard(
-    Chronology chronology,
-    Validation validation,
-  ) {
-    return StaffCard(
-      padding: const EdgeInsets.all(20),
-      child: Column(
-        children: [
-          const StaffSectionTitle(
-            'Validación',
-            icon: Icons.verified_outlined,
-          ),
-          const SizedBox(height: 16),
-          Row(
-            children: [
-              Expanded(
-                child: Column(
-                  children: [
-                    Container(
-                      width: 110,
-                      height: 72,
-                      decoration: BoxDecoration(
-                        color: StaffUi.background,
-                        borderRadius: BorderRadius.circular(12),
-                        border: Border.all(color: StaffUi.border),
-                      ),
-                      clipBehavior: Clip.antiAlias,
-                      child: FadeInImage.assetNetwork(
-                        placeholder: AssetImageApp.getIconLoading,
-                        image: validation.supervisorSignatureUrl ?? '',
-                        fit: BoxFit.cover,
-                        imageErrorBuilder: (_, _, _) {
-                          return const Center(
-                            child: Icon(
-                              Icons.draw_outlined,
-                              size: 28,
-                              color: StaffUi.muted,
-                            ),
-                          );
-                        },
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                    const Text(
-                      'Firma supervisor',
-                      style: TextStyle(
-                        fontSize: 12.5,
-                        fontWeight: FontWeight.w700,
-                        color: StaffUi.textPrimary,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              Container(
-                width: 1,
-                height: 64,
-                color: StaffUi.border,
-                margin: const EdgeInsets.symmetric(horizontal: 8),
-              ),
-              Expanded(
-                child: Column(
-                  children: [
-                    Container(
-                      padding: const EdgeInsets.all(8),
-                      decoration: BoxDecoration(
-                        color: StaffUi.primarySoft,
-                        borderRadius: BorderRadius.circular(50),
-                      ),
-                      child: const Icon(
-                        Icons.location_on_rounded,
-                        color: StaffUi.primary,
-                        size: 24,
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                    Text(
-                      (chronology.checkOut.location == null ||
-                              chronology.checkOut.location!.isEmpty)
-                          ? 'Lugar no registrado'
-                          : chronology.checkOut.location!,
-                      textAlign: TextAlign.center,
-                      style: const TextStyle(
-                        fontSize: 12.5,
-                        fontWeight: FontWeight.w700,
-                        color: StaffUi.textPrimary,
-                      ),
-                    ),
-                    const SizedBox(height: 2),
-                    Text(
-                      'Lat: ${validation.geolocation.checkOut.latitude}, Lon: ${validation.geolocation.checkOut.longitude}',
-                      textAlign: TextAlign.center,
-                      style: const TextStyle(
-                        fontSize: 10.5,
-                        color: StaffUi.textSecondary,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
+  // Widget _buildValidationCard(
+  //   Chronology chronology,
+  //   Validation validation,
+  // ) {
+  //   return StaffCard(
+  //     padding: const EdgeInsets.all(20),
+  //     child: Column(
+  //       children: [
+  //         const StaffSectionTitle(
+  //           'Validación',
+  //           icon: Icons.verified_outlined,
+  //         ),
+  //         const SizedBox(height: 16),
+  //         Row(
+  //           children: [
+  //             Expanded(
+  //               child: Column(
+  //                 children: [
+  //                   Container(
+  //                     width: 110,
+  //                     height: 72,
+  //                     decoration: BoxDecoration(
+  //                       color: StaffUi.background,
+  //                       borderRadius: BorderRadius.circular(12),
+  //                       border: Border.all(color: StaffUi.border),
+  //                     ),
+  //                     clipBehavior: Clip.antiAlias,
+  //                     child: FadeInImage.assetNetwork(
+  //                       placeholder: AssetImageApp.getIconLoading,
+  //                       image: validation.supervisorSignatureUrl ?? '',
+  //                       fit: BoxFit.cover,
+  //                       imageErrorBuilder: (_, _, _) {
+  //                         return const Center(
+  //                           child: Icon(
+  //                             Icons.draw_outlined,
+  //                             size: 28,
+  //                             color: StaffUi.muted,
+  //                           ),
+  //                         );
+  //                       },
+  //                     ),
+  //                   ),
+  //                   const SizedBox(height: 8),
+  //                   const Text(
+  //                     'Firma supervisor',
+  //                     style: TextStyle(
+  //                       fontSize: 12.5,
+  //                       fontWeight: FontWeight.w700,
+  //                       color: StaffUi.textPrimary,
+  //                     ),
+  //                   ),
+  //                 ],
+  //               ),
+  //             ),
+  //             Container(
+  //               width: 1,
+  //               height: 64,
+  //               color: StaffUi.border,
+  //               margin: const EdgeInsets.symmetric(horizontal: 8),
+  //             ),
+  //             Expanded(
+  //               child: Column(
+  //                 children: [
+  //                   Container(
+  //                     padding: const EdgeInsets.all(8),
+  //                     decoration: BoxDecoration(
+  //                       color: StaffUi.primarySoft,
+  //                       borderRadius: BorderRadius.circular(50),
+  //                     ),
+  //                     child: const Icon(
+  //                       Icons.location_on_rounded,
+  //                       color: StaffUi.primary,
+  //                       size: 24,
+  //                     ),
+  //                   ),
+  //                   const SizedBox(height: 8),
+  //                   Text(
+  //                     (chronology.checkOut.location == null ||
+  //                             chronology.checkOut.location!.isEmpty)
+  //                         ? 'Lugar no registrado'
+  //                         : chronology.checkOut.location!,
+  //                     textAlign: TextAlign.center,
+  //                     style: const TextStyle(
+  //                       fontSize: 12.5,
+  //                       fontWeight: FontWeight.w700,
+  //                       color: StaffUi.textPrimary,
+  //                     ),
+  //                   ),
+  //                   const SizedBox(height: 2),
+  //                   Text(
+  //                     'Lat: ${validation.geolocation.checkOut.latitude}, Lon: ${validation.geolocation.checkOut.longitude}',
+  //                     textAlign: TextAlign.center,
+  //                     style: const TextStyle(
+  //                       fontSize: 10.5,
+  //                       color: StaffUi.textSecondary,
+  //                     ),
+  //                   ),
+  //                 ],
+  //               ),
+  //             ),
+  //           ],
+  //         ),
+  //       ],
+  //     ),
+  //   );
+  // }
 
   // ── Acción: generar reporte PDF (imprimir / previsualizar) ──
   Widget _buildReportButton(

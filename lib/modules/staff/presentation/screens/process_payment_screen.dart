@@ -1,7 +1,10 @@
+import 'dart:io';
+
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:uuid/uuid.dart';
 
 import 'package:front_gestion_minera/core/widgets/custom_alert_widget.dart';
@@ -30,6 +33,10 @@ class _ProcessPaymentScreenState extends State<ProcessPaymentScreen> {
   late final StaffBloc _bloc;
   final Uuid _uuid = const Uuid();
   final TextEditingController _amountCtrl = TextEditingController();
+
+  final ImagePicker _picker = ImagePicker();
+  final int _maxFileSize = 10 * 1024 * 1024;
+  XFile? _comprobante;
 
   PayrollMonthlyEntity get payroll => widget.payroll;
 
@@ -106,6 +113,15 @@ class _ProcessPaymentScreenState extends State<ProcessPaymentScreen> {
       );
       return;
     }
+    if (_comprobante == null) {
+      CustomAlert.show(
+        context,
+        title: 'Comprobante requerido',
+        message: 'Adjunta el comprobante de pago para continuar.',
+        type: AlertType.warning,
+      );
+      return;
+    }
 
     final result = await showDialog<bool>(
       context: context,
@@ -167,9 +183,87 @@ class _ProcessPaymentScreenState extends State<ProcessPaymentScreen> {
       ProcessPayrollPaymentEvent(
         payrollId: payroll.payrollId,
         idempotencyKey: _uuid.v4(),
+        comprobantePath: _comprobante!.path,
         amount: amount,
       ),
     );
+  }
+
+  /// Abre el selector para adjuntar el comprobante (galería o cámara).
+  void _showAttachSheet() {
+    HapticFeedback.selectionClick();
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: StaffUi.surface,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (sheetContext) {
+        return SafeArea(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Padding(
+                padding: EdgeInsets.fromLTRB(20, 18, 20, 6),
+                child: Align(
+                  alignment: Alignment.centerLeft,
+                  child: Text(
+                    'Adjuntar comprobante',
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w800,
+                      color: StaffUi.textPrimary,
+                      letterSpacing: -0.2,
+                    ),
+                  ),
+                ),
+              ),
+              ListTile(
+                leading: const Icon(Icons.photo_library_rounded,
+                    color: StaffUi.primary),
+                title: const Text('Elegir de la galería'),
+                onTap: () {
+                  Navigator.of(sheetContext).pop();
+                  _pickComprobante(ImageSource.gallery);
+                },
+              ),
+              ListTile(
+                leading: const Icon(Icons.photo_camera_rounded,
+                    color: StaffUi.primary),
+                title: const Text('Tomar foto'),
+                onTap: () {
+                  Navigator.of(sheetContext).pop();
+                  _pickComprobante(ImageSource.camera);
+                },
+              ),
+              const SizedBox(height: 16),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  Future<void> _pickComprobante(ImageSource source) async {
+    try {
+      final XFile? photo =
+          await _picker.pickImage(source: source, imageQuality: 80);
+      if (photo == null) return;
+      final int size = await photo.length();
+      if (size > _maxFileSize) {
+        if (!mounted) return;
+        CustomAlert.show(
+          context,
+          title: 'Archivo muy grande',
+          message: 'El archivo ${photo.path.split('/').last} supera los 10MB.',
+          type: AlertType.error,
+        );
+        return;
+      }
+      setState(() => _comprobante = photo);
+    } catch (e) {
+      debugPrint('Error al procesar el comprobante: $e');
+    }
   }
 
   @override
@@ -225,6 +319,19 @@ class _ProcessPaymentScreenState extends State<ProcessPaymentScreen> {
                               enabled: !isLoading,
                               onFull: () => _setAmount(payroll.remaining),
                               onHalf: () => _setAmount(payroll.remaining / 2),
+                            ),
+                            const SizedBox(height: 22),
+                            const StaffSectionTitle(
+                              'Comprobante de pago',
+                              icon: Icons.attach_file_rounded,
+                            ),
+                            const SizedBox(height: 12),
+                            _ComprobantePicker(
+                              file: _comprobante,
+                              enabled: !isLoading,
+                              onTap: _showAttachSheet,
+                              onRemove: () =>
+                                  setState(() => _comprobante = null),
                             ),
                             const Spacer(),
                             const SizedBox(height: 24),
@@ -767,6 +874,105 @@ class _QuickChip extends StatelessWidget {
                   fontWeight: FontWeight.w700,
                   color: StaffUi.textPrimary,
                 ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// Selector/preview del comprobante de pago (obligatorio).
+class _ComprobantePicker extends StatelessWidget {
+  final XFile? file;
+  final bool enabled;
+  final VoidCallback onTap;
+  final VoidCallback onRemove;
+  const _ComprobantePicker({
+    required this.file,
+    required this.enabled,
+    required this.onTap,
+    required this.onRemove,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    if (file != null) {
+      return Container(
+        decoration: BoxDecoration(
+          color: StaffUi.surface,
+          borderRadius: BorderRadius.circular(14),
+          border: Border.all(color: StaffUi.border),
+        ),
+        child: Row(
+          children: [
+            ClipRRect(
+              borderRadius: const BorderRadius.horizontal(
+                left: Radius.circular(13),
+              ),
+              child: Image.file(
+                File(file!.path),
+                width: 64,
+                height: 64,
+                fit: BoxFit.cover,
+              ),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Text(
+                file!.path.split('/').last,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+                style: const TextStyle(
+                  fontSize: 12.5,
+                  fontWeight: FontWeight.w600,
+                  color: StaffUi.textPrimary,
+                ),
+              ),
+            ),
+            IconButton(
+              onPressed: enabled ? onRemove : null,
+              icon: const Icon(Icons.close_rounded,
+                  size: 20, color: StaffUi.muted),
+              tooltip: 'Quitar',
+            ),
+            const SizedBox(width: 4),
+          ],
+        ),
+      );
+    }
+
+    return GestureDetector(
+      onTap: enabled ? onTap : null,
+      child: Container(
+        width: double.infinity,
+        padding: const EdgeInsets.symmetric(vertical: 22, horizontal: 16),
+        decoration: BoxDecoration(
+          color: StaffUi.primarySoft,
+          borderRadius: BorderRadius.circular(14),
+          border: Border.all(color: StaffUi.primary.withValues(alpha: 0.35)),
+        ),
+        child: Column(
+          children: [
+            const Icon(Icons.cloud_upload_rounded,
+                size: 28, color: StaffUi.primary),
+            const SizedBox(height: 8),
+            const Text(
+              'Adjuntar comprobante',
+              style: TextStyle(
+                fontSize: 13.5,
+                fontWeight: FontWeight.w800,
+                color: StaffUi.primary,
+              ),
+            ),
+            const SizedBox(height: 3),
+            Text(
+              'Foto o imagen del comprobante (máx. 10MB)',
+              style: TextStyle(
+                fontSize: 11,
+                fontWeight: FontWeight.w500,
+                color: StaffUi.textSecondary.withValues(alpha: 0.9),
               ),
             ),
           ],

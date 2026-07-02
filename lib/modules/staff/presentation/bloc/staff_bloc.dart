@@ -183,7 +183,7 @@ class StaffBloc extends Bloc<StaffEvent, StaffState> {
       final totalEmployee = response.length;
       double totalAmount = response.fold(
         0,
-        (sum, employee) => sum + employee.baseSalary,
+        (sum, employee) => sum + employee.remaining,
       );
       emit(
         GenerateEmployeePayrollSuccess(
@@ -644,6 +644,7 @@ class StaffBloc extends Bloc<StaffEvent, StaffState> {
       final response = await repository.processPayrollPayment(
         payrollId: event.payrollId,
         idempotencyKey: event.idempotencyKey,
+        comprobantePath: event.comprobantePath,
         amount: event.amount,
       );
       emit(ProcessPayrollPaymentSuccess(response));
