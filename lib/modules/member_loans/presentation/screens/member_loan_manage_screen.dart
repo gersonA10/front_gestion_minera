@@ -108,13 +108,7 @@ class _MemberLoanManageScreenState extends State<MemberLoanManageScreen> {
                         bloc: _bloc,
                       ),
                     ),
-                    if (busy)
-                      Positioned.fill(
-                        child: Container(
-                          color: Colors.black.withValues(alpha: 0.25),
-                          child: const Center(child: StaffLoader(),),
-                        ),
-                      ),
+                    if (busy) const StaffSubmitOverlay(label: 'Procesando'),
                   ],
                 );
               },
