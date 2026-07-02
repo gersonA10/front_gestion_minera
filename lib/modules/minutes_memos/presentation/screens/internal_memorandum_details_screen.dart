@@ -1,5 +1,6 @@
+import 'dart:io';
+
 import 'package:auto_route/auto_route.dart';
-import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:front_gestion_minera/injector_container.dart';
@@ -11,6 +12,7 @@ import 'package:open_filex/open_filex.dart';
 import 'package:path_provider/path_provider.dart';
 
 import '../bloc/minutes_memos_bloc.dart';
+import '../utils/minutes_memos_pdf.dart';
 
 @RoutePage()
 class InternalMemorandumDetailsScreen extends StatefulWidget {
@@ -383,7 +385,7 @@ class _InternalMemorandumDetailsScreenState
           child: ElevatedButton.icon(
             onPressed: _isDownloading
                 ? null
-                : () => _downloadDocument(memorandum.attachments),
+                : () => _downloadDocument(memorandum),
             icon: _isDownloading
                 ? const SizedBox(
                     width: 18,
@@ -411,35 +413,22 @@ class _InternalMemorandumDetailsScreenState
     );
   }
 
-  /// Descarga el documento adjunto del memorando (PDF o imagen) y lo abre con
-  /// el visor nativo del dispositivo.
-  Future<void> _downloadDocument(
-    List<MemorandumAttachmentEntity> attachments,
-  ) async {
-    if (attachments.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Este memorando no tiene documento adjunto.'),
-        ),
-      );
-      return;
-    }
-
-    // Preferimos el PDF; si no hay, usamos el primer adjunto disponible.
-    final attachment = attachments.firstWhere(
-      (a) => a.tipoArchivo.toLowerCase() == 'pdf',
-      orElse: () => attachments.first,
-    );
-
+  /// Genera un PDF del memorando con su información (número, título, fecha,
+  /// destinatario, descripción e imágenes adjuntas) y lo abre con el visor
+  /// nativo del dispositivo.
+  Future<void> _downloadDocument(MemorandumDetailEntity memorandum) async {
     setState(() => _isDownloading = true);
     try {
-      final dir = await getTemporaryDirectory();
-      final safeName = attachment.nombreArchivo.trim().isEmpty
-          ? 'memorando_${DateTime.now().millisecondsSinceEpoch}'
-          : attachment.nombreArchivo.replaceAll(RegExp(r'[\\/:*?"<>|]'), '_');
-      final savePath = '${dir.path}/$safeName';
+      final bytes = await MinutesMemosPdf.buildMemorandumPdf(memorandum);
 
-      await Dio().download(attachment.url, savePath);
+      final dir = await getTemporaryDirectory();
+      final safeName = memorandum.numero.trim().isEmpty
+          ? 'memorando'
+          : memorandum.numero.replaceAll(RegExp(r'[\\/:*?"<>|]'), '_');
+      final savePath = '${dir.path}/Memorando_$safeName.pdf';
+
+      final file = File(savePath);
+      await file.writeAsBytes(bytes);
 
       final result = await OpenFilex.open(savePath);
       if (result.type != ResultType.done && mounted) {
@@ -452,7 +441,7 @@ class _InternalMemorandumDetailsScreenState
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error al descargar el documento: $e')),
+          SnackBar(content: Text('Error al generar el documento: $e')),
         );
       }
     } finally {

@@ -1,5 +1,6 @@
+import 'dart:io';
+
 import 'package:auto_route/auto_route.dart';
-import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:front_gestion_minera/injector_container.dart';
@@ -10,6 +11,7 @@ import 'package:open_filex/open_filex.dart';
 import 'package:path_provider/path_provider.dart';
 import '../../domain/entity/entity.dart';
 import '../bloc/minutes_memos_bloc.dart';
+import '../utils/minutes_memos_pdf.dart';
 
 @RoutePage()
 class ActaDetailsScreen extends StatefulWidget {
@@ -498,7 +500,7 @@ class _ActaDetailsScreenState extends State<ActaDetailsScreen> {
         border: Border(top: BorderSide(color: Color(0xFFEEEEEE))),
       ),
       child: ElevatedButton.icon(
-        onPressed: _isDownloading ? null : () => _downloadDocument(acta.attachments),
+        onPressed: _isDownloading ? null : () => _downloadDocument(acta),
         icon: _isDownloading
             ? const SizedBox(
                 width: 18,
@@ -526,31 +528,22 @@ class _ActaDetailsScreenState extends State<ActaDetailsScreen> {
     );
   }
 
-  /// Descarga el documento adjunto del acta (PDF o imagen) y lo abre con el
-  /// visor nativo del dispositivo.
-  Future<void> _downloadDocument(List<ActaAttachmentEntity> attachments) async {
-    if (attachments.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Esta acta no tiene documento adjunto.')),
-      );
-      return;
-    }
-
-    // Preferimos el PDF; si no hay, usamos el primer adjunto disponible.
-    final attachment = attachments.firstWhere(
-      (a) => a.tipoArchivo.toLowerCase() == 'pdf',
-      orElse: () => attachments.first,
-    );
-
+  /// Genera un PDF del acta con su información (número, título, fecha,
+  /// descripción, ubicación, participantes e imágenes adjuntas) y lo abre con
+  /// el visor nativo del dispositivo.
+  Future<void> _downloadDocument(ActaDetailEntity acta) async {
     setState(() => _isDownloading = true);
     try {
-      final dir = await getTemporaryDirectory();
-      final safeName = attachment.nombreArchivo.trim().isEmpty
-          ? 'acta_${DateTime.now().millisecondsSinceEpoch}'
-          : attachment.nombreArchivo.replaceAll(RegExp(r'[\\/:*?"<>|]'), '_');
-      final savePath = '${dir.path}/$safeName';
+      final bytes = await MinutesMemosPdf.buildActaPdf(acta);
 
-      await Dio().download(attachment.url, savePath);
+      final dir = await getTemporaryDirectory();
+      final safeName = acta.numero.trim().isEmpty
+          ? 'acta'
+          : acta.numero.replaceAll(RegExp(r'[\\/:*?"<>|]'), '_');
+      final savePath = '${dir.path}/Acta_$safeName.pdf';
+
+      final file = File(savePath);
+      await file.writeAsBytes(bytes);
 
       final result = await OpenFilex.open(savePath);
       if (result.type != ResultType.done && mounted) {
@@ -561,7 +554,7 @@ class _ActaDetailsScreenState extends State<ActaDetailsScreen> {
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error al descargar el documento: $e')),
+          SnackBar(content: Text('Error al generar el documento: $e')),
         );
       }
     } finally {
