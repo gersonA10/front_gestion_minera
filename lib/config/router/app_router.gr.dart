@@ -1927,6 +1927,7 @@ class PaymentSuccessDistributionRouteArgs {
       receiptId.hashCode ^
       bloc.hashCode ^
       isFromDetails.hashCode;
+ 
 }
 
 /// generated route for
