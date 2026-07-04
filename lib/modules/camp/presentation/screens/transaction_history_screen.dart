@@ -2,6 +2,7 @@ import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:front_gestion_minera/injector_container.dart';
+import 'package:front_gestion_minera/modules/staff/presentation/widgets/staff_ui.dart';
 
 import '../bloc/camp_bloc.dart';
 import '../widgets/widgets.dart';
@@ -93,9 +94,7 @@ class _TransactionHistoryScreenState extends State<TransactionHistoryScreen> {
                     curr is CampHistoryError,
                 builder: (context, state) {
                   if (state is CampHistoryLoading) {
-                    return const Center(
-                      child: CircularProgressIndicator(color: _C.primary),
-                    );
+                    return const StaffLoader();
                   }
 
                   if (state is CampHistoryError) {
@@ -117,16 +116,7 @@ class _TransactionHistoryScreenState extends State<TransactionHistoryScreen> {
                           if (index == state.items.length) {
                             return const Padding(
                               padding: EdgeInsets.symmetric(vertical: 18),
-                              child: Center(
-                                child: SizedBox(
-                                  width: 22,
-                                  height: 22,
-                                  child: CircularProgressIndicator(
-                                    strokeWidth: 2.4,
-                                    color: _C.primary,
-                                  ),
-                                ),
-                              ),
+                              child: StaffLoader(),
                             );
                           }
                           return CardRequestDetailWidget(

@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:front_gestion_minera/modules/minutes_memos/presentation/bloc/minutes_memos_bloc.dart';
 import 'package:front_gestion_minera/modules/minutes_memos/presentation/widgets/actas_theme.dart';
+import 'package:front_gestion_minera/modules/staff/presentation/widgets/staff_ui.dart';
 
 import '../../domain/entity/entity.dart';
 
@@ -220,7 +221,7 @@ class _ParticipantsDialogState extends State<ParticipantsDialog> {
 
   Widget _buildBody() {
     if (_isLoading) {
-      return const Center(child: CircularProgressIndicator(color: AC.primary));
+      return const StaffLoader();
     }
     if (_error != null) {
       return Center(
@@ -251,7 +252,7 @@ class _ParticipantsDialogState extends State<ParticipantsDialog> {
         if (index == _filteredSocios.length) {
           return const Padding(
             padding: EdgeInsets.symmetric(vertical: 10),
-            child: Center(child: CircularProgressIndicator(color: AC.primary)),
+            child: StaffLoader(),
           );
         }
         final socio = _filteredSocios[index];

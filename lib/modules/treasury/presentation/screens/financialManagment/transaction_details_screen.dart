@@ -3,6 +3,7 @@ import 'package:auto_route/auto_route.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:front_gestion_minera/core/widgets/custom_alert_widget.dart';
 import 'package:front_gestion_minera/injector_container.dart';
+import 'package:front_gestion_minera/modules/staff/presentation/widgets/staff_ui.dart';
 import 'package:front_gestion_minera/modules/treasury/presentation/bloc/treasury_bloc.dart';
 import 'package:intl/intl.dart';
 import 'package:path_provider/path_provider.dart';
@@ -254,26 +255,7 @@ class TransactionDetailsScreen extends StatelessWidget {
           },
           builder: (context, state) {
             if (state is TransactionDetailsLoading) {
-              return Center(
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    const CircularProgressIndicator(
-                      color: Color(0xFF3B82F6),
-                      strokeWidth: 3,
-                    ),
-                    const SizedBox(height: 16),
-                    Text(
-                      'Cargando detalle...',
-                      style: TextStyle(
-                        fontSize: 14,
-                        fontWeight: FontWeight.w500,
-                        color: Colors.grey.shade500,
-                      ),
-                    ),
-                  ],
-                ),
-              );
+              return const StaffLoader(label: 'Cargando detalle...');
             }
             if (state is TransactionDetailsLoaded) {
               return LoadedView(details: state.transactionDetails);

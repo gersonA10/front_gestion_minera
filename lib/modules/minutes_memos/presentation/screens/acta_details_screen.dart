@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:front_gestion_minera/injector_container.dart';
 import 'package:front_gestion_minera/modules/minutes_memos/presentation/widgets/actas_theme.dart';
+import 'package:front_gestion_minera/modules/staff/presentation/widgets/staff_ui.dart';
 import 'package:front_gestion_minera/utils/constants/color.constant.dart';
 import 'package:intl/intl.dart';
 import 'package:open_filex/open_filex.dart';
@@ -47,7 +48,7 @@ class _ActaDetailsScreenState extends State<ActaDetailsScreen> {
           if (state is ActaDetailLoading) {
             return const Scaffold(
               backgroundColor: TColors.white,
-              body: Center(child: CircularProgressIndicator()),
+              body: StaffLoader(),
             );
           }
 

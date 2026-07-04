@@ -2,9 +2,9 @@ import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:front_gestion_minera/core/widgets/custom_alert_widget.dart';
-import 'package:front_gestion_minera/core/widgets/excavator_loader.dart';
 import 'package:front_gestion_minera/modules/machinery/presentation/bloc/machinery_bloc.dart';
 import 'package:front_gestion_minera/modules/machinery/presentation/widgets/info_banner_widget.dart';
+import 'package:front_gestion_minera/modules/staff/presentation/widgets/staff_ui.dart';
 import 'package:front_gestion_minera/utils/constants/color.constant.dart';
 import 'package:image_picker/image_picker.dart';
 
@@ -285,9 +285,7 @@ class _RegistrationFormBodyState extends State<RegistrationFormBody> {
               ),
             ),
             if (submitting)
-              const Positioned.fill(
-                child: SubmittingOverlay(title: 'Registrando maquinaria...'),
-              ),
+              const StaffSubmitOverlay(label: 'Registrando maquinaria'),
           ],
         );
       },

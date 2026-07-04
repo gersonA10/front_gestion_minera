@@ -4,10 +4,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:front_gestion_minera/core/widgets/custom_alert_widget.dart';
-import 'package:front_gestion_minera/core/widgets/excavator_loader.dart';
 import 'package:front_gestion_minera/injector_container.dart';
 import 'package:front_gestion_minera/modules/partners/presentation/bloc/partners_bloc.dart';
 import 'package:front_gestion_minera/modules/partners/presentation/widgets/custom_card_widget.dart';
+import 'package:front_gestion_minera/modules/staff/presentation/widgets/staff_ui.dart';
 import 'package:image_picker/image_picker.dart';
 
 class _LoanColors {
@@ -261,7 +261,6 @@ class _LoanScreenState extends State<LoanScreen> {
                       ),
                     ),
                     _SubmitBar(
-                      isLoading: isLoading,
                       onPressed: isLoading ? null : () => _submit(context),
                     ),
                   ],
@@ -270,7 +269,7 @@ class _LoanScreenState extends State<LoanScreen> {
                   const Positioned.fill(
                     child: ColoredBox(
                       color: Colors.black26,
-                      child: Center(child: ExcavatorLoader()),
+                      child: Center(child: StaffLoader(),),
                     ),
                   ),
               ],
@@ -480,10 +479,9 @@ class _TypeSelector extends StatelessWidget {
 // ─── Barra inferior con botón de envío ──────────────────────────────────────
 
 class _SubmitBar extends StatefulWidget {
-  final bool isLoading;
   final VoidCallback? onPressed;
 
-  const _SubmitBar({required this.isLoading, required this.onPressed});
+  const _SubmitBar({ required this.onPressed});
 
   @override
   State<_SubmitBar> createState() => _SubmitBarState();
@@ -534,16 +532,7 @@ class _SubmitBarState extends State<_SubmitBar> {
               ],
             ),
             alignment: Alignment.center,
-            child: widget.isLoading
-                ? const SizedBox(
-                    width: 24,
-                    height: 24,
-                    child: CircularProgressIndicator(
-                      strokeWidth: 2.6,
-                      color: _LoanColors.textPrimary,
-                    ),
-                  )
-                : const Row(
+            child:  const Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       Icon(

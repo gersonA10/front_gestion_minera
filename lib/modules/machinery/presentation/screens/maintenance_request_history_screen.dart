@@ -5,6 +5,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:front_gestion_minera/config/router/app_router.gr.dart';
 import 'package:front_gestion_minera/injector_container.dart';
 import 'package:front_gestion_minera/modules/machinery/presentation/bloc/machinery_bloc.dart';
+import 'package:front_gestion_minera/modules/staff/presentation/widgets/staff_ui.dart';
 import 'package:front_gestion_minera/utils/constants/color.constant.dart';
 import '../../domain/entity/entity.dart';
 import '../widgets/widgets.dart';
@@ -204,16 +205,7 @@ class _MaintenanceRequestHistoryScreenState
           if (index == items.length) {
             return const Padding(
               padding: EdgeInsets.symmetric(vertical: 18),
-              child: Center(
-                child: SizedBox(
-                  width: 22,
-                  height: 22,
-                  child: CircularProgressIndicator(
-                    strokeWidth: 2.4,
-                    color: TColors.appMainColor,
-                  ),
-                ),
-              ),
+              child: StaffLoader(),
             );
           }
           final item = items[index];

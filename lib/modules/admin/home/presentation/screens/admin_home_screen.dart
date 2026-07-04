@@ -7,6 +7,7 @@ import 'package:front_gestion_minera/injector_container.dart';
 import 'package:front_gestion_minera/modules/admin/home/presentation/widgets/bottom_nav_widget.dart';
 import 'package:front_gestion_minera/modules/admin/home/presentation/bloc/admin_bloc.dart';
 import 'package:front_gestion_minera/modules/admin/users/presentation/bloc/admin_users_bloc.dart';
+import 'package:front_gestion_minera/modules/staff/presentation/widgets/staff_ui.dart';
 import 'package:front_gestion_minera/utils/constants/color.constant.dart';
 import 'package:showcaseview/showcaseview.dart';
 
@@ -287,7 +288,7 @@ class _SolicitudesPendientesPageState
           if (index >= _cachedItems.length) {
             return const Padding(
               padding: EdgeInsets.symmetric(vertical: 20),
-              child: Center(child: CircularProgressIndicator(strokeWidth: 2)),
+              child: StaffLoader(),
             );
           }
           return SolicitudCard(solicitud: _cachedItems[index], index: index);

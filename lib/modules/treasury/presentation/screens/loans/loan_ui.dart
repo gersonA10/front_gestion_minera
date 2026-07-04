@@ -309,14 +309,12 @@ class LoanPrimaryButton extends StatelessWidget {
   final String label;
   final VoidCallback? onPressed;
   final IconData? icon;
-  final bool loading;
   final Color color;
   const LoanPrimaryButton({
     super.key,
     required this.label,
     required this.onPressed,
     this.icon,
-    this.loading = false,
     this.color = LoanUi.primary,
   });
 
@@ -326,7 +324,7 @@ class LoanPrimaryButton extends StatelessWidget {
       width: double.infinity,
       height: 52,
       child: ElevatedButton(
-        onPressed: loading ? null : onPressed,
+        onPressed: onPressed,
         style: ElevatedButton.styleFrom(
           backgroundColor: color,
           foregroundColor: Colors.white,
@@ -336,16 +334,7 @@ class LoanPrimaryButton extends StatelessWidget {
             borderRadius: BorderRadius.circular(14),
           ),
         ),
-        child: loading
-            ? const SizedBox(
-                width: 22,
-                height: 22,
-                child: CircularProgressIndicator(
-                  strokeWidth: 2.4,
-                  color: Colors.white,
-                ),
-              )
-            : Row(
+        child:  Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   if (icon != null) ...[

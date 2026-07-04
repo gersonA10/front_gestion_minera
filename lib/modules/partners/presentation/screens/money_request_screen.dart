@@ -3,8 +3,8 @@ import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:front_gestion_minera/core/widgets/custom_alert_widget.dart';
-import 'package:front_gestion_minera/core/widgets/excavator_loader.dart';
 import 'package:front_gestion_minera/injector_container.dart';
+import 'package:front_gestion_minera/modules/staff/presentation/widgets/staff_ui.dart';
 import 'package:front_gestion_minera/utils/session/user_session.dart';
 import 'package:image_picker/image_picker.dart';
 import '../bloc/partners_bloc.dart';
@@ -229,7 +229,6 @@ class _MoneyRequestScreenState extends State<MoneyRequestScreen> {
                             _PrimaryButton(
                               label: 'Solicitar Egreso',
                               icon: Icons.send_rounded,
-                              loading: isLoading,
                               onTap: isLoading ? null : () => _submit(context),
                             ),
                           ],
@@ -239,7 +238,7 @@ class _MoneyRequestScreenState extends State<MoneyRequestScreen> {
                         Positioned.fill(
                           child: Container(
                             color: Colors.black.withValues(alpha: 0.25),
-                            child: const Center(child: ExcavatorLoader()),
+                            child: const Center(child: StaffLoader(),),
                           ),
                         ),
                     ],
@@ -670,13 +669,11 @@ class _DescriptionField extends StatelessWidget {
 class _PrimaryButton extends StatefulWidget {
   final String label;
   final IconData icon;
-  final bool loading;
   final VoidCallback? onTap;
 
   const _PrimaryButton({
     required this.label,
     required this.icon,
-    required this.loading,
     required this.onTap,
   });
 
@@ -689,7 +686,7 @@ class _PrimaryButtonState extends State<_PrimaryButton> {
 
   @override
   Widget build(BuildContext context) {
-    final bool enabled = widget.onTap != null && !widget.loading;
+    final bool enabled = widget.onTap != null;
     return GestureDetector(
       onTapDown: enabled ? (_) => setState(() => _pressed = true) : null,
       onTapUp: enabled ? (_) => setState(() => _pressed = false) : null,
@@ -717,30 +714,21 @@ class _PrimaryButtonState extends State<_PrimaryButton> {
             ],
           ),
           child: Center(
-            child: widget.loading
-                ? const SizedBox(
-                    width: 22,
-                    height: 22,
-                    child: CircularProgressIndicator(
-                      strokeWidth: 2.4,
-                      valueColor: AlwaysStoppedAnimation(Colors.white),
-                    ),
-                  )
-                : Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Text(
-                        widget.label,
-                        style: const TextStyle(
-                          fontSize: 15,
-                          fontWeight: FontWeight.w700,
-                          color: Colors.white,
-                        ),
-                      ),
-                      const SizedBox(width: 8),
-                      Icon(widget.icon, color: Colors.white, size: 19),
-                    ],
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text(
+                  widget.label,
+                  style: const TextStyle(
+                    fontSize: 15,
+                    fontWeight: FontWeight.w700,
+                    color: Colors.white,
                   ),
+                ),
+                const SizedBox(width: 8),
+                Icon(widget.icon, color: Colors.white, size: 19),
+              ],
+            ),
           ),
         ),
       ),

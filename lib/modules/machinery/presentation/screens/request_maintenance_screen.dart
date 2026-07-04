@@ -3,10 +3,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:front_gestion_minera/core/widgets/custom_alert_widget.dart';
-import 'package:front_gestion_minera/core/widgets/excavator_loader.dart';
 import 'package:front_gestion_minera/injector_container.dart';
 import 'package:front_gestion_minera/modules/machinery/presentation/bloc/machinery_bloc.dart';
 import 'package:front_gestion_minera/modules/machinery/presentation/widgets/info_banner_widget.dart';
+import 'package:front_gestion_minera/modules/staff/presentation/widgets/staff_ui.dart';
 import 'package:front_gestion_minera/utils/constants/color.constant.dart';
 import 'package:image_picker/image_picker.dart';
 
@@ -233,9 +233,7 @@ class _RequestMaintenanceScreenState extends State<RequestMaintenanceScreen> {
                 ),
               ),
               if (isSubmitting)
-                const Positioned.fill(
-                  child: SubmittingOverlay(title: 'Enviando solicitud...'),
-                ),
+                const StaffSubmitOverlay(label: 'Enviando solicitud'),
             ],
           );
         },

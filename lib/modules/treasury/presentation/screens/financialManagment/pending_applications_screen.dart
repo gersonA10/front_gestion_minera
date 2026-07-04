@@ -1,7 +1,7 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:front_gestion_minera/core/widgets/excavator_loader.dart';
 import 'package:front_gestion_minera/injector_container.dart';
+import 'package:front_gestion_minera/modules/staff/presentation/widgets/staff_ui.dart';
 import 'package:front_gestion_minera/modules/treasury/presentation/bloc/treasury_bloc.dart';
 import 'package:intl/intl.dart';
 
@@ -85,7 +85,7 @@ class _PendingApplicationsScreenState extends State<PendingApplicationsScreen> {
         body: BlocBuilder<TreasuryBloc, TreasuryState>(
           builder: (context, state) {
             if (state is ListOfPendingRequestsLoading) {
-              return const Center(child: ExcavatorLoader());
+              return const Center(child: StaffLoader(),);
             }
 
             if (state is ListOfPendingRequestsError) {
@@ -153,16 +153,7 @@ class _PendingApplicationsScreenState extends State<PendingApplicationsScreen> {
                                     return const Padding(
                                       padding:
                                           EdgeInsets.symmetric(vertical: 20),
-                                      child: Center(
-                                        child: SizedBox(
-                                          width: 22,
-                                          height: 22,
-                                          child: CircularProgressIndicator(
-                                            strokeWidth: 2.4,
-                                            color: _C.primary,
-                                          ),
-                                        ),
-                                      ),
+                                      child: StaffLoader(),
                                     );
                                   }
                                   return const Padding(
@@ -189,7 +180,7 @@ class _PendingApplicationsScreenState extends State<PendingApplicationsScreen> {
 
             // Estado inicial: mientras llega la primera respuesta (el handler
             // no emite Loading cuando isRefresh es false), mostramos el loader.
-            return const Center(child: ExcavatorLoader());
+            return const Center(child: StaffLoader(),);
           },
         ),
       ),

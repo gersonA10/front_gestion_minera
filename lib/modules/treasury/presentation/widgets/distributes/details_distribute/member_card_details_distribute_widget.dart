@@ -4,8 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:front_gestion_minera/config/router/app_router.gr.dart';
 import 'package:front_gestion_minera/core/widgets/custom_alert_widget.dart';
-import 'package:front_gestion_minera/core/widgets/excavator_loader.dart';
 import 'package:front_gestion_minera/core/widgets/upload_file_widget.dart';
+import 'package:front_gestion_minera/modules/staff/presentation/widgets/staff_ui.dart';
 import 'package:front_gestion_minera/utils/constants/color.constant.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
@@ -73,7 +73,7 @@ class _MemberCardState extends State<MemberCard> {
             barrierColor: Colors.black.withValues(alpha: 0.45),
             builder: (_) => const PopScope(
               canPop: false,
-              child: Center(child: ExcavatorLoader()),
+              child: Center(child: StaffLoader(),),
             ),
           );
         }

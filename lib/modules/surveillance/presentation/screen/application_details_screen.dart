@@ -6,6 +6,7 @@ import 'package:front_gestion_minera/core/widgets/custom_alert_widget.dart';
 import 'package:front_gestion_minera/core/widgets/zoomable_evidence_image.dart';
 import 'package:front_gestion_minera/injector_container.dart';
 import 'package:front_gestion_minera/modules/surveillance/presentation/bloc/surveillance_bloc.dart';
+import 'package:front_gestion_minera/modules/staff/presentation/widgets/staff_ui.dart';
 import 'package:front_gestion_minera/modules/surveillance/presentation/widget/custom_dialog_wigdet.dart';
 import 'package:front_gestion_minera/utils/date_util.dart';
 import 'package:front_gestion_minera/utils/text_util.dart';
@@ -836,12 +837,7 @@ class _BlockingLoader extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            CircularProgressIndicator(),
-            SizedBox(height: 18),
-            Text(
-              'Procesando solicitud...',
-              style: TextStyle(color: Colors.white),
-            ),
+            StaffLoader(label: 'Procesando solicitud...'),
           ],
         ),
       ),

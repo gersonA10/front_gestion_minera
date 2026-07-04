@@ -5,6 +5,7 @@ import 'package:front_gestion_minera/core/widgets/custom_alert_widget.dart';
 import 'package:front_gestion_minera/injector_container.dart';
 import 'package:front_gestion_minera/modules/admin/users/domain/entity/user_entity.dart';
 import 'package:front_gestion_minera/modules/admin/users/presentation/bloc/admin_users_bloc.dart';
+import 'package:front_gestion_minera/modules/staff/presentation/widgets/staff_ui.dart';
 import 'package:front_gestion_minera/utils/constants/color.constant.dart';
 
 @RoutePage()
@@ -312,8 +313,8 @@ class _UserFormScreenState extends State<UserFormScreen>
                       color: Colors.black.withValues(alpha:0.25),
                       child: Center(
                         child: Container(
-                          width: 80,
-                          height: 80,
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 20, vertical: 20),
                           decoration: BoxDecoration(
                             color: TColors.surface,
                             borderRadius: BorderRadius.circular(20),
@@ -325,11 +326,10 @@ class _UserFormScreenState extends State<UserFormScreen>
                               ),
                             ],
                           ),
-                          child: const Center(
-                            child: CircularProgressIndicator(
-                              color: TColors.appMainDarkColor,
-                              strokeWidth: 2.5,
-                            ),
+                          child: const SizedBox(
+                            width: 168,
+                            height: 172,
+                            child: StaffLoader(),
                           ),
                         ),
                       ),

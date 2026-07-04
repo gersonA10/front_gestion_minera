@@ -2,6 +2,7 @@ import 'package:auto_route/auto_route.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:front_gestion_minera/config/router/app_router.gr.dart';
 import 'package:front_gestion_minera/injector_container.dart';
+import 'package:front_gestion_minera/modules/staff/presentation/widgets/staff_ui.dart';
 import 'package:front_gestion_minera/modules/treasury/presentation/bloc/treasury_bloc.dart';
 
 import '../../../domain/entity/entity.dart';
@@ -154,8 +155,7 @@ class _LoansHomeScreenState extends State<LoansHomeScreen> {
 
               if (_cachedList == null) {
                 if (isLoading) {
-                  return const Center(
-                    child: CircularProgressIndicator(color: LoanUi.primary));
+                  return const StaffLoader();
                 }
                 if (state is InternalLoansError) {
                   return ErrorView(
@@ -164,8 +164,7 @@ class _LoansHomeScreenState extends State<LoansHomeScreen> {
                         _treasuryBloc.add(InternalLoansRequestsEvent()),
                   );
                 }
-                return const Center(
-                    child: CircularProgressIndicator(color: LoanUi.primary));
+                return const StaffLoader();
               }
 
               final list = _cachedList!;
@@ -311,11 +310,7 @@ class _LoansHomeScreenState extends State<LoansHomeScreen> {
                                       padding: EdgeInsets.symmetric(
                                         vertical: 16,
                                       ),
-                                      child: Center(
-                                        child: CircularProgressIndicator(
-                                          strokeWidth: 2,
-                                        ),
-                                      ),
+                                      child: StaffLoader(),
                                     );
                                   }
                                   return LoanCard(loan: list[i], treasuryBloc: _treasuryBloc, onReturn: _reloadWithCurrentFilter,);

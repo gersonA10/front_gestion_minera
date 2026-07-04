@@ -2,9 +2,9 @@ import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:front_gestion_minera/core/widgets/custom_alert_widget.dart';
-import 'package:front_gestion_minera/core/widgets/excavator_loader.dart';
 import 'package:front_gestion_minera/core/widgets/zoomable_evidence_image.dart';
 import 'package:front_gestion_minera/injector_container.dart';
+import 'package:front_gestion_minera/modules/staff/presentation/widgets/staff_ui.dart';
 import 'package:intl/intl.dart';
 
 import '../../../../../core/widgets/app_loading_overlay.dart';
@@ -253,8 +253,27 @@ class _RequestDetailScreenState extends State<RequestDetailScreen> {
             ),
             body: AppLoadingOverlay(
               isLoading: isLoading,
-              message: 'Procesando solicitud...',
-              loader: const ExcavatorLoader(),
+              message: '',
+              loader: Container(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(20),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withValues(alpha: 0.1),
+                      blurRadius: 20,
+                      offset: const Offset(0, 4),
+                    ),
+                  ],
+                ),
+                child: const SizedBox(
+                  width: 168,
+                  height: 172,
+                  child: StaffLoader(label: 'Procesando'),
+                ),
+              ),
               child: _buildBody(state),
             ),
             bottomNavigationBar: showActions ? _buildActionBar(isLoading) : null,
@@ -266,9 +285,7 @@ class _RequestDetailScreenState extends State<RequestDetailScreen> {
 
   Widget _buildBody(AdminState state) {
     if (state is AdminRequestDetailLoading && _cachedDetail == null) {
-      return const Center(
-        child: CircularProgressIndicator(color: Color(0xFF1A3557)),
-      );
+      return const StaffLoader();
     }
 
     if (state is AdminRequestDetailError && _cachedDetail == null) {

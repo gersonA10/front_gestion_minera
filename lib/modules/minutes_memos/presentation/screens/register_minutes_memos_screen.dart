@@ -5,12 +5,12 @@ import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:front_gestion_minera/core/widgets/custom_alert_widget.dart';
-import 'package:front_gestion_minera/core/widgets/excavator_loader.dart';
 import 'package:front_gestion_minera/injector_container.dart';
 import 'package:front_gestion_minera/modules/minutes_memos/domain/entity/entity.dart';
 import 'package:front_gestion_minera/modules/minutes_memos/presentation/bloc/minutes_memos_bloc.dart';
 import 'package:front_gestion_minera/modules/minutes_memos/presentation/widgets/actas_theme.dart';
 import 'package:front_gestion_minera/modules/minutes_memos/presentation/widgets/participants_dialogo_wisget.dart';
+import 'package:front_gestion_minera/modules/staff/presentation/widgets/staff_ui.dart';
 import 'package:front_gestion_minera/utils/constants/color.constant.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
@@ -461,7 +461,7 @@ class _RegisterMinutesMemosScreenState
                 if (isLoading)
                   Container(
                     color: Colors.black.withValues(alpha: 0.3),
-                    child: const Center(child: ExcavatorLoader()),
+                    child: const Center(child: StaffLoader(),),
                   ),
               ],
             );

@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:front_gestion_minera/core/widgets/custom_date_selector.dart';
 import 'package:front_gestion_minera/config/router/app_router.gr.dart';
 import 'package:front_gestion_minera/injector_container.dart';
+import 'package:front_gestion_minera/modules/staff/presentation/widgets/staff_ui.dart';
 import 'package:front_gestion_minera/utils/constants/color.constant.dart';
 import 'package:intl/intl.dart';
 
@@ -139,9 +140,7 @@ class _GoldDashboardScreenState extends State<GoldDashboardScreen> {
 
         if (_cachedInventory == null) {
           if (isLoading) {
-            return const Center(
-              child: CircularProgressIndicator(color: TColors.primary),
-            );
+            return const StaffLoader();
           }
           if (state is GoldDashboardError) {
             return Center(child: Text(state.message));
@@ -219,9 +218,7 @@ class _GoldDashboardScreenState extends State<GoldDashboardScreen> {
                             const Center(
                               child: Padding(
                                 padding: EdgeInsets.all(8.0),
-                                child: CircularProgressIndicator(
-                                  color: TColors.primary,
-                                ),
+                                child: StaffLoader(),
                               ),
                             ),
                           const SizedBox(height: 80),
@@ -779,9 +776,7 @@ class _HistoryWidgetState extends State<HistoryWidget> {
 
           if (_cachedStatsSales == null) {
             if (isLoading) {
-              return const Center(
-                child: CircularProgressIndicator(color: TColors.primary),
-              );
+              return const StaffLoader();
             }
             if (state is SalesGoldHistoryError) {
               return Center(child: Text(state.message));
@@ -919,9 +914,7 @@ class _HistoryWidgetState extends State<HistoryWidget> {
                                       padding: const EdgeInsets.only(top: 120),
                                       child:
                                           state is SalesGoldHistoryLoading
-                                          ? const CircularProgressIndicator(
-                                              color: TColors.primary,
-                                            )
+                                          ? const StaffLoader()
                                           : const _GoldEmptyState(
                                               icon: Icons.receipt_long_outlined,
                                               title: 'No hay transacciones',
@@ -943,11 +936,7 @@ class _HistoryWidgetState extends State<HistoryWidget> {
                                       if (index >= sales.length) {
                                         return const Padding(
                                           padding: EdgeInsets.all(16),
-                                          child: Center(
-                                            child: CircularProgressIndicator(
-                                              color: TColors.primary,
-                                            ),
-                                          ),
+                                          child: StaffLoader(),
                                         );
                                       }
                                       final item = sales[index];

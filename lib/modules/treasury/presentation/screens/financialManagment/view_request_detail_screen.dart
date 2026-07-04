@@ -5,6 +5,7 @@ import 'package:front_gestion_minera/config/theme/extension_theme.dart';
 import 'package:front_gestion_minera/core/widgets/custom_alert_widget.dart';
 import 'package:front_gestion_minera/core/widgets/zoomable_evidence_image.dart';
 import 'package:front_gestion_minera/injector_container.dart';
+import 'package:front_gestion_minera/modules/staff/presentation/widgets/staff_ui.dart';
 import 'package:front_gestion_minera/utils/date_util.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
@@ -143,7 +144,7 @@ class _ViewRequestDetailsScreenState extends State<ViewRequestDetailsScreen> {
             },
             builder: (context, state) {
               if (state is DetailsofanapplicationLoading) {
-                return Center(child: CircularProgressIndicator());
+                return const StaffLoader();
               }
               if (state is DetailsofanapplicationSuccess) {
                 final data = state.data;

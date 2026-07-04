@@ -1,5 +1,6 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:front_gestion_minera/modules/staff/presentation/widgets/staff_ui.dart';
 import 'package:front_gestion_minera/modules/treasury/domain/entity/payment_history_entity.dart';
 import 'package:intl/intl.dart';
 
@@ -224,9 +225,7 @@ class _PaymentHistoryViewState extends State<_PaymentHistoryView> {
 
             if (_cachedItems == null || _cachedSummary == null) {
               if (isLoading) {
-                return const Center(
-                  child: CircularProgressIndicator(color: _C.primary),
-                );
+                return const StaffLoader();
               }
               if (state is PaymentHistoryError) {
                 return _ErrorView(
@@ -392,16 +391,7 @@ class _PaymentHistoryViewState extends State<_PaymentHistoryView> {
                         const SliverToBoxAdapter(
                           child: Padding(
                             padding: EdgeInsets.symmetric(vertical: 20),
-                            child: Center(
-                              child: SizedBox(
-                                width: 22,
-                                height: 22,
-                                child: CircularProgressIndicator(
-                                  color: _C.primary,
-                                  strokeWidth: 2.4,
-                                ),
-                              ),
-                            ),
+                            child: StaffLoader(),
                           ),
                         ),
                       const SliverToBoxAdapter(child: SizedBox(height: 32)),

@@ -5,6 +5,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:front_gestion_minera/injector_container.dart';
 import 'package:front_gestion_minera/modules/minutes_memos/domain/entity/memorandum_detail_entity.dart';
 import 'package:front_gestion_minera/modules/minutes_memos/presentation/widgets/actas_theme.dart';
+import 'package:front_gestion_minera/modules/staff/presentation/widgets/staff_ui.dart';
 import 'package:front_gestion_minera/utils/constants/color.constant.dart';
 import 'package:intl/intl.dart';
 import 'package:open_filex/open_filex.dart';
@@ -53,7 +54,7 @@ class _InternalMemorandumDetailsScreenState
           if (state is MemorandumDetailLoading) {
             return Scaffold(
               backgroundColor: TColors.white,
-              body: const Center(child: CircularProgressIndicator()),
+              body: const StaffLoader(),
             );
           }
 

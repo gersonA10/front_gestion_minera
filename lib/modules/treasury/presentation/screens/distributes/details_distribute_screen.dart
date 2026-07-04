@@ -1,8 +1,8 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:front_gestion_minera/core/widgets/custom_alert_widget.dart';
-import 'package:front_gestion_minera/core/widgets/excavator_loader.dart';
 import 'package:front_gestion_minera/injector_container.dart';
+import 'package:front_gestion_minera/modules/staff/presentation/widgets/staff_ui.dart';
 import 'package:front_gestion_minera/modules/treasury/presentation/bloc/treasury_bloc.dart';
 import 'package:front_gestion_minera/utils/constants/color.constant.dart';
 import 'package:intl/intl.dart';
@@ -105,7 +105,7 @@ class _DividendDistributionDetailsScreenState
               curr is DistributionDetailError,
           builder: (context, state) {
             if (state is DistributionDetailLoading) {
-              return const Center(child: ExcavatorLoader());
+              return const Center(child: StaffLoader(),);
             }
 
             if (state is DistributionDetailError) {
@@ -342,11 +342,7 @@ class _DividendDistributionDetailsScreenState
                       if (!state.hasReachedMax)
                         const Padding(
                           padding: EdgeInsets.symmetric(vertical: 16),
-                          child: Center(
-                            child: CircularProgressIndicator(
-                              color: TColors.primary,
-                            ),
-                          ),
+                          child: StaffLoader(),
                         ),
                       const SizedBox(height: 24),
                     ],

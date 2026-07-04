@@ -1,9 +1,9 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:front_gestion_minera/core/widgets/excavator_loader.dart';
 import 'package:front_gestion_minera/core/widgets/zoomable_evidence_image.dart';
 import 'package:front_gestion_minera/injector_container.dart';
+import 'package:front_gestion_minera/modules/staff/presentation/widgets/staff_ui.dart';
 import 'package:front_gestion_minera/modules/treasury/presentation/widgets/batch_details/batch_details_widgets.dart';
 import 'package:front_gestion_minera/utils/constants/color.constant.dart';
 import 'package:intl/intl.dart';
@@ -137,7 +137,7 @@ class _Body extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (state is BatchLotDetailsLoading) {
-      return const Center(child: ExcavatorLoader());
+      return const Center(child: StaffLoader(),);
     }
     if (state is BatchLotDetailsError) {
       return Center(

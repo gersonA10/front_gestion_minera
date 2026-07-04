@@ -4,11 +4,11 @@ import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:front_gestion_minera/config/router/app_router.gr.dart';
 import 'package:front_gestion_minera/core/widgets/app_network_image.dart';
-import 'package:front_gestion_minera/core/widgets/excavator_loader.dart';
 import 'package:front_gestion_minera/injector_container.dart';
 import 'package:front_gestion_minera/modules/machinery/domain/entity/entity.dart';
 import 'package:front_gestion_minera/modules/machinery/presentation/bloc/machinery_bloc.dart';
 import 'package:front_gestion_minera/modules/machinery/presentation/machinery_signals.dart';
+import 'package:front_gestion_minera/modules/staff/presentation/widgets/staff_ui.dart';
 import 'package:intl/intl.dart';
 import 'package:front_gestion_minera/utils/session/user_session.dart';
 
@@ -206,9 +206,7 @@ class _DetailMachineryScreenState extends State<DetailMachineryScreen> {
                 _buildContent(
                     context, _cacheHeader!, _cacheItems, _cacheTotal),
                 if (changing)
-                  const Positioned.fill(
-                    child: SubmittingOverlay(title: 'Actualizando estado...'),
-                  ),
+                  const StaffSubmitOverlay(label: 'Actualizando estado'),
               ],
             );
           },

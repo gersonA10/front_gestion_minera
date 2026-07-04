@@ -2,8 +2,8 @@ import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:front_gestion_minera/config/router/app_router.gr.dart';
-import 'package:front_gestion_minera/core/widgets/excavator_loader.dart';
 import 'package:front_gestion_minera/injector_container.dart';
+import 'package:front_gestion_minera/modules/staff/presentation/widgets/staff_ui.dart';
 import 'package:front_gestion_minera/modules/treasury/domain/entity/contributes/contribution_receipt_entity.dart';
 import 'package:front_gestion_minera/modules/treasury/presentation/bloc/treasury_bloc.dart';
 import 'package:intl/intl.dart';
@@ -70,7 +70,7 @@ class _ReceiptsHistoryScreenState extends State<ReceiptsHistoryScreen> {
                 state is ContributionReceiptsError,
             builder: (context, state) {
               if (state is ContributionReceiptsLoading) {
-                return const Center(child: ExcavatorLoader());
+                return const Center(child: StaffLoader(),);
               }
               if (state is ContributionReceiptsError) {
                 return CStateView(

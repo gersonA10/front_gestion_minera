@@ -2,6 +2,7 @@ import 'package:auto_route/auto_route.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:front_gestion_minera/config/router/app_router.gr.dart';
 import 'package:front_gestion_minera/injector_container.dart';
+import 'package:front_gestion_minera/modules/staff/presentation/widgets/staff_ui.dart';
 import 'package:front_gestion_minera/modules/treasury/presentation/bloc/treasury_bloc.dart';
 import 'package:intl/intl.dart';
 import '../../widgets/widgtes.dart';
@@ -67,9 +68,7 @@ class _ContributesDetailScreenState extends State<ContributesDetailScreen> {
                 state is ContributionDetailError,
             builder: (context, state) {
               if (state is ContributionDetailLoading) {
-                return const Center(
-                  child: CircularProgressIndicator(color: CUi.primary),
-                );
+                return const StaffLoader();
               }
               if (state is ContributionDetailError) {
                 return CStateView(

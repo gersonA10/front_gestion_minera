@@ -9,6 +9,7 @@ import 'package:front_gestion_minera/core/tutorial/tutorial_tts.dart';
 import 'package:front_gestion_minera/injector_container.dart';
 import 'package:front_gestion_minera/modules/surveillance/presentation/bloc/surveillance_bloc.dart';
 import 'package:front_gestion_minera/modules/surveillance/presentation/widget/request_card_widget.dart';
+import 'package:front_gestion_minera/modules/staff/presentation/widgets/staff_ui.dart';
 import 'package:front_gestion_minera/utils/date_util.dart';
 import 'package:front_gestion_minera/utils/text_util.dart';
 import 'package:showcaseview/showcaseview.dart';
@@ -290,13 +291,7 @@ class _HomeSurveillanceScreenState extends State<HomeSurveillanceScreen> {
                 const Padding(
                   padding: EdgeInsets.symmetric(vertical: 20),
                   child: Center(
-                    child: Column(
-                      children: [
-                        CircularProgressIndicator(),
-                        SizedBox(height: 10),
-                        Text('Cargando más solicitudes...'),
-                      ],
-                    ),
+                    child: StaffLoader(label: 'Cargando más solicitudes...'),
                   ),
                 )
               else if (items.isNotEmpty)

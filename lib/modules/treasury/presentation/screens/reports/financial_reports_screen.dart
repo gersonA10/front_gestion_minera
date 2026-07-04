@@ -16,6 +16,7 @@ import 'package:path_provider/path_provider.dart';
 
 import 'package:front_gestion_minera/config/theme/extension_theme.dart';
 import 'package:front_gestion_minera/injector_container.dart';
+import 'package:front_gestion_minera/modules/staff/presentation/widgets/staff_ui.dart';
 import 'package:front_gestion_minera/modules/treasury/domain/entity/financial_report_entity.dart';
 import 'package:front_gestion_minera/modules/treasury/presentation/bloc/treasury_bloc.dart';
 import 'package:front_gestion_minera/modules/treasury/presentation/widgets/reports/chart_card_widget.dart';
@@ -194,9 +195,7 @@ class _FinancialReportsScreenState extends State<FinancialReportsScreen> {
           }
 
           if (_cachedReport == null && isLoading) {
-            return const Center(
-              child: CircularProgressIndicator(color: Color(0xFF1D54F3)),
-            );
+            return const StaffLoader();
           }
 
           if (_cachedReport == null && state is FinancialReportError) {

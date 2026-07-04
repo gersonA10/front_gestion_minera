@@ -189,16 +189,7 @@ class _HistoricalRecordExpenditureScreenState
                 if (index >= _items.length) {
                   return const Padding(
                     padding: EdgeInsets.symmetric(vertical: 18),
-                    child: Center(
-                      child: SizedBox(
-                        width: 22,
-                        height: 22,
-                        child: CircularProgressIndicator(
-                          strokeWidth: 2.2,
-                          color: StaffUi.primary,
-                        ),
-                      ),
-                    ),
+                    child: StaffLoader(),
                   );
                 }
                 return _ExpenditureCard(
