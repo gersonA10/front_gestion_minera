@@ -137,7 +137,6 @@ class _LoanSimulationScreenState extends State<LoanSimulationScreen> {
                       child: LoanPrimaryButton(
                         label: 'Confirmar',
                         icon: Icons.check_rounded,
-                        loading: isLoading,
                         onPressed: () => _openConfirmDialog(context, summary),
                       ),
                     ),
