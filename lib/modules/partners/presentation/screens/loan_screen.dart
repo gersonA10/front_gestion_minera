@@ -261,7 +261,6 @@ class _LoanScreenState extends State<LoanScreen> {
                       ),
                     ),
                     _SubmitBar(
-                      isLoading: isLoading,
                       onPressed: isLoading ? null : () => _submit(context),
                     ),
                   ],
@@ -480,10 +479,9 @@ class _TypeSelector extends StatelessWidget {
 // ─── Barra inferior con botón de envío ──────────────────────────────────────
 
 class _SubmitBar extends StatefulWidget {
-  final bool isLoading;
   final VoidCallback? onPressed;
 
-  const _SubmitBar({required this.isLoading, required this.onPressed});
+  const _SubmitBar({ required this.onPressed});
 
   @override
   State<_SubmitBar> createState() => _SubmitBarState();
@@ -534,16 +532,7 @@ class _SubmitBarState extends State<_SubmitBar> {
               ],
             ),
             alignment: Alignment.center,
-            child: widget.isLoading
-                ? const SizedBox(
-                    width: 24,
-                    height: 24,
-                    child: CircularProgressIndicator(
-                      strokeWidth: 2.6,
-                      color: _LoanColors.textPrimary,
-                    ),
-                  )
-                : const Row(
+            child:  const Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       Icon(

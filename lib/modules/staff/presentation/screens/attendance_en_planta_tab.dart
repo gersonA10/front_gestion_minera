@@ -64,7 +64,7 @@ class _AttendanceEnPlantaTabState extends State<AttendanceEnPlantaTab> {
           if (widget.isLoading)
             const Padding(
               padding: EdgeInsets.symmetric(vertical: 32),
-              child: CircularProgressIndicator(),
+              child: StaffLoader(),
             )
           else if (widget.errorMessage != null)
             _buildErrorState(widget.errorMessage!)

@@ -4,6 +4,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:front_gestion_minera/config/theme/extension_theme.dart';
 import 'package:front_gestion_minera/core/widgets/custom_date_selector.dart';
 import 'package:front_gestion_minera/injector_container.dart';
+import 'package:front_gestion_minera/modules/staff/presentation/widgets/staff_ui.dart';
 import 'package:front_gestion_minera/modules/surveillance/presentation/bloc/surveillance_bloc.dart';
 import 'package:front_gestion_minera/utils/text_util.dart';
 
@@ -143,8 +144,8 @@ class _HistoryRequestsScreenState extends State<HistoryRequestsScreen> {
               bloc: _bloc,
               builder: (context, state) {
                 if (state is SurveillanceHistoryLoading) {
-                  return Center(
-                    child: CircularProgressIndicator(color: colors.blue),
+                  return const Center(
+                    child: StaffLoader(),
                   );
                 }
 
@@ -209,7 +210,7 @@ class _HistoryRequestsScreenState extends State<HistoryRequestsScreen> {
                                 return const Padding(
                                   padding: EdgeInsets.symmetric(vertical: 20),
                                   child: Center(
-                                    child: CircularProgressIndicator(),
+                                    child: StaffLoader(),
                                   ),
                                 );
                               }
