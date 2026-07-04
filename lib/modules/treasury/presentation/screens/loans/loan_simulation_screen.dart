@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:front_gestion_minera/config/router/app_router.gr.dart';
 import 'package:front_gestion_minera/core/widgets/custom_alert_widget.dart';
 import 'package:front_gestion_minera/injector_container.dart';
+import 'package:front_gestion_minera/modules/staff/presentation/widgets/staff_ui.dart';
 import 'package:front_gestion_minera/modules/treasury/presentation/bloc/treasury_bloc.dart';
 import 'package:front_gestion_minera/utils/date_util.dart';
 import 'package:intl/intl.dart';
@@ -143,18 +144,7 @@ class _LoanSimulationScreenState extends State<LoanSimulationScreen> {
                   ],
                 ),
                 if (isLoading)
-                  const Positioned.fill(
-                    child: AbsorbPointer(
-                      child: ColoredBox(
-                        color: Color(0x66000000),
-                        child: Center(
-                          child: CircularProgressIndicator(
-                            color: LoanUi.primary,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
+                  const StaffSubmitOverlay(label: 'Procesando'),
               ],
             );
           },

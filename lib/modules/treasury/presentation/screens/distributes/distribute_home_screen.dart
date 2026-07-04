@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:front_gestion_minera/config/router/app_router.gr.dart';
 import 'package:front_gestion_minera/injector_container.dart';
+import 'package:front_gestion_minera/modules/staff/presentation/widgets/staff_ui.dart';
 import 'package:front_gestion_minera/modules/treasury/domain/entity/distribute/distribution_history_entity.dart';
 import 'package:front_gestion_minera/modules/treasury/presentation/bloc/treasury_bloc.dart';
 import 'package:front_gestion_minera/modules/treasury/presentation/widgets/distributes/distributes_home/distribution_card_home_widget.dart';
@@ -306,10 +307,7 @@ class _DistributeHomeScreenState extends State<DistributeHomeScreen> {
                                     return const Padding(
                                       padding:
                                           EdgeInsets.symmetric(vertical: 16),
-                                      child: Center(
-                                        child: CircularProgressIndicator(
-                                            color: TColors.primary),
-                                      ),
+                                      child: StaffLoader(),
                                     );
                                   }
                                   return DistribucionCardHome(

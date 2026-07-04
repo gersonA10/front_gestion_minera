@@ -2,6 +2,7 @@ import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:front_gestion_minera/injector_container.dart';
+import 'package:front_gestion_minera/modules/staff/presentation/widgets/staff_ui.dart';
 import 'package:front_gestion_minera/modules/treasury/presentation/bloc/treasury_bloc.dart';
 import 'package:intl/intl.dart';
 import 'contributes_ui.dart';
@@ -52,9 +53,7 @@ class _PaymentConfirmationScreenState extends State<PaymentConfirmationScreen> {
           body: BlocBuilder<TreasuryBloc, TreasuryState>(
             builder: (context, state) {
               if (state is ContributionPaymentReceiptLoading) {
-                return const Center(
-                  child: CircularProgressIndicator(color: CUi.primary),
-                );
+                return const StaffLoader();
               }
               if (state is ContributionPaymentReceiptError) {
                 return CStateView(

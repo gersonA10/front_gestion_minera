@@ -206,10 +206,7 @@ class _RequestHistoryScreenState extends State<RequestHistoryScreen> {
                             )
                           : const Padding(
                               padding: EdgeInsets.symmetric(vertical: 8),
-                              child: CircularProgressIndicator(
-                                strokeWidth: 2.4,
-                                color: _ReqColors.primary,
-                              ),
+                              child: StaffLoader(),
                             ),
                     ),
                   );

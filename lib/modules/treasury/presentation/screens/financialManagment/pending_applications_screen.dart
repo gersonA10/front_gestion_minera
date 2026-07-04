@@ -153,16 +153,7 @@ class _PendingApplicationsScreenState extends State<PendingApplicationsScreen> {
                                     return const Padding(
                                       padding:
                                           EdgeInsets.symmetric(vertical: 20),
-                                      child: Center(
-                                        child: SizedBox(
-                                          width: 22,
-                                          height: 22,
-                                          child: CircularProgressIndicator(
-                                            strokeWidth: 2.4,
-                                            color: _C.primary,
-                                          ),
-                                        ),
-                                      ),
+                                      child: StaffLoader(),
                                     );
                                   }
                                   return const Padding(

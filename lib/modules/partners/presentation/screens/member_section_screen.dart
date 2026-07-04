@@ -5,6 +5,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:front_gestion_minera/injector_container.dart';
 import 'package:front_gestion_minera/modules/partners/domain/entity/member_inbox_entity.dart';
 import 'package:front_gestion_minera/modules/partners/presentation/bloc/partners_bloc.dart';
+import 'package:front_gestion_minera/modules/staff/presentation/widgets/staff_ui.dart';
 import 'package:front_gestion_minera/utils/constants/color.constant.dart';
 import 'package:intl/intl.dart';
 
@@ -93,9 +94,7 @@ class _MemberSectionScreenState extends State<MemberSectionScreen> {
               bloc: _bloc,
               builder: (context, state) {
                 if (state is MemberInboxLoading) {
-                  return const Center(
-                    child: CircularProgressIndicator(color: TColors.primary),
-                  );
+                  return const StaffLoader();
                 }
 
                 if (state is MemberInboxError) {

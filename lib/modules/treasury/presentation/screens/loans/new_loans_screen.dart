@@ -4,6 +4,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:front_gestion_minera/config/router/app_router.gr.dart';
 import 'package:front_gestion_minera/core/widgets/custom_alert_widget.dart';
 import 'package:front_gestion_minera/injector_container.dart';
+import 'package:front_gestion_minera/modules/staff/presentation/widgets/staff_ui.dart';
 import 'package:front_gestion_minera/modules/treasury/presentation/bloc/treasury_bloc.dart';
 import 'loan_ui.dart';
 
@@ -107,9 +108,7 @@ class _NewLoansScreenState extends State<NewLoansScreen> {
             },
             builder: (context, state) {
               if (state is NewLoansSimulateLoading) {
-                return const Center(
-                  child: CircularProgressIndicator(color: LoanUi.primary),
-                );
+                return const StaffLoader();
               }
               return SingleChildScrollView(
                 padding: const EdgeInsets.all(20),

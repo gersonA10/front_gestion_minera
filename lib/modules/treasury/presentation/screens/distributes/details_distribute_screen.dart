@@ -342,11 +342,7 @@ class _DividendDistributionDetailsScreenState
                       if (!state.hasReachedMax)
                         const Padding(
                           padding: EdgeInsets.symmetric(vertical: 16),
-                          child: Center(
-                            child: CircularProgressIndicator(
-                              color: TColors.primary,
-                            ),
-                          ),
+                          child: StaffLoader(),
                         ),
                       const SizedBox(height: 24),
                     ],

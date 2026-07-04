@@ -269,9 +269,7 @@ class _ContributesHomeScreenState extends State<ContributesHomeScreen> {
           if (state.items.isNotEmpty && !state.hasReachedMax)
             const Padding(
               padding: EdgeInsets.symmetric(vertical: 16),
-              child: Center(
-                child: CircularProgressIndicator(color: CUi.primary),
-              ),
+              child: StaffLoader(),
             )
           else if (state.items.isNotEmpty)
             const Padding(

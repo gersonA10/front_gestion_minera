@@ -12,6 +12,7 @@ import 'package:front_gestion_minera/modules/minutes_memos/presentation/bloc/min
 import 'package:front_gestion_minera/modules/minutes_memos/presentation/widgets/actas_theme.dart';
 import 'package:front_gestion_minera/modules/minutes_memos/presentation/widgets/widgets.dart';
 import 'package:front_gestion_minera/utils/greeting_util.dart';
+import 'package:front_gestion_minera/modules/staff/presentation/widgets/staff_ui.dart';
 import 'package:front_gestion_minera/utils/session/user_session.dart';
 import 'package:intl/intl.dart';
 import 'package:showcaseview/showcaseview.dart';
@@ -651,7 +652,7 @@ class _MinutesMemosMainScreenState extends State<MinutesMemosMainScreen> {
           s is ActasLoading || s is ActasLoaded || s is ActasError,
       builder: (context, state) {
         if (state is ActasLoading) {
-          return const Center(child: CircularProgressIndicator());
+          return const StaffLoader();
         }
         if (state is ActasError) {
           return _ErrorView(message: state.message);
@@ -685,7 +686,7 @@ class _MinutesMemosMainScreenState extends State<MinutesMemosMainScreen> {
                 if (i == state.items.length) {
                   return const Padding(
                     padding: EdgeInsets.symmetric(vertical: 16),
-                    child: Center(child: CircularProgressIndicator()),
+                    child: StaffLoader(),
                   );
                 }
                 return _buildActaCard(state.items[i]);
@@ -732,7 +733,7 @@ class _MinutesMemosMainScreenState extends State<MinutesMemosMainScreen> {
           s is MemorandosError,
       builder: (context, state) {
         if (state is MemorandosLoading) {
-          return const Center(child: CircularProgressIndicator());
+          return const StaffLoader();
         }
         if (state is MemorandosError) {
           return _ErrorView(message: state.message);
@@ -766,7 +767,7 @@ class _MinutesMemosMainScreenState extends State<MinutesMemosMainScreen> {
                 if (i == state.items.length) {
                   return const Padding(
                     padding: EdgeInsets.symmetric(vertical: 16),
-                    child: Center(child: CircularProgressIndicator()),
+                    child: StaffLoader(),
                   );
                 }
                 return _buildMemorandoCard(state.items[i]);

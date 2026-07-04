@@ -176,16 +176,7 @@ class _LoanHistoryScreenState extends State<LoanHistoryScreen> {
                             if (!_hasReachedMax)
                               const Padding(
                                 padding: EdgeInsets.symmetric(vertical: 16),
-                                child: Center(
-                                  child: SizedBox(
-                                    width: 22,
-                                    height: 22,
-                                    child: CircularProgressIndicator(
-                                      strokeWidth: 2.4,
-                                      color: _LoanColors.primary,
-                                    ),
-                                  ),
-                                ),
+                                child: StaffLoader(),
                               ),
                           ],
                         ],

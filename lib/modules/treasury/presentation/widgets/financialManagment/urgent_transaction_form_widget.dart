@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:front_gestion_minera/core/widgets/custom_alert_widget.dart';
+import 'package:front_gestion_minera/modules/staff/presentation/widgets/staff_ui.dart';
 import 'package:front_gestion_minera/modules/treasury/domain/entity/income_request_entity.dart';
 import 'package:image_picker/image_picker.dart';
 
@@ -225,7 +226,7 @@ class _UrgentTransactionFormWidgetState
                     current is CashRegistersError,
                 builder: (context, state) {
                   if (state is CashRegistersLoading) {
-                    return const Center(child: CircularProgressIndicator());
+                    return const StaffLoader();
                   }
                   
                   final cajas = context.read<TreasuryBloc>().cashRegisters;

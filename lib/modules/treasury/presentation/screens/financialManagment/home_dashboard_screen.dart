@@ -5,6 +5,7 @@ import 'package:front_gestion_minera/config/router/app_router.dart';
 import 'package:front_gestion_minera/config/router/app_router.gr.dart';
 import 'package:front_gestion_minera/core/widgets/custom_alert_widget.dart';
 import 'package:front_gestion_minera/injector_container.dart';
+import 'package:front_gestion_minera/modules/staff/presentation/widgets/staff_ui.dart';
 import 'package:front_gestion_minera/modules/treasury/presentation/bloc/treasury_bloc.dart';
 import 'package:front_gestion_minera/modules/treasury/presentation/screens/financialManagment/payment_history_screen.dart';
 import 'package:front_gestion_minera/utils/session/user_session.dart';
@@ -155,7 +156,7 @@ class HomeBody extends StatelessWidget {
           },
           builder: (context, state) {
             if (state is DashboardDataLoading) {
-              return const Center(child: CircularProgressIndicator());
+              return const StaffLoader();
             }
             if (state is! DashboardDataLoaded) {
               return ListView(
