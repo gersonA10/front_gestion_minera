@@ -1,73 +1,161 @@
+import 'dart:async'; // <-- 1. Importante para usar Timer
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:front_gestion_minera/core/services/connectivity_service.dart';
+import 'package:front_gestion_minera/core/widgets/connectivity_wrapper.dart';
+import 'package:front_gestion_minera/utils/session/session_actions.dart';
+import 'package:in_app_update/in_app_update.dart';
+
+import 'package:front_gestion_minera/config/theme/app_theme.dart';
 import 'package:front_gestion_minera/injector_container.dart';
 import 'package:front_gestion_minera/config/router/app_router.dart';
+import 'package:front_gestion_minera/config/router/app_route_observer.dart';
+import 'package:front_gestion_minera/utils/session/user_session.dart';
+import 'package:intl/date_symbol_data_local.dart';
 
 void main() async {
-   await dotenv.load(fileName: '.env');
+  WidgetsFlutterBinding.ensureInitialized();
+  await SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
+
+  SystemChrome.setSystemUIOverlayStyle(
+    const SystemUiOverlayStyle(
+      statusBarColor: Colors.transparent,
+      statusBarIconBrightness: Brightness.dark,
+    ),
+  );
+  await UserSession.loadSession();
+  await dotenv.load(fileName: '.env');
   InjectorContainer.setupGetIt();
+  await initializeDateFormatting('es');
+  await ConnectivityService.instance.initialize();
   runApp(const MainApp());
 }
 
-class MainApp extends StatelessWidget {
+class MainApp extends StatefulWidget {
   const MainApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    final appRouter = InjectorContainer.getIt<AppRouter>();
-    return MaterialApp.router(routerConfig: appRouter.config());
-  }
-}
-/**
-void main() async {
-  ///This .env file contains the private URL.
-  await dotenv.load(fileName: '.env');
-
-  ///This is the main container where all containers will be declared.
-  InjectorContainer.setupGetIt();
-
-  ///hive declaration
-  await SecureHive.init();
-
-  runApp(
-    BlocProvider<ThemeCubit>.value(
-      value: InjectorContainer.getIt<ThemeCubit>(),
-      child: const MainApp(),
-    ),
-  );
+  State<MainApp> createState() => _MainAppState();
 }
 
-class MainApp extends StatelessWidget {
-  const MainApp({super.key});
+class _MainAppState extends State<MainApp> {
+  late final AppLifecycleListener _lifecycleListener;
+  DateTime? _pausedTime;
+
+  Timer? _inactivityTimer;
+  final int _timeoutMinutes = 5;
 
   @override
-  Widget build(BuildContext context) {
-    final appRouter = InjectorContainer.getIt<AppRouter>();
-    return BlocBuilder<ThemeCubit, ThemeMode>(
-      builder: (context, themeMode) {
-        return MaterialApp.router(
-          title: 'Prodem',
-          debugShowCheckedModeBanner: false,
-          theme: ThemeData.dark(),
-          darkTheme: ThemeData.light(),
-          themeMode: themeMode,
+  void initState() {
+    super.initState();
 
-          /// Aquí agregamos las localizaciones
-          localizationsDelegates: const [
-            GlobalMaterialLocalizations.delegate,
-            GlobalWidgetsLocalizations.delegate,
-            GlobalCupertinoLocalizations.delegate,
-          ],
+    _startInactivityTimer();
 
-          /// Soporte para idiomas (español e inglés por ejemplo)
-          supportedLocales: const [
-            Locale('es', ''), // Español
-            Locale('en', ''), // Inglés
-          ],
-          routerConfig: appRouter.config(),
-        );
+    _lifecycleListener = AppLifecycleListener(
+      onHide: () {
+        // En algunos dispositivos el app pasa a 'hidden' antes que 'paused'
+        _pausedTime ??= DateTime.now();
+        _inactivityTimer?.cancel();
       },
+      onPause: () {
+        _pausedTime ??= DateTime.now();
+        _inactivityTimer?.cancel();
+      },
+      onResume: () async {
+        if (_pausedTime != null) {
+          final diff = DateTime.now().difference(_pausedTime!);
+          _pausedTime = null;
+          final hasSession = await UserSession.isSession();
+          if (!hasSession) {
+            _startInactivityTimer();
+            return;
+          }
+          if (diff.inMinutes >= _timeoutMinutes) {
+            SessionActions.logout(SessionLogoutReason.inactivity);
+            return;
+          }
+        }
+        _startInactivityTimer();
+      },
+    );
+
+    _checkForUpdate();
+  }
+
+  void _startInactivityTimer() {
+    _inactivityTimer?.cancel();
+    _inactivityTimer = Timer(Duration(minutes: _timeoutMinutes), () async {
+      final hasSession = await UserSession.isSession();
+      if (hasSession) {
+        SessionActions.logout(SessionLogoutReason.inactivity);
+      }
+    });
+  }
+
+  void _handleUserInteraction([_]) {
+    _startInactivityTimer();
+  }
+
+  @override
+  void dispose() {
+    _lifecycleListener.dispose();
+    _inactivityTimer?.cancel();
+    super.dispose();
+  }
+
+  Future<void> _checkForUpdate() async {
+    try {
+      final info = await InAppUpdate.checkForUpdate();
+
+      if (info.updateAvailability == UpdateAvailability.updateAvailable) {
+        if (info.immediateUpdateAllowed) {
+          await InAppUpdate.performImmediateUpdate();
+        } else if (info.flexibleUpdateAllowed) {
+          await InAppUpdate.startFlexibleUpdate();
+          await InAppUpdate.completeFlexibleUpdate();
+        }
+      }
+    } catch (e) {
+      debugPrint("Error al comprobar la actualización: $e");
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final appRouter = InjectorContainer.getIt<AppRouter>();
+
+    return Listener(
+      behavior: HitTestBehavior.translucent,
+      onPointerDown: _handleUserInteraction,
+      onPointerMove: _handleUserInteraction,
+      child: MaterialApp.router(
+        title: 'Tigres Dorados',
+        debugShowCheckedModeBanner: false,
+        locale: const Locale('es'),
+        supportedLocales: const [Locale('es'), Locale('en')],
+        localizationsDelegates: const [
+          GlobalMaterialLocalizations.delegate,
+          GlobalWidgetsLocalizations.delegate,
+          GlobalCupertinoLocalizations.delegate,
+        ],
+        themeMode: ThemeMode.light,
+        theme: TAppTheme.lightTheme,
+        darkTheme: TAppTheme.lightTheme,
+        routerConfig: appRouter.config(
+          navigatorObservers: () => [appRouteObserver],
+        ),
+        builder: (context, child) => ConnectivityWrapper(
+          child: SafeArea(
+            bottom: true,
+            top: false,
+            left: false,
+            right: false,
+            child: child ?? const SizedBox.shrink(),
+          ),
+        ),
+      ),
     );
   }
 }
- */

@@ -1,5 +1,7 @@
 import 'package:dio/dio.dart';
 import 'package:front_gestion_minera/utils/session/user_session.dart';
+import 'package:front_gestion_minera/utils/session/session_actions.dart'
+    show SessionActions, SessionLogoutReason;
 
 class InterceptorService extends Interceptor {
   final Dio _dio;
@@ -7,84 +9,35 @@ class InterceptorService extends Interceptor {
   InterceptorService(this._dio);
 
   @override
-  void onRequest(
-    RequestOptions options,
-    RequestInterceptorHandler handler,
-  ) async {
+  void onRequest(RequestOptions options, RequestInterceptorHandler handler) async {
     final token = await UserSession.getAccessToken();
     if (token.isNotEmpty && !options.headers.containsKey('Authorization')) {
-      options.headers.addAll(
-        {'Authorization': 'Bearer $token'},
-      );
+      options.headers.addAll({'Authorization': token});
     }
     handler.next(options);
   }
 
   @override
-  void onResponse(
-    Response response,
-    ResponseInterceptorHandler handler,
-  ) async {
+  void onResponse(Response response, ResponseInterceptorHandler handler) {
     handler.next(response);
   }
 
   @override
-  void onError(
-    DioException err,
-    ErrorInterceptorHandler handler,
-  ) async {
-    try {
-      if (int.parse(err.response?.statusCode.toString() ?? '0') == 401) {
-        //TODO: Refresh token logic here
-        // String newAccessToken = await refreshToken();
-        // err.requestOptions.headers['Authorization'] = 'Bearer $newAccessToken';
+  void onError(DioException err, ErrorInterceptorHandler handler) async {
+    if (err.response?.statusCode == 401) {
+      final isLoginRequest = err.requestOptions.path.toLowerCase().contains('login');
 
-        return handler.resolve(await _retry(err.requestOptions));
-      } else {
-        return handler.next(err);
+      if (!isLoginRequest) {
+        final responseData = err.response?.data;
+        final reason = responseData is Map ? responseData['reason'] as String? : null;
+
+        final logoutReason = reason == 'session_replaced'
+            ? SessionLogoutReason.replacedByAnotherDevice
+            : SessionLogoutReason.inactivity;
+
+        await SessionActions.logout(logoutReason);
       }
-    } catch (error) {
-      return handler.next(err);
     }
+    return handler.next(err);
   }
-
-  Future<Response<dynamic>> _retry(RequestOptions requestOptions) async {
-    final options = Options(
-      method: requestOptions.method,
-      headers: requestOptions.headers,
-    );
-    return _dio.request<dynamic>(
-      requestOptions.path,
-      data: requestOptions.data,
-      queryParameters: requestOptions.queryParameters,
-      options: options,
-    );
-  }
-
-  // Future<String> refreshToken() async {
-  //   try {
-  //     final refreshToken = await UserSession.getRefreshToken();
-  //     final url = dotenv.env['API_BASE_URL']!;
-  //     if (refreshToken.isEmpty) {
-  //       throw 'No exit refresh token';
-  //     }
-  //     final response = await Dio().post(
-  //       '${url}auth/refresh',
-  //       options: Options(
-  //         headers: {'Authorization': 'Bearer $refreshToken'},
-  //       ),
-  //     );
-
-  //     final signModel = SignResponseModel.fromJson(response.data);
-  //     await UserSession.setAccessToken(
-  //       signModel.accessToken,
-  //     );
-  //     await UserSession.setRefreshToken(
-  //       signModel.refreshToken,
-  //     );
-  //     return signModel.accessToken;
-  //   } catch (error) {
-  //     throw 'error: refresh token';
-  //   }
-  // }
 }

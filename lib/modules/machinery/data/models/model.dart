@@ -1,0 +1,13 @@
+export 'package:front_gestion_minera/modules/machinery/data/models/detail_maintenance_reponse_model.dart';
+export 'package:front_gestion_minera/modules/machinery/data/models/machine_data_model.dart';
+export 'package:front_gestion_minera/modules/machinery/data/models/request_data_model.dart';
+export 'package:front_gestion_minera/modules/machinery/data/models/type_machinery_model.dart';
+export 'package:front_gestion_minera/modules/machinery/data/models/metrics_machinery_model.dart';
+export 'package:front_gestion_minera/modules/machinery/data/models/invetory_machinery_model.dart';
+export 'package:front_gestion_minera/modules/machinery/data/models/maintenance_history_model.dart';
+export 'package:front_gestion_minera/modules/machinery/data/models/register_machinery_request_model.dart';
+export 'package:front_gestion_minera/modules/machinery/data/models/update_machinery_request_model.dart';
+export 'package:front_gestion_minera/modules/machinery/data/models/register_machinery_response_model.dart';
+export 'package:front_gestion_minera/modules/machinery/data/models/create_maintenance_request_model.dart';
+export 'package:front_gestion_minera/modules/machinery/data/models/failure_type_model.dart';
+export 'package:front_gestion_minera/modules/machinery/data/models/close_up_of_a_machine_model.dart';

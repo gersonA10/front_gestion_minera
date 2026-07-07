@@ -1,0 +1,437 @@
+import 'dart:io';
+import 'package:auto_route/auto_route.dart';
+import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:pdf/pdf.dart';
+import 'package:pdf/widgets.dart' as pw;
+import 'package:open_filex/open_filex.dart';
+import 'package:share_plus/share_plus.dart';
+import '../../../domain/entity/loans/payment_process_entity.dart';
+import 'loan_ui.dart';
+
+@RoutePage()
+class PaymentSuccessScreen extends StatefulWidget {
+  final PayTheFeeResponseEntity paymentData;
+  const PaymentSuccessScreen({super.key, required this.paymentData});
+
+  @override
+  State<PaymentSuccessScreen> createState() => _PaymentSuccessScreenState();
+}
+
+class _PaymentSuccessScreenState extends State<PaymentSuccessScreen> {
+  bool _isSaving = false;
+  bool _isSharing = false;
+
+  Future<List<int>> _buildPdfBytes() async {
+    final pdf = pw.Document();
+    final data = widget.paymentData;
+
+    pdf.addPage(
+      pw.Page(
+        pageFormat: PdfPageFormat.a5,
+        margin: const pw.EdgeInsets.all(32),
+        build: (context) => pw.Column(
+          crossAxisAlignment: pw.CrossAxisAlignment.center,
+          children: [
+            pw.Text(
+              'RECIBO DE PAGO',
+              style: pw.TextStyle(
+                fontSize: 18,
+                fontWeight: pw.FontWeight.bold,
+              ),
+            ),
+            pw.SizedBox(height: 4),
+            pw.Text(
+              'Gestión Minera',
+              style: const pw.TextStyle(fontSize: 12, color: PdfColors.grey700),
+            ),
+            pw.SizedBox(height: 24),
+            pw.Divider(),
+            pw.SizedBox(height: 16),
+            pw.Center(
+              child: pw.Column(
+                children: [
+                  pw.Text(
+                    'MONTO PAGADO',
+                    style: const pw.TextStyle(
+                      fontSize: 10,
+                      color: PdfColors.grey600,
+                    ),
+                  ),
+                  pw.SizedBox(height: 6),
+                  pw.Text(
+                    data.montoPagado.toStringAsFixed(2),
+                    style: pw.TextStyle(
+                      fontSize: 28,
+                      fontWeight: pw.FontWeight.bold,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            pw.SizedBox(height: 16),
+            pw.Divider(),
+            pw.SizedBox(height: 16),
+            _pdfRow('Referencia', data.referencia),
+            pw.SizedBox(height: 10),
+            _pdfRow('Fecha / Hora', data.fechaHora),
+            pw.SizedBox(height: 10),
+            _pdfRow('Caja afectada', data.cajaAfectada),
+            pw.SizedBox(height: 10),
+            _pdfRow('ID Transacción', data.transactionId),
+            pw.SizedBox(height: 24),
+            pw.Divider(),
+            pw.SizedBox(height: 12),
+            pw.Text(
+              'Pago procesado correctamente.',
+              style: const pw.TextStyle(
+                fontSize: 10,
+                color: PdfColors.grey600,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+
+    return pdf.save();
+  }
+
+  pw.Widget _pdfRow(String label, String value) {
+    return pw.Row(
+      mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+      children: [
+        pw.Text(
+          label,
+          style: const pw.TextStyle(fontSize: 11, color: PdfColors.grey700),
+        ),
+        pw.Text(
+          value,
+          style: pw.TextStyle(fontSize: 11, fontWeight: pw.FontWeight.bold),
+        ),
+      ],
+    );
+  }
+
+  Future<void> _shareReceipt() async {
+    setState(() => _isSharing = true);
+    try {
+      final bytes = await _buildPdfBytes();
+      final dir = await getTemporaryDirectory();
+      final file = File(
+          '${dir.path}/recibo_pago_${widget.paymentData.referencia}.pdf');
+      await file.writeAsBytes(bytes);
+
+      await SharePlus.instance.share(
+        ShareParams(
+          files: [XFile(file.path, mimeType: 'application/pdf')],
+          subject: 'Recibo de pago - ${widget.paymentData.referencia}',
+        ),
+      );
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error al compartir: $e')),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _isSharing = false);
+    }
+  }
+
+  Future<void> _saveReceipt() async {
+    setState(() => _isSaving = true);
+    try {
+      final bytes = await _buildPdfBytes();
+      final dir = await getApplicationDocumentsDirectory();
+      final fileName =
+          'recibo_${widget.paymentData.referencia}_${DateTime.now().millisecondsSinceEpoch}.pdf';
+      final file = File('${dir.path}/$fileName');
+      await file.writeAsBytes(bytes);
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Recibo guardado correctamente'),
+            backgroundColor: LoanUi.finalizado,
+            behavior: SnackBarBehavior.floating,
+            duration: Duration(seconds: 3),
+          ),
+        );
+        await OpenFilex.open(file.path);
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error al guardar: $e')),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _isSaving = false);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final fmt = NumberFormat('#,##0.00', 'es_PE');
+    return Scaffold(
+      backgroundColor: LoanUi.bg,
+      appBar: loanAppBar(
+        context,
+        title: 'Confirmación',
+        showBack: false,
+      ),
+      body: SafeArea(
+        child: Column(
+          children: [
+            Expanded(
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 24,
+                  vertical: 32,
+                ),
+                child: Column(
+                  children: [
+                    Container(
+                      width: 90,
+                      height: 90,
+                      alignment: Alignment.center,
+                      decoration: BoxDecoration(
+                        color: LoanUi.finalizado,
+                        shape: BoxShape.circle,
+                        boxShadow: [
+                          BoxShadow(
+                            color: LoanUi.finalizado.withValues(alpha: 0.35),
+                            blurRadius: 36,
+                            spreadRadius: 4,
+                          ),
+                        ],
+                      ),
+                      child: const Icon(
+                        Icons.check_rounded,
+                        color: Colors.white,
+                        size: 46,
+                      ),
+                    ),
+                    const SizedBox(height: 28),
+                    const Text(
+                      'Pago registrado\ncon éxito',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        color: LoanUi.textPrimary,
+                        fontSize: 26,
+                        fontWeight: FontWeight.w800,
+                        height: 1.25,
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    const Text(
+                      'La transacción se ha procesado correctamente. Puedes revisar los detalles de tu pago o compartir el recibo.',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        color: LoanUi.textSecondary,
+                        fontSize: 13.5,
+                        height: 1.5,
+                      ),
+                    ),
+                    const SizedBox(height: 32),
+                    Container(
+                      width: double.infinity,
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 20,
+                        vertical: 24,
+                      ),
+                      decoration: BoxDecoration(
+                        color: LoanUi.surface,
+                        borderRadius: BorderRadius.circular(16),
+                        border: Border.all(color: LoanUi.border),
+                      ),
+                      child: Column(
+                        children: [
+                          const Text(
+                            'MONTO PAGADO',
+                            style: TextStyle(
+                              color: LoanUi.textSecondary,
+                              fontSize: 11,
+                              fontWeight: FontWeight.w600,
+                              letterSpacing: 1.1,
+                            ),
+                          ),
+                          const SizedBox(height: 10),
+                          Text(
+                            'Bs ${fmt.format(widget.paymentData.montoPagado)}',
+                            style: const TextStyle(
+                              color: LoanUi.textPrimary,
+                              fontSize: 32,
+                              fontWeight: FontWeight.w800,
+                              letterSpacing: -0.5,
+                            ),
+                          ),
+                          const SizedBox(height: 20),
+                          const Divider(
+                            color: LoanUi.border,
+                            thickness: 1,
+                            height: 1,
+                          ),
+                          const SizedBox(height: 16),
+                          _DetailRow(
+                            label: 'Referencia',
+                            value: widget.paymentData.referencia,
+                          ),
+                          const SizedBox(height: 12),
+                          _DetailRow(
+                            label: 'Fecha / Hora',
+                            value: widget.paymentData.fechaHora,
+                          ),
+                          const SizedBox(height: 12),
+                          _DetailRow(
+                            label: 'Caja afectada',
+                            value: widget.paymentData.cajaAfectada,
+                            valueBold: true,
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            // Bottom actions
+            Padding(
+              padding: const EdgeInsets.fromLTRB(24, 0, 24, 16),
+              child: Column(
+                children: [
+                  SizedBox(
+                    width: double.infinity,
+                    height: 52,
+                    child: ElevatedButton(
+                      onPressed: () {
+                        context.router.back();
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: LoanUi.finalizado,
+                        foregroundColor: Colors.white,
+                        elevation: 0,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(14),
+                        ),
+                      ),
+                      child: const Text(
+                        'Salir',
+                        style: TextStyle(
+                          fontSize: 15,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      _ActionButton(
+                        icon: Icons.share_outlined,
+                        label: 'Compartir',
+                        isLoading: _isSharing,
+                        onTap: _isSharing ? null : _shareReceipt,
+                      ),
+                      const SizedBox(width: 32),
+                      _ActionButton(
+                        icon: Icons.download_outlined,
+                        label: 'Guardar Recibo',
+                        isLoading: _isSaving,
+                        onTap: _isSaving ? null : _saveReceipt,
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _DetailRow extends StatelessWidget {
+  final String label;
+  final String value;
+  final bool valueBold;
+
+  const _DetailRow({
+    required this.label,
+    required this.value,
+    this.valueBold = false,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Text(
+          label,
+          style: const TextStyle(color: LoanUi.textSecondary, fontSize: 13),
+        ),
+        Flexible(
+          child: Text(
+            value,
+            textAlign: TextAlign.right,
+            style: TextStyle(
+              color: LoanUi.textPrimary,
+              fontSize: 13,
+              fontWeight: valueBold ? FontWeight.w700 : FontWeight.w500,
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _ActionButton extends StatelessWidget {
+  final IconData icon;
+  final String label;
+  final bool isLoading;
+  final VoidCallback? onTap;
+
+  const _ActionButton({
+    required this.icon,
+    required this.label,
+    required this.onTap,
+    this.isLoading = false,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Row(
+        children: [
+          if (isLoading)
+            const SizedBox(
+              width: 18,
+              height: 18,
+              child: CircularProgressIndicator(
+                strokeWidth: 2,
+                color: LoanUi.primary,
+              ),
+            )
+          else
+            Icon(icon, color: LoanUi.primary, size: 18),
+          const SizedBox(width: 6),
+          Text(
+            label,
+            style: const TextStyle(
+              color: LoanUi.primary,
+              fontSize: 13,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}

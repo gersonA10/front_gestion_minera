@@ -1,0 +1,173 @@
+import '../entity/entity.dart';
+import '../entity/income_request_entity.dart';
+
+abstract class TreasuryRepository {
+  Future<TreasuryMetricsEntity> getMetrics();
+  Future<BondBalanceResponseEntity> getBondBalence();
+  Future<PendingApplicationsResponseEntity> getPendingApplications();
+  Future<DetailsofanapplicationResponseEntity> getDetailsofanapplication(
+    String id,
+  );
+  Future<CashResponseEntity> getCash();
+  Future<ListOfPendingRequestsResponseEntity> listOfPendingRequests({
+    int page = 1,
+    int limit = 10,
+  });
+
+  Future<FinancialReportEntity> getFinancialReport({
+    String period = 'month',
+    String? exactDate,
+    String? startDate,
+    String? endDate,
+  });
+
+  Future<IncomeResponseEntity> registerUrgentIncome(
+    IncomeRequestEntity request,
+  );
+
+  Future<ExpenseResponseEntity> registerUrgentExpense(
+    ExpenseRequestEntity request,
+  );
+
+  Future<TransferResponseEntity> registerUrgentTransfer(
+    TransferRequestEntity request,
+  );
+
+  Future<List<CashRegisterEntity>> getCashRegisters();
+
+  Future<ReconciliationListResponseEntity> getPendingReconciliations({
+    int page = 1,
+    int limit = 10,
+    String? search,
+  });
+
+  Future<ExecuteReconciliationResultEntity> executeReconciliation(
+    String requestId,
+    String cajaOrigenId,
+    String? nota,
+  );
+
+  Future<GoldInventoryEntity> getGoldInventory();
+  Future<PaginatedGoldBatchesEntity> getGoldBatches({int page = 1, int limit = 10, String? status});
+  
+  Future<SaleHistoryResponseEntity> getSalesHistory({int page = 1, int limit = 5, String? status});
+  
+  Future<ConfirmPaymentResponseEntity> confirmPayment(
+    String idCash,
+    ConfirmPaymentRequetsEntity confirmPaymentRequets,
+  );
+  Future<RejectAnApplicationResponseEntity> rejectAnApplication(
+    String idCash,
+    String reason,
+  );
+
+  Future<PaymentHistoryResponseEntity> getPaymentHistory({
+    int page = 1,
+    int limit = 10,
+    String? period,
+    String? exactDate,
+  });
+
+  Future<InternalLoansResponseEntity> getInternalLoans({
+    String? status,
+    String? search,
+    int page = 1,
+    int limit = 10,
+  });
+
+  Future<TransactionDetailsResponseEntity> getTransactionDetails(
+    String idTansaction,
+  );
+  Future<NewExtractionResponseEntiy> newExtraction(
+    NewExtractionRequetsEntity newExtractionRequets,
+  );
+
+  Future<SalePreviewResponseEntity> previewSale(double gramsToSell);
+
+  Future<RegisterSaleResponseEntity> registerSale(
+    RegisterSaleRequestEntity request,
+  );
+
+  Future<RegisterSaleResponseEntity> getSaleById(String idSale);
+
+  Future<ApplyForALoanResponseEntity> applyForALoan(
+    String lenderName,
+    double amount,
+    int termMonths,
+    double annualInterestRate,
+    String startDate,
+    String cajaDestinoId,
+  );
+  Future<NewLoansResponseEntity> postNewLoansSimulate(
+    double amount,
+    int termMonths,
+    String annualInterestRate,
+    String startDate,
+  );
+  Future<LoanDetailsResponseEntity> getloanDatails(String idLoan);
+
+  Future<DistributionHistoryResponseEntity> getDistributionHistory({
+    int page = 1,
+    int limit = 10,
+    int? year,
+  });
+
+  Future<DistributionDetailResponseEntity> getDistributionDetail(
+    String distributionId, {
+    int page = 1,
+    int limit = 10,
+  });
+
+  Future<LotDetailsDataEntity> getLotDetails(String batchId);
+
+  Future<PayTheFeeResponseEntity> payTheFee(
+    PayTheFeeRequetsEntity payTheFeeRequest,
+    String idLoan,
+    String idQuota,
+  );
+
+  Future<NewLayoutResponseEntity> newLayoutPost(
+   String monthPeriod,
+    String yearPeriod,
+    double baseAmount
+  );
+  Future<SimulateDistributionResponseEntity> postSimulateDistribution(
+    double baseAmount
+  );
+
+  Future<ContributionsResponseEntity> getContributions({
+    int page = 1,
+    int limit = 10,
+    String? search,
+  });
+
+  Future<ContributionDetailResponseEntity> getContributionDetail(
+    String contributionId, {
+    int page = 1,
+    int limit = 10,
+  });
+  Future<DividendPaymentResponseEntity> payDividend(
+    String distributionId,
+    String memberId,
+    String cashRegisterId,
+    String period,
+    String evidenciaPath,
+  );
+
+  Future<ReceiptResponseEneity> getReceipt(String transactionId);
+  Future<ContributionReceiptsResponseEntity> getContributionReceipts(
+    String contributionId, {
+    int page = 1,
+    int limit = 10,
+  });
+  Future<RecordContributionPaymentDataEntity> recordContributionPayment(
+    RecordContributionPaymentRequestEntity recordContributionPaymentRequestModel
+  );
+  Future<ContributionPaymentReceiptEntity> getContributionPaymentReceipt(
+    String transactionId,
+  );
+}
+
+
+
+

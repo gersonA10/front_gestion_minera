@@ -59,12 +59,14 @@ class ApiClient extends BaseApiClient {
     required String operationName,
     required Map<String, dynamic> data,
     Map<String, dynamic>? queryParameters,
+    Options? options,
   }) async {
     final response = await network(
       request: (request) => request.post(
         path,
         data: data,
         queryParameters: queryParameters,
+        options: options,
       ),
       handleSuccess: (startedAt, response) async {
         return await _handleSuccess(
@@ -148,6 +150,44 @@ class ApiClient extends BaseApiClient {
 
     final response = await network(
       request: (request) => request.patch(
+        path,
+        data: formData,
+        queryParameters: queryParameters,
+        options: options,
+      ),
+      handleSuccess: (startedAt, response) async {
+        return await _handleSuccess(
+          startedAt: startedAt,
+          response: response,
+          operationName: operationName,
+        );
+      },
+    );
+
+    return response;
+  }
+
+  Future<dynamic> putFormData(
+    String path, {
+    required String operationName,
+    Map<String, dynamic>? data,
+    Map<String, dynamic>? queryParameters,
+    List<Map<String, dynamic>>? files,
+    Options? options,
+  }) async {
+    final formData = FormData.fromMap({
+      ...?data,
+      ...?files?.asMap().map((i, file) => MapEntry(
+          file['name'],
+          MultipartFile.fromFileSync(
+            file['path'],
+            filename: file['filename'],
+            contentType: file['contentType'],
+          ))),
+    });
+
+    final response = await network(
+      request: (request) => request.put(
         path,
         data: formData,
         queryParameters: queryParameters,

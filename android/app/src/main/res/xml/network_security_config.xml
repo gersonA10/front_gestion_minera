@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<network-security-config>
+    <!-- El backend de producción corre sobre HTTP en la IP del droplet.
+         Se permite tráfico sin cifrar SOLO hacia esa IP; quitar cuando
+         el servidor tenga dominio con HTTPS. -->
+    <domain-config cleartextTrafficPermitted="true">
+        <domain includeSubdomains="false">147.182.215.238</domain>
+    </domain-config>
+</network-security-config>

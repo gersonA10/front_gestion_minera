@@ -1,12 +1,16 @@
 class LoginResponseEntity {
   final bool success;
   final String message;
-  final LoginDataEntity data;
+  final String? reason;
+  final LoginDataEntity? data;
+  final String? tempToken;
 
   LoginResponseEntity({
     required this.success,
     required this.message,
-    required this.data,
+    this.reason,
+    this.data,
+    this.tempToken,
   });
 }
 

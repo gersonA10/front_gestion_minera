@@ -1,0 +1,328 @@
+part of 'staff_bloc.dart';
+
+abstract class StaffState {}
+
+class StaffInitial extends StaffState {}
+
+class AttendanceReportLoading extends StaffState {}
+
+class AttendanceReportLoaded extends StaffState {
+  final AttendanceReportEntity report;
+  AttendanceReportLoaded({required this.report});
+}
+
+class AttendanceReportError extends StaffState {
+  final String message;
+  AttendanceReportError(this.message);
+}
+
+class EmployeesLoading extends StaffState {}
+
+class EmployeesPageLoading extends StaffState {
+  final EmployeesLoaded previousState;
+  EmployeesPageLoading(this.previousState);
+}
+
+class EmployeesLoaded extends StaffState {
+  final List<EmployeeEntity> employees;
+  final bool hasMore;
+  final int total;
+  final int currentPage;
+  final int totalPages;
+  final String? currentSearch;
+  final String? currentDepartment;
+  final String? currentStatus;
+
+  EmployeesLoaded({
+    required this.employees,
+    required this.hasMore,
+    required this.total,
+    required this.currentPage,
+    required this.totalPages,
+    this.currentSearch,
+    this.currentDepartment,
+    this.currentStatus,
+  });
+
+  EmployeesLoaded copyWith({
+    List<EmployeeEntity>? employees,
+    bool? hasMore,
+    int? total,
+    int? currentPage,
+    int? totalPages,
+    String? currentSearch,
+    String? currentDepartment,
+    String? currentStatus,
+  }) {
+    return EmployeesLoaded(
+      employees: employees ?? this.employees,
+      hasMore: hasMore ?? this.hasMore,
+      total: total ?? this.total,
+      currentPage: currentPage ?? this.currentPage,
+      totalPages: totalPages ?? this.totalPages,
+      currentSearch: currentSearch ?? this.currentSearch,
+      currentDepartment: currentDepartment ?? this.currentDepartment,
+      currentStatus: currentStatus ?? this.currentStatus,
+    );
+  }
+}
+
+class RegisterEmployeesLoading extends StaffState {}
+
+class RegisterEmployeesSuccess extends StaffState {}
+
+class RegisterEmployeesError extends StaffState {
+  final String message;
+  RegisterEmployeesError(this.message);
+}
+
+class EmployeesError extends StaffState {
+  final String message;
+  EmployeesError(this.message);
+}
+
+class EmployeeProfileLoading extends StaffState {}
+
+class EmployeeProfileLoaded extends StaffState {
+  final EmployeeEntity employee;
+  EmployeeProfileLoaded(this.employee);
+}
+
+class EmployeeProfileError extends StaffState {
+  final String message;
+  EmployeeProfileError(this.message);
+}
+
+class EmployeeProfileUpdateSuccess extends StaffState {
+  final EmployeeEntity employee;
+  EmployeeProfileUpdateSuccess(this.employee);
+}
+
+class EmployeeProfileUpdateError extends StaffState {
+  final String message;
+  EmployeeProfileUpdateError(this.message);
+}
+
+class EgresoDetailLoading extends StaffState {}
+
+class EgresoDetailLoaded extends StaffState {
+  final List<EgresoDetailItemEntity> items;
+  EgresoDetailLoaded(this.items);
+}
+
+class EgresoDetailError extends StaffState {
+  final String message;
+  EgresoDetailError(this.message);
+}
+
+class EmployeeBalanceLoaded extends StaffState {
+  final EmployeeBalanceEntity balance;
+  EmployeeBalanceLoaded(this.balance);
+}
+
+// Solo saldo de caja (para Gestionar Nómina, sin alterar la lista)
+class CashBalanceLoaded extends StaffState {
+  final double balance;
+  CashBalanceLoaded(this.balance);
+}
+
+// Caja de Personal
+class PersonnelCashLoading extends StaffState {}
+
+class PersonnelCashError extends StaffState {
+  final String message;
+  PersonnelCashError(this.message);
+}
+
+class PersonnelCashLoaded extends StaffState {
+  final double balance;
+  final List<CashMovementEntity> movements;
+  final List<CashPayableEntity> payables;
+  PersonnelCashLoaded({
+    required this.balance,
+    required this.movements,
+    required this.payables,
+  });
+}
+
+class PayPayrollSuccess extends StaffState {
+  final String message;
+  PayPayrollSuccess(this.message);
+}
+
+class PayPayrollError extends StaffState {
+  final String message;
+  PayPayrollError(this.message);
+}
+
+class EmployeePaymentRequestLoading extends StaffState {}
+
+class EmployeePaymentRequestSuccess extends StaffState {}
+
+class EmployeePaymentRequestError extends StaffState {
+  final String message;
+  EmployeePaymentRequestError(this.message);
+}
+
+class CreatePayrollRequestLoading extends StaffState {}
+
+class CreatePayrollRequestSuccess extends StaffState {}
+
+class CreatePayrollRequestError extends StaffState {
+  final String message;
+  CreatePayrollRequestError(this.message);
+}
+
+class GenerateEmployeePayrollLoading extends StaffState {}
+
+class GenerateEmployeePayrollSuccess extends StaffState {
+  final int totalEmployee;
+  final double totalAmount;
+  GenerateEmployeePayrollSuccess({
+    required this.totalEmployee,
+    required this.totalAmount,
+  });
+}
+
+class GenerateEmployeePayrollError extends StaffState {
+  final String message;
+  GenerateEmployeePayrollError(this.message);
+}
+
+// Attendance Ingreso
+class AttendanceIngresoLoading extends StaffState {}
+
+class AttendanceIngresoLoaded extends StaffState {
+  final List<AttendanceIngresoEntity> employees;
+  AttendanceIngresoLoaded(this.employees);
+}
+
+class AttendanceIngresoError extends StaffState {
+  final String message;
+  AttendanceIngresoError(this.message);
+}
+
+// Attendance En Planta
+class AttendanceEnPlantaLoading extends StaffState {}
+
+class AttendanceEnPlantaLoaded extends StaffState {
+  final List<AttendanceEnPlantaEntity> employees;
+  AttendanceEnPlantaLoaded(this.employees);
+}
+
+class AttendanceEnPlantaError extends StaffState {
+  final String message;
+  AttendanceEnPlantaError(this.message);
+}
+
+// Attendance Finalizado
+class AttendanceFinalizadoLoading extends StaffState {}
+
+class AttendanceFinalizadoLoaded extends StaffState {
+  final List<AttendanceFinalizadoEntity> employees;
+  AttendanceFinalizadoLoaded(this.employees);
+}
+
+class AttendanceFinalizadoError extends StaffState {
+  final String message;
+  AttendanceFinalizadoError(this.message);
+}
+
+class CheckOutEmployeeLoading extends StaffState {}
+
+class CheckOutEmployeeSuccess extends StaffState {
+  final EmployeeCheckOutResponseEntity data;
+  CheckOutEmployeeSuccess(this.data);
+}
+
+class CheckOutEmployeeError extends StaffState {
+  final String message;
+  CheckOutEmployeeError(this.message);
+}
+
+class CheckInEmployeeLoading extends StaffState {}
+
+class CheckInEmployeeSuccess extends StaffState {}
+
+class CheckInEmployeeError extends StaffState {
+  final String message;
+  CheckInEmployeeError(this.message);
+}
+
+class DetailAssistanceEmployeeLoading extends StaffState {}
+
+class DetailAssistanceEmployeeLoaded extends StaffState {
+  final EmployeeDetailAssistanceModel employee;
+
+  DetailAssistanceEmployeeLoaded({required this.employee});
+}
+
+class DetailAssistanceEmployeeError extends StaffState {
+  final String message;
+  DetailAssistanceEmployeeError(this.message);
+}
+
+class PayrollMonthlyLoading extends StaffState {}
+
+class PayrollMonthlyLoaded extends StaffState {
+  final List<PayrollMonthlyEntity> payrolls;
+  final double totalPayroll;
+  final double totalPaid;
+  final double totalPending;
+  PayrollMonthlyLoaded({
+    required this.payrolls,
+    required this.totalPayroll,
+    required this.totalPaid,
+    required this.totalPending,
+  });
+}
+
+class PayrollMonthlyError extends StaffState {
+  final String message;
+
+  PayrollMonthlyError(this.message);
+}
+
+class HistoryRecordExpenditureLoading extends StaffState {}
+
+class HistoryRecordExpenditureLoaded extends StaffState {
+  final List<HistoryExpenditureEntity> items;
+  final double totalExpenses;
+  final bool hasMore;
+  final int total;
+  HistoryRecordExpenditureLoaded({
+    required this.items,
+    required this.hasMore,
+    required this.total,
+    required this.totalExpenses,
+  });
+}
+
+class HistoryRecordExpenditureError extends StaffState {
+  final String message;
+  HistoryRecordExpenditureError(this.message);
+}
+
+class PayrollHistoryLoading extends StaffState {}
+
+class PayrollHistoryLoaded extends StaffState {
+  final PayrollHistoryResponseModel history;
+  PayrollHistoryLoaded({required this.history});
+}
+
+class PayrollHistoryError extends StaffState {
+  final String message;
+  PayrollHistoryError({required this.message});
+}
+
+class ProcessPayrollPaymentLoading extends StaffState {}
+
+class ProcessPayrollPaymentSuccess extends StaffState {
+  final ProcessPayrollPaymentEntity payment;
+  ProcessPayrollPaymentSuccess(this.payment);
+}
+
+class ProcessPayrollPaymentError extends StaffState {
+  final String message;
+  ProcessPayrollPaymentError(this.message);
+}

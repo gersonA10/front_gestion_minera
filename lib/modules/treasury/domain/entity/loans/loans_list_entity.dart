@@ -1,0 +1,55 @@
+enum LoanStatus { activo, enMora, finalizado }
+
+class InternalLoansResponseEntity {
+  final int totalRecords;
+  final bool hasMore;
+  final List<InternalLoansEntity> items;
+
+  InternalLoansResponseEntity({
+    required this.totalRecords,
+    required this.hasMore,
+    required this.items,
+  });
+}
+
+class InternalLoansEntity {
+  final String loanId;
+  final String lenderName;
+  final String loanCode;
+  final String estadoEtiqueta;
+  final double montoPrestado;
+  final double totalAPagar;
+  final double pendiente;
+  final int progresoPagoPct;
+  final AlertaVencimientoEntity alertaVencimiento;
+
+  InternalLoansEntity({
+    required this.loanId,
+    required this.lenderName,
+    required this.loanCode,
+    required this.estadoEtiqueta,
+    required this.montoPrestado,
+    required this.totalAPagar,
+    required this.pendiente,
+    required this.progresoPagoPct,
+    required this.alertaVencimiento,
+  });
+
+  LoanStatus get status {
+    final label = estadoEtiqueta.toLowerCase().trim();
+    if (label == 'finalizado' || label == 'pagado') return LoanStatus.finalizado;
+    if (alertaVencimiento.estaEnMora || label == 'en mora' || label == 'mora') return LoanStatus.enMora;
+    return LoanStatus.activo;
+  }
+
+  double get progreso => progresoPagoPct.toDouble();
+  int get progresoInt => progresoPagoPct;
+  double get totalPagado => totalAPagar - pendiente;
+}
+
+class AlertaVencimientoEntity {
+  final bool estaEnMora;
+  final String textoFecha;
+
+  AlertaVencimientoEntity({required this.estaEnMora, required this.textoFecha});
+}
