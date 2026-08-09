@@ -36,10 +36,20 @@ extension DateFilterTypeExt on DateFilterType {
 
 @RoutePage()
 class PaymentHistoryScreen extends StatelessWidget {
-  const PaymentHistoryScreen({super.key});
+  /// Bloc externo opcional: permite al dueño (p. ej. el dashboard de gestión
+  /// financiera) reenviar GetPaymentHistoryEvent tras registrar movimientos.
+  final TreasuryBloc? bloc;
+
+  const PaymentHistoryScreen({super.key, this.bloc});
 
   @override
   Widget build(BuildContext context) {
+    if (bloc != null) {
+      return BlocProvider.value(
+        value: bloc!,
+        child: const _PaymentHistoryView(),
+      );
+    }
     return BlocProvider(
       create: (_) => InjectorContainer.getIt<TreasuryBloc>()
         ..add(GetPaymentHistoryEvent(isRefresh: true)),
@@ -256,11 +266,32 @@ class _PaymentHistoryViewState extends State<_PaymentHistoryView> {
                     physics: const AlwaysScrollableScrollPhysics(),
                     slivers: [
                       SliverToBoxAdapter(
-                        child: Padding(
-                          padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
-                          child: Row(
+                        child: SizedBox(
+                          // Escala con el tamaño de texto de accesibilidad
+                          // para no desbordar las tarjetas.
+                          height: 150 *
+                              MediaQuery.textScalerOf(context)
+                                  .scale(1.0)
+                                  .clamp(1.0, 1.6),
+                          child: ListView(
+                            scrollDirection: Axis.horizontal,
+                            padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
                             children: [
-                              Expanded(
+                              SizedBox(
+                                width: 168,
+                                child: SummaryCard(
+                                  icon: Icons.trending_up_rounded,
+                                  iconColor: const Color(0xFF16A34A),
+                                  iconBg: const Color(0xFFDCFCE7),
+                                  label: 'Ingresos de hoy',
+                                  value:
+                                      _money(_cachedSummary!.totalIngresosHoy),
+                                  isHighlighted: false,
+                                ),
+                              ),
+                              const SizedBox(width: 12),
+                              SizedBox(
+                                width: 168,
                                 child: SummaryCard(
                                   icon: Icons.payments_rounded,
                                   iconColor: _C.primary,
@@ -271,7 +302,8 @@ class _PaymentHistoryViewState extends State<_PaymentHistoryView> {
                                 ),
                               ),
                               const SizedBox(width: 12),
-                              Expanded(
+                              SizedBox(
+                                width: 168,
                                 child: SummaryCard(
                                   icon: Icons.receipt_long_rounded,
                                   iconColor: _C.textSecondary,

@@ -30,10 +30,14 @@
 	<string>Esta aplicación necesita acceso a la cámara para tomar fotos como comprobante.</string>
 	<key>NSFaceIDUsageDescription</key>
 	<string>Usa Face ID para acceder de forma segura al sistema.</string>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>Esta aplicación necesita acceso al micrófono para el registro por dictado de voz.</string>
 	<key>NSPhotoLibraryAddUsageDescription</key>
 	<string>Esta aplicación necesita guardar imágenes en tu galería.</string>
 	<key>NSPhotoLibraryUsageDescription</key>
 	<string>Esta aplicación necesita acceso a la galería para seleccionar imágenes como comprobante.</string>
+	<key>NSSpeechRecognitionUsageDescription</key>
+	<string>Esta aplicación usa reconocimiento de voz para autocompletar registros dictados.</string>
 	<key>UIApplicationSceneManifest</key>
 	<dict>
 		<key>UIApplicationSupportsMultipleScenes</key>

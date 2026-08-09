@@ -2,6 +2,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:front_gestion_minera/core/voice/voice_dictation_sheet.dart';
 import 'package:front_gestion_minera/core/widgets/custom_alert_widget.dart';
 import 'package:front_gestion_minera/modules/staff/presentation/widgets/staff_ui.dart';
 import 'package:front_gestion_minera/modules/treasury/domain/entity/income_request_entity.dart';
@@ -9,6 +10,7 @@ import 'package:image_picker/image_picker.dart';
 
 import '../../../domain/entity/entity.dart';
 import '../../bloc/treasury_bloc.dart';
+import '../../voice/transaction_voice_parser.dart';
 import 'transaction_type_selector_widget.dart';
 import 'transaction_action_buttons_widget.dart';
 
@@ -124,6 +126,67 @@ class _UrgentTransactionFormWidgetState
     );
   }
 
+  Future<void> _dictarPorVoz() async {
+    final transcript = await showVoiceDictationSheet(
+      context: context,
+      title: 'Dictar transacción',
+      hintExample:
+          'Di por ejemplo: "Egreso de 500 bolivianos de caja chica por compra de diésel"',
+    );
+    if (transcript == null || !mounted) return;
+
+    final result = TransactionVoiceParser.parse(
+      transcript,
+      cajas: context.read<TreasuryBloc>().cashRegisters,
+    );
+
+    if (!result.understoodSomething) {
+      CustomAlert.show(
+        context,
+        title: 'Atención',
+        message:
+            'No se pudo interpretar el dictado: "$transcript". Intenta de nuevo.',
+        type: AlertType.warning,
+      );
+      return;
+    }
+
+    setState(() {
+      if (result.tipo != null && result.tipo != _selectedType) {
+        // Mismo reseteo que hace el selector manual al cambiar de tipo.
+        _selectedType = result.tipo!;
+        _evidenciaFile = null;
+        _selectedCajaId = null;
+        _selectedCajaOrigenId = null;
+        _selectedCajaDestinoId = null;
+      }
+      if (_selectedType == 'Transferencia') {
+        if (result.cajaOrigenId != null) {
+          _selectedCajaOrigenId = result.cajaOrigenId;
+        }
+        if (result.cajaDestinoId != null) {
+          _selectedCajaDestinoId = result.cajaDestinoId;
+        }
+      } else if (result.cajaId != null) {
+        _selectedCajaId = result.cajaId;
+      }
+      if (result.monto != null) {
+        _montoController.text = result.monto!.toStringAsFixed(2);
+      }
+      if (result.concepto != null) {
+        _conceptoController.text = result.concepto!;
+      }
+    });
+
+    if (!mounted) return;
+    CustomAlert.show(
+      context,
+      title: 'Formulario rellenado',
+      message: 'Revisa los datos dictados y completa lo que falte antes de registrar.',
+      type: AlertType.success,
+    );
+  }
+
   void _submitForm() {
     if (!_formKey.currentState!.validate()) return;
 
@@ -188,7 +251,8 @@ class _UrgentTransactionFormWidgetState
           if (state is UrgentTransferSuccess) mensaje = 'La transferencia se ha registrado correctamente';
           
           CustomAlert.show(context, title: 'Éxito', message: mensaje, type: AlertType.success);
-          Navigator.pop(context);
+          // Devuelve true para que el dashboard recargue también el historial.
+          Navigator.pop(context, true);
         } else if (state is UrgentIncomeError) {
           CustomAlert.show(context, title: 'Error', message: state.message, type: AlertType.error);
         } else if (state is UrgentExpenseError) {
@@ -203,6 +267,25 @@ class _UrgentTransactionFormWidgetState
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
+              OutlinedButton.icon(
+                onPressed: _dictarPorVoz,
+                style: OutlinedButton.styleFrom(
+                  foregroundColor: const Color(0xFFD97706),
+                  minimumSize: const Size.fromHeight(48),
+                  side: BorderSide(
+                    color: const Color(0xFFD97706).withValues(alpha: 0.4),
+                  ),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(14),
+                  ),
+                ),
+                icon: const Icon(Icons.mic_rounded, size: 20),
+                label: const Text(
+                  'Dictar por voz',
+                  style: TextStyle(fontSize: 14, fontWeight: FontWeight.w700),
+                ),
+              ),
+              const SizedBox(height: 16),
               TransactionTypeSelectorWidget(
                 selectedValue: _selectedType,
                 onChanged: (value) {

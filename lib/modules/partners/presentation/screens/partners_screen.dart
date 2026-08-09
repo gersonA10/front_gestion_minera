@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:front_gestion_minera/config/router/app_router.dart';
 import 'package:front_gestion_minera/config/router/app_router.gr.dart';
+import 'package:front_gestion_minera/core/widgets/assistant_fab.dart';
 import 'package:front_gestion_minera/core/tutorial/tutorial_prefs.dart';
 import 'package:front_gestion_minera/core/tutorial/tutorial_tts.dart';
 import 'package:front_gestion_minera/injector_container.dart';
@@ -298,6 +299,10 @@ class _PartnersScreenState extends State<PartnersScreen>
 
     return Scaffold(
       backgroundColor: _AppColors.background,
+      floatingActionButton: AssistantFab(
+        onTap: () =>
+            context.router.push(AssistantChatRoute(role: 'socios')),
+      ),
       body: FadeTransition(
         opacity: _fadeIn,
         child: CustomScrollView(

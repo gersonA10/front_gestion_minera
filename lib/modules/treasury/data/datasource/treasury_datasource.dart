@@ -360,6 +360,7 @@ class TreasuryDatasource {
   Future<NewExtractionResponseModel> newExtraction(
     NewExtractionRequestModel newExtractionRequest,
   ) async {
+    final evidencia = newExtractionRequest.evidencia;
     final response = await apiClient.postFormData(
       '/api/treasury/batches',
       data: newExtractionRequest.toFormDataMap(),
@@ -367,8 +368,8 @@ class TreasuryDatasource {
       files: [
         {
           'name': 'evidencia',
-          'path': newExtractionRequest.evidencia,
-          'filename': newExtractionRequest.evidencia.split('/').last,
+          'path': evidencia,
+          'filename': evidencia.split('/').last,
         },
       ],
     );

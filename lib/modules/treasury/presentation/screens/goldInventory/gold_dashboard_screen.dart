@@ -117,6 +117,29 @@ class _GoldDashboardScreenState extends State<GoldDashboardScreen> {
               _treasuryBloc.add(FetchGoldDashboardDataEvent());
             }
           },
+          onVoiceTap: () async {
+            final result = await showUrgentVoiceExtractionSheet(
+              context: context,
+              bloc: _treasuryBloc,
+            );
+            if (!context.mounted) return;
+            if (result is VoiceExtractionEditRequest) {
+              await context.router.push(
+                NewExtractionRoute(
+                  initialPeso: result.peso,
+                  initialPureza: result.pureza,
+                  initialObservaciones: result.observaciones,
+                ),
+              );
+              if (context.mounted) {
+                _treasuryBloc.add(FetchGoldDashboardDataEvent());
+              }
+            } else if (result == true) {
+              // Registró por voz: refresca. Si canceló (null), no hay nada
+              // que recargar.
+              _treasuryBloc.add(FetchGoldDashboardDataEvent());
+            }
+          },
         ),
         bottomNavigationBar: _buildBottomNav(),
       ),
