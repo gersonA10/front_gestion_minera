@@ -258,6 +258,24 @@ class _SummaryCard extends StatelessWidget {
                       label: 'PAGADO', value: m(cabecera.capitalPagado))),
             ],
           ),
+          if (cabecera.loteGenerado != null) ...[
+            const SizedBox(height: 10),
+            Row(
+              children: [
+                Icon(Icons.inventory_2_outlined,
+                    size: 14, color: Colors.white.withValues(alpha: 0.8)),
+                const SizedBox(width: 6),
+                Text(
+                  'Lote en bóveda: ${cabecera.loteGenerado}',
+                  style: TextStyle(
+                    fontSize: 11.5,
+                    fontWeight: FontWeight.w600,
+                    color: Colors.white.withValues(alpha: 0.85),
+                  ),
+                ),
+              ],
+            ),
+          ],
         ],
       ),
     );
@@ -791,7 +809,7 @@ class _ActionBar extends StatelessWidget {
                 children: [
                   Text(
                     c.isGrams
-                        ? 'Confirmas la aprobación de este préstamo en oro. No afecta cajas.'
+                        ? 'Los gramos ingresan a la bóveda como un lote nuevo marcado como "Prestado". No afecta cajas.'
                         : 'Selecciona la caja donde ingresa el monto.',
                     style: const TextStyle(
                         fontSize: 13, color: MlColors.textSecondary),
@@ -1070,6 +1088,31 @@ class _PaymentSheetState extends State<_PaymentSheet> {
               cajas: widget.cajas,
               value: _cajaId,
               onChanged: (v) => setState(() => _cajaId = v),
+            ),
+          ] else ...[
+            const SizedBox(height: 14),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+              decoration: BoxDecoration(
+                color: MlColors.background,
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: MlColors.border),
+              ),
+              child: const Row(
+                children: [
+                  Icon(Icons.inventory_2_outlined,
+                      size: 16, color: MlColors.textSecondary),
+                  SizedBox(width: 10),
+                  Expanded(
+                    child: Text(
+                      'Los gramos se descuentan de los lotes de la bóveda, '
+                      'empezando por el más antiguo.',
+                      style: TextStyle(
+                          fontSize: 12, color: MlColors.textSecondary),
+                    ),
+                  ),
+                ],
+              ),
             ),
           ],
           const SizedBox(height: 14),

@@ -37,6 +37,9 @@ class MemberLoanDetailHeaderEntity {
   final String? motivoCancelacion;
   final String? comprobanteUrl;
 
+  /// Solo en gramos: código del lote creado en bóveda al aprobar (ej. PRE-2026-0001).
+  final String? loteGenerado;
+
   MemberLoanDetailHeaderEntity({
     required this.loanId,
     required this.socio,
@@ -62,6 +65,7 @@ class MemberLoanDetailHeaderEntity {
     this.fechaCancelacion,
     this.motivoCancelacion,
     this.comprobanteUrl,
+    this.loteGenerado,
   });
 
   bool get isGrams => tipo.toLowerCase() == 'gramos';

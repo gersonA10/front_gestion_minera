@@ -41,6 +41,7 @@ class MemberLoanDetailModel extends MemberLoanDetailEntity {
         fechaCancelacion: pDate(cab['fecha_cancelacion']),
         motivoCancelacion: pStrN(cab['motivo_cancelacion']),
         comprobanteUrl: pStrN(cab['comprobante_url']),
+        loteGenerado: pStrN(cab['lote_generado']),
       ),
       cronogramaInteres: crono
           .map((e) => _period(e as Map<String, dynamic>))

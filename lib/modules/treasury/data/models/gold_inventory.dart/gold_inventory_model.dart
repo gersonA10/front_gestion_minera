@@ -25,6 +25,7 @@ class GoldBatchModel extends GoldBatchEntity {
     required super.avilableWeight,
     required super.purity,
     required super.status,
+    super.origin,
   });
 
   factory GoldBatchModel.fromJson(Map<String, dynamic> json) {
@@ -36,6 +37,7 @@ class GoldBatchModel extends GoldBatchEntity {
       avilableWeight: (json['peso_disponible'] ?? 0).toDouble(),
       purity: (json['pureza'] ?? 0).toDouble(),
       status: json['estado'] ?? 'Agotado',
+      origin: json['origen'] ?? 'Extracción',
     );
   }
 }

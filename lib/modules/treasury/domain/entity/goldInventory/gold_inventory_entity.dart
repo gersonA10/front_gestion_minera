@@ -21,6 +21,9 @@ class GoldBatchEntity {
   final double purity;
   final String status;
 
+  /// "Extracción" | "Prestado" (oro que entró por un préstamo de socio en gramos).
+  final String origin;
+
   GoldBatchEntity({
     required this.batchId,
     required this.batchCode,
@@ -29,7 +32,10 @@ class GoldBatchEntity {
     required this.avilableWeight,
     required this.purity,
     required this.status,
+    this.origin = 'Extracción',
   });
+
+  bool get isLoaned => origin == 'Prestado';
 }
 
 class PaginatedGoldBatchesEntity {

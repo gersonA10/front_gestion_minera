@@ -342,21 +342,15 @@ class _GoldDashboardScreenState extends State<GoldDashboardScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              // Los badges y la fecha van arriba; el código del lote en su propia
+              // línea, porque con dos badges no le quedaba ancho y se cortaba.
               Row(
                 children: [
                   _buildStatusBadge(lote.status, statusColor),
-                  const SizedBox(width: 8),
-                  Flexible(
-                    child: Text(
-                      lote.batchCode,
-                      overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(
-                        fontSize: 11,
-                        color: TColors.textSecondary,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                  ),
+                  if (lote.isLoaned) ...[
+                    const SizedBox(width: 6),
+                    _buildStatusBadge('Prestado', TColors.info),
+                  ],
                   const Spacer(),
                   Text(
                     _formatDate(lote.extractionDate),
@@ -367,7 +361,17 @@ class _GoldDashboardScreenState extends State<GoldDashboardScreen> {
                   ),
                 ],
               ),
-              const SizedBox(height: 14),
+              const SizedBox(height: 8),
+              Text(
+                lote.batchCode,
+                overflow: TextOverflow.ellipsis,
+                style: const TextStyle(
+                  fontSize: 11,
+                  color: TColors.textSecondary,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+              const SizedBox(height: 12),
               const Divider(height: 1, color: TColors.border),
               const SizedBox(height: 14),
               Row(
@@ -386,7 +390,8 @@ class _GoldDashboardScreenState extends State<GoldDashboardScreen> {
                   const SizedBox(width: 20),
                   _buildStatCol(
                     'PUREZA',
-                    '${lote.purity}%',
+                    // El oro prestado por un socio entra sin análisis de pureza.
+                    lote.purity > 0 ? '${lote.purity}%' : '—',
                     TColors.textPrimary,
                   ),
                 ],
