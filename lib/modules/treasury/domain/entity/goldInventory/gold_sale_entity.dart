@@ -6,7 +6,9 @@ class SalePreviewRequestEntity {
 class SalePreviewBatchDistributionEntity {
   final String batchId;
   final String batchCode;
-  final double pureza;
+
+  /// Null en lotes que entraron por préstamo de socio: no tienen pureza analizada.
+  final double? pureza;
   final double disponibleAntes;
   final double gramosDescontados;
   final double restanteDespues;
@@ -49,7 +51,9 @@ class RegisterSaleRequestEntity {
 
 class SaleBatchDesgloceEntity {
   final String batchCode;
-  final double pureza;
+
+  /// Null en lotes que entraron por préstamo de socio: no tienen pureza analizada.
+  final double? pureza;
   final double gramosDescontados;
   final String estado;
 

@@ -411,7 +411,7 @@ class _LotCard extends StatelessWidget {
                   borderRadius: BorderRadius.circular(6),
                 ),
                 child: Text(
-                  'Pureza ${lot.pureza.toStringAsFixed(0)}%',
+                  'Pureza ${lot.pureza != null ? '${lot.pureza!.toStringAsFixed(0)}%' : '—'}',
                   style: const TextStyle(
                     fontSize: 11,
                     fontWeight: FontWeight.w700,

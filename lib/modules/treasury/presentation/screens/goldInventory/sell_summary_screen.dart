@@ -323,7 +323,7 @@ class _LotCard extends StatelessWidget {
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  'Pureza ${lot.pureza.toStringAsFixed(0)}% · '
+                  'Pureza ${lot.pureza != null ? '${lot.pureza!.toStringAsFixed(0)}%' : '—'} · '
                   '${_formatGrams(lot.gramosDescontados)} descontados',
                   style: const TextStyle(
                     fontSize: 12,

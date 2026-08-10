@@ -912,7 +912,7 @@ class TreasuryBloc extends Bloc<TreasuryEvent, TreasuryState> {
       if (error.key == DioExceptionKey.unauthorised) {
         return;
       }
-      emit(SalePreviewError(message: mapErrorMessage(error.key)));
+      emit(SalePreviewError(message: apiErrorMessage(error)));
     } catch (e) {
       emit(SalePreviewError(message: 'Error inesperado: $e'));
     }
@@ -930,7 +930,7 @@ class TreasuryBloc extends Bloc<TreasuryEvent, TreasuryState> {
       if (error.key == DioExceptionKey.unauthorised) {
         return;
       }
-      emit(RegisterSaleError(message: mapErrorMessage(error.key)));
+      emit(RegisterSaleError(message: apiErrorMessage(error)));
     } catch (e) {
       emit(RegisterSaleError(message: 'Error inesperado: $e'));
     }
@@ -947,7 +947,7 @@ class TreasuryBloc extends Bloc<TreasuryEvent, TreasuryState> {
       if (error.key == DioExceptionKey.unauthorised) {
         return;
       }
-      emit(SalePreviewError(message: mapErrorMessage(error.key)));
+      emit(SalePreviewError(message: apiErrorMessage(error)));
     } catch (e) {
       emit(SalePreviewError(message: 'Error inesperado: $e'));
     }

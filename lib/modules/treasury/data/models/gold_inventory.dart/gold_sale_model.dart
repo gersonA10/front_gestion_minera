@@ -17,7 +17,7 @@ class SalePreviewBatchDistributionModel
     return SalePreviewBatchDistributionModel(
       batchId: json['batch_id'] as String? ?? '',
       batchCode: json['batch_code'] as String? ?? '',
-      pureza: (json['pureza'] as num).toDouble(),
+      pureza: (json['pureza'] as num?)?.toDouble(),
       disponibleAntes: (json['disponible_antes'] as num).toDouble(),
       gramosDescontados: (json['gramos_descontados'] as num).toDouble(),
       restanteDespues: (json['restante_despues'] as num).toDouble(),
@@ -86,7 +86,7 @@ class SaleBatchDesgloceModel extends SaleBatchDesgloceEntity {
   factory SaleBatchDesgloceModel.fromJson(Map<String, dynamic> json) {
     return SaleBatchDesgloceModel(
       batchCode: json['batch_code'] as String? ?? '',
-      pureza: (json['pureza'] as num).toDouble(),
+      pureza: (json['pureza'] as num?)?.toDouble(),
       gramosDescontados: (json['gramos_descontados'] as num).toDouble(),
       estado: json['estado'] as String? ?? '',
     );
