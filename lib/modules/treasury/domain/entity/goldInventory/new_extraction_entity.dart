@@ -14,6 +14,8 @@ class NewExtractionRequetsEntity {
   final String grossWeightGrams;
   final String purityPercent;
   final String observations;
+  /// Path de la foto de evidencia. Obligatoria en TODOS los flujos
+  /// (el backend también la exige con 400).
   final String evidencia;
 
     NewExtractionRequetsEntity({

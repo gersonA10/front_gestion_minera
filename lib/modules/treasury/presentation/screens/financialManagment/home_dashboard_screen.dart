@@ -45,13 +45,24 @@ class HomeDashboardScreen extends StatefulWidget {
 class _HomeDashboardScreenState extends State<HomeDashboardScreen> {
   int _selectedIndex = 0;
 
+  // Bloc propio del tab Historial, para poder recargarlo tras registrar
+  // una transacción urgente.
+  late final TreasuryBloc _historyBloc = InjectorContainer.getIt<TreasuryBloc>()
+    ..add(GetPaymentHistoryEvent(isRefresh: true));
+
   void _onItemTapped(int index) {
     setState(() => _selectedIndex = index);
   }
 
   @override
+  void dispose() {
+    _historyBloc.close();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    final pages = [const HomeBody(), PaymentHistoryScreen()];
+    final pages = [const HomeBody(), PaymentHistoryScreen(bloc: _historyBloc)];
 
     return MultiBlocProvider(
       providers: [
@@ -82,9 +93,15 @@ class _HomeDashboardScreenState extends State<HomeDashboardScreen> {
             floatingActionButton: _selectedIndex == 0
                 ? FloatingActionButton.extended(
                     onPressed: () async {
-                      await context.router.push(UrgentTransactionRoute());
+                      final registered =
+                          await context.router.push(UrgentTransactionRoute());
+                      if (!mounted) return;
                       if (context.mounted) {
                         context.read<TreasuryBloc>().add(DashboardDataEvent());
+                      }
+                      if (registered == true) {
+                        _historyBloc
+                            .add(GetPaymentHistoryEvent(isRefresh: true));
                       }
                     },
                     backgroundColor: _C.primary,

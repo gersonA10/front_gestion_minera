@@ -15,19 +15,41 @@ import '../../widgets/widgtes.dart';
 
 @RoutePage()
 class NewExtractionScreen extends StatelessWidget {
-  const NewExtractionScreen({super.key});
+  /// Valores iniciales opcionales (p. ej. desde el dictado por voz).
+  final double? initialPeso;
+  final double? initialPureza;
+  final String? initialObservaciones;
+
+  const NewExtractionScreen({
+    super.key,
+    this.initialPeso,
+    this.initialPureza,
+    this.initialObservaciones,
+  });
 
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
       create: (_) => InjectorContainer.getIt<TreasuryBloc>(),
-      child: const _NewExtractionBody(),
+      child: _NewExtractionBody(
+        initialPeso: initialPeso,
+        initialPureza: initialPureza,
+        initialObservaciones: initialObservaciones,
+      ),
     );
   }
 }
 
 class _NewExtractionBody extends StatefulWidget {
-  const _NewExtractionBody();
+  final double? initialPeso;
+  final double? initialPureza;
+  final String? initialObservaciones;
+
+  const _NewExtractionBody({
+    this.initialPeso,
+    this.initialPureza,
+    this.initialObservaciones,
+  });
 
   @override
   State<_NewExtractionBody> createState() => _NewExtractionBodyState();
@@ -52,6 +74,16 @@ class _NewExtractionBodyState extends State<_NewExtractionBody> {
     _selectedDate = DateTime(_today.year, _today.month, _today.day);
     _displayedMonth = DateTime(_today.year, _today.month);
     _minDate = _selectedDate.subtract(const Duration(days: 3));
+
+    if (widget.initialPeso != null) {
+      _pesoController.text = widget.initialPeso!.toStringAsFixed(2);
+    }
+    if (widget.initialPureza != null) {
+      _purezaController.text = widget.initialPureza!.toStringAsFixed(0);
+    }
+    if (widget.initialObservaciones != null) {
+      _observacionesController.text = widget.initialObservaciones!;
+    }
   }
 
   @override
