@@ -2,6 +2,7 @@ import 'dart:io';
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:front_gestion_minera/core/idempotency/gold_operation_key_store.dart';
 import 'package:front_gestion_minera/core/widgets/custom_alert_widget.dart';
 import 'package:front_gestion_minera/injector_container.dart';
 import 'package:front_gestion_minera/modules/staff/presentation/widgets/staff_ui.dart';
@@ -45,6 +46,8 @@ class _NewExtractionBodyState extends State<_NewExtractionBody> {
 
   File? _selectedImage;
   bool _isSubmitting = false;
+  GoldOperationKeyStore? _operationKeyStore;
+  String? _activeIdempotencyKey;
 
   @override
   void initState() {
@@ -69,7 +72,10 @@ class _NewExtractionBodyState extends State<_NewExtractionBody> {
       double.tryParse(_purezaController.text.replaceAll(',', '.')) ?? 0.0;
 
   bool get _isFormValid =>
-      _pesoTotal > 0 && _pureza > 0 && _pureza <= 100 && _selectedImage != null;
+      _pesoTotal > 0 &&
+      _pureza >= 90 &&
+      _pureza <= 99 &&
+      _selectedImage != null;
 
   bool _isDaySelectable(DateTime day) {
     final d = DateTime(day.year, day.month, day.day);
@@ -178,16 +184,38 @@ class _NewExtractionBodyState extends State<_NewExtractionBody> {
     );
   }
 
-  void _submit() {
+  Future<GoldOperationKeyStore> _getOperationKeyStore() async {
+    return _operationKeyStore ??= await GoldOperationKeyStore.create();
+  }
+
+  Future<void> _submit() async {
     if (!_isFormValid || _isSubmitting) return;
     setState(() => _isSubmitting = true);
 
+    final extractionDate = DateFormat('yyyy-MM-dd').format(_selectedDate);
+    final observations = _observacionesController.text;
+    final fingerprint = GoldOperationFingerprint.extraction(
+      extractionDate: extractionDate,
+      grossWeightGrams: _pesoTotal,
+      purityPercent: _pureza,
+      observations: observations,
+    );
+
+    final store = await _getOperationKeyStore();
+    final idempotencyKey = await store.getOrCreate(
+      type: GoldOperationType.extraction,
+      fingerprint: fingerprint,
+    );
+    if (!mounted) return;
+    _activeIdempotencyKey = idempotencyKey;
+
     final formData = NewExtractionRequetsEntity(
-      extractionDate: DateFormat('yyyy-MM-dd').format(_selectedDate),
+      extractionDate: extractionDate,
       grossWeightGrams: _pesoTotal.toString(),
       purityPercent: _pureza.toString(),
-      observations: _observacionesController.text,
+      observations: observations,
       evidencia: _selectedImage!.path,
+      idempotencyKey: idempotencyKey,
     );
 
     context.read<TreasuryBloc>().add(
@@ -227,18 +255,39 @@ class _NewExtractionBodyState extends State<_NewExtractionBody> {
       ),
       body: SafeArea(
         child: BlocConsumer<TreasuryBloc, TreasuryState>(
-          listener: (context, state) {
+          listener: (listenerContext, state) async {
             if (state is NewExtractionLoaded) {
+              final completedKey = _activeIdempotencyKey;
+              if (completedKey != null) {
+                await (await _getOperationKeyStore()).complete(completedKey);
+              }
+              if (!listenerContext.mounted) return;
+              setState(() {
+                _isSubmitting = false;
+                _activeIdempotencyKey = null;
+              });
               showExtractionSuccessDialog(
-                context: context,
+                context: listenerContext,
                 loteId: state.newExtraction.batchCode,
                 pesoGramos: _pesoTotal.toString(),
-                message: state.newExtraction.message,
+                isRecovered: state.newExtraction.isIdempotent,
+                message: state.newExtraction.isIdempotent
+                    ? 'La extracción ya estaba registrada. Recuperamos el lote sin duplicarlo.'
+                    : 'Extracción registrada correctamente en el inventario.',
               );
             } else if (state is NewExtractionError) {
+              final failedKey = _activeIdempotencyKey;
+              if (state.isConflict && failedKey != null) {
+                await (await _getOperationKeyStore()).complete(failedKey);
+                _activeIdempotencyKey = null;
+              }
+              if (!listenerContext.mounted) return;
+              setState(() => _isSubmitting = false);
               CustomAlert.show(
-                context,
-                title: 'Error',
+                listenerContext,
+                title: state.isConflict
+                    ? 'Revisa la operación'
+                    : 'No se pudo confirmar',
                 message: state.message,
                 type: AlertType.error,
               );
@@ -246,7 +295,7 @@ class _NewExtractionBodyState extends State<_NewExtractionBody> {
           },
           builder: (context, state) {
             final isLoading = state is NewExtractionLoading;
-        
+
             return Stack(
               children: [
                 SingleChildScrollView(
@@ -286,7 +335,25 @@ class _NewExtractionBodyState extends State<_NewExtractionBody> {
                   Container(
                     color: TColors.textPrimary.withValues(alpha: 0.1),
                     child: const Center(
-                      child: StaffLoader(),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          StaffLoader(),
+                          SizedBox(height: 14),
+                          Text(
+                            'Registrando la extracción…',
+                            style: TextStyle(
+                              color: TColors.textPrimary,
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
+                          SizedBox(height: 4),
+                          Text(
+                            'Espera la confirmación antes de salir.',
+                            style: TextStyle(color: TColors.textSecondary),
+                          ),
+                        ],
+                      ),
                     ),
                   ),
               ],
@@ -584,6 +651,19 @@ class _NewExtractionBodyState extends State<_NewExtractionBody> {
             ),
           ),
         ),
+        const SizedBox(height: 5),
+        Text(
+          _pureza >= 90 && _pureza <= 99
+              ? 'Rango permitido: 90% a 99%'
+              : 'Ingresa una pureza entre 90% y 99%',
+          style: TextStyle(
+            fontSize: 11,
+            color: _pureza >= 90 && _pureza <= 99
+                ? TColors.textSecondary
+                : TColors.danger,
+            fontWeight: FontWeight.w500,
+          ),
+        ),
       ],
     );
   }
@@ -836,7 +916,9 @@ class _NewExtractionBodyState extends State<_NewExtractionBody> {
       width: double.infinity,
       height: 52,
       child: ElevatedButton(
-        onPressed: (_isFormValid && !isLoading && !_isSubmitting) ? _submit : null,
+        onPressed: (_isFormValid && !isLoading && !_isSubmitting)
+            ? _submit
+            : null,
         style: ElevatedButton.styleFrom(
           backgroundColor: TColors.primary,
           disabledBackgroundColor: TColors.primary.withValues(alpha: 0.4),
@@ -848,16 +930,16 @@ class _NewExtractionBodyState extends State<_NewExtractionBody> {
           ),
         ),
         child: const Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(Icons.save_rounded, size: 20),
-                  SizedBox(width: 8),
-                  Text(
-                    'Registrar Extracción',
-                    style: TextStyle(fontSize: 15, fontWeight: FontWeight.w700),
-                  ),
-                ],
-              ),
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(Icons.save_rounded, size: 20),
+            SizedBox(width: 8),
+            Text(
+              'Registrar Extracción',
+              style: TextStyle(fontSize: 15, fontWeight: FontWeight.w700),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -879,6 +961,7 @@ void showExtractionSuccessDialog({
   required BuildContext context,
   required String loteId,
   required String pesoGramos,
+  required bool isRecovered,
   required String message,
 }) {
   showGeneralDialog(
@@ -911,6 +994,7 @@ void showExtractionSuccessDialog({
             child: ExtractionSuccessContent(
               loteId: loteId,
               pesoGramos: pesoGramos,
+              isRecovered: isRecovered,
               message: message,
             ),
           ),

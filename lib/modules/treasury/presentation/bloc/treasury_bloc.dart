@@ -8,6 +8,43 @@ import '../../domain/repositories/treasury_repository.dart';
 part 'treasury_event.dart';
 part 'treasury_state.dart';
 
+class _GoldOperationFailure {
+  final String message;
+  final bool isConflict;
+
+  const _GoldOperationFailure(this.message, {this.isConflict = false});
+}
+
+_GoldOperationFailure _goldOperationFailure(
+  BaseApiException error,
+  String operationName,
+) {
+  if (error.response?.statusCode == 409) {
+    return _GoldOperationFailure(
+      'No se registró una nueva operación porque el identificador ya estaba '
+      'asociado a otros datos. Revisa la información y vuelve a intentarlo.',
+      isConflict: true,
+    );
+  }
+
+  const uncertainKeys = {
+    DioExceptionKey.connectTimeout,
+    DioExceptionKey.receiveTimeout,
+    DioExceptionKey.sendTimeout,
+    DioExceptionKey.offline,
+    DioExceptionKey.unexpected,
+    DioExceptionKey.unknown,
+  };
+  if (uncertainKeys.contains(error.key)) {
+    return _GoldOperationFailure(
+      'Aún no pudimos confirmar $operationName. Puedes reintentar con '
+      'tranquilidad: la app conservará esta operación y no la duplicará.',
+    );
+  }
+
+  return _GoldOperationFailure(error.message);
+}
+
 class TreasuryBloc extends Bloc<TreasuryEvent, TreasuryState> {
   int _currentPage = 1;
   bool _hasReachedMax = false;
@@ -152,7 +189,7 @@ class TreasuryBloc extends Bloc<TreasuryEvent, TreasuryState> {
     on<LoadMoreContributionsEvent>(_onLoadMoreContributions);
     on<GetContributionDetailEvent>(_onGetContributionDetail);
     on<LoadMoreContributionDetailEvent>(_onLoadMoreContributionDetail);
-     on<PayDividendEvent>(_onPayDividend);
+    on<PayDividendEvent>(_onPayDividend);
     on<ReceiptEvent>(_getReceipt);
     on<GetContributionReceiptsEvent>(_onGetContributionReceipts);
     on<LoadMoreContributionReceiptsEvent>(_onLoadMoreContributionReceipts);
@@ -645,16 +682,16 @@ class TreasuryBloc extends Bloc<TreasuryEvent, TreasuryState> {
       final response = await repository.getSalesHistory(
         page: _currentSalesPage,
         limit: event.limit,
-        status: _currentSalesStatus
+        status: _currentSalesStatus,
       );
       _statsSales = response.meta;
 
       if (_currentSalesPage == 1) {
         _goldSales = response.sales;
-      } else{
+      } else {
         _goldSales.addAll(response.sales);
       }
-       _hasReachedSalesMax = _currentSalesPage >= response.meta.totalPaginas;
+      _hasReachedSalesMax = _currentSalesPage >= response.meta.totalPaginas;
       emit(
         SalesGoldHistoryLoaded(
           stats: _statsSales!,
@@ -673,9 +710,7 @@ class TreasuryBloc extends Bloc<TreasuryEvent, TreasuryState> {
     LoadMoreHistorySalesEvent event,
     Emitter<TreasuryState> emit,
   ) async {
-    if (_hasReachedSalesMax ||
-        _statsSales == null ||
-        _isLoadingMoreSales) {
+    if (_hasReachedSalesMax || _statsSales == null || _isLoadingMoreSales) {
       return;
     }
     _isLoadingMoreSales = true;
@@ -687,7 +722,7 @@ class TreasuryBloc extends Bloc<TreasuryEvent, TreasuryState> {
         limit: event.limit,
         status: _currentSalesStatus,
       );
-      
+
       _goldSales.addAll(response.sales);
       _statsSales = response.meta;
       _hasReachedSalesMax = _currentSalesPage >= response.meta.totalPaginas;
@@ -894,7 +929,13 @@ class TreasuryBloc extends Bloc<TreasuryEvent, TreasuryState> {
       if (error.key == DioExceptionKey.unauthorised) {
         return;
       }
-      emit(NewExtractionError(message: error.message));
+      final failure = _goldOperationFailure(error, 'la extracción');
+      emit(
+        NewExtractionError(
+          message: failure.message,
+          isConflict: failure.isConflict,
+        ),
+      );
     } catch (e) {
       emit(NewExtractionError(message: 'Error inesperado: $e'));
     }
@@ -930,7 +971,13 @@ class TreasuryBloc extends Bloc<TreasuryEvent, TreasuryState> {
       if (error.key == DioExceptionKey.unauthorised) {
         return;
       }
-      emit(RegisterSaleError(message: mapErrorMessage(error.key)));
+      final failure = _goldOperationFailure(error, 'la venta');
+      emit(
+        RegisterSaleError(
+          message: failure.message,
+          isConflict: failure.isConflict,
+        ),
+      );
     } catch (e) {
       emit(RegisterSaleError(message: 'Error inesperado: $e'));
     }
@@ -942,7 +989,7 @@ class TreasuryBloc extends Bloc<TreasuryEvent, TreasuryState> {
   ) async {
     try {
       final response = await repository.getSaleById(event.idSale);
-      emit (RegistersaleGetSucces(data: response));
+      emit(RegistersaleGetSucces(data: response));
     } on BaseApiException catch (error) {
       if (error.key == DioExceptionKey.unauthorised) {
         return;
@@ -1109,7 +1156,8 @@ class TreasuryBloc extends Bloc<TreasuryEvent, TreasuryState> {
     LoadMoreDistributionHistoryEvent event,
     Emitter<TreasuryState> emit,
   ) async {
-    if (_distributionHistoryReachedMax || _isLoadingMoreDistributionHistory) return;
+    if (_distributionHistoryReachedMax || _isLoadingMoreDistributionHistory)
+      return;
     _isLoadingMoreDistributionHistory = true;
     _distributionHistoryPage++;
     try {
@@ -1254,35 +1302,41 @@ class TreasuryBloc extends Bloc<TreasuryEvent, TreasuryState> {
   ) async {
     emit(NewLayoutLoading());
     try {
-      final response = await repository.newLayoutPost(event.monthPeriod, event.yearPeriod, event.baseAmount);
-      emit(NewLayoutLoaded(newLayout:  response));
+      final response = await repository.newLayoutPost(
+        event.monthPeriod,
+        event.yearPeriod,
+        event.baseAmount,
+      );
+      emit(NewLayoutLoaded(newLayout: response));
     } on BaseApiException catch (error) {
       if (error.key == DioExceptionKey.unauthorised) {
         return;
       }
       emit(NewLayoutError(mapErrorMessage(error.key)));
     } catch (e) {
-      emit(NewLayoutError( 'Error inesperado: $e'));
+      emit(NewLayoutError('Error inesperado: $e'));
     }
-   }
+  }
 
-   Future<void> _onSimulateDistribution(
+  Future<void> _onSimulateDistribution(
     SimulateDistributionEvent event,
     Emitter<TreasuryState> emit,
   ) async {
     emit(SimulateDistributionLoading());
     try {
-      final response = await repository.postSimulateDistribution(event.baseAmount);
-      emit(SimulateDistributionLoaded(simulateDistribution:  response));
+      final response = await repository.postSimulateDistribution(
+        event.baseAmount,
+      );
+      emit(SimulateDistributionLoaded(simulateDistribution: response));
     } on BaseApiException catch (error) {
       if (error.key == DioExceptionKey.unauthorised) {
         return;
       }
       emit(SimulateDistributionError(mapErrorMessage(error.key)));
     } catch (e) {
-      emit(SimulateDistributionError( 'Error inesperado: $e'));
+      emit(SimulateDistributionError('Error inesperado: $e'));
     }
-   }
+  }
 
   Future<void> _onGetContributions(
     GetContributionsEvent event,
@@ -1381,7 +1435,7 @@ class TreasuryBloc extends Bloc<TreasuryEvent, TreasuryState> {
       //     membersList: List.from(_contributionDetailMembers),
       //     hasReachedMax: _contributionDetailReachedMax,
       //     totalRecords: _contributionDetailTotalRecords,
-      //     cash: 
+      //     cash:
       //   ),
       // );
       return;
@@ -1446,7 +1500,7 @@ class TreasuryBloc extends Bloc<TreasuryEvent, TreasuryState> {
           membersList: List.from(_contributionDetailMembers),
           hasReachedMax: _contributionDetailReachedMax,
           totalRecords: _contributionDetailTotalRecords,
-          cash: cahs
+          cash: cahs,
         ),
       );
     } on BaseApiException catch (error) {
@@ -1467,9 +1521,7 @@ class TreasuryBloc extends Bloc<TreasuryEvent, TreasuryState> {
   ) async {
     emit(ReceiptLoading());
     try {
-      final response = await repository.getReceipt(
-        event.transactionId,
-      );
+      final response = await repository.getReceipt(event.transactionId);
       emit(ReceiptSuccess(data: response));
     } on BaseApiException catch (error) {
       if (error.key == DioExceptionKey.unauthorised) return;
@@ -1563,8 +1615,12 @@ class TreasuryBloc extends Bloc<TreasuryEvent, TreasuryState> {
   ) async {
     emit(RecordContributionPaymentLoading());
     try {
-      final response = await repository.recordContributionPayment(event.recordContributionPaymentRequestModel);
-      emit(RecordContributionPaymentLoaded(recordContributionPayment: response));
+      final response = await repository.recordContributionPayment(
+        event.recordContributionPaymentRequestModel,
+      );
+      emit(
+        RecordContributionPaymentLoaded(recordContributionPayment: response),
+      );
     } on BaseApiException catch (error) {
       if (error.key == DioExceptionKey.unauthorised) {
         return;
@@ -1581,7 +1637,9 @@ class TreasuryBloc extends Bloc<TreasuryEvent, TreasuryState> {
   ) async {
     emit(ContributionPaymentReceiptLoading());
     try {
-      final response = await repository.getContributionPaymentReceipt(event.transactionId);
+      final response = await repository.getContributionPaymentReceipt(
+        event.transactionId,
+      );
       emit(ContributionPaymentReceiptLoaded(receipt: response));
     } on BaseApiException catch (error) {
       if (error.key == DioExceptionKey.unauthorised) return;

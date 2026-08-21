@@ -1,3 +1,4 @@
+import 'package:dio/dio.dart';
 
 import '../../../../core/networking/http_services.dart';
 import '../../domain/entity/entity.dart';
@@ -364,6 +365,9 @@ class TreasuryDatasource {
       '/api/treasury/batches',
       data: newExtractionRequest.toFormDataMap(),
       operationName: 'newExtraction',
+      options: Options(
+        headers: {'X-Idempotency-Key': newExtractionRequest.idempotencyKey},
+      ),
       files: [
         {
           'name': 'evidencia',
@@ -391,6 +395,7 @@ class TreasuryDatasource {
       '/api/treasury/sales',
       data: request.toFormDataMap(),
       operationName: 'registerSale',
+      options: Options(headers: {'X-Idempotency-Key': request.idempotencyKey}),
       files: [
         {
           'name': 'comprobante',
@@ -402,10 +407,11 @@ class TreasuryDatasource {
     return RegisterSaleResponseModel.fromJson(response['data']);
   }
 
-  Future<RegisterSaleResponseEntity> getSaleById(String idSale) async{
+  Future<RegisterSaleResponseEntity> getSaleById(String idSale) async {
     final response = await apiClient.get(
-      '/api/treasury/sales/$idSale', 
-      operationName: 'getSaleById');
+      '/api/treasury/sales/$idSale',
+      operationName: 'getSaleById',
+    );
     return RegisterSaleResponseModel.fromJson(response['data']);
   }
 
@@ -563,7 +569,8 @@ class TreasuryDatasource {
 
     return PayTheFeeResponseModel.fromJson(response['data']);
   }
-    Future<NewLayoutResponseEntity> newLayoutPost(
+
+  Future<NewLayoutResponseEntity> newLayoutPost(
     String monthPeriod,
     String yearPeriod,
     double baseAmount,
@@ -579,14 +586,13 @@ class TreasuryDatasource {
     );
     return NewLayoutResponseModel.fromJson(response['data']);
   }
+
   Future<SimulateDistributionResponseEntity> postSimulateDistribution(
     double baseAmount,
   ) async {
     final response = await apiClient.post(
       '/api/treasury/distributions/simulate',
-      data: {
-        "base_amount": baseAmount,
-      },
+      data: {"base_amount": baseAmount},
       operationName: 'postSimulateDistribution',
     );
     return SimulateDistributionResponseModel.fromJson(response);
@@ -638,7 +644,9 @@ class TreasuryDatasource {
     final Map<String, dynamic> meta = response['meta'] ?? {};
     return {
       'receipts': data
-          .map((r) => ContributionReceiptModel.fromJson(r as Map<String, dynamic>))
+          .map(
+            (r) => ContributionReceiptModel.fromJson(r as Map<String, dynamic>),
+          )
           .toList(),
       'has_more': meta['has_more'] ?? false,
       'total_records': meta['total_records'] ?? 0,
@@ -669,6 +677,7 @@ class TreasuryDatasource {
       'total_records': meta['total_records'] ?? 0,
     };
   }
+
   Future<ReceiptResponseEneity> receiptDetails(String receiptId) async {
     final response = await apiClient.get(
       '/api/treasury/distributions/receipt/$receiptId',
@@ -676,6 +685,7 @@ class TreasuryDatasource {
     );
     return ReceiptResponseModel.fromJson(response['data']);
   }
+
   Future<ContributionPaymentReceiptModel> getContributionPaymentReceipt(
     String transactionId,
   ) async {
@@ -687,7 +697,7 @@ class TreasuryDatasource {
   }
 
   Future<RecordContributionPaymentDataModel> recordContributionPayment(
-    RecordContributionPaymentRequestModel recordContributionPaymentRequestModel
+    RecordContributionPaymentRequestModel recordContributionPaymentRequestModel,
   ) async {
     final response = await apiClient.postFormData(
       '/api/treasury/contributions/pay',
@@ -697,7 +707,9 @@ class TreasuryDatasource {
         {
           'name': 'evidencia',
           'path': recordContributionPaymentRequestModel.evidencia,
-          'filename': recordContributionPaymentRequestModel.evidencia.split('/').last,
+          'filename': recordContributionPaymentRequestModel.evidencia
+              .split('/')
+              .last,
         },
       ],
     );
