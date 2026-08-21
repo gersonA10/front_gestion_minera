@@ -253,7 +253,7 @@ class SalesGoldHistoryLoaded extends TreasuryState {
   });
 }
 
-class SalesGoldHistoryError extends TreasuryState{
+class SalesGoldHistoryError extends TreasuryState {
   final String message;
   SalesGoldHistoryError(this.message);
 }
@@ -276,6 +276,7 @@ class InternalLoansError extends TreasuryState {
   final String message;
   InternalLoansError(this.message);
 }
+
 ///
 class TransactionDetailsLoading extends TreasuryState {}
 
@@ -300,8 +301,9 @@ class NewExtractionLoaded extends TreasuryState {
 
 class NewExtractionError extends TreasuryState {
   final String message;
+  final bool isConflict;
 
-  NewExtractionError({required this.message});
+  NewExtractionError({required this.message, this.isConflict = false});
 }
 
 // preview venta
@@ -327,7 +329,8 @@ class RegisterSaleLoaded extends TreasuryState {
 
 class RegisterSaleError extends TreasuryState {
   final String message;
-  RegisterSaleError({required this.message});
+  final bool isConflict;
+  RegisterSaleError({required this.message, this.isConflict = false});
 }
 
 class RegistersaleGetSucces extends TreasuryState {
@@ -335,6 +338,7 @@ class RegistersaleGetSucces extends TreasuryState {
 
   RegistersaleGetSucces({required this.data});
 }
+
 // registrar prestamo
 class ApplyForALoanLoading extends TreasuryState {}
 
@@ -347,12 +351,13 @@ class ApplyForALoanError extends TreasuryState {
   final String message;
   ApplyForALoanError({required this.message});
 }
+
 // simulacion de nuevo prestamo
 class NewLoansSimulateLoading extends TreasuryState {}
 
 class NewLoansSimulateLoaded extends TreasuryState {
   final NewLoansResponseEntity loan;
-    final CashResponseEntity cash;
+  final CashResponseEntity cash;
   NewLoansSimulateLoaded({required this.loan, required this.cash});
 }
 
@@ -360,16 +365,14 @@ class NewLoansSimulateError extends TreasuryState {
   final String message;
   NewLoansSimulateError({required this.message});
 }
+
 // detalle de prestamo
 class LoanDetailsLoading extends TreasuryState {}
 
 class LoanDetailsLoaded extends TreasuryState {
   final LoanDetailsResponseEntity loanDetails;
-final CashResponseEntity cash;
-  LoanDetailsLoaded({
-    required this.loanDetails,
-    required this.cash,
-  });
+  final CashResponseEntity cash;
+  LoanDetailsLoaded({required this.loanDetails, required this.cash});
 }
 
 class LoanDetailsError extends TreasuryState {
@@ -419,7 +422,6 @@ class DistributionDetailError extends TreasuryState {
   DistributionDetailError(this.message);
 }
 
-
 // detalle de lote (inventario de oro)
 class BatchLotDetailsLoading extends TreasuryState {}
 
@@ -432,7 +434,6 @@ class BatchLotDetailsError extends TreasuryState {
   final String message;
   BatchLotDetailsError(this.message);
 }
-
 
 // pago cuota
 class PayTheFeeLoading extends TreasuryState {}
@@ -453,9 +454,7 @@ class NewLayoutLoading extends TreasuryState {}
 class NewLayoutLoaded extends TreasuryState {
   final NewLayoutResponseEntity newLayout;
 
-  NewLayoutLoaded({
-    required this.newLayout,
-  });
+  NewLayoutLoaded({required this.newLayout});
 }
 
 class NewLayoutError extends TreasuryState {
@@ -468,9 +467,7 @@ class SimulateDistributionLoading extends TreasuryState {}
 
 class SimulateDistributionLoaded extends TreasuryState {
   final SimulateDistributionResponseEntity simulateDistribution;
-  SimulateDistributionLoaded({
-    required this.simulateDistribution,
-  });
+  SimulateDistributionLoaded({required this.simulateDistribution});
 }
 
 class SimulateDistributionError extends TreasuryState {
@@ -519,7 +516,6 @@ class ContributionDetailLoaded extends TreasuryState {
   });
 }
 
-
 class ContributionDetailError extends TreasuryState {
   final String message;
   ContributionDetailError(this.message);
@@ -550,7 +546,6 @@ class ReceiptError extends TreasuryState {
   ReceiptError(this.message);
 }
 
-
 // historial de recibos de aporte
 class ContributionReceiptsLoading extends TreasuryState {}
 
@@ -570,6 +565,7 @@ class ContributionReceiptsError extends TreasuryState {
   final String message;
   ContributionReceiptsError(this.message);
 }
+
 // registrar pago de aporte
 class RecordContributionPaymentLoading extends TreasuryState {}
 

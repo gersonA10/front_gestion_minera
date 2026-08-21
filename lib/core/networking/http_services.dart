@@ -28,9 +28,7 @@ class ApiClient extends BaseApiClient {
   }
 
   @override
-  get interceptors => {
-        InterceptorService: InterceptorService(api),
-      };
+  get interceptors => {InterceptorService: InterceptorService(api)};
 
   Future<dynamic> get(
     String path, {
@@ -38,10 +36,7 @@ class ApiClient extends BaseApiClient {
     Map<String, dynamic>? queryParameters,
   }) async {
     final response = await network(
-      request: (request) => request.get(
-        path,
-        queryParameters: queryParameters,
-      ),
+      request: (request) => request.get(path, queryParameters: queryParameters),
       handleSuccess: (startedAt, response) async {
         return await _handleSuccess(
           startedAt: startedAt,
@@ -87,28 +82,32 @@ class ApiClient extends BaseApiClient {
     Map<String, dynamic>? queryParameters,
     List<Map<String, dynamic>>? files,
     Map<String, List<Map<String, dynamic>>>? fileGroups,
+    Options? options,
   }) async {
     final formData = FormData.fromMap({
       ...data,
       ...?files?.asMap().map(
-            (i, file) => MapEntry(
-                file['name'],
-                MultipartFile.fromFileSync(
-                  file['path'],
-                  filename: file['filename'],
-                  contentType: file['contentType'],
-                )),
+        (i, file) => MapEntry(
+          file['name'],
+          MultipartFile.fromFileSync(
+            file['path'],
+            filename: file['filename'],
+            contentType: file['contentType'],
           ),
-      ...?fileGroups?.map((key, files) => MapEntry(
-            key,
-            files.map((file) {
-              return MultipartFile.fromFileSync(
-                file['path'],
-                filename: file['filename'],
-                contentType: file['contentType'],
-              );
-            }).toList(),
-          )),
+        ),
+      ),
+      ...?fileGroups?.map(
+        (key, files) => MapEntry(
+          key,
+          files.map((file) {
+            return MultipartFile.fromFileSync(
+              file['path'],
+              filename: file['filename'],
+              contentType: file['contentType'],
+            );
+          }).toList(),
+        ),
+      ),
     });
 
     final response = await network(
@@ -116,6 +115,7 @@ class ApiClient extends BaseApiClient {
         path,
         data: formData,
         queryParameters: queryParameters,
+        options: options,
       ),
       handleSuccess: (startedAt, response) async {
         return await _handleSuccess(
@@ -139,13 +139,16 @@ class ApiClient extends BaseApiClient {
   }) async {
     final formData = FormData.fromMap({
       ...?data,
-      ...?files?.asMap().map((i, file) => MapEntry(
+      ...?files?.asMap().map(
+        (i, file) => MapEntry(
           file['name'],
           MultipartFile.fromFileSync(
             file['path'],
             filename: file['filename'],
             contentType: file['contentType'],
-          ))),
+          ),
+        ),
+      ),
     });
 
     final response = await network(
@@ -177,13 +180,16 @@ class ApiClient extends BaseApiClient {
   }) async {
     final formData = FormData.fromMap({
       ...?data,
-      ...?files?.asMap().map((i, file) => MapEntry(
+      ...?files?.asMap().map(
+        (i, file) => MapEntry(
           file['name'],
           MultipartFile.fromFileSync(
             file['path'],
             filename: file['filename'],
             contentType: file['contentType'],
-          ))),
+          ),
+        ),
+      ),
     });
 
     final response = await network(
@@ -238,11 +244,8 @@ class ApiClient extends BaseApiClient {
     Map<String, dynamic>? queryParameters,
   }) async {
     final response = await network(
-      request: (request) => request.put(
-        path,
-        data: data,
-        queryParameters: queryParameters,
-      ),
+      request: (request) =>
+          request.put(path, data: data, queryParameters: queryParameters),
       handleSuccess: (startedAt, response) async {
         return await _handleSuccess(
           startedAt: startedAt,
@@ -262,11 +265,8 @@ class ApiClient extends BaseApiClient {
     Map<String, dynamic>? queryParameters,
   }) async {
     final response = await network(
-      request: (request) => request.delete(
-        path,
-        data: data,
-        queryParameters: queryParameters,
-      ),
+      request: (request) =>
+          request.delete(path, data: data, queryParameters: queryParameters),
       handleSuccess: (startedAt, response) async {
         return await _handleSuccess(
           startedAt: startedAt,
@@ -288,9 +288,7 @@ class ApiClient extends BaseApiClient {
   }
 
   @override
-  BaseApiException handleResponseType(
-    DioException error,
-  ) {
+  BaseApiException handleResponseType(DioException error) {
     late String key;
     late String message;
     String? detail;
@@ -308,14 +306,20 @@ class ApiClient extends BaseApiClient {
     }
 
     if (error.response != null && error.response!.data is Map) {
-      key = error.response!.data['error_key'] ?? DioExceptionKey.unexpected;
+      final data = error.response!.data as Map;
+      key = data['error_key'] is String
+          ? data['error_key'] as String
+          : DioExceptionKey.response;
 
-      if (error.response!.data['message'] is List) {
-        message = error.response!.data['message'].join(', ');
-      } else if (error.response!.data['message'] is Map) {
-        message = error.response!.data['message']['message'];
+      if (data['message'] is List) {
+        message = (data['message'] as List).join(', ');
+      } else if (data['message'] is Map &&
+          data['message']['message'] is String) {
+        message = data['message']['message'] as String;
       } else {
-        message = error.response!.data['message'] ?? 'Error inesperado';
+        message = data['message'] is String
+            ? data['message'] as String
+            : 'No pudimos procesar la solicitud.';
       }
     } else {
       key = DioExceptionKey.unexpected;

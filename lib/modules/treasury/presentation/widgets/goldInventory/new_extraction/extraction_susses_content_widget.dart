@@ -6,12 +6,14 @@ import 'package:front_gestion_minera/utils/constants/color.constant.dart';
 class ExtractionSuccessContent extends StatelessWidget {
   final String loteId;
   final String pesoGramos;
+  final bool isRecovered;
   final String message;
 
   const ExtractionSuccessContent({
     super.key,
     required this.loteId,
     required this.pesoGramos,
+    required this.isRecovered,
     required this.message,
   });
 
@@ -59,9 +61,9 @@ class ExtractionSuccessContent extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 20),
-          const Text(
-            'Extracción Registrada',
-            style: TextStyle(
+          Text(
+            isRecovered ? 'Extracción recuperada' : 'Extracción registrada',
+            style: const TextStyle(
               fontSize: 22,
               fontWeight: FontWeight.w800,
               color: TColors.textPrimary,
@@ -78,7 +80,12 @@ class ExtractionSuccessContent extends StatelessWidget {
                 height: 1.5,
               ),
               children: [
-                const TextSpan(text: 'Se registró correctamente el lote '),
+                TextSpan(
+                  text: isRecovered
+                      ? 'Este lote ya estaba registrado. Recuperamos '
+                            'la operación original sin duplicarla: '
+                      : 'Se registró correctamente el lote ',
+                ),
                 TextSpan(
                   text: '#$loteId',
                   style: const TextStyle(
@@ -105,7 +112,9 @@ class ExtractionSuccessContent extends StatelessWidget {
             decoration: BoxDecoration(
               color: TColors.goldAccentLight,
               borderRadius: BorderRadius.circular(14),
-              border: Border.all(color: TColors.goldAccent.withValues(alpha: 0.25)),
+              border: Border.all(
+                color: TColors.goldAccent.withValues(alpha: 0.25),
+              ),
             ),
             child: Row(
               children: [

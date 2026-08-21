@@ -37,6 +37,7 @@ class RegisterSaleRequestEntity {
   final double totalGramsSold;
   final double priceBsPerGram;
   final String comprobante;
+  final String idempotencyKey;
 
   const RegisterSaleRequestEntity({
     required this.salesDate,
@@ -44,6 +45,7 @@ class RegisterSaleRequestEntity {
     required this.totalGramsSold,
     required this.priceBsPerGram,
     required this.comprobante,
+    required this.idempotencyKey,
   });
 }
 
@@ -70,6 +72,8 @@ class RegisterSaleResponseEntity {
   final String fechaHora;
   final String numOperacion;
   final List<SaleBatchDesgloceEntity> desgloseLotes;
+  final bool isIdempotent;
+  final String cashRegisterName;
 
   const RegisterSaleResponseEntity({
     required this.saleId,
@@ -80,5 +84,7 @@ class RegisterSaleResponseEntity {
     required this.fechaHora,
     required this.numOperacion,
     required this.desgloseLotes,
+    this.isIdempotent = false,
+    this.cashRegisterName = 'Caja Mayor',
   });
 }
