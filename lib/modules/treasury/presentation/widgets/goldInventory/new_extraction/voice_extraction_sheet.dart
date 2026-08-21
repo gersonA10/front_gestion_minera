@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:front_gestion_minera/core/idempotency/gold_operation_key_store.dart';
 import 'package:front_gestion_minera/core/voice/voice_dictation_service.dart';
 import 'package:front_gestion_minera/core/widgets/custom_alert_widget.dart';
 import 'package:front_gestion_minera/modules/treasury/domain/entity/entity.dart';
@@ -70,6 +71,9 @@ class _VoiceExtractionSheetState extends State<_VoiceExtractionSheet>
   File? _evidencia;
   String _batchCode = '';
   String _successMessage = '';
+  bool _successWasRecovered = false;
+  GoldOperationKeyStore? _operationKeyStore;
+  String? _activeIdempotencyKey;
 
   late final AnimationController _pulseController;
 
@@ -227,7 +231,11 @@ class _VoiceExtractionSheetState extends State<_VoiceExtractionSheet>
     );
   }
 
-  void _confirm() {
+  Future<GoldOperationKeyStore> _getOperationKeyStore() async {
+    return _operationKeyStore ??= await GoldOperationKeyStore.create();
+  }
+
+  Future<void> _confirm() async {
     final result = _result;
     final evidencia = _evidencia;
     // Guard de doble envío: un segundo tap antes de que llegue
@@ -236,16 +244,32 @@ class _VoiceExtractionSheetState extends State<_VoiceExtractionSheet>
     if (result == null || !result.isValid || evidencia == null) return;
     setState(() => _phase = _VoicePhase.submitting);
 
+    final extractionDate = DateFormat(
+      'yyyy-MM-dd',
+    ).format(result.extractionDate);
+    final observations = 'Registro por voz. Dictado: "${result.transcript}"';
+    final store = await _getOperationKeyStore();
+    final idempotencyKey = await store.getOrCreate(
+      type: GoldOperationType.extraction,
+      fingerprint: GoldOperationFingerprint.extraction(
+        extractionDate: extractionDate,
+        grossWeightGrams: result.weightGrams!,
+        purityPercent: result.purityPercent,
+        observations: observations,
+      ),
+    );
+    if (!mounted) return;
+    _activeIdempotencyKey = idempotencyKey;
+
     context.read<TreasuryBloc>().add(
       NewExtractionEvent(
         newExtractionRequets: NewExtractionRequetsEntity(
-          extractionDate: DateFormat(
-            'yyyy-MM-dd',
-          ).format(result.extractionDate),
+          extractionDate: extractionDate,
           grossWeightGrams: result.weightGrams!.toString(),
           purityPercent: result.purityPercent.toString(),
-          observations: 'Registro por voz. Dictado: "${result.transcript}"',
+          observations: observations,
           evidencia: evidencia.path,
+          idempotencyKey: idempotencyKey,
         ),
       ),
     );
@@ -286,16 +310,31 @@ class _VoiceExtractionSheetState extends State<_VoiceExtractionSheet>
   @override
   Widget build(BuildContext context) {
     return BlocListener<TreasuryBloc, TreasuryState>(
-      listener: (context, state) {
+      listener: (listenerContext, state) async {
         if (state is NewExtractionLoading) {
           setState(() => _phase = _VoicePhase.submitting);
         } else if (state is NewExtractionLoaded) {
+          final completedKey = _activeIdempotencyKey;
+          if (completedKey != null) {
+            await (await _getOperationKeyStore()).complete(completedKey);
+          }
+          if (!listenerContext.mounted) return;
           setState(() {
             _phase = _VoicePhase.success;
             _batchCode = state.newExtraction.batchCode;
-            _successMessage = state.newExtraction.message;
+            _successWasRecovered = state.newExtraction.isIdempotent;
+            _successMessage = state.newExtraction.isIdempotent
+                ? 'La extracción ya estaba registrada. Recuperamos el lote sin duplicarlo.'
+                : 'Extracción registrada correctamente en el inventario.';
+            _activeIdempotencyKey = null;
           });
         } else if (state is NewExtractionError) {
+          final failedKey = _activeIdempotencyKey;
+          if (state.isConflict && failedKey != null) {
+            await (await _getOperationKeyStore()).complete(failedKey);
+            _activeIdempotencyKey = null;
+          }
+          if (!listenerContext.mounted) return;
           setState(() {
             _phase = _VoicePhase.review;
             _errorMessage = state.message;
@@ -699,9 +738,11 @@ class _VoiceExtractionSheetState extends State<_VoiceExtractionSheet>
           ),
         ),
         const SizedBox(height: 16),
-        const Text(
-          'Extracción Registrada',
-          style: TextStyle(
+        Text(
+          _successWasRecovered
+              ? 'Extracción recuperada'
+              : 'Extracción registrada',
+          style: const TextStyle(
             fontSize: 18,
             fontWeight: FontWeight.w800,
             color: TColors.textPrimary,
