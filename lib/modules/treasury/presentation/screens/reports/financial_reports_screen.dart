@@ -1212,6 +1212,77 @@ Future<void> _generateAndSharePDF(FinancialReportEntity report) async {
       }
     }
 
+    final ingresos = report.detalleAbsolutoPdf.where((item) {
+      return item.tipo.trim().toLowerCase().contains('ingreso');
+    }).toList();
+
+    final egresos = report.detalleAbsolutoPdf.where((item) {
+      return item.tipo.trim().toLowerCase().contains('egreso');
+    }).toList();
+
+    pw.Widget buildTransactionsTable(List<dynamic> transactions) {
+      if (transactions.isEmpty) {
+        return pw.Container(
+          width: double.infinity,
+          padding: const pw.EdgeInsets.all(12),
+          decoration: pw.BoxDecoration(
+            color: PdfColors.grey100,
+            borderRadius: const pw.BorderRadius.all(pw.Radius.circular(6)),
+          ),
+          child: pw.Text(
+            'No existen movimientos registrados en este periodo.',
+            style: const pw.TextStyle(fontSize: 9, color: PdfColors.grey700),
+          ),
+        );
+      }
+
+      return pw.TableHelper.fromTextArray(
+        headers: const [
+          'Fecha',
+          'Caja',
+          'Responsable',
+          'Concepto',
+          'Monto',
+        ],
+        data: transactions.map((item) {
+          return [
+            formatPdfDate(item.fecha),
+            item.caja,
+            item.responsable,
+            item.concepto,
+            formatCurrency.format(item.monto),
+          ];
+        }).toList(),
+        headerDecoration: const pw.BoxDecoration(color: PdfColors.blue900),
+        headerStyle: pw.TextStyle(
+          color: PdfColors.white,
+          fontWeight: pw.FontWeight.bold,
+          fontSize: 9,
+        ),
+        cellStyle: const pw.TextStyle(fontSize: 7),
+        rowDecoration: const pw.BoxDecoration(
+          border: pw.Border(
+            bottom: pw.BorderSide(color: PdfColors.grey300, width: 0.5),
+          ),
+        ),
+        cellPadding: const pw.EdgeInsets.symmetric(horizontal: 4, vertical: 6),
+        columnWidths: const {
+          0: pw.FlexColumnWidth(1.4),
+          1: pw.FlexColumnWidth(1.2),
+          2: pw.FlexColumnWidth(2.0),
+          3: pw.FlexColumnWidth(3.4),
+          4: pw.FlexColumnWidth(1.5),
+        },
+        cellAlignments: const {
+          0: pw.Alignment.centerLeft,
+          1: pw.Alignment.centerLeft,
+          2: pw.Alignment.centerLeft,
+          3: pw.Alignment.centerLeft,
+          4: pw.Alignment.centerRight,
+        },
+      );
+    }
+
     pdf.addPage(
       pw.MultiPage(
         // Cambiado a PORTRAIT (PdfPageFormat.a4 por defecto es Vertical)
@@ -1327,72 +1398,26 @@ Future<void> _generateAndSharePDF(FinancialReportEntity report) async {
             pw.SizedBox(height: 20),
 
             pw.Text(
-              'Listado de Transacciones',
-              style: pw.TextStyle(fontSize: 16, fontWeight: pw.FontWeight.bold),
+              'Lista de ingresos',
+              style: pw.TextStyle(
+                fontSize: 16,
+                fontWeight: pw.FontWeight.bold,
+                color: PdfColors.green800,
+              ),
             ),
             pw.SizedBox(height: 10),
-
-            // TABLA CON TODO (Portrait)
-            pw.TableHelper.fromTextArray(
-              context: context,
-              headerDecoration: const pw.BoxDecoration(
-                color: PdfColors.blue900,
-              ),
-              headerStyle: pw.TextStyle(
-                color: PdfColors.white,
+            buildTransactionsTable(ingresos),
+            pw.SizedBox(height: 24),
+            pw.Text(
+              'Lista de egresos',
+              style: pw.TextStyle(
+                fontSize: 16,
                 fontWeight: pw.FontWeight.bold,
-                fontSize: 9, // Letra ligeramente más pequeña para Portrait
+                color: PdfColors.red800,
               ),
-              cellStyle: const pw.TextStyle(fontSize: 7), // Compacto para que entre en la hoja vertical
-              rowDecoration: const pw.BoxDecoration(
-                border: pw.Border(
-                  bottom: pw.BorderSide(color: PdfColors.grey300, width: 0.5),
-                ),
-              ),
-              cellPadding: const pw.EdgeInsets.symmetric(
-                horizontal: 4,
-                vertical: 6,
-              ),
-
-              // Proporciones ajustadas para la hoja angosta (Vertical)
-              columnWidths: {
-                0: const pw.FlexColumnWidth(1.4), // Fecha
-                1: const pw.FlexColumnWidth(1.6), // Tipo de Mov.
-                2: const pw.FlexColumnWidth(1.2), // Caja
-                3: const pw.FlexColumnWidth(2.0), // Responsable
-                4: const pw.FlexColumnWidth(3.0), // Concepto (Se lleva más espacio para bajar a 2 líneas fluidamente)
-                5: const pw.FlexColumnWidth(1.5), // Monto
-              },
-
-              cellAlignments: {
-                0: pw.Alignment.centerLeft,
-                1: pw.Alignment.centerLeft,
-                2: pw.Alignment.centerLeft,
-                3: pw.Alignment.centerLeft,
-                4: pw.Alignment.centerLeft,
-                5: pw.Alignment.centerRight,
-              },
-
-              headers: [
-                'Fecha',
-                'Tipo',
-                'Caja',
-                'Responsable',
-                'Concepto',
-                'Monto',
-              ],
-
-              data: report.detalleAbsolutoPdf.map((item) {
-                return [
-                  formatPdfDate(item.fecha),
-                  item.tipo,
-                  item.caja,
-                  item.responsable,
-                  item.concepto,
-                  formatCurrency.format(item.monto),
-                ];
-              }).toList(),
             ),
+            pw.SizedBox(height: 10),
+            buildTransactionsTable(egresos),
           ];
         },
       ),
