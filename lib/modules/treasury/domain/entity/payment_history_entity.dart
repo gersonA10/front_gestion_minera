@@ -19,10 +19,12 @@ class PaymentHistoryItemEntity {
 
 class PaymentHistorySummaryEntity {
   final double totalMontoHoy;
+  final double totalIngresosHoy;
   final int totalTransaccionesHoy;
 
   const PaymentHistorySummaryEntity({
     required this.totalMontoHoy,
+    required this.totalIngresosHoy,
     required this.totalTransaccionesHoy,
   });
 }

@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:front_gestion_minera/config/router/app_router.dart';
 import 'package:front_gestion_minera/config/router/app_router.gr.dart';
+import 'package:front_gestion_minera/core/widgets/assistant_fab.dart';
 import 'package:front_gestion_minera/injector_container.dart';
 import 'package:front_gestion_minera/utils/greeting_util.dart';
 import 'package:front_gestion_minera/utils/session/session_actions.dart';
@@ -319,6 +320,9 @@ class _TreasuryScreenState extends State<TreasuryScreen> {
       value: _treasuryBloc,
       child: Scaffold(
         backgroundColor: _C.background,
+        floatingActionButton: AssistantFab(
+          onTap: () => context.router.push(AssistantChatRoute()),
+        ),
         body: RefreshIndicator(
           color: _C.primary,
           onRefresh: () async => _treasuryBloc.add(FetchTreasuryMetricsEvent()),

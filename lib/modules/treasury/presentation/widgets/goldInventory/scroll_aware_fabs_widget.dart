@@ -6,12 +6,14 @@ class ScrollAwareFabs extends StatelessWidget {
   final bool visible;
   final VoidCallback onAddTap;
   final VoidCallback onMoneyTap;
+  final VoidCallback? onVoiceTap;
 
   const ScrollAwareFabs({
     super.key,
     required this.visible,
     required this.onAddTap,
     required this.onMoneyTap,
+    this.onVoiceTap,
   });
 
   @override
@@ -27,6 +29,15 @@ class ScrollAwareFabs extends StatelessWidget {
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
+            if (onVoiceTap != null) ...[
+              FabButton(
+                icon: Icons.mic_rounded,
+                backgroundColor: TColors.warning,
+                onTap: onVoiceTap!,
+                tooltip: 'Registro urgente por voz',
+              ),
+              const SizedBox(width: 12),
+            ],
             FabButton(
               icon: Icons.attach_money_rounded,
               backgroundColor: TColors.goldAccent,

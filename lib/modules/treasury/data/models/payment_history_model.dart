@@ -25,12 +25,22 @@ class PaymentHistoryItemModel extends PaymentHistoryItemEntity {
 class PaymentHistorySummaryModel extends PaymentHistorySummaryEntity {
   const PaymentHistorySummaryModel({
     required super.totalMontoHoy,
+    required super.totalIngresosHoy,
     required super.totalTransaccionesHoy,
   });
 
+  // pg puede serializar SUM/COUNT como String y los backends viejos pueden
+  // omitir campos: todo el summary se parsea de forma tolerante.
   factory PaymentHistorySummaryModel.fromJson(Map<String, dynamic> json) =>
       PaymentHistorySummaryModel(
-        totalMontoHoy: (json['total_monto_hoy'] as num).toDouble(),
-        totalTransaccionesHoy: json['total_transacciones_hoy'] as int,
+        totalMontoHoy: _asDouble(json['total_monto_hoy']),
+        totalIngresosHoy: _asDouble(json['total_ingresos_hoy']),
+        totalTransaccionesHoy: _asDouble(json['total_transacciones_hoy']).toInt(),
       );
+
+  static double _asDouble(dynamic value) {
+    if (value == null) return 0;
+    if (value is num) return value.toDouble();
+    return double.tryParse(value.toString()) ?? 0;
+  }
 }

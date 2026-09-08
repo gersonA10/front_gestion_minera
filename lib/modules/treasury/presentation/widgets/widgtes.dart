@@ -21,6 +21,7 @@ export 'package:front_gestion_minera/modules/treasury/presentation/widgets/trans
 export 'package:front_gestion_minera/modules/treasury/presentation/widgets/goldInventory/new_extraction/dashed_border_painter_widget.dart';
 export 'package:front_gestion_minera/modules/treasury/presentation/widgets/goldInventory/new_extraction/extraction_susses_content_widget.dart';
 export 'package:front_gestion_minera/modules/treasury/presentation/widgets/goldInventory/new_extraction/image_source_option_widget.dart';
+export 'package:front_gestion_minera/modules/treasury/presentation/widgets/goldInventory/new_extraction/voice_extraction_sheet.dart';
 export 'package:front_gestion_minera/modules/treasury/presentation/widgets/loan_details/info_box_widget.dart';
 export 'package:front_gestion_minera/modules/treasury/presentation/widgets/loan_details/installment_card_widget.dart';
 export 'package:front_gestion_minera/modules/treasury/presentation/widgets/loan_details/loan_info_card_widget.dart';

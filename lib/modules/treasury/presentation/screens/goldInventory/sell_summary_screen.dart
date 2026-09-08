@@ -6,10 +6,10 @@ import 'package:front_gestion_minera/utils/constants/color.constant.dart';
 import 'package:intl/intl.dart';
 
 String _formatCurrency(double value) => NumberFormat.currency(
-      locale: 'es_BO',
-      symbol: 'Bs',
-      decimalDigits: 2,
-    ).format(value);
+  locale: 'es_BO',
+  symbol: 'Bs',
+  decimalDigits: 2,
+).format(value);
 
 String _formatGrams(double value) {
   final formatter = NumberFormat.decimalPatternDigits(
@@ -23,15 +23,21 @@ String _formatGrams(double value) {
 class SellSummaryScreen extends StatelessWidget {
   final RegisterSaleResponseEntity saleData;
   final bool isFromHistory;
-  
-  const SellSummaryScreen({super.key, required this.saleData, this.isFromHistory = false});
-  
+
+  const SellSummaryScreen({
+    super.key,
+    required this.saleData,
+    this.isFromHistory = false,
+  });
+
   @override
   Widget build(BuildContext context) {
-    SystemChrome.setSystemUIOverlayStyle(const SystemUiOverlayStyle(
-      statusBarColor: Colors.transparent,
-      statusBarIconBrightness: Brightness.dark,
-    ));
+    SystemChrome.setSystemUIOverlayStyle(
+      const SystemUiOverlayStyle(
+        statusBarColor: Colors.transparent,
+        statusBarIconBrightness: Brightness.dark,
+      ),
+    );
 
     return Scaffold(
       backgroundColor: TColors.background,
@@ -40,7 +46,11 @@ class SellSummaryScreen extends StatelessWidget {
         physics: const BouncingScrollPhysics(),
         padding: const EdgeInsets.fromLTRB(16, 16, 16, 32),
         children: [
-          _SuccessBanner(numOperacion: saleData.numOperacion),
+          _SuccessBanner(
+            numOperacion: saleData.numOperacion,
+            isRecovered: saleData.isIdempotent,
+            cashRegisterName: saleData.cashRegisterName,
+          ),
           const SizedBox(height: 20),
           _SectionTitle(text: 'Detalle de la Venta'),
           const SizedBox(height: 12),
@@ -103,7 +113,14 @@ class SellSummaryScreen extends StatelessWidget {
 
 class _SuccessBanner extends StatelessWidget {
   final String numOperacion;
-  const _SuccessBanner({required this.numOperacion});
+  final bool isRecovered;
+  final String cashRegisterName;
+
+  const _SuccessBanner({
+    required this.numOperacion,
+    required this.isRecovered,
+    required this.cashRegisterName,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -131,13 +148,25 @@ class _SuccessBanner extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 12),
-          const Text(
-            '¡Venta Exitosa!',
-            style: TextStyle(
+          Text(
+            isRecovered ? 'Venta recuperada' : '¡Venta exitosa!',
+            style: const TextStyle(
               fontSize: 20,
               fontWeight: FontWeight.w800,
               color: TColors.success,
               letterSpacing: -0.5,
+            ),
+          ),
+          const SizedBox(height: 6),
+          Text(
+            isRecovered
+                ? 'Ya estaba registrada; no se creó ningún duplicado.'
+                : 'El ingreso fue acreditado en $cashRegisterName.',
+            textAlign: TextAlign.center,
+            style: const TextStyle(
+              fontSize: 12,
+              fontWeight: FontWeight.w500,
+              color: TColors.textSecondary,
             ),
           ),
           const SizedBox(height: 6),
@@ -200,10 +229,7 @@ class _DetailCard extends StatelessWidget {
             value: _formatCurrency(saleData.precioPorGramoBS),
           ),
           const Divider(color: TColors.border, height: 20),
-          _DetailRow(
-            label: 'Fecha',
-            value: _formatDate(saleData.fechaHora),
-          ),
+          _DetailRow(label: 'Fecha', value: _formatDate(saleData.fechaHora)),
           const Divider(color: TColors.border, height: 20),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -384,7 +410,7 @@ class _BackButton extends StatelessWidget {
             const Icon(Icons.home_rounded, color: Colors.white, size: 20),
             const SizedBox(width: 10),
             Text(
-              isFromHistory ? 'Volver A Historial': 'Volver al Inicio',
+              isFromHistory ? 'Volver A Historial' : 'Volver al Inicio',
               style: const TextStyle(
                 fontSize: 15,
                 fontWeight: FontWeight.w800,

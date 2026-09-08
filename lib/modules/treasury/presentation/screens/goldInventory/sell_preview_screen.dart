@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:front_gestion_minera/config/router/app_router.gr.dart';
+import 'package:front_gestion_minera/core/idempotency/gold_operation_key_store.dart';
 import 'package:front_gestion_minera/core/widgets/custom_alert_widget.dart';
 import 'package:front_gestion_minera/injector_container.dart';
 import 'package:front_gestion_minera/modules/treasury/domain/entity/entity.dart';
@@ -11,10 +12,10 @@ import 'package:front_gestion_minera/utils/constants/color.constant.dart';
 import 'package:intl/intl.dart';
 
 String _formatCurrency(double value) => NumberFormat.currency(
-      locale: 'es_BO',
-      symbol: 'Bs',
-      decimalDigits: 2,
-    ).format(value);
+  locale: 'es_BO',
+  symbol: 'Bs',
+  decimalDigits: 2,
+).format(value);
 
 String _formatGrams(double value) {
   final formatter = NumberFormat.decimalPatternDigits(
@@ -59,7 +60,7 @@ class SellPreviewScreen extends StatelessWidget {
   }
 }
 
-class _SellPreviewBody extends StatelessWidget {
+class _SellPreviewBody extends StatefulWidget {
   final SalePreviewResponseEntity previewData;
   final String salesDate;
   final String buyer;
@@ -76,9 +77,46 @@ class _SellPreviewBody extends StatelessWidget {
     required this.comprobanteFilePath,
   });
 
+  @override
+  State<_SellPreviewBody> createState() => _SellPreviewBodyState();
+}
+
+class _SellPreviewBodyState extends State<_SellPreviewBody> {
+  GoldOperationKeyStore? _operationKeyStore;
+  String? _activeIdempotencyKey;
+  bool _isConfirming = false;
+
+  SalePreviewResponseEntity get previewData => widget.previewData;
+  String get salesDate => widget.salesDate;
+  String get buyer => widget.buyer;
+  double get totalGramsSold => widget.totalGramsSold;
+  double get priceBsPerGram => widget.priceBsPerGram;
+  String get comprobanteFilePath => widget.comprobanteFilePath;
+
   double get _estimatedTotal => totalGramsSold * priceBsPerGram;
 
-  void _confirm(BuildContext context) {
+  Future<GoldOperationKeyStore> _getOperationKeyStore() async {
+    return _operationKeyStore ??= await GoldOperationKeyStore.create();
+  }
+
+  Future<void> _confirm() async {
+    if (_isConfirming) return;
+    setState(() => _isConfirming = true);
+
+    final fingerprint = GoldOperationFingerprint.sale(
+      salesDate: salesDate,
+      buyer: buyer,
+      totalGramsSold: totalGramsSold,
+      priceBsPerGram: priceBsPerGram,
+    );
+    final store = await _getOperationKeyStore();
+    final idempotencyKey = await store.getOrCreate(
+      type: GoldOperationType.sale,
+      fingerprint: fingerprint,
+    );
+    if (!mounted) return;
+    _activeIdempotencyKey = idempotencyKey;
+
     context.read<TreasuryBloc>().add(
       RegisterSaleEvent(
         request: RegisterSaleRequestEntity(
@@ -87,6 +125,7 @@ class _SellPreviewBody extends StatelessWidget {
           totalGramsSold: totalGramsSold,
           priceBsPerGram: priceBsPerGram,
           comprobante: comprobanteFilePath,
+          idempotencyKey: idempotencyKey,
         ),
       ),
     );
@@ -102,13 +141,31 @@ class _SellPreviewBody extends StatelessWidget {
     );
 
     return BlocListener<TreasuryBloc, TreasuryState>(
-      listener: (context, state) {
+      listener: (listenerContext, state) async {
         if (state is RegisterSaleLoaded) {
-          context.router.replace(SellSummaryRoute(saleData: state.sale));
+          final completedKey = _activeIdempotencyKey;
+          if (completedKey != null) {
+            await (await _getOperationKeyStore()).complete(completedKey);
+          }
+          if (!listenerContext.mounted) return;
+          _activeIdempotencyKey = null;
+          _isConfirming = false;
+          listenerContext.router.replace(
+            SellSummaryRoute(saleData: state.sale),
+          );
         } else if (state is RegisterSaleError) {
+          final failedKey = _activeIdempotencyKey;
+          if (state.isConflict && failedKey != null) {
+            await (await _getOperationKeyStore()).complete(failedKey);
+            _activeIdempotencyKey = null;
+          }
+          if (!listenerContext.mounted) return;
+          setState(() => _isConfirming = false);
           CustomAlert.show(
-            context,
-            title: 'Error',
+            listenerContext,
+            title: state.isConflict
+                ? 'Revisa la operación'
+                : 'No se pudo confirmar',
             message: state.message,
             type: AlertType.error,
           );
@@ -119,7 +176,7 @@ class _SellPreviewBody extends StatelessWidget {
         appBar: _buildAppBar(context),
         body: BlocBuilder<TreasuryBloc, TreasuryState>(
           builder: (context, state) {
-            final isLoading = state is RegisterSaleLoading;
+            final isLoading = state is RegisterSaleLoading || _isConfirming;
             return ListView(
               physics: const BouncingScrollPhysics(),
               padding: const EdgeInsets.fromLTRB(16, 16, 16, 32),
@@ -166,8 +223,20 @@ class _SellPreviewBody extends StatelessWidget {
                 // ── Confirm button ─────────────────────────────────
                 _ConfirmButton(
                   isLoading: isLoading,
-                  onTap: isLoading ? null : () => _confirm(context),
+                  onTap: isLoading ? null : _confirm,
                 ),
+                if (isLoading) ...[
+                  const SizedBox(height: 10),
+                  const Text(
+                    'Estamos confirmando la venta y actualizando Caja Mayor. No cierres esta pantalla.',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: TColors.textSecondary,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ],
               ],
             );
           },
@@ -535,15 +604,27 @@ class _ConfirmButtonState extends State<_ConfirmButton> {
             ],
           ),
           child: widget.isLoading
-              ? const Center(
-                  child: SizedBox(
-                    width: 22,
-                    height: 22,
-                    child: CircularProgressIndicator(
-                      color: Colors.white,
-                      strokeWidth: 2.5,
+              ? const Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    SizedBox(
+                      width: 20,
+                      height: 20,
+                      child: CircularProgressIndicator(
+                        color: Colors.white,
+                        strokeWidth: 2.5,
+                      ),
                     ),
-                  ),
+                    SizedBox(width: 10),
+                    Text(
+                      'Confirmando venta…',
+                      style: TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w700,
+                        color: Colors.white,
+                      ),
+                    ),
+                  ],
                 )
               : const Row(
                   mainAxisAlignment: MainAxisAlignment.center,

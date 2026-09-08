@@ -36,9 +36,11 @@ class SalePreviewResponseModel extends SalePreviewResponseEntity {
     return SalePreviewResponseModel(
       totalSolicitado: (json['total_solicitado'] as num).toDouble(),
       distribucionLotes: lots
-          .map((e) => SalePreviewBatchDistributionModel.fromJson(
-                e as Map<String, dynamic>,
-              ))
+          .map(
+            (e) => SalePreviewBatchDistributionModel.fromJson(
+              e as Map<String, dynamic>,
+            ),
+          )
           .toList(),
     );
   }
@@ -51,6 +53,7 @@ class RegisterSaleRequestModel extends RegisterSaleRequestEntity {
     required super.totalGramsSold,
     required super.priceBsPerGram,
     required super.comprobante,
+    required super.idempotencyKey,
   });
 
   factory RegisterSaleRequestModel.fromEntity(
@@ -62,6 +65,7 @@ class RegisterSaleRequestModel extends RegisterSaleRequestEntity {
       totalGramsSold: entity.totalGramsSold,
       priceBsPerGram: entity.priceBsPerGram,
       comprobante: entity.comprobante,
+      idempotencyKey: entity.idempotencyKey,
     );
   }
 
@@ -103,6 +107,8 @@ class RegisterSaleResponseModel extends RegisterSaleResponseEntity {
     required super.fechaHora,
     required super.numOperacion,
     required super.desgloseLotes,
+    super.isIdempotent,
+    super.cashRegisterName,
   });
 
   factory RegisterSaleResponseModel.fromJson(Map<String, dynamic> json) {
@@ -115,9 +121,12 @@ class RegisterSaleResponseModel extends RegisterSaleResponseEntity {
       comprador: json['comprador'] as String? ?? '',
       fechaHora: json['fecha_hora'] as String? ?? '',
       numOperacion: json['num_operacion'] as String? ?? '',
+      isIdempotent: json['is_idempotent'] == true,
+      cashRegisterName: json['caja_destino'] as String? ?? 'Caja Mayor',
       desgloseLotes: lots
-          .map((e) =>
-              SaleBatchDesgloceModel.fromJson(e as Map<String, dynamic>))
+          .map(
+            (e) => SaleBatchDesgloceModel.fromJson(e as Map<String, dynamic>),
+          )
           .toList(),
     );
   }
